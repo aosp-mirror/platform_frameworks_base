@@ -16,6 +16,9 @@
 
 package com.android.dynsystem;
 
+import static android.os.image.DynamicSystemClient.ACTION_NOTIFY_KEYGUARD_DISMISSED;
+import static android.os.image.DynamicSystemClient.KEY_KEYGUARD_USE_DEFAULT_STRINGS;
+
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -47,10 +50,7 @@ public class VerificationActivity extends Activity {
         KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
 
         if (km != null) {
-            String title = getString(R.string.keyguard_title);
-            String description = getString(R.string.keyguard_description);
-            Intent intent = km.createConfirmDeviceCredentialIntent(title, description);
-
+            Intent intent = createConfirmDeviceCredentialIntent(km);
             if (intent == null) {
                 Log.d(TAG, "This device is not protected by a password/pin");
                 startInstallationService();
@@ -63,13 +63,38 @@ public class VerificationActivity extends Activity {
         }
     }
 
+    private Intent createConfirmDeviceCredentialIntent(KeyguardManager km) {
+        final boolean useDefaultStrings =
+                getIntent().getBooleanExtra(KEY_KEYGUARD_USE_DEFAULT_STRINGS, false);
+        final String title;
+        final String description;
+        if (useDefaultStrings) {
+            // Use default strings provided by keyguard manager
+            title = null;
+            description = null;
+        } else {
+            // Use custom strings provided by DSU
+            title = getString(R.string.keyguard_title);
+            description = getString(R.string.keyguard_description);
+        }
+        return km.createConfirmDeviceCredentialIntent(title, description);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
             startInstallationService();
+        } else {
+            notifyKeyguardDismissed();
         }
 
         finish();
+    }
+
+    private void notifyKeyguardDismissed() {
+        Intent intent = new Intent(this, DynamicSystemInstallationService.class);
+        intent.setAction(ACTION_NOTIFY_KEYGUARD_DISMISSED);
+        startServiceAsUser(intent, UserHandle.SYSTEM);
     }
 
     private void startInstallationService() {

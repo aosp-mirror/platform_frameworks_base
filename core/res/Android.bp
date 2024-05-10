@@ -104,10 +104,13 @@ genrule {
 
 android_app {
     name: "framework-res",
+    use_resource_processor: false,
     sdk_version: "core_platform",
     certificate: "platform",
 
-    srcs: [":remote-color-resources-arsc"],
+    srcs: [
+        ":remote-color-resources-arsc",
+    ],
 
     // Disable dexpreopt and verify_uses_libraries check as the app
     // contains no Java code to be dexpreopted.
@@ -130,6 +133,10 @@ android_app {
 
         // Allow overlay to add resource
         "--auto-add-overlay",
+
+        // Framework resources benefit tremendously from enabling sparse encoding, saving tens
+        // of MBs in size and RAM use.
+        "--enable-sparse-encoding",
     ],
 
     resource_zips: [
@@ -145,6 +152,8 @@ android_app {
             "simulated_device_launcher",
         ],
     },
+
+    generate_product_characteristics_rro: true,
 }
 
 java_genrule {
@@ -171,4 +180,13 @@ genrule {
         " | sed -r 's/\\s*name=\\s*//g' | tr -d '\"'" +
         " > $(out)",
     tools: ["xmllint"],
+}
+
+filegroup {
+    name: "frameworks-base-core-AndroidManifest.xml",
+    srcs: ["AndroidManifest.xml"],
+    visibility: [
+        "//frameworks/base",
+        "//frameworks/base/api",
+    ],
 }

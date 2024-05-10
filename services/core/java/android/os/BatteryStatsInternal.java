@@ -16,11 +16,14 @@
 
 package android.os;
 
+import android.annotation.IntDef;
 import android.net.Network;
 
 import com.android.internal.os.BinderCallsStats;
-import com.android.internal.os.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
+import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Collection;
 import java.util.List;
 
@@ -31,6 +34,27 @@ import java.util.List;
  * @hide Only for use within Android OS.
  */
 public abstract class BatteryStatsInternal {
+
+    public static final int CPU_WAKEUP_SUBSYSTEM_UNKNOWN = -1;
+    public static final int CPU_WAKEUP_SUBSYSTEM_ALARM = 1;
+    public static final int CPU_WAKEUP_SUBSYSTEM_WIFI = 2;
+    public static final int CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER = 3;
+    public static final int CPU_WAKEUP_SUBSYSTEM_SENSOR = 4;
+    public static final int CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA = 5;
+
+    /** @hide */
+    @IntDef(prefix = {"CPU_WAKEUP_SUBSYSTEM_"}, value = {
+            CPU_WAKEUP_SUBSYSTEM_UNKNOWN,
+            CPU_WAKEUP_SUBSYSTEM_ALARM,
+            CPU_WAKEUP_SUBSYSTEM_WIFI,
+            CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER,
+            CPU_WAKEUP_SUBSYSTEM_SENSOR,
+            CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CpuWakeupSubsystem {
+    }
+
     /**
      * Returns the wifi interfaces.
      */
@@ -58,9 +82,10 @@ public abstract class BatteryStatsInternal {
     /**
      * Inform battery stats how many deferred jobs existed when the app got launched and how
      * long ago was the last job execution for the app.
-     * @param uid the uid of the app.
+     *
+     * @param uid         the uid of the app.
      * @param numDeferred number of deferred jobs.
-     * @param sinceLast how long in millis has it been since a job was run
+     * @param sinceLast   how long in millis has it been since a job was run
      */
     public abstract void noteJobsDeferred(int uid, int numDeferred, long sinceLast);
 
@@ -83,4 +108,18 @@ public abstract class BatteryStatsInternal {
      * Informs battery stats of native thread IDs of threads taking incoming binder calls.
      */
     public abstract void noteBinderThreadNativeIds(int[] binderThreadNativeTids);
+
+    /**
+     * Reports a sound trigger recognition event that may have woken up the CPU.
+     * @param elapsedMillis The time when the event happened in the elapsed timebase.
+     * @param uid The uid that requested this trigger.
+     */
+    public abstract void noteWakingSoundTrigger(long elapsedMillis, int uid);
+
+    /**
+     * Reports an alarm batch that would have woken up the CPU.
+     * @param elapsedMillis The time at which this alarm batch was scheduled to go off.
+     * @param uids the uids of all apps that have any alarm in this batch.
+     */
+    public abstract void noteWakingAlarmBatch(long elapsedMillis, int... uids);
 }

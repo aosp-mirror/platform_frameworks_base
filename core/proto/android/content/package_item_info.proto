@@ -30,6 +30,7 @@ message PackageItemInfoProto {
     optional string non_localized_label = 4;
     optional int32 icon = 5;
     optional int32 banner = 6;
+    optional bool is_archived = 7;
 }
 
 // Proto of android.content.pm.ApplicationInfo which extends PackageItemInfo

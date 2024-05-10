@@ -22,13 +22,22 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.multiuser.Flags;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.settingslib.utils.ThreadUtils;
+
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -36,7 +45,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.ExecutionException;
 
 /**
  * This class contains logic for starting activities to take/choose/crop photo, reads and transforms
@@ -52,14 +60,18 @@ public class EditUserPhotoController {
     private static final String IMAGES_DIR = "multi_user";
     private static final String NEW_USER_PHOTO_FILE_NAME = "NewUserPhoto.png";
 
+    private static final String AVATAR_PICKER_ACTION = "com.android.avatarpicker"
+            + ".FULL_SCREEN_ACTIVITY";
+
     private final Activity mActivity;
     private final ActivityStarter mActivityStarter;
     private final ImageView mImageView;
     private final String mFileAuthority;
-
+    private final ListeningExecutorService mExecutorService;
     private final File mImagesDir;
     private Bitmap mNewUserPhotoBitmap;
     private Drawable mNewUserPhotoDrawable;
+    private String mCachedDrawablePath;
 
     public EditUserPhotoController(Activity activity, ActivityStarter activityStarter,
             ImageView view, Bitmap savedBitmap, Drawable savedDrawable, String fileAuthority) {
@@ -74,6 +86,7 @@ public class EditUserPhotoController {
 
         mNewUserPhotoBitmap = savedBitmap;
         mNewUserPhotoDrawable = savedDrawable;
+        mExecutorService = ThreadUtils.getBackgroundExecutor();
     }
 
     /**
@@ -96,7 +109,6 @@ public class EditUserPhotoController {
                 onPhotoCropped(data.getData());
                 return true;
             }
-
         }
         return false;
     }
@@ -106,28 +118,39 @@ public class EditUserPhotoController {
     }
 
     private void showAvatarPicker() {
-        Intent intent = new Intent(mImageView.getContext(), AvatarPickerActivity.class);
+        Intent intent;
+        if (Flags.avatarSync()) {
+            intent = new Intent(AVATAR_PICKER_ACTION);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+        } else {
+            intent = new Intent(mImageView.getContext(), AvatarPickerActivity.class);
+        }
         intent.putExtra(AvatarPickerActivity.EXTRA_FILE_AUTHORITY, mFileAuthority);
         mActivityStarter.startActivityForResult(intent, REQUEST_CODE_PICK_AVATAR);
     }
 
     private void onDefaultIconSelected(int tintColor) {
-        try {
-            ThreadUtils.postOnBackgroundThread(() -> {
-                Resources res = mActivity.getResources();
-                Drawable drawable =
-                        UserIcons.getDefaultUserIconInColor(res, tintColor);
-                Bitmap bitmap = UserIcons.convertToBitmapAtUserIconSize(res, drawable);
+        ListenableFuture<Bitmap> future = mExecutorService.submit(() -> {
+            Resources res = mActivity.getResources();
+            Drawable drawable =
+                    UserIcons.getDefaultUserIconInColor(res, tintColor);
+            return UserIcons.convertToBitmapAtUserIconSize(res, drawable);
+        });
+        Futures.addCallback(future, new FutureCallback<>() {
+            @Override
+            public void onSuccess(@NonNull Bitmap result) {
+                onPhotoProcessed(result);
+            }
 
-                ThreadUtils.postOnMainThread(() -> onPhotoProcessed(bitmap));
-            }).get();
-        } catch (InterruptedException | ExecutionException e) {
-            Log.e(TAG, "Error processing default icon", e);
-        }
+            @Override
+            public void onFailure(Throwable t) {
+                Log.e(TAG, "Error processing default icon", t);
+            }
+        }, mImageView.getContext().getMainExecutor());
     }
 
     private void onPhotoCropped(final Uri data) {
-        ThreadUtils.postOnBackgroundThread(() -> {
+        ListenableFuture<Bitmap> future = mExecutorService.submit(() -> {
             InputStream imageStream = null;
             Bitmap bitmap = null;
             try {
@@ -145,17 +168,25 @@ public class EditUserPhotoController {
                     }
                 }
             }
-
-            if (bitmap != null) {
-                Bitmap finalBitmap = bitmap;
-                ThreadUtils.postOnMainThread(() -> onPhotoProcessed(finalBitmap));
-            }
+            return bitmap;
         });
+        Futures.addCallback(future, new FutureCallback<>() {
+            @Override
+            public void onSuccess(@Nullable Bitmap result) {
+                onPhotoProcessed(result);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {}
+        }, mImageView.getContext().getMainExecutor());
     }
 
-    private void onPhotoProcessed(Bitmap bitmap) {
+    private void onPhotoProcessed(@Nullable Bitmap bitmap) {
         if (bitmap != null) {
             mNewUserPhotoBitmap = bitmap;
+            var unused = mExecutorService.submit(() -> {
+                mCachedDrawablePath = saveNewUserPhotoBitmap().getPath();
+            });
             mNewUserPhotoDrawable = CircleFramedDrawable
                     .getInstance(mImageView.getContext(), mNewUserPhotoBitmap);
             mImageView.setImageDrawable(mNewUserPhotoDrawable);
@@ -185,5 +216,9 @@ public class EditUserPhotoController {
 
     void removeNewUserPhotoBitmapFile() {
         new File(mImagesDir, NEW_USER_PHOTO_FILE_NAME).delete();
+    }
+
+    String getCachedDrawablePath() {
+        return mCachedDrawablePath;
     }
 }

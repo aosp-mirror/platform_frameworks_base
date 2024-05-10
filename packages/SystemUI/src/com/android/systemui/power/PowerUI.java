@@ -35,31 +35,34 @@ import android.os.SystemClock;
 import android.os.Temperature;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.vr.IVrManager;
+import android.service.vr.IVrStateCallbacks;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Slog;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.fuelgauge.Estimate;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
-
 @SysUISingleton
-public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
+public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
 
     static final String TAG = "PowerUI";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -78,6 +81,8 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
 
     private final PowerManager mPowerManager;
     private final WarningsUI mWarnings;
+    private final WakefulnessLifecycle mWakefulnessLifecycle;
+    private final UserTracker mUserTracker;
     private InattentiveSleepWarningView mOverlayView;
     private final Configuration mLastConfiguration = new Configuration();
     private int mPlugType = 0;
@@ -101,24 +106,63 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
     @VisibleForTesting int mBatteryLevel = 100;
     @VisibleForTesting int mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
 
+    private boolean mInVrMode;
+
     private IThermalEventListener mSkinThermalEventListener;
     private IThermalEventListener mUsbThermalEventListener;
+    private final Context mContext;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    @Nullable
+    private final IVrManager mVrManager;
+    private final WakefulnessLifecycle.Observer mWakefulnessObserver =
+            new WakefulnessLifecycle.Observer() {
+                @Override
+                public void onStartedWakingUp() {
+                    mScreenOffTime = -1;
+                }
+
+                @Override
+                public void onFinishedGoingToSleep() {
+                    mScreenOffTime = SystemClock.elapsedRealtime();
+                }
+            };
+
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    mWarnings.userSwitched();
+                }
+            };
+
+    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
+        @Override
+        public void onVrStateChanged(boolean enabled) {
+            mInVrMode = enabled;
+        }
+    };
 
     @Inject
-    public PowerUI(Context context, BroadcastDispatcher broadcastDispatcher,
-            CommandQueue commandQueue, Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
-            WarningsUI warningsUI, EnhancedEstimates enhancedEstimates,
-            PowerManager powerManager) {
-        super(context);
+    public PowerUI(
+            Context context,
+            BroadcastDispatcher broadcastDispatcher,
+            CommandQueue commandQueue,
+            @Nullable IVrManager vrManager,
+            WarningsUI warningsUI,
+            EnhancedEstimates enhancedEstimates,
+            WakefulnessLifecycle wakefulnessLifecycle,
+            PowerManager powerManager,
+            UserTracker userTracker) {
+        mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
+        mVrManager = vrManager;
         mWarnings = warningsUI;
         mEnhancedEstimates = enhancedEstimates;
         mPowerManager = powerManager;
+        mWakefulnessLifecycle = wakefulnessLifecycle;
+        mUserTracker = userTracker;
     }
 
     public void start() {
@@ -133,10 +177,12 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
         };
         final ContentResolver resolver = mContext.getContentResolver();
         resolver.registerContentObserver(Settings.Global.getUriFor(
-                Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL),
+                        Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL),
                 false, obs, UserHandle.USER_ALL);
         updateBatteryWarningLevels();
         mReceiver.init();
+        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());
+        mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
 
         // Check to see if we need to let the user know that the phone previously shut down due
         // to the temperature being too high.
@@ -166,10 +212,18 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
                 });
         initThermalEventListeners();
         mCommandQueue.addCallback(this);
+
+        if (mVrManager != null) {
+            try {
+                mVrManager.registerListener(mVrStateCallbacks);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to register VR mode state listener: " + e);
+            }
+        }
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(Configuration newConfig) {
         final int mask = ActivityInfo.CONFIG_MCC | ActivityInfo.CONFIG_MNC;
 
         // Safe to modify mLastConfiguration here as it's only updated by the main thread (here).
@@ -232,9 +286,6 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
             IntentFilter filter = new IntentFilter();
             filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
             filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-            filter.addAction(Intent.ACTION_SCREEN_OFF);
-            filter.addAction(Intent.ACTION_SCREEN_ON);
-            filter.addAction(Intent.ACTION_USER_SWITCHED);
             mBroadcastDispatcher.registerReceiverWithHandler(this, filter, mHandler);
             // Force get initial values. Relying on Sticky behavior until API for getting info.
             if (!mHasReceivedBattery) {
@@ -316,12 +367,6 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
                             plugged, bucket);
                 });
 
-            } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                mScreenOffTime = SystemClock.elapsedRealtime();
-            } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
-                mScreenOffTime = -1;
-            } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                mWarnings.userSwitched();
             } else {
                 Slog.w(TAG, "unknown intent: " + intent);
             }
@@ -694,10 +739,7 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
             int status = temp.getStatus();
 
             if (status >= Temperature.THROTTLING_EMERGENCY) {
-                final Optional<CentralSurfaces> centralSurfacesOptional =
-                        mCentralSurfacesOptionalLazy.get();
-                if (!centralSurfacesOptional.map(CentralSurfaces::isDeviceInVrMode)
-                        .orElse(false)) {
+                if (!mInVrMode) {
                     mWarnings.showHighTemperatureWarning();
                     Slog.d(TAG, "SkinThermalEventListener: notifyThrottling was called "
                             + ", current skin status = " + status

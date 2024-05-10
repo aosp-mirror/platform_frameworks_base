@@ -7,8 +7,8 @@ import android.content.res.Configuration
 import android.util.MathUtils
 import android.view.animation.PathInterpolator
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
+import com.android.systemui.res.R
+import com.android.app.animation.Interpolators
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -51,8 +51,8 @@ constructor(
                     updateResources()
                 }
             })
-        dumpManager.registerDumpable("SplitShadeLockscreenOverScroller") { printWriter, _ ->
-            dump(printWriter)
+        dumpManager.registerCriticalDumpable("SplitShadeLockscreenOverScroller") { pw, _ ->
+            dump(pw)
         }
     }
 

@@ -41,8 +41,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.android.systemui.R
-import com.android.systemui.compose.theme.LocalAndroidColorScheme
+import com.android.compose.theme.LocalAndroidColorScheme
+import com.android.systemui.res.R
 
 @Composable
 internal fun PeopleScreenEmpty(
@@ -76,10 +76,12 @@ internal fun PeopleScreenEmpty(
             Modifier.fillMaxWidth().defaultMinSize(minHeight = 56.dp),
             colors =
                 ButtonDefaults.buttonColors(
-                    containerColor = androidColors.colorAccentPrimary,
-                    contentColor = androidColors.textColorOnAccent,
+                    containerColor = androidColors.deprecated.colorAccentPrimary,
+                    contentColor = androidColors.deprecated.textColorOnAccent,
                 )
-        ) { Text(stringResource(R.string.got_it)) }
+        ) {
+            Text(stringResource(R.string.got_it))
+        }
     }
 }
 
@@ -88,8 +90,8 @@ private fun ExampleTile() {
     val androidColors = LocalAndroidColorScheme.current
     Surface(
         shape = RoundedCornerShape(28.dp),
-        color = androidColors.colorSurface,
-        contentColor = androidColors.textColorPrimary,
+        color = androidColors.deprecated.colorSurface,
+        contentColor = androidColors.deprecated.textColorPrimary,
     ) {
         Row(
             Modifier.padding(vertical = 20.dp, horizontal = 16.dp),

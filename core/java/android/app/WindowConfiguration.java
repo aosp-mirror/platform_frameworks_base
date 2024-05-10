@@ -36,11 +36,14 @@ import android.os.Parcelable;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.WireTypeMismatchException;
+import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.WindowManager;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -66,6 +69,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * the display level. Lower levels can override these values to provide custom bounds to enforce
      * features such as a max aspect ratio.
      */
+    @Nullable
     private Rect mAppBounds;
 
     /**
@@ -118,6 +122,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             WINDOWING_MODE_PINNED,
             WINDOWING_MODE_FREEFORM,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface WindowingMode {}
 
     /** The current activity type of the configuration. */
@@ -145,6 +150,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             ACTIVITY_TYPE_ASSISTANT,
             ACTIVITY_TYPE_DREAM,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface ActivityType {}
 
     /** The current always on top status of the configuration. */
@@ -267,9 +273,11 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
 
     /**
      * Sets the bounds to the provided {@link Rect}.
+     * Passing {@code null} sets the bounds {@link Rect} to empty.
+     *
      * @param rect the new bounds value.
      */
-    public void setBounds(Rect rect) {
+    public void setBounds(@Nullable Rect rect) {
         if (rect == null) {
             mBounds.setEmpty();
             return;
@@ -279,11 +287,13 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /**
-     * Set {@link #mAppBounds} to the input Rect.
-     * @param rect The rect value to set {@link #mAppBounds} to.
+     * Sets the app bounds to the provided {@link Rect}.
+     * Passing {@code null} sets the bounds to {@code null}.
+     *
+     * @param rect the new app bounds value.
      * @see #getAppBounds()
      */
-    public void setAppBounds(Rect rect) {
+    public void setAppBounds(@Nullable Rect rect) {
         if (rect == null) {
             mAppBounds = null;
             return;
@@ -294,7 +304,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
 
     /**
      * Sets the maximum bounds to the provided {@link Rect}.
-     * @param rect the new bounds value.
+     * Passing {@code null} sets the bounds {@link Rect} to empty.
+     *
+     * @param rect the new max bounds value.
      * @see #getMaxBounds()
      */
     public void setMaxBounds(@Nullable Rect rect) {
@@ -356,11 +368,13 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /** @see #setAppBounds(Rect) */
+    @Nullable
     public Rect getAppBounds() {
         return mAppBounds;
     }
 
     /** @see #setBounds(Rect) */
+    @NonNull
     public Rect getBounds() {
         return mBounds;
     }
@@ -462,11 +476,28 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
 
     /** @hide */
     public void scale(float scale) {
-        mBounds.scale(scale);
-        mMaxBounds.scale(scale);
+        scaleBounds(scale, mBounds);
+        scaleBounds(scale, mMaxBounds);
         if (mAppBounds != null) {
-            mAppBounds.scale(scale);
+            scaleBounds(scale, mAppBounds);
         }
+    }
+
+    /**
+     * Size based scaling. This avoid inconsistent length when rounding 4 sides.
+     * E.g. left=12, right=18, scale=0.8. The scaled width can be:
+     *   int((right - left) * scale + 0.5) = int(4.8 + 0.5) = 5
+     * But with rounding both left and right, the width will be inconsistent:
+     *   int(right * scale + 0.5) - int(left * scale + 0.5) = int(14.9) - int(10.1) = 4
+     * @hide
+     */
+    private static void scaleBounds(float scale, Rect bounds) {
+        final int w = bounds.width();
+        final int h = bounds.height();
+        bounds.left = (int) (bounds.left * scale + .5f);
+        bounds.top = (int) (bounds.top * scale + .5f);
+        bounds.right = bounds.left + (int) (w * scale + .5f);
+        bounds.bottom = bounds.top + (int) (h * scale + .5f);
     }
 
     /**
@@ -858,15 +889,6 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /**
-     * Returns true if any visible windows belonging to apps with this window configuration should
-     * be kept on screen when the app is killed due to something like the low memory killer.
-     * @hide
-     */
-    public boolean keepVisibleDeadAppWindowOnScreen() {
-        return mWindowingMode != WINDOWING_MODE_PINNED;
-    }
-
-    /**
      * Returns true if the backdrop on the client side should match the frame of the window.
      * Returns false, if the backdrop should be fullscreen.
      * @hide
@@ -895,6 +917,23 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** @hide */
     public static boolean supportSplitScreenWindowingMode(int activityType) {
         return activityType != ACTIVITY_TYPE_ASSISTANT && activityType != ACTIVITY_TYPE_DREAM;
+    }
+
+    /**
+     * Checks if the two {@link Configuration}s are equal to each other for the fields that are read
+     * by {@link Display}.
+     * @hide
+     */
+    public static boolean areConfigurationsEqualForDisplay(@NonNull Configuration newConfig,
+            @NonNull Configuration oldConfig) {
+        // Only report different if max bounds and display rotation is changed, so that it will not
+        // report on Task resizing.
+        if (!newConfig.windowConfiguration.getMaxBounds().equals(
+                oldConfig.windowConfiguration.getMaxBounds())) {
+            return false;
+        }
+        return newConfig.windowConfiguration.getDisplayRotation()
+                == oldConfig.windowConfiguration.getDisplayRotation();
     }
 
     /** @hide */

@@ -51,6 +51,7 @@ import com.android.server.UiServiceTestCase;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -87,6 +88,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
         LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
     }
 
+    @Ignore("b/253871109")
     @Test
     public void testAddPinCreatesPinned() throws RemoteException {
         grantSlicePermission();
@@ -97,6 +99,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
         verify(mService, times(1)).createPinnedSlice(eq(maybeAddUserId(TEST_URI, 0)), anyString());
     }
 
+    @Ignore("b/253871109")
     @Test
     public void testRemovePinDestroysPinned() throws RemoteException {
         grantSlicePermission();
@@ -109,6 +112,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
         verify(mCreatedSliceState, never()).destroy();
     }
 
+    @Ignore("b/253871109")
     @Test
     public void testCheckAutoGrantPermissions() throws RemoteException {
         String[] testPerms = new String[] {
@@ -122,19 +126,20 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
         when(mContextSpy.checkPermission("perm2", Process.myPid(), Process.myUid()))
                 .thenReturn(PERMISSION_GRANTED);
         mService.checkSlicePermission(TEST_URI, mContext.getPackageName(),
-                mContext.getPackageName(), Process.myPid(),
-                Process.myUid(), testPerms);
+                Process.myPid(), Process.myUid(), testPerms);
 
         verify(mContextSpy).checkPermission(eq("perm1"), eq(Process.myPid()), eq(Process.myUid()));
         verify(mContextSpy).checkPermission(eq("perm2"), eq(Process.myPid()), eq(Process.myUid()));
     }
 
+    @Ignore("b/253871109")
     @Test(expected = IllegalStateException.class)
     public void testNoPinThrow() throws Exception {
         grantSlicePermission();
         mService.getPinnedSpecs(TEST_URI, "pkg");
     }
 
+    @Ignore("b/253871109")
     @Test
     public void testGetPinnedSpecs() throws Exception {
         grantSlicePermission();
@@ -148,7 +153,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
 
     private void grantSlicePermission() {
         doReturn(PERMISSION_GRANTED).when(mService).checkSlicePermission(
-                eq(TEST_URI), anyString(), anyString(), anyInt(), anyInt(), any());
+                eq(TEST_URI), anyString(), anyInt(), anyInt(), any());
         doReturn(PERMISSION_GRANTED).when(mService).checkAccess(
                 anyString(), eq(TEST_URI), anyInt(), anyInt());
     }

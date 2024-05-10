@@ -25,7 +25,10 @@ package {
 
 android_test {
     name: "TaskOrganizerTest",
-    srcs: ["**/*.java","**/*.kt"],
+    srcs: [
+        "**/*.java",
+        "**/*.kt",
+    ],
     manifest: "AndroidManifest.xml",
     test_config: "AndroidTest.xml",
     platform_apis: true,
@@ -39,6 +42,7 @@ android_test {
         "kotlin-stdlib",
         "kotlinx-coroutines-android",
         "flickerlib",
-        "truth-prebuilt",
+        "flickerlib-trace_processor_shell",
+        "truth",
     ],
 }

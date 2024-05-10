@@ -17,6 +17,8 @@
 package android.app.backup;
 
 import android.annotation.SystemApi;
+import android.app.backup.BackupAnnotations.OperationType;
+import android.content.pm.PackageInfo;
 import android.os.Bundle;
 
 /**
@@ -129,6 +131,20 @@ public class BackupManagerMonitor {
    */
   public static final String EXTRA_LOG_OLD_VERSION = "android.app.backup.extra.LOG_OLD_VERSION";
 
+  /**
+   * ParcelableList: when we have an event of id LOG_EVENT_ID_AGENT_LOGGING_RESULTS we send a list
+   * of {@link android.app.backup.BackupRestoreEventLogger.DataTypeResult}.
+   */
+  public static final String EXTRA_LOG_AGENT_LOGGING_RESULTS =
+          "android.app.backup.extra.LOG_AGENT_LOGGING_RESULTS";
+
+  /**
+   * The operation type this log is associated with. See {@link OperationType}.
+   *
+   * @hide
+   */
+  public static final String EXTRA_LOG_OPERATION_TYPE = "android.app.backup.extra.OPERATION_TYPE";
+
   // TODO complete this list with all log messages. And document properly.
   public static final int LOG_EVENT_ID_FULL_BACKUP_CANCEL = 4;
   public static final int LOG_EVENT_ID_ILLEGAL_KEY = 5;
@@ -171,15 +187,60 @@ public class BackupManagerMonitor {
   public static final int LOG_EVENT_ID_WIDGET_UNKNOWN_VERSION = 48;
   public static final int LOG_EVENT_ID_NO_PACKAGES = 49;
   public static final int LOG_EVENT_ID_TRANSPORT_IS_NULL = 50;
+  /** The transport returned {@link BackupTransport#TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED}. */
+  public static final int LOG_EVENT_ID_TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED = 51;
 
-    /**
-     * The transport returned {@link BackupTransport#TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED}.
-     */
-    public static final int LOG_EVENT_ID_TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED = 51;
-
-
-
-
+  public static final int LOG_EVENT_ID_AGENT_LOGGING_RESULTS = 52;
+  /** @hide */
+  public static final int LOG_EVENT_ID_START_SYSTEM_RESTORE = 53;
+  /** @hide */
+  public static final int LOG_EVENT_ID_START_RESTORE_AT_INSTALL = 54;
+  /** A transport error happened during {@link PerformUnifiedRestoreTask#startRestore()}
+  @hide */
+  public static final int LOG_EVENT_ID_TRANSPORT_ERROR_DURING_START_RESTORE = 55;
+  /** Unable to get the name of the next package in the queue during a restore operation
+  @hide */
+  public static final int LOG_EVENT_ID_CANNOT_GET_NEXT_PKG_NAME = 56;
+  /** Attempting a restore operation that is neither KV nor full
+  @hide */
+  public static final int LOG_EVENT_ID_UNKNOWN_RESTORE_TYPE = 57;
+  /** The package is part of KeyValue restore
+  @hide */
+  public static final int LOG_EVENT_ID_KV_RESTORE = 58;
+  /** The package is part of Full restore
+  @hide */
+  public static final int LOG_EVENT_ID_FULL_RESTORE = 59;
+  /** Unable to fetch the nest restore target in the queue
+  @hide */
+  public static final int LOG_EVENT_ID_NO_NEXT_RESTORE_TARGET = 60;
+  /** An error occurred while attempting KeyValueRestore
+  @hide */
+  public static final int LOG_EVENT_ID_KV_AGENT_ERROR = 61;
+  /** Restore operation finished for the given package
+  @hide */
+  public static final int LOG_EVENT_ID_PACKAGE_RESTORE_FINISHED= 62;
+  /** A transport error happened during
+   * {@link PerformUnifiedRestoreTask#initiateOneRestore(PackageInfo, long)}
+  @hide */
+  public static final int LOG_EVENT_ID_TRANSPORT_ERROR_KV_RESTORE = 63;
+  /** Unable to instantiate the feeder thread in full restore
+  @hide */
+  public static final int LOG_EVENT_ID_NO_FEEDER_THREAD = 64;
+  /** An error occurred while attempting Full restore
+  @hide */
+  public static final int LOG_EVENT_ID_FULL_AGENT_ERROR = 65;
+  /** A transport error happened during a full restore
+  @hide */
+  public static final int LOG_EVENT_ID_TRANSPORT_ERROR_FULL_RESTORE = 66;
+  /** Start restore operation for a given package
+  @hide */
+  public static final int LOG_EVENT_ID_START_PACKAGE_RESTORE = 67;
+  /** Whole restore operation is complete
+  @hide */
+  public static final int LOG_EVENT_ID_RESTORE_COMPLETE = 68;
+  /** Agent error during {@link PerformUnifiedRestoreTask#restoreFinished()}
+   @hide */
+  public static final int LOG_EVENT_ID_AGENT_FAILURE = 69;
 
   /**
    * This method will be called each time something important happens on BackupManager.

@@ -28,4 +28,8 @@ cc_library_shared {
         "liblog",
         "libbase",
     ],
+    visibility: [
+        "//frameworks/base/apex:__subpackages__",
+        "//visibility:any_system_partition",
+    ],
 }

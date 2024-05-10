@@ -42,15 +42,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.test.espresso.NoActivityResumedException;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.infra.AndroidFuture;
+
+import com.google.common.util.concurrent.Uninterruptibles;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -60,6 +64,8 @@ import java.util.concurrent.TimeUnit;
 @SmallTest
 @Presubmit
 public class GameSessionTrampolineActivityTest {
+
+    private static final Duration TEST_ACTIVITY_OPEN_DURATION = Duration.ofSeconds(5);
 
     @Before
     public void setUp() {
@@ -80,6 +86,7 @@ public class GameSessionTrampolineActivityTest {
     }
 
     @Test
+    @FlakyTest(bugId = 245615459)
     public void launch_targetActivityFinishesSuccessfully_futureCompletedWithSameResults() {
         AndroidFuture<GameSessionActivityResult> resultFuture =
                 startTestActivityViaGameSessionTrampolineActivity();
@@ -96,6 +103,7 @@ public class GameSessionTrampolineActivityTest {
     }
 
     @Test
+    @FlakyTest(bugId = 245616660)
     public void launch_trampolineActivityProcessDeath_futureCompletedWithSameResults() {
         setAlwaysFinishActivities(true);
 
@@ -142,8 +150,13 @@ public class GameSessionTrampolineActivityTest {
             startTestActivityViaGameSessionTrampolineActivity() {
         Intent testActivityIntent = new Intent();
         testActivityIntent.setClass(getInstrumentation().getTargetContext(), TestActivity.class);
+        sleep(TEST_ACTIVITY_OPEN_DURATION);
 
         return startGameSessionTrampolineActivity(testActivityIntent);
+    }
+
+    private static void sleep(Duration sleepDuration) {
+        Uninterruptibles.sleepUninterruptibly(sleepDuration.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     private static AndroidFuture<GameSessionActivityResult> startGameSessionTrampolineActivity(

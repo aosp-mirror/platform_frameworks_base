@@ -84,6 +84,11 @@ public class FakeSecurityController extends BaseLeakChecker<SecurityControllerCa
     }
 
     @Override
+    public boolean isFinancedDevice() {
+        return false;
+    }
+
+    @Override
     public boolean isNetworkLoggingEnabled() {
         return false;
     }
@@ -100,6 +105,11 @@ public class FakeSecurityController extends BaseLeakChecker<SecurityControllerCa
 
     @Override
     public boolean isVpnBranded() {
+        return false;
+    }
+
+    @Override
+    public boolean isVpnValidated() {
         return false;
     }
 

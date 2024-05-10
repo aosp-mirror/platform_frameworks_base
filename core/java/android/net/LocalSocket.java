@@ -196,7 +196,8 @@ public class LocalSocket implements Closeable {
     }
 
     /**
-     * Retrieves the input stream for this instance.
+     * Retrieves the input stream for this instance. Closing this stream is equivalent to closing
+     * the entire socket and its associated streams using {@link #close()}.
      *
      * @return input stream
      * @throws IOException if socket has been closed or cannot be created.
@@ -207,7 +208,8 @@ public class LocalSocket implements Closeable {
     }
 
     /**
-     * Retrieves the output stream for this instance.
+     * Retrieves the output stream for this instance. Closing this stream is equivalent to closing
+     * the entire socket and its associated streams using {@link #close()}.
      *
      * @return output stream
      * @throws IOException if socket has been closed or cannot be created.

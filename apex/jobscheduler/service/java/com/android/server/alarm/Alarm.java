@@ -21,7 +21,8 @@ import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
 import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.RTC_WAKEUP;
 
-import static com.android.server.alarm.AlarmManagerService.clampPositive;
+import static com.android.server.alarm.AlarmManagerService.PRIORITY_NORMAL;
+import static com.android.server.alarm.AlarmManagerService.addClampPositive;
 
 import android.app.AlarmManager;
 import android.app.IAlarmListener;
@@ -35,6 +36,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -92,6 +94,14 @@ class Alarm {
      * Caller had USE_EXACT_ALARM permission.
      */
     static final int EXACT_ALLOW_REASON_POLICY_PERMISSION = 3;
+    /**
+     * Caller used a listener alarm, which does not need permission to be exact.
+     */
+    static final int EXACT_ALLOW_REASON_LISTENER = 4;
+    /**
+     * Caller used a prioritized alarm, which does not need permission to be exact.
+     */
+    static final int EXACT_ALLOW_REASON_PRIORITIZED = 5;
 
     public final int type;
     /**
@@ -119,8 +129,9 @@ class Alarm {
     /** The ultimate delivery time to be used for this alarm */
     private long mWhenElapsed;
     private long mMaxWhenElapsed;
-    public int mExactAllowReason;
-    public AlarmManagerService.PriorityClass priorityClass;
+    public int exactAllowReason;
+    @AlarmManagerService.DispatchPriority
+    public int priorityClass;
     /** Broadcast options to use when delivering this alarm */
     public Bundle mIdleOptions;
     public boolean mUsingReserveQuota;
@@ -137,7 +148,7 @@ class Alarm {
         mPolicyWhenElapsed[REQUESTER_POLICY_INDEX] = requestedWhenElapsed;
         mWhenElapsed = requestedWhenElapsed;
         this.windowLength = windowLength;
-        mMaxWhenElapsed = clampPositive(requestedWhenElapsed + windowLength);
+        mMaxWhenElapsed = addClampPositive(requestedWhenElapsed, windowLength);
         repeatInterval = interval;
         operation = op;
         listener = rec;
@@ -149,10 +160,11 @@ class Alarm {
         this.uid = uid;
         packageName = pkgName;
         mIdleOptions = idleOptions;
-        mExactAllowReason = exactAllowReason;
+        this.exactAllowReason = exactAllowReason;
         sourcePackage = (operation != null) ? operation.getCreatorPackage() : packageName;
         creatorUid = (operation != null) ? operation.getCreatorUid() : this.uid;
         mUsingReserveQuota = false;
+        priorityClass = PRIORITY_NORMAL;
     }
 
     public static String makeTag(PendingIntent pi, String tag, int type) {
@@ -232,8 +244,8 @@ class Alarm {
 
         final long oldMaxWhenElapsed = mMaxWhenElapsed;
         // windowLength should always be >= 0 here.
-        final long maxRequestedElapsed = clampPositive(
-                mPolicyWhenElapsed[REQUESTER_POLICY_INDEX] + windowLength);
+        final long maxRequestedElapsed = addClampPositive(
+                mPolicyWhenElapsed[REQUESTER_POLICY_INDEX], windowLength);
         mMaxWhenElapsed = Math.max(maxRequestedElapsed, mWhenElapsed);
 
         return (oldWhenElapsed != mWhenElapsed) || (oldMaxWhenElapsed != mMaxWhenElapsed);
@@ -256,7 +268,7 @@ class Alarm {
         return sb.toString();
     }
 
-    private static String policyIndexToString(int index) {
+    static String policyIndexToString(int index) {
         switch (index) {
             case REQUESTER_POLICY_INDEX:
                 return "requester";
@@ -283,6 +295,10 @@ class Alarm {
                 return "permission";
             case EXACT_ALLOW_REASON_POLICY_PERMISSION:
                 return "policy_permission";
+            case EXACT_ALLOW_REASON_LISTENER:
+                return "listener";
+            case EXACT_ALLOW_REASON_PRIORITIZED:
+                return "prioritized";
             case EXACT_ALLOW_REASON_NOT_APPLICABLE:
                 return "N/A";
             default:
@@ -320,9 +336,9 @@ class Alarm {
         }
         ipw.print(" window=");
         TimeUtils.formatDuration(windowLength, ipw);
-        if (mExactAllowReason != EXACT_ALLOW_REASON_NOT_APPLICABLE) {
+        if (exactAllowReason != EXACT_ALLOW_REASON_NOT_APPLICABLE) {
             ipw.print(" exactAllowReason=");
-            ipw.print(exactReasonToString(mExactAllowReason));
+            ipw.print(exactReasonToString(exactAllowReason));
         }
         ipw.print(" repeatInterval=");
         ipw.print(repeatInterval);
@@ -391,5 +407,33 @@ class Alarm {
         }
 
         proto.end(token);
+    }
+
+    /**
+     * Stores a snapshot of an alarm at any given time to be used for logging and diagnostics.
+     * This should intentionally avoid holding pointers to objects like {@link Alarm#operation}.
+     */
+    static class Snapshot {
+        final int mType;
+        final String mTag;
+        final long[] mPolicyWhenElapsed;
+
+        Snapshot(Alarm a) {
+            mType = a.type;
+            mTag = a.statsTag;
+            mPolicyWhenElapsed = Arrays.copyOf(a.mPolicyWhenElapsed, NUM_POLICIES);
+        }
+
+        void dump(IndentingPrintWriter pw, long nowElapsed) {
+            pw.print("type", typeToString(mType));
+            pw.print("tag", mTag);
+            pw.println();
+            pw.print("policyWhenElapsed:");
+            for (int i = 0; i < NUM_POLICIES; i++) {
+                pw.print(" " + policyIndexToString(i) + "=");
+                TimeUtils.formatDuration(mPolicyWhenElapsed[i], nowElapsed, pw);
+            }
+            pw.println();
+        }
     }
 }

@@ -24,6 +24,8 @@ import android.view.SurfaceControl;
 import android.view.WindowContentFrameStats;
 import android.view.WindowAnimationFrameStats;
 import android.os.ParcelFileDescriptor;
+import android.window.ScreenCapture.ScreenCaptureListener;
+import android.window.ScreenCapture.LayerCaptureArgs;
 
 import java.util.List;
 
@@ -40,10 +42,11 @@ interface IUiAutomationConnection {
     void connect(IAccessibilityServiceClient client, int flags);
     void disconnect();
     boolean injectInputEvent(in InputEvent event, boolean sync, boolean waitForAnimations);
+    void injectInputEventToInputFilter(in InputEvent event);
     void syncInputTransactions(boolean waitForAnimations);
     boolean setRotation(int rotation);
-    Bitmap takeScreenshot(in Rect crop);
-    Bitmap takeSurfaceControlScreenshot(in SurfaceControl surfaceControl);
+    boolean takeScreenshot(in Rect crop, in ScreenCaptureListener listener);
+    boolean takeSurfaceControlScreenshot(in SurfaceControl surfaceControl, in ScreenCaptureListener listener);
     boolean clearWindowContentFrameStats(int windowId);
     WindowContentFrameStats getWindowContentFrameStats(int windowId);
     void clearWindowAnimationFrameStats();

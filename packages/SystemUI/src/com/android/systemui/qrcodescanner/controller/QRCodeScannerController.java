@@ -120,6 +120,7 @@ public class QRCodeScannerController implements
         mUserTracker = userTracker;
         mConfigEnableLockScreenButton = mContext.getResources().getBoolean(
             android.R.bool.config_enableQrCodeScannerOnLockScreen);
+        mExecutor.execute(this::updateQRCodeScannerActivityDetails);
     }
 
     /**
@@ -158,14 +159,18 @@ public class QRCodeScannerController implements
      * Returns true if lock screen entry point for QR Code Scanner is to be enabled.
      */
     public boolean isEnabledForLockScreenButton() {
-        return mQRCodeScannerEnabled && mIntent != null && mConfigEnableLockScreenButton
-                && isActivityCallable(mIntent);
+        return mQRCodeScannerEnabled && isAbleToLaunchScannerActivity() && isAllowedOnLockScreen();
+    }
+
+    /** Returns whether the QR scanner button is allowed on lockscreen. */
+    public boolean isAllowedOnLockScreen() {
+        return mConfigEnableLockScreenButton;
     }
 
     /**
-     * Returns true if quick settings entry point for QR Code Scanner is to be enabled.
+     * Returns true if the feature can open the configured QR scanner activity.
      */
-    public boolean isEnabledForQuickSettings() {
+    public boolean isAbleToLaunchScannerActivity() {
         return mIntent != null && isActivityCallable(mIntent);
     }
 
@@ -351,9 +356,6 @@ public class QRCodeScannerController implements
 
         // Reset cached values to default as we are no longer listening
         mOnDefaultQRCodeScannerChangedListener = null;
-        mQRCodeScannerActivity = null;
-        mIntent = null;
-        mComponentName = null;
     }
 
     private void notifyQRCodeScannerActivityChanged() {

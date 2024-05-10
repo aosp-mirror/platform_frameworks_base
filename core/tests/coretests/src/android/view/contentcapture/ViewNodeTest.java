@@ -41,49 +41,60 @@ public class ViewNodeTest {
 
     private final Context mContext = InstrumentationRegistry.getTargetContext();
 
+    private final View mView = new View(mContext);
+
+    private final ViewStructureImpl mViewStructure = new ViewStructureImpl(mView);
+
+    private final ViewNode mViewNode = mViewStructure.getNode();
+
     @Mock
     private HtmlInfo mHtmlInfoMock;
 
     @Test
     public void testUnsupportedProperties() {
-        View view = new View(mContext);
+        mViewStructure.setChildCount(1);
+        assertThat(mViewNode.getChildCount()).isEqualTo(0);
 
-        ViewStructureImpl structure = new ViewStructureImpl(view);
-        ViewNode node = structure.getNode();
+        mViewStructure.addChildCount(1);
+        assertThat(mViewNode.getChildCount()).isEqualTo(0);
 
-        structure.setChildCount(1);
-        assertThat(node.getChildCount()).isEqualTo(0);
+        assertThat(mViewStructure.newChild(0)).isNull();
+        assertThat(mViewNode.getChildCount()).isEqualTo(0);
 
-        structure.addChildCount(1);
-        assertThat(node.getChildCount()).isEqualTo(0);
+        assertThat(mViewStructure.asyncNewChild(0)).isNull();
+        assertThat(mViewNode.getChildCount()).isEqualTo(0);
 
-        assertThat(structure.newChild(0)).isNull();
-        assertThat(node.getChildCount()).isEqualTo(0);
+        mViewStructure.asyncCommit();
+        assertThat(mViewNode.getChildCount()).isEqualTo(0);
 
-        assertThat(structure.asyncNewChild(0)).isNull();
-        assertThat(node.getChildCount()).isEqualTo(0);
+        mViewStructure.setWebDomain("Y U NO SET?");
+        assertThat(mViewNode.getWebDomain()).isNull();
 
-        structure.asyncCommit();
-        assertThat(node.getChildCount()).isEqualTo(0);
+        assertThat(mViewStructure.newHtmlInfoBuilder("WHATEVER")).isNull();
 
-        structure.setWebDomain("Y U NO SET?");
-        assertThat(node.getWebDomain()).isNull();
+        mViewStructure.setHtmlInfo(mHtmlInfoMock);
+        assertThat(mViewNode.getHtmlInfo()).isNull();
 
-        assertThat(structure.newHtmlInfoBuilder("WHATEVER")).isNull();
+        mViewStructure.setDataIsSensitive(true);
 
-        structure.setHtmlInfo(mHtmlInfoMock);
-        assertThat(node.getHtmlInfo()).isNull();
-
-        structure.setDataIsSensitive(true);
-
-        assertThat(structure.getTempRect()).isNull();
+        assertThat(mViewStructure.getTempRect()).isNull();
 
         // Graphic properties
-        structure.setElevation(6.66f);
-        assertThat(node.getElevation()).isWithin(1.0e-10f).of(0f);
-        structure.setAlpha(66.6f);
-        assertThat(node.getAlpha()).isWithin(1.0e-10f).of(1.0f);
-        structure.setTransformation(Matrix.IDENTITY_MATRIX);
-        assertThat(node.getTransformation()).isNull();
+        mViewStructure.setElevation(6.66f);
+        assertThat(mViewNode.getElevation()).isEqualTo(0f);
+        mViewStructure.setAlpha(66.6f);
+        assertThat(mViewNode.getAlpha()).isEqualTo(1.0f);
+        mViewStructure.setTransformation(Matrix.IDENTITY_MATRIX);
+        assertThat(mViewNode.getTransformation()).isNull();
+    }
+
+    @Test
+    public void testGetSet_textIdEntry() {
+        assertThat(mViewNode.getTextIdEntry()).isNull();
+
+        String expected = "TEXT_ID_ENTRY";
+        mViewNode.setTextIdEntry(expected);
+
+        assertThat(mViewNode.getTextIdEntry()).isEqualTo(expected);
     }
 }

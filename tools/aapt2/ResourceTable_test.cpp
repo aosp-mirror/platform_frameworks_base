@@ -15,14 +15,15 @@
  */
 
 #include "ResourceTable.h"
-#include "Diagnostics.h"
-#include "ResourceValues.h"
-#include "test/Test.h"
-#include "util/Util.h"
 
 #include <algorithm>
 #include <ostream>
 #include <string>
+
+#include "ResourceValues.h"
+#include "androidfw/IDiagnostics.h"
+#include "test/Test.h"
+#include "util/Util.h"
 
 using ::android::ConfigDescription;
 using ::android::StringPiece;
@@ -186,7 +187,7 @@ static StringPiece LevelToString(Visibility::Level level) {
 static ::testing::AssertionResult VisibilityOfResource(const ResourceTable& table,
                                                        const ResourceNameRef& name,
                                                        Visibility::Level level,
-                                                       const StringPiece& comment) {
+                                                       StringPiece comment) {
   std::optional<ResourceTable::SearchResult> result = table.FindResource(name);
   if (!result) {
     return ::testing::AssertionFailure() << "no resource '" << name << "' found in table";
@@ -263,13 +264,13 @@ TEST(ResourceTableTest, SetAllowNew) {
 
 TEST(ResourceTableTest, SetOverlayable) {
   ResourceTable table;
-  auto overlayable = std::make_shared<Overlayable>("Name", "overlay://theme",
-                                                   Source("res/values/overlayable.xml", 40));
+  auto overlayable = std::make_shared<Overlayable>(
+      "Name", "overlay://theme", android::Source("res/values/overlayable.xml", 40));
   OverlayableItem overlayable_item(overlayable);
   overlayable_item.policies |= PolicyFlags::PRODUCT_PARTITION;
   overlayable_item.policies |= PolicyFlags::VENDOR_PARTITION;
   overlayable_item.comment = "comment";
-  overlayable_item.source = Source("res/values/overlayable.xml", 42);
+  overlayable_item.source = android::Source("res/values/overlayable.xml", 42);
 
   const ResourceName name = test::ParseNameOrDie("android:string/foo");
   ASSERT_TRUE(table.AddResource(NewResourceBuilder(name).SetOverlayable(overlayable_item).Build(),

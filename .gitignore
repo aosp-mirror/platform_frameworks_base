@@ -5,3 +5,4 @@
 gen/
 .vscode/
 *.code-workspace
+.gradle/

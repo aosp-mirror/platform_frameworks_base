@@ -50,11 +50,8 @@ import android.os.StrictMode;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -65,11 +62,11 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.pm.ShortcutService.DumpFilter;
 import com.android.server.pm.ShortcutService.ShortcutOperation;
 import com.android.server.pm.ShortcutService.Stats;
-
-import libcore.io.IoUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,7 +75,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -376,6 +372,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         // Extract Icon and update the icon res ID and the bitmap path.
         s.saveIconAndFixUpShortcutLocked(this, newShortcut);
         s.fixUpShortcutResourceNamesAndValues(newShortcut);
+        ensureShortcutCountBeforePush();
         saveShortcut(newShortcut);
     }
 
@@ -437,7 +434,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         final ShortcutInfo oldShortcut = findShortcutById(newShortcut.getId());
         boolean deleted = false;
 
-        if (oldShortcut == null) {
+        if (oldShortcut == null || !oldShortcut.isDynamic()) {
             final ShortcutService service = mShortcutUser.mService;
             final int maxShortcuts = service.getMaxActivityShortcuts();
 
@@ -446,18 +443,12 @@ class ShortcutPackage extends ShortcutPackageItem {
             final ArrayList<ShortcutInfo> activityShortcuts = all.get(newShortcut.getActivity());
 
             if (activityShortcuts != null && activityShortcuts.size() > maxShortcuts) {
-                Slog.e(TAG, "Error pushing shortcut. There are already "
-                        + activityShortcuts.size() + " shortcuts, exceeding the " + maxShortcuts
-                        + " shortcuts limit when pushing the new shortcut " + newShortcut
-                        + ". Id of shortcuts currently available in system memory are "
-                        + activityShortcuts.stream().map(ShortcutInfo::getId)
-                        .collect(Collectors.joining(",", "[", "]")));
-                // TODO: This should not have happened. If it does, identify the root cause where
-                //  possible, otherwise bail-out early to prevent memory issue.
+                // Root cause was discovered in b/233155034, so this should not be happening.
+                service.wtf("Error pushing shortcut. There are already "
+                        + activityShortcuts.size() + " shortcuts.");
             }
             if (activityShortcuts != null && activityShortcuts.size() == maxShortcuts) {
                 // Max has reached. Delete the shortcut with lowest rank.
-
                 // Sort by isManifestShortcut() and getRank().
                 Collections.sort(activityShortcuts, mShortcutTypeAndRankComparator);
 
@@ -473,7 +464,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                 deleted = deleteDynamicWithId(shortcut.getId(), /* ignoreInvisible =*/ true,
                         /*ignorePersistedShortcuts=*/ true) != null;
             }
-        } else {
+        }
+        if (oldShortcut != null) {
             // It's an update case.
             // Make sure the target is updatable. (i.e. should be mutable.)
             oldShortcut.ensureUpdatableWith(newShortcut, /*isUpdating=*/ false);
@@ -503,6 +495,32 @@ class ShortcutPackage extends ShortcutPackageItem {
                             })));
         }
         return deleted;
+    }
+
+    private void ensureShortcutCountBeforePush() {
+        final ShortcutService service = mShortcutUser.mService;
+        // Ensure the total number of shortcuts doesn't exceed the hard limit per app.
+        final int maxShortcutPerApp = service.getMaxAppShortcuts();
+        synchronized (mLock) {
+            final List<ShortcutInfo> appShortcuts = mShortcuts.values().stream().filter(si ->
+                    !si.isPinned()).collect(Collectors.toList());
+            if (appShortcuts.size() >= maxShortcutPerApp) {
+                // Max has reached. Removes shortcuts until they fall within the hard cap.
+                // Sort by isManifestShortcut(), isDynamic() and getLastChangedTimestamp().
+                Collections.sort(appShortcuts, mShortcutTypeRankAndTimeComparator);
+
+                while (appShortcuts.size() >= maxShortcutPerApp) {
+                    final ShortcutInfo shortcut = appShortcuts.remove(appShortcuts.size() - 1);
+                    if (shortcut.isDeclaredInManifest()) {
+                        // All shortcuts are manifest shortcuts and cannot be removed.
+                        throw new IllegalArgumentException(getPackageName() + " has published "
+                                + appShortcuts.size() + " manifest shortcuts across different"
+                                + " activities.");
+                    }
+                    forceDeleteShortcutInner(shortcut.getId());
+                }
+            }
+        }
     }
 
     /**
@@ -885,7 +903,12 @@ class ShortcutPackage extends ShortcutPackageItem {
      * available ShareTarget definitions in this package.
      */
     public List<ShortcutManager.ShareShortcutInfo> getMatchingShareTargets(
-            @NonNull IntentFilter filter) {
+            @NonNull final IntentFilter filter) {
+        return getMatchingShareTargets(filter, null);
+    }
+
+    List<ShortcutManager.ShareShortcutInfo> getMatchingShareTargets(
+            @NonNull final IntentFilter filter, @Nullable final String pkgName) {
         synchronized (mLock) {
             final List<ShareTargetInfo> matchedTargets = new ArrayList<>();
             for (int i = 0; i < mShareTargets.size(); i++) {
@@ -909,8 +932,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             // included in the result
             findAll(shortcuts, ShortcutInfo::isNonManifestVisible,
                     ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION,
-                    mShortcutUser.mService.mContext.getPackageName(),
-                    0, /*getPinnedByAnyLauncher=*/ false);
+                    pkgName, 0, /*getPinnedByAnyLauncher=*/ false);
 
             final List<ShortcutManager.ShareShortcutInfo> result = new ArrayList<>();
             for (int i = 0; i < shortcuts.size(); i++) {
@@ -1108,7 +1130,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         // Now prepare to publish manifest shortcuts.
         List<ShortcutInfo> newManifestShortcutList = null;
-        final int shareTargetSize;
+        int shareTargetSize = 0;
         synchronized (mLock) {
             try {
                 shareTargetSize = mShareTargets.size();
@@ -1364,6 +1386,61 @@ class ShortcutPackage extends ShortcutPackageItem {
             return 1;
         }
         return Integer.compare(a.getRank(), b.getRank());
+    };
+
+    /**
+     * To sort by isManifestShortcut(), isDynamic(), getRank() and
+     * getLastChangedTimestamp(). i.e. manifest shortcuts come before non-manifest shortcuts,
+     * dynamic shortcuts come before floating shortcuts, then sort by last changed timestamp.
+     *
+     * This is used to decide which shortcuts to remove when the total number of shortcuts retained
+     * for the app exceeds the limit defined in {@link ShortcutService#getMaxAppShortcuts()}.
+     *
+     * (Note the number of manifest shortcuts is always <= the max number, because if there are
+     * more, ShortcutParser would ignore the rest.)
+     */
+    final Comparator<ShortcutInfo> mShortcutTypeRankAndTimeComparator = (ShortcutInfo a,
+            ShortcutInfo b) -> {
+        if (a.isDeclaredInManifest() && !b.isDeclaredInManifest()) {
+            return -1;
+        }
+        if (!a.isDeclaredInManifest() && b.isDeclaredInManifest()) {
+            return 1;
+        }
+        if (a.isDynamic() && b.isDynamic()) {
+            return Integer.compare(a.getRank(), b.getRank());
+        }
+        if (a.isDynamic()) {
+            return -1;
+        }
+        if (b.isDynamic()) {
+            return 1;
+        }
+        if (a.isCached() && b.isCached()) {
+            // if both shortcuts are cached, prioritize shortcuts cached by people tile,
+            if (a.hasFlags(ShortcutInfo.FLAG_CACHED_PEOPLE_TILE)
+                    && !b.hasFlags(ShortcutInfo.FLAG_CACHED_PEOPLE_TILE)) {
+                return -1;
+            } else if (!a.hasFlags(ShortcutInfo.FLAG_CACHED_PEOPLE_TILE)
+                    && b.hasFlags(ShortcutInfo.FLAG_CACHED_PEOPLE_TILE)) {
+                return 1;
+            }
+            // followed by bubbles.
+            if (a.hasFlags(ShortcutInfo.FLAG_CACHED_BUBBLES)
+                    && !b.hasFlags(ShortcutInfo.FLAG_CACHED_BUBBLES)) {
+                return -1;
+            } else if (!a.hasFlags(ShortcutInfo.FLAG_CACHED_BUBBLES)
+                    && b.hasFlags(ShortcutInfo.FLAG_CACHED_BUBBLES)) {
+                return 1;
+            }
+        }
+        if (a.isCached()) {
+            return -1;
+        }
+        if (b.isCached()) {
+            return 1;
+        }
+        return Long.compare(b.getLastChangedTimestamp(), a.getLastChangedTimestamp());
     };
 
     /**
@@ -1888,45 +1965,41 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     public static ShortcutPackage loadFromFile(ShortcutService s, ShortcutUser shortcutUser,
             File path, boolean fromBackup) {
+        try (ResilientAtomicFile file = getResilientFile(path)) {
+            FileInputStream in = null;
+            try {
+                in = file.openRead();
+                if (in == null) {
+                    Slog.d(TAG, "Not found " + path);
+                    return null;
+                }
 
-        final AtomicFile file = new AtomicFile(path);
-        final FileInputStream in;
-        try {
-            in = file.openRead();
-        } catch (FileNotFoundException e) {
-            if (ShortcutService.DEBUG) {
-                Slog.d(TAG, "Not found " + path);
+                ShortcutPackage ret = null;
+                TypedXmlPullParser parser = Xml.resolvePullParser(in);
+
+                int type;
+                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                    if (type != XmlPullParser.START_TAG) {
+                        continue;
+                    }
+                    final int depth = parser.getDepth();
+
+                    final String tag = parser.getName();
+                    if (ShortcutService.DEBUG_LOAD || ShortcutService.DEBUG_REBOOT) {
+                        Slog.d(TAG, String.format("depth=%d type=%d name=%s", depth, type, tag));
+                    }
+                    if ((depth == 1) && TAG_ROOT.equals(tag)) {
+                        ret = loadFromXml(s, shortcutUser, parser, fromBackup);
+                        continue;
+                    }
+                    ShortcutService.throwForInvalidTag(depth, tag);
+                }
+                return ret;
+            } catch (Exception e) {
+                Slog.e(TAG, "Failed to read file " + file.getBaseFile(), e);
+                file.failRead(in, e);
+                return loadFromFile(s, shortcutUser, path, fromBackup);
             }
-            return null;
-        }
-
-        try {
-            ShortcutPackage ret = null;
-            TypedXmlPullParser parser = Xml.resolvePullParser(in);
-
-            int type;
-            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
-                if (type != XmlPullParser.START_TAG) {
-                    continue;
-                }
-                final int depth = parser.getDepth();
-
-                final String tag = parser.getName();
-                if (ShortcutService.DEBUG_LOAD || ShortcutService.DEBUG_REBOOT) {
-                    Slog.d(TAG, String.format("depth=%d type=%d name=%s", depth, type, tag));
-                }
-                if ((depth == 1) && TAG_ROOT.equals(tag)) {
-                    ret = loadFromXml(s, shortcutUser, parser, fromBackup);
-                    continue;
-                }
-                ShortcutService.throwForInvalidTag(depth, tag);
-            }
-            return ret;
-        } catch (IOException | XmlPullParserException e) {
-            Slog.e(TAG, "Failed to read file " + file.getBaseFile(), e);
-            return null;
-        } finally {
-            IoUtils.closeQuietly(in);
         }
     }
 
@@ -1967,6 +2040,9 @@ class ShortcutPackage extends ShortcutPackageItem {
                                         shortcutUser.getUserId(), fromBackup);
                                 // Don't use addShortcut(), we don't need to save the icon.
                                 ret.mShortcuts.put(si.getId(), si);
+                            } catch (IOException e) {
+                                // Don't ignore IO exceptions.
+                                throw e;
                             } catch (Exception e) {
                                 // b/246540168 malformed shortcuts should be ignored
                                 Slog.e(TAG, "Failed parsing shortcut.", e);

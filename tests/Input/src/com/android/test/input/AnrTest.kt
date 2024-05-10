@@ -27,13 +27,14 @@ import android.os.IInputConstants.UNMULTIPLIED_DEFAULT_DISPATCHING_TIMEOUT_MILLI
 import android.os.SystemClock
 import android.provider.Settings
 import android.provider.Settings.Global.HIDE_ERROR_DIALOGS
-import android.support.test.uiautomator.By
-import android.support.test.uiautomator.UiDevice
-import android.support.test.uiautomator.UiObject2
-import android.support.test.uiautomator.Until
 import android.testing.PollingCheck
 import android.view.InputDevice
 import android.view.MotionEvent
+
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObject2
+import androidx.test.uiautomator.Until
 
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -73,7 +74,7 @@ class AnrTest {
         val contentResolver = instrumentation.targetContext.contentResolver
         hideErrorDialogs = Settings.Global.getInt(contentResolver, HIDE_ERROR_DIALOGS, 0)
         Settings.Global.putInt(contentResolver, HIDE_ERROR_DIALOGS, 0)
-        PACKAGE_NAME = UnresponsiveGestureMonitorActivity::class.java.getPackage().getName()
+        PACKAGE_NAME = UnresponsiveGestureMonitorActivity::class.java.getPackage()!!.getName()
     }
 
     @After
@@ -99,6 +100,7 @@ class AnrTest {
 
     private fun clickCloseAppOnAnrDialog() {
         // Find anr dialog and kill app
+        val timestamp = System.currentTimeMillis()
         val uiDevice: UiDevice = UiDevice.getInstance(instrumentation)
         val closeAppButton: UiObject2? =
                 uiDevice.wait(Until.findObject(By.res("android:id/aerr_close")), 20000)
@@ -106,7 +108,6 @@ class AnrTest {
             fail("Could not find anr dialog")
             return
         }
-        val initialReasons = getExitReasons()
         closeAppButton.click()
         /**
          * We must wait for the app to be fully closed before exiting this test. This is because
@@ -115,7 +116,7 @@ class AnrTest {
          * the killing logic will apply to the newly launched 'am start' instance, and the second
          * test will fail because the unresponsive activity will never be launched.
          */
-        waitForNewExitReason(initialReasons[0].timestamp)
+        waitForNewExitReasonAfter(timestamp)
     }
 
     private fun clickWaitOnAnrDialog() {
@@ -133,26 +134,26 @@ class AnrTest {
     private fun getExitReasons(): List<ApplicationExitInfo> {
         lateinit var infos: List<ApplicationExitInfo>
         instrumentation.runOnMainSync {
-            val am = instrumentation.getContext().getSystemService(ActivityManager::class.java)
+            val am = instrumentation.getContext().getSystemService(ActivityManager::class.java)!!
             infos = am.getHistoricalProcessExitReasons(PACKAGE_NAME, ALL_PIDS, NO_MAX)
         }
         return infos
     }
 
-    private fun waitForNewExitReason(previousExitTimestamp: Long) {
+    private fun waitForNewExitReasonAfter(timestamp: Long) {
         PollingCheck.waitFor {
-            getExitReasons()[0].timestamp > previousExitTimestamp
+            val reasons = getExitReasons()
+            !reasons.isEmpty() && reasons[0].timestamp >= timestamp
         }
         val reasons = getExitReasons()
-        assertTrue(reasons[0].timestamp > previousExitTimestamp)
+        assertTrue(reasons[0].timestamp > timestamp)
         assertEquals(ApplicationExitInfo.REASON_ANR, reasons[0].reason)
     }
 
     private fun triggerAnr() {
         startUnresponsiveActivity()
         val uiDevice: UiDevice = UiDevice.getInstance(instrumentation)
-        val obj: UiObject2? = uiDevice.wait(Until.findObject(
-                By.text("Unresponsive gesture monitor")), 10000)
+        val obj: UiObject2? = uiDevice.wait(Until.findObject(By.pkg(PACKAGE_NAME)), 10000)
 
         if (obj == null) {
             fail("Could not find unresponsive activity")

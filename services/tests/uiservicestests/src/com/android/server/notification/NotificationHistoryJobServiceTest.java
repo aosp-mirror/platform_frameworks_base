@@ -52,9 +52,9 @@ import java.lang.reflect.Field;
 @RunWith(AndroidTestingRunner.class)
 public class NotificationHistoryJobServiceTest extends UiServiceTestCase {
     private NotificationHistoryJobService mJobService;
-    private JobParameters mJobParams = new JobParameters(null,
-            NotificationHistoryJobService.BASE_JOB_ID, null, null, null,
-            0, false, false, null, null, null);
+
+    @Mock
+    private JobParameters mJobParams;
 
     @Captor
     ArgumentCaptor<JobInfo> mJobInfoCaptor;
@@ -71,10 +71,10 @@ public class NotificationHistoryJobServiceTest extends UiServiceTestCase {
     @Before
     public void setUp() throws Exception {
         mJobService = new NotificationHistoryJobService();
+        mJobService.attachBaseContext(mContext);
+        mJobService.onCreate();
+        mJobService.onBind(/* intent= */ null);  // Create JobServiceEngine within JobService.
 
-        final Field field = JobService.class.getDeclaredField("mEngine");
-        field.setAccessible(true);
-        field.set(mJobService, mock(JobServiceEngine.class));
         mContext.addMockSystemService(JobScheduler.class, mMockJobScheduler);
 
         // add NotificationManagerInternal to LocalServices

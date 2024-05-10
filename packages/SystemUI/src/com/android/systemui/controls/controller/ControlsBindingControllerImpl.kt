@@ -41,7 +41,8 @@ open class ControlsBindingControllerImpl @Inject constructor(
     private val context: Context,
     @Background private val backgroundExecutor: DelayableExecutor,
     private val lazyController: Lazy<ControlsController>,
-    userTracker: UserTracker
+    private val packageUpdateMonitorFactory: PackageUpdateMonitor.Factory,
+    userTracker: UserTracker,
 ) : ControlsBindingController {
 
     companion object {
@@ -93,7 +94,8 @@ open class ControlsBindingControllerImpl @Inject constructor(
                 backgroundExecutor,
                 actionCallbackService,
                 currentUser,
-                component
+                component,
+                packageUpdateMonitorFactory
         )
     }
 
@@ -168,6 +170,10 @@ open class ControlsBindingControllerImpl @Inject constructor(
 
     override fun bindService(component: ComponentName) {
         retrieveLifecycleManager(component).bindService()
+    }
+
+    override fun bindServiceForPanel(component: ComponentName) {
+        retrieveLifecycleManager(component).bindServiceForPanel()
     }
 
     override fun changeUser(newUser: UserHandle) {
@@ -306,6 +312,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
                 Log.d(TAG, "Canceling loadSubscribtion")
                 it.invoke()
             }
+            callback.error("Load cancelled")
         }
 
         override fun onSubscribe(token: IBinder, subs: IControlsSubscription) {

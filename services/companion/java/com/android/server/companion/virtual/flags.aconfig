@@ -1,0 +1,11 @@
+# OLD PACKAGE, DO NOT USE: Prefer `flags.aconfig` in core/java/android/companion/virtual
+# (or other custom files) to define your flags
+package: "com.android.server.companion.virtual"
+container: "system"
+
+flag {
+  name: "dump_history"
+  namespace: "virtual_devices"
+  description: "This flag controls if a history of virtual devices is shown in dumpsys virtualdevices"
+  bug: "293114719"
+}

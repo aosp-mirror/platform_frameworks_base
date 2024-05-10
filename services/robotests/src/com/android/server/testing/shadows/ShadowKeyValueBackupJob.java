@@ -21,6 +21,7 @@ import android.os.Binder;
 
 import com.android.server.backup.BackupManagerConstants;
 import com.android.server.backup.KeyValueBackupJob;
+import com.android.server.backup.UserBackupManagerService;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -35,7 +36,7 @@ public class ShadowKeyValueBackupJob {
 
     @Implementation
     protected static void schedule(int userId, Context ctx, long delay,
-            BackupManagerConstants constants) {
+            UserBackupManagerService userBackupManagerService) {
         callingUid = Binder.getCallingUid();
     }
 }

@@ -26,8 +26,10 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.graphics.fonts.FontFamily.Builder.VariableFontFamilyType;
 import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
+import android.icu.util.ULocale;
 import android.os.Build;
 import android.os.LocaleList;
 import android.os.Parcel;
@@ -36,7 +38,9 @@ import android.os.Parcelable;
 import java.io.File;
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 
@@ -55,6 +59,8 @@ import java.util.Objects;
 public final class FontConfig implements Parcelable {
     private final @NonNull List<FontFamily> mFamilies;
     private final @NonNull List<Alias> mAliases;
+    private final @NonNull List<NamedFamilyList> mNamedFamilyLists;
+    private final @NonNull List<Customization.LocaleFallback> mLocaleFallbackCustomizations;
     private final long mLastModifiedTimeMillis;
     private final int mConfigVersion;
 
@@ -67,12 +73,26 @@ public final class FontConfig implements Parcelable {
      * @hide Only system server can create this instance and passed via IPC.
      */
     public FontConfig(@NonNull List<FontFamily> families, @NonNull List<Alias> aliases,
+            @NonNull List<NamedFamilyList> namedFamilyLists,
+            @NonNull List<Customization.LocaleFallback> localeFallbackCustomizations,
             long lastModifiedTimeMillis, @IntRange(from = 0) int configVersion) {
         mFamilies = families;
         mAliases = aliases;
+        mNamedFamilyLists = namedFamilyLists;
+        mLocaleFallbackCustomizations = localeFallbackCustomizations;
         mLastModifiedTimeMillis = lastModifiedTimeMillis;
         mConfigVersion = configVersion;
     }
+
+    /**
+     * @hide Keep this constructor for reoborectric.
+     */
+    public FontConfig(@NonNull List<FontFamily> families, @NonNull List<Alias> aliases,
+            long lastModifiedTimeMillis, @IntRange(from = 0) int configVersion) {
+        this(families, aliases, Collections.emptyList(), Collections.emptyList(),
+                lastModifiedTimeMillis, configVersion);
+    }
+
 
     /**
      * Returns the ordered list of font families available in the system.
@@ -92,6 +112,22 @@ public final class FontConfig implements Parcelable {
      */
     public @NonNull List<Alias> getAliases() {
         return mAliases;
+    }
+
+    public @NonNull List<NamedFamilyList> getNamedFamilyLists() {
+        return mNamedFamilyLists;
+    }
+
+    /**
+     * Returns a locale fallback customizations.
+     *
+     * This field is used for creating the system fallback in the system server. This field is
+     * always empty in the application process.
+     *
+     * @hide
+     */
+    public @NonNull List<Customization.LocaleFallback> getLocaleFallbackCustomizations() {
+        return mLocaleFallbackCustomizations;
     }
 
     /**
@@ -133,8 +169,9 @@ public final class FontConfig implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeParcelableList(mFamilies, flags);
-        dest.writeParcelableList(mAliases, flags);
+        dest.writeTypedList(mFamilies, flags);
+        dest.writeTypedList(mAliases, flags);
+        dest.writeTypedList(mNamedFamilyLists, flags);
         dest.writeLong(mLastModifiedTimeMillis);
         dest.writeInt(mConfigVersion);
     }
@@ -142,13 +179,17 @@ public final class FontConfig implements Parcelable {
     public static final @NonNull Creator<FontConfig> CREATOR = new Creator<FontConfig>() {
         @Override
         public FontConfig createFromParcel(Parcel source) {
-            List<FontFamily> families = source.readParcelableList(new ArrayList<>(),
-                    FontFamily.class.getClassLoader(), android.text.FontConfig.FontFamily.class);
-            List<Alias> aliases = source.readParcelableList(new ArrayList<>(),
-                    Alias.class.getClassLoader(), android.text.FontConfig.Alias.class);
+            final List<FontFamily> families = new ArrayList<>();
+            source.readTypedList(families, FontFamily.CREATOR);
+            final List<Alias> aliases = new ArrayList<>();
+            source.readTypedList(aliases, Alias.CREATOR);
+            final List<NamedFamilyList> familyLists = new ArrayList<>();
+            source.readTypedList(familyLists, NamedFamilyList.CREATOR);
             long lastModifiedDate = source.readLong();
             int configVersion = source.readInt();
-            return new FontConfig(families, aliases, lastModifiedDate, configVersion);
+            return new FontConfig(families, aliases, familyLists,
+                    Collections.emptyList(),  // Don't need to pass customization to API caller.
+                    lastModifiedDate, configVersion);
         }
 
         @Override
@@ -506,9 +547,9 @@ public final class FontConfig implements Parcelable {
      */
     public static final class FontFamily implements Parcelable {
         private final @NonNull List<Font> mFonts;
-        private final @Nullable String mName;
         private final @NonNull LocaleList mLocaleList;
         private final @Variant int mVariant;
+        private final int mVariableFontFamilyType;
 
         /** @hide */
         @Retention(SOURCE)
@@ -547,12 +588,12 @@ public final class FontConfig implements Parcelable {
          *
          * @hide Only system server can create this instance and passed via IPC.
          */
-        public FontFamily(@NonNull List<Font> fonts, @Nullable String name,
-                @NonNull LocaleList localeList, @Variant int variant) {
+        public FontFamily(@NonNull List<Font> fonts, @NonNull LocaleList localeList,
+                @Variant int variant, int variableFontFamilyType) {
             mFonts = fonts;
-            mName = name;
             mLocaleList = localeList;
             mVariant = variant;
+            mVariableFontFamilyType = variableFontFamilyType;
         }
 
         /**
@@ -577,9 +618,13 @@ public final class FontConfig implements Parcelable {
          *
          * When the name of a {@link FontFamily} is null, it will be appended to all of the
          * {@code Fallback List}s.
+         *
+         * @deprecated From API 34, this function always returns null. All font families which have
+         *             name attribute will be reported as a {@link NamedFamilyList}.
          */
+        @Deprecated
         public @Nullable String getName() {
-            return mName;
+            return null;
         }
 
         /**
@@ -599,6 +644,20 @@ public final class FontConfig implements Parcelable {
             return mVariant;
         }
 
+        /**
+         * Returns the font family type.
+         *
+         * @see Builder#VARIABLE_FONT_FAMILY_TYPE_NONE
+         * @see Builder#VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ITAL
+         * @see Builder#VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ONLY
+         * @see Builder#VARIABLE_FONT_FAMILY_TYPE_TWO_FONTS_WGHT
+         * @hide
+         * @return variable font family type.
+         */
+        public @VariableFontFamilyType int getVariableFontFamilyType() {
+            return mVariableFontFamilyType;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -606,23 +665,24 @@ public final class FontConfig implements Parcelable {
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
-            dest.writeParcelableList(mFonts, flags);
-            dest.writeString8(mName);
+            dest.writeTypedList(mFonts, flags);
             dest.writeString8(mLocaleList.toLanguageTags());
             dest.writeInt(mVariant);
+            dest.writeInt(mVariableFontFamilyType);
         }
 
         public static final @NonNull Creator<FontFamily> CREATOR = new Creator<FontFamily>() {
 
             @Override
             public FontFamily createFromParcel(Parcel source) {
-                List<Font> fonts = source.readParcelableList(
-                        new ArrayList<>(), Font.class.getClassLoader(), android.text.FontConfig.Font.class);
-                String name = source.readString8();
+                List<Font> fonts = new ArrayList<>();
+                source.readTypedList(fonts, Font.CREATOR);
                 String langTags = source.readString8();
                 int variant = source.readInt();
+                int varFamilyType = source.readInt();
 
-                return new FontFamily(fonts, name, LocaleList.forLanguageTags(langTags), variant);
+                return new FontFamily(fonts, LocaleList.forLanguageTags(langTags), variant,
+                        varFamilyType);
             }
 
             @Override
@@ -659,23 +719,243 @@ public final class FontConfig implements Parcelable {
             FontFamily that = (FontFamily) o;
             return mVariant == that.mVariant
                     && Objects.equals(mFonts, that.mFonts)
-                    && Objects.equals(mName, that.mName)
                     && Objects.equals(mLocaleList, that.mLocaleList);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mFonts, mName, mLocaleList, mVariant);
+            return Objects.hash(mFonts, mLocaleList, mVariant);
         }
 
         @Override
         public String toString() {
             return "FontFamily{"
                     + "mFonts=" + mFonts
-                    + ", mName='" + mName + '\''
                     + ", mLocaleList=" + mLocaleList
                     + ", mVariant=" + mVariant
                     + '}';
         }
+    }
+
+    /**
+     * Represents list of font family in the system font configuration.
+     *
+     * In the fonts_customization.xml, it can define the list of FontFamily as a named family. The
+     * list of FontFamily is treated as a fallback list when drawing.
+     *
+     * @see android.graphics.fonts.FontFamily
+     */
+    public static final class NamedFamilyList implements Parcelable {
+        private final List<FontFamily> mFamilies;
+        private final String mName;
+
+        /** @hide */
+        public NamedFamilyList(@NonNull List<FontFamily> families, @NonNull String name) {
+            mFamilies = families;
+            mName = name;
+        }
+
+        /** @hide */
+        public NamedFamilyList(@NonNull FontFamily family) {
+            mFamilies = new ArrayList<>();
+            mFamilies.add(family);
+            mName = family.getName();
+        }
+
+        /**
+         * A list of font families.
+         *
+         * @return a list of font families.
+         */
+        public @NonNull List<FontFamily> getFamilies() {
+            return mFamilies;
+        }
+
+        /**
+         * Returns the name of the {@link FontFamily}.
+         *
+         * This name is used to create a new {@code Fallback List}.
+         *
+         * For example, if the {@link FontFamily} has the name "serif", then the system will create
+         * a “serif” {@code Fallback List} and it can be used by creating a Typeface via
+         * {@code Typeface.create("serif", Typeface.NORMAL);}
+         */
+        public @NonNull String getName() {
+            return mName;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@androidx.annotation.NonNull Parcel dest, int flags) {
+            dest.writeTypedList(mFamilies, flags);
+            dest.writeString8(mName);
+        }
+
+        public static final @NonNull Creator<NamedFamilyList> CREATOR = new Creator<>() {
+
+            @Override
+            public NamedFamilyList createFromParcel(Parcel source) {
+                final List<FontFamily> families = new ArrayList<>();
+                source.readTypedList(families, FontFamily.CREATOR);
+                String name = source.readString8();
+                return new NamedFamilyList(families, name);
+            }
+
+            @Override
+            public NamedFamilyList[] newArray(int size) {
+                return new NamedFamilyList[size];
+            }
+        };
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            NamedFamilyList that = (NamedFamilyList) o;
+            return Objects.equals(mFamilies, that.mFamilies) && Objects.equals(mName,
+                    that.mName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mFamilies, mName);
+        }
+
+        @Override
+        public String toString() {
+            return "NamedFamilyList{"
+                    + "mFamilies=" + mFamilies
+                    + ", mName='" + mName + '\''
+                    + '}';
+        }
+    }
+
+    /** @hide */
+    public static class Customization {
+        private Customization() {}  // Singleton
+
+        /**
+         * A class that represents customization of locale fallback
+         *
+         * This class represents a vendor customization of new-locale-family.
+         *
+         * <pre>
+         * <family customizationType="new-locale-family" operation="prepend" lang="ja-JP">
+         *     <font weight="400" style="normal">MyAlternativeFont.ttf
+         *         <axis tag="wght" stylevalue="400"/>
+         *     </font>
+         * </family>
+         * </pre>
+         *
+         * The operation can be one of prepend, replace or append. The operation prepend means that
+         * the new font family is inserted just before the original font family. The original font
+         * family is still in the fallback. The operation replace means that the original font
+         * family is replaced with new font family. The original font family is removed from the
+         * fallback. The operation append means that the new font family is inserted just after the
+         * original font family. The original font family is still in the fallback.
+         *
+         * The lang attribute is a BCP47 compliant language tag. The font fallback mainly uses ISO
+         * 15924 script code for matching. If the script code is missing, most likely script code
+         * will be used.
+         */
+        public static class LocaleFallback {
+            private final Locale mLocale;
+            private final int mOperation;
+            private final FontFamily mFamily;
+            private final String mScript;
+
+            public static final int OPERATION_PREPEND = 0;
+            public static final int OPERATION_APPEND = 1;
+            public static final int OPERATION_REPLACE = 2;
+
+            /** @hide */
+            @Retention(SOURCE)
+            @IntDef(prefix = { "OPERATION_" }, value = {
+                    OPERATION_PREPEND,
+                    OPERATION_APPEND,
+                    OPERATION_REPLACE
+            })
+            public @interface Operation {}
+
+
+            public LocaleFallback(@NonNull Locale locale, @Operation int operation,
+                    @NonNull FontFamily family) {
+                mLocale = locale;
+                mOperation = operation;
+                mFamily = family;
+                mScript = resolveScript(locale);
+            }
+
+            /**
+             * A customization target locale.
+             * @return a locale
+             */
+            public @NonNull Locale getLocale() {
+                return mLocale;
+            }
+
+            /**
+             * An operation to be applied to the original font family.
+             *
+             * The operation can be one of {@link #OPERATION_PREPEND}, {@link #OPERATION_REPLACE} or
+             * {@link #OPERATION_APPEND}.
+             *
+             * The operation prepend ({@link #OPERATION_PREPEND}) means that the new font family is
+             * inserted just before the original font family. The original font family is still in
+             * the fallback.
+             *
+             * The operation replace ({@link #OPERATION_REPLACE}) means that the original font
+             * family is replaced with new font family. The original font family is removed from the
+             * fallback.
+             *
+             * The operation append ({@link #OPERATION_APPEND}) means that the new font family is
+             * inserted just after the original font family. The original font family is still in
+             * the fallback.
+             *
+             * @return an operation.
+             */
+            public @Operation int getOperation() {
+                return mOperation;
+            }
+
+            /**
+             * Returns a family to be inserted or replaced to the fallback.
+             *
+             * @return a family
+             */
+            public @NonNull FontFamily getFamily() {
+                return mFamily;
+            }
+
+            /**
+             * Returns a script of the locale. If the script is missing in the given locale, the
+             * most likely locale is returned.
+             */
+            public @NonNull String getScript() {
+                return mScript;
+            }
+
+            @Override
+            public String toString() {
+                return "LocaleFallback{"
+                        + "mLocale=" + mLocale
+                        + ", mOperation=" + mOperation
+                        + ", mFamily=" + mFamily
+                        + '}';
+            }
+        }
+    }
+
+    /** @hide */
+    public static String resolveScript(Locale locale) {
+        String script = locale.getScript();
+        if (script != null && !script.isEmpty()) {
+            return script;
+        }
+        return ULocale.addLikelySubtags(ULocale.forLocale(locale)).getScript();
     }
 }

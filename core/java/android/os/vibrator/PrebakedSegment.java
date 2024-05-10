@@ -22,6 +22,8 @@ import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.os.VibratorInfo;
 
 import java.util.Objects;
 
@@ -32,6 +34,13 @@ import java.util.Objects;
  */
 @TestApi
 public final class PrebakedSegment extends VibrationEffectSegment {
+
+    /** @hide */
+    public static final int DEFAULT_STRENGTH = VibrationEffect.EFFECT_STRENGTH_MEDIUM;
+
+    /** @hide */
+    public static final boolean DEFAULT_SHOULD_FALLBACK = true;
+
     private final int mEffectId;
     private final boolean mFallback;
     private final int mEffectStrength;
@@ -69,6 +78,31 @@ public final class PrebakedSegment extends VibrationEffectSegment {
 
     /** @hide */
     @Override
+    public boolean areVibrationFeaturesSupported(@NonNull VibratorInfo vibratorInfo) {
+        if (vibratorInfo.isEffectSupported(mEffectId) == Vibrator.VIBRATION_EFFECT_SUPPORT_YES) {
+            return true;
+        }
+        if (!mFallback) {
+            // If the Vibrator's support is not `VIBRATION_EFFECT_SUPPORT_YES`, and this effect does
+            // not support fallbacks, the effect is considered not supported by the vibrator.
+            return false;
+        }
+        // The vibrator does not have hardware support for the effect, but the effect has fallback
+        // support. Check if a fallback will be available for the effect ID.
+        switch (mEffectId) {
+            case VibrationEffect.EFFECT_CLICK:
+            case VibrationEffect.EFFECT_DOUBLE_CLICK:
+            case VibrationEffect.EFFECT_HEAVY_CLICK:
+            case VibrationEffect.EFFECT_TICK:
+                // Any of these effects are always supported via some form of fallback.
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /** @hide */
+    @Override
     public boolean isHapticFeedbackCandidate() {
         switch (mEffectId) {
             case VibrationEffect.EFFECT_CLICK:
@@ -83,12 +117,6 @@ public final class PrebakedSegment extends VibrationEffectSegment {
                 // VibrationEffect.RINGTONES are not segments that could represent a haptic feedback
                 return false;
         }
-    }
-
-    /** @hide */
-    @Override
-    public boolean hasNonZeroAmplitude() {
-        return true;
     }
 
     /** @hide */
@@ -174,6 +202,15 @@ public final class PrebakedSegment extends VibrationEffectSegment {
                 + ", strength=" + VibrationEffect.effectStrengthToString(mEffectStrength)
                 + ", fallback=" + mFallback
                 + "}";
+    }
+
+    /** @hide */
+    @Override
+    public String toDebugString() {
+        return String.format("Prebaked=%s(%s, %s fallback)",
+                VibrationEffect.effectIdToString(mEffectId),
+                VibrationEffect.effectStrengthToString(mEffectStrength),
+                mFallback ? "with" : "no");
     }
 
     @Override

@@ -15,15 +15,11 @@
 //
 
 package {
-    // See: http://go/android-license-faq
-    // A large-scale-change added 'default_applicable_licenses' to import
-    // all of the 'license_kinds' from "frameworks_base_license"
-    // to get the below license kinds:
-    //   SPDX-license-identifier-Apache-2.0
-    default_applicable_licenses: ["frameworks_base_license"],
+    default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
 toolSources = [
+    "cmd/ApkInfo.cpp",
     "cmd/Command.cpp",
     "cmd/Compile.cpp",
     "cmd/Convert.cpp",
@@ -36,6 +32,7 @@ toolSources = [
 
 cc_defaults {
     name: "aapt2_defaults",
+    cpp_std: "gnu++2b",
     cflags: [
         "-Wall",
         "-Werror",
@@ -45,9 +42,11 @@ cc_defaults {
         "-Wno-missing-field-initializers",
         "-fno-exceptions",
         "-fno-rtti",
+        "-Wno-deprecated-declarations",
     ],
     target: {
         windows: {
+            compile_multilib: "64",
             enabled: true,
             cflags: ["-Wno-maybe-uninitialized"],
             ldflags: ["-static"],
@@ -88,10 +87,6 @@ cc_library_host_static {
     srcs: [
         "compile/IdAssigner.cpp",
         "compile/InlineXmlFormatParser.cpp",
-        "compile/NinePatch.cpp",
-        "compile/Png.cpp",
-        "compile/PngChunkFilter.cpp",
-        "compile/PngCrunch.cpp",
         "compile/PseudolocaleGenerator.cpp",
         "compile/Pseudolocalizer.cpp",
         "compile/XmlIdCollector.cpp",
@@ -103,21 +98,20 @@ cc_library_host_static {
         "format/Container.cpp",
         "format/binary/BinaryResourceParser.cpp",
         "format/binary/ResChunkPullParser.cpp",
+        "format/binary/ResEntryWriter.cpp",
         "format/binary/TableFlattener.cpp",
         "format/binary/XmlFlattener.cpp",
         "format/proto/ProtoDeserialize.cpp",
         "format/proto/ProtoSerialize.cpp",
-        "io/BigBufferStream.cpp",
         "io/File.cpp",
-        "io/FileStream.cpp",
         "io/FileSystem.cpp",
         "io/StringStream.cpp",
         "io/Util.cpp",
         "io/ZipArchive.cpp",
         "link/AutoVersioner.cpp",
+        "link/FeatureFlagsFilter.cpp",
         "link/ManifestFixer.cpp",
         "link/NoDefaultResourceRemover.cpp",
-        "link/ProductFilter.cpp",
         "link/PrivateAttributeMover.cpp",
         "link/ReferenceLinker.cpp",
         "link/ResourceExcluder.cpp",
@@ -128,14 +122,14 @@ cc_library_host_static {
         "optimize/MultiApkGenerator.cpp",
         "optimize/ResourceDeduper.cpp",
         "optimize/ResourceFilter.cpp",
-        "optimize/ResourcePathShortener.cpp",
+        "optimize/Obfuscator.cpp",
         "optimize/VersionCollapser.cpp",
+        "process/ProductFilter.cpp",
         "process/SymbolTable.cpp",
         "split/TableSplitter.cpp",
         "text/Printer.cpp",
         "text/Unicode.cpp",
         "text/Utf8Iterator.cpp",
-        "util/BigBuffer.cpp",
         "util/Files.cpp",
         "util/Util.cpp",
         "Debug.cpp",
@@ -152,14 +146,15 @@ cc_library_host_static {
         "ResourceUtils.cpp",
         "ResourceValues.cpp",
         "SdkConstants.cpp",
-        "StringPool.cpp",
         "trace/TraceBuffer.cpp",
         "xml/XmlActionExecutor.cpp",
         "xml/XmlDom.cpp",
         "xml/XmlPullParser.cpp",
         "xml/XmlUtil.cpp",
+        "ApkInfo.proto",
         "Configuration.proto",
         "Resources.proto",
+        "ResourceMetadata.proto",
         "ResourcesInternal.proto",
         "ValueTransformer.cpp",
     ],
@@ -190,6 +185,7 @@ cc_test_host {
         "integration-tests/CompileTest/**/*",
         "integration-tests/CommandTests/**/*",
         "integration-tests/ConvertTest/**/*",
+        "integration-tests/DumpTest/**/*",
     ],
 }
 
@@ -214,8 +210,10 @@ genrule {
     name: "aapt2-protos",
     tools: [":soong_zip"],
     srcs: [
+        "ApkInfo.proto",
         "Configuration.proto",
         "ResourcesInternal.proto",
+        "ResourceMetadata.proto",
         "Resources.proto",
     ],
     out: ["aapt2-protos.zip"],

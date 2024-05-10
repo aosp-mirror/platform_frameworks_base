@@ -27,17 +27,25 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.UserHandle;
 import android.view.accessibility.AccessibilityManager.ShortcutType;
+import android.view.accessibility.Flags;
 
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
+import com.android.internal.accessibility.util.ShortcutUtils;
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Set;
 
 /**
  * Extension for {@link AccessibilityServiceTarget} with
  * {@link AccessibilityFragmentType#INVISIBLE_TOGGLE} type.
  */
-class InvisibleToggleAccessibilityServiceTarget extends AccessibilityServiceTarget {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public class InvisibleToggleAccessibilityServiceTarget extends AccessibilityServiceTarget {
 
-    InvisibleToggleAccessibilityServiceTarget(Context context, @ShortcutType int shortcutType,
+    public InvisibleToggleAccessibilityServiceTarget(
+            Context context, @ShortcutType int shortcutType,
             @NonNull AccessibilityServiceInfo serviceInfo) {
         super(context,
                 shortcutType,
@@ -49,11 +57,17 @@ class InvisibleToggleAccessibilityServiceTarget extends AccessibilityServiceTarg
     public void onCheckedChanged(boolean isChecked) {
         final ComponentName componentName = ComponentName.unflattenFromString(getId());
 
-        if (!isComponentIdExistingInOtherShortcut()) {
-            setAccessibilityServiceState(getContext(), componentName, isChecked);
-        }
+        if (Flags.updateAlwaysOnA11yService()) {
+            super.onCheckedChanged(isChecked);
+            ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
+                    getContext(), Set.of(componentName.flattenToString()), UserHandle.myUserId());
+        } else {
+            if (!isComponentIdExistingInOtherShortcut()) {
+                setAccessibilityServiceState(getContext(), componentName, isChecked);
+            }
 
-        super.onCheckedChanged(isChecked);
+            super.onCheckedChanged(isChecked);
+        }
     }
 
     private boolean isComponentIdExistingInOtherShortcut() {

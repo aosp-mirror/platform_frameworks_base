@@ -33,8 +33,12 @@ import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.Process.SYSTEM_UID;
+import static android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE;
+import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS_TRIM_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RECENTS;
@@ -60,6 +64,7 @@ import android.graphics.Bitmap;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -179,6 +184,8 @@ class RecentTasks {
 
     /** The non-empty tasks that are removed from recent tasks (see {@link #removeForAddTask}). */
     private final ArrayList<Task> mHiddenTasks = new ArrayList<>();
+    /** The maximum size that the hidden tasks are cached. */
+    private static final int MAX_HIDDEN_TASK_SIZE = 10;
 
     /** Whether to trim inactive tasks when activities are idle. */
     private boolean mCheckTrimmableTasksOnIdle;
@@ -206,7 +213,8 @@ class RecentTasks {
     private final PointerEventListener mListener = new PointerEventListener() {
         @Override
         public void onPointerEvent(MotionEvent ev) {
-            if (!mFreezeTaskListReordering || ev.getAction() != MotionEvent.ACTION_DOWN) {
+            if (!mFreezeTaskListReordering || ev.getAction() != MotionEvent.ACTION_DOWN
+                    || ev.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE) {
                 // Skip if we aren't freezing or starting a gesture
                 return;
             }
@@ -215,10 +223,16 @@ class RecentTasks {
             int y = (int) ev.getY();
             mService.mH.post(PooledLambda.obtainRunnable((nonArg) -> {
                 synchronized (mService.mGlobalLock) {
-                    // Unfreeze the task list once we touch down in a task
                     final RootWindowContainer rac = mService.mRootWindowContainer;
                     final DisplayContent dc = rac.getDisplayContent(displayId).mDisplayContent;
-                    if (dc.pointWithinAppWindow(x, y)) {
+                    final WindowState win = dc.getTouchableWinAtPointLocked((float) x, (float) y);
+                    if (win == null) {
+                        return;
+                    }
+                    // Unfreeze the task list once we touch down in a task
+                    final boolean isAppWindowTouch = FIRST_APPLICATION_WINDOW <= win.mAttrs.type
+                            && win.mAttrs.type <= LAST_APPLICATION_WINDOW;
+                    if (isAppWindowTouch) {
                         final Task stack = mService.getTopDisplayFocusedRootTask();
                         final Task topTask = stack != null ? stack.getTopMostTask() : null;
                         resetFreezeTaskListReordering(topTask);
@@ -329,7 +343,8 @@ class RecentTasks {
         synchronized (mService.mGlobalLock) {
             final Task focusedStack = mService.getTopDisplayFocusedRootTask();
             final Task topTask = focusedStack != null ? focusedStack.getTopMostTask() : null;
-            resetFreezeTaskListReordering(topTask);
+            final Task reorderToEndTask = topTask != null && topTask.hasChild() ? topTask : null;
+            resetFreezeTaskListReordering(reorderToEndTask);
         }
     }
 
@@ -489,6 +504,16 @@ class RecentTasks {
 
         Slog.i(TAG, "Loading recents for user " + userId + " into memory.");
         List<Task> tasks = mTaskPersister.restoreTasksForUserLocked(userId, preaddedTasks);
+
+        // Tasks are ordered from most recent to least recent. Update the last active time to be
+        // in sync with task recency when device reboots, so the most recent task has the
+        // highest last active time
+        long currentElapsedTime = SystemClock.elapsedRealtime();
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            task.lastActiveTime = currentElapsedTime - i;
+        }
+
         mTasks.addAll(tasks);
         cleanupLocked(userId);
         mUsersWithRecentsLoaded.put(userId, true);
@@ -670,13 +695,31 @@ class RecentTasks {
         }
     }
 
+    /**
+     * Removes the oldest recent task that is compatible with the given one. This is possible if
+     * the task windowing mode changed after being added to the Recents.
+     */
+    void removeCompatibleRecentTask(Task task) {
+        final int taskIndex = mTasks.indexOf(task);
+        if (taskIndex < 0) {
+            return;
+        }
+
+        final int candidateIndex = findRemoveIndexForTask(task, false /* includingSelf */);
+        if (candidateIndex == -1) {
+            // Nothing to trim
+            return;
+        }
+
+        final Task taskToRemove = taskIndex > candidateIndex ? task : mTasks.get(candidateIndex);
+        remove(taskToRemove);
+    }
+
     void removeTasksByPackageName(String packageName, int userId) {
         for (int i = mTasks.size() - 1; i >= 0; --i) {
             final Task task = mTasks.get(i);
-            final String taskPackageName =
-                    task.getBaseIntent().getComponent().getPackageName();
             if (task.mUserId != userId) continue;
-            if (!taskPackageName.equals(packageName)) continue;
+            if (!task.getBasePackageName().equals(packageName)) continue;
 
             mSupervisor.removeTask(task, true, REMOVE_FROM_RECENTS, "remove-package-task");
         }
@@ -850,8 +893,7 @@ class RecentTasks {
             if (task.effectiveUid != callingUid) {
                 continue;
             }
-            Intent intent = task.getBaseIntent();
-            if (intent == null || !callingPackage.equals(intent.getComponent().getPackageName())) {
+            if (!callingPackage.equals(task.getBasePackageName())) {
                 continue;
             }
             AppTaskImpl taskImpl = new AppTaskImpl(mService, task.mTaskId, callingUid);
@@ -970,9 +1012,10 @@ class RecentTasks {
 
             if (!task.mUserSetupComplete) {
                 // Don't include task launched while user is not done setting-up.
-                if (DEBUG_RECENTS) {
-                    Slog.d(TAG_RECENTS, "Skipping, user setup not complete: " + task);
-                }
+
+                // NOTE: not guarding with DEBUG_RECENTS as it's not frequent enough to spam logcat,
+                // but is useful when running CTS.
+                Slog.d(TAG_RECENTS, "Skipping, user setup not complete: " + task);
                 continue;
             }
 
@@ -1094,6 +1137,10 @@ class RecentTasks {
                         // front unless overridden by the provided activity options
                         mTasks.remove(taskIndex);
                         mTasks.add(0, task);
+                        if (taskIndex != 0) {
+                            // Only notify when position changes
+                            mTaskNotificationController.notifyTaskListUpdated();
+                        }
 
                         if (DEBUG_RECENTS) {
                             Slog.d(TAG_RECENTS, "addRecent: moving to top " + task
@@ -1213,7 +1260,7 @@ class RecentTasks {
     void onActivityIdle(ActivityRecord r) {
         // Clean up the hidden tasks when going to home because the user may not be unable to return
         // to the task from recents.
-        if (!mHiddenTasks.isEmpty() && r.isActivityTypeHome()) {
+        if (!mHiddenTasks.isEmpty() && r.isActivityTypeHome() && r.isState(RESUMED)) {
             removeUnreachableHiddenTasks(r.getWindowingMode());
         }
         if (mCheckTrimmableTasksOnIdle) {
@@ -1348,8 +1395,7 @@ class RecentTasks {
                     + " activityType=" + task.getActivityType()
                     + " windowingMode=" + task.getWindowingMode()
                     + " isAlwaysOnTopWhenVisible=" + task.isAlwaysOnTopWhenVisible()
-                    + " intentFlags=" + task.getBaseIntent().getFlags()
-                    + " isEmbedded=" + task.isEmbedded());
+                    + " intentFlags=" + task.getBaseIntent().getFlags());
         }
 
         switch (task.getActivityType()) {
@@ -1385,15 +1431,10 @@ class RecentTasks {
             return false;
         }
 
-        // Ignore the task if it is a embedded task
-        if (task.isEmbedded()) {
-            return false;
-        }
-
         // Ignore the task if it is started on a display which is not allow to show its tasks on
         // Recents.
         if (task.getDisplayContent() != null
-                && !task.getDisplayContent().canShowTasksInRecents()) {
+                && !task.getDisplayContent().canShowTasksInHostDeviceRecents()) {
             return false;
         }
 
@@ -1469,9 +1510,13 @@ class RecentTasks {
         return task.compareTo(rootHomeTask) < 0;
     }
 
-    /** Remove the tasks that user may not be able to return. */
+    /** Remove the tasks that user may not be able to return when exceeds the cache limit. */
     private void removeUnreachableHiddenTasks(int windowingMode) {
-        for (int i = mHiddenTasks.size() - 1; i >= 0; i--) {
+        final int size = mHiddenTasks.size();
+        if (size <= MAX_HIDDEN_TASK_SIZE) {
+            return;
+        }
+        for (int i = size - 1; i >= MAX_HIDDEN_TASK_SIZE; i--) {
             final Task hiddenTask = mHiddenTasks.get(i);
             if (!hiddenTask.hasChild() || hiddenTask.inRecents) {
                 // The task was removed by other path or it became reachable (added to recents).
@@ -1510,12 +1555,12 @@ class RecentTasks {
         // callbacks here.
         final Task removedTask = mTasks.remove(removeIndex);
         if (removedTask != task) {
-            if (removedTask.hasChild()) {
+            if (removedTask.hasChild() && !removedTask.isActivityTypeHome()) {
                 Slog.i(TAG, "Add " + removedTask + " to hidden list because adding " + task);
                 // A non-empty task is replaced by a new task. Because the removed task is no longer
                 // managed by the recent tasks list, add it to the hidden list to prevent the task
                 // from becoming dangling.
-                mHiddenTasks.add(removedTask);
+                mHiddenTasks.add(0, removedTask);
             }
             notifyTaskRemoved(removedTask, false /* wasTrimmed */, false /* killProcess */);
             if (DEBUG_RECENTS_TRIM_TASKS) {
@@ -1532,6 +1577,10 @@ class RecentTasks {
      * list (if any).
      */
     private int findRemoveIndexForAddTask(Task task) {
+        return findRemoveIndexForTask(task, true /* includingSelf */);
+    }
+
+    private int findRemoveIndexForTask(Task task, boolean includingSelf) {
         final int recentsCount = mTasks.size();
         final Intent intent = task.intent;
         final boolean document = intent != null && intent.isDocument();
@@ -1548,7 +1597,7 @@ class RecentTasks {
                         task.affinity != null && task.affinity.equals(t.affinity);
                 final boolean sameIntent = intent != null && intent.filterEquals(trIntent);
                 boolean multiTasksAllowed = false;
-                final int flags = intent.getFlags();
+                final int flags = intent != null ? intent.getFlags() : 0;
                 if ((flags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NEW_DOCUMENT)) != 0
                         && (flags & FLAG_ACTIVITY_MULTIPLE_TASK) != 0) {
                     multiTasksAllowed = true;
@@ -1587,6 +1636,8 @@ class RecentTasks {
                     // existing task
                     continue;
                 }
+            } else if (!includingSelf) {
+                continue;
             }
             return i;
         }

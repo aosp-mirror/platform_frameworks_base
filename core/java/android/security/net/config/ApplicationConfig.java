@@ -16,10 +16,15 @@
 
 package android.security.net.config;
 
+import static android.security.Flags.certificateTransparencyConfiguration;
+
+import android.annotation.NonNull;
 import android.util.Pair;
+
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+
 import javax.net.ssl.X509TrustManager;
 
 /**
@@ -145,6 +150,22 @@ public final class ApplicationConfig {
      */
     public boolean isCleartextTrafficPermitted(String hostname) {
         return getConfigForHostname(hostname).isCleartextTrafficPermitted();
+    }
+
+    /**
+     * Returns {@code true} if Certificate Transparency information is required to be verified by
+     * the client in TLS connections to {@code hostname}.
+     *
+     * <p>See RFC6962 section 3.3 for more details.
+     *
+     * @param hostname hostname to check whether certificate transparency verification is required
+     * @return {@code true} if certificate transparency verification is required and {@code false}
+     *     otherwise
+     */
+    public boolean isCertificateTransparencyVerificationRequired(@NonNull String hostname) {
+        return certificateTransparencyConfiguration()
+                ? getConfigForHostname(hostname).isCertificateTransparencyVerificationRequired()
+                : NetworkSecurityConfig.DEFAULT_CERTIFICATE_TRANSPARENCY_VERIFICATION_REQUIRED;
     }
 
     public void handleTrustStorageUpdate() {

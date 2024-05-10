@@ -23,15 +23,15 @@
 namespace aapt {
 
 std::unique_ptr<AbiFilter> AbiFilter::FromAbiList(const std::vector<configuration::Abi>& abi_list) {
-  std::unordered_set<std::string> abi_set;
+  std::unordered_set<std::string_view> abi_set;
   for (auto& abi : abi_list) {
-    abi_set.insert(configuration::AbiToString(abi).to_string());
+    abi_set.insert(configuration::AbiToString(abi));
   }
   // Make unique by hand as the constructor is private.
-  return std::unique_ptr<AbiFilter>(new AbiFilter(abi_set));
+  return std::unique_ptr<AbiFilter>(new AbiFilter(std::move(abi_set)));
 }
 
-bool AbiFilter::Keep(const std::string& path) {
+bool AbiFilter::Keep(std::string_view path) {
   // We only care about libraries.
   if (!util::StartsWith(path, kLibPrefix)) {
     return true;
@@ -44,7 +44,7 @@ bool AbiFilter::Keep(const std::string& path) {
   }
 
   // Strip the lib/ prefix.
-  const std::string& path_abi = path.substr(kLibPrefixLen, abi_end - kLibPrefixLen);
+  const auto path_abi = path.substr(kLibPrefixLen, abi_end - kLibPrefixLen);
   return (abis_.find(path_abi) != abis_.end());
 }
 

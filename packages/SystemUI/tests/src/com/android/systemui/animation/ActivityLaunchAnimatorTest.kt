@@ -15,6 +15,7 @@ import android.view.RemoteAnimationAdapter
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -26,6 +27,7 @@ import junit.framework.Assert.assertTrue
 import junit.framework.AssertionFailedError
 import kotlin.concurrent.thread
 import org.junit.After
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -55,7 +57,8 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        activityLaunchAnimator = ActivityLaunchAnimator(testLaunchAnimator, testLaunchAnimator)
+        activityLaunchAnimator =
+            ActivityLaunchAnimator(testLaunchAnimator, testLaunchAnimator, disableWmTimeout = true)
         activityLaunchAnimator.callback = callback
         activityLaunchAnimator.addListener(listener)
     }
@@ -157,23 +160,15 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     @Test
     fun doesNotStartIfAnimationIsCancelled() {
         val runner = activityLaunchAnimator.createRunner(controller)
-        runner.onAnimationCancelled(false /* isKeyguardOccluded */)
+        runner.onAnimationCancelled()
         runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
 
         waitForIdleSync()
-        verify(controller).onLaunchAnimationCancelled(false /* newKeyguardOccludedState */)
+        verify(controller).onLaunchAnimationCancelled()
         verify(controller, never()).onLaunchAnimationStart(anyBoolean())
-    }
-
-    @Test
-    fun passesOccludedStateToLaunchAnimationCancelled_ifTrue() {
-        val runner = activityLaunchAnimator.createRunner(controller)
-        runner.onAnimationCancelled(true /* isKeyguardOccluded */)
-        runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
-
-        waitForIdleSync()
-        verify(controller).onLaunchAnimationCancelled(true /* newKeyguardOccludedState */)
-        verify(controller, never()).onLaunchAnimationStart(anyBoolean())
+        verify(listener).onLaunchAnimationCancelled()
+        verify(listener, never()).onLaunchAnimationStart()
+        assertNull(runner.delegate)
     }
 
     @Test
@@ -184,6 +179,9 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         waitForIdleSync()
         verify(controller).onLaunchAnimationCancelled()
         verify(controller, never()).onLaunchAnimationStart(anyBoolean())
+        verify(listener).onLaunchAnimationCancelled()
+        verify(listener, never()).onLaunchAnimationStart()
+        assertNull(runner.delegate)
     }
 
     @Test
@@ -193,6 +191,22 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         waitForIdleSync()
         verify(listener).onLaunchAnimationStart()
         verify(controller).onLaunchAnimationStart(anyBoolean())
+    }
+
+    @Test
+    fun creatingControllerFromNormalViewThrows() {
+        assertThrows(IllegalArgumentException::class.java) {
+            ActivityLaunchAnimator.Controller.fromView(FrameLayout(mContext))
+        }
+    }
+
+    @Test
+    fun disposeRunner_delegateDereferenced() {
+        val runner = activityLaunchAnimator.createRunner(controller)
+        assertNotNull(runner.delegate)
+        runner.dispose()
+        waitForIdleSync()
+        assertNull(runner.delegate)
     }
 
     private fun fakeWindow(): RemoteAnimationTarget {

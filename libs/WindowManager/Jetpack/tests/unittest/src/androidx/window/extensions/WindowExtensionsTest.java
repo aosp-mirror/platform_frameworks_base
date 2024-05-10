@@ -16,19 +16,23 @@
 
 package androidx.window.extensions;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import android.app.ActivityTaskManager;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.window.extensions.embedding.SplitAttributes;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Test class for {@link WindowExtensionsTest}.
+ * Test class for {@link WindowExtensions}.
  *
  * Build/Install/Run:
  *  atest WMJetpackUnitTests:WindowExtensionsTest
@@ -51,6 +55,22 @@ public class WindowExtensionsTest {
 
     @Test
     public void testGetActivityEmbeddingComponent() {
-        assertThat(mExtensions.getActivityEmbeddingComponent()).isNotNull();
+        if (ActivityTaskManager.supportsMultiWindow(getInstrumentation().getContext())) {
+            assertThat(mExtensions.getActivityEmbeddingComponent()).isNotNull();
+        } else {
+            assertThat(mExtensions.getActivityEmbeddingComponent()).isNull();
+        }
+    }
+
+    @Test
+    public void testSplitAttributes_default() {
+        // Make sure the default value in the extensions aar.
+        final SplitAttributes splitAttributes = new SplitAttributes.Builder().build();
+        assertThat(splitAttributes.getLayoutDirection())
+                .isEqualTo(SplitAttributes.LayoutDirection.LOCALE);
+        assertThat(splitAttributes.getSplitType())
+                .isEqualTo(new SplitAttributes.SplitType.RatioSplitType(0.5f));
+        // TODO(b/263047900): Update extensions API.
+        // assertThat(splitAttributes.getAnimationBackgroundColor()).isEqualTo(0);
     }
 }

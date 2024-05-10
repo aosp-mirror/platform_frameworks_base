@@ -17,7 +17,10 @@
 #ifndef _ANDROID_GRAPHICS_UTILS_H_
 #define _ANDROID_GRAPHICS_UTILS_H_
 
+#include "SkRefCnt.h"
 #include "SkStream.h"
+
+class SkData;
 
 #include <jni.h>
 #include <androidfw/Asset.h>

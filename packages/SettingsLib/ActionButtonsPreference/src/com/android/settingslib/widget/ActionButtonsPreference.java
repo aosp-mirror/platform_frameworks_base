@@ -32,9 +32,10 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.utils.BuildCompatUtils;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import com.android.settingslib.widget.preference.actionbuttons.R;
 
 /**
  * This preference provides a four buttons layout with Settings style.

@@ -24,9 +24,12 @@ import android.annotation.Nullable;
 import android.app.UiAutomation;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
+import android.os.Looper;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -34,6 +37,8 @@ import android.view.Display;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.Preconditions;
+import com.android.server.utils.Slogf;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
@@ -51,11 +56,7 @@ class UiAutomationManager {
 
     private UiAutomationService mUiAutomationService;
 
-    private AccessibilityServiceInfo mUiAutomationServiceInfo;
-
     private AbstractAccessibilityServiceConnection.SystemSupport mSystemSupport;
-
-    private AccessibilityTrace mTrace;
 
     private int mUiAutomationFlags;
 
@@ -97,50 +98,50 @@ class UiAutomationManager {
             WindowManagerInternal windowManagerInternal,
             SystemActionPerformer systemActionPerformer,
             AccessibilityWindowManager awm, int flags) {
-        synchronized (mLock) {
-            accessibilityServiceInfo.setComponentName(COMPONENT_NAME);
-
-            if (mUiAutomationService != null) {
-                throw new IllegalStateException(
-                        "UiAutomationService " + mUiAutomationService.mServiceInterface
-                                + "already registered!");
-            }
-
-            try {
-                owner.linkToDeath(mUiAutomationServiceOwnerDeathRecipient, 0);
-            } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Couldn't register for the death of a UiTestAutomationService!",
-                        re);
-                return;
-            }
-
-            mUiAutomationFlags = flags;
-            mSystemSupport = systemSupport;
-            mTrace = trace;
-            // Ignore registering UiAutomation if it is not allowed to use the accessibility
-            // subsystem.
-            if (!useAccessibility()) {
-                return;
-            }
-            mUiAutomationService = new UiAutomationService(context, accessibilityServiceInfo, id,
-                    mainHandler, mLock, securityPolicy, systemSupport, trace, windowManagerInternal,
-                    systemActionPerformer, awm);
-            mUiAutomationServiceOwner = owner;
-            mUiAutomationServiceInfo = accessibilityServiceInfo;
-            mUiAutomationService.mServiceInterface = serviceClient;
-            try {
-                mUiAutomationService.mServiceInterface.asBinder().linkToDeath(mUiAutomationService,
-                        0);
-            } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Failed registering death link: " + re);
-                destroyUiAutomationService();
-                return;
-            }
-
-            mUiAutomationService.onAdded();
-
-            mUiAutomationService.connectServiceUnknownThread();
+        accessibilityServiceInfo.setComponentName(COMPONENT_NAME);
+        Slogf.i(LOG_TAG, "Registering UiTestAutomationService (id=%s) when called by user %d",
+                accessibilityServiceInfo.getId(), Binder.getCallingUserHandle().getIdentifier());
+        if (mUiAutomationService != null) {
+            throw new IllegalStateException(
+                    "UiAutomationService " + mUiAutomationService.mServiceInterface
+                            + "already registered!");
         }
+
+        try {
+            owner.linkToDeath(mUiAutomationServiceOwnerDeathRecipient, 0);
+        } catch (RemoteException re) {
+            Slog.e(LOG_TAG, "Couldn't register for the death of a UiTestAutomationService!",
+                    re);
+            return;
+        }
+
+        mUiAutomationFlags = flags;
+        mSystemSupport = systemSupport;
+        // Ignore registering UiAutomation if it is not allowed to use the accessibility
+        // subsystem.
+        if (!useAccessibility()) {
+            return;
+        }
+        mUiAutomationService = new UiAutomationService(context, accessibilityServiceInfo, id,
+                mainHandler, mLock, securityPolicy, systemSupport, trace, windowManagerInternal,
+                systemActionPerformer, awm);
+        mUiAutomationServiceOwner = owner;
+        mUiAutomationService.mServiceInterface = serviceClient;
+        try {
+            mUiAutomationService.mServiceInterface.asBinder().linkToDeath(mUiAutomationService,
+                    0);
+        } catch (RemoteException re) {
+            Slog.e(LOG_TAG, "Failed registering death link: " + re);
+            destroyUiAutomationService();
+            return;
+        }
+
+        if (!Flags.addWindowTokenWithoutLock()) {
+            mUiAutomationService.addWindowTokensForAllDisplays();
+        }
+        // UiAutomationService#connectServiceUnknownThread posts to a handler
+        // so this call should return immediately.
+        mUiAutomationService.connectServiceUnknownThread();
     }
 
     void unregisterUiTestAutomationServiceLocked(IAccessibilityServiceClient serviceClient) {
@@ -176,6 +177,10 @@ class UiAutomationManager {
 
     boolean useAccessibility() {
         return ((mUiAutomationFlags & UiAutomation.FLAG_DONT_USE_ACCESSIBILITY) == 0);
+    }
+
+    boolean canIntrospect() {
+        return mUiAutomationService != null;
     }
 
     boolean isTouchExplorationEnabledLocked() {
@@ -240,6 +245,7 @@ class UiAutomationManager {
         }
     }
 
+    @SuppressWarnings("MissingPermissionAnnotation")
     private class UiAutomationService extends AbstractAccessibilityServiceConnection {
         private final Handler mMainHandler;
 
@@ -252,7 +258,15 @@ class UiAutomationManager {
             super(context, COMPONENT_NAME, accessibilityServiceInfo, id, mainHandler, lock,
                     securityPolicy, systemSupport, trace, windowManagerInternal,
                     systemActionPerformer, awm);
+            final boolean isMainHandler = mainHandler.getLooper() == Looper.getMainLooper();
+            final String errorMessage = "UiAutomationService must use the main handler";
+            if (Build.IS_USERDEBUG || Build.IS_ENG) {
+                Preconditions.checkArgument(isMainHandler, errorMessage);
+            } else if (!isMainHandler) {
+                Slog.e(LOG_TAG, errorMessage);
+            }
             mMainHandler = mainHandler;
+            setDisplayTypes(DISPLAY_TYPE_DEFAULT | DISPLAY_TYPE_PROXY);
         }
 
         void connectServiceUnknownThread() {
@@ -272,6 +286,9 @@ class UiAutomationManager {
                     // If the serviceInterface is null, the UiAutomation has been shut down on
                     // another thread.
                     if (serviceInterface != null) {
+                        if (Flags.addWindowTokenWithoutLock()) {
+                            mUiAutomationService.addWindowTokensForAllDisplays();
+                        }
                         if (mTrace.isA11yTracingEnabledForTypes(
                                 AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CLIENT)) {
                             mTrace.logTrace("UiAutomationService.connectServiceUnknownThread",
@@ -284,7 +301,7 @@ class UiAutomationManager {
                                 mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
                     }
                 } catch (RemoteException re) {
-                    Slog.w(LOG_TAG, "Error initialized connection", re);
+                    Slog.w(LOG_TAG, "Error initializing connection", re);
                     destroyUiAutomationService();
                 }
             });

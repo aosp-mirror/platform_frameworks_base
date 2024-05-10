@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+#include <getopt.h>
 
 #include <linux/fb.h>
 #include <sys/ioctl.h>
@@ -30,6 +31,9 @@
 
 #include <binder/ProcessState.h>
 
+#include <ftl/concat.h>
+#include <ftl/optional.h>
+#include <gui/DisplayCaptureArgs.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
 #include <gui/SyncScreenCaptureListener.h>
@@ -45,18 +49,41 @@ using namespace android;
 #define COLORSPACE_SRGB       1
 #define COLORSPACE_DISPLAY_P3 2
 
-static void usage(const char* pname, DisplayId displayId)
-{
-    fprintf(stderr,
-            "usage: %s [-hp] [-d display-id] [FILENAME]\n"
-            "   -h: this message\n"
-            "   -p: save the file as a png.\n"
-            "   -d: specify the display ID to capture (default: %s)\n"
-            "       see \"dumpsys SurfaceFlinger --display-id\" for valid display IDs.\n"
-            "If FILENAME ends with .png it will be saved as a png.\n"
-            "If FILENAME is not given, the results will be printed to stdout.\n",
-            pname, to_string(displayId).c_str());
+void usage(const char* pname, ftl::Optional<DisplayId> displayIdOpt) {
+    fprintf(stderr, R"(
+usage: %s [-hp] [-d display-id] [FILENAME]
+   -h: this message
+   -p: save the file as a png.
+   -d: specify the display ID to capture%s
+       see "dumpsys SurfaceFlinger --display-id" for valid display IDs.
+   --hint-for-seamless If set will use the hintForSeamless path in SF
+
+If FILENAME ends with .png it will be saved as a png.
+If FILENAME is not given, the results will be printed to stdout.
+)",
+            pname,
+            displayIdOpt
+                    .transform([](DisplayId id) {
+                        return std::string(ftl::Concat(" (default: ", id.value, ')').str());
+                    })
+                    .value_or(std::string())
+                    .c_str());
 }
+
+// For options that only exist in long-form. Anything in the
+// 0-255 range is reserved for short options (which just use their ASCII value)
+namespace LongOpts {
+enum {
+    Reserved = 255,
+    HintForSeamless,
+};
+}
+
+static const struct option LONG_OPTIONS[] = {
+        {"png", no_argument, nullptr, 'p'},
+        {"help", no_argument, nullptr, 'h'},
+        {"hint-for-seamless", no_argument, nullptr, LongOpts::HintForSeamless},
+        {0, 0, 0, 0}};
 
 static int32_t flinger2bitmapFormat(PixelFormat f)
 {
@@ -121,33 +148,62 @@ static status_t notifyMediaScanner(const char* fileName) {
 
 int main(int argc, char** argv)
 {
-    std::optional<DisplayId> displayId = SurfaceComposerClient::getInternalDisplayId();
-    if (!displayId) {
-        fprintf(stderr, "Failed to get ID for internal display\n");
+    const std::vector<PhysicalDisplayId> ids = SurfaceComposerClient::getPhysicalDisplayIds();
+    if (ids.empty()) {
+        fprintf(stderr, "Failed to get ID for any displays.\n");
         return 1;
     }
-
+    std::optional<DisplayId> displayIdOpt;
+    gui::CaptureArgs captureArgs;
     const char* pname = argv[0];
     bool png = false;
     int c;
-    while ((c = getopt(argc, argv, "phd:")) != -1) {
+    while ((c = getopt_long(argc, argv, "phd:", LONG_OPTIONS, nullptr)) != -1) {
         switch (c) {
             case 'p':
                 png = true;
                 break;
-            case 'd':
-                displayId = DisplayId::fromValue(atoll(optarg));
-                if (!displayId) {
-                    fprintf(stderr, "Invalid display ID\n");
+            case 'd': {
+                errno = 0;
+                char* end = nullptr;
+                const uint64_t id = strtoull(optarg, &end, 10);
+                if (!end || *end != '\0' || errno == ERANGE) {
+                    fprintf(stderr, "Invalid display ID: Out of range [0, 2^64).\n");
+                    return 1;
+                }
+
+                displayIdOpt = DisplayId::fromValue(id);
+                if (!displayIdOpt) {
+                    fprintf(stderr, "Invalid display ID: Incorrect encoding.\n");
                     return 1;
                 }
                 break;
+            }
             case '?':
             case 'h':
-                usage(pname, *displayId);
+                if (ids.size() == 1) {
+                    displayIdOpt = ids.front();
+                }
+                usage(pname, displayIdOpt);
                 return 1;
+            case LongOpts::HintForSeamless:
+                captureArgs.hintForSeamlessTransition = true;
+                break;
         }
     }
+
+    if (!displayIdOpt) {
+        displayIdOpt = ids.front();
+        if (ids.size() > 1) {
+            fprintf(stderr,
+                    "[Warning] Multiple displays were found, but no display id was specified! "
+                    "Defaulting to the first display found, however this default is not guaranteed "
+                    "to be consistent across captures. A display id should be specified.\n");
+            fprintf(stderr, "A display ID can be specified with the [-d display-id] option.\n");
+            fprintf(stderr, "See \"dumpsys SurfaceFlinger --display-id\" for valid display IDs.\n");
+        }
+    }
+
     argc -= optind;
     argv += optind;
 
@@ -169,12 +225,9 @@ int main(int argc, char** argv)
     }
 
     if (fd == -1) {
-        usage(pname, *displayId);
+        usage(pname, displayIdOpt);
         return 1;
     }
-
-    void const* mapbase = MAP_FAILED;
-    ssize_t mapsize = -1;
 
     void* base = NULL;
 
@@ -186,21 +239,19 @@ int main(int argc, char** argv)
     ProcessState::self()->startThreadPool();
 
     sp<SyncScreenCaptureListener> captureListener = new SyncScreenCaptureListener();
-    status_t result = ScreenshotClient::captureDisplay(*displayId, captureListener);
-    if (result != NO_ERROR) {
-        close(fd);
-        return 1;
-    }
+    ScreenshotClient::captureDisplay(*displayIdOpt, captureArgs, captureListener);
 
     ScreenCaptureResults captureResults = captureListener->waitForResults();
-    if (captureResults.result != NO_ERROR) {
+    if (!captureResults.fenceResult.ok()) {
         close(fd);
+        fprintf(stderr, "Failed to take screenshot. Status: %d\n",
+            fenceStatus(captureResults.fenceResult));
         return 1;
     }
     ui::Dataspace dataspace = captureResults.capturedDataspace;
     sp<GraphicBuffer> buffer = captureResults.buffer;
 
-    result = buffer->lock(GraphicBuffer::USAGE_SW_READ_OFTEN, &base);
+    status_t result = buffer->lock(GraphicBuffer::USAGE_SW_READ_OFTEN, &base);
 
     if (base == nullptr || result != NO_ERROR) {
         String8 reason;
@@ -255,9 +306,6 @@ int main(int argc, char** argv)
         }
     }
     close(fd);
-    if (mapbase != MAP_FAILED) {
-        munmap((void *)mapbase, mapsize);
-    }
 
     return 0;
 }

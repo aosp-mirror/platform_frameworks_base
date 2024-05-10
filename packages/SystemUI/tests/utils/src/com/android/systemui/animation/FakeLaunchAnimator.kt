@@ -14,6 +14,8 @@
 
 package com.android.systemui.animation
 
+import com.android.app.animation.Interpolators
+
 /** A [LaunchAnimator] to be used in tests. */
 fun fakeLaunchAnimator(): LaunchAnimator {
     return LaunchAnimator(TEST_TIMINGS, TEST_INTERPOLATORS)

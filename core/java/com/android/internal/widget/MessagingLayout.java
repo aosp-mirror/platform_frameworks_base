@@ -87,7 +87,7 @@ public class MessagingLayout extends FrameLayout
     private ImageResolver mImageResolver;
     private CharSequence mConversationTitle;
     private ArrayList<MessagingLinearLayout.MessagingChild> mToRecycle = new ArrayList<>();
-
+    private boolean mPrecomputedTextEnabled = false;
     public MessagingLayout(@NonNull Context context) {
         super(context);
     }
@@ -156,21 +156,79 @@ public class MessagingLayout extends FrameLayout
         mConversationTitle = conversationTitle;
     }
 
-    @RemotableViewMethod
+    /**
+     * Set Messaging data
+     * @param extras Bundle contains messaging data
+     */
+    @RemotableViewMethod(asyncImpl = "setDataAsync")
     public void setData(Bundle extras) {
+        bind(parseMessagingData(extras, /* usePrecomputedText= */false));
+    }
+
+    @NonNull
+    private MessagingData parseMessagingData(Bundle extras, boolean usePrecomputedText) {
         Parcelable[] messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);
-        List<Notification.MessagingStyle.Message> newMessages
-                = Notification.MessagingStyle.Message.getMessagesFromBundleArray(messages);
+        List<Notification.MessagingStyle.Message> newMessages =
+                Notification.MessagingStyle.Message.getMessagesFromBundleArray(messages);
         Parcelable[] histMessages = extras.getParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES);
-        List<Notification.MessagingStyle.Message> newHistoricMessages
-                = Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages);
-        setUser(extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON));
-        RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
-                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+        List<Notification.MessagingStyle.Message> newHistoricMessages =
+                Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages);
+        setUser(extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON,
+                Person.class));
+        RemoteInputHistoryItem[] history =
+                (RemoteInputHistoryItem[]) extras.getParcelableArray(
+                        Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
+                        RemoteInputHistoryItem.class);
         addRemoteInputHistoryToMessages(newMessages, history);
+
+        final Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON, Person.class);
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
-        bind(newMessages, newHistoricMessages, showSpinner);
+
+        final List<MessagingMessage> historicMessagingMessages = createMessages(newHistoricMessages,
+                /* isHistoric= */true, usePrecomputedText);
+        final List<MessagingMessage> newMessagingMessages =
+                createMessages(newMessages, /* isHistoric */false, usePrecomputedText);
+
+        return new MessagingData(user, showSpinner,
+                historicMessagingMessages, newMessagingMessages);
+    }
+
+    /**
+     * RemotableViewMethod's asyncImpl of {@link #setData(Bundle)}.
+     * This should be called on a background thread, and returns a Runnable which is then must be
+     * called on the main thread to complete the operation and set text.
+     * @param extras Bundle contains messaging data
+     * @hide
+     */
+    @NonNull
+    public Runnable setDataAsync(Bundle extras) {
+        if (!mPrecomputedTextEnabled) {
+            return () -> setData(extras);
+        }
+
+        final MessagingData messagingData =
+                parseMessagingData(extras, /* usePrecomputedText= */true);
+
+        return () -> {
+            finalizeInflate(messagingData.getHistoricMessagingMessages());
+            finalizeInflate(messagingData.getNewMessagingMessages());
+            bind(messagingData);
+        };
+    }
+
+    /**
+     * enable/disable precomputed text usage
+     * @hide
+     */
+    public void setPrecomputedTextEnabled(boolean precomputedTextEnabled) {
+        mPrecomputedTextEnabled = precomputedTextEnabled;
+    }
+
+    private void finalizeInflate(List<MessagingMessage> historicMessagingMessages) {
+        for (MessagingMessage messagingMessage: historicMessagingMessages) {
+            messagingMessage.finalizeInflate();
+        }
     }
 
     @Override
@@ -195,16 +253,13 @@ public class MessagingLayout extends FrameLayout
         }
     }
 
-    private void bind(List<Notification.MessagingStyle.Message> newMessages,
-            List<Notification.MessagingStyle.Message> newHistoricMessages,
-            boolean showSpinner) {
+    private void bind(MessagingData messagingData) {
+        setUser(messagingData.getUser());
 
-        List<MessagingMessage> historicMessages = createMessages(newHistoricMessages,
-                true /* isHistoric */);
-        List<MessagingMessage> messages = createMessages(newMessages, false /* isHistoric */);
-
+        List<MessagingMessage> historicMessages = messagingData.getHistoricMessagingMessages();
+        List<MessagingMessage> messages = messagingData.getNewMessagingMessages();
         ArrayList<MessagingGroup> oldGroups = new ArrayList<>(mGroups);
-        addMessagesToGroups(historicMessages, messages, showSpinner);
+        addMessagesToGroups(historicMessages, messages, messagingData.getShowSpinner());
 
         // Let's first check which groups were removed altogether and remove them in one animation
         removeGroups(oldGroups);
@@ -494,15 +549,17 @@ public class MessagingLayout extends FrameLayout
      * @param newMessages the messages to parse.
      */
     private List<MessagingMessage> createMessages(
-            List<Notification.MessagingStyle.Message> newMessages, boolean historic) {
+            List<Notification.MessagingStyle.Message> newMessages, boolean isHistoric,
+            boolean usePrecomputedText) {
         List<MessagingMessage> result = new ArrayList<>();
         for (int i = 0; i < newMessages.size(); i++) {
             Notification.MessagingStyle.Message m = newMessages.get(i);
             MessagingMessage message = findAndRemoveMatchingMessage(m);
             if (message == null) {
-                message = MessagingMessage.createMessage(this, m, mImageResolver);
+                message = MessagingMessage.createMessage(this, m,
+                        mImageResolver, usePrecomputedText);
             }
-            message.setIsHistoric(historic);
+            message.setIsHistoric(isHistoric);
             result.add(message);
         }
         return result;

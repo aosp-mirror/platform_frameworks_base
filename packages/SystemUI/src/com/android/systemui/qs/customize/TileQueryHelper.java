@@ -33,12 +33,12 @@ import android.widget.Button;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon;
@@ -85,7 +85,7 @@ public class TileQueryHelper {
         mListener = listener;
     }
 
-    public void queryTiles(QSTileHost host) {
+    public void queryTiles(QSHost host) {
         mTiles.clear();
         mSpecs.clear();
         mFinished = false;
@@ -97,7 +97,7 @@ public class TileQueryHelper {
         return mFinished;
     }
 
-    private void addCurrentAndStockTiles(QSTileHost host) {
+    private void addCurrentAndStockTiles(QSHost host) {
         String stock = mContext.getString(R.string.quick_settings_tiles_stock);
         String current = Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.QS_TILES);
@@ -130,11 +130,9 @@ public class TileQueryHelper {
             if (tile == null) {
                 continue;
             } else if (!tile.isAvailable()) {
-                tile.setTileSpec(spec);
                 tile.destroy();
                 continue;
             }
-            tile.setTileSpec(spec);
             tilesToAdd.add(tile);
         }
 
@@ -153,14 +151,14 @@ public class TileQueryHelper {
     private class TileCollector implements QSTile.Callback {
 
         private final List<TilePair> mQSTileList = new ArrayList<>();
-        private final QSTileHost mQSTileHost;
+        private final QSHost mQSHost;
 
-        TileCollector(List<QSTile> tilesToAdd, QSTileHost host) {
+        TileCollector(List<QSTile> tilesToAdd, QSHost host) {
             for (QSTile tile: tilesToAdd) {
                 TilePair pair = new TilePair(tile);
                 mQSTileList.add(pair);
             }
-            mQSTileHost = host;
+            mQSHost = host;
             if (tilesToAdd.isEmpty()) {
                 mBgExecutor.execute(this::finished);
             }
@@ -168,7 +166,7 @@ public class TileQueryHelper {
 
         private void finished() {
             notifyTilesChanged(false);
-            addPackageTiles(mQSTileHost);
+            addPackageTiles(mQSHost);
         }
 
         private void startListening() {
@@ -207,7 +205,7 @@ public class TileQueryHelper {
         }
     }
 
-    private void addPackageTiles(final QSTileHost host) {
+    private void addPackageTiles(final QSHost host) {
         mBgExecutor.execute(() -> {
             Collection<QSTile> params = host.getTiles();
             PackageManager pm = mContext.getPackageManager();

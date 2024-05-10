@@ -18,10 +18,13 @@ package com.android.systemui.shade
 
 import android.content.Context
 import android.view.ViewGroup
-import com.android.systemui.R
+import com.android.systemui.res.R
+import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.StatusBarState.SHADE
+import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator
-import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.LEFT
-import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.RIGHT
+import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.END
+import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.START
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.ViewIdToTranslate
 import com.android.systemui.unfold.SysUIUnfoldScope
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
@@ -30,23 +33,50 @@ import javax.inject.Inject
 @SysUIUnfoldScope
 class NotificationPanelUnfoldAnimationController
 @Inject
-constructor(private val context: Context, progressProvider: NaturalRotationUnfoldProgressProvider) {
+constructor(
+    private val context: Context,
+    statusBarStateController: StatusBarStateController,
+    progressProvider: NaturalRotationUnfoldProgressProvider,
+) {
+
+    private val filterShade: () -> Boolean = { statusBarStateController.getState() == SHADE ||
+        statusBarStateController.getState() == SHADE_LOCKED }
 
     private val translateAnimator by lazy {
         UnfoldConstantTranslateAnimator(
             viewsIdToTranslate =
                 setOf(
-                    ViewIdToTranslate(R.id.quick_settings_panel, LEFT),
-                    ViewIdToTranslate(R.id.notification_stack_scroller, RIGHT),
-                    ViewIdToTranslate(R.id.rightLayout, RIGHT),
-                    ViewIdToTranslate(R.id.clock, LEFT),
-                    ViewIdToTranslate(R.id.date, LEFT)),
+                    ViewIdToTranslate(R.id.quick_settings_panel, START, filterShade),
+                    ViewIdToTranslate(R.id.notification_stack_scroller, END, filterShade)),
             progressProvider = progressProvider)
+    }
+
+    private val translateAnimatorStatusBar by lazy {
+        UnfoldConstantTranslateAnimator(
+            viewsIdToTranslate =
+            setOf(
+                ViewIdToTranslate(R.id.statusIcons, END, filterShade),
+                ViewIdToTranslate(R.id.privacy_container, END, filterShade),
+                ViewIdToTranslate(R.id.batteryRemainingIcon, END, filterShade),
+                ViewIdToTranslate(R.id.carrier_group, END, filterShade),
+                ViewIdToTranslate(R.id.clock, START, filterShade),
+                ViewIdToTranslate(R.id.date, START, filterShade)
+            ),
+            progressProvider = progressProvider
+        )
     }
 
     fun setup(root: ViewGroup) {
         val translationMax =
             context.resources.getDimensionPixelSize(R.dimen.notification_side_paddings).toFloat()
         translateAnimator.init(root, translationMax)
+        val splitShadeStatusBarViewGroup: ViewGroup? =
+            root.findViewById(R.id.split_shade_status_bar)
+        if (splitShadeStatusBarViewGroup != null) {
+            translateAnimatorStatusBar.init(
+                splitShadeStatusBarViewGroup,
+                translationMax
+            )
+        }
     }
 }

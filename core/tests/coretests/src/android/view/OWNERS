@@ -1,4 +1,5 @@
 # Accessibility
+per-file AccessibilityInteractionControllerTest.java = file:/services/accessibility/OWNERS
 per-file WindowInfoTest.java = file:/services/accessibility/OWNERS
 
 # Input
@@ -20,3 +21,6 @@ per-file *ScrollCapture*.java = file:/packages/SystemUI/src/com/android/systemui
 
 # Stylus
 per-file stylus/* = file:/core/java/android/text/OWNERS
+
+# View
+file:/core/java/android/view/OWNERS

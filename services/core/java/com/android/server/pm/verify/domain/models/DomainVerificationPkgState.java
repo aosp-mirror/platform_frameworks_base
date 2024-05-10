@@ -40,7 +40,7 @@ public class DomainVerificationPkgState {
     private final String mPackageName;
 
     @NonNull
-    private UUID mId;
+    private final UUID mId;
 
     /**
      * Whether or not the package declares any autoVerify domains. This is separate from an empty

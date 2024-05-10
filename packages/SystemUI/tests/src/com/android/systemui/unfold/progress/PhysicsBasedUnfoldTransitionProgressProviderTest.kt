@@ -15,22 +15,20 @@
  */
 package com.android.systemui.unfold.progress
 
+import android.os.Handler
+import android.os.HandlerThread
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
-import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
-import com.android.systemui.unfold.updates.FOLD_UPDATE_START_OPENING
-import com.android.systemui.unfold.updates.FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE
+import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
-import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
+import com.android.systemui.unfold.updates.FOLD_UPDATE_START_OPENING
 import com.android.systemui.unfold.util.TestFoldStateProvider
-import com.android.systemui.util.leak.ReferenceTestUtils.waitForCondition
-import com.google.common.truth.Truth.assertThat
-import com.google.common.truth.Truth.assertWithMessage
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,21 +40,31 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
     private val foldStateProvider: TestFoldStateProvider = TestFoldStateProvider()
     private val listener = TestUnfoldProgressListener()
     private lateinit var progressProvider: UnfoldTransitionProgressProvider
+    private val schedulerFactory =
+        mock<UnfoldFrameCallbackScheduler.Factory>().apply {
+            whenever(create()).then { UnfoldFrameCallbackScheduler() }
+        }
+    private val mockBgHandler = mock<Handler>()
+    private val fakeHandler = Handler(HandlerThread("UnfoldBg").apply { start() }.looper)
 
     @Before
     fun setUp() {
-        progressProvider = PhysicsBasedUnfoldTransitionProgressProvider(
-            foldStateProvider
-        )
+        progressProvider =
+            PhysicsBasedUnfoldTransitionProgressProvider(
+                context,
+                schedulerFactory,
+                foldStateProvider = foldStateProvider,
+                progressHandler = fakeHandler
+            )
         progressProvider.addCallback(listener)
     }
 
     @Test
     fun testUnfold_emitsIncreasingTransitionEvents() {
-        runOnMainThreadWithInterval(
+        runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
-            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE) },
+            { foldStateProvider.sendUnfoldedScreenAvailable() },
             { foldStateProvider.sendHingeAngleUpdate(90f) },
             { foldStateProvider.sendHingeAngleUpdate(180f) },
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN) },
@@ -69,14 +77,28 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
     }
 
     @Test
+    fun testUnfold_emitsFinishingEvent() {
+        runOnProgressThreadWithInterval(
+            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
+            { foldStateProvider.sendHingeAngleUpdate(10f) },
+            { foldStateProvider.sendUnfoldedScreenAvailable() },
+            { foldStateProvider.sendHingeAngleUpdate(90f) },
+            { foldStateProvider.sendHingeAngleUpdate(180f) },
+            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN) },
+        )
+
+        with(listener.ensureTransitionFinished()) { assertHasSingleFinishingEvent() }
+    }
+
+    @Test
     fun testUnfold_screenAvailableOnlyAfterFullUnfold_emitsIncreasingTransitionEvents() {
-        runOnMainThreadWithInterval(
+        runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
             { foldStateProvider.sendHingeAngleUpdate(90f) },
             { foldStateProvider.sendHingeAngleUpdate(180f) },
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN) },
-            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE) },
+            { foldStateProvider.sendUnfoldedScreenAvailable() },
         )
 
         with(listener.ensureTransitionFinished()) {
@@ -87,7 +109,7 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
 
     @Test
     fun testFold_emitsDecreasingTransitionEvents() {
-        runOnMainThreadWithInterval(
+        runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_CLOSING) },
             { foldStateProvider.sendHingeAngleUpdate(170f) },
             { foldStateProvider.sendHingeAngleUpdate(90f) },
@@ -103,9 +125,9 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
 
     @Test
     fun testUnfoldAndStopUnfolding_finishesTheUnfoldTransition() {
-        runOnMainThreadWithInterval(
+        runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
-            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE) },
+            { foldStateProvider.sendUnfoldedScreenAvailable() },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
             { foldStateProvider.sendHingeAngleUpdate(90f) },
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_HALF_OPEN) },
@@ -119,102 +141,30 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
 
     @Test
     fun testFoldImmediatelyAfterUnfold_runsFoldAnimation() {
-        runOnMainThreadWithInterval(
+        runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
-            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE) },
+            { foldStateProvider.sendUnfoldedScreenAvailable() },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
             { foldStateProvider.sendHingeAngleUpdate(90f) },
-            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN) },
-            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_CLOSING) },
+            {
+                foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN)
+                // Start closing immediately after we opened, before the animation ended
+                foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_CLOSING)
+            },
             { foldStateProvider.sendHingeAngleUpdate(60f) },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_CLOSED) },
         )
 
-        with(listener.ensureTransitionFinished()) {
-            assertHasFoldAnimationAtTheEnd()
-        }
+        with(listener.ensureTransitionFinished()) { assertHasFoldAnimationAtTheEnd() }
     }
 
-    private class TestUnfoldProgressListener : TransitionProgressListener {
-
-        private val recordings: MutableList<UnfoldTransitionRecording> = arrayListOf()
-        private var currentRecording: UnfoldTransitionRecording? = null
-
-        override fun onTransitionStarted() {
-            assertWithMessage("Trying to start a transition when it is already in progress")
-                .that(currentRecording).isNull()
-
-            currentRecording = UnfoldTransitionRecording()
-        }
-
-        override fun onTransitionProgress(progress: Float) {
-            assertWithMessage("Received transition progress event when it's not started")
-                .that(currentRecording).isNotNull()
-            currentRecording!!.addProgress(progress)
-        }
-
-        override fun onTransitionFinished() {
-            assertWithMessage("Received transition finish event when it's not started")
-                .that(currentRecording).isNotNull()
-            recordings += currentRecording!!
-            currentRecording = null
-        }
-
-        fun ensureTransitionFinished(): UnfoldTransitionRecording {
-            waitForCondition { recordings.size == 1 }
-            return recordings.first()
-        }
-
-        class UnfoldTransitionRecording {
-            private val progressHistory: MutableList<Float> = arrayListOf()
-
-            fun addProgress(progress: Float) {
-                assertThat(progress).isAtMost(1.0f)
-                assertThat(progress).isAtLeast(0.0f)
-
-                progressHistory += progress
-            }
-
-            fun assertIncreasingProgress() {
-                assertThat(progressHistory.size).isGreaterThan(MIN_ANIMATION_EVENTS)
-                assertThat(progressHistory).isInOrder()
-            }
-
-            fun assertDecreasingProgress() {
-                assertThat(progressHistory.size).isGreaterThan(MIN_ANIMATION_EVENTS)
-                assertThat(progressHistory).isInOrder(Comparator.reverseOrder<Float>())
-            }
-
-            fun assertFinishedWithUnfold() {
-                assertThat(progressHistory).isNotEmpty()
-                assertThat(progressHistory.last()).isEqualTo(1.0f)
-            }
-
-            fun assertFinishedWithFold() {
-                assertThat(progressHistory).isNotEmpty()
-                assertThat(progressHistory.last()).isEqualTo(0.0f)
-            }
-
-            fun assertHasFoldAnimationAtTheEnd() {
-                // Check that there are at least a few decreasing events at the end
-                assertThat(progressHistory.size).isGreaterThan(MIN_ANIMATION_EVENTS)
-                assertThat(progressHistory.takeLast(MIN_ANIMATION_EVENTS))
-                    .isInOrder(Comparator.reverseOrder<Float>())
-                assertThat(progressHistory.last()).isEqualTo(0.0f)
-            }
-        }
-
-        private companion object {
-            private const val MIN_ANIMATION_EVENTS = 5
-        }
-    }
-
-    private fun runOnMainThreadWithInterval(vararg blocks: () -> Unit, intervalMillis: Long = 60) {
+    private fun runOnProgressThreadWithInterval(
+        vararg blocks: () -> Unit,
+        intervalMillis: Long = 60,
+    ) {
         blocks.forEach {
-            InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                it()
-            }
+            fakeHandler.post(it)
             Thread.sleep(intervalMillis)
         }
     }

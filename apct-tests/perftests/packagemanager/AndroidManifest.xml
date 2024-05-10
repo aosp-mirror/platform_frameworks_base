@@ -26,6 +26,7 @@
 
     <permission android:name="com.android.perftests.packagemanager.TestPermission" />
     <uses-permission android:name="com.android.perftests.packagemanager.TestPermission" />
+    <uses-permission android:name="android.permission.GET_APP_METADATA" />
 
     <queries>
         <package android:name="com.android.perftests.appenumeration0" />

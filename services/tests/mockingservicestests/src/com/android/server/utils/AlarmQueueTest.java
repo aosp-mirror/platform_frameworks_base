@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
 import android.content.Context;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.ArraySet;
@@ -222,7 +223,8 @@ public class AlarmQueueTest {
 
         alarmQueue.addAlarm("com.android.test.1", nowElapsed + HOUR_IN_MILLIS);
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
-                anyInt(), eq(nowElapsed + HOUR_IN_MILLIS), anyLong(), eq(ALARM_TAG), any(), any());
+                anyInt(), eq(nowElapsed + HOUR_IN_MILLIS), anyLong(), eq(ALARM_TAG), any(), any(
+                        Handler.class));
     }
 
     @Test
@@ -254,6 +256,29 @@ public class AlarmQueueTest {
         // Minimum of 2 hours between alarms, so the next alarm should be 2 hours after the second.
         inOrder.verify(mAlarmManager, timeout(1000).times(1)).setExact(
                 anyInt(), eq(nowElapsed + 5 * HOUR_IN_MILLIS), eq(ALARM_TAG), any(), any());
+    }
+
+    @Test
+    public void testMinTimeBetweenAlarms_freshAlarm() {
+        final AlarmQueue<String> alarmQueue = createAlarmQueue(true, 5 * MINUTE_IN_MILLIS);
+        final long fixedTimeElapsed = mInjector.getElapsedRealtime();
+
+        InOrder inOrder = inOrder(mAlarmManager);
+
+        final String pkg1 = "com.android.test.1";
+        final String pkg2 = "com.android.test.2";
+        alarmQueue.addAlarm(pkg1, fixedTimeElapsed + MINUTE_IN_MILLIS);
+        inOrder.verify(mAlarmManager, timeout(1000).times(1)).setExact(
+                anyInt(), eq(fixedTimeElapsed + MINUTE_IN_MILLIS), eq(ALARM_TAG), any(), any());
+
+        advanceElapsedClock(MINUTE_IN_MILLIS);
+
+        alarmQueue.onAlarm();
+        // Minimum of 5 minutes between alarms, so the next alarm should be 5 minutes after the
+        // first.
+        alarmQueue.addAlarm(pkg2, fixedTimeElapsed + 2 * MINUTE_IN_MILLIS);
+        inOrder.verify(mAlarmManager, timeout(1000).times(1)).setExact(
+                anyInt(), eq(fixedTimeElapsed + 6 * MINUTE_IN_MILLIS), eq(ALARM_TAG), any(), any());
     }
 
     @Test

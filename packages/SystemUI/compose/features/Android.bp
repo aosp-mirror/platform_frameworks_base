@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_system_ui_please_use_a_more_specific_subteam_if_possible_",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_packages_SystemUI_license"
@@ -23,6 +24,7 @@ package {
 
 android_library {
     name: "SystemUIComposeFeatures",
+    use_resource_processor: true,
     manifest: "AndroidManifest.xml",
 
     srcs: [
@@ -31,10 +33,13 @@ android_library {
 
     static_libs: [
         "SystemUI-core",
-        "SystemUIComposeCore",
+        "PlatformComposeCore",
+        "PlatformComposeSceneTransitionLayout",
 
         "androidx.compose.runtime_runtime",
+        "androidx.compose.animation_animation-graphics",
         "androidx.compose.material3_material3",
+        "androidx.activity_activity-compose",
     ],
 
     kotlincflags: ["-Xjvm-default=all"],

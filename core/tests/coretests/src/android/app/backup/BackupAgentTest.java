@@ -21,7 +21,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 import android.app.backup.BackupAgent.IncludeExcludeRules;
-import android.app.backup.BackupManager.OperationType;
+import android.app.backup.BackupAnnotations.BackupDestination;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.app.backup.FullBackup.BackupScheme.PathWithRequiredFlags;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
@@ -46,6 +47,7 @@ import java.util.Set;
 public class BackupAgentTest {
     // An arbitrary user.
     private static final UserHandle USER_HANDLE = new UserHandle(15);
+    private static final String DATA_TYPE_BACKED_UP = "test data type";
 
     @Mock FullBackup.BackupScheme mBackupScheme;
 
@@ -65,7 +67,7 @@ public class BackupAgentTest {
         excludePaths.add(path);
         IncludeExcludeRules expectedRules = new IncludeExcludeRules(includePaths, excludePaths);
 
-        mBackupAgent = getAgentForOperationType(OperationType.BACKUP);
+        mBackupAgent = getAgentForBackupDestination(BackupDestination.CLOUD);
         when(mBackupScheme.maybeParseAndGetCanonicalExcludePaths()).thenReturn(excludePaths);
         when(mBackupScheme.maybeParseAndGetCanonicalIncludePaths()).thenReturn(includePaths);
 
@@ -73,9 +75,71 @@ public class BackupAgentTest {
         assertThat(rules).isEqualTo(expectedRules);
     }
 
-    private BackupAgent getAgentForOperationType(@OperationType int operationType) {
+    @Test
+    public void getBackupRestoreEventLogger_beforeOnCreate_isNull() {
         BackupAgent agent = new TestFullBackupAgent();
-        agent.onCreate(USER_HANDLE, operationType);
+
+        assertThat(agent.getBackupRestoreEventLogger()).isNull();
+    }
+
+    @Test
+    public void getBackupRestoreEventLogger_afterOnCreateForBackup_initializedForBackup() {
+        BackupAgent agent = new TestFullBackupAgent();
+        agent.onCreate(USER_HANDLE, BackupDestination.CLOUD, OperationType.BACKUP);
+
+        assertThat(agent.getBackupRestoreEventLogger().getOperationType()).isEqualTo(
+                OperationType.BACKUP);
+    }
+
+    @Test
+    public void getBackupRestoreEventLogger_afterOnCreateForRestore_initializedForRestore() {
+        BackupAgent agent = new TestFullBackupAgent();
+        agent.onCreate(USER_HANDLE, BackupDestination.CLOUD, OperationType.RESTORE);
+
+        assertThat(agent.getBackupRestoreEventLogger().getOperationType()).isEqualTo(
+                OperationType.RESTORE);
+    }
+
+    @Test
+    public void getBackupRestoreEventLogger_afterBackup_containsLogsLoggedByAgent()
+            throws Exception {
+        BackupAgent agent = new TestFullBackupAgent();
+        agent.onCreate(USER_HANDLE, BackupDestination.CLOUD, OperationType.BACKUP);
+
+        // TestFullBackupAgent logs DATA_TYPE_BACKED_UP when onFullBackup is called.
+        agent.onFullBackup(new FullBackupDataOutput(/* quota = */ 0));
+
+        assertThat(agent.getBackupRestoreEventLogger().getLoggingResults().get(0).getDataType())
+                .isEqualTo(DATA_TYPE_BACKED_UP);
+    }
+
+    @Test
+    public void testClearLogger_clearsPendingLogs() throws Exception {
+        BackupAgent agent = new TestFullBackupAgent();
+        agent.onCreate(USER_HANDLE, BackupDestination.CLOUD, OperationType.BACKUP);
+
+        agent.onFullBackup(new FullBackupDataOutput(/* quota = */ 0));
+        agent.clearBackupRestoreEventLogger();
+
+        assertThat(agent.getBackupRestoreEventLogger().getLoggingResults().size()).isEqualTo(0);
+    }
+
+    @Test
+    public void testClearLoggerBetweenBackups_restartsSuccessCount() throws Exception {
+        BackupAgent agent = new TestFullBackupAgent();
+        agent.onCreate(USER_HANDLE, BackupDestination.CLOUD, OperationType.BACKUP);
+
+        agent.onFullBackup(new FullBackupDataOutput(/* quota = */ 0));
+        agent.clearBackupRestoreEventLogger();
+        agent.onFullBackup(new FullBackupDataOutput(/* quota = */ 0));
+
+        assertThat(agent.getBackupRestoreEventLogger().getLoggingResults().get(
+                0).getSuccessCount()).isEqualTo(1);
+    }
+
+    private BackupAgent getAgentForBackupDestination(@BackupDestination int backupDestination) {
+        BackupAgent agent = new TestFullBackupAgent();
+        agent.onCreate(USER_HANDLE, backupDestination);
         return agent;
     }
 
@@ -85,6 +149,11 @@ public class BackupAgentTest {
         public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
                 ParcelFileDescriptor newState) throws IOException {
             // Left empty as this is a full backup agent.
+        }
+
+        @Override
+        public void onFullBackup(FullBackupDataOutput data) {
+            getBackupRestoreEventLogger().logItemsBackedUp(DATA_TYPE_BACKED_UP, 1);
         }
 
         @Override

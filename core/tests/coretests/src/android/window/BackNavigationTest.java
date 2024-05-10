@@ -26,12 +26,12 @@ import android.app.ActivityTaskManager;
 import android.app.EmptyActivity;
 import android.app.Instrumentation;
 import android.os.RemoteException;
-import android.support.test.uiautomator.UiDevice;
 
 import androidx.lifecycle.Lifecycle;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.UiDevice;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -92,7 +92,7 @@ public class BackNavigationTest {
         try {
             mInstrumentation.getUiAutomation().waitForIdle(500, 1000);
             BackNavigationInfo info = ActivityTaskManager.getService()
-                    .startBackNavigation(true, null, null);
+                    .startBackNavigation(null, null);
             assertNotNull("BackNavigationInfo is null", info);
             assertNotNull("OnBackInvokedCallback is null", info.getOnBackInvokedCallback());
             info.getOnBackInvokedCallback().onBackInvoked();

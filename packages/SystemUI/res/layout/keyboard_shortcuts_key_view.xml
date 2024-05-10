@@ -14,14 +14,18 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:padding="@dimen/ksh_item_padding"
-          android:layout_marginStart="@dimen/ksh_item_margin_start"
-          android:background="@drawable/ksh_key_item_background"
-          android:textColor="@color/ksh_key_item_color"
-          android:singleLine="true"
-          android:gravity="center"
-          android:textSize="@dimen/ksh_item_text_size"
-          android:textAllCaps="true"/>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="32dp"
+        android:minHeight="32dp"
+        android:paddingLeft="@dimen/ksh_key_view_padding_horizontal"
+        android:paddingRight="@dimen/ksh_key_view_padding_horizontal"
+        android:paddingTop="@dimen/ksh_key_view_padding_vertical"
+        android:paddingBottom="@dimen/ksh_key_view_padding_vertical"
+        android:layout_marginStart="@dimen/ksh_item_margin_start"
+        android:background="@drawable/ksh_key_item_background"
+        android:textColor="?androidprv:attr/materialColorOnSurfaceVariant"
+        android:singleLine="true"
+        android:gravity="center"
+        android:textSize="@dimen/ksh_item_text_size" />

@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.UserPackage;
 import android.content.pm.overlay.OverlayPaths;
 import android.util.ArraySet;
 
@@ -40,6 +41,8 @@ public class PackageStateMutator {
     private final Function<String, PackageSetting> mActiveStateFunction;
     private final Function<String, PackageSetting> mDisabledStateFunction;
 
+    private final ArraySet<PackageSetting> mChangedStates = new ArraySet<>();
+
     public PackageStateMutator(@NonNull Function<String, PackageSetting> activeStateFunction,
             @NonNull Function<String, PackageSetting> disabledStateFunction) {
         mActiveStateFunction = activeStateFunction;
@@ -52,23 +55,23 @@ public class PackageStateMutator {
 
     @NonNull
     public PackageStateWrite forPackage(@NonNull String packageName) {
-        return mStateWrite.setState(mActiveStateFunction.apply(packageName));
+        return setState(mActiveStateFunction.apply(packageName));
     }
 
     @Nullable
     public PackageStateWrite forPackageNullable(@NonNull String packageName) {
         final PackageSetting packageState = mActiveStateFunction.apply(packageName);
-        mStateWrite.setState(packageState);
+        setState(packageState);
         if (packageState == null) {
             return null;
         }
 
-        return mStateWrite.setState(packageState);
+        return setState(packageState);
     }
 
     @NonNull
     public PackageStateWrite forDisabledSystemPackage(@NonNull String packageName) {
-        return mStateWrite.setState(mDisabledStateFunction.apply(packageName));
+        return setState(mDisabledStateFunction.apply(packageName));
     }
 
     @Nullable
@@ -78,7 +81,7 @@ public class PackageStateMutator {
             return null;
         }
 
-        return mStateWrite.setState(packageState);
+        return setState(packageState);
     }
 
     @NonNull
@@ -107,6 +110,21 @@ public class PackageStateMutator {
         } else {
             return Result.SUCCESS;
         }
+    }
+
+    public void onFinished() {
+        for (int index = 0; index < mChangedStates.size(); index++) {
+            mChangedStates.valueAt(index).onChanged();
+        }
+    }
+
+    @NonNull
+    private StateWriteWrapper setState(@Nullable PackageSetting state) {
+        // State can be nullable because this infrastructure no-ops on non-existent states
+        if (state != null) {
+            mChangedStates.add(state);
+        }
+        return mStateWrite.setState(state);
     }
 
     public static class InitialState {
@@ -173,8 +191,11 @@ public class PackageStateMutator {
         @NonNull
         @Override
         public PackageUserStateWrite userState(int userId) {
-            return mUserStateWrite.setStates(
-                    mState == null ? null : mState.getOrCreateUserState(userId));
+            var userState = mState == null ? null : mState.getOrCreateUserState(userId);
+            if (userState != null) {
+                userState.setWatchable(mState);
+            }
+            return mUserStateWrite.setStates(userState);
         }
 
         @Override
@@ -254,6 +275,15 @@ public class PackageStateMutator {
 
         @NonNull
         @Override
+        public PackageStateWrite setLoadingCompletedTime(long loadingCompletedTime) {
+            if (mState != null) {
+                mState.setLoadingCompletedTime(loadingCompletedTime);
+            }
+            return this;
+        }
+
+        @NonNull
+        @Override
         public PackageStateWrite setOverrideSeInfo(@Nullable String newSeInfo) {
             if (mState != null) {
                 mState.getTransientState().setOverrideSeInfo(newSeInfo);
@@ -263,9 +293,19 @@ public class PackageStateMutator {
 
         @NonNull
         @Override
-        public PackageStateWrite setInstaller(@NonNull String installerPackageName) {
+        public PackageStateWrite setInstaller(@Nullable String installerPackageName,
+                int installerPackageUid) {
             if (mState != null) {
-                mState.setInstallerPackageName(installerPackageName);
+                mState.setInstallerPackage(installerPackageName, installerPackageUid);
+            }
+            return this;
+        }
+
+        @NonNull
+        @Override
+        public PackageStateWrite setUpdateOwner(@NonNull String updateOwnerPackageName) {
+            if (mState != null) {
+                mState.setUpdateOwnerPackage(updateOwnerPackageName);
             }
             return this;
         }
@@ -310,7 +350,7 @@ public class PackageStateMutator {
 
             @NonNull
             @Override
-            public PackageUserStateWrite putSuspendParams(@NonNull String suspendingPackage,
+            public PackageUserStateWrite putSuspendParams(@NonNull UserPackage suspendingPackage,
                     @Nullable SuspendParams suspendParams) {
                 if (mUserState != null) {
                     mUserState.putSuspendParams(suspendingPackage, suspendParams);
@@ -320,7 +360,7 @@ public class PackageStateMutator {
 
             @NonNull
             @Override
-            public PackageUserStateWrite removeSuspension(@NonNull String suspendingPackage) {
+            public PackageUserStateWrite removeSuspension(@NonNull UserPackage suspendingPackage) {
                 if (mUserState != null) {
                     mUserState.removeSuspension(suspendingPackage);
                 }
@@ -399,6 +439,16 @@ public class PackageStateMutator {
                     mUserState.overrideLabelAndIcon(componentName, nonLocalizedLabel, icon);
                 }
                 return null;
+            }
+
+            @NonNull
+            @Override
+            public PackageUserStateWrite setMinAspectRatio(
+                    @PackageManager.UserMinAspectRatio int aspectRatio) {
+                if (mUserState != null) {
+                    mUserState.setMinAspectRatio(aspectRatio);
+                }
+                return this;
             }
         }
     }

@@ -37,6 +37,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.settings.backup.DeviceSpecificSettings;
 import android.provider.settings.backup.GlobalSettings;
+import android.provider.settings.backup.LargeScreenSettings;
 import android.provider.settings.backup.SecureSettings;
 import android.provider.settings.backup.SystemSettings;
 import android.provider.settings.validators.GlobalSettingsValidators;
@@ -181,6 +182,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             "visible_pattern_enabled";
     private static final String KEY_LOCK_SETTINGS_POWER_BUTTON_INSTANTLY_LOCKS =
             "power_button_instantly_locks";
+    private static final String KEY_LOCK_SETTINGS_PIN_ENHANCED_PRIVACY =
+            "pin_enhanced_privacy";
 
     // Name of the temporary file we use during full backup/restore.  This is
     // stored in the full-backup tarfile as well, so should not be changed.
@@ -243,9 +246,13 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         stateChecksums[STATE_LOCK_SETTINGS] =
                 writeIfChanged(stateChecksums[STATE_LOCK_SETTINGS], KEY_LOCK_SETTINGS,
                         lockSettingsData, data);
-        stateChecksums[STATE_SOFTAP_CONFIG] =
-                writeIfChanged(stateChecksums[STATE_SOFTAP_CONFIG], KEY_SOFTAP_CONFIG,
-                        softApConfigData, data);
+        if (isWatch()) {
+            stateChecksums[STATE_SOFTAP_CONFIG] = 0;
+        } else {
+            stateChecksums[STATE_SOFTAP_CONFIG] =
+                    writeIfChanged(stateChecksums[STATE_SOFTAP_CONFIG], KEY_SOFTAP_CONFIG,
+                            softApConfigData, data);
+        }
         stateChecksums[STATE_NETWORK_POLICIES] =
                 writeIfChanged(stateChecksums[STATE_NETWORK_POLICIES], KEY_NETWORK_POLICIES,
                         netPoliciesData, data);
@@ -260,6 +267,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                         KEY_SIM_SPECIFIC_SETTINGS_2, simSpecificSettingsData, data);
 
         writeNewChecksums(stateChecksums, newState);
+    }
+
+    private boolean isWatch() {
+        return getBaseContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
     }
 
     @Override
@@ -363,19 +374,25 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 case KEY_SOFTAP_CONFIG :
                     byte[] softapData = new byte[size];
                     data.readEntityData(softapData, 0, size);
-                    restoreSoftApConfiguration(softapData);
+                    if (!isWatch()) {
+                        restoreSoftApConfiguration(softapData);
+                    }
                     break;
 
                 case KEY_NETWORK_POLICIES:
                     byte[] netPoliciesData = new byte[size];
                     data.readEntityData(netPoliciesData, 0, size);
-                    restoreNetworkPolicies(netPoliciesData);
+                    if (!isWatch()) {
+                        restoreNetworkPolicies(netPoliciesData);
+                    }
                     break;
 
                 case KEY_WIFI_NEW_CONFIG:
                     byte[] restoredWifiNewConfigData = new byte[size];
                     data.readEntityData(restoredWifiNewConfigData, 0, size);
-                    restoreNewWifiConfigData(restoredWifiNewConfigData);
+                    if (!isWatch()) {
+                        restoreNewWifiConfigData(restoredWifiNewConfigData);
+                    }
                     break;
 
                 case KEY_DEVICE_SPECIFIC_CONFIG:
@@ -404,7 +421,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         }
 
         // Do this at the end so that we also pull in the ipconfig data.
-        if (restoredWifiSupplicantData != null) {
+        if (restoredWifiSupplicantData != null && !isWatch()) {
             restoreSupplicantWifiConfigData(
                     restoredWifiSupplicantData, restoredWifiIpConfigData);
         }
@@ -488,7 +505,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 if (DEBUG_BACKUP) Log.d(TAG, ipconfig_size + " bytes of ip config data");
                 byte[] ipconfig_buffer = new byte[ipconfig_size];
                 in.readFully(ipconfig_buffer, 0, nBytes);
-                restoreSupplicantWifiConfigData(supplicant_buffer, ipconfig_buffer);
+                if (!isWatch()) {
+                    restoreSupplicantWifiConfigData(supplicant_buffer, ipconfig_buffer);
+                }
             }
 
             if (version >= FULL_BACKUP_ADDED_LOCK_SETTINGS) {
@@ -507,7 +526,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 if (nBytes > buffer.length) buffer = new byte[nBytes];
                 if (nBytes > 0) {
                     in.readFully(buffer, 0, nBytes);
-                    restoreSoftApConfiguration(buffer);
+                    if (!isWatch()) {
+                        restoreSoftApConfiguration(buffer);
+                    }
                 }
             }
             // network policies
@@ -517,7 +538,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 if (nBytes > buffer.length) buffer = new byte[nBytes];
                 if (nBytes > 0) {
                     in.readFully(buffer, 0, nBytes);
-                    restoreNetworkPolicies(buffer);
+                    if (!isWatch()) {
+                        restoreNetworkPolicies(buffer);
+                    }
                 }
             }
             // Restore full wifi config data
@@ -526,7 +549,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of full wifi config data");
                 if (nBytes > buffer.length) buffer = new byte[nBytes];
                 in.readFully(buffer, 0, nBytes);
-                restoreNewWifiConfigData(buffer);
+                if (!isWatch()) {
+                    restoreNewWifiConfigData(buffer);
+                }
             }
 
             if (DEBUG_BACKUP) Log.d(TAG, "Full restore complete.");
@@ -708,6 +733,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 out.writeUTF(KEY_LOCK_SETTINGS_POWER_BUTTON_INSTANTLY_LOCKS);
                 out.writeUTF(powerButtonInstantlyLocks ? "1" : "0");
             }
+            if (lockPatternUtils.isPinEnhancedPrivacyEverChosen(userId)) {
+                out.writeUTF(KEY_LOCK_SETTINGS_PIN_ENHANCED_PRIVACY);
+                out.writeUTF(lockPatternUtils.isPinEnhancedPrivacyEnabled(userId) ? "1" : "0");
+            }
             // End marker
             out.writeUTF("");
             out.flush();
@@ -806,9 +835,19 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 continue;
             }
 
-            if (settingsToPreserve.contains(getQualifiedKeyForSetting(key, contentUri))) {
+            // Filter out Settings.Secure.NAVIGATION_MODE from modified preserve settings.
+            // Let it take part in restore process. See also b/244532342.
+            boolean isSettingPreserved = settingsToPreserve.contains(
+                    getQualifiedKeyForSetting(key, contentUri));
+            if (isSettingPreserved && !Settings.Secure.NAVIGATION_MODE.equals(key)) {
                 Log.i(TAG, "Skipping restore for setting " + key + " as it is marked as "
                         + "preserved");
+                continue;
+            }
+
+            if (LargeScreenSettings.doNotRestoreIfLargeScreenSetting(key, getBaseContext())) {
+                Log.i(TAG, "Skipping restore for setting " + key + " as the target device "
+                        + "is a large screen (i.e tablet or foldable in unfolded state)");
                 continue;
             }
 
@@ -861,6 +900,23 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             } else {
                 destination = contentUri;
             }
+
+            // Value is written to NAVIGATION_MODE_RESTORE to mark navigation mode
+            // has been set before on source device.
+            // See also: b/244532342.
+            if (Settings.Secure.NAVIGATION_MODE.equals(key)) {
+                contentValues.clear();
+                contentValues.put(Settings.NameValueTable.NAME,
+                        Settings.Secure.NAVIGATION_MODE_RESTORE);
+                contentValues.put(Settings.NameValueTable.VALUE, value);
+                cr.insert(destination, contentValues);
+                // Avoid restore original setting if it has been preserved.
+                if (isSettingPreserved) {
+                    Log.i(TAG, "Skipping restore for setting navigation_mode "
+                        + "as it is marked as preserved");
+                    continue;
+                }
+            }
             settingsHelper.restoreValue(this, cr, contentValues, destination, key, value,
                     mRestoredFromSdkInt);
 
@@ -871,7 +927,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     @VisibleForTesting
     SettingsBackupWhitelist getBackupWhitelist(Uri contentUri) {
         // Figure out the white list and redirects to the global table.  We restore anything
-        // in either the backup whitelist or the legacy-restore whitelist for this table.
+        // in either the backup allowlist or the legacy-restore allowlist for this table.
         String[] whitelist;
         Map<String, Validator> validators = null;
         if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
@@ -948,11 +1004,13 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                         lockPatternUtils.setOwnerInfo(value, userId);
                         break;
                     case KEY_LOCK_SETTINGS_VISIBLE_PATTERN_ENABLED:
-                        lockPatternUtils.reportPatternWasChosen(userId);
                         lockPatternUtils.setVisiblePatternEnabled("1".equals(value), userId);
                         break;
                     case KEY_LOCK_SETTINGS_POWER_BUTTON_INSTANTLY_LOCKS:
                         lockPatternUtils.setPowerButtonInstantlyLocks("1".equals(value), userId);
+                        break;
+                    case KEY_LOCK_SETTINGS_PIN_ENHANCED_PRIVACY:
+                        lockPatternUtils.setPinEnhancedPrivacyEnabled("1".equals(value), userId);
                         break;
                 }
             }
@@ -1416,7 +1474,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     }
 
     /**
-     * Store the whitelist of settings to be backed up and validators for them.
+     * Store the allowlist of settings to be backed up and validators for them.
      */
     @VisibleForTesting
     static class SettingsBackupWhitelist {

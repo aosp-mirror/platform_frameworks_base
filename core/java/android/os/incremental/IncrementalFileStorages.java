@@ -153,7 +153,8 @@ public final class IncrementalFileStorages {
         final String apkName = apk.name;
         final File targetFile = new File(mStageDir, apkName);
         if (!targetFile.exists()) {
-            mDefaultStorage.makeFile(apkName, apk.size, null, apk.metadata, apk.signature, null);
+            mDefaultStorage.makeFile(apkName, apk.size, 0777, null, apk.metadata,
+                    apk.signature, null);
         }
     }
 
@@ -176,8 +177,10 @@ public final class IncrementalFileStorages {
     /**
      * Creates file in default storage and sets its content.
      */
-    public void makeFile(@NonNull String name, @NonNull byte[] content) throws IOException {
-        mDefaultStorage.makeFile(name, content.length, UUID.randomUUID(), null, null, content);
+    public void makeFile(@NonNull String name, @NonNull byte[] content,
+            @NonNull int mode) throws IOException {
+        mDefaultStorage.makeFile(name, content.length, mode, UUID.randomUUID(),
+                null, null, content);
     }
 
     /**

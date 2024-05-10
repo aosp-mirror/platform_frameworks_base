@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="accessibility_menu_service_name" msgid="730136711554740131">"Menu de acessibilidade"</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"\"Acessibilidade\" é um menu grande mostrado na tela para controlar seu dispositivo. Você pode bloquear o dispositivo, controlar o volume e o brilho, fazer capturas de tela e muito mais."</string>
+    <string name="assistant_label" msgid="6796392082252272356">"Assistente"</string>
+    <string name="assistant_utterance" msgid="65509599221141377">"Google Assistente"</string>
+    <string name="a11y_settings_label" msgid="3977714687248445050">"Configurações de acessibilidade"</string>
+    <string name="power_label" msgid="7699720321491287839">"Liga/desliga"</string>
+    <string name="power_utterance" msgid="7444296686402104807">"Opções do botão liga/desliga"</string>
+    <string name="recent_apps_label" msgid="6583276995616385847">"Apps recentes"</string>
+    <string name="lockscreen_label" msgid="648347953557887087">"Tela de bloqueio"</string>
+    <string name="quick_settings_label" msgid="2999117381487601865">"Config. rápida"</string>
+    <string name="notifications_label" msgid="6829741046963013567">"Notificações"</string>
+    <string name="screenshot_label" msgid="863978141223970162">"Captura de tela"</string>
+    <string name="screenshot_utterance" msgid="1430760563401895074">"Fazer uma captura de tela"</string>
+    <string name="volume_up_label" msgid="8592766918780362870">"Aumentar volume"</string>
+    <string name="volume_down_label" msgid="8574981863656447346">"Diminuir volume"</string>
+    <string name="brightness_up_label" msgid="8010753822854544846">"Aumentar o brilho"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"Diminuir o brilho"</string>
+    <string name="previous_button_content_description" msgid="840869171117765966">"Ir para tela anterior"</string>
+    <string name="next_button_content_description" msgid="6810058269847364406">"Ir para a próxima tela"</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"\"Acessibilidade\" é um grande menu mostrado na tela para controlar seu dispositivo. Você pode bloquear o dispositivo, controlar o volume e o brilho, fazer capturas de tela e muito mais."</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"Controlar o dispositivo com o menu grande"</string>
+    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Config. do menu de acessibilidade"</string>
+    <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Botões grandes"</string>
+    <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Aumentar o tamanho dos botões do menu de acessibilidade"</string>
+    <string name="pref_help_title" msgid="6871558837025010641">"Ajuda"</string>
+    <string name="brightness_percentage_label" msgid="7391554573977867369">"Brilho: <xliff:g id="PERCENTAGE">%1$s</xliff:g>%%"</string>
+    <string name="music_volume_percentage_label" msgid="398635599662604706">"Volume da música: <xliff:g id="PERCENTAGE">%1$s</xliff:g>%%"</string>
+</resources>

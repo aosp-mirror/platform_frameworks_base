@@ -40,13 +40,14 @@ import android.os.Process;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.CaptioningManager;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
@@ -61,6 +62,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.concurrent.Executor;
 
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
@@ -94,11 +97,13 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     @Mock
     private WakefulnessLifecycle mWakefullnessLifcycle;
     @Mock
-    private CaptioningManager mCaptioningManager;
-    @Mock
     private KeyguardManager mKeyguardManager;
     @Mock
     private ActivityManager mActivityManager;
+    @Mock
+    private UserTracker mUserTracker;
+    @Mock
+    private DumpManager mDumpManager;
 
 
     @Before
@@ -110,6 +115,8 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         // Initial non-set value
         when(mRingerModeLiveData.getValue()).thenReturn(-1);
         when(mRingerModeInternalLiveData.getValue()).thenReturn(-1);
+        when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
+        when(mUserTracker.getUserContext()).thenReturn(mContext);
         // Enable group volume adjustments
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions,
@@ -120,8 +127,8 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         mVolumeController = new TestableVolumeDialogControllerImpl(mContext,
                 mBroadcastDispatcher, mRingerModeTracker, mThreadFactory, mAudioManager,
                 mNotificationManager, mVibrator, mIAudioService, mAccessibilityManager,
-                mPackageManager, mWakefullnessLifcycle, mCaptioningManager, mKeyguardManager,
-                mActivityManager, mCallback);
+                mPackageManager, mWakefullnessLifcycle, mKeyguardManager,
+                mActivityManager, mUserTracker, mDumpManager, mCallback);
         mVolumeController.setEnableDialogs(true, true);
     }
 
@@ -212,6 +219,11 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         verify(mRingerModeInternalLiveData).observeForever(any());
     }
 
+    @Test
+    public void testAddCallbackWithUserTracker() {
+        verify(mUserTracker).addCallback(any(UserTracker.Callback.class), any(Executor.class));
+    }
+
     static class TestableVolumeDialogControllerImpl extends VolumeDialogControllerImpl {
         private final WakefulnessLifecycle.Observer mWakefullessLifecycleObserver;
 
@@ -227,14 +239,15 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                 AccessibilityManager accessibilityManager,
                 PackageManager packageManager,
                 WakefulnessLifecycle wakefulnessLifecycle,
-                CaptioningManager captioningManager,
                 KeyguardManager keyguardManager,
                 ActivityManager activityManager,
+                UserTracker userTracker,
+                DumpManager dumpManager,
                 C callback) {
             super(context, broadcastDispatcher, ringerModeTracker, theadFactory, audioManager,
                     notificationManager, optionalVibrator, iAudioService, accessibilityManager,
-                    packageManager, wakefulnessLifecycle, captioningManager, keyguardManager,
-                    activityManager);
+                    packageManager, wakefulnessLifecycle, keyguardManager,
+                    activityManager, userTracker, dumpManager);
             mCallbacks = callback;
 
             ArgumentCaptor<WakefulnessLifecycle.Observer> observerCaptor =

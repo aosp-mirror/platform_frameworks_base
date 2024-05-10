@@ -36,8 +36,10 @@ import android.content.pm.PackageStats;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -48,7 +50,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.format.Formatter;
-import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -80,6 +81,8 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
+
 /**
  * Keeps track of information about all installed applications, lazy-loading
  * as needed.
@@ -100,6 +103,9 @@ public class ApplicationsState {
     @VisibleForTesting
     static ApplicationsState sInstance;
 
+    // Whether the app icon cache mechanism is enabled or not.
+    private static boolean sAppIconCacheEnabled = false;
+
     public static ApplicationsState getInstance(Application app) {
         return getInstance(app, AppGlobals.getPackageManager());
     }
@@ -114,15 +120,20 @@ public class ApplicationsState {
         }
     }
 
+    /** Set whether the app icon cache mechanism is enabled or not. */
+    public static void setAppIconCacheEnabled(boolean enabled) {
+        sAppIconCacheEnabled = enabled;
+    }
+
     final Context mContext;
     final PackageManager mPm;
-    final IconDrawableFactory mDrawableFactory;
     final IPackageManager mIpm;
     final UserManager mUm;
     final StorageStatsManager mStats;
     final int mAdminRetrieveFlags;
     final int mRetrieveFlags;
     PackageIntentReceiver mPackageIntentReceiver;
+    PackageIntentReceiver mClonePackageIntentReceiver;
 
     boolean mResumed;
     boolean mHaveDisabledApps;
@@ -194,7 +205,6 @@ public class ApplicationsState {
     private ApplicationsState(Application app, IPackageManager iPackageManager) {
         mContext = app;
         mPm = mContext.getPackageManager();
-        mDrawableFactory = IconDrawableFactory.newInstance(mContext);
         mIpm = iPackageManager;
         mUm = mContext.getSystemService(UserManager.class);
         mStats = mContext.getSystemService(StorageStatsManager.class);
@@ -264,6 +274,15 @@ public class ApplicationsState {
         if (mPackageIntentReceiver == null) {
             mPackageIntentReceiver = new PackageIntentReceiver();
             mPackageIntentReceiver.registerReceiver();
+        }
+
+        // Listen to any package additions in clone user to refresh the app list.
+        if (mClonePackageIntentReceiver == null) {
+            int cloneUserId = AppUtils.getCloneUserId(mContext);
+            if (cloneUserId != -1) {
+                mClonePackageIntentReceiver = new PackageIntentReceiver();
+                mClonePackageIntentReceiver.registerReceiverForClone(cloneUserId);
+            }
         }
 
         final List<ApplicationInfo> prevApplications = mApplications;
@@ -457,17 +476,26 @@ public class ApplicationsState {
             mPackageIntentReceiver.unregisterReceiver();
             mPackageIntentReceiver = null;
         }
+        if (mClonePackageIntentReceiver != null) {
+            mClonePackageIntentReceiver.unregisterReceiver();
+            mClonePackageIntentReceiver = null;
+        }
     }
 
     public AppEntry getEntry(String packageName, int userId) {
         if (DEBUG_LOCKING) Log.v(TAG, "getEntry about to acquire lock...");
         synchronized (mEntriesMap) {
-            AppEntry entry = mEntriesMap.get(userId).get(packageName);
+            AppEntry entry = null;
+            HashMap<String, AppEntry> userEntriesMap = mEntriesMap.get(userId);
+            if (userEntriesMap != null) {
+                entry = userEntriesMap.get(packageName);
+            }
             if (entry == null) {
                 ApplicationInfo info = getAppInfoLocked(packageName, userId);
                 if (info == null) {
                     try {
-                        info = mIpm.getApplicationInfo(packageName, 0, userId);
+                        info = mIpm.getApplicationInfo(packageName,
+                                PackageManager.MATCH_ARCHIVED_PACKAGES, userId);
                     } catch (RemoteException e) {
                         Log.w(TAG, "getEntry couldn't reach PackageManager", e);
                         return null;
@@ -710,7 +738,11 @@ public class ApplicationsState {
 
     private AppEntry getEntryLocked(ApplicationInfo info) {
         int userId = UserHandle.getUserId(info.uid);
-        AppEntry entry = mEntriesMap.get(userId).get(info.packageName);
+        AppEntry entry = null;
+        HashMap<String, AppEntry> userEntriesMap = mEntriesMap.get(userId);
+        if (userEntriesMap != null) {
+            entry = userEntriesMap.get(info.packageName);
+        }
         if (DEBUG) {
             Log.i(TAG, "Looking up entry of pkg " + info.packageName + ": " + entry);
         }
@@ -725,8 +757,11 @@ public class ApplicationsState {
                 Log.i(TAG, "Creating AppEntry for " + info.packageName);
             }
             entry = new AppEntry(mContext, info, mCurId++);
-            mEntriesMap.get(userId).put(info.packageName, entry);
-            mAppEntries.add(entry);
+            userEntriesMap = mEntriesMap.get(userId);
+            if (userEntriesMap != null) {
+                userEntriesMap.put(info.packageName, entry);
+                mAppEntries.add(entry);
+            }
         } else if (entry.info != info) {
             entry.info = info;
         }
@@ -763,7 +798,8 @@ public class ApplicationsState {
     }
 
     private static boolean isAppIconCacheEnabled(Context context) {
-        return SETTING_PKG.equals(context.getPackageName());
+        return SETTING_PKG.equals(context.getPackageName())
+                || sAppIconCacheEnabled;
     }
 
     void rebuildActiveSessions() {
@@ -795,10 +831,8 @@ public class ApplicationsState {
         // Rebuilding of app list.  Synchronized on mRebuildSync.
         final Object mRebuildSync = new Object();
         boolean mRebuildRequested;
-        boolean mRebuildAsync;
         AppFilter mRebuildFilter;
         Comparator<AppEntry> mRebuildComparator;
-        ArrayList<AppEntry> mRebuildResult;
         ArrayList<AppEntry> mLastAppList;
         boolean mRebuildForeground;
 
@@ -904,11 +938,9 @@ public class ApplicationsState {
                 synchronized (mRebuildingSessions) {
                     mRebuildingSessions.add(this);
                     mRebuildRequested = true;
-                    mRebuildAsync = true;
                     mRebuildFilter = filter;
                     mRebuildComparator = comparator;
                     mRebuildForeground = foreground;
-                    mRebuildResult = null;
                     if (!mBackgroundHandler.hasMessages(BackgroundHandler.MSG_REBUILD_LIST)) {
                         Message msg = mBackgroundHandler.obtainMessage(
                                 BackgroundHandler.MSG_REBUILD_LIST);
@@ -988,15 +1020,10 @@ public class ApplicationsState {
             synchronized (mRebuildSync) {
                 if (!mRebuildRequested) {
                     mLastAppList = filteredApps;
-                    if (!mRebuildAsync) {
-                        mRebuildResult = filteredApps;
-                        mRebuildSync.notifyAll();
-                    } else {
-                        if (!mMainHandler.hasMessages(MainHandler.MSG_REBUILD_COMPLETE, this)) {
-                            Message msg = mMainHandler.obtainMessage(
-                                    MainHandler.MSG_REBUILD_COMPLETE, this);
-                            mMainHandler.sendMessage(msg);
-                        }
+                    if (!mMainHandler.hasMessages(MainHandler.MSG_REBUILD_COMPLETE, this)) {
+                        Message msg = mMainHandler.obtainMessage(
+                                MainHandler.MSG_REBUILD_COMPLETE, this);
+                        mMainHandler.sendMessage(msg);
                     }
                 }
             }
@@ -1536,6 +1563,12 @@ public class ApplicationsState {
                 removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL));
             }
         }
+
+        public void registerReceiverForClone(int cloneId) {
+            IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+            filter.addDataScheme("package");
+            mContext.registerReceiverAsUser(this, UserHandle.of(cloneId), filter, null, null);
+        }
     }
 
     /**
@@ -1582,15 +1615,15 @@ public class ApplicationsState {
     }
 
     public static class AppEntry extends SizeInfo {
-        public final File apkFile;
+        @Nullable public final File apkFile;
         public final long id;
         public String label;
         public long size;
         public long internalSize;
         public long externalSize;
         public String labelDescription;
-
         public boolean mounted;
+        public boolean showInPersonalTab;
 
         /**
          * Setting this to {@code true} prevents the entry to be filtered by
@@ -1607,6 +1640,11 @@ public class ApplicationsState {
          * Whether or not it's a Home app.
          */
         public boolean isHomeApp;
+
+        /**
+         * Whether or not it's a cloned app .
+         */
+        public boolean isCloned;
 
         public String getNormalizedLabel() {
             if (normalizedLabel != null) {
@@ -1636,7 +1674,7 @@ public class ApplicationsState {
 
         @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
         public AppEntry(Context context, ApplicationInfo info, long id) {
-            apkFile = new File(info.sourceDir);
+            this.apkFile = info.sourceDir != null ? new File(info.sourceDir) : null;
             this.id = id;
             this.info = info;
             this.size = SIZE_UNKNOWN;
@@ -1644,20 +1682,51 @@ public class ApplicationsState {
             ensureLabel(context);
             // Speed up the cache of the label description if they haven't been created.
             if (this.labelDescription == null) {
-                ThreadUtils.postOnBackgroundThread(
+                var unused = ThreadUtils.getBackgroundExecutor().submit(
                         () -> this.ensureLabelDescriptionLocked(context));
             }
+            UserManager um = UserManager.get(context);
+            this.showInPersonalTab = shouldShowInPersonalTab(um, info.uid);
+            UserInfo userInfo = um.getUserInfo(UserHandle.getUserId(info.uid));
+            if (userInfo != null) {
+                this.isCloned = userInfo.isCloneProfile();
+            }
+        }
+
+        /**
+         * Checks if the user that the app belongs to have the property
+         * {@link UserProperties#SHOW_IN_SETTINGS_WITH_PARENT} set.
+         */
+        @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+        boolean shouldShowInPersonalTab(UserManager userManager, int uid) {
+            int userId = UserHandle.getUserId(uid);
+
+            // Regardless of apk version, if the app belongs to the current user then return true.
+            if (userId == ActivityManager.getCurrentUser()) {
+                return true;
+            }
+
+            // For sdk version < 34, if the app doesn't belong to the current user,
+            // then as per earlier behaviour the app shouldn't be displayed in personal tab.
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                return false;
+            }
+
+            UserProperties userProperties = userManager.getUserProperties(
+                        UserHandle.of(userId));
+            return userProperties.getShowInSettings()
+                        == UserProperties.SHOW_IN_SETTINGS_WITH_PARENT;
         }
 
         public void ensureLabel(Context context) {
             if (this.label == null || !this.mounted) {
-                if (!this.apkFile.exists()) {
-                    this.mounted = false;
-                    this.label = info.packageName;
-                } else {
+                if (this.apkFile != null  && this.apkFile.exists()) {
                     this.mounted = true;
                     CharSequence label = info.loadLabel(context.getPackageManager());
                     this.label = label != null ? label.toString() : info.packageName;
+                } else {
+                    this.mounted = false;
+                    this.label = info.packageName;
                 }
             }
         }
@@ -1672,7 +1741,7 @@ public class ApplicationsState {
             }
 
             if (this.icon == null) {
-                if (this.apkFile.exists()) {
+                if (this.apkFile != null && this.apkFile.exists()) {
                     this.icon = Utils.getBadgedIcon(context, info);
                     return true;
                 } else {
@@ -1682,7 +1751,7 @@ public class ApplicationsState {
             } else if (!this.mounted) {
                 // If the app wasn't mounted but is now mounted, reload
                 // its icon.
-                if (this.apkFile.exists()) {
+                if (this.apkFile != null && this.apkFile.exists()) {
                     this.mounted = true;
                     this.icon = Utils.getBadgedIcon(context, info);
                     return true;
@@ -1710,7 +1779,8 @@ public class ApplicationsState {
             final int userId = UserHandle.getUserId(this.info.uid);
             if (UserManager.get(context).isManagedProfile(userId)) {
                 this.labelDescription = context.getString(
-                        com.android.settingslib.R.string.accessibility_work_profile_app_description,
+                        com.android.settingslib.utils.R
+                                .string.accessibility_work_profile_app_description,
                         this.label);
             } else {
                 this.labelDescription = this.label;
@@ -1796,7 +1866,7 @@ public class ApplicationsState {
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            return UserHandle.getUserId(entry.info.uid) == mCurrentUser;
+            return entry.showInPersonalTab;
         }
     };
 
@@ -1823,7 +1893,7 @@ public class ApplicationsState {
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            return UserHandle.getUserId(entry.info.uid) != mCurrentUser;
+            return !entry.showInPersonalTab;
         }
     };
 

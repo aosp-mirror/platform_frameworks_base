@@ -46,6 +46,7 @@ message ResourceEntry {
   oneof value {
     ResourceValue res_value = 2;
   }
+  string configuration = 3;
 }
 
 message ResourceValue {

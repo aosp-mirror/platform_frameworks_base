@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 **
-** Copyright 2012, The Android Open Source Project
+** Copyright 2023, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License")
 ** you may not use this file except in compliance with the License.
@@ -27,9 +27,16 @@
     android:clipToPadding="false"
     android:orientation="vertical"
     androidprv:layout_maxWidth="@dimen/keyguard_security_width">
-<include layout="@layout/keyguard_bouncer_message_area"/>
 
-<androidx.constraintlayout.widget.ConstraintLayout
+    <include layout="@layout/keyguard_bouncer_message_area"/>
+
+    <com.android.systemui.bouncer.ui.BouncerMessageView
+        android:id="@+id/bouncer_message_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/pin_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -54,7 +61,7 @@
             androidprv:layout_constraintEnd_toEndOf="parent"
             androidprv:layout_constraintStart_toStartOf="parent"
             androidprv:layout_constraintBottom_toTopOf="@id/key1"
-            androidprv:layout_constraintVertical_bias="1.0">
+            androidprv:layout_constraintVertical_bias="0.5">
 
             <com.android.keyguard.PasswordTextView
                 android:id="@+id/pinEntry"
@@ -76,7 +83,7 @@
             androidprv:layout_constraintGuide_percent="0"
             android:orientation="horizontal" />
 
-        <androidx.constraintlayout.helper.widget.Flow
+        <com.android.keyguard.KeyguardPinFlowView
             android:id="@+id/flow1"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -105,6 +112,7 @@
             android:id="@+id/key1"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key2"
             androidprv:digit="1"
             androidprv:textView="@+id/pinEntry" />
 
@@ -112,6 +120,7 @@
             android:id="@+id/key2"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key3"
             androidprv:digit="2"
             androidprv:textView="@+id/pinEntry" />
 
@@ -119,6 +128,7 @@
             android:id="@+id/key3"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key4"
             androidprv:digit="3"
             androidprv:textView="@+id/pinEntry" />
 
@@ -126,6 +136,7 @@
             android:id="@+id/key4"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key5"
             androidprv:digit="4"
             androidprv:textView="@+id/pinEntry" />
 
@@ -133,6 +144,7 @@
             android:id="@+id/key5"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key6"
             androidprv:digit="5"
             androidprv:textView="@+id/pinEntry" />
 
@@ -140,6 +152,7 @@
             android:id="@+id/key6"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key7"
             androidprv:digit="6"
             androidprv:textView="@+id/pinEntry" />
 
@@ -147,13 +160,16 @@
             android:id="@+id/key7"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key8"
             androidprv:digit="7"
             androidprv:textView="@+id/pinEntry" />
+
 
         <com.android.keyguard.NumPadKey
             android:id="@+id/key8"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key9"
             androidprv:digit="8"
             androidprv:textView="@+id/pinEntry" />
 
@@ -161,43 +177,42 @@
             android:id="@+id/key9"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/delete_button"
             androidprv:digit="9"
             androidprv:textView="@+id/pinEntry" />
 
-
         <com.android.keyguard.NumPadButton
             android:id="@+id/delete_button"
+            style="@style/NumPadKey.Delete"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            style="@style/NumPadKey.Delete"
-            android:contentDescription="@string/keyboardview_keycode_delete"
-            />
+            android:accessibilityTraversalBefore="@id/key0"
+            android:contentDescription="@string/keyboardview_keycode_delete" />
 
         <com.android.keyguard.NumPadKey
             android:id="@+id/key0"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key_enter"
             androidprv:digit="0"
             androidprv:textView="@+id/pinEntry" />
 
         <com.android.keyguard.NumPadButton
             android:id="@+id/key_enter"
+            style="@style/NumPadKey.Enter"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            style="@style/NumPadKey.Enter"
-            android:contentDescription="@string/keyboardview_keycode_enter"
-            />
-
+            android:contentDescription="@string/keyboardview_keycode_enter" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <include layout="@layout/keyguard_eca"
-             android:id="@+id/keyguard_selector_fade_container"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:orientation="vertical"
-             android:layout_gravity="bottom|center_horizontal"
-             android:layout_marginTop="@dimen/keyguard_eca_top_margin"
-             android:layout_marginBottom="@dimen/keyguard_eca_bottom_margin"
-             android:gravity="center_horizontal"/>
+        android:id="@+id/keyguard_selector_fade_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginTop="@dimen/keyguard_eca_top_margin"
+        android:layout_marginBottom="@dimen/keyguard_eca_bottom_margin"
+        android:gravity="center_horizontal"/>
 
 </com.android.keyguard.KeyguardPINView>

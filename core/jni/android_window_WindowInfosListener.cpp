@@ -21,6 +21,7 @@
 #include <android_runtime/Log.h>
 #include <gui/DisplayInfo.h>
 #include <gui/SurfaceComposerClient.h>
+#include <gui/WindowInfosUpdate.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalFrame.h>
 #include <utils/Log.h>
@@ -66,7 +67,7 @@ jobject fromDisplayInfo(JNIEnv* env, gui::DisplayInfo displayInfo) {
 static jobjectArray fromWindowInfos(JNIEnv* env, const std::vector<WindowInfo>& windowInfos) {
     jobjectArray jWindowHandlesArray =
             env->NewObjectArray(windowInfos.size(), gInputWindowHandleClass, nullptr);
-    for (int i = 0; i < windowInfos.size(); i++) {
+    for (size_t i = 0; i < windowInfos.size(); i++) {
         ScopedLocalRef<jobject>
                 jWindowHandle(env,
                               android_view_InputWindowHandle_fromWindowInfo(env, windowInfos[i]));
@@ -79,7 +80,7 @@ static jobjectArray fromWindowInfos(JNIEnv* env, const std::vector<WindowInfo>& 
 static jobjectArray fromDisplayInfos(JNIEnv* env, const std::vector<DisplayInfo>& displayInfos) {
     jobjectArray jDisplayInfoArray =
             env->NewObjectArray(displayInfos.size(), gDisplayInfoClassInfo.clazz, nullptr);
-    for (int i = 0; i < displayInfos.size(); i++) {
+    for (size_t i = 0; i < displayInfos.size(); i++) {
         ScopedLocalRef<jobject> jDisplayInfo(env, fromDisplayInfo(env, displayInfos[i]));
         env->SetObjectArrayElement(jDisplayInfoArray, i, jDisplayInfo.get());
     }
@@ -91,8 +92,7 @@ struct WindowInfosListener : public gui::WindowInfosListener {
     WindowInfosListener(JNIEnv* env, jobject listener)
           : mListener(env->NewWeakGlobalRef(listener)) {}
 
-    void onWindowInfosChanged(const std::vector<WindowInfo>& windowInfos,
-                              const std::vector<DisplayInfo>& displayInfos) override {
+    void onWindowInfosChanged(const gui::WindowInfosUpdate& update) override {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         LOG_ALWAYS_FATAL_IF(env == nullptr, "Unable to retrieve JNIEnv in onWindowInfoChanged.");
 
@@ -103,8 +103,10 @@ struct WindowInfosListener : public gui::WindowInfosListener {
             return;
         }
 
-        ScopedLocalRef<jobjectArray> jWindowHandlesArray(env, fromWindowInfos(env, windowInfos));
-        ScopedLocalRef<jobjectArray> jDisplayInfoArray(env, fromDisplayInfos(env, displayInfos));
+        ScopedLocalRef<jobjectArray> jWindowHandlesArray(env,
+                                                         fromWindowInfos(env, update.windowInfos));
+        ScopedLocalRef<jobjectArray> jDisplayInfoArray(env,
+                                                       fromDisplayInfos(env, update.displayInfos));
 
         env->CallVoidMethod(listener, gListenerClassInfo.onWindowInfosChanged,
                             jWindowHandlesArray.get(), jDisplayInfoArray.get());
@@ -134,6 +136,7 @@ jlong nativeCreate(JNIEnv* env, jclass clazz, jobject obj) {
 
 void destroyNativeService(void* ptr) {
     WindowInfosListener* listener = reinterpret_cast<WindowInfosListener*>(ptr);
+    SurfaceComposerClient::getDefault()->removeWindowInfosListener(listener);
     listener->decStrong((void*)nativeCreate);
 }
 

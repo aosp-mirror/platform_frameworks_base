@@ -52,9 +52,9 @@ import android.widget.RemoteViews.InteractionHandler;
 import com.android.internal.widget.IRemoteViewsFactory;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.concurrent.Executor;
 
 /**
@@ -424,17 +424,17 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
      * adapter that have not yet had their RemoteViews loaded.
      */
     private class RemoteViewsFrameLayoutRefSet
-            extends SparseArray<LinkedList<RemoteViewsFrameLayout>> {
+            extends SparseArray<ArrayList<RemoteViewsFrameLayout>> {
 
         /**
          * Adds a new reference to a RemoteViewsFrameLayout returned by the adapter.
          */
         public void add(int position, RemoteViewsFrameLayout layout) {
-            LinkedList<RemoteViewsFrameLayout> refs = get(position);
+            ArrayList<RemoteViewsFrameLayout> refs = get(position);
 
             // Create the list if necessary
             if (refs == null) {
-                refs = new LinkedList<>();
+                refs = new ArrayList<>();
                 put(position, refs);
             }
 
@@ -451,7 +451,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             if (view == null) return;
 
             // Remove this set from the original mapping
-            final LinkedList<RemoteViewsFrameLayout> refs = removeReturnOld(position);
+            final ArrayList<RemoteViewsFrameLayout> refs = removeReturnOld(position);
             if (refs != null) {
                 // Notify all the references for that position of the newly loaded RemoteViews
                 for (final RemoteViewsFrameLayout ref : refs) {
@@ -467,7 +467,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             if (rvfl.cacheIndex < 0) {
                 return;
             }
-            final LinkedList<RemoteViewsFrameLayout> refs = get(rvfl.cacheIndex);
+            final ArrayList<RemoteViewsFrameLayout> refs = get(rvfl.cacheIndex);
             if (refs != null) {
                 refs.remove(rvfl);
             }
@@ -933,12 +933,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
 
             Runnable r = () -> {
                 synchronized (sCachedRemoteViewsCaches) {
-                    if (sCachedRemoteViewsCaches.containsKey(key)) {
-                        sCachedRemoteViewsCaches.remove(key);
-                    }
-                    if (sRemoteViewsCacheRemoveRunnables.containsKey(key)) {
-                        sRemoteViewsCacheRemoveRunnables.remove(key);
-                    }
+                    sCachedRemoteViewsCaches.remove(key);
+                    sRemoteViewsCacheRemoveRunnables.remove(key);
                 }
             };
             sRemoteViewsCacheRemoveRunnables.put(key, r);

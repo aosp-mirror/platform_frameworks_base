@@ -60,15 +60,29 @@ public final class Light implements Parcelable {
     public static final int LIGHT_TYPE_PLAYER_ID = 10002;
 
     /**
+     * Type for lights that illuminate keyboard keys.
+     */
+    public static final int LIGHT_TYPE_KEYBOARD_BACKLIGHT = 10003;
+
+    /**
      * Capability for lights that could adjust its LED brightness. If the capability is not present
-     * the led can only be turned either on or off.
+     * the LED can only be turned either on or off.
      */
     public static final int LIGHT_CAPABILITY_BRIGHTNESS = 1 << 0;
 
     /**
-     * Capability for lights that has red, green and blue LEDs to control the light's color.
+     * Capability for lights that have red, green and blue LEDs to control the light's color.
      */
-    public static final int LIGHT_CAPABILITY_RGB = 0 << 1;
+    public static final int LIGHT_CAPABILITY_COLOR_RGB = 1 << 1;
+
+    /**
+     * Capability for lights that have red, green and blue LEDs to control the light's color.
+     *
+     * @deprecated Wrong int based flag with value 0. Use capability flag {@code
+     * LIGHT_CAPABILITY_COLOR_RGB} instead.
+     */
+    @Deprecated
+    public static final int LIGHT_CAPABILITY_RGB = 0;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -77,6 +91,7 @@ public final class Light implements Parcelable {
             LIGHT_TYPE_MICROPHONE,
             LIGHT_TYPE_INPUT,
             LIGHT_TYPE_PLAYER_ID,
+            LIGHT_TYPE_KEYBOARD_BACKLIGHT,
         })
     public @interface LightType {}
 
@@ -85,6 +100,7 @@ public final class Light implements Parcelable {
     @IntDef(flag = true, prefix = {"LIGHT_CAPABILITY_"},
         value = {
             LIGHT_CAPABILITY_BRIGHTNESS,
+            LIGHT_CAPABILITY_COLOR_RGB,
             LIGHT_CAPABILITY_RGB,
         })
     public @interface LightCapability {}
@@ -94,6 +110,8 @@ public final class Light implements Parcelable {
     private final int mOrdinal;
     private final int mType;
     private final int mCapabilities;
+    @Nullable
+    private final int[] mPreferredBrightnessLevels;
 
     /**
      * Creates a new light with the given data.
@@ -101,7 +119,7 @@ public final class Light implements Parcelable {
      * @hide
      */
     public Light(int id, int ordinal, int type) {
-        this(id, "Light", ordinal, type, 0);
+        this(id, "Light", ordinal, type, 0, null);
     }
 
     /**
@@ -110,11 +128,22 @@ public final class Light implements Parcelable {
      * @hide
      */
     public Light(int id, String name, int ordinal, int type, int capabilities) {
+        this(id, name, ordinal, type, capabilities, null);
+    }
+
+    /**
+     * Creates a new light with the given data.
+     *
+     * @hide
+     */
+    public Light(int id, String name, int ordinal, int type, int capabilities,
+            @Nullable int[] preferredBrightnessLevels) {
         mId = id;
         mName = name;
         mOrdinal = ordinal;
         mType = type;
         mCapabilities = capabilities;
+        mPreferredBrightnessLevels = preferredBrightnessLevels;
     }
 
     private Light(@NonNull Parcel in) {
@@ -123,6 +152,7 @@ public final class Light implements Parcelable {
         mOrdinal = in.readInt();
         mType = in.readInt();
         mCapabilities = in.readInt();
+        mPreferredBrightnessLevels = in.createIntArray();
     }
 
     /** Implement the Parcelable interface */
@@ -133,6 +163,7 @@ public final class Light implements Parcelable {
         dest.writeInt(mOrdinal);
         dest.writeInt(mType);
         dest.writeInt(mCapabilities);
+        dest.writeIntArray(mPreferredBrightnessLevels);
     }
 
     /** Implement the Parcelable interface */
@@ -233,7 +264,20 @@ public final class Light implements Parcelable {
      * @return True if the hardware can control the RGB led, otherwise false.
      */
     public boolean hasRgbControl() {
-        return (mCapabilities & LIGHT_CAPABILITY_RGB) == LIGHT_CAPABILITY_RGB;
+        return (mCapabilities & LIGHT_CAPABILITY_COLOR_RGB) == LIGHT_CAPABILITY_COLOR_RGB;
     }
 
+    /**
+     * Returns preferred brightness levels for the light which will be used when user
+     * increase/decrease brightness levels for the light (currently only used for Keyboard
+     * backlight control using backlight up/down keys).
+     *
+     * The values in the preferred brightness level array are in the range [0, 255].
+     *
+     * @hide
+     */
+    @Nullable
+    public int[] getPreferredBrightnessLevels() {
+        return mPreferredBrightnessLevels;
+    }
 }

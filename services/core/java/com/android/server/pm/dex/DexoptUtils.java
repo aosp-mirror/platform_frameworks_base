@@ -23,7 +23,7 @@ import android.util.SparseArray;
 
 import com.android.internal.os.ClassLoaderFactory;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.File;
 import java.util.List;

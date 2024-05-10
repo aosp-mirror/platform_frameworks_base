@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.server.wm.BackgroundActivityStartController.BalVerdict;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -31,8 +32,9 @@ import static org.mockito.Mockito.mock;
 
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.os.UserHandle;
+import android.os.Process;
 import android.util.ArraySet;
 import android.view.Display;
 import android.window.DisplayWindowPolicyController;
@@ -43,7 +45,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -100,12 +101,11 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         int uidAmount = (expectedUid0 && expectedUid1) ? 2 : (expectedUid0 || expectedUid1) ? 1 : 0;
         assertEquals(expectedTopActivity == null ? null :
                 expectedTopActivity.info.getComponentName(), mDwpc.mTopActivity);
-        assertEquals(expectedTopActivity == null ? UserHandle.USER_NULL :
+        assertEquals(expectedTopActivity == null ? Process.INVALID_UID :
                 expectedTopActivity.info.applicationInfo.uid, mDwpc.mTopActivityUid);
         assertEquals(uidAmount, mDwpc.mRunningUids.size());
         assertTrue(mDwpc.mRunningUids.contains(TEST_USER_0_ID) == expectedUid0);
         assertTrue(mDwpc.mRunningUids.contains(TEST_USER_1_ID) == expectedUid1);
-
     }
 
     private ActivityRecord launchActivityOnDisplay(DisplayContent display, int uid) {
@@ -184,12 +184,42 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
                 /* voiceSession */null,
                 /* voiceInteractor */ null,
                 /* startFlags */ 0,
-                /* doResume */true,
                 /* options */null,
                 /* inTask */null,
                 /* inTaskFragment */ null,
-                /* restrictedBgActivity */false,
-                /* intentGrants */null);
+                BalVerdict.ALLOW_BY_DEFAULT,
+                /* intentGrants */null,
+                /* realCaiingUid */ -1);
+
+        assertEquals(result, START_ABORTED);
+    }
+
+    @Test
+    public void testCanActivityBeLaunched_requiredDisplayCategory() {
+        doReturn(null).when(mWm.mDisplayManagerInternal)
+                .getDisplayWindowPolicyController(anyInt());
+        mSecondaryDisplay = createNewDisplay();
+        assertFalse(mSecondaryDisplay.mDwpcHelper.hasController());
+
+        ActivityStarter starter = new ActivityStarter(mock(ActivityStartController.class), mAtm,
+                mSupervisor, mock(ActivityStartInterceptor.class));
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(mSecondaryDisplay).build();
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setTask(task).build();
+        final ActivityRecord disallowedRecord =
+                new ActivityBuilder(mAtm).setRequiredDisplayCategory("auto").build();
+
+        int result = starter.startActivityInner(
+                disallowedRecord,
+                sourceRecord,
+                /* voiceSession= */null,
+                /* voiceInteractor= */ null,
+                /* startFlags= */ 0,
+                /* options= */null,
+                /* inTask= */null,
+                /* inTaskFragment= */ null,
+                BalVerdict.ALLOW_BY_DEFAULT,
+                /* intentGrants= */null,
+                /* realCaiingUid */ -1);
 
         assertEquals(result, START_ABORTED);
     }
@@ -200,27 +230,21 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
                 new ComponentName("fake.package", "DisallowedActivity");
 
         ComponentName mTopActivity = null;
-        int mTopActivityUid = UserHandle.USER_NULL;
+        int mTopActivityUid = Process.INVALID_UID;
         ArraySet<Integer> mRunningUids = new ArraySet<>();
 
         @Override
-        public boolean canActivityBeLaunched(@NonNull ActivityInfo activity,
+        public boolean canActivityBeLaunched(@NonNull ActivityInfo activity, Intent intent,
                 @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
                 boolean isNewTask) {
-            return false;
+            return canContainActivity(activity, windowingMode, launchingFromDisplayId, isNewTask);
         }
 
         @Override
-        public boolean canContainActivities(@NonNull List<ActivityInfo> activities,
-                @WindowConfiguration.WindowingMode int windowingMode) {
-            final int activityCount = activities.size();
-            for (int i = 0; i < activityCount; i++) {
-                final ActivityInfo aInfo = activities.get(i);
-                if (aInfo.getComponentName().equals(DISALLOWED_ACTIVITY)) {
-                    return false;
-                }
-            }
-            return true;
+        protected boolean canContainActivity(@NonNull ActivityInfo activity,
+                @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
+                boolean isNewTask) {
+            return !activity.getComponentName().equals(DISALLOWED_ACTIVITY);
         }
 
         @Override
@@ -230,8 +254,8 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         }
 
         @Override
-        public void onTopActivityChanged(ComponentName topActivity, int uid) {
-            super.onTopActivityChanged(topActivity, uid);
+        public void onTopActivityChanged(ComponentName topActivity, int uid, int userId) {
+            super.onTopActivityChanged(topActivity, uid, userId);
             mTopActivity = topActivity;
             mTopActivityUid = uid;
         }
@@ -244,8 +268,18 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         }
 
         @Override
-        public boolean canShowTasksInRecents() {
+        public boolean canShowTasksInHostDeviceRecents() {
             return true;
+        }
+
+        @Override
+        public boolean isEnteringPipAllowed(int uid) {
+            return true;
+        }
+
+        @Override
+        public ComponentName getCustomHomeComponent() {
+            return null;
         }
     }
 }

@@ -20,8 +20,6 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
-import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
-import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 
 import java.util.List;
 
@@ -47,7 +45,12 @@ public class FakeStatusBarIconController extends BaseLeakChecker<IconManager>
     }
 
     @Override
-    public void setExternalIcon(String slot) {
+    public void setIconFromTile(String slot, StatusBarIcon icon) {
+
+    }
+
+    @Override
+    public void removeIconForTile(String slot) {
 
     }
 
@@ -57,16 +60,11 @@ public class FakeStatusBarIconController extends BaseLeakChecker<IconManager>
     }
 
     @Override
-    public void setIcon(String slot, StatusBarIcon icon) {
-
+    public void setNewWifiIcon() {
     }
 
     @Override
-    public void setSignalIcon(String slot, WifiIconState state) {
-    }
-
-    @Override
-    public void setMobileIcons(String slot, List<MobileIconState> states) {
+    public void setNewMobileIconSubIds(List<Integer> subIds) {
     }
 
     @Override
@@ -83,10 +81,6 @@ public class FakeStatusBarIconController extends BaseLeakChecker<IconManager>
 
     @Override
     public void removeIcon(String slot, int tag) {
-    }
-
-    @Override
-    public void removeAllIconsForSlot(String slot) {
     }
 
     @Override

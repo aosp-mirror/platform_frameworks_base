@@ -1,0 +1,61 @@
+soong_config_module_type {
+    name: "platform_filegroup",
+    module_type: "filegroup",
+    config_namespace: "ANDROID",
+    bool_variables: [
+        "crashrecovery_files_in_platform",
+    ],
+    properties: [
+        "srcs",
+    ],
+}
+
+platform_filegroup {
+    name: "services-crashrecovery-sources",
+    soong_config_variables: {
+        // if this flag is enabled, then files are part of platform
+        crashrecovery_files_in_platform: {
+            srcs: [
+                "java/**/*.java",
+                "java/**/*.aidl",
+                ":statslog-crashrecovery-java-gen",
+            ],
+        },
+    },
+    visibility: ["//frameworks/base:__subpackages__"],
+}
+
+soong_config_module_type {
+    name: "module_filegroup",
+    module_type: "filegroup",
+    config_namespace: "ANDROID",
+    bool_variables: [
+        "crashrecovery_files_in_module",
+    ],
+    properties: [
+        "srcs",
+    ],
+}
+
+module_filegroup {
+    name: "services-crashrecovery-module-sources",
+    soong_config_variables: {
+        // if this flag is enabled, then files are part of module
+        crashrecovery_files_in_module: {
+            srcs: [
+                "java/**/*.java",
+                "java/**/*.aidl",
+                ":statslog-crashrecovery-java-gen",
+            ],
+        },
+    },
+    visibility: ["//packages/modules/CrashRecovery/service"],
+}
+
+genrule {
+    name: "statslog-crashrecovery-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module crashrecovery " +
+        "--javaPackage com.android.server.crashrecovery.proto --javaClass CrashRecoveryStatsLog --worksource",
+    out: ["com/android/server/crashrecovery/proto/CrashRecoveryStatsLog.java"],
+}

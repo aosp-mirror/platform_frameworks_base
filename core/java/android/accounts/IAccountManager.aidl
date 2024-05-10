@@ -38,7 +38,7 @@ interface IAccountManager {
     Account[] getAccountsByTypeForPackage(String type, String packageName, String opPackageName);
     Account[] getAccountsAsUser(String accountType, int userId, String opPackageName);
     void hasFeatures(in IAccountManagerResponse response, in Account account, in String[] features,
-        String opPackageName);
+        int userId, String opPackageName);
     void getAccountByTypeAndFeatures(in IAccountManagerResponse response, String accountType,
         in String[] features, String opPackageName);
     void getAccountsByFeatures(in IAccountManagerResponse response, String accountType,

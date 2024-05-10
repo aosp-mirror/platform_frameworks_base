@@ -51,7 +51,8 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
     private final Rect mOldWindowCrop = new Rect();
 
     InputConsumerImpl(WindowManagerService service, IBinder token, String name,
-            InputChannel inputChannel, int clientPid, UserHandle clientUser, int displayId) {
+            InputChannel inputChannel, int clientPid, UserHandle clientUser, int displayId,
+            SurfaceControl.Transaction t) {
         mService = service;
         mToken = token;
         mName = name;
@@ -74,7 +75,7 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         mWindowHandle.ownerPid = WindowManagerService.MY_PID;
         mWindowHandle.ownerUid = WindowManagerService.MY_UID;
         mWindowHandle.scaleFactor = 1.0f;
-        mWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE | InputConfig.TRUSTED_OVERLAY;
+        mWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE;
 
         mInputSurface = mService.makeSurfaceBuilder(
                         mService.mRoot.getDisplayContent(displayId).getSession())
@@ -82,6 +83,7 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
                 .setName("Input Consumer " + name)
                 .setCallsite("InputConsumerImpl")
                 .build();
+        mWindowHandle.setTrustedOverlay(t, mInputSurface, true);
     }
 
     void linkToDeathRecipient() {
@@ -158,7 +160,7 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
             if (dc == null) {
                 return;
             }
-            dc.getInputMonitor().destroyInputConsumer(mName);
+            dc.getInputMonitor().destroyInputConsumer(mToken);
             unlinkFromDeathRecipient();
         }
     }

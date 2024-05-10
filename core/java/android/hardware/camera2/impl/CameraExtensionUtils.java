@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
+import android.hardware.HardwareBuffer;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraExtensionCharacteristics;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
@@ -33,6 +35,7 @@ import android.view.Surface;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 
@@ -44,7 +47,8 @@ public final class CameraExtensionUtils {
 
     public static final int[] SUPPORTED_CAPTURE_OUTPUT_FORMATS = {
             CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT,
-            ImageFormat.JPEG
+            ImageFormat.JPEG,
+            ImageFormat.JPEG_R
     };
 
     public static class SurfaceInfo {
@@ -89,9 +93,38 @@ public final class CameraExtensionUtils {
                 (dataspace == StreamConfigurationMap.HAL_DATASPACE_V0_JFIF)) {
             surfaceInfo.mFormat = ImageFormat.JPEG;
             return surfaceInfo;
+        } else if ((nativeFormat == StreamConfigurationMap.HAL_PIXEL_FORMAT_BLOB)
+                && (dataspace == StreamConfigurationMap.HAL_DATASPACE_JPEG_R)) {
+            surfaceInfo.mFormat = ImageFormat.JPEG_R;
+            return surfaceInfo;
         }
 
         return surfaceInfo;
+    }
+
+    public static @Nullable Surface getPostviewSurface(
+            @Nullable OutputConfiguration outputConfig,
+            @NonNull HashMap<Integer, List<Size>> supportedPostviewSizes,
+            @NonNull int captureFormat) {
+        if (outputConfig == null) return null;
+
+        SurfaceInfo surfaceInfo = querySurface(outputConfig.getSurface());
+        if (surfaceInfo.mFormat == captureFormat) {
+            if (supportedPostviewSizes.containsKey(captureFormat)) {
+                Size postviewSize = new Size(surfaceInfo.mWidth, surfaceInfo.mHeight);
+                if (supportedPostviewSizes.get(surfaceInfo.mFormat)
+                        .contains(postviewSize)) {
+                    return outputConfig.getSurface();
+                } else {
+                    throw new IllegalArgumentException("Postview size not supported!");
+                }
+            }
+        } else {
+            throw new IllegalArgumentException("Postview format should be equivalent to " +
+                    " the capture format!");
+        }
+
+        return null;
     }
 
     public static Surface getBurstCaptureSurface(
@@ -124,6 +157,7 @@ public final class CameraExtensionUtils {
             SurfaceInfo surfaceInfo = querySurface(config.getSurface());
             if ((surfaceInfo.mFormat ==
                     CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT) ||
+                    ((surfaceInfo.mUsage & HardwareBuffer.USAGE_COMPOSER_OVERLAY) != 0) ||
                     // The default RGBA_8888 is also implicitly supported because camera will
                     // internally override it to
                     // 'CameraExtensionCharacteristics.NON_PROCESSING_INPUT_FORMAT'
@@ -141,5 +175,14 @@ public final class CameraExtensionUtils {
         }
 
         return null;
+    }
+
+    public static Map<String, CameraMetadataNative> getCharacteristicsMapNative(
+            Map<String, CameraCharacteristics> charsMap) {
+        HashMap<String, CameraMetadataNative> ret = new HashMap<>();
+        for (Map.Entry<String, CameraCharacteristics> entry : charsMap.entrySet()) {
+            ret.put(entry.getKey(), entry.getValue().getNativeMetadata());
+        }
+        return ret;
     }
 }

@@ -16,20 +16,22 @@
 
 package com.android.systemui.shade
 
+import android.graphics.Point
 import android.hardware.display.AmbientDisplayConfiguration
-import android.os.SystemClock
-import android.os.UserHandle
+import android.os.PowerManager
 import android.provider.Settings
 import android.view.GestureDetector
 import android.view.MotionEvent
 import com.android.systemui.Dumpable
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.DozeInteractor
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.LOW_PENALTY
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.phone.CentralSurfaces
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.tuner.TunerService.Tunable
 import java.io.PrintWriter
@@ -44,14 +46,16 @@ import javax.inject.Inject
  * screen is still ON and not in the true AoD display state. When the device is in the true AoD
  * display state, wake-ups are handled by [com.android.systemui.doze.DozeSensors].
  */
-@CentralSurfacesComponent.CentralSurfacesScope
+@SysUISingleton
 class PulsingGestureListener @Inject constructor(
-        private val notificationShadeWindowView: NotificationShadeWindowView,
         private val falsingManager: FalsingManager,
         private val dockManager: DockManager,
-        private val centralSurfaces: CentralSurfaces,
+        private val powerInteractor: PowerInteractor,
         private val ambientDisplayConfiguration: AmbientDisplayConfiguration,
         private val statusBarStateController: StatusBarStateController,
+        private val shadeLogger: ShadeLogger,
+        private val dozeInteractor: DozeInteractor,
+        userTracker: UserTracker,
         tunerService: TunerService,
         dumpManager: DumpManager
 ) : GestureDetector.SimpleOnGestureListener(), Dumpable {
@@ -63,10 +67,10 @@ class PulsingGestureListener @Inject constructor(
             when (key) {
                 Settings.Secure.DOZE_DOUBLE_TAP_GESTURE ->
                     doubleTapEnabled = ambientDisplayConfiguration.doubleTapGestureEnabled(
-                            UserHandle.USER_CURRENT)
+                            userTracker.userId)
                 Settings.Secure.DOZE_TAP_SCREEN_GESTURE ->
                     singleTapEnabled = ambientDisplayConfiguration.tapGestureEnabled(
-                            UserHandle.USER_CURRENT)
+                            userTracker.userId)
             }
         }
         tunerService.addTunable(tunable,
@@ -77,18 +81,20 @@ class PulsingGestureListener @Inject constructor(
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
-        if (statusBarStateController.isDozing &&
-                singleTapEnabled &&
-                !dockManager.isDocked &&
-                !falsingManager.isProximityNear &&
-                !falsingManager.isFalseTap(LOW_PENALTY)
-        ) {
-            centralSurfaces.wakeUpIfDozing(
-                    SystemClock.uptimeMillis(),
-                    notificationShadeWindowView,
-                    "PULSING_SINGLE_TAP")
+        val isNotDocked = !dockManager.isDocked
+        shadeLogger.logSingleTapUp(statusBarStateController.isDozing, singleTapEnabled, isNotDocked)
+        if (statusBarStateController.isDozing && singleTapEnabled && isNotDocked) {
+            val proximityIsNotNear = !falsingManager.isProximityNear
+            val isNotAFalseTap = !falsingManager.isFalseTap(LOW_PENALTY)
+            shadeLogger.logSingleTapUpFalsingState(proximityIsNotNear, isNotAFalseTap)
+            if (proximityIsNotNear && isNotAFalseTap) {
+                shadeLogger.d("Single tap handled, requesting centralSurfaces.wakeUpIfDozing")
+                dozeInteractor.setLastTapToWakePosition(Point(e.x.toInt(), e.y.toInt()))
+                powerInteractor.wakeUpIfDozing("PULSING_SINGLE_TAP", PowerManager.WAKE_REASON_TAP)
+            }
             return true
         }
+        shadeLogger.d("onSingleTapUp event ignored")
         return false
     }
 
@@ -105,10 +111,7 @@ class PulsingGestureListener @Inject constructor(
                 !falsingManager.isProximityNear &&
                 !falsingManager.isFalseDoubleTap
         ) {
-            centralSurfaces.wakeUpIfDozing(
-                    SystemClock.uptimeMillis(),
-                    notificationShadeWindowView,
-                    "PULSING_DOUBLE_TAP")
+            powerInteractor.wakeUpIfDozing("PULSING_DOUBLE_TAP", PowerManager.WAKE_REASON_TAP)
             return true
         }
         return false

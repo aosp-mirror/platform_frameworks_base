@@ -70,7 +70,7 @@ bool SplitDescription::match(const SplitDescription& o) const {
 String8 SplitDescription::toString() const {
     String8 extension;
     if (abi != abi::Variant_none) {
-        if (extension.isEmpty()) {
+        if (extension.empty()) {
             extension.append(":");
         } else {
             extension.append("-");
@@ -134,10 +134,10 @@ bool SplitDescription::parse(const String8& str, SplitDescription* outSplit) {
     String8 configStr;
     String8 extensionStr;
     if (index >= 0) {
-        configStr.setTo(str.string(), index);
-        extensionStr.setTo(str.string() + index + 1);
+        configStr = String8(str.c_str(), index);
+        extensionStr = (str.c_str() + index + 1);
     } else {
-        configStr.setTo(str);
+        configStr = str;
     }
 
     SplitDescription split;

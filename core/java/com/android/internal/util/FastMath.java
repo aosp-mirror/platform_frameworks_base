@@ -21,6 +21,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 /**
  * Fast and loose math routines.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class FastMath {
 
     /**

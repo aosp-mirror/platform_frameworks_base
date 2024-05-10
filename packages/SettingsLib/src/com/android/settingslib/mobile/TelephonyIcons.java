@@ -16,7 +16,6 @@
 
 package com.android.settingslib.mobile;
 
-import com.android.settingslib.AccessibilityContentDescriptions;
 import com.android.settingslib.R;
 import com.android.settingslib.SignalIcon.MobileIconGroup;
 
@@ -49,297 +48,129 @@ public class TelephonyIcons {
 
     public static final MobileIconGroup CARRIER_NETWORK_CHANGE = new MobileIconGroup(
             "CARRIER_NETWORK_CHANGE",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.carrier_network_change_mode,
-            0
+            /* dataType= */ 0
     );
 
     public static final MobileIconGroup THREE_G = new MobileIconGroup(
             "3G",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_3g,
             TelephonyIcons.ICON_3G
     );
 
     public static final MobileIconGroup WFC = new MobileIconGroup(
             "WFC",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
-            0,
-            0);
+            /* dataContentDescription= */ 0,
+            /* dataType= */ 0);
 
     public static final MobileIconGroup UNKNOWN = new MobileIconGroup(
             "Unknown",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
-            0,
-            0);
+            /* dataContentDescription= */ 0,
+            /* dataType= */ 0);
 
     public static final MobileIconGroup E = new MobileIconGroup(
             "E",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_edge,
             TelephonyIcons.ICON_E
     );
 
     public static final MobileIconGroup ONE_X = new MobileIconGroup(
             "1X",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_cdma,
             TelephonyIcons.ICON_1X
     );
 
     public static final MobileIconGroup G = new MobileIconGroup(
             "G",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_gprs,
             TelephonyIcons.ICON_G
     );
 
     public static final MobileIconGroup H = new MobileIconGroup(
             "H",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_3_5g,
             TelephonyIcons.ICON_H
     );
 
     public static final MobileIconGroup H_PLUS = new MobileIconGroup(
             "H+",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_3_5g_plus,
             TelephonyIcons.ICON_H_PLUS
     );
 
     public static final MobileIconGroup FOUR_G = new MobileIconGroup(
             "4G",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_4g,
             TelephonyIcons.ICON_4G
     );
 
     public static final MobileIconGroup FOUR_G_PLUS = new MobileIconGroup(
             "4G+",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_4g_plus,
             TelephonyIcons.ICON_4G_PLUS
     );
 
     public static final MobileIconGroup LTE = new MobileIconGroup(
             "LTE",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_lte,
             TelephonyIcons.ICON_LTE
     );
 
     public static final MobileIconGroup LTE_PLUS = new MobileIconGroup(
             "LTE+",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_lte_plus,
             TelephonyIcons.ICON_LTE_PLUS
     );
 
     public static final MobileIconGroup FOUR_G_LTE = new MobileIconGroup(
             "4G LTE",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_4g_lte,
             TelephonyIcons.ICON_4G_LTE
     );
 
     public static final MobileIconGroup FOUR_G_LTE_PLUS = new MobileIconGroup(
             "4G LTE+",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_4g_lte_plus,
             TelephonyIcons.ICON_4G_LTE_PLUS
     );
 
     public static final MobileIconGroup LTE_CA_5G_E = new MobileIconGroup(
             "5Ge",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_5ge_html,
             TelephonyIcons.ICON_5G_E
     );
 
     public static final MobileIconGroup NR_5G = new MobileIconGroup(
             "5G",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_5g,
             TelephonyIcons.ICON_5G
     );
 
     public static final MobileIconGroup NR_5G_PLUS = new MobileIconGroup(
             "5G_PLUS",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_5g_plus,
             TelephonyIcons.ICON_5G_PLUS
     );
 
     public static final MobileIconGroup DATA_DISABLED = new MobileIconGroup(
             "DataDisabled",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.cell_data_off_content_description,
             0
     );
 
     public static final MobileIconGroup NOT_DEFAULT_DATA = new MobileIconGroup(
             "NotDefaultData",
-            null,
-            null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,
-            0,
-            0,
-            0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.not_default_data_content_description,
-            0
+            /* dataType= */ 0
     );
 
     public static final MobileIconGroup CARRIER_MERGED_WIFI = new MobileIconGroup(
             "CWF",
-            /* sbIcons= */ null,
-            /* qsIcons= */ null,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            /* sbNullState= */ 0,
-            /* qsNullState= */ 0,
-            /* sbDiscState= */ 0,
-            /* qsDiscState= */ 0,
-            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             R.string.data_connection_carrier_wifi,
             TelephonyIcons.ICON_CWF
     );
 
-    // When adding a new MobileIconGround, check if the dataContentDescription has to be filtered
+    // When adding a new MobileIconGroup, check if the dataContentDescription has to be filtered
     // in QSCarrier#hasValidTypeContentDescription
 
     /** Mapping icon name(lower case) to the icon object. */
@@ -368,14 +199,6 @@ public class TelephonyIcons {
         ICON_NAME_TO_ICON.put("notdefaultdata", NOT_DEFAULT_DATA);
     }
 
-    public static final int[] WIFI_CALL_STRENGTH_ICONS = {
-        R.drawable.ic_wifi_call_strength_0,
-        R.drawable.ic_wifi_call_strength_1,
-        R.drawable.ic_wifi_call_strength_2,
-        R.drawable.ic_wifi_call_strength_3,
-        R.drawable.ic_wifi_call_strength_4
-    };
-
     public static final int[] MOBILE_CALL_STRENGTH_ICONS = {
         R.drawable.ic_mobile_call_strength_0,
         R.drawable.ic_mobile_call_strength_1,
@@ -384,4 +207,3 @@ public class TelephonyIcons {
         R.drawable.ic_mobile_call_strength_4
     };
 }
-

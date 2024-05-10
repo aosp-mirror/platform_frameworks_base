@@ -68,6 +68,9 @@ data class ListAttachState private constructor(
      */
     var stableIndex: Int = -1
 
+    /** Access the index of the [section] or -1 if the entry does not have one */
+    val sectionIndex: Int get() = section?.index ?: -1
+
     /** Copies the state of another instance. */
     fun clone(other: ListAttachState) {
         parent = other.parent
@@ -99,7 +102,7 @@ data class ListAttachState private constructor(
         parent = null
         section = null
         promoter = null
-        // stableIndex = -1  // TODO(b/241229236): Clear this once we fix the stability fragility
+        stableIndex = -1
     }
 
     companion object {

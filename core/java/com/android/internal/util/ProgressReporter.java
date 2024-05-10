@@ -25,6 +25,7 @@ import android.os.RemoteException;
 import android.util.MathUtils;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * Tracks and reports progress of a single task to a {@link IProgressListener}.
@@ -175,7 +176,8 @@ public class ProgressReporter {
         }
     }
 
-    int getProgress() {
+    @VisibleForTesting
+    public int getProgress() {
         return mProgress;
     }
 

@@ -14,36 +14,80 @@
  * limitations under the License.
  *
  */
+
 package com.android.systemui.statusbar.policy
 
-import android.annotation.UserIdInt
+import android.content.Context
 import android.content.Intent
 import android.view.View
-import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin
-import com.android.systemui.Dumpable
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController.DialogShower
 import com.android.systemui.user.data.source.UserRecord
+import com.android.systemui.user.domain.interactor.GuestUserInteractor
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
+import dagger.Lazy
+import java.io.PrintWriter
 import java.lang.ref.WeakReference
-import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-/** Defines interface for a class that provides user switching functionality and state. */
-interface UserSwitcherController : Dumpable {
+/** Access point into multi-user switching logic. */
+@Deprecated("Use UserInteractor or GuestUserInteractor instead.")
+@SysUISingleton
+class UserSwitcherController
+@Inject
+constructor(
+    @Application private val applicationContext: Context,
+    private val userSwitcherInteractorLazy: Lazy<UserSwitcherInteractor>,
+    private val guestUserInteractorLazy: Lazy<GuestUserInteractor>,
+    private val keyguardInteractorLazy: Lazy<KeyguardInteractor>,
+    private val activityStarter: ActivityStarter,
+) {
+
+    /** Defines interface for classes that can be called back when the user is switched. */
+    fun interface UserSwitchCallback {
+        /** Notifies that the user has switched. */
+        fun onUserSwitched()
+    }
+
+    private val mUserSwitcherInteractor: UserSwitcherInteractor by lazy {
+        userSwitcherInteractorLazy.get()
+    }
+    private val guestUserInteractor: GuestUserInteractor by lazy { guestUserInteractorLazy.get() }
+    private val keyguardInteractor: KeyguardInteractor by lazy { keyguardInteractorLazy.get() }
+
+    private val callbackCompatMap =
+        mutableMapOf<UserSwitchCallback, UserSwitcherInteractor.UserCallback>()
 
     /** The current list of [UserRecord]. */
     val users: ArrayList<UserRecord>
+        get() = mUserSwitcherInteractor.userRecords.value
 
     /** Whether the user switcher experience should use the simple experience. */
     val isSimpleUserSwitcher: Boolean
+        get() = mUserSwitcherInteractor.isSimpleUserSwitcher
 
-    /** Require a view for jank detection */
-    fun init(view: View)
+    val isUserSwitcherEnabled: Boolean
+        get() = mUserSwitcherInteractor.isUserSwitcherEnabled
 
     /** The [UserRecord] of the current user or `null` when none. */
     val currentUserRecord: UserRecord?
+        get() = mUserSwitcherInteractor.selectedUserRecord.value
 
     /** The name of the current user of the device or `null`, when none is selected. */
     val currentUserName: String?
+        get() =
+            currentUserRecord?.let {
+                LegacyUserUiHelper.getUserRecordName(
+                    context = applicationContext,
+                    record = it,
+                    isGuestUserAutoCreated = mUserSwitcherInteractor.isGuestUserAutoCreated,
+                    isGuestUserResetting = mUserSwitcherInteractor.isGuestUserResetting,
+                )
+            }
 
     /**
      * Notifies that a user has been selected.
@@ -56,34 +100,40 @@ interface UserSwitcherController : Dumpable {
      * @param userId The ID of the user to switch to.
      * @param dialogShower An optional [DialogShower] in case we need to show dialogs.
      */
-    fun onUserSelected(userId: Int, dialogShower: DialogShower?)
-
-    /** Whether it is allowed to add users while the device is locked. */
-    val isAddUsersFromLockScreenEnabled: Flow<Boolean>
+    fun onUserSelected(userId: Int, dialogShower: DialogShower?) {
+        mUserSwitcherInteractor.selectUser(userId, dialogShower)
+    }
 
     /** Whether the guest user is configured to always be present on the device. */
     val isGuestUserAutoCreated: Boolean
+        get() = mUserSwitcherInteractor.isGuestUserAutoCreated
 
     /** Whether the guest user is currently being reset. */
     val isGuestUserResetting: Boolean
-
-    /** Creates and switches to the guest user. */
-    fun createAndSwitchToGuestUser(dialogShower: DialogShower?)
-
-    /** Shows the add user dialog. */
-    fun showAddUserDialog(dialogShower: DialogShower?)
-
-    /** Starts an activity to add a supervised user to the device. */
-    fun startSupervisedUserActivity()
-
-    /** Notifies when the display density or font scale has changed. */
-    fun onDensityOrFontScaleChanged()
+        get() = mUserSwitcherInteractor.isGuestUserResetting
 
     /** Registers an adapter to notify when the users change. */
-    fun addAdapter(adapter: WeakReference<BaseUserSwitcherAdapter>)
+    fun addAdapter(adapter: WeakReference<BaseUserSwitcherAdapter>) {
+        mUserSwitcherInteractor.addCallback(
+            object : UserSwitcherInteractor.UserCallback {
+                override fun isEvictable(): Boolean {
+                    return adapter.get() == null
+                }
+
+                override fun onUserStateChanged() {
+                    adapter.get()?.notifyDataSetChanged()
+                }
+            }
+        )
+    }
 
     /** Notifies the item for a user has been clicked. */
-    fun onUserListItemClicked(record: UserRecord, dialogShower: DialogShower?)
+    fun onUserListItemClicked(
+        record: UserRecord,
+        dialogShower: DialogShower?,
+    ) {
+        mUserSwitcherInteractor.onRecordSelected(record, dialogShower)
+    }
 
     /**
      * Removes guest user and switches to target user. The guest must be the current user and its id
@@ -102,62 +152,76 @@ interface UserSwitcherController : Dumpable {
      *
      * @param guestUserId id of the guest user to remove
      * @param targetUserId id of the user to switch to after guest is removed. If
-     * `UserHandle.USER_NULL`, then switch immediately to the newly created guest user.
+     *   `UserHandle.USER_NULL`, then switch immediately to the newly created guest user.
      */
-    fun removeGuestUser(@UserIdInt guestUserId: Int, @UserIdInt targetUserId: Int)
+    fun removeGuestUser(guestUserId: Int, targetUserId: Int) {
+        mUserSwitcherInteractor.removeGuestUser(
+            guestUserId = guestUserId,
+            targetUserId = targetUserId,
+        )
+    }
 
     /**
      * Exits guest user and switches to previous non-guest user. The guest must be the current user.
      *
      * @param guestUserId user id of the guest user to exit
      * @param targetUserId user id of the guest user to exit, set to UserHandle#USER_NULL when
-     * target user id is not known
+     *   target user id is not known
      * @param forceRemoveGuestOnExit true: remove guest before switching user, false: remove guest
-     * only if its ephemeral, else keep guest
+     *   only if its ephemeral, else keep guest
      */
-    fun exitGuestUser(
-        @UserIdInt guestUserId: Int,
-        @UserIdInt targetUserId: Int,
-        forceRemoveGuestOnExit: Boolean
-    )
+    fun exitGuestUser(guestUserId: Int, targetUserId: Int, forceRemoveGuestOnExit: Boolean) {
+        mUserSwitcherInteractor.exitGuestUser(guestUserId, targetUserId, forceRemoveGuestOnExit)
+    }
 
     /**
      * Guarantee guest is present only if the device is provisioned. Otherwise, create a content
      * observer to wait until the device is provisioned, then schedule the guest creation.
      */
-    fun schedulePostBootGuestCreation()
+    fun schedulePostBootGuestCreation() {
+        guestUserInteractor.onDeviceBootCompleted()
+    }
 
     /** Whether keyguard is showing. */
     val isKeyguardShowing: Boolean
-
-    /** Returns the [EnforcedAdmin] for the given record, or `null` if there isn't one. */
-    fun getEnforcedAdmin(record: UserRecord): EnforcedAdmin?
-
-    /** Returns `true` if the given record is disabled by the admin; `false` otherwise. */
-    fun isDisabledByAdmin(record: UserRecord): Boolean
+        get() = keyguardInteractor.isKeyguardShowing()
 
     /** Starts an activity with the given [Intent]. */
-    fun startActivity(intent: Intent)
+    fun startActivity(intent: Intent) {
+        activityStarter.startActivity(intent, /* dismissShade= */ true)
+    }
 
     /**
      * Refreshes users from UserManager.
      *
      * The pictures are only loaded if they have not been loaded yet.
-     *
-     * @param forcePictureLoadForId forces the picture of the given user to be reloaded.
      */
-    fun refreshUsers(forcePictureLoadForId: Int)
+    fun refreshUsers() {
+        mUserSwitcherInteractor.refreshUsers()
+    }
 
     /** Adds a subscriber to when user switches. */
-    fun addUserSwitchCallback(callback: UserSwitchCallback)
+    fun addUserSwitchCallback(callback: UserSwitchCallback) {
+        val interactorCallback =
+            object : UserSwitcherInteractor.UserCallback {
+                override fun onUserStateChanged() {
+                    callback.onUserSwitched()
+                }
+            }
+        callbackCompatMap[callback] = interactorCallback
+        mUserSwitcherInteractor.addCallback(interactorCallback)
+    }
 
     /** Removes a previously-added subscriber. */
-    fun removeUserSwitchCallback(callback: UserSwitchCallback)
+    fun removeUserSwitchCallback(callback: UserSwitchCallback) {
+        val interactorCallback = callbackCompatMap.remove(callback)
+        if (interactorCallback != null) {
+            mUserSwitcherInteractor.removeCallback(interactorCallback)
+        }
+    }
 
-    /** Defines interface for classes that can be called back when the user is switched. */
-    fun interface UserSwitchCallback {
-        /** Notifies that the user has switched. */
-        fun onUserSwitched()
+    fun dump(pw: PrintWriter, args: Array<out String>) {
+        mUserSwitcherInteractor.dump(pw)
     }
 
     companion object {

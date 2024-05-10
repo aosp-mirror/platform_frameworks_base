@@ -132,6 +132,40 @@ public class FakeExecutorTest extends SysuiTestCase {
      * Test FakeExecutor that is told to delay execution on items.
      */
     @Test
+    public void testAtTime() {
+        FakeSystemClock clock = new FakeSystemClock();
+        FakeExecutor fakeExecutor = new FakeExecutor(clock);
+        RunnableImpl runnable = new RunnableImpl();
+
+        // Add three delayed runnables.
+        fakeExecutor.executeAtTime(runnable, 10001);
+        fakeExecutor.executeAtTime(runnable, 10050);
+        fakeExecutor.executeAtTime(runnable, 10100);
+        assertEquals(0, runnable.mRunCount);
+        assertEquals(10000, clock.uptimeMillis());
+        assertEquals(3, fakeExecutor.numPending());
+        // Delayed runnables should not advance the clock and therefore should not run.
+        assertFalse(fakeExecutor.runNextReady());
+        assertEquals(0, fakeExecutor.runAllReady());
+        assertEquals(3, fakeExecutor.numPending());
+
+        // Advance the clock to the next runnable. One runnable should execute.
+        assertEquals(1, fakeExecutor.advanceClockToNext());
+        assertEquals(1, fakeExecutor.runAllReady());
+        assertEquals(2, fakeExecutor.numPending());
+        assertEquals(1, runnable.mRunCount);
+        // Advance the clock to the last runnable.
+        assertEquals(99, fakeExecutor.advanceClockToLast());
+        assertEquals(2, fakeExecutor.runAllReady());
+        // Now all remaining runnables should execute.
+        assertEquals(0, fakeExecutor.numPending());
+        assertEquals(3, runnable.mRunCount);
+    }
+
+    /**
+     * Test FakeExecutor that is told to delay execution on items.
+     */
+    @Test
     public void testDelayed_AdvanceAndRun() {
         FakeSystemClock clock = new FakeSystemClock();
         FakeExecutor fakeExecutor = new FakeExecutor(clock);

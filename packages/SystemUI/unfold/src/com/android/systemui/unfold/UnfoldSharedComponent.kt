@@ -19,11 +19,15 @@ package com.android.systemui.unfold
 import android.content.ContentResolver
 import android.content.Context
 import android.hardware.SensorManager
+import android.hardware.display.DisplayManager
 import android.os.Handler
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
-import com.android.systemui.unfold.dagger.UnfoldBackground
+import com.android.systemui.unfold.dagger.UnfoldBg
 import com.android.systemui.unfold.dagger.UnfoldMain
+import com.android.systemui.unfold.dagger.UnfoldSingleThreadBg
+import com.android.systemui.unfold.progress.RemoteUnfoldTransitionReceiver
 import com.android.systemui.unfold.updates.FoldProvider
+import com.android.systemui.unfold.updates.RotationChangeProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.util.CurrentActivityTypeProvider
 import com.android.systemui.unfold.util.UnfoldTransitionATracePrefix
@@ -39,11 +43,11 @@ import javax.inject.Singleton
  *
  * This component is meant to be used for places that don't use dagger. By providing those
  * parameters to the factory, all dagger objects are correctly instantiated. See
- * [createUnfoldTransitionProgressProvider] for an example.
+ * [createUnfoldSharedComponent] for an example.
  */
 @Singleton
 @Component(modules = [UnfoldSharedModule::class])
-internal interface UnfoldSharedComponent {
+interface UnfoldSharedComponent {
 
     @Component.Factory
     interface Factory {
@@ -56,11 +60,50 @@ internal interface UnfoldSharedComponent {
             @BindsInstance sensorManager: SensorManager,
             @BindsInstance @UnfoldMain handler: Handler,
             @BindsInstance @UnfoldMain executor: Executor,
-            @BindsInstance @UnfoldBackground backgroundExecutor: Executor,
+            @BindsInstance @UnfoldSingleThreadBg singleThreadBgExecutor: Executor,
             @BindsInstance @UnfoldTransitionATracePrefix tracingTagPrefix: String,
-            @BindsInstance contentResolver: ContentResolver = context.contentResolver
+            @BindsInstance displayManager: DisplayManager,
+            @BindsInstance @UnfoldBg bgHandler: Handler,
+            @BindsInstance contentResolver: ContentResolver = context.contentResolver,
         ): UnfoldSharedComponent
     }
 
     val unfoldTransitionProvider: Optional<UnfoldTransitionProgressProvider>
 }
+
+/**
+ * Generates a [RemoteTransitionProgress] usable to receive unfold transition progress from another
+ * process.
+ */
+@Singleton
+@Component(modules = [UnfoldRemoteModule::class])
+interface RemoteUnfoldSharedComponent {
+
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance context: Context,
+            @BindsInstance config: UnfoldTransitionConfig,
+            @BindsInstance @UnfoldMain executor: Executor,
+            @BindsInstance @UnfoldMain handler: Handler,
+            @BindsInstance @UnfoldSingleThreadBg singleThreadBgExecutor: Executor,
+            @BindsInstance displayManager: DisplayManager,
+            @BindsInstance @UnfoldTransitionATracePrefix tracingTagPrefix: String,
+        ): RemoteUnfoldSharedComponent
+    }
+
+    val remoteTransitionProgress: Optional<RemoteUnfoldTransitionReceiver>
+
+    @UnfoldMain fun getRotationChangeProvider(): RotationChangeProvider
+}
+
+/**
+ * Usable to receive and propagate unfold transition progresses
+ *
+ * All unfold events received by [remoteReceiver] will be propagated to [localProvider].
+ * [remoteReceiver] is meant to receive events from a remote process (E.g. from a binder service).
+ */
+data class RemoteTransitionProgress(
+    val localProvider: UnfoldTransitionProgressProvider,
+    val remoteReceiver: UnfoldTransitionProgressProvider.TransitionProgressListener
+)

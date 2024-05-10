@@ -16,14 +16,20 @@
 
 package com.android.keyguard;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.text.Editable;
+import android.text.TextWatcher;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -36,6 +42,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
+@TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner.class)
 public class KeyguardMessageAreaControllerTest extends SysuiTestCase {
     @Mock
@@ -44,14 +51,14 @@ public class KeyguardMessageAreaControllerTest extends SysuiTestCase {
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     private KeyguardMessageArea mKeyguardMessageArea;
-
     private KeyguardMessageAreaController mMessageAreaController;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mMessageAreaController = new KeyguardMessageAreaController.Factory(
-                mKeyguardUpdateMonitor, mConfigurationController).create(mKeyguardMessageArea);
+                mKeyguardUpdateMonitor, mConfigurationController).create(
+                mKeyguardMessageArea);
     }
 
     @Test
@@ -84,7 +91,20 @@ public class KeyguardMessageAreaControllerTest extends SysuiTestCase {
     @Test
     public void testClearsTextField() {
         mMessageAreaController.setMessage("");
-        verify(mKeyguardMessageArea).setMessage("");
+        verify(mKeyguardMessageArea).setMessage("", /* animate= */ true);
+    }
+
+    @Test
+    public void textChanged_AnnounceForAccessibility() {
+        ArgumentCaptor<TextWatcher> textWatcherArgumentCaptor = ArgumentCaptor.forClass(
+                TextWatcher.class);
+        mMessageAreaController.onViewAttached();
+        verify(mKeyguardMessageArea).addTextChangedListener(textWatcherArgumentCaptor.capture());
+
+        textWatcherArgumentCaptor.getValue().afterTextChanged(
+                Editable.Factory.getInstance().newEditable("abc"));
+        verify(mKeyguardMessageArea).removeCallbacks(any(Runnable.class));
+        verify(mKeyguardMessageArea).postDelayed(any(Runnable.class), anyLong());
     }
 
     @Test
@@ -94,17 +114,9 @@ public class KeyguardMessageAreaControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetMessageIfEmpty_empty() {
-        mMessageAreaController.setMessage("");
-        mMessageAreaController.setMessageIfEmpty(R.string.keyguard_enter_your_pin);
-        verify(mKeyguardMessageArea).setMessage(R.string.keyguard_enter_your_pin);
-    }
-
-    @Test
-    public void testSetMessageIfEmpty_notEmpty() {
-        mMessageAreaController.setMessage("abc");
-        mMessageAreaController.setMessageIfEmpty(R.string.keyguard_enter_your_pin);
-        verify(mKeyguardMessageArea, never()).setMessage(getContext()
-                .getResources().getText(R.string.keyguard_enter_your_pin));
+    public void testGetMessage() {
+        String msg = "abc";
+        when(mKeyguardMessageArea.getText()).thenReturn(msg);
+        assertThat(mMessageAreaController.getMessage()).isEqualTo(msg);
     }
 }

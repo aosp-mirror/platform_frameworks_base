@@ -19,7 +19,7 @@ package com.android.systemui.util.service.dagger;
 
 import android.content.res.Resources;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Main;
 
 import javax.inject.Named;

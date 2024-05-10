@@ -32,7 +32,7 @@ import android.widget.LinearLayout;
 
 import androidx.preference.PreferenceViewHolder;
 
-import com.android.settingslib.R;
+import com.android.settingslib.widget.preference.twotarget.R;
 
 import org.junit.Before;
 import org.junit.Test;

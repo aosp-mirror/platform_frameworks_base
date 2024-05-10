@@ -22,18 +22,20 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
 
+import android.app.Activity;
 import android.app.Application;
+import android.app.Instrumentation;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.os.BatteryManager;
 import android.os.UserHandle;
 import android.perftests.utils.PerfStatusReporter;
+import android.perftests.utils.PerfTestActivity;
 import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.test.rule.ActivityTestRule;
 
 import com.android.compatibility.common.util.ActivitiesWatcher;
 import com.android.compatibility.common.util.ActivitiesWatcher.ActivityWatcher;
@@ -53,18 +55,18 @@ import org.junit.runners.model.Statement;
 public abstract class AbstractContentCapturePerfTestCase {
 
     private static final String TAG = AbstractContentCapturePerfTestCase.class.getSimpleName();
-    private static final long GENERIC_TIMEOUT_MS = 10_000;
+    protected static final long GENERIC_TIMEOUT_MS = 5_000;
 
     private static int sOriginalStayOnWhilePluggedIn;
-    private static Context sContext = getInstrumentation().getTargetContext();
+    protected static final Instrumentation sInstrumentation = getInstrumentation();
+    protected static final Context sContext = sInstrumentation.getTargetContext();
 
     protected ActivitiesWatcher mActivitiesWatcher;
 
-    private MyContentCaptureService.ServiceWatcher mServiceWatcher;
+    /** A simple activity as the task root to reduce the noise of pause and animation time. */
+    protected Activity mEntryActivity;
 
-    @Rule
-    public ActivityTestRule<CustomTestActivity> mActivityRule =
-            new ActivityTestRule<>(CustomTestActivity.class, false, false);
+    private MyContentCaptureService.ServiceWatcher mServiceWatcher;
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
@@ -220,6 +222,17 @@ public abstract class AbstractContentCapturePerfTestCase {
         }
     }
 
+    @Before
+    public void setUp() {
+        mEntryActivity = sInstrumentation.startActivitySync(
+                PerfTestActivity.createLaunchIntent(sInstrumentation.getContext()));
+    }
+
+    @After
+    public void tearDown() {
+        mEntryActivity.finishAndRemoveTask();
+    }
+
     /**
      * Sets {@link MyContentCaptureService} as the service for the current user and waits until
      * its created, then add the perf test package into allow list.
@@ -248,20 +261,24 @@ public abstract class AbstractContentCapturePerfTestCase {
     }
 
     /**
+     * Returns the intent which will launch CustomTestActivity.
+     */
+    protected Intent getLaunchIntent(int layoutId, int numViews) {
+        final Intent intent = new Intent(sContext, CustomTestActivity.class)
+                // Use NEW_TASK because the context is not activity. It is still in the same task
+                // of PerfTestActivity because of the same task affinity. Use NO_ANIMATION because
+                // this test focuses on launch time instead of animation duration.
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        intent.putExtra(INTENT_EXTRA_LAYOUT_ID, layoutId);
+        intent.putExtra(INTENT_EXTRA_CUSTOM_VIEWS, numViews);
+        return intent;
+    }
+
+    /**
      * Launch test activity with give layout and parameter
      */
     protected CustomTestActivity launchActivity(int layoutId, int numViews) {
-        final Intent intent = new Intent(sContext, CustomTestActivity.class);
-        intent.putExtra(INTENT_EXTRA_LAYOUT_ID, layoutId);
-        intent.putExtra(INTENT_EXTRA_CUSTOM_VIEWS, numViews);
-        return mActivityRule.launchActivity(intent);
-    }
-
-    protected void finishActivity() {
-        try {
-            mActivityRule.finishActivity();
-        } catch (IllegalStateException e) {
-            // no op
-        }
+        final Intent intent = getLaunchIntent(layoutId, numViews);
+        return (CustomTestActivity) sInstrumentation.startActivitySync(intent);
     }
 }

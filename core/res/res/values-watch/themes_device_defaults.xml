@@ -52,6 +52,7 @@ a similar way.
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar -->
     <style name="Theme.DeviceDefault.NoActionBar" parent="Theme.Material.NoActionBar">
+        <item name="android:windowActionBar">false</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -70,6 +71,8 @@ a similar way.
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar.  This theme
          sets {@link android.R.attr#windowFullscreen} to true.  -->
     <style name="Theme.DeviceDefault.NoActionBar.Fullscreen" parent="Theme.Material.NoActionBar.Fullscreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowActionBar">false</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -90,6 +93,7 @@ a similar way.
     sets {@link android.R.attr#windowFullscreen} and {@link android.R.attr#windowOverscan}
     to true. -->
     <style name="Theme.DeviceDefault.NoActionBar.Overscan" parent="Theme.Material.NoActionBar.Overscan">
+        <item name="android:windowActionBar">false</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -149,8 +153,8 @@ a similar way.
     watch theme is not floating. You can set this theme on an activity if you would like to make
     an activity that looks like a Dialog.-->
     <style name="Theme.DeviceDefault.Dialog" parent="Theme.Material.Dialog" >
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
+        <item name="android:windowFullscreen">true</item>
+
         <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault</item>
         <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
 
@@ -160,6 +164,23 @@ a similar way.
         <item name="textAppearance">@style/TextAppearance.DeviceDefault</item>
         <item name="textAppearanceInverse">@style/TextAppearance.DeviceDefault.Inverse</item>
 
+        <!-- Color palette Dark -->
+        <item name="colorPrimary">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
+        <item name="colorButtonNormal">@color/button_normal_device_default_dark</item>
+        <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="disabledAlpha">@dimen/disabled_alpha_device_default</item>
+        <item name="primaryContentAlpha">@dimen/primary_content_alpha_device_default</item>
+        <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_device_default</item>
+    </style>
+
+    <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Material.Dialog.Alert">
+        <item name="android:windowFullscreen">true</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -185,9 +206,9 @@ a similar way.
     <style name="Theme.DeviceDefault.Settings.Dialog.Presentation" parent="Theme.DeviceDefault.Dialog.Presentation"/>
     <style name="Theme.DeviceDefault.Settings.SearchBar" parent="Theme.DeviceDefault.SearchBar"/>
 
-    <style name="Theme.DeviceDefault.Settings.Dialog.Alert" parent="Theme.Material.Dialog.Alert">
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
+    <style name="Theme.DeviceDefault.Settings.Dialog.Alert" parent="Theme.DeviceDefault.Dialog.Alert">
+        <item name="android:windowFullscreen">true</item>
+        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -204,8 +225,6 @@ a similar way.
     </style>
 
     <style name="Theme.DeviceDefault.Settings.CompactMenu" parent="Theme.Material.CompactMenu">
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -224,8 +243,7 @@ a similar way.
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog} that has a nice minimum width for a
     regular dialog. -->
     <style name="Theme.DeviceDefault.Dialog.MinWidth" parent="Theme.Material.Dialog.MinWidth">
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
+        <item name="android:windowFullscreen">true</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -243,8 +261,8 @@ a similar way.
 
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog} without an action bar -->
     <style name="Theme.DeviceDefault.Dialog.NoActionBar" parent="Theme.Material.Dialog.NoActionBar">
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowActionBar">false</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -263,8 +281,8 @@ a similar way.
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog_NoActionBar} that has a nice minimum width
     for a regular dialog. -->
     <style name="Theme.DeviceDefault.Dialog.NoActionBar.MinWidth" parent="Theme.Material.Dialog.NoActionBar.MinWidth">
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowActionBar">false</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -302,6 +320,8 @@ a similar way.
     full-screen on smaller screens (small, normal) or as a dialog on larger screens (large,
     xlarge). -->
     <style name="Theme.DeviceDefault.DialogWhenLarge.NoActionBar" parent="Theme.Material.DialogWhenLarge.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowActionBar">false</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -319,6 +339,7 @@ a similar way.
 
     <!-- DeviceDefault theme for a presentation window on a secondary display. -->
     <style name="Theme.DeviceDefault.Dialog.Presentation" parent="Theme.Material.Dialog.Presentation">
+        <item name="android:windowFullscreen">true</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -338,6 +359,8 @@ a similar way.
     decorations, so you basically have an empty rectangle in which to place your content. It makes
     the window floating, with a transparent background, and turns off dimming behind the window. -->
     <style name="Theme.DeviceDefault.Panel" parent="Theme.Material.Panel">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowActionBar">false</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -407,26 +430,10 @@ a similar way.
         <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_device_default</item>
     </style>
 
-    <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Material.Dialog.Alert">
-        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault</item>
-
-        <!-- Color palette Dialog -->
-        <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorForeground">@color/foreground_device_default_dark</item>
-        <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorBackground">@color/background_device_default_dark</item>
-        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
-        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
-        <item name="colorButtonNormal">@color/button_normal_device_default_dark</item>
-        <item name="colorError">@color/error_color_device_default_dark</item>
-        <item name="disabledAlpha">@dimen/disabled_alpha_device_default</item>
-        <item name="primaryContentAlpha">@dimen/primary_content_alpha_device_default</item>
-        <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_device_default</item>
-    </style>
-
     <!-- Theme for the dialog shown when an app crashes or ANRs. Override to make it dark. -->
     <style name="Theme.DeviceDefault.Dialog.AppError" parent="Theme.DeviceDefault.Dialog.Alert">
+        <item name="alertDialogStyle">@style/BaseErrorDialog.DeviceDefault</item>
+        <item name="dialogPreferredPadding">@dimen/base_error_dialog_padding</item>
         <item name="windowContentTransitions">false</item>
         <item name="windowActivityTransitions">false</item>
         <item name="windowCloseOnTouchOutside">false</item>
@@ -449,8 +456,6 @@ a similar way.
     </style>
 
     <style name="Theme.DeviceDefault.Dialog.NoFrame" parent="Theme.Material.Dialog.NoFrame">
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
         <!-- Color palette Dialog -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>

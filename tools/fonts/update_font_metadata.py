@@ -19,7 +19,7 @@ def main():
     args_parser.add_argument('--revision', help='Updated font revision. Use + to update revision based on the current revision')
     args = args_parser.parse_args()
 
-    font = ttLib.TTFont(args.input)
+    font = ttLib.TTFont(args.input, recalcTimestamp=False)
     update_font_revision(font, args.revision)
     font.save(args.output)
 

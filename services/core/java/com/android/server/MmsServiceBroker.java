@@ -45,6 +45,8 @@ import android.telephony.TelephonyManager;
 import android.util.Slog;
 
 import com.android.internal.telephony.IMms;
+import com.android.internal.telephony.TelephonyPermissions;
+import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
 
@@ -337,6 +339,18 @@ public class MmsServiceBroker extends SystemService {
                 throws RemoteException {
             Slog.d(TAG, "sendMessage() by " + callingPkg);
             mContext.enforceCallingPermission(Manifest.permission.SEND_SMS, "Send MMS message");
+
+            // Check if user is associated with the subscription
+            if (!TelephonyPermissions.checkSubscriptionAssociatedWithUser(mContext, subId,
+                    Binder.getCallingUserHandle())
+                    // For inactive sub, fall through to MMS service to have it recorded in metrics.
+                    && isActiveSubId(subId)) {
+                // Try remind user to use another profile to send.
+                TelephonyUtils.showSwitchToManagedProfileDialogIfAppropriate(mContext,
+                        subId, Binder.getCallingUid(), callingPkg);
+                return;
+            }
+
             if (getAppOpsManager().noteOp(AppOpsManager.OP_SEND_SMS, Binder.getCallingUid(),
                     callingPkg, attributionTag, null) != AppOpsManager.MODE_ALLOWED) {
                 Slog.e(TAG, callingPkg + " is not allowed to call sendMessage()");
@@ -536,6 +550,17 @@ public class MmsServiceBroker extends SystemService {
                 Binder.restoreCallingIdentity(token);
             }
             return contentUri;
+        }
+    }
+
+    /** @return true if the subId is active. */
+    private boolean isActiveSubId(int subId) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            SubscriptionManager subManager = mContext.getSystemService(SubscriptionManager.class);
+            return subManager != null && subManager.isActiveSubscriptionId(subId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 

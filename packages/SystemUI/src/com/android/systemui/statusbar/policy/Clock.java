@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.annotation.NonNull;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.icu.lang.UCharacter;
 import android.icu.text.DateTimePatternGenerator;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,20 +38,22 @@ import android.text.format.DateFormat;
 import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -79,7 +83,7 @@ public class Clock extends TextView implements
     private static final String SHOW_SECONDS = "show_seconds";
     private static final String VISIBILITY = "visibility";
 
-    private final CurrentUserTracker mCurrentUserTracker;
+    private final UserTracker mUserTracker;
     private final CommandQueue mCommandQueue;
     private int mCurrentUserId;
 
@@ -114,6 +118,15 @@ public class Clock extends TextView implements
 
     private final BroadcastDispatcher mBroadcastDispatcher;
 
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    mCurrentUserId = newUser;
+                    updateClock();
+                }
+            };
+
     public Clock(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
@@ -132,12 +145,9 @@ public class Clock extends TextView implements
             a.recycle();
         }
         mBroadcastDispatcher = Dependency.get(BroadcastDispatcher.class);
-        mCurrentUserTracker = new CurrentUserTracker(mBroadcastDispatcher) {
-            @Override
-            public void onUserSwitched(int newUserId) {
-                mCurrentUserId = newUserId;
-            }
-        };
+        mUserTracker = Dependency.get(UserTracker.class);
+
+        setIncludeFontPadding(false);
     }
 
     @Override
@@ -186,7 +196,6 @@ public class Clock extends TextView implements
             filter.addAction(Intent.ACTION_TIME_CHANGED);
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-            filter.addAction(Intent.ACTION_USER_SWITCHED);
 
             // NOTE: This receiver could run before this method returns, as it's not dispatching
             // on the main thread and BroadcastDispatcher may not need to register with Context.
@@ -196,8 +205,8 @@ public class Clock extends TextView implements
             Dependency.get(TunerService.class).addTunable(this, CLOCK_SECONDS,
                     StatusBarIconController.ICON_HIDE_LIST);
             mCommandQueue.addCallback(this);
-            mCurrentUserTracker.startTracking();
-            mCurrentUserId = mCurrentUserTracker.getCurrentUserId();
+            mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());
+            mCurrentUserId = mUserTracker.getUserId();
         }
 
         // The time zone may have changed while the receiver wasn't registered, so update the Time
@@ -227,7 +236,7 @@ public class Clock extends TextView implements
             mAttached = false;
             Dependency.get(TunerService.class).removeTunable(this);
             mCommandQueue.removeCallback(this);
-            mCurrentUserTracker.stopTracking();
+            mUserTracker.removeCallback(mUserChangedCallback);
         }
     }
 
@@ -370,6 +379,13 @@ public class Clock extends TextView implements
 
     @Override
     public void onDensityOrFontScaleChanged() {
+        reloadDimens();
+    }
+
+    private void reloadDimens() {
+        // reset mCachedWidth so the new width would be updated properly when next onMeasure
+        mCachedWidth = -1;
+
         FontSizeUtils.updateFontSize(this, R.dimen.status_bar_clock_size);
         setPaddingRelative(
                 mContext.getResources().getDimensionPixelSize(
@@ -378,6 +394,15 @@ public class Clock extends TextView implements
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.status_bar_clock_end_padding),
                 0);
+
+        float fontHeight = getPaint().getFontMetricsInt(null);
+        setLineHeight(TypedValue.COMPLEX_UNIT_PX, fontHeight);
+
+        ViewGroup.LayoutParams lp = getLayoutParams();
+        if (lp != null) {
+            lp.height = (int) Math.ceil(fontHeight);
+            setLayoutParams(lp);
+        }
     }
 
     private void updateShowSeconds() {
@@ -448,7 +473,7 @@ public class Clock extends TextView implements
                 if (a >= 0) {
                     // Move a back so any whitespace before AM/PM is also in the alternate size.
                     final int b = a;
-                    while (a > 0 && Character.isWhitespace(format.charAt(a-1))) {
+                    while (a > 0 && UCharacter.isUWhiteSpace(format.charAt(a - 1))) {
                         a--;
                     }
                     format = format.substring(0, a) + MAGIC1 + format.substring(a, b)

@@ -28,7 +28,6 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.IOException;
 import java.util.List;
@@ -112,13 +111,13 @@ public class OverlayActorEnforcer {
         }
 
         final String targetPackageName = overlayInfo.targetPackageName;
-        final AndroidPackage targetPkgInfo = mPackageManager.getPackageForUser(targetPackageName,
-                userId);
-        if (targetPkgInfo == null) {
+        var targetPkgState = mPackageManager.getPackageStateForUser(targetPackageName, userId);
+        var targetPkg = targetPkgState == null ? null : targetPkgState.getAndroidPackage();
+        if (targetPkg == null) {
             return ActorState.TARGET_NOT_FOUND;
         }
 
-        if (targetPkgInfo.isDebuggable()) {
+        if (targetPkg.isDebuggable()) {
             return ActorState.ALLOWED;
         }
 
@@ -189,13 +188,13 @@ public class OverlayActorEnforcer {
         }
 
         String actorPackageName = actorUriPair.first;
-        AndroidPackage actorPackage = mPackageManager.getPackageForUser(actorPackageName, userId);
-        if (actorPackage == null) {
+        var actorPackageState = mPackageManager.getPackageStateForUser(actorPackageName, userId);
+        if (actorPackageState == null || actorPackageState.getAndroidPackage() == null) {
             return ActorState.ACTOR_NOT_FOUND;
         }
 
         // Currently only pre-installed apps can be actors
-        if (!actorPackage.isSystem()) {
+        if (!actorPackageState.isSystem()) {
             return ActorState.ACTOR_NOT_PREINSTALLED;
         }
 

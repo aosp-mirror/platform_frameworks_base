@@ -656,6 +656,21 @@ public class BackupTransport {
     }
 
     /**
+     * Ask the transport for a {@link BackupManagerMonitor} instance which will be used by the
+     * framework to report logging events back to the transport.
+     *
+     * <p>Backups requested from outside the framework may pass in a monitor with the request,
+     * however backups initiated by the framework will call this method to retrieve one.
+     *
+     * @return {@link BackupManagerMonitor} or {@code null} if the transport implementation does not
+     *         wish to receive the logging events.
+     */
+    @Nullable
+    public BackupManagerMonitor getBackupManagerMonitor() {
+        return null;
+    }
+
+    /**
      * Bridge between the actual IBackupTransport implementation and the stable API.  If the
      * binder interface needs to change, we use this layer to translate so that we can
      * (if appropriate) decouple those framework-side changes from the BackupTransport
@@ -950,6 +965,16 @@ public class BackupTransport {
                 callback.onOperationCompleteWithStatus(result);
             } catch (RuntimeException e) {
                 callback.onOperationCompleteWithStatus(BackupTransport.TRANSPORT_ERROR);
+            }
+        }
+
+        @Override
+        public void getBackupManagerMonitor(AndroidFuture<IBackupManagerMonitor> resultFuture) {
+            try {
+                BackupManagerMonitor result = BackupTransport.this.getBackupManagerMonitor();
+                resultFuture.complete(new BackupManagerMonitorWrapper(result));
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
             }
         }
     }

@@ -33,10 +33,10 @@ import java.util.function.Supplier;
 /**
  * Fingerprint-specific generateChallenge client for the {@link IFingerprint} AIDL HAL interface.
  */
-class FingerprintGenerateChallengeClient extends GenerateChallengeClient<AidlSession> {
+public class FingerprintGenerateChallengeClient extends GenerateChallengeClient<AidlSession> {
     private static final String TAG = "FingerprintGenerateChallengeClient";
 
-    FingerprintGenerateChallengeClient(@NonNull Context context,
+    public FingerprintGenerateChallengeClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener,

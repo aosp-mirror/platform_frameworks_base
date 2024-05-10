@@ -16,7 +16,10 @@
 
 package android.text;
 
-import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+
+import android.graphics.fonts.Font;
+import android.graphics.fonts.FontFileUtil;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -31,11 +34,16 @@ public class TextShaperTest {
     @Test
     public void testFontWithPath() {
         TextPaint p = new TextPaint();
-        p.setFontFeatureSettings("'wght' 900");
+        p.setFontVariationSettings("'wght' 900");
         TextShaper.shapeText("a", 0, 1, TextDirectionHeuristics.LTR, p,
                 (start, end, glyphs, paint) -> {
                 // This test only passes if the font of the Latin font is variable font.
-                assertThat(glyphs.getFont(0).getFile()).isNotNull();
+                Font font = glyphs.getFont(0);
+                String psName = FontFileUtil.getPostScriptName(font.getBuffer(), 0);
+                String message = "psName = " + psName + ", file = " + font.getFile();
+                assertWithMessage(message).that(glyphs.getFont(0).getFile())
+                        .isNotNull();
+
             });
     }
 }

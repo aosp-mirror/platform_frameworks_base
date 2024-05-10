@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.view.inputmethod.EditorInfo;
@@ -49,6 +50,18 @@ public abstract class AccessibilityManagerInternal {
             IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             EditorInfo editorInfo, boolean restarting);
 
+    /** Trigger a system action with the provided {@code actionId}. */
+    public abstract void performSystemAction(int actionId);
+
+    /**
+     * Queries whether touch-exploration mode is enabled or not for the specified user.
+     *
+     * @param userId User ID to be queried about.
+     * @return {@code true} if touch-exploration mode is enabled.
+     * @see android.view.accessibility.AccessibilityManager#isTouchExplorationEnabled()
+     */
+    public abstract boolean isTouchExplorationEnabled(@UserIdInt int userId);
+
     private static final AccessibilityManagerInternal NOP = new AccessibilityManagerInternal() {
         @Override
         public void setImeSessionEnabled(SparseArray<IAccessibilityInputMethodSession> sessions,
@@ -70,6 +83,15 @@ public abstract class AccessibilityManagerInternal {
         @Override
         public void startInput(IRemoteAccessibilityInputConnection remoteAccessibility,
                 EditorInfo editorInfo, boolean restarting) {
+        }
+
+        @Override
+        public boolean isTouchExplorationEnabled(int userId) {
+            return false;
+        }
+
+        @Override
+        public void performSystemAction(int actionId) {
         }
     };
 

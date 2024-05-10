@@ -29,7 +29,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Activity that alerts the user when contaminant is detected on USB port.
@@ -75,7 +75,12 @@ public class UsbContaminantActivity extends Activity implements View.OnClickList
             mLearnMore.setVisibility(View.VISIBLE);
         }
 
-        mEnableUsb.setOnClickListener(this);
+        if (!mUsbPort.supportsEnableContaminantPresenceDetection()) {
+            mEnableUsb.setVisibility(View.GONE);
+        } else {
+            mEnableUsb.setOnClickListener(this);
+        }
+
         mGotIt.setOnClickListener(this);
         mLearnMore.setOnClickListener(this);
     }

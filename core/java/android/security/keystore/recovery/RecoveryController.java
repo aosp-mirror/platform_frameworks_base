@@ -26,7 +26,6 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
-import android.security.KeyStore;
 import android.security.KeyStore2;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore2.AndroidKeyStoreProvider;
@@ -264,12 +263,17 @@ public class RecoveryController {
      */
     public static final int ERROR_DOWNGRADE_CERTIFICATE = 29;
 
-    private final ILockSettings mBinder;
-    private final KeyStore mKeyStore;
+    /**
+     * Requested key is not available in AndroidKeyStore.
+     *
+     * @hide
+     */
+    public static final int ERROR_KEY_NOT_FOUND = 30;
 
-    private RecoveryController(ILockSettings binder, KeyStore keystore) {
+    private final ILockSettings mBinder;
+
+    private RecoveryController(ILockSettings binder) {
         mBinder = binder;
-        mKeyStore = keystore;
     }
 
     /**
@@ -289,7 +293,7 @@ public class RecoveryController {
         // lockSettings may be null.
         ILockSettings lockSettings =
                 ILockSettings.Stub.asInterface(ServiceManager.getService("lock_settings"));
-        return new RecoveryController(lockSettings, KeyStore.getInstance());
+        return new RecoveryController(lockSettings);
     }
 
     /**
@@ -703,6 +707,9 @@ public class RecoveryController {
         } catch (KeyPermanentlyInvalidatedException | UnrecoverableKeyException e) {
             throw new UnrecoverableKeyException(e.getMessage());
         } catch (ServiceSpecificException e) {
+            if (e.errorCode == ERROR_KEY_NOT_FOUND) {
+                throw new UnrecoverableKeyException(e.getMessage());
+            }
             throw wrapUnexpectedServiceSpecificException(e);
         }
     }

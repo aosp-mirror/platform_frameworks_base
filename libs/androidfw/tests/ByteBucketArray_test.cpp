@@ -52,4 +52,57 @@ TEST(ByteBucketArrayTest, TestSparseInsertion) {
   }
 }
 
+TEST(ByteBucketArrayTest, TestForEach) {
+  ByteBucketArray<int> bba;
+  ASSERT_TRUE(bba.set(0, 1));
+  ASSERT_TRUE(bba.set(10, 2));
+  ASSERT_TRUE(bba.set(26, 3));
+  ASSERT_TRUE(bba.set(129, 4));
+  ASSERT_TRUE(bba.set(234, 5));
+
+  int count = 0;
+  bba.forEachItem([&count](auto i, auto val) {
+    ++count;
+    switch (i) {
+      case 0:
+        EXPECT_EQ(1, val);
+        break;
+      case 10:
+        EXPECT_EQ(2, val);
+        break;
+      case 26:
+        EXPECT_EQ(3, val);
+        break;
+      case 129:
+        EXPECT_EQ(4, val);
+        break;
+      case 234:
+        EXPECT_EQ(5, val);
+        break;
+      default:
+        EXPECT_EQ(0, val);
+        break;
+    }
+  });
+  ASSERT_EQ(4 * 16, count);
+}
+
+TEST(ByteBucketArrayTest, TestTrimBuckets) {
+  ByteBucketArray<int> bba;
+  ASSERT_TRUE(bba.set(0, 1));
+  ASSERT_TRUE(bba.set(255, 2));
+  {
+    bba.trimBuckets([](auto val) { return val < 2; });
+    int count = 0;
+    bba.forEachItem([&count](auto, auto) { ++count; });
+    ASSERT_EQ(1 * 16, count);
+  }
+  {
+    bba.trimBuckets([](auto val) { return val < 3; });
+    int count = 0;
+    bba.forEachItem([&count](auto, auto) { ++count; });
+    ASSERT_EQ(0, count);
+  }
+}
+
 }  // namespace android

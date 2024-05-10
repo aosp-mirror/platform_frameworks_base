@@ -24,4 +24,5 @@ oneway interface IImsSmsListener {
     void onSendSmsResult(int token, int messageRef, int status, int reason, int networkErrorCode);
     void onSmsStatusReportReceived(int token, in String format, in byte[] pdu);
     void onSmsReceived(int token, in String format, in byte[] pdu);
+    void onMemoryAvailableResult(int token, int status, int networkErrorCode);
 }

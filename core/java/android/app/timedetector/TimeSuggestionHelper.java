@@ -18,9 +18,9 @@ package android.app.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.time.UnixEpochTime;
 import android.os.Parcel;
 import android.os.ShellCommand;
-import android.os.TimestampedValue;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -51,20 +51,19 @@ import java.util.Objects;
 public final class TimeSuggestionHelper {
 
     @NonNull private final Class<?> mHelpedClass;
-    @NonNull private final TimestampedValue<Long> mUnixEpochTime;
+    @NonNull private final UnixEpochTime mUnixEpochTime;
     @Nullable private ArrayList<String> mDebugInfo;
 
     /** Creates a helper for the specified class, containing the supplied properties. */
     public TimeSuggestionHelper(@NonNull Class<?> helpedClass,
-            @NonNull TimestampedValue<Long> unixEpochTime) {
+            @NonNull UnixEpochTime unixEpochTime) {
         mHelpedClass = Objects.requireNonNull(helpedClass);
         mUnixEpochTime = Objects.requireNonNull(unixEpochTime);
-        Objects.requireNonNull(unixEpochTime.getValue());
     }
 
     /** See {@link TimeSuggestionHelper} for property details. */
     @NonNull
-    public TimestampedValue<Long> getUnixEpochTime() {
+    public UnixEpochTime getUnixEpochTime() {
         return mUnixEpochTime;
     }
 
@@ -146,8 +145,8 @@ public final class TimeSuggestionHelper {
     public static TimeSuggestionHelper handleCreateFromParcel(@NonNull Class<?> helpedClass,
             @NonNull Parcel in) {
         @SuppressWarnings("unchecked")
-        TimestampedValue<Long> unixEpochTime = in.readParcelable(
-                null /* classLoader */, TimestampedValue.class);
+        UnixEpochTime unixEpochTime =
+                in.readParcelable(null /* classLoader */, UnixEpochTime.class);
         TimeSuggestionHelper suggestionHelper =
                 new TimeSuggestionHelper(helpedClass, unixEpochTime);
         suggestionHelper.mDebugInfo = in.readArrayList(null /* classLoader */, String.class);
@@ -164,13 +163,14 @@ public final class TimeSuggestionHelper {
     public static TimeSuggestionHelper handleParseCommandLineArg(
             @NonNull Class<?> helpedClass, @NonNull ShellCommand cmd)
             throws IllegalArgumentException {
-        Long referenceTimeMillis = null;
+        Long elapsedRealtimeMillis = null;
         Long unixEpochTimeMillis = null;
         String opt;
         while ((opt = cmd.getNextArg()) != null) {
             switch (opt) {
-                case "--reference_time": {
-                    referenceTimeMillis = Long.parseLong(cmd.getNextArgRequired());
+                case "--reference_time":
+                case "--elapsed_realtime": {
+                    elapsedRealtimeMillis = Long.parseLong(cmd.getNextArgRequired());
                     break;
                 }
                 case "--unix_epoch_time": {
@@ -183,15 +183,14 @@ public final class TimeSuggestionHelper {
             }
         }
 
-        if (referenceTimeMillis == null) {
+        if (elapsedRealtimeMillis == null) {
             throw new IllegalArgumentException("No referenceTimeMillis specified.");
         }
         if (unixEpochTimeMillis == null) {
             throw new IllegalArgumentException("No unixEpochTimeMillis specified.");
         }
 
-        TimestampedValue<Long> timeSignal =
-                new TimestampedValue<>(referenceTimeMillis, unixEpochTimeMillis);
+        UnixEpochTime timeSignal = new UnixEpochTime(elapsedRealtimeMillis, unixEpochTimeMillis);
         TimeSuggestionHelper suggestionHelper = new TimeSuggestionHelper(helpedClass, timeSignal);
         suggestionHelper.addDebugInfo("Command line injection");
         return suggestionHelper;
@@ -201,7 +200,8 @@ public final class TimeSuggestionHelper {
     public static void handlePrintCommandLineOpts(
             @NonNull PrintWriter pw, @NonNull String typeName, @NonNull Class<?> clazz) {
         pw.printf("%s suggestion options:\n", typeName);
-        pw.println("  --reference_time <elapsed realtime millis>");
+        pw.println("  --elapsed_realtime <elapsed realtime millis> - the elapsed realtime millis"
+                + " when unix epoch time was read");
         pw.println("  --unix_epoch_time <Unix epoch time millis>");
         pw.println();
         pw.println("See " + clazz.getName() + " for more information");

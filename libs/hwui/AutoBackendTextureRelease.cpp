@@ -16,6 +16,11 @@
 
 #include "AutoBackendTextureRelease.h"
 
+#include <SkImage.h>
+#include <include/gpu/ganesh/SkImageGanesh.h>
+#include <include/gpu/GrDirectContext.h>
+#include <include/gpu/GrBackendSurface.h>
+#include <include/gpu/MutableTextureState.h>
 #include "renderthread/RenderThread.h"
 #include "utils/Color.h"
 #include "utils/PaintUtils.h"
@@ -30,15 +35,47 @@ AutoBackendTextureRelease::AutoBackendTextureRelease(GrDirectContext* context,
     AHardwareBuffer_Desc desc;
     AHardwareBuffer_describe(buffer, &desc);
     bool createProtectedImage = 0 != (desc.usage & AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT);
-    GrBackendFormat backendFormat =
-            GrAHardwareBufferUtils::GetBackendFormat(context, buffer, desc.format, false);
+
+    GrBackendFormat backendFormat;
+    GrBackendApi backend = context->backend();
+    if (backend == GrBackendApi::kOpenGL) {
+        backendFormat =
+                GrAHardwareBufferUtils::GetGLBackendFormat(context, desc.format, false);
+        mBackendTexture =
+                GrAHardwareBufferUtils::MakeGLBackendTexture(context,
+                                                             buffer,
+                                                             desc.width,
+                                                             desc.height,
+                                                             &mDeleteProc,
+                                                             &mUpdateProc,
+                                                             &mImageCtx,
+                                                             createProtectedImage,
+                                                             backendFormat,
+                                                             false);
+    } else if (backend == GrBackendApi::kVulkan) {
+        backendFormat =
+                GrAHardwareBufferUtils::GetVulkanBackendFormat(context,
+                                                               buffer,
+                                                               desc.format,
+                                                               false);
+        mBackendTexture =
+                GrAHardwareBufferUtils::MakeVulkanBackendTexture(context,
+                                                                 buffer,
+                                                                 desc.width,
+                                                                 desc.height,
+                                                                 &mDeleteProc,
+                                                                 &mUpdateProc,
+                                                                 &mImageCtx,
+                                                                 createProtectedImage,
+                                                                 backendFormat,
+                                                                 false);
+    } else {
+        LOG_ALWAYS_FATAL("Unexpected backend %d", backend);
+    }
     LOG_ALWAYS_FATAL_IF(!backendFormat.isValid(),
                         __FILE__ " Invalid GrBackendFormat. GrBackendApi==%" PRIu32
                                  ", AHardwareBuffer_Format==%" PRIu32 ".",
                         static_cast<int>(context->backend()), desc.format);
-    mBackendTexture = GrAHardwareBufferUtils::MakeBackendTexture(
-            context, buffer, desc.width, desc.height, &mDeleteProc, &mUpdateProc, &mImageCtx,
-            createProtectedImage, backendFormat, false);
     LOG_ALWAYS_FATAL_IF(!mBackendTexture.isValid(),
                         __FILE__ " Invalid GrBackendTexture. Width==%" PRIu32 ", height==%" PRIu32
                                  ", protected==%d",
@@ -70,7 +107,7 @@ void AutoBackendTextureRelease::unref(bool releaseImage) {
 
 // releaseProc is invoked by SkImage, when texture is no longer in use.
 // "releaseContext" contains an "AutoBackendTextureRelease*".
-static void releaseProc(SkImage::ReleaseContext releaseContext) {
+static void releaseProc(SkImages::ReleaseContext releaseContext) {
     AutoBackendTextureRelease* textureRelease =
             reinterpret_cast<AutoBackendTextureRelease*>(releaseContext);
     textureRelease->unref(false);
@@ -83,10 +120,10 @@ void AutoBackendTextureRelease::makeImage(AHardwareBuffer* buffer,
     AHardwareBuffer_describe(buffer, &desc);
     SkColorType colorType = GrAHardwareBufferUtils::GetSkColorTypeFromBufferFormat(desc.format);
     // The following ref will be counteracted by Skia calling releaseProc, either during
-    // MakeFromTexture if there is a failure, or later when SkImage is discarded. It must
-    // be called before MakeFromTexture, otherwise Skia may remove HWUI's ref on failure.
+    // BorrowTextureFrom if there is a failure, or later when SkImage is discarded. It must
+    // be called before BorrowTextureFrom, otherwise Skia may remove HWUI's ref on failure.
     ref();
-    mImage = SkImage::MakeFromTexture(
+    mImage = SkImages::BorrowTextureFrom(
             context, mBackendTexture, kTopLeft_GrSurfaceOrigin, colorType, kPremul_SkAlphaType,
             uirenderer::DataSpaceToColorSpace(dataspace), releaseProc, this);
 }
@@ -105,8 +142,8 @@ void AutoBackendTextureRelease::releaseQueueOwnership(GrDirectContext* context) 
     LOG_ALWAYS_FATAL_IF(Properties::getRenderPipelineType() != RenderPipelineType::SkiaVulkan);
     if (mBackendTexture.isValid()) {
         // Passing in VK_IMAGE_LAYOUT_UNDEFINED means we keep the old layout.
-        GrBackendSurfaceMutableState newState(VK_IMAGE_LAYOUT_UNDEFINED,
-                                              VK_QUEUE_FAMILY_FOREIGN_EXT);
+        skgpu::MutableTextureState newState(VK_IMAGE_LAYOUT_UNDEFINED,
+                                            VK_QUEUE_FAMILY_FOREIGN_EXT);
 
         // The unref for this ref happens in the releaseProc passed into setBackendTextureState. The
         // releaseProc callback will be made when the work to set the new state has finished on the

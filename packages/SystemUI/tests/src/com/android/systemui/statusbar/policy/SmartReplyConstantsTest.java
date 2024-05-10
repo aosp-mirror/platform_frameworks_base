@@ -29,7 +29,7 @@ import android.testing.TestableLooper;
 import android.testing.TestableResources;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.DeviceConfigProxyFake;
 

@@ -117,7 +117,7 @@ class MtpNotificationManager {
         @Override
         public void onReceive(Context context, Intent intent) {
             final UsbDevice device =
-                    intent.getExtras().<UsbDevice>getParcelable(UsbManager.EXTRA_DEVICE);
+                    intent.getExtras().<UsbDevice>getParcelable(UsbManager.EXTRA_DEVICE, android.hardware.usb.UsbDevice.class);
             if (device == null) {
                 return;
             }

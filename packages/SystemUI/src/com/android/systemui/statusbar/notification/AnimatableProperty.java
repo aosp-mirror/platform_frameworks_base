@@ -20,7 +20,7 @@ import android.util.FloatProperty;
 import android.util.Property;
 import android.view.View;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -47,6 +47,10 @@ public abstract class AnimatableProperty {
     public static final AnimatableProperty SCALE_Y = AnimatableProperty.from(
             View.SCALE_Y, R.id.scale_y_animator_tag, R.id.scale_y_animator_start_value_tag,
             R.id.scale_y_animator_end_value_tag);
+
+    public static final AnimatableProperty ALPHA = AnimatableProperty.from(
+            View.ALPHA, R.id.alpha_animator_tag, R.id.alpha_animator_start_value_tag,
+            R.id.alpha_animator_end_value_tag);
 
     /**
      * Similar to X, however this doesn't allow for any other modifications other than from this

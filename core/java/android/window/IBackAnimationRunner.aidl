@@ -17,7 +17,7 @@
 package android.window;
 
 import android.view.RemoteAnimationTarget;
-import android.window.IBackNaviAnimationController;
+import android.window.IBackAnimationFinishedCallback;
 
 /**
  * Interface that is used to callback from window manager to the process that runs a back gesture
@@ -37,9 +37,15 @@ oneway interface IBackAnimationRunner {
 
     /**
      * Called when the system is ready for the handler to start animating all the visible tasks.
-     *
+     * @param apps The list of departing (type=MODE_CLOSING) and entering (type=MODE_OPENING)
+                   windows to animate,
+     * @param wallpapers The list of wallpapers to animate.
+     * @param nonApps The list of non-app windows such as Bubbles to animate.
+     * @param finishedCallback The callback to invoke when the animation is finished.
      */
-    void onAnimationStart(in IBackNaviAnimationController controller, in int type,
-            in RemoteAnimationTarget[] apps, in RemoteAnimationTarget[] wallpapers,
-            in RemoteAnimationTarget[] nonApps) = 2;
+    void onAnimationStart(
+            in RemoteAnimationTarget[] apps,
+            in RemoteAnimationTarget[] wallpapers,
+            in RemoteAnimationTarget[] nonApps,
+            in IBackAnimationFinishedCallback finishedCallback) = 2;
 }

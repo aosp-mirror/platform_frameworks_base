@@ -639,19 +639,22 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz, jint target, jint level,
         jint internalformat, jobject bitmapObj, jint type, jint border)
 {
     graphics::Bitmap bitmap(env, bitmapObj);
-    AndroidBitmapInfo bitmapInfo = bitmap.getInfo();
+    if (bitmap.isValid() && bitmap.getPixels() != nullptr) {
+        AndroidBitmapInfo bitmapInfo = bitmap.getInfo();
 
-    if (internalformat < 0) {
-        internalformat = getInternalFormat(bitmapInfo.format);
-    }
-    if (type < 0) {
-        type = getType(bitmapInfo.format);
-    }
+        if (internalformat < 0) {
+            internalformat = getInternalFormat(bitmapInfo.format);
+        }
+        if (type < 0) {
+            type = getType(bitmapInfo.format);
+        }
 
-    if (checkInternalFormat(bitmapInfo.format, internalformat, type)) {
-        glTexImage2D(target, level, internalformat, bitmapInfo.width, bitmapInfo.height, border,
-                     getPixelFormatFromInternalFormat(internalformat), type, bitmap.getPixels());
-        return 0;
+        if (checkInternalFormat(bitmapInfo.format, internalformat, type)) {
+            glTexImage2D(target, level, internalformat, bitmapInfo.width, bitmapInfo.height, border,
+                         getPixelFormatFromInternalFormat(internalformat), type,
+                         bitmap.getPixels());
+            return 0;
+        }
     }
     return -1;
 }
@@ -660,19 +663,21 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz, jint target, jint leve
         jint xoffset, jint yoffset, jobject bitmapObj, jint format, jint type)
 {
     graphics::Bitmap bitmap(env, bitmapObj);
-    AndroidBitmapInfo bitmapInfo = bitmap.getInfo();
+    if (bitmap.isValid() && bitmap.getPixels() != nullptr) {
+        AndroidBitmapInfo bitmapInfo = bitmap.getInfo();
 
-    int internalFormat = getInternalFormat(bitmapInfo.format);
-    if (format < 0) {
-        format = getPixelFormatFromInternalFormat(internalFormat);
-        if (format == GL_PALETTE8_RGBA8_OES)
-            return -1; // glCompressedTexSubImage2D() not supported
-    }
+        int internalFormat = getInternalFormat(bitmapInfo.format);
+        if (format < 0) {
+            format = getPixelFormatFromInternalFormat(internalFormat);
+            if (format == GL_PALETTE8_RGBA8_OES)
+                return -1; // glCompressedTexSubImage2D() not supported
+        }
 
-    if (checkInternalFormat(bitmapInfo.format, internalFormat, type)) {
-        glTexSubImage2D(target, level, xoffset, yoffset, bitmapInfo.width, bitmapInfo.height,
-                        format, type, bitmap.getPixels());
-        return 0;
+        if (checkInternalFormat(bitmapInfo.format, internalFormat, type)) {
+            glTexSubImage2D(target, level, xoffset, yoffset, bitmapInfo.width, bitmapInfo.height,
+                            format, type, bitmap.getPixels());
+            return 0;
+        }
     }
     return -1;
 }

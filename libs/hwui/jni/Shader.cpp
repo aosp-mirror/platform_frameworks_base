@@ -1,22 +1,31 @@
-#undef LOG_TAG
-#define LOG_TAG "ShaderJNI"
+#include <vector>
 
+#include "Gainmap.h"
 #include "GraphicsJNI.h"
+#include "SkBitmap.h"
+#include "SkBlendMode.h"
+#include "SkColor.h"
 #include "SkColorFilter.h"
 #include "SkGradientShader.h"
+#include "SkImage.h"
 #include "SkImagePriv.h"
+#include "SkMatrix.h"
+#include "SkPoint.h"
+#include "SkRefCnt.h"
+#include "SkSamplingOptions.h"
+#include "SkScalar.h"
 #include "SkShader.h"
-#include "SkBlendMode.h"
+#include "SkString.h"
+#include "SkTileMode.h"
+#include "effects/GainmapRenderer.h"
 #include "include/effects/SkRuntimeEffect.h"
-
-#include <vector>
 
 using namespace android::uirenderer;
 
 /**
  * By default Skia gradients will interpolate their colors in unpremul space
  * and then premultiply each of the results. We must set this flag to preserve
- * backwards compatiblity by premultiplying the colors of the gradient first,
+ * backwards compatibility by premultiplying the colors of the gradient first,
  * and then interpolating between them.
  */
 static const uint32_t sGradientShaderFlags = SkGradientShader::kInterpolateColorsInPremul_Flag;
@@ -42,12 +51,7 @@ static void Color_RGBToHSV(JNIEnv* env, jobject, jint red, jint green, jint blue
 static jint Color_HSVToColor(JNIEnv* env, jobject, jint alpha, jfloatArray hsvArray)
 {
     AutoJavaFloatArray  autoHSV(env, hsvArray, 3);
-#ifdef SK_SCALAR_IS_FLOAT
-    SkScalar*   hsv = autoHSV.ptr();
-#else
-    #error Need to convert float array to SkScalar array before calling the following function.
-#endif
-
+    SkScalar* hsv = autoHSV.ptr();
     return static_cast<jint>(SkHSVToColor(alpha, hsv));
 }
 
@@ -63,23 +67,53 @@ static jlong Shader_getNativeFinalizer(JNIEnv*, jobject) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
+static SkGainmapInfo sNoOpGainmap = {
+        .fGainmapRatioMin = {1.f, 1.f, 1.f, 1.0},
+        .fGainmapRatioMax = {1.f, 1.f, 1.f, 1.0},
+        .fGainmapGamma = {1.f, 1.f, 1.f, 1.f},
+        .fEpsilonSdr = {0.f, 0.f, 0.f, 1.0},
+        .fEpsilonHdr = {0.f, 0.f, 0.f, 1.0},
+        .fDisplayRatioSdr = 1.f,
+        .fDisplayRatioHdr = 1.f,
+};
+
 static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, jlong bitmapHandle,
-                                      jint tileModeX, jint tileModeY, bool filter,
-                                      bool isDirectSampled) {
+                                      jint tileModeX, jint tileModeY, jint maxAniso, bool filter,
+                                      bool isDirectSampled, jlong overrideGainmapPtr) {
+    SkSamplingOptions sampling = maxAniso > 0 ? SkSamplingOptions::Aniso(static_cast<int>(maxAniso))
+                                              : SkSamplingOptions(filter ? SkFilterMode::kLinear
+                                                                         : SkFilterMode::kNearest,
+                                                                  SkMipmapMode::kNone);
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
+    const Gainmap* gainmap = reinterpret_cast<Gainmap*>(overrideGainmapPtr);
     sk_sp<SkImage> image;
     if (bitmapHandle) {
         // Only pass a valid SkBitmap object to the constructor if the Bitmap exists. Otherwise,
         // we'll pass an empty SkBitmap to avoid crashing/excepting for compatibility.
-        image = android::bitmap::toBitmap(bitmapHandle).makeImage();
+        auto& bitmap = android::bitmap::toBitmap(bitmapHandle);
+        image = bitmap.makeImage();
+        if (!gainmap && bitmap.hasGainmap()) {
+            gainmap = bitmap.gainmap().get();
+        }
+
+        if (!isDirectSampled && gainmap && gainmap->info != sNoOpGainmap) {
+            sk_sp<SkShader> gainmapShader =
+                    MakeGainmapShader(image, gainmap->bitmap->makeImage(), gainmap->info,
+                                      (SkTileMode)tileModeX, (SkTileMode)tileModeY, sampling);
+            if (gainmapShader) {
+                if (matrix) {
+                    gainmapShader = gainmapShader->makeWithLocalMatrix(*matrix);
+                }
+                return reinterpret_cast<jlong>(gainmapShader.release());
+            }
+        }
     }
 
     if (!image.get()) {
         SkBitmap bitmap;
         image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
     }
-    SkSamplingOptions sampling(filter ? SkFilterMode::kLinear : SkFilterMode::kNearest,
-                               SkMipmapMode::kNone);
+
     sk_sp<SkShader> shader;
     if (isDirectSampled) {
         shader = image->makeRawShader((SkTileMode)tileModeX, (SkTileMode)tileModeY, sampling);
@@ -122,11 +156,7 @@ static jlong LinearGradient_create(JNIEnv* env, jobject, jlong matrixPtr,
     std::vector<SkColor4f> colors = convertColorLongs(env, colorArray);
 
     AutoJavaFloatArray autoPos(env, posArray, colors.size());
-#ifdef SK_SCALAR_IS_FLOAT
     SkScalar* pos = autoPos.ptr();
-#else
-    #error Need to convert float array to SkScalar array before calling the following function.
-#endif
 
     sk_sp<SkShader> shader(SkGradientShader::MakeLinear(pts, &colors[0],
                 GraphicsJNI::getNativeColorSpace(colorSpaceHandle), pos, colors.size(),
@@ -166,11 +196,7 @@ static jlong RadialGradient_create(JNIEnv* env,
     std::vector<SkColor4f> colors = convertColorLongs(env, colorArray);
 
     AutoJavaFloatArray autoPos(env, posArray, colors.size());
-#ifdef SK_SCALAR_IS_FLOAT
     SkScalar* pos = autoPos.ptr();
-#else
-    #error Need to convert float array to SkScalar array before calling the following function.
-#endif
 
     auto colorSpace = GraphicsJNI::getNativeColorSpace(colorSpaceHandle);
     auto skTileMode = static_cast<SkTileMode>(tileMode);
@@ -198,11 +224,7 @@ static jlong SweepGradient_create(JNIEnv* env, jobject, jlong matrixPtr, jfloat 
     std::vector<SkColor4f> colors = convertColorLongs(env, colorArray);
 
     AutoJavaFloatArray autoPos(env, jpositions, colors.size());
-#ifdef SK_SCALAR_IS_FLOAT
     SkScalar* pos = autoPos.ptr();
-#else
-    #error Need to convert float array to SkScalar array before calling the following function.
-#endif
 
     sk_sp<SkShader> shader = SkGradientShader::MakeSweep(x, y, &colors[0],
             GraphicsJNI::getNativeColorSpace(colorSpaceHandle), pos, colors.size(),
@@ -397,7 +419,8 @@ static const JNINativeMethod gShaderMethods[] = {
 };
 
 static const JNINativeMethod gBitmapShaderMethods[] = {
-        {"nativeCreate", "(JJIIZZ)J", (void*)BitmapShader_constructor},
+        {"nativeCreate", "(JJIIIZZJ)J", (void*)BitmapShader_constructor},
+
 };
 
 static const JNINativeMethod gLinearGradientMethods[] = {

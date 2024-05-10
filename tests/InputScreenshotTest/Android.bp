@@ -1,0 +1,76 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+filegroup {
+    name: "InputScreenshotTestRNGFiles",
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
+    exclude_srcs: [
+        "src/android/input/screenshot/KeyboardLayoutPreviewAnsiScreenshotTest.kt",
+        "src/android/input/screenshot/KeyboardLayoutPreviewJisScreenshotTest.kt",
+    ],
+}
+
+android_test {
+    name: "InputScreenshotTests",
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
+    exclude_srcs: [
+        "src/android/input/screenshot/package-info.java",
+    ],
+    platform_apis: true,
+    certificate: "platform",
+    static_libs: [
+        "androidx.arch.core_core-testing",
+        "androidx.compose.ui_ui-test-junit4",
+        "androidx.compose.ui_ui-test-manifest",
+        "androidx.lifecycle_lifecycle-runtime-testing",
+        "androidx.compose.animation_animation",
+        "androidx.compose.material3_material3",
+        "androidx.compose.material_material-icons-extended",
+        "androidx.compose.runtime_runtime",
+        "androidx.compose.runtime_runtime-livedata",
+        "androidx.compose.ui_ui-tooling-preview",
+        "androidx.lifecycle_lifecycle-livedata-ktx",
+        "androidx.lifecycle_lifecycle-runtime-compose",
+        "androidx.navigation_navigation-compose",
+        "truth",
+        "androidx.compose.runtime_runtime",
+        "androidx.test.core",
+        "androidx.test.ext.junit",
+        "androidx.test.ext.truth",
+        "androidx.test.rules",
+        "androidx.test.runner",
+        "androidx.test.uiautomator_uiautomator",
+        "servicestests-utils",
+        "frameworks-base-testutils",
+        "platform-screenshot-diff-core",
+        "hamcrest-library",
+        "kotlin-test",
+        "flag-junit",
+        "platform-parametric-runner-lib",
+        "platform-test-annotations",
+        "services.core.unboosted",
+        "testables",
+        "testng",
+        "truth",
+    ],
+    libs: [
+        "android.test.mock",
+        "android.test.base",
+    ],
+    test_suites: ["device-tests"],
+    compile_multilib: "both",
+    use_embedded_native_libs: false,
+    asset_dirs: ["assets"],
+}

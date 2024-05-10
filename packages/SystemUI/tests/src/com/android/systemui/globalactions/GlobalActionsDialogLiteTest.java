@@ -16,13 +16,15 @@
 
 package com.android.systemui.globalactions;
 
+import static android.content.pm.UserInfo.FLAG_ADMIN;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,11 +34,13 @@ import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -63,14 +67,20 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.settings.UserContextProvider;
+import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.telephony.TelephonyListenerManager;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
+import com.android.systemui.util.settings.FakeGlobalSettings;
+import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -83,7 +93,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 @SmallTest
@@ -99,10 +108,11 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private LockPatternUtils mLockPatternUtils;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private TelephonyListenerManager mTelephonyListenerManager;
-    @Mock private GlobalSettings mGlobalSettings;
-    @Mock private SecureSettings mSecureSettings;
+    private GlobalSettings mGlobalSettings;
+    private SecureSettings mSecureSettings;
     @Mock private Resources mResources;
     @Mock private ConfigurationController mConfigurationController;
+    @Mock private UserTracker mUserTracker;
     @Mock private KeyguardStateController mKeyguardStateController;
     @Mock private UserManager mUserManager;
     @Mock private TrustManager mTrustManager;
@@ -110,7 +120,9 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private SysuiColorExtractor mColorExtractor;
     @Mock private IStatusBarService mStatusBarService;
+    @Mock private LightBarController mLightBarController;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
+    @Mock private StatusBarWindowController mStatusBarWindowController;
     @Mock private IWindowManager mWindowManager;
     @Mock private Executor mBackgroundExecutor;
     @Mock private UiEventLogger mUiEventLogger;
@@ -120,9 +132,10 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private Handler mHandler;
     @Mock private UserContextProvider mUserContextProvider;
     @Mock private VibratorHelper mVibratorHelper;
-    @Mock private CentralSurfaces mCentralSurfaces;
+    @Mock private ShadeController mShadeController;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private DialogLaunchAnimator mDialogLaunchAnimator;
+    @Mock private SelectedUserInteractor mSelectedUserInteractor;
     @Mock private OnBackInvokedDispatcher mOnBackInvokedDispatcher;
     @Captor private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
 
@@ -139,6 +152,9 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         when(mResources.getConfiguration()).thenReturn(
                 getContext().getResources().getConfiguration());
 
+        mGlobalSettings = new FakeGlobalSettings();
+        mSecureSettings = new FakeSettings();
+
         mGlobalActionsDialogLite = new GlobalActionsDialogLite(mContext,
                 mWindowManagerFuncs,
                 mAudioManager,
@@ -152,6 +168,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mVibratorHelper,
                 mResources,
                 mConfigurationController,
+                mUserTracker,
                 mKeyguardStateController,
                 mUserManager,
                 mTrustManager,
@@ -160,21 +177,25 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mMetricsLogger,
                 mColorExtractor,
                 mStatusBarService,
+                mLightBarController,
                 mNotificationShadeWindowController,
+                mStatusBarWindowController,
                 mWindowManager,
                 mBackgroundExecutor,
                 mUiEventLogger,
                 mRingerModeTracker,
                 mHandler,
                 mPackageManager,
-                Optional.of(mCentralSurfaces),
+                mShadeController,
                 mKeyguardUpdateMonitor,
-                mDialogLaunchAnimator);
+                mDialogLaunchAnimator,
+                mSelectedUserInteractor);
         mGlobalActionsDialogLite.setZeroDialogPressDelayForTesting();
 
         ColorExtractor.GradientColors backdropColors = new ColorExtractor.GradientColors();
         backdropColors.setMainColor(Color.BLACK);
         when(mColorExtractor.getNeutralColors()).thenReturn(backdropColors);
+        when(mSelectedUserInteractor.getSelectedUserId()).thenReturn(0);
     }
 
     @Test
@@ -293,7 +314,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
         doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
-        doReturn(true).when(mCentralSurfaces).isKeyguardShowing();
+        doReturn(true).when(mKeyguardStateController).isShowing();
         String[] actions = {
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
@@ -308,7 +329,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         MotionEvent end = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 500, 0);
         gestureListener.onFling(start, end, 0, 1000);
         verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
-        verify(mCentralSurfaces).animateExpandSettingsPanel(null);
+        verify(mShadeController).animateExpandQs();
     }
 
     @Test
@@ -317,7 +338,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
         doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
-        doReturn(false).when(mCentralSurfaces).isKeyguardShowing();
+        doReturn(false).when(mKeyguardStateController).isShowing();
         String[] actions = {
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
@@ -332,7 +353,35 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         MotionEvent end = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 500, 0);
         gestureListener.onFling(start, end, 0, 1000);
         verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
-        verify(mCentralSurfaces).animateExpandNotificationsPanel();
+        verify(mShadeController).animateExpandShade();
+    }
+
+    @Test
+    public void testSwipeDown_pastStatusBarHeight_shadeNotOpened() {
+        mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
+        doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
+        doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
+        doReturn(false).when(mKeyguardStateController).isShowing();
+        String[] actions = {
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART,
+        };
+        doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
+        GlobalActionsDialogLite.ActionsDialogLite dialog = mGlobalActionsDialogLite.createDialog();
+
+        doReturn(100).when(mStatusBarWindowController).getStatusBarHeight();
+
+        GestureDetector.SimpleOnGestureListener gestureListener = spy(dialog.mGestureListener);
+        // WHEN the start y is larger than the status bar height
+        MotionEvent start = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 200, 0);
+        MotionEvent end = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 500, 0);
+        gestureListener.onFling(start, end, 0, 1000);
+
+        // THEN the shade isn't opened
+        verify(mShadeController, never()).animateExpandShade();
     }
 
     @Test
@@ -523,11 +572,12 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Test
     public void testOnLockScreen_disableSmartLock() {
         mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
-        int user = KeyguardUpdateMonitor.getCurrentUser();
+        int expectedUser = 100;
+        doReturn(expectedUser).when(mSelectedUserInteractor).getSelectedUserId();
         doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
         doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
-        doReturn(false).when(mCentralSurfaces).isKeyguardShowing();
+        doReturn(false).when(mKeyguardStateController).isShowing();
         String[] actions = {
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
@@ -541,7 +591,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         mGlobalActionsDialogLite.showOrHideDialog(true, true, null /* view */);
 
         // Then smart lock will be disabled
-        verify(mLockPatternUtils).requireCredentialEntry(eq(user));
+        verify(mLockPatternUtils).requireCredentialEntry(eq(expectedUser));
 
         // hide dialog again
         mGlobalActionsDialogLite.showOrHideDialog(true, true, null /* view */);
@@ -549,10 +599,32 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
 
     @Test
     public void testBugreportAction_whenDebugMode_shouldOfferBugreportButtonBeforeProvisioning() {
-        doReturn(1).when(mGlobalSettings).getInt(anyString(), anyInt());
+        UserInfo currentUser = mockCurrentUser(FLAG_ADMIN);
+
+        when(mGlobalActionsDialogLite.getCurrentUser()).thenReturn(currentUser);
+        mSecureSettings.putIntForUser(Settings.Secure.BUGREPORT_IN_POWER_MENU, 1,
+                currentUser.id);
 
         GlobalActionsDialogLite.BugReportAction bugReportAction =
                 mGlobalActionsDialogLite.makeBugReportActionForTesting();
         assertThat(bugReportAction.showBeforeProvisioning()).isTrue();
+    }
+
+    @Test
+    public void testBugreportAction_whenUserIsNotAdmin_noBugReportActionBeforeProvisioning() {
+        UserInfo currentUser = mockCurrentUser(0);
+
+        when(mGlobalActionsDialogLite.getCurrentUser()).thenReturn(currentUser);
+        mSecureSettings.putIntForUser(Settings.Secure.BUGREPORT_IN_POWER_MENU, 1,
+                currentUser.id);
+
+        GlobalActionsDialogLite.BugReportAction bugReportAction =
+                mGlobalActionsDialogLite.makeBugReportActionForTesting();
+        assertThat(bugReportAction.showBeforeProvisioning()).isFalse();
+    }
+
+    private UserInfo mockCurrentUser(int flags) {
+        return new UserInfo(10, "A User", flags);
+
     }
 }

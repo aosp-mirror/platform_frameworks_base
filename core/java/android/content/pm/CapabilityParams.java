@@ -172,7 +172,7 @@ public final class CapabilityParams implements Parcelable {
         @NonNull
         private final String mKey;
         @NonNull
-        private String mPrimaryValue;
+        private final String mPrimaryValue;
         @NonNull
         private Set<String> mAliases;
 

@@ -24,8 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.android.frameworks.servicestests.R;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -270,11 +268,13 @@ public class TestAccountType1Authenticator extends AbstractAccountAuthenticator 
         String accountName = null;
         Bundle sessionBundle = null;
         String password = null;
+        int intentFlags = 0;
         if (options != null) {
             accountName = options.getString(AccountManagerServiceTestFixtures.KEY_ACCOUNT_NAME);
             sessionBundle = options.getBundle(
                     AccountManagerServiceTestFixtures.KEY_ACCOUNT_SESSION_BUNDLE);
             password = options.getString(AccountManagerServiceTestFixtures.KEY_ACCOUNT_PASSWORD);
+            intentFlags = options.getInt(AccountManagerServiceTestFixtures.KEY_INTENT_FLAGS, 0);
         }
 
         Bundle result = new Bundle();
@@ -302,6 +302,7 @@ public class TestAccountType1Authenticator extends AbstractAccountAuthenticator 
             intent.putExtra(AccountManagerServiceTestFixtures.KEY_RESULT,
                     eventualActivityResultData);
             intent.putExtra(AccountManagerServiceTestFixtures.KEY_CALLBACK, response);
+            intent.setFlags(intentFlags);
 
             result.putParcelable(AccountManager.KEY_INTENT, intent);
         } else {

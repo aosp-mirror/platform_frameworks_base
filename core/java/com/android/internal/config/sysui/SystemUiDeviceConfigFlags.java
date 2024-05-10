@@ -48,24 +48,9 @@ public final class SystemUiDeviceConfigFlags {
     public static final String NAS_MAX_SUGGESTIONS = "nas_max_suggestions";
 
     /**
-     * Whether the Notification Assistant can change ranking.
-     */
-    public static final String ENABLE_NAS_RANKING = "enable_nas_ranking";
-
-    /**
-     * Whether the Notification Assistant can prioritize notification.
-     */
-    public static final String ENABLE_NAS_PRIORITIZER = "enable_nas_prioritizer";
-
-    /**
      * Whether to enable feedback UI for Notification Assistant
      */
     public static final String ENABLE_NAS_FEEDBACK = "enable_nas_feedback";
-
-    /**
-     * Whether the Notification Assistant can label a notification not a conversation
-     */
-    public static final String ENABLE_NAS_NOT_CONVERSATION = "enable_nas_not_conversation";
 
     // Flags related to screenshot intelligence
 
@@ -141,11 +126,6 @@ public final class SystemUiDeviceConfigFlags {
     public static final String HASH_SALT_MAX_DAYS = "hash_salt_max_days";
 
     // Flag related to Privacy Indicators
-
-    /**
-     * Whether to show the complete ongoing app ops chip.
-     */
-    public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_2_enabled";
 
     /**
      * Whether to show app ops chip for just microphone + camera.
@@ -434,11 +414,6 @@ public final class SystemUiDeviceConfigFlags {
             "dark_launch_remote_prediction_service_enabled";
 
     /**
-     * (boolean) Whether to enable pinch resizing for PIP.
-     */
-    public static final String PIP_PINCH_RESIZE = "pip_pinch_resize";
-
-    /**
      * (boolean) Whether to enable stashing for PIP.
      */
     public static final String PIP_STASHING = "pip_stashing";
@@ -539,11 +514,6 @@ public final class SystemUiDeviceConfigFlags {
     public static final String DEFAULT_QR_CODE_SCANNER = "default_qr_code_scanner";
 
     /**
-     * (boolean) Whether the task manager entrypoint is enabled.
-     */
-    public static final String TASK_MANAGER_ENABLED = "task_manager_enabled";
-
-    /**
      * (boolean) Whether the task manager should show an attention grabbing dot when tasks changed.
      */
     public static final String TASK_MANAGER_SHOW_FOOTER_DOT = "task_manager_show_footer_dot";
@@ -556,27 +526,39 @@ public final class SystemUiDeviceConfigFlags {
             "show_stop_button_for_user_allowlisted_apps";
 
     /**
-     * (boolean) Whether the clipboard overlay is enabled.
+     * (boolean) Whether the task manager should show apps running user-visible jobs.
      */
-    public static final String CLIPBOARD_OVERLAY_ENABLED = "clipboard_overlay_enabled";
+    public static final String TASK_MANAGER_SHOW_USER_VISIBLE_JOBS =
+            "task_manager_show_user_visible_jobs";
 
     /**
-     * (boolean) Whether widget provider info would be saved to / loaded from system persistence
-     * layer as opposed to individual manifests in respective apps.
+     * (boolean) Whether the task manager should tell JobScheduler it's about to ask for an
+     * app stop.
      */
-    public static final String PERSISTS_WIDGET_PROVIDER_INFO = "persists_widget_provider_info";
-
-    /**
-     * (boolean) Whether the clipboard overlay shows an edit button (as opposed to requiring tapping
-     * the preview to send an edit intent).
-     */
-    public static final String CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON =
-            "clipboard_overlay_show_edit_button";
+    public static final String TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP =
+            "task_manager_inform_job_scheduler_of_pending_app_stop";
 
     /**
      * (boolean) Whether to show smart chips (based on TextClassifier) in the clipboard overlay.
      */
     public static final String CLIPBOARD_OVERLAY_SHOW_ACTIONS = "clipboard_overlay_show_actions";
+
+    /**
+     * (boolean) Whether to ignore the source package for determining whether to use remote copy
+     * behavior in the clipboard UI.
+     */
+    public static final String CLIPBOARD_IGNORE_REMOTE_COPY_SOURCE =
+            "clipboard_ignore_remote_copy_source";
+
+    /**
+     * (boolean) Whether to combine the broadcasts APPWIDGET_ENABLED and APPWIDGET_UPDATE
+     */
+    public static final String COMBINED_BROADCAST_ENABLED = "combined_broadcast_enabled";
+
+    /**
+     * (boolean) Whether to allow cursor hover states for certain elements.
+     */
+    public static final String CURSOR_HOVER_STATES_ENABLED = "cursor_hover_states_enabled";
 
     private SystemUiDeviceConfigFlags() {
     }

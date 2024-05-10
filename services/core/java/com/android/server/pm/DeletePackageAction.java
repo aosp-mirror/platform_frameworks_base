@@ -16,17 +16,19 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
 import android.os.UserHandle;
 
 final class DeletePackageAction {
     public final PackageSetting mDeletingPs;
     public final PackageSetting mDisabledPs;
+    @NonNull
     public final PackageRemovedInfo mRemovedInfo;
     public final int mFlags;
     public final UserHandle mUser;
 
     DeletePackageAction(PackageSetting deletingPs, PackageSetting disabledPs,
-            PackageRemovedInfo removedInfo, int flags, UserHandle user) {
+            @NonNull PackageRemovedInfo removedInfo, int flags, UserHandle user) {
         mDeletingPs = deletingPs;
         mDisabledPs = disabledPs;
         mRemovedInfo = removedInfo;

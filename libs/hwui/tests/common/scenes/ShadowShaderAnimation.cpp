@@ -16,6 +16,8 @@
 
 #include "TestSceneBase.h"
 
+#include <SkBlendMode.h>
+
 class ShadowShaderAnimation;
 
 static TestScene::Registrar _ShadowShader(TestScene::Info{

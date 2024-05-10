@@ -18,7 +18,7 @@ package com.android.server.wm.flicker.testapp;
 
 import static android.os.SystemClock.sleep;
 
-import static com.android.server.wm.flicker.testapp.ActivityOptions.EXTRA_STARVE_UI_THREAD;
+import static com.android.server.wm.flicker.testapp.ActivityOptions.SeamlessRotation.EXTRA_STARVE_UI_THREAD;
 
 import android.app.Activity;
 import android.os.Bundle;

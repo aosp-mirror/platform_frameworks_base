@@ -45,6 +45,7 @@ public class Device {
     private static final int MSG_OPEN_UINPUT_DEVICE = 1;
     private static final int MSG_CLOSE_UINPUT_DEVICE = 2;
     private static final int MSG_INJECT_EVENT = 3;
+    private static final int MSG_SYNC_EVENT = 4;
 
     private final int mId;
     private final HandlerThread mThread;
@@ -60,16 +61,20 @@ public class Device {
         System.loadLibrary("uinputcommand_jni");
     }
 
-    private static native long nativeOpenUinputDevice(String name, int id, int vid, int pid,
-            int bus, int ffEffectsMax, DeviceCallback callback);
+    private static native long nativeOpenUinputDevice(String name, int id, int vendorId,
+            int productId, int versionId, int bus, int ffEffectsMax, String port,
+            DeviceCallback callback);
     private static native void nativeCloseUinputDevice(long ptr);
     private static native void nativeInjectEvent(long ptr, int type, int code, int value);
     private static native void nativeConfigure(int handle, int code, int[] configs);
     private static native void nativeSetAbsInfo(int handle, int axisCode, Parcel axisParcel);
+    private static native int nativeGetEvdevEventTypeByLabel(String label);
+    private static native int nativeGetEvdevEventCodeByLabel(int type, String label);
+    private static native int nativeGetEvdevInputPropByLabel(String label);
 
-    public Device(int id, String name, int vid, int pid, int bus,
+    public Device(int id, String name, int vendorId, int productId, int versionId, int bus,
             SparseArray<int[]> configuration, int ffEffectsMax,
-            SparseArray<InputAbsInfo> absInfo) {
+            SparseArray<InputAbsInfo> absInfo, String port) {
         mId = id;
         mThread = new HandlerThread("UinputDeviceHandler");
         mThread.start();
@@ -79,14 +84,20 @@ public class Device {
         mOutputStream = System.out;
         SomeArgs args = SomeArgs.obtain();
         args.argi1 = id;
-        args.argi2 = vid;
-        args.argi3 = pid;
-        args.argi4 = bus;
-        args.argi5 = ffEffectsMax;
+        args.argi2 = vendorId;
+        args.argi3 = productId;
+        args.argi4 = versionId;
+        args.argi5 = bus;
+        args.argi6 = ffEffectsMax;
         if (name != null) {
             args.arg1 = name;
         } else {
-            args.arg1 = id + ":" + vid + ":" + pid;
+            args.arg1 = id + ":" + vendorId + ":" + productId;
+        }
+        if (port != null) {
+            args.arg2 = port;
+        } else {
+            args.arg2 = "uinput:" + id + ":" + vendorId + ":" + productId;
         }
 
         mHandler.obtainMessage(MSG_OPEN_UINPUT_DEVICE, args).sendToTarget();
@@ -111,6 +122,16 @@ public class Device {
      */
     public void addDelay(int delay) {
         mTimeToSend = Math.max(SystemClock.uptimeMillis(), mTimeToSend) + delay;
+    }
+
+    /**
+     * Synchronize the uinput command queue by writing a sync response with the provided syncToken
+     * to the output stream when this event is processed.
+     *
+     * @param syncToken  The token for this sync command.
+     */
+    public void syncEvent(String syncToken) {
+        mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_SYNC_EVENT, syncToken), mTimeToSend);
     }
 
     /**
@@ -141,9 +162,18 @@ public class Device {
             switch (msg.what) {
                 case MSG_OPEN_UINPUT_DEVICE:
                     SomeArgs args = (SomeArgs) msg.obj;
-                    mPtr = nativeOpenUinputDevice((String) args.arg1, args.argi1, args.argi2,
-                            args.argi3, args.argi4, args.argi5,
+                    String name = (String) args.arg1;
+                    mPtr = nativeOpenUinputDevice(name, args.argi1 /* id */,
+                            args.argi2 /* vendorId */, args.argi3 /* productId */,
+                            args.argi4 /* versionId */, args.argi5 /* bus */,
+                            args.argi6 /* ffEffectsMax */, (String) args.arg2 /* port */,
                             new DeviceCallback());
+                    if (mPtr == 0) {
+                        RuntimeException ex = new RuntimeException(
+                                "Could not create uinput device \"" + name + "\"");
+                        Log.e(TAG, "Couldn't create uinput device, exiting.", ex);
+                        throw ex;
+                    }
                     break;
                 case MSG_INJECT_EVENT:
                     if (mPtr != 0) {
@@ -166,6 +196,9 @@ public class Device {
                         mCond.notify();
                     }
                     break;
+                case MSG_SYNC_EVENT:
+                    handleSyncEvent((String) msg.obj);
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown device message");
             }
@@ -178,6 +211,18 @@ public class Device {
         public void resumeEvents() {
             getLooper().myQueue().removeSyncBarrier(mBarrierToken);
             mBarrierToken = 0;
+        }
+
+        private void handleSyncEvent(String syncToken) {
+            final JSONObject json = new JSONObject();
+            try {
+                json.put("reason", "sync");
+                json.put("id", mId);
+                json.put("syncToken", syncToken);
+            } catch (JSONException e) {
+                throw new RuntimeException("Could not create JSON object ", e);
+            }
+            writeOutputObject(json);
         }
     }
 
@@ -206,7 +251,7 @@ public class Device {
         }
 
         public void onDeviceVibrating(int value) {
-            JSONObject json = new JSONObject();
+            final JSONObject json = new JSONObject();
             try {
                 json.put("reason", "vibrating");
                 json.put("id", mId);
@@ -214,12 +259,7 @@ public class Device {
             } catch (JSONException e) {
                 throw new RuntimeException("Could not create JSON object ", e);
             }
-            try {
-                mOutputStream.write(json.toString().getBytes());
-                mOutputStream.flush();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            writeOutputObject(json);
         }
 
         public void onDeviceError() {
@@ -228,5 +268,42 @@ public class Device {
             msg.setAsynchronous(true);
             msg.sendToTarget();
         }
+    }
+
+    private void writeOutputObject(JSONObject json) {
+        try {
+            mOutputStream.write(json.toString().getBytes());
+            mOutputStream.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static int getEvdevEventTypeByLabel(String label) {
+        final var type = nativeGetEvdevEventTypeByLabel(label);
+        if (type < 0) {
+            throw new IllegalArgumentException(
+                    "Failed to get evdev event type from label: " + label);
+        }
+        return type;
+    }
+
+    static int getEvdevEventCodeByLabel(int type, String label) {
+        final var code = nativeGetEvdevEventCodeByLabel(type, label);
+        if (code < 0) {
+            throw new IllegalArgumentException(
+                    "Failed to get evdev event code for type " + type + " from label: " + label);
+        }
+        return code;
+
+    }
+
+    static int getEvdevInputPropByLabel(String label) {
+        final var prop = nativeGetEvdevInputPropByLabel(label);
+        if (prop < 0) {
+            throw new IllegalArgumentException(
+                    "Failed to get evdev input prop from label: " + label);
+        }
+        return prop;
     }
 }

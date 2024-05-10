@@ -25,11 +25,11 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.pkg.component.ParsedActivity;
+import com.android.internal.pm.pkg.component.ParsedProvider;
+import com.android.internal.pm.pkg.component.ParsedService;
 import com.android.server.pm.Computer;
 import com.android.server.pm.DumpState;
-import com.android.server.pm.pkg.component.ParsedActivity;
-import com.android.server.pm.pkg.component.ParsedProvider;
-import com.android.server.pm.pkg.component.ParsedService;
 
 import java.io.PrintWriter;
 import java.util.List;

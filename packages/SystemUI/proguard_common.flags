@@ -1,0 +1,53 @@
+-include proguard_kotlin.flags
+-keep class com.android.systemui.VendorServices
+
+# Needed to ensure callback field references are kept in their respective
+# owning classes when the downstream callback registrars only store weak refs.
+# Note that we restrict this to SysUISingleton classes, as other registering
+# classes should either *always* unregister or *never* register from their
+# constructor. We also keep callback class names for easier debugging.
+-keepnames @com.android.systemui.util.annotations.WeaklyReferencedCallback class *
+-keepnames class * extends @com.android.systemui.util.annotations.WeaklyReferencedCallback **
+-if @com.android.systemui.util.annotations.WeaklyReferencedCallback class *
+-keepclassmembers,allowaccessmodification @com.android.systemui.dagger.SysUISingleton class * {
+  <1> *;
+}
+-if class * extends @com.android.systemui.util.annotations.WeaklyReferencedCallback **
+-keepclassmembers,allowaccessmodification @com.android.systemui.dagger.SysUISingleton class * {
+  <1> *;
+}
+
+-keepclasseswithmembers class * {
+    public <init>(android.content.Context, android.util.AttributeSet);
+}
+
+-keep class androidx.core.app.CoreComponentFactory
+
+# Keep the wm shell lib
+-keep class com.android.wm.shell.*
+# Keep the protolog group methods that are called by the generated code
+-keepclassmembers class com.android.wm.shell.protolog.ShellProtoLogGroup {
+    *;
+}
+
+# Prevent optimization or access modification of any referenced code that may
+# conflict with code in the bootclasspath.
+# TODO(b/222468116): Resolve such collisions in the build system.
+-keepnames class android.**.nano.** { *; }
+-keepnames class com.android.**.nano.** { *; }
+-keepnames class com.android.internal.protolog.** { *; }
+-keepnames class android.hardware.common.** { *; }
+
+# Allows proguard to make private and protected methods and fields public as
+# part of optimization. This lets proguard inline trivial getter/setter methods.
+-allowaccessmodification
+
+# Strip verbose logs.
+-assumenosideeffects class android.util.Log {
+  static *** v(...);
+  static *** isLoggable(...);
+}
+-assumenosideeffects class android.util.Slog {
+  static *** v(...);
+}
+-maximumremovedandroidloglevel 2

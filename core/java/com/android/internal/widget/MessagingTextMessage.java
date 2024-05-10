@@ -23,7 +23,9 @@ import android.annotation.StyleRes;
 import android.app.Notification;
 import android.content.Context;
 import android.text.Layout;
+import android.text.PrecomputedText;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
@@ -35,9 +37,12 @@ import com.android.internal.R;
 @RemoteViews.RemoteView
 public class MessagingTextMessage extends ImageFloatingTextView implements MessagingMessage {
 
+    private static final String TAG = "MessagingTextMessage";
     private static final MessagingPool<MessagingTextMessage> sInstancePool =
             new MessagingPool<>(20);
     private final MessagingMessageState mState = new MessagingMessageState(this);
+
+    private PrecomputedText mPrecomputedText = null;
 
     public MessagingTextMessage(@NonNull Context context) {
         super(context);
@@ -63,25 +68,32 @@ public class MessagingTextMessage extends ImageFloatingTextView implements Messa
     }
 
     @Override
-    public boolean setMessage(Notification.MessagingStyle.Message message) {
-        MessagingMessage.super.setMessage(message);
-        setText(message.getText());
+    public boolean setMessage(Notification.MessagingStyle.Message message,
+            boolean usePrecomputedText) {
+        MessagingMessage.super.setMessage(message, usePrecomputedText);
+        if (usePrecomputedText) {
+            mPrecomputedText = PrecomputedText.create(message.getText(), getTextMetricsParams());
+        } else {
+            setText(message.getText());
+            mPrecomputedText = null;
+        }
+
         return true;
     }
 
     static MessagingMessage createMessage(IMessagingLayout layout,
-            Notification.MessagingStyle.Message m) {
+            Notification.MessagingStyle.Message m, boolean usePrecomputedText) {
         MessagingLinearLayout messagingLinearLayout = layout.getMessagingLinearLayout();
         MessagingTextMessage createdMessage = sInstancePool.acquire();
         if (createdMessage == null) {
             createdMessage = (MessagingTextMessage) LayoutInflater.from(
                     layout.getContext()).inflate(
-                            R.layout.notification_template_messaging_text_message,
-                            messagingLinearLayout,
-                            false);
+                    R.layout.notification_template_messaging_text_message,
+                    messagingLinearLayout,
+                    false);
             createdMessage.addOnLayoutChangeListener(MessagingLayout.MESSAGING_PROPERTY_ANIMATOR);
         }
-        createdMessage.setMessage(m);
+        createdMessage.setMessage(m, usePrecomputedText);
         return createdMessage;
     }
 
@@ -134,5 +146,21 @@ public class MessagingTextMessage extends ImageFloatingTextView implements Messa
     @Override
     public void setColor(int color) {
         setTextColor(color);
+    }
+
+    @Override
+    public void finalizeInflate() {
+        try {
+            setText(mPrecomputedText != null ? mPrecomputedText
+                    : getState().getMessage().getText());
+        } catch (IllegalArgumentException exception) {
+            Log.wtf(
+                    /* tag = */ TAG,
+                    /* msg = */ "PrecomputedText setText failed for TextView:" + this,
+                    /* tr = */ exception
+            );
+            mPrecomputedText = null;
+            setText(getState().getMessage().getText());
+        }
     }
 }

@@ -1,0 +1,167 @@
+badging {
+  package {
+    package: "com.example.bundletool.minimal"
+    version_code: 1
+    version_name: "1.0"
+    platform_version_name: "12"
+    platform_version_code: "31"
+    compile_sdk_version: 31
+    compile_sdk_version_codename: "12"
+  }
+  application {
+    label: "minimal"
+    icon: "res/uF.xml"
+    density_icons {
+      key: 160
+      value: "res/uF.xml"
+    }
+    density_icons {
+      key: 240
+      value: "res/uF.xml"
+    }
+    density_icons {
+      key: 320
+      value: "res/uF.xml"
+    }
+    density_icons {
+      key: 480
+      value: "res/uF.xml"
+    }
+    density_icons {
+      key: 640
+      value: "res/uF.xml"
+    }
+    density_icons {
+      key: 65534
+      value: "res/uF.xml"
+    }
+  }
+  uses_sdk {
+    min_sdk_version: 21
+    target_sdk_version: 31
+  }
+  supports_screen {
+    screens: NORMAL
+    screens: LARGE
+    screens: XLARGE
+    supports_any_densities: true
+    requires_smallest_width_dp: 240
+    compatible_width_limit_dp: 360
+    largest_width_limit_dp: 480
+  }
+  launchable_activity {
+    name: "com.example.bundletool.minimal.MainActivity"
+    label: "minimal"
+  }
+  compatible_screens {
+    screens {
+      size: 500
+      density: 240
+    }
+    screens {
+      size: 400
+      density: 160
+    }
+  }
+  architectures {
+    architectures: "x86_64"
+    alt_architectures: "x86"
+  }
+  supports_gl_texture {
+    name: "GL_OES_compressed_paletted_texture"
+  }
+  components {
+    main: true
+    other_receivers: true
+    other_services: true
+    provided_components: "app-widget"
+    provided_components: "device-admin"
+    provided_components: "ime"
+    provided_components: "wallpaper"
+    provided_components: "accessibility"
+    provided_components: "print-service"
+    provided_components: "payment"
+    provided_components: "search"
+    provided_components: "document-provider"
+    provided_components: "notification-listener"
+    provided_components: "dream"
+    provided_components: "camera"
+    provided_components: "camera-secure"
+  }
+  locales: "--_--"
+  densities: 160
+  densities: 240
+  densities: 320
+  densities: 480
+  densities: 640
+  densities: 65534
+  uses_configurations {
+    req_touch_screen: 3
+    req_keyboard_type: 2
+    req_hard_keyboard: -1
+    req_navigation: 3
+    req_five_way_nav: -1
+  }
+  feature_groups {
+    features {
+      name: "android.hardware.bluetooth"
+      required: true
+    }
+    features {
+      name: "android.hardware.camera"
+      required: true
+    }
+    features {
+      name: "android.hardware.faketouch"
+      implied_data {
+        reasons: "default feature for all apps"
+      }
+    }
+    features {
+      name: "android.hardware.telephony"
+      implied_data {
+        from_sdk_23_permission: true
+        reasons: "requested a telephony permission"
+      }
+    }
+  }
+  uses_permissions {
+    name: "android.permission.BIND_ACCESSIBILITY_SERVICE"
+    max_sdk_version: 24
+    required: true
+  }
+  uses_permissions {
+    name: "android.permission.RECEIVE_SMS"
+    sdk23_and_above: true
+  }
+  uses_permissions {
+    name: "android.permission.WRITE_EXTERNAL_STORAGE"
+    required: true
+  }
+  uses_permissions {
+    name: "android.permission.READ_EXTERNAL_STORAGE"
+    required: true
+    implied: true
+  }
+  permissions {
+    name: "minimal.FIRST_PERMISSION"
+  }
+  uses_libraries {
+    name: "mylib1"
+    required: true
+  }
+  uses_libraries {
+    name: "my_optional_lib"
+  }
+  uses_native_libraries {
+    name: "native1"
+    required: true
+  }
+  uses_native_libraries {
+    name: "optional"
+  }
+  metadata {
+    name: "android.nfc.cardemulation.host_apdu_service"
+    resource_string: "res/dU.xml"
+  }
+}

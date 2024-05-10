@@ -25,10 +25,12 @@ import android.view.ViewTreeObserver
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.shade.NotificationPanelViewController
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
+import com.android.systemui.shade.ShadeFoldAnimator
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.unfold.util.FoldableDeviceStates
@@ -46,6 +48,8 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when` as whenever
@@ -67,11 +71,13 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
     @Mock lateinit var lightRevealScrim: LightRevealScrim
 
-    @Mock lateinit var notificationPanelViewController: NotificationPanelViewController
+    @Mock lateinit var shadeViewController: ShadeViewController
 
     @Mock lateinit var viewGroup: ViewGroup
 
     @Mock lateinit var viewTreeObserver: ViewTreeObserver
+
+    @Mock lateinit var shadeFoldAnimator: ShadeFoldAnimator
 
     @Captor private lateinit var foldStateListenerCaptor: ArgumentCaptor<FoldStateListener>
 
@@ -88,20 +94,20 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
         deviceStates = FoldableTestUtils.findDeviceStates(context)
 
-        whenever(notificationPanelViewController.view).thenReturn(viewGroup)
+        // TODO(b/254878364): remove this call to NPVC.getView()
+        whenever(shadeViewController.shadeFoldAnimator).thenReturn(shadeFoldAnimator)
+        whenever(shadeFoldAnimator.view).thenReturn(viewGroup)
         whenever(viewGroup.viewTreeObserver).thenReturn(viewTreeObserver)
         whenever(wakefulnessLifecycle.lastSleepReason)
             .thenReturn(PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD)
-        whenever(centralSurfaces.notificationPanelViewController)
-            .thenReturn(notificationPanelViewController)
-        whenever(notificationPanelViewController.startFoldToAodAnimation(any(), any(), any()))
-            .then {
-                val onActionStarted = it.arguments[0] as Runnable
-                onActionStarted.run()
-            }
+        whenever(shadeFoldAnimator.startFoldToAodAnimation(any(), any(), any())).then {
+            val onActionStarted = it.arguments[0] as Runnable
+            onActionStarted.run()
+        }
 
-        keyguardRepository = FakeKeyguardRepository()
-        val keyguardInteractor = KeyguardInteractor(repository = keyguardRepository)
+        val withDeps = KeyguardInteractorFactory.create(featureFlags = FakeFeatureFlags())
+        val keyguardInteractor = withDeps.keyguardInteractor
+        keyguardRepository = withDeps.repository
 
         // Needs to be run on the main thread
         runBlocking(IMMEDIATE) {
@@ -115,7 +121,7 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
                         latencyTracker,
                         { keyguardInteractor },
                     )
-                    .apply { initialize(centralSurfaces, lightRevealScrim) }
+                    .apply { initialize(centralSurfaces, shadeViewController, lightRevealScrim) }
 
             verify(deviceStateManager).registerCallback(any(), foldStateListenerCaptor.capture())
 
@@ -128,7 +134,7 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
     fun onFolded_aodDisabled_doesNotLogLatency() =
         runBlocking(IMMEDIATE) {
             val job = underTest.listenForDozing(this)
-            keyguardRepository.setDozing(true)
+            keyguardRepository.setIsDozing(true)
             setAodEnabled(enabled = false)
 
             yield()
@@ -145,7 +151,7 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
     fun onFolded_aodEnabled_logsLatency() =
         runBlocking(IMMEDIATE) {
             val job = underTest.listenForDozing(this)
-            keyguardRepository.setDozing(true)
+            keyguardRepository.setIsDozing(true)
             setAodEnabled(enabled = true)
 
             yield()
@@ -160,18 +166,67 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
         }
 
     @Test
+    fun onFolded_onScreenTurningOnInvokedTwice_doesNotLogLatency() =
+        runBlocking(IMMEDIATE) {
+            val job = underTest.listenForDozing(this)
+            keyguardRepository.setIsDozing(true)
+            setAodEnabled(enabled = true)
+
+            yield()
+
+            fold()
+            simulateScreenTurningOn()
+            reset(latencyTracker)
+
+            // This can happen > 1 time if the prox sensor is covered
+            simulateScreenTurningOn()
+
+            verify(latencyTracker, never()).onActionStart(any())
+            verify(latencyTracker, never()).onActionEnd(any())
+
+            job.cancel()
+        }
+
+    @Test
+    fun onFolded_onScreenTurningOnWithoutDozingThenWithDozing_doesNotLogLatency() =
+        runBlocking(IMMEDIATE) {
+            val job = underTest.listenForDozing(this)
+            keyguardRepository.setIsDozing(false)
+            setAodEnabled(enabled = true)
+
+            yield()
+
+            fold()
+            simulateScreenTurningOn()
+            reset(latencyTracker)
+
+            // Now enable dozing and trigger a second run through the aod animation code. It should
+            // not rerun the animation
+            keyguardRepository.setIsDozing(true)
+            yield()
+            simulateScreenTurningOn()
+
+            verify(latencyTracker, never()).onActionStart(any())
+            verify(latencyTracker, never()).onActionEnd(any())
+
+            job.cancel()
+        }
+
+    @Test
     fun onFolded_animationCancelled_doesNotLogLatency() =
         runBlocking(IMMEDIATE) {
             val job = underTest.listenForDozing(this)
-            keyguardRepository.setDozing(true)
+            keyguardRepository.setIsDozing(true)
             setAodEnabled(enabled = true)
 
             yield()
 
             fold()
             underTest.onScreenTurningOn({})
-            underTest.onStartedWakingUp()
+            // The body of onScreenTurningOn is executed on fakeExecutor,
+            // run all pending tasks before calling the next method
             fakeExecutor.runAllReady()
+            underTest.onStartedWakingUp()
 
             verify(latencyTracker).onActionStart(any())
             verify(latencyTracker).onActionCancel(any())

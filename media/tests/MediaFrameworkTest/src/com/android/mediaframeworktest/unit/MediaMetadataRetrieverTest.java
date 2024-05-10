@@ -16,26 +16,45 @@
 
 package com.android.mediaframeworktest.unit;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
-import android.test.AndroidTestCase;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Log;
 
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.media.playback.flags.Flags;
 import com.android.mediaframeworktest.MediaNames;
 import com.android.mediaframeworktest.MediaProfileReader;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class MediaMetadataRetrieverTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class MediaMetadataRetrieverTest {
 
     private static final String TAG = "MediaMetadataRetrieverTest";
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     // Test album art extraction.
     @MediumTest
-    public static void testGetEmbeddedPicture() throws Exception {
+    @Test
+    public void testGetEmbeddedPicture() throws Exception {
         Log.v(TAG, "testGetEmbeddedPicture starts.");
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         boolean supportWMA = MediaProfileReader.getWMAEnable();
@@ -78,7 +97,8 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
 
     // Test frame capture
     @LargeTest
-    public static void testThumbnailCapture() throws Exception {
+    @Test
+    public void testThumbnailCapture() throws Exception {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         boolean supportWMA = MediaProfileReader.getWMAEnable();
         boolean supportWMV = MediaProfileReader.getWMVEnable();
@@ -134,7 +154,8 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     }
 
     @LargeTest
-    public static void testMetadataRetrieval() throws Exception {
+    @Test
+    public void testMetadataRetrieval() throws Exception {
         boolean supportWMA = MediaProfileReader.getWMAEnable();
         boolean supportWMV = MediaProfileReader.getWMVEnable();
         boolean hasFailed = false;
@@ -169,7 +190,8 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     // If the specified call order and valid media file is used, no exception
     // should be thrown.
     @MediumTest
-    public static void testBasicNormalMethodCallSequence() throws Exception {
+    @Test
+    public void testBasicNormalMethodCallSequence() throws Exception {
         boolean hasFailed = false;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
@@ -197,7 +219,8 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     // If setDataSource() has not been called, both getFrameAtTime() and extractMetadata() must
     // return null.
     @MediumTest
-    public static void testBasicAbnormalMethodCallSequence() {
+    @Test
+    public void testBasicAbnormalMethodCallSequence() {
         boolean hasFailed = false;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         if (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM) != null) {
@@ -213,7 +236,8 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
 
     // Test setDataSource()
     @MediumTest
-    public static void testSetDataSource() throws IOException {
+    @Test
+    public void testSetDataSource() throws IOException {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         boolean hasFailed = false;
 
@@ -269,6 +293,34 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
 
         retriever.release();
         assertTrue(!hasFailed);
+    }
+
+    /** Test the thumbnail is generated when the default is set to RGBA8888 */
+    @MediumTest
+    // TODO(b/305160754) Remove the following annotation and use SetFlagsRule.enableFlags
+    @RequiresFlagsEnabled(Flags.FLAG_MEDIAMETADATARETRIEVER_DEFAULT_RGBA8888)
+    @Test
+    public void testGetFrameAtTimeWithRGBA8888Flag_Set() throws IOException {
+        try (MediaMetadataRetriever retriever = new MediaMetadataRetriever()) {
+            retriever.setDataSource(MediaNames.TEST_PATH_1);
+            Bitmap bitmap = retriever.getFrameAtTime(-1);
+            assertNotNull(bitmap);
+            assertEquals(Bitmap.Config.ARGB_8888, bitmap.getConfig());
+        }
+    }
+
+    /** Test the thumbnail is generated when the default is not set to RGBA8888 */
+    @MediumTest
+    // TODO(b/305160754) Remove the following annotation and use SetFlagsRule.disableFlags
+    @RequiresFlagsDisabled(Flags.FLAG_MEDIAMETADATARETRIEVER_DEFAULT_RGBA8888)
+    @Test
+    public void testGetFrameAtTimeWithRGBA8888Flag_Unset() throws IOException {
+        try (MediaMetadataRetriever retriever = new MediaMetadataRetriever()) {
+            retriever.setDataSource(MediaNames.TEST_PATH_1);
+            Bitmap bitmap = retriever.getFrameAtTime(-1);
+            assertNotNull(bitmap);
+            assertEquals(Bitmap.Config.RGB_565, bitmap.getConfig());
+        }
     }
 
     // TODO:

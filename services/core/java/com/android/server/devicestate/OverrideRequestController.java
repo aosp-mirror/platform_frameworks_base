@@ -59,6 +59,23 @@ final class OverrideRequestController {
     @Retention(RetentionPolicy.SOURCE)
     @interface RequestStatus {}
 
+    /**
+     * A flag indicating that the status change was triggered by thermal critical status.
+     */
+    static final int FLAG_THERMAL_CRITICAL = 1 << 0;
+
+    /**
+     * A flag indicating that the status change was triggered by power save mode.
+     */
+    static final int FLAG_POWER_SAVE_ENABLED = 1 << 1;
+
+    @IntDef(flag = true, prefix = {"FLAG_"}, value = {
+            FLAG_THERMAL_CRITICAL,
+            FLAG_POWER_SAVE_ENABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface StatusChangedFlag {}
+
     static String statusToString(@RequestStatus int status) {
         switch (status) {
             case STATUS_ACTIVE:
@@ -106,7 +123,7 @@ final class OverrideRequestController {
     void addRequest(@NonNull OverrideRequest request) {
         OverrideRequest previousRequest = mRequest;
         mRequest = request;
-        mListener.onStatusChanged(request, STATUS_ACTIVE);
+        mListener.onStatusChanged(request, STATUS_ACTIVE, 0 /* flags */);
 
         if (previousRequest != null) {
             cancelRequestLocked(previousRequest);
@@ -116,7 +133,7 @@ final class OverrideRequestController {
     void addBaseStateRequest(@NonNull OverrideRequest request) {
         OverrideRequest previousRequest = mBaseStateRequest;
         mBaseStateRequest = request;
-        mListener.onStatusChanged(request, STATUS_ACTIVE);
+        mListener.onStatusChanged(request, STATUS_ACTIVE, 0 /* flags */);
 
         if (previousRequest != null) {
             cancelRequestLocked(previousRequest);
@@ -187,6 +204,12 @@ final class OverrideRequestController {
         }
 
         if (mRequest != null && mRequest.getPid() == pid) {
+            if (mRequest.getRequestedDeviceState().hasFlag(
+                    DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP)) {
+                cancelCurrentRequestLocked();
+                return;
+            }
+
             if (mStickyRequestsAllowed) {
                 // Do not cancel the requests now because sticky requests are allowed. These
                 // requests will be cancelled on a call to cancelStickyRequests().
@@ -202,7 +225,7 @@ final class OverrideRequestController {
      * listener of all changes to request status as a result of this change.
      */
     void handleBaseStateChanged(int state) {
-        if (mBaseStateRequest != null && state != mBaseStateRequest.getRequestedState()) {
+        if (mBaseStateRequest != null && state != mBaseStateRequest.getRequestedStateIdentifier()) {
             cancelBaseStateOverrideRequest();
         }
         if (mRequest == null) {
@@ -219,14 +242,23 @@ final class OverrideRequestController {
      * Notifies the controller that the set of supported states has changed. The controller will
      * notify the listener of all changes to request status as a result of this change.
      */
-    void handleNewSupportedStates(int[] newSupportedStates) {
+    void handleNewSupportedStates(int[] newSupportedStates,
+            @DeviceStateProvider.SupportedStatesUpdatedReason int reason) {
+        boolean isThermalCritical =
+                reason == DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_CRITICAL;
+        boolean isPowerSaveEnabled =
+                reason == DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_ENABLED;
+        @StatusChangedFlag int flags = 0;
+        flags |= isThermalCritical ? FLAG_THERMAL_CRITICAL : 0;
+        flags |= isPowerSaveEnabled ? FLAG_POWER_SAVE_ENABLED : 0;
         if (mBaseStateRequest != null && !contains(newSupportedStates,
-                mBaseStateRequest.getRequestedState())) {
-            cancelCurrentBaseStateRequestLocked();
+                mBaseStateRequest.getRequestedStateIdentifier())) {
+            cancelCurrentBaseStateRequestLocked(flags);
         }
 
-        if (mRequest != null && !contains(newSupportedStates, mRequest.getRequestedState())) {
-            cancelCurrentRequestLocked();
+        if (mRequest != null && !contains(newSupportedStates,
+                mRequest.getRequestedStateIdentifier())) {
+            cancelCurrentRequestLocked(flags);
         }
     }
 
@@ -237,14 +269,19 @@ final class OverrideRequestController {
         pw.println("Override Request active: " + requestActive);
         if (requestActive) {
             pw.println("Request: mPid=" + overrideRequest.getPid()
-                    + ", mRequestedState=" + overrideRequest.getRequestedState()
+                    + ", mRequestedState=" + overrideRequest.getRequestedStateIdentifier()
                     + ", mFlags=" + overrideRequest.getFlags()
                     + ", mStatus=" + statusToString(STATUS_ACTIVE));
         }
     }
 
     private void cancelRequestLocked(@NonNull OverrideRequest requestToCancel) {
-        mListener.onStatusChanged(requestToCancel, STATUS_CANCELED);
+        cancelRequestLocked(requestToCancel, 0 /* flags */);
+    }
+
+    private void cancelRequestLocked(@NonNull OverrideRequest requestToCancel,
+            @StatusChangedFlag int flags) {
+        mListener.onStatusChanged(requestToCancel, STATUS_CANCELED, flags);
     }
 
     /**
@@ -252,12 +289,16 @@ final class OverrideRequestController {
      * Notifies the listener of the canceled status as well.
      */
     private void cancelCurrentRequestLocked() {
+        cancelCurrentRequestLocked(0 /* flags */);
+    }
+
+    private void cancelCurrentRequestLocked(@StatusChangedFlag int flags) {
         if (mRequest == null) {
             Slog.w(TAG, "Attempted to cancel a null OverrideRequest");
             return;
         }
         mStickyRequest = false;
-        cancelRequestLocked(mRequest);
+        cancelRequestLocked(mRequest, flags);
         mRequest = null;
     }
 
@@ -266,11 +307,15 @@ final class OverrideRequestController {
      * Notifies the listener of the canceled status as well.
      */
     private void cancelCurrentBaseStateRequestLocked() {
+        cancelCurrentBaseStateRequestLocked(0 /* flags */);
+    }
+
+    private void cancelCurrentBaseStateRequestLocked(@StatusChangedFlag int flags) {
         if (mBaseStateRequest == null) {
             Slog.w(TAG, "Attempted to cancel a null OverrideRequest");
             return;
         }
-        cancelRequestLocked(mBaseStateRequest);
+        cancelRequestLocked(mBaseStateRequest, flags);
         mBaseStateRequest = null;
     }
 
@@ -284,12 +329,14 @@ final class OverrideRequestController {
     }
 
     public interface StatusChangeListener {
+
         /**
          * Notifies the listener of a change in request status. If a change within the controller
          * causes one request to become active and one to become either suspended or cancelled, this
          * method is guaranteed to be called with the active request first before the suspended or
          * cancelled request.
          */
-        void onStatusChanged(@NonNull OverrideRequest request, @RequestStatus int newStatus);
+        void onStatusChanged(@NonNull OverrideRequest request, @RequestStatus int newStatus,
+                @StatusChangedFlag int flags);
     }
 }

@@ -18,16 +18,25 @@ package android.location;
 
 import android.compat.annotation.UnsupportedAppUsage;
 
+import java.util.function.Consumer;
+
 /**
  * The listener for receiving the notification when the country is detected or
  * changed
  *
  * @hide
  */
-public interface CountryListener {
+public interface CountryListener extends Consumer<Country> {
     /**
      * @param country the changed or detected country.
      */
     @UnsupportedAppUsage
     void onCountryDetected(Country country);
+
+    /**
+     * @param country the changed or detected country.
+     */
+    default void accept(Country country) {
+        onCountryDetected(country);
+    }
 }

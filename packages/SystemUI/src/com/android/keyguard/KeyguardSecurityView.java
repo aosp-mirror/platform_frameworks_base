@@ -61,6 +61,18 @@ public interface KeyguardSecurityView {
     int PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT = 7;
 
     /**
+     * Some auth is required because the trustagent expired either from timeout or manually by the
+     * user
+     */
+    int PROMPT_REASON_TRUSTAGENT_EXPIRED = 8;
+
+    /**
+     * Strong auth is required because the device has just booted because of an automatic
+     * mainline update.
+     */
+    int PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE = 16;
+
+    /**
      * Reset the view and prepare to take input. This should do things like clearing the
      * password or pattern and clear error messages.
      */
@@ -100,7 +112,7 @@ public interface KeyguardSecurityView {
      * @param message the message to show
      * @param colorState the color to use
      */
-    void showMessage(CharSequence message, ColorStateList colorState);
+    void showMessage(CharSequence message, ColorStateList colorState, boolean animated);
 
     /**
      * Starts the animation which should run when the security view appears.

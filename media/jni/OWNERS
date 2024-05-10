@@ -1,5 +1,8 @@
 # extra for MTP related files
-per-file android_mtp_*.cpp=marcone@google.com,jsharkey@android.com,jameswei@google.com,rmojumder@google.com
+per-file android_mtp_*.cpp=aprasath@google.com,anothermark@google.com,kumarashishg@google.com,sarup@google.com,jsharkey@android.com,jameswei@google.com,rmojumder@google.com
 
 # extra for TV related files
 per-file android_media_tv_*=hgchen@google.com,quxiangfang@google.com
+
+per-file android_media_JetPlayer.cpp,android_media_MediaDataSource.cpp,android_media_MediaDataSource.h,android_media_MediaPlayer.java=set noparent
+per-file android_media_JetPlayer.cpp,android_media_MediaDataSource.cpp,android_media_MediaDataSource.h,android_media_MediaPlayer.java=file:platform/frameworks/av:/media/janitors/media_solutions_OWNERS

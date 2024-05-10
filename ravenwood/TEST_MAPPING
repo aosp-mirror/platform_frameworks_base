@@ -1,0 +1,21 @@
+{
+  "presubmit": [
+    {
+      "name": "RavenwoodMockitoTest_device"
+    }
+  ],
+  "ravenwood-presubmit": [
+    {
+      "name": "RavenwoodMinimumTest",
+      "host": true
+    },
+    {
+      "name": "RavenwoodMockitoTest",
+      "host": true
+    },
+    {
+      "name": "CtsUtilTestCasesRavenwood",
+      "host": true
+    }
+  ]
+}

@@ -81,7 +81,7 @@ public class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         switch (resultCode) {
             case MSG_SET_REMOTE_RECEIVER:
                 stopCancel();
-                mResultReceiver = resultData.getParcelable(KEY_REMOTE_RECEIVER);
+                mResultReceiver = resultData.getParcelable(KEY_REMOTE_RECEIVER, android.os.ResultReceiver.class);
                 if (mIsCanceled) {
                     mResultReceiver.send(MSG_CANCEL, null);
                     mResultReceiver = null;
@@ -426,7 +426,7 @@ public class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 mSharedElementNotified = true;
                 delayCancel();
 
-                if (mExitCallbacks.isReturnTransitionAllowed()) {
+                if (mExitCallbacks != null && mExitCallbacks.isReturnTransitionAllowed()) {
                     mResultReceiver.send(MSG_ALLOW_RETURN_TRANSITION, null);
                 }
 

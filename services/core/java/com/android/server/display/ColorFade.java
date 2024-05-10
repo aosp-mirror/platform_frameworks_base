@@ -16,7 +16,7 @@
 
 package com.android.server.display;
 
-import static com.android.server.wm.utils.RotationAnimationUtils.hasProtectedContent;
+import static com.android.internal.policy.TransitionAnimation.hasProtectedContent;
 
 import android.content.Context;
 import android.graphics.BLASTBufferQueue;
@@ -31,7 +31,6 @@ import android.opengl.EGLDisplay;
 import android.opengl.EGLSurface;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
-import android.os.IBinder;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -39,8 +38,11 @@ import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.window.ScreenCapture;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
+import com.android.server.display.utils.DebugUtils;
 import com.android.server.policy.WindowManagerPolicy;
 
 import libcore.io.Streams;
@@ -65,7 +67,9 @@ import java.nio.FloatBuffer;
 final class ColorFade {
     private static final String TAG = "ColorFade";
 
-    private static final boolean DEBUG = false;
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.ColorFade DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     // The layer for the electron beam surface.
     // This is currently hardcoded to be one layer above the boot animation.
@@ -138,8 +142,13 @@ final class ColorFade {
     public static final int MODE_FADE = 2;
 
     public ColorFade(int displayId) {
+        this(displayId, LocalServices.getService(DisplayManagerInternal.class));
+    }
+
+    @VisibleForTesting
+    ColorFade(int displayId, DisplayManagerInternal displayManagerInternal) {
         mDisplayId = displayId;
-        mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
+        mDisplayManagerInternal = displayManagerInternal;
     }
 
     /**
@@ -169,19 +178,11 @@ final class ColorFade {
         mDisplayWidth = displayInfo.getNaturalWidth();
         mDisplayHeight = displayInfo.getNaturalHeight();
 
-        final IBinder token = SurfaceControl.getInternalDisplayToken();
-        if (token == null) {
-            Slog.e(TAG,
-                    "Failed to take screenshot because internal display is disconnected");
-            return false;
-        }
-        final boolean isWideColor = SurfaceControl.getDynamicDisplayInfo(token).activeColorMode
-                == Display.COLOR_MODE_DISPLAY_P3;
-
+        final boolean isWideColor = displayInfo.colorMode == Display.COLOR_MODE_DISPLAY_P3;
         // Set mPrepared here so if initialization fails, resources can be cleaned up.
         mPrepared = true;
 
-        final SurfaceControl.ScreenshotHardwareBuffer hardwareBuffer = captureScreen();
+        final ScreenCapture.ScreenshotHardwareBuffer hardwareBuffer = captureScreen();
         if (hardwareBuffer == null) {
             dismiss();
             return false;
@@ -199,7 +200,7 @@ final class ColorFade {
         }
 
         if (!(createEglContext(isProtected) && createEglSurface(isProtected, isWideColor)
-                && setScreenshotTextureAndSetViewport(hardwareBuffer))) {
+                && setScreenshotTextureAndSetViewport(hardwareBuffer, displayInfo.rotation))) {
             dismiss();
             return false;
         }
@@ -410,6 +411,33 @@ final class ColorFade {
     }
 
     /**
+     * Destroys ColorFade animation and its resources
+     *
+     * This method should be called when the ColorFade is no longer in use; i.e. when
+     * the {@link #mDisplayId display} has been removed.
+     */
+    public void destroy() {
+        if (DEBUG) {
+            Slog.d(TAG, "destroy");
+        }
+        if (mPrepared) {
+            if (mCreatedResources) {
+                attachEglContext();
+                try {
+                    destroyScreenshotTexture();
+                    destroyGLShaders();
+                    destroyGLBuffers();
+                    destroyEglSurface();
+                } finally {
+                    detachEglContext();
+                }
+            }
+            destroyEglContext();
+            destroySurface();
+        }
+    }
+
+    /**
      * Draws an animation frame showing the color fade activated at the
      * specified level.
      *
@@ -508,7 +536,8 @@ final class ColorFade {
     }
 
     private boolean setScreenshotTextureAndSetViewport(
-            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer) {
+            ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer,
+            @Surface.Rotation int rotation) {
         if (!attachEglContext()) {
             return false;
         }
@@ -533,14 +562,22 @@ final class ColorFade {
                 s.release();
                 st.release();
             }
+            // if screen is rotated, map texture starting different corner
+            int indexDelta = (rotation == Surface.ROTATION_90) ? 2
+                            : (rotation == Surface.ROTATION_180) ? 4
+                            : (rotation == Surface.ROTATION_270) ? 6 : 0;
 
             // Set up texture coordinates for a quad.
             // We might need to change this if the texture ends up being
             // a different size from the display for some reason.
-            mTexCoordBuffer.put(0, 0f); mTexCoordBuffer.put(1, 0f);
-            mTexCoordBuffer.put(2, 0f); mTexCoordBuffer.put(3, 1f);
-            mTexCoordBuffer.put(4, 1f); mTexCoordBuffer.put(5, 1f);
-            mTexCoordBuffer.put(6, 1f); mTexCoordBuffer.put(7, 0f);
+            mTexCoordBuffer.put(indexDelta, 0f);
+            mTexCoordBuffer.put(indexDelta + 1, 0f);
+            mTexCoordBuffer.put((indexDelta + 2) % 8, 0f);
+            mTexCoordBuffer.put((indexDelta + 3) % 8, 1f);
+            mTexCoordBuffer.put((indexDelta + 4) % 8, 1f);
+            mTexCoordBuffer.put((indexDelta + 5) % 8, 1f);
+            mTexCoordBuffer.put((indexDelta + 6) % 8, 1f);
+            mTexCoordBuffer.put((indexDelta + 7) % 8, 0f);
 
             // Set up our viewport.
             GLES20.glViewport(0, 0, mDisplayWidth, mDisplayHeight);
@@ -559,8 +596,8 @@ final class ColorFade {
         }
     }
 
-    private SurfaceControl.ScreenshotHardwareBuffer captureScreen() {
-        SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+    private ScreenCapture.ScreenshotHardwareBuffer captureScreen() {
+        ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
                 mDisplayManagerInternal.systemScreenshot(mDisplayId);
         if (screenshotBuffer == null) {
             Slog.e(TAG, "Failed to take screenshot. Buffer is null");
@@ -780,6 +817,12 @@ final class ColorFade {
         if (mEglDisplay != null) {
             EGL14.eglMakeCurrent(mEglDisplay,
                     EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_CONTEXT);
+        }
+    }
+
+    private void destroyEglContext() {
+        if (mEglDisplay != null && mEglContext != null) {
+            EGL14.eglDestroyContext(mEglDisplay, mEglContext);
         }
     }
 

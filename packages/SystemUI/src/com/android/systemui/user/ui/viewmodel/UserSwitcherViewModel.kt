@@ -17,38 +17,40 @@
 
 package com.android.systemui.user.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import com.android.systemui.R
+import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.ui.drawable.CircularDrawable
-import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.user.domain.interactor.GuestUserInteractor
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.shared.model.UserModel
 import javax.inject.Inject
+import kotlin.math.ceil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 /** Models UI state for the user switcher feature. */
+@SysUISingleton
 class UserSwitcherViewModel
-private constructor(
-    private val userInteractor: UserInteractor,
-    private val powerInteractor: PowerInteractor,
-) : ViewModel() {
+@Inject
+constructor(
+    private val userSwitcherInteractor: UserSwitcherInteractor,
+    private val guestUserInteractor: GuestUserInteractor,
+) {
+
+    /** The currently selected user. */
+    val selectedUser: Flow<UserViewModel> =
+        userSwitcherInteractor.selectedUser.map { user -> toViewModel(user) }
 
     /** On-device users. */
     val users: Flow<List<UserViewModel>> =
-        userInteractor.users.map { models -> models.map { user -> toViewModel(user) } }
+        userSwitcherInteractor.users.map { models -> models.map { user -> toViewModel(user) } }
 
     /** The maximum number of columns that the user selection grid should use. */
-    val maximumUserColumns: Flow<Int> =
-        users.map { LegacyUserUiHelper.getMaxUserSwitcherItemColumns(it.size) }
-
-    /** Whether the button to open the user action menu is visible. */
-    val isOpenMenuButtonVisible: Flow<Boolean> = userInteractor.actions.map { it.isNotEmpty() }
+    val maximumUserColumns: Flow<Int> = users.map { getMaxUserSwitcherItemColumns(it.size) }
 
     private val _isMenuVisible = MutableStateFlow(false)
     /**
@@ -58,9 +60,16 @@ private constructor(
     val isMenuVisible: Flow<Boolean> = _isMenuVisible
     /** The user action menu. */
     val menu: Flow<List<UserActionViewModel>> =
-        userInteractor.actions.map { actions -> actions.map { action -> toViewModel(action) } }
+        userSwitcherInteractor.actions.map { actions ->
+            actions.map { action -> toViewModel(action) }
+        }
+
+    /** Whether the button to open the user action menu is visible. */
+    val isOpenMenuButtonVisible: Flow<Boolean> = menu.map { it.isNotEmpty() }
 
     private val hasCancelButtonBeenClicked = MutableStateFlow(false)
+    private val isFinishRequiredDueToExecutedAction = MutableStateFlow(false)
+    private val userSwitched = MutableStateFlow(false)
 
     /**
      * Whether the observer should finish the experience. Once consumed, [onFinished] must be called
@@ -81,6 +90,8 @@ private constructor(
      */
     fun onFinished() {
         hasCancelButtonBeenClicked.value = false
+        isFinishRequiredDueToExecutedAction.value = false
+        userSwitched.value = false
     }
 
     /** Notifies that the user has clicked the "open menu" button. */
@@ -98,39 +109,37 @@ private constructor(
         _isMenuVisible.value = false
     }
 
-    private fun createFinishRequestedFlow(): Flow<Boolean> {
-        var mostRecentSelectedUserId: Int? = null
-        var mostRecentIsInteractive: Boolean? = null
-
-        return combine(
-            // When the user is switched, we should finish.
-            userInteractor.selectedUser
-                .map { it.id }
-                .map {
-                    val selectedUserChanged =
-                        mostRecentSelectedUserId != null && mostRecentSelectedUserId != it
-                    mostRecentSelectedUserId = it
-                    selectedUserChanged
-                },
-            // When the screen turns off, we should finish.
-            powerInteractor.isInteractive.map {
-                val screenTurnedOff = mostRecentIsInteractive == true && !it
-                mostRecentIsInteractive = it
-                screenTurnedOff
-            },
-            // When the cancel button is clicked, we should finish.
-            hasCancelButtonBeenClicked,
-        ) { selectedUserChanged, screenTurnedOff, cancelButtonClicked ->
-            selectedUserChanged || screenTurnedOff || cancelButtonClicked
+    /** Returns the maximum number of columns for user items in the user switcher. */
+    private fun getMaxUserSwitcherItemColumns(userCount: Int): Int {
+        return if (userCount < 5) {
+            4
+        } else {
+            ceil(userCount / 2.0).toInt()
         }
     }
+
+    private fun createFinishRequestedFlow(): Flow<Boolean> =
+        combine(
+            // When the cancel button is clicked, we should finish.
+            hasCancelButtonBeenClicked,
+            // If an executed action told us to finish, we should finish,
+            isFinishRequiredDueToExecutedAction,
+            userSwitched,
+        ) { cancelButtonClicked, executedActionFinish, userSwitched ->
+            cancelButtonClicked || executedActionFinish || userSwitched
+        }
 
     private fun toViewModel(
         model: UserModel,
     ): UserViewModel {
         return UserViewModel(
             viewKey = model.id,
-            name = model.name,
+            name =
+                if (model.isGuest && model.isSelected) {
+                    Text.Resource(com.android.settingslib.R.string.guest_exit_quick_settings_button)
+                } else {
+                    model.name
+                },
             image = CircularDrawable(model.image),
             isSelectionMarkerVisible = model.isSelected,
             alpha =
@@ -149,28 +158,36 @@ private constructor(
         return UserActionViewModel(
             viewKey = model.ordinal.toLong(),
             iconResourceId =
-                if (model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT) {
-                    R.drawable.ic_manage_users
-                } else {
-                    LegacyUserUiHelper.getUserSwitcherActionIconResourceId(
-                        isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
-                        isAddUser = model == UserActionModel.ADD_USER,
-                        isGuest = model == UserActionModel.ENTER_GUEST_MODE,
-                    )
-                },
+                LegacyUserUiHelper.getUserSwitcherActionIconResourceId(
+                    isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
+                    isAddUser = model == UserActionModel.ADD_USER,
+                    isGuest = model == UserActionModel.ENTER_GUEST_MODE,
+                    isManageUsers = model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+                    isTablet = true,
+                ),
             textResourceId =
-                if (model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT) {
-                    R.string.manage_users
-                } else {
-                    LegacyUserUiHelper.getUserSwitcherActionTextResourceId(
-                        isGuest = model == UserActionModel.ENTER_GUEST_MODE,
-                        isGuestUserAutoCreated = userInteractor.isGuestUserAutoCreated,
-                        isGuestUserResetting = userInteractor.isGuestUserResetting,
-                        isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
-                        isAddUser = model == UserActionModel.ADD_USER,
-                    )
-                },
-            onClicked = { userInteractor.executeAction(action = model) },
+                LegacyUserUiHelper.getUserSwitcherActionTextResourceId(
+                    isGuest = model == UserActionModel.ENTER_GUEST_MODE,
+                    isGuestUserAutoCreated = guestUserInteractor.isGuestUserAutoCreated,
+                    isGuestUserResetting = guestUserInteractor.isGuestUserResetting,
+                    isAddSupervisedUser = model == UserActionModel.ADD_SUPERVISED_USER,
+                    isAddUser = model == UserActionModel.ADD_USER,
+                    isManageUsers = model == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+                    isTablet = true,
+                ),
+            onClicked = {
+                userSwitcherInteractor.executeAction(action = model)
+                // We don't finish because we want to show a dialog over the full-screen UI and
+                // that dialog can be dismissed in case the user changes their mind and decides not
+                // to add a user.
+                //
+                // We finish for all other actions because they navigate us away from the
+                // full-screen experience or are destructive (like changing to the guest user).
+                val shouldFinish = model != UserActionModel.ADD_USER
+                if (shouldFinish) {
+                    isFinishRequiredDueToExecutedAction.value = true
+                }
+            },
         )
     }
 
@@ -178,23 +195,10 @@ private constructor(
         return if (!model.isSelectable) {
             null
         } else {
-            { userInteractor.selectUser(model.id) }
-        }
-    }
-
-    class Factory
-    @Inject
-    constructor(
-        private val userInteractor: UserInteractor,
-        private val powerInteractor: PowerInteractor,
-    ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            @Suppress("UNCHECKED_CAST")
-            return UserSwitcherViewModel(
-                userInteractor = userInteractor,
-                powerInteractor = powerInteractor,
-            )
-                as T
+            {
+                userSwitcherInteractor.selectUser(model.id)
+                userSwitched.value = true
+            }
         }
     }
 }

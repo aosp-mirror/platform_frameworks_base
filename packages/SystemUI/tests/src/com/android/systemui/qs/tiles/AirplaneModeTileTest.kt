@@ -22,9 +22,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.internal.logging.UiEventLogger
-import com.android.internal.logging.testing.UiEventLoggerFake
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.classifier.FalsingManagerFake
@@ -32,11 +30,14 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.settings.GlobalSettings
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,20 +65,23 @@ class AirplaneModeTileTest : SysuiTestCase() {
     private lateinit var mConnectivityManager: Lazy<ConnectivityManager>
     @Mock
     private lateinit var mGlobalSettings: GlobalSettings
+    @Mock
+    private lateinit var mUserTracker: UserTracker
+    @Mock
+    private lateinit var mUiEventLogger: QsEventLogger
     private lateinit var mTestableLooper: TestableLooper
     private lateinit var mTile: AirplaneModeTile
-
-    private val mUiEventLogger: UiEventLogger = UiEventLoggerFake()
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         mTestableLooper = TestableLooper.get(this)
         Mockito.`when`(mHost.context).thenReturn(mContext)
-        Mockito.`when`(mHost.uiEventLogger).thenReturn(mUiEventLogger)
         Mockito.`when`(mHost.userContext).thenReturn(mContext)
 
-        mTile = AirplaneModeTile(mHost,
+        mTile = AirplaneModeTile(
+            mHost,
+            mUiEventLogger,
             mTestableLooper.looper,
             Handler(mTestableLooper.looper),
             FalsingManagerFake(),
@@ -87,7 +91,14 @@ class AirplaneModeTileTest : SysuiTestCase() {
             mQsLogger,
             mBroadcastDispatcher,
             mConnectivityManager,
-            mGlobalSettings)
+            mGlobalSettings,
+            mUserTracker)
+    }
+
+    @After
+    fun tearDown() {
+        mTile.destroy()
+        mTestableLooper.processAllMessages()
     }
 
     @Test

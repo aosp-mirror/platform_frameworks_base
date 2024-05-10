@@ -15,6 +15,9 @@
  */
 package android.media;
 
+import static android.media.audio.Flags.FLAG_SCO_MANAGED_BY_AUDIO;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.bluetooth.BluetoothProfile;
@@ -173,5 +176,14 @@ public final class BluetoothProfileConnectionInfo implements Parcelable {
      */
     public boolean isLeOutput() {
         return mIsLeOutput;
+    }
+
+    /**
+     * Factory method for <code>BluetoothProfileConnectionInfo</code> for an HFP device.
+     */
+    @FlaggedApi(FLAG_SCO_MANAGED_BY_AUDIO)
+    public static @NonNull BluetoothProfileConnectionInfo createHfpInfo() {
+        return new BluetoothProfileConnectionInfo(BluetoothProfile.HEADSET, false,
+                -1, false);
     }
 }

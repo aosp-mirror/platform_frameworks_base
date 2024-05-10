@@ -86,7 +86,7 @@ public:
     }
 
     // Retrieves the associated object, returns nullValue T if not available.
-    T get(JNIEnv *env, jobject thiz) {
+    T get(JNIEnv *env, jobject thiz) const {
         std::lock_guard lg(mLock);
         // NOLINTNEXTLINE(performance-no-int-to-ptr)
         auto ptr = reinterpret_cast<T*>(env->GetLongField(thiz, mFieldId));
@@ -167,8 +167,10 @@ private:
 //    is possible by checking if the WeakGlobalRef is null equivalent.
 
 auto& getSoundPoolManager() {
-    static ObjectManager<std::shared_ptr<SoundPool>> soundPoolManager(fields.mNativeContext);
-    return soundPoolManager;
+    // never-delete singleton
+    static auto soundPoolManager =
+            new ObjectManager<std::shared_ptr<SoundPool>>(fields.mNativeContext);
+    return *soundPoolManager;
 }
 
 inline auto getSoundPool(JNIEnv *env, jobject thiz) {
@@ -274,8 +276,9 @@ static_assert(std::is_same_v<JWeakValue*, jweak>);
 auto& getSoundPoolJavaRefManager() {
     // Note this can store shared_ptrs to either jweak and jobject,
     // as the underlying type is identical.
-    static ConcurrentHashMap<SoundPool *, std::shared_ptr<JWeakValue>> concurrentHashMap;
-    return concurrentHashMap;
+    static auto concurrentHashMap =
+            new ConcurrentHashMap<SoundPool *, std::shared_ptr<JWeakValue>>();
+    return *concurrentHashMap;
 }
 
 // make_shared_globalref_from_localref() creates a sharable Java global
@@ -364,12 +367,19 @@ android_media_SoundPool_unload(JNIEnv *env, jobject thiz, jint sampleID) {
 static jint
 android_media_SoundPool_play(JNIEnv *env, jobject thiz, jint sampleID,
         jfloat leftVolume, jfloat rightVolume, jint priority, jint loop,
-        jfloat rate)
+        jfloat rate, jint playerIId)
 {
     ALOGV("android_media_SoundPool_play\n");
     auto soundPool = getSoundPool(env, thiz);
     if (soundPool == nullptr) return 0;
-    return (jint) soundPool->play(sampleID, leftVolume, rightVolume, priority, loop, rate);
+
+    return (jint) soundPool->play(sampleID,
+                                  leftVolume,
+                                  rightVolume,
+                                  priority,
+                                  loop,
+                                  rate,
+                                  playerIId);
 }
 
 static void
@@ -563,7 +573,7 @@ static JNINativeMethod gMethods[] = {
         (void *)android_media_SoundPool_unload
     },
     {   "_play",
-        "(IFFIIF)I",
+        "(IFFIIFI)I",
         (void *)android_media_SoundPool_play
     },
     {   "pause",

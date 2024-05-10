@@ -53,6 +53,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
+                android:focusable="true"
+                android:importantForAccessibility="no"
+                android:tint="?attr/shadeActive"
                 android:visibility="gone" />
 
             <FrameLayout
@@ -64,13 +67,13 @@
                     android:layout_width="@dimen/qs_footer_action_button_size"
                     android:layout_height="@dimen/qs_footer_action_button_size"
                     android:layout_gravity="center_vertical|end"
-                    android:background="?android:attr/selectableItemBackground"
+                    android:background="@drawable/qs_footer_edit_circle"
                     android:clickable="true"
                     android:contentDescription="@string/accessibility_quick_settings_edit"
                     android:focusable="true"
                     android:padding="@dimen/qs_footer_icon_padding"
                     android:src="@*android:drawable/ic_mode_edit"
-                    android:tint="?android:attr/textColorPrimary" />
+                    android:tint="?attr/onSurfaceVariant" />
             </FrameLayout>
 
         </LinearLayout>

@@ -47,6 +47,7 @@ import android.app.backup.BackupAgent;
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.FullBackup;
 import android.app.backup.IBackupManagerMonitor;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -84,7 +85,8 @@ public class TarBackupReader {
     private final InputStream mInputStream;
     private final BytesReadListener mBytesReadListener;
 
-    private IBackupManagerMonitor mMonitor;
+
+    private BackupManagerMonitorEventSender mBackupManagerMonitorEventSender;
 
     // Widget blob to be restored out-of-band.
     private byte[] mWidgetData = null;
@@ -93,7 +95,7 @@ public class TarBackupReader {
             IBackupManagerMonitor monitor) {
         mInputStream = inputStream;
         mBytesReadListener = bytesReadListener;
-        mMonitor = monitor;
+        mBackupManagerMonitorEventSender = new BackupManagerMonitorEventSender(monitor);
     }
 
     /**
@@ -322,24 +324,22 @@ public class TarBackupReader {
                         return sigs;
                     } else {
                         Slog.i(TAG, "Missing signature on backed-up package " + info.packageName);
-                        mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                                mMonitor,
+                        mBackupManagerMonitorEventSender.monitorEvent(
                                 LOG_EVENT_ID_MISSING_SIGNATURE,
                                 null,
                                 LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                BackupManagerMonitorUtils.putMonitoringExtra(null,
+                                mBackupManagerMonitorEventSender.putMonitoringExtra(null,
                                         EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName));
                     }
                 } else {
                     Slog.i(TAG, "Expected package " + info.packageName
                             + " but restore manifest claims " + manifestPackage);
-                    Bundle monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(null,
-                            EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
-                    monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(
+                    Bundle monitoringExtras = mBackupManagerMonitorEventSender.putMonitoringExtra(
+                            null, EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
+                    monitoringExtras = mBackupManagerMonitorEventSender.putMonitoringExtra(
                             monitoringExtras,
                             EXTRA_LOG_MANIFEST_PACKAGE_NAME, manifestPackage);
-                    mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                            mMonitor,
+                    mBackupManagerMonitorEventSender.monitorEvent(
                             LOG_EVENT_ID_EXPECTED_DIFFERENT_PACKAGE,
                             null,
                             LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -348,12 +348,11 @@ public class TarBackupReader {
             } else {
                 Slog.i(TAG, "Unknown restore manifest version " + version
                         + " for package " + info.packageName);
-                Bundle monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(null,
-                        EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
-                monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(monitoringExtras,
-                        EXTRA_LOG_EVENT_PACKAGE_VERSION, version);
-                mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                        mMonitor,
+                Bundle monitoringExtras = mBackupManagerMonitorEventSender.putMonitoringExtra(
+                        null, EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
+                monitoringExtras = mBackupManagerMonitorEventSender.putMonitoringExtra(
+                        monitoringExtras, EXTRA_LOG_EVENT_PACKAGE_VERSION, version);
+                mBackupManagerMonitorEventSender.monitorEvent(
                         BackupManagerMonitor.LOG_EVENT_ID_UNKNOWN_VERSION,
                         null,
                         LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -362,12 +361,12 @@ public class TarBackupReader {
             }
         } catch (NumberFormatException e) {
             Slog.w(TAG, "Corrupt restore manifest for package " + info.packageName);
-            mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                    mMonitor,
+            mBackupManagerMonitorEventSender.monitorEvent(
                     BackupManagerMonitor.LOG_EVENT_ID_CORRUPT_MANIFEST,
                     null,
                     LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                    BackupManagerMonitorUtils.putMonitoringExtra(null, EXTRA_LOG_EVENT_PACKAGE_NAME,
+                    mBackupManagerMonitorEventSender.putMonitoringExtra(null,
+                            EXTRA_LOG_EVENT_PACKAGE_NAME,
                             info.packageName));
         } catch (IllegalArgumentException e) {
             Slog.w(TAG, e.getMessage());
@@ -384,13 +383,14 @@ public class TarBackupReader {
      * @param info - file metadata.
      * @param signatures - array of signatures parsed from backup file.
      * @param userId - ID of the user for which restore is performed.
+     * @param context - Context instance.
      * @return a restore policy constant.
      */
     public RestorePolicy chooseRestorePolicy(PackageManager packageManager,
             boolean allowApks, FileMetadata info, Signature[] signatures,
-            PackageManagerInternal pmi, int userId) {
+            PackageManagerInternal pmi, int userId, Context context) {
         return chooseRestorePolicy(packageManager, allowApks, info, signatures, pmi, userId,
-                BackupEligibilityRules.forBackup(packageManager, pmi, userId));
+                BackupEligibilityRules.forBackup(packageManager, pmi, userId, context));
     }
 
     /**
@@ -434,8 +434,7 @@ public class TarBackupReader {
                         if ((pkgInfo.applicationInfo.flags
                                 & ApplicationInfo.FLAG_RESTORE_ANY_VERSION) != 0) {
                             Slog.i(TAG, "Package has restoreAnyVersion; taking data");
-                            mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                                    mMonitor,
+                            mBackupManagerMonitorEventSender.monitorEvent(
                                     LOG_EVENT_ID_RESTORE_ANY_VERSION,
                                     pkgInfo,
                                     LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -444,8 +443,7 @@ public class TarBackupReader {
                         } else if (pkgInfo.getLongVersionCode() >= info.version) {
                             Slog.i(TAG, "Sig + version match; taking data");
                             policy = RestorePolicy.ACCEPT;
-                            mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                                    mMonitor,
+                            mBackupManagerMonitorEventSender.monitorEvent(
                                     LOG_EVENT_ID_VERSIONS_MATCH,
                                     pkgInfo,
                                     LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -464,12 +462,11 @@ public class TarBackupReader {
                             } else {
                                 Slog.i(TAG, "Data requires newer version "
                                         + info.version + "; ignoring");
-                                mMonitor = BackupManagerMonitorUtils
-                                        .monitorEvent(mMonitor,
+                                mBackupManagerMonitorEventSender.monitorEvent(
                                                 LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER,
                                                 pkgInfo,
                                                 LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                                BackupManagerMonitorUtils
+                                                mBackupManagerMonitorEventSender
                                                         .putMonitoringExtra(
                                                                 null,
                                                                 EXTRA_LOG_OLD_VERSION,
@@ -482,8 +479,7 @@ public class TarBackupReader {
                         Slog.w(TAG, "Restore manifest signatures do not match "
                                 + "installed application for "
                                 + info.packageName);
-                        mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                                mMonitor,
+                        mBackupManagerMonitorEventSender.monitorEvent(
                                 LOG_EVENT_ID_FULL_RESTORE_SIGNATURE_MISMATCH,
                                 pkgInfo,
                                 LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -492,8 +488,7 @@ public class TarBackupReader {
                 } else {
                     Slog.w(TAG, "Package " + info.packageName
                             + " is system level with no agent");
-                    mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                            mMonitor,
+                    mBackupManagerMonitorEventSender.monitorEvent(
                             LOG_EVENT_ID_SYSTEM_APP_NO_AGENT,
                             pkgInfo,
                             LOG_EVENT_CATEGORY_AGENT,
@@ -504,8 +499,7 @@ public class TarBackupReader {
                     Slog.i(TAG,
                             "Restore manifest from " + info.packageName + " but allowBackup=false");
                 }
-                mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                        mMonitor,
+                mBackupManagerMonitorEventSender.monitorEvent(
                         LOG_EVENT_ID_FULL_RESTORE_ALLOW_BACKUP_FALSE,
                         pkgInfo,
                         LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -524,14 +518,13 @@ public class TarBackupReader {
             } else {
                 policy = RestorePolicy.IGNORE;
             }
-            Bundle monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(
+            Bundle monitoringExtras = mBackupManagerMonitorEventSender.putMonitoringExtra(
                     null,
                     EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
-            monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(
+            monitoringExtras = mBackupManagerMonitorEventSender.putMonitoringExtra(
                     monitoringExtras,
                     EXTRA_LOG_POLICY_ALLOW_APKS, allowApks);
-            mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                    mMonitor,
+            mBackupManagerMonitorEventSender.monitorEvent(
                     LOG_EVENT_ID_APK_NOT_INSTALLED,
                     null,
                     LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -541,12 +534,11 @@ public class TarBackupReader {
         if (policy == RestorePolicy.ACCEPT_IF_APK && !info.hasApk) {
             Slog.i(TAG, "Cannot restore package " + info.packageName
                     + " without the matching .apk");
-            mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                    mMonitor,
+            mBackupManagerMonitorEventSender.monitorEvent(
                     LOG_EVENT_ID_CANNOT_RESTORE_WITHOUT_APK,
                     null,
                     LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                    BackupManagerMonitorUtils.putMonitoringExtra(null,
+                    mBackupManagerMonitorEventSender.putMonitoringExtra(null,
                             EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName));
         }
 
@@ -630,12 +622,11 @@ public class TarBackupReader {
                         "Metadata mismatch: package " + info.packageName + " but widget data for "
                                 + pkg);
 
-                Bundle monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(null,
+                Bundle monitoringExtras = mBackupManagerMonitorEventSender.putMonitoringExtra(null,
                         EXTRA_LOG_EVENT_PACKAGE_NAME, info.packageName);
-                monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(monitoringExtras,
-                        BackupManagerMonitor.EXTRA_LOG_WIDGET_PACKAGE_NAME, pkg);
-                mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                        mMonitor,
+                monitoringExtras = mBackupManagerMonitorEventSender.putMonitoringExtra(
+                        monitoringExtras, BackupManagerMonitor.EXTRA_LOG_WIDGET_PACKAGE_NAME, pkg);
+                mBackupManagerMonitorEventSender.monitorEvent(
                         BackupManagerMonitor.LOG_EVENT_ID_WIDGET_METADATA_MISMATCH,
                         null,
                         LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -644,13 +635,12 @@ public class TarBackupReader {
         } else {
             Slog.w(TAG, "Unsupported metadata version " + version);
 
-            Bundle monitoringExtras = BackupManagerMonitorUtils
+            Bundle monitoringExtras = mBackupManagerMonitorEventSender
                     .putMonitoringExtra(null, EXTRA_LOG_EVENT_PACKAGE_NAME,
                             info.packageName);
-            monitoringExtras = BackupManagerMonitorUtils.putMonitoringExtra(monitoringExtras,
+            monitoringExtras = mBackupManagerMonitorEventSender.putMonitoringExtra(monitoringExtras,
                     EXTRA_LOG_EVENT_PACKAGE_VERSION, version);
-            mMonitor = BackupManagerMonitorUtils.monitorEvent(
-                    mMonitor,
+            mBackupManagerMonitorEventSender.monitorEvent(
                     BackupManagerMonitor.LOG_EVENT_ID_WIDGET_UNKNOWN_VERSION,
                     null,
                     LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -808,7 +798,7 @@ public class TarBackupReader {
     }
 
     public IBackupManagerMonitor getMonitor() {
-        return mMonitor;
+        return mBackupManagerMonitorEventSender.getMonitor();
     }
 
     public byte[] getWidgetData() {

@@ -16,11 +16,16 @@
 
 #include "compile/PseudolocaleGenerator.h"
 
+#include <stdint.h>
+
 #include <algorithm>
+#include <random>
 
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
+#include "androidfw/ResourceTypes.h"
+#include "androidfw/Util.h"
 #include "compile/Pseudolocalizer.h"
 #include "util/Util.h"
 
@@ -53,7 +58,7 @@ inline static bool operator<(const UnifiedSpan& left, const UnifiedSpan& right) 
   return false;
 }
 
-inline static UnifiedSpan SpanToUnifiedSpan(const StringPool::Span& span) {
+inline static UnifiedSpan SpanToUnifiedSpan(const android::StringPool::Span& span) {
   return UnifiedSpan{*span.name, span.first_char, span.last_char};
 }
 
@@ -111,7 +116,7 @@ static std::vector<UnifiedSpan> MergeSpans(const StyledString& string) {
 
 std::unique_ptr<StyledString> PseudolocalizeStyledString(StyledString* string,
                                                          Pseudolocalizer::Method method,
-                                                         StringPool* pool) {
+                                                         android::StringPool* pool) {
   Pseudolocalizer localizer(method);
 
   // Collect the spans and untranslatable sections into one set of spans, sorted by first_char.
@@ -121,7 +126,7 @@ std::unique_ptr<StyledString> PseudolocalizeStyledString(StyledString* string,
 
   // All Span indices are UTF-16 based, according to the resources.arsc format expected by the
   // runtime. So we will do all our processing in UTF-16, then convert back.
-  const std::u16string text16 = util::Utf8ToUtf16(string->value->value);
+  const std::u16string text16 = android::util::Utf8ToUtf16(string->value->value);
 
   // Convenient wrapper around the text that allows us to work with StringPieces.
   const StringPiece16 text(text16);
@@ -154,7 +159,7 @@ std::unique_ptr<StyledString> PseudolocalizeStyledString(StyledString* string,
         cursor += substr.size();
 
         // Pseudolocalize the substring.
-        std::string new_substr = util::Utf16ToUtf8(substr);
+        std::string new_substr = android::util::Utf16ToUtf8(substr);
         if (translatable) {
           new_substr = localizer.Text(new_substr);
         }
@@ -181,7 +186,7 @@ std::unique_ptr<StyledString> PseudolocalizeStyledString(StyledString* string,
       cursor += substr.size();
 
       // Pseudolocalize the substring.
-      std::string new_substr = util::Utf16ToUtf8(substr);
+      std::string new_substr = android::util::Utf16ToUtf8(substr);
       if (translatable) {
         new_substr = localizer.Text(new_substr);
       }
@@ -199,16 +204,18 @@ std::unique_ptr<StyledString> PseudolocalizeStyledString(StyledString* string,
   }
 
   // Finish the pseudolocalization at the end of the string.
-  new_string += localizer.Text(util::Utf16ToUtf8(text.substr(cursor, text.size() - cursor)));
+  new_string +=
+      localizer.Text(android::util::Utf16ToUtf8(text.substr(cursor, text.size() - cursor)));
   new_string += localizer.End();
 
-  StyleString localized;
+  android::StyleString localized;
   localized.str = std::move(new_string);
 
   // Convert the UnifiedSpans into regular Spans, skipping the UntranslatableSections.
   for (UnifiedSpan& span : merged_spans) {
     if (span.tag) {
-      localized.spans.push_back(Span{std::move(span.tag.value()), span.first_char, span.last_char});
+      localized.spans.push_back(
+          android::Span{std::move(span.tag.value()), span.first_char, span.last_char});
     }
   }
   return util::make_unique<StyledString>(pool->MakeRef(localized));
@@ -222,8 +229,9 @@ class Visitor : public ValueVisitor {
   std::unique_ptr<Value> value;
   std::unique_ptr<Item> item;
 
-  Visitor(StringPool* pool, Pseudolocalizer::Method method)
-      : pool_(pool), method_(method), localizer_(method) {}
+  Visitor(android::StringPool* pool, Pseudolocalizer::Method method)
+      : pool_(pool), method_(method), localizer_(method) {
+  }
 
   void Visit(Plural* plural) override {
     CloningValueTransformer cloner(pool_);
@@ -284,13 +292,90 @@ class Visitor : public ValueVisitor {
  private:
   DISALLOW_COPY_AND_ASSIGN(Visitor);
 
-  StringPool* pool_;
+  android::StringPool* pool_;
   Pseudolocalizer::Method method_;
   Pseudolocalizer localizer_;
 };
 
+class GrammaticalGenderVisitor : public ValueVisitor {
+ public:
+  std::unique_ptr<Value> value;
+  std::unique_ptr<Item> item;
+
+  GrammaticalGenderVisitor(android::StringPool* pool, uint8_t grammaticalInflection)
+      : pool_(pool), grammaticalInflection_(grammaticalInflection) {
+  }
+
+  void Visit(Plural* plural) override {
+    CloningValueTransformer cloner(pool_);
+    std::unique_ptr<Plural> grammatical_gendered = util::make_unique<Plural>();
+    for (size_t i = 0; i < plural->values.size(); i++) {
+      if (plural->values[i]) {
+        GrammaticalGenderVisitor sub_visitor(pool_, grammaticalInflection_);
+        plural->values[i]->Accept(&sub_visitor);
+        if (sub_visitor.item) {
+          grammatical_gendered->values[i] = std::move(sub_visitor.item);
+        } else {
+          grammatical_gendered->values[i] = plural->values[i]->Transform(cloner);
+        }
+      }
+    }
+    grammatical_gendered->SetSource(plural->GetSource());
+    grammatical_gendered->SetWeak(true);
+    value = std::move(grammatical_gendered);
+  }
+
+  std::string AddGrammaticalGenderPrefix(const std::string_view& original_string) {
+    std::string result;
+    switch (grammaticalInflection_) {
+      case android::ResTable_config::GRAMMATICAL_GENDER_MASCULINE:
+        result = std::string("(M)") + std::string(original_string);
+        break;
+      case android::ResTable_config::GRAMMATICAL_GENDER_FEMININE:
+        result = std::string("(F)") + std::string(original_string);
+        break;
+      case android::ResTable_config::GRAMMATICAL_GENDER_NEUTER:
+        result = std::string("(N)") + std::string(original_string);
+        break;
+      default:
+        result = std::string(original_string);
+        break;
+    }
+    return result;
+  }
+
+  void Visit(String* string) override {
+    std::string prefixed_string = AddGrammaticalGenderPrefix(std::string(*string->value));
+    std::unique_ptr<String> grammatical_gendered =
+        util::make_unique<String>(pool_->MakeRef(prefixed_string));
+    grammatical_gendered->SetSource(string->GetSource());
+    grammatical_gendered->SetWeak(true);
+    item = std::move(grammatical_gendered);
+  }
+
+  void Visit(StyledString* string) override {
+    std::string prefixed_string = AddGrammaticalGenderPrefix(std::string(string->value->value));
+    android::StyleString new_string;
+    new_string.str = std::move(prefixed_string);
+    for (const android::StringPool::Span& span : string->value->spans) {
+      new_string.spans.emplace_back(android::Span{*span.name, span.first_char, span.last_char});
+    }
+    std::unique_ptr<StyledString> grammatical_gendered =
+        util::make_unique<StyledString>(pool_->MakeRef(new_string));
+    grammatical_gendered->SetSource(string->GetSource());
+    grammatical_gendered->SetWeak(true);
+    item = std::move(grammatical_gendered);
+  }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(GrammaticalGenderVisitor);
+  android::StringPool* pool_;
+  uint8_t grammaticalInflection_;
+};
+
 ConfigDescription ModifyConfigForPseudoLocale(const ConfigDescription& base,
-                                              Pseudolocalizer::Method m) {
+                                              Pseudolocalizer::Method m,
+                                              uint8_t grammaticalInflection) {
   ConfigDescription modified = base;
   switch (m) {
     case Pseudolocalizer::Method::kAccent:
@@ -309,12 +394,64 @@ ConfigDescription ModifyConfigForPseudoLocale(const ConfigDescription& base,
     default:
       break;
   }
+  modified.grammaticalInflection = grammaticalInflection;
   return modified;
 }
 
+void GrammaticalGender(ResourceConfigValue* original_value,
+                       ResourceConfigValue* localized_config_value, android::StringPool* pool,
+                       ResourceEntry* entry, const Pseudolocalizer::Method method,
+                       uint8_t grammaticalInflection) {
+  GrammaticalGenderVisitor visitor(pool, grammaticalInflection);
+  localized_config_value->value->Accept(&visitor);
+
+  std::unique_ptr<Value> grammatical_gendered_value;
+  if (visitor.value) {
+    grammatical_gendered_value = std::move(visitor.value);
+  } else if (visitor.item) {
+    grammatical_gendered_value = std::move(visitor.item);
+  }
+  if (!grammatical_gendered_value) {
+    return;
+  }
+
+  ConfigDescription config =
+      ModifyConfigForPseudoLocale(original_value->config, method, grammaticalInflection);
+
+  ResourceConfigValue* grammatical_gendered_config_value =
+      entry->FindOrCreateValue(config, original_value->product);
+  if (!grammatical_gendered_config_value->value) {
+    // Only use auto-generated pseudo-localization if none is defined.
+    grammatical_gendered_config_value->value = std::move(grammatical_gendered_value);
+  }
+}
+
+const uint32_t MASK_MASCULINE = 1;  // Bit mask for masculine
+const uint32_t MASK_FEMININE = 2;   // Bit mask for feminine
+const uint32_t MASK_NEUTER = 4;     // Bit mask for neuter
+
+void GrammaticalGenderIfNeeded(ResourceConfigValue* original_value, ResourceConfigValue* new_value,
+                               android::StringPool* pool, ResourceEntry* entry,
+                               const Pseudolocalizer::Method method, uint32_t gender_state) {
+  if (gender_state & MASK_FEMININE) {
+    GrammaticalGender(original_value, new_value, pool, entry, method,
+                      android::ResTable_config::GRAMMATICAL_GENDER_FEMININE);
+  }
+
+  if (gender_state & MASK_MASCULINE) {
+    GrammaticalGender(original_value, new_value, pool, entry, method,
+                      android::ResTable_config::GRAMMATICAL_GENDER_MASCULINE);
+  }
+
+  if (gender_state & MASK_NEUTER) {
+    GrammaticalGender(original_value, new_value, pool, entry, method,
+                      android::ResTable_config::GRAMMATICAL_GENDER_NEUTER);
+  }
+}
+
 void PseudolocalizeIfNeeded(const Pseudolocalizer::Method method,
-                            ResourceConfigValue* original_value,
-                            StringPool* pool, ResourceEntry* entry) {
+                            ResourceConfigValue* original_value, android::StringPool* pool,
+                            ResourceEntry* entry, uint32_t gender_state, bool gender_flag) {
   Visitor visitor(pool, method);
   original_value->value->Accept(&visitor);
 
@@ -329,14 +466,17 @@ void PseudolocalizeIfNeeded(const Pseudolocalizer::Method method,
     return;
   }
 
-  ConfigDescription config_with_accent =
-      ModifyConfigForPseudoLocale(original_value->config, method);
+  ConfigDescription config_with_accent = ModifyConfigForPseudoLocale(
+      original_value->config, method, android::ResTable_config::GRAMMATICAL_GENDER_ANY);
 
   ResourceConfigValue* new_config_value =
       entry->FindOrCreateValue(config_with_accent, original_value->product);
   if (!new_config_value->value) {
     // Only use auto-generated pseudo-localization if none is defined.
     new_config_value->value = std::move(localized_value);
+  }
+  if (gender_flag) {
+    GrammaticalGenderIfNeeded(original_value, new_config_value, pool, entry, method, gender_state);
   }
 }
 
@@ -352,16 +492,71 @@ static bool IsPseudolocalizable(ResourceConfigValue* config_value) {
 
 }  // namespace
 
+bool ParseGenderValuesAndSaveState(const std::string& grammatical_gender_values,
+                                   uint32_t* gender_state, android::IDiagnostics* diag) {
+  std::vector<std::string> values = util::SplitAndLowercase(grammatical_gender_values, ',');
+  for (size_t i = 0; i < values.size(); i++) {
+    if (values[i].length() != 0) {
+      if (values[i] == "f") {
+        *gender_state |= MASK_FEMININE;
+      } else if (values[i] == "m") {
+        *gender_state |= MASK_MASCULINE;
+      } else if (values[i] == "n") {
+        *gender_state |= MASK_NEUTER;
+      } else {
+        diag->Error(android::DiagMessage() << "Invalid grammatical gender value: " << values[i]);
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool ParseGenderRatio(const std::string& grammatical_gender_ratio, float* gender_ratio,
+                      android::IDiagnostics* diag) {
+  const char* input = grammatical_gender_ratio.c_str();
+  char* endPtr;
+  errno = 0;
+  *gender_ratio = strtof(input, &endPtr);
+  if (endPtr == input || *endPtr != '\0' || errno == ERANGE || *gender_ratio < 0 ||
+      *gender_ratio > 1) {
+    diag->Error(android::DiagMessage()
+                << "Invalid grammatical gender ratio: " << grammatical_gender_ratio
+                << ", must be a real number between 0 and 1");
+    return false;
+  }
+  return true;
+}
+
 bool PseudolocaleGenerator::Consume(IAaptContext* context, ResourceTable* table) {
+  uint32_t gender_state = 0;
+  if (!ParseGenderValuesAndSaveState(grammatical_gender_values_, &gender_state,
+                                     context->GetDiagnostics())) {
+    return false;
+  }
+
+  float gender_ratio = 0;
+  if (!ParseGenderRatio(grammatical_gender_ratio_, &gender_ratio, context->GetDiagnostics())) {
+    return false;
+  }
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> distrib(0.0, 1.0);
+
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {
+        bool gender_flag = false;
+        if (distrib(gen) < gender_ratio) {
+          gender_flag = true;
+        }
         std::vector<ResourceConfigValue*> values = entry->FindValuesIf(IsPseudolocalizable);
         for (ResourceConfigValue* value : values) {
           PseudolocalizeIfNeeded(Pseudolocalizer::Method::kAccent, value, &table->string_pool,
-                                 entry.get());
+                                 entry.get(), gender_state, gender_flag);
           PseudolocalizeIfNeeded(Pseudolocalizer::Method::kBidi, value, &table->string_pool,
-                                 entry.get());
+                                 entry.get(), gender_state, gender_flag);
         }
       }
     }

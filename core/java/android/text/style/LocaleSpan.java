@@ -126,4 +126,9 @@ public class LocaleSpan extends MetricAffectingSpan implements ParcelableSpan {
     private static void apply(@NonNull Paint paint, @NonNull LocaleList locales) {
         paint.setTextLocales(locales);
     }
+
+    @Override
+    public String toString() {
+        return "LocaleSpan{locales=" + getLocales() + '}';
+    }
 }

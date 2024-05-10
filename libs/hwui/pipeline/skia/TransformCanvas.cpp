@@ -19,19 +19,25 @@
 #include "HolePunch.h"
 #include "SkData.h"
 #include "SkDrawable.h"
+#include "SkMatrix.h"
+#include "SkPaint.h"
+#include "SkRect.h"
+#include "SkRRect.h"
 
 using namespace android::uirenderer::skiapipeline;
 
 void TransformCanvas::onDrawAnnotation(const SkRect& rect, const char* key, SkData* value) {
     if (HOLE_PUNCH_ANNOTATION == key) {
         auto* rectParams = reinterpret_cast<const float*>(value->data());
-        float radiusX = rectParams[0];
-        float radiusY = rectParams[1];
+        const float radiusX = rectParams[0];
+        const float radiusY = rectParams[1];
+        const float alpha = rectParams[2];
         SkRRect roundRect = SkRRect::MakeRectXY(rect, radiusX, radiusY);
 
         SkPaint paint;
         paint.setColor(SkColors::kBlack);
         paint.setBlendMode(mHolePunchBlendMode);
+        paint.setAlphaf(alpha);
         mWrappedCanvas->drawRRect(roundRect, paint);
     }
 }

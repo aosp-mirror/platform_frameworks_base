@@ -56,8 +56,7 @@ public class PhoneMediaDeviceTest {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
 
-        mPhoneMediaDevice =
-                new PhoneMediaDevice(mContext, null, mInfo, null);
+        mPhoneMediaDevice = new PhoneMediaDevice(mContext, mInfo, null);
     }
 
     @Test

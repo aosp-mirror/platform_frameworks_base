@@ -20,7 +20,7 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
-import static com.android.systemui.animation.Interpolators.FAST_OUT_SLOW_IN;
+import static com.android.app.animation.Interpolators.FAST_OUT_SLOW_IN;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -60,7 +60,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
@@ -104,8 +104,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private String mAppName;
     private int mAppUid;
     private String mDelegatePkg;
-    private int mNumUniqueChannelsInRow;
-    private Set<NotificationChannel> mUniqueChannelsInRow;
     private NotificationChannel mSingleNotificationChannel;
     private int mStartingChannelImportance;
     private boolean mWasShownHighPriority;
@@ -196,7 +194,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             ChannelEditorDialogController channelEditorDialogController,
             String pkg,
             NotificationChannel notificationChannel,
-            Set<NotificationChannel> uniqueChannelsInRow,
             NotificationEntry entry,
             OnSettingsClickListener onSettingsClick,
             OnAppSettingsClickListener onAppSettingsClick,
@@ -204,16 +201,15 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             boolean isDeviceProvisioned,
             boolean isNonblockable,
             boolean wasShownHighPriority,
-            AssistantFeedbackController assistantFeedbackController)
+            AssistantFeedbackController assistantFeedbackController,
+            MetricsLogger metricsLogger)
             throws RemoteException {
         mINotificationManager = iNotificationManager;
-        mMetricsLogger = Dependency.get(MetricsLogger.class);
+        mMetricsLogger = metricsLogger;
         mOnUserInteractionCallback = onUserInteractionCallback;
         mChannelEditorDialogController = channelEditorDialogController;
         mAssistantFeedbackController = assistantFeedbackController;
         mPackageName = pkg;
-        mUniqueChannelsInRow = uniqueChannelsInRow;
-        mNumUniqueChannelsInRow = uniqueChannelsInRow.size();
         mEntry = entry;
         mSbn = entry.getSbn();
         mPm = pm;
@@ -235,15 +231,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
         int numTotalChannels = mINotificationManager.getNumNotificationChannelsForPackage(
                 pkg, mAppUid, false /* includeDeleted */);
-        if (mNumUniqueChannelsInRow == 0) {
-            throw new IllegalArgumentException("bindNotification requires at least one channel");
-        } else  {
-            // Special behavior for the Default channel if no other channels have been defined.
-            mIsSingleDefaultChannel = mNumUniqueChannelsInRow == 1
-                    && mSingleNotificationChannel.getId().equals(
-                            NotificationChannel.DEFAULT_CHANNEL_ID)
-                    && numTotalChannels == 1;
-        }
+        mIsSingleDefaultChannel = mSingleNotificationChannel.getId().equals(
+                NotificationChannel.DEFAULT_CHANNEL_ID) && numTotalChannels == 1;
         mIsAutomaticChosen = getAlertingBehavior() == BEHAVIOR_AUTOMATIC;
 
         bindHeader();
@@ -270,11 +259,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             findViewById(R.id.interruptiveness_settings).setVisibility(GONE);
             ((TextView) findViewById(R.id.done)).setText(R.string.inline_done_button);
             findViewById(R.id.turn_off_notifications).setVisibility(GONE);
-        } else if (mNumUniqueChannelsInRow > 1) {
-            findViewById(R.id.non_configurable_call_text).setVisibility(GONE);
-            findViewById(R.id.non_configurable_text).setVisibility(GONE);
-            findViewById(R.id.interruptiveness_settings).setVisibility(GONE);
-            findViewById(R.id.non_configurable_multichannel_text).setVisibility(VISIBLE);
         } else {
             findViewById(R.id.non_configurable_call_text).setVisibility(GONE);
             findViewById(R.id.non_configurable_text).setVisibility(GONE);
@@ -360,9 +344,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         if (mAppUid >= 0 && mOnSettingsClickListener != null && mIsDeviceProvisioned) {
             final int appUidF = mAppUid;
             return ((View view) -> {
-                mOnSettingsClickListener.onClick(view,
-                        mNumUniqueChannelsInRow > 1 ? null : mSingleNotificationChannel,
-                        appUidF);
+                mOnSettingsClickListener.onClick(view, mSingleNotificationChannel, appUidF);
             });
         }
         return null;
@@ -374,7 +356,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 mPresentingChannelEditorDialog = true;
 
                 mChannelEditorDialogController.prepareDialogForApp(mAppName, mPackageName, mAppUid,
-                        mUniqueChannelsInRow, mPkgIcon, mOnSettingsClickListener);
+                        mSingleNotificationChannel, mPkgIcon, mOnSettingsClickListener);
                 mChannelEditorDialogController.setOnFinishListener(() -> {
                     mPresentingChannelEditorDialog = false;
                     mGutsContainer.closeControls(this, false);
@@ -391,7 +373,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     private void bindName() {
         final TextView channelName = findViewById(R.id.channel_name);
-        if (mIsSingleDefaultChannel || mNumUniqueChannelsInRow > 1) {
+        if (mIsSingleDefaultChannel) {
             channelName.setVisibility(View.GONE);
         } else {
             channelName.setText(mSingleNotificationChannel.getName());
@@ -458,7 +440,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             Handler bgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
             bgHandler.post(
                     new UpdateImportanceRunnable(mINotificationManager, mPackageName, mAppUid,
-                            mNumUniqueChannelsInRow == 1 ? mSingleNotificationChannel : null,
+                            mSingleNotificationChannel,
                             mStartingChannelImportance, newImportance, mIsAutomaticChosen));
             mOnUserInteractionCallback.onImportanceChanged(mEntry);
         }

@@ -12,26 +12,31 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Describes the source of some work that may be done by someone else.
  * Currently the public representation of what a work source is not
  * defined; this is an opaque container.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class WorkSource implements Parcelable {
     static final String TAG = "WorkSource";
     static final boolean DEBUG = false;
 
     @UnsupportedAppUsage
     int mNum;
+
     @UnsupportedAppUsage
-    int[] mUids;
+    @NonNull
+    int[] mUids = new int[0];
+
     @UnsupportedAppUsage
+    @Nullable
     String[] mNames;
 
     private ArrayList<WorkChain> mChains;
@@ -73,13 +78,8 @@ public class WorkSource implements Parcelable {
             return;
         }
         mNum = orig.mNum;
-        if (orig.mUids != null) {
-            mUids = orig.mUids.clone();
-            mNames = orig.mNames != null ? orig.mNames.clone() : null;
-        } else {
-            mUids = null;
-            mNames = null;
-        }
+        mUids = orig.mUids.clone();
+        mNames = orig.mNames != null ? orig.mNames.clone() : null;
 
         if (orig.mChains != null) {
             // Make a copy of all WorkChains that exist on |orig| since they are mutable.
@@ -114,7 +114,7 @@ public class WorkSource implements Parcelable {
      */
     @SystemApi
     public WorkSource(int uid, @NonNull String packageName) {
-        Preconditions.checkNotNull(packageName, "packageName can't be null");
+        Objects.requireNonNull(packageName, "packageName can't be null");
         mNum = 1;
         mUids = new int[] { uid, 0 };
         mNames = new String[] { packageName, null };
@@ -124,11 +124,11 @@ public class WorkSource implements Parcelable {
     @UnsupportedAppUsage
     WorkSource(Parcel in) {
         mNum = in.readInt();
-        mUids = in.createIntArray();
+        mUids = Objects.requireNonNullElse(in.createIntArray(), new int[0]);
         mNames = in.createStringArray();
 
         int numChains = in.readInt();
-        if (numChains > 0) {
+        if (numChains >= 0) {
             mChains = new ArrayList<>(numChains);
             in.readParcelableList(mChains, WorkChain.class.getClassLoader(), android.os.WorkSource.WorkChain.class);
         } else {
@@ -142,9 +142,15 @@ public class WorkSource implements Parcelable {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static boolean isChainedBatteryAttributionEnabled(Context context) {
         return Settings.Global.getInt(context.getContentResolver(),
                 Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED, 0) == 1;
+    }
+
+    /** @hide */
+    public static boolean isChainedBatteryAttributionEnabled$ravenwood(Context context) {
+        return false;
     }
 
     /**
@@ -318,30 +324,22 @@ public class WorkSource implements Parcelable {
      */
     public void set(WorkSource other) {
         if (other == null) {
-            mNum = 0;
-            if (mChains != null) {
-                mChains.clear();
-            }
+            clear();
             return;
         }
         mNum = other.mNum;
-        if (other.mUids != null) {
-            if (mUids != null && mUids.length >= mNum) {
-                System.arraycopy(other.mUids, 0, mUids, 0, mNum);
+        if (mUids.length >= mNum) { // this has more data than other
+            System.arraycopy(other.mUids, 0, mUids, 0, mNum);
+        } else {
+            mUids = other.mUids.clone();
+        }
+        if (other.mNames != null) {
+            if (mNames != null && mNames.length >= mNum) {
+                System.arraycopy(other.mNames, 0, mNames, 0, mNum);
             } else {
-                mUids = other.mUids.clone();
-            }
-            if (other.mNames != null) {
-                if (mNames != null && mNames.length >= mNum) {
-                    System.arraycopy(other.mNames, 0, mNames, 0, mNum);
-                } else {
-                    mNames = other.mNames.clone();
-                }
-            } else {
-                mNames = null;
+                mNames = other.mNames.clone();
             }
         } else {
-            mUids = null;
             mNames = null;
         }
 
@@ -361,7 +359,7 @@ public class WorkSource implements Parcelable {
     /** @hide */
     public void set(int uid) {
         mNum = 1;
-        if (mUids == null) mUids = new int[2];
+        if (mUids.length == 0) mUids = new int[2];
         mUids[0] = uid;
         mNames = null;
         if (mChains != null) {
@@ -375,7 +373,7 @@ public class WorkSource implements Parcelable {
             throw new NullPointerException("Name can't be null");
         }
         mNum = 1;
-        if (mUids == null) {
+        if (mUids.length == 0) {
             mUids = new int[2];
             mNames = new String[2];
         }
@@ -727,7 +725,7 @@ public class WorkSource implements Parcelable {
                 if (DEBUG) Log.d(TAG, "i1=" + i1 + " i2=" + i2 + " N1=" + N1
                         + ": insert " + uids2[i2]);
                 changed = true;
-                if (uids1 == null) {
+                if (uids1.length == 0) {
                     uids1 = new int[4];
                     uids1[0] = uids2[i2];
                 } else if (N1 >= uids1.length) {
@@ -866,7 +864,7 @@ public class WorkSource implements Parcelable {
 
     private void insert(int index, int uid)  {
         if (DEBUG) Log.d(TAG, "Insert in " + this + " @ " + index + " uid " + uid);
-        if (mUids == null) {
+        if (mUids.length == 0) {
             mUids = new int[4];
             mUids[0] = uid;
             mNum = 1;
@@ -891,7 +889,7 @@ public class WorkSource implements Parcelable {
     }
 
     private void insert(int index, int uid, String name)  {
-        if (mUids == null) {
+        if (mNum == 0) {
             mUids = new int[4];
             mUids[0] = uid;
             mNames = new String[4];
@@ -1244,8 +1242,8 @@ public class WorkSource implements Parcelable {
         proto.end(workSourceToken);
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<WorkSource> CREATOR
-            = new Parcelable.Creator<WorkSource>() {
+    @NonNull
+    public static final Parcelable.Creator<WorkSource> CREATOR = new Parcelable.Creator<>() {
         public WorkSource createFromParcel(Parcel in) {
             return new WorkSource(in);
         }

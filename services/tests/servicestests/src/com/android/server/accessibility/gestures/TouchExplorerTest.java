@@ -44,6 +44,10 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -56,6 +60,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.EventStreamTransformation;
+import com.android.server.accessibility.Flags;
 import com.android.server.accessibility.utils.GestureLogParser;
 import com.android.server.testutils.OffsettableClock;
 
@@ -75,6 +80,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+
 
 @RunWith(AndroidJUnit4.class)
 public class TouchExplorerTest {
@@ -119,6 +125,9 @@ public class TouchExplorerTest {
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     /**
      * {@link TouchExplorer#sendDownForAllNotInjectedPointers} injecting events with the same object
      * is resulting {@link ArgumentCaptor} to capture events with last state. Before implementation
@@ -161,11 +170,16 @@ public class TouchExplorerTest {
         goFromStateClearTo(STATE_TOUCH_EXPLORING_1FINGER);
         // Wait for transiting to touch exploring state.
         mHandler.fastForward(2 * USER_INTENT_TIMEOUT);
-        moveEachPointers(mLastEvent, p(10, 10));
-        send(mLastEvent);
+        assertState(STATE_TOUCH_EXPLORING);
+        // Manually construct the next move event. Using moveEachPointers() will batch the move
+        // event which produces zero movement for some reason.
+        float[] x = new float[1];
+        float[] y = new float[1];
+        x[0] = mLastEvent.getX(0) + mTouchSlop;
+        y[0] = mLastEvent.getY(0) + mTouchSlop;
+        send(manyPointerEvent(ACTION_MOVE, x, y));
         goToStateClearFrom(STATE_TOUCH_EXPLORING_1FINGER);
         assertCapturedEvents(ACTION_HOVER_ENTER, ACTION_HOVER_MOVE, ACTION_HOVER_EXIT);
-        assertState(STATE_TOUCH_EXPLORING);
     }
 
     /**
@@ -173,7 +187,8 @@ public class TouchExplorerTest {
      * change the coordinates.
      */
     @Test
-    public void testOneFingerMoveWithExtraMoveEvents() {
+    @RequiresFlagsEnabled(Flags.FLAG_REDUCE_TOUCH_EXPLORATION_SENSITIVITY)
+    public void testOneFingerMoveWithExtraMoveEvents_generatesOneMoveEvent() {
         goFromStateClearTo(STATE_TOUCH_EXPLORING_1FINGER);
         // Inject a set of move events that have the same coordinates as the down event.
         moveEachPointers(mLastEvent, p(0, 0));
@@ -181,7 +196,33 @@ public class TouchExplorerTest {
         // Wait for transition to touch exploring state.
         mHandler.fastForward(2 * USER_INTENT_TIMEOUT);
         // Now move for real.
-        moveEachPointers(mLastEvent, p(10, 10));
+        moveAtLeastTouchSlop(mLastEvent);
+        send(mLastEvent);
+        // One more move event with no change.
+        moveEachPointers(mLastEvent, p(0, 0));
+        send(mLastEvent);
+        goToStateClearFrom(STATE_TOUCH_EXPLORING_1FINGER);
+        assertCapturedEvents(
+                ACTION_HOVER_ENTER,
+                ACTION_HOVER_MOVE,
+                ACTION_HOVER_EXIT);
+    }
+
+    /**
+     * Test the case where ACTION_DOWN is followed by a number of ACTION_MOVE events that do not
+     * change the coordinates.
+     */
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REDUCE_TOUCH_EXPLORATION_SENSITIVITY)
+    public void testOneFingerMoveWithExtraMoveEvents_generatesThreeMoveEvent() {
+        goFromStateClearTo(STATE_TOUCH_EXPLORING_1FINGER);
+        // Inject a set of move events that have the same coordinates as the down event.
+        moveEachPointers(mLastEvent, p(0, 0));
+        send(mLastEvent);
+        // Wait for transition to touch exploring state.
+        mHandler.fastForward(2 * USER_INTENT_TIMEOUT);
+        // Now move for real.
+        moveAtLeastTouchSlop(mLastEvent);
         send(mLastEvent);
         // One more move event with no change.
         moveEachPointers(mLastEvent, p(0, 0));
@@ -242,7 +283,7 @@ public class TouchExplorerTest {
         moveEachPointers(mLastEvent, p(0, 0), p(0, 0));
         send(mLastEvent);
         // Now move for real.
-        moveEachPointers(mLastEvent, p(10, 10), p(10, 10));
+        moveEachPointers(mLastEvent, p(mTouchSlop, mTouchSlop), p(mTouchSlop, mTouchSlop));
         send(mLastEvent);
         goToStateClearFrom(STATE_DRAGGING_2FINGERS);
         assertCapturedEvents(ACTION_DOWN, ACTION_MOVE, ACTION_MOVE, ACTION_MOVE, ACTION_UP);
@@ -251,9 +292,10 @@ public class TouchExplorerTest {
     @Test
     public void testUpEvent_OneFingerMove_clearStateAndInjectHoverEvents() {
         goFromStateClearTo(STATE_TOUCH_EXPLORING_1FINGER);
-        moveEachPointers(mLastEvent, p(10, 10));
+        moveAtLeastTouchSlop(mLastEvent);
         send(mLastEvent);
-
+        // Wait 10 ms to make sure that hover enter and exit are not scheduled for the same moment.
+        mHandler.fastForward(10);
         send(upEvent());
         // Wait for sending hover exit event to transit to clear state.
         mHandler.fastForward(USER_INTENT_TIMEOUT);
@@ -276,7 +318,7 @@ public class TouchExplorerTest {
 
         // Wait for the finger moving to the second view.
         mHandler.fastForward(oneThirdUserIntentTimeout);
-        moveEachPointers(mLastEvent, p(10, 10));
+        moveAtLeastTouchSlop(mLastEvent);
         send(mLastEvent);
 
         // Wait for the finger lifting from the second view.
@@ -401,7 +443,6 @@ public class TouchExplorerTest {
         // Manually construct the next move event. Using moveEachPointers() will batch the move
         // event onto the pointer up event which will mean that the move event still has a pointer
         // count of 3.
-        // Todo: refactor to avoid using batching as there is no special reason to do it that way.
         float[] x = new float[2];
         float[] y = new float[2];
         x[0] = mLastEvent.getX(0) + 100;
@@ -733,6 +774,9 @@ public class TouchExplorerTest {
         }
     }
 
+    private void moveAtLeastTouchSlop(MotionEvent event) {
+        moveEachPointers(event, p(2 * mTouchSlop, 0));
+    }
     /**
      * A {@link android.os.Handler} that doesn't process messages until {@link #fastForward(int)} is
      * invoked.

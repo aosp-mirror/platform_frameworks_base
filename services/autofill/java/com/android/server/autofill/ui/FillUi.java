@@ -60,6 +60,7 @@ import com.android.internal.R;
 import com.android.server.UiThread;
 import com.android.server.autofill.AutofillManagerService;
 import com.android.server.autofill.Helper;
+import com.android.server.utils.Slogf;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -86,9 +87,11 @@ final class FillUi {
         void onDatasetPicked(@NonNull Dataset dataset);
         void onCanceled();
         void onDestroy();
+        void onShown();
         void requestShowFillUi(int width, int height,
                 IAutofillWindowPresenter windowPresenter);
         void requestHideFillUi();
+        void requestHideFillUiWhenDestroyed();
         void startIntentSender(IntentSender intentSender);
         void dispatchUnhandledKey(KeyEvent keyEvent);
         void cancelSession();
@@ -124,6 +127,8 @@ final class FillUi {
 
     private final int mThemeId;
 
+    private int mMaxInputLengthForAutofill;
+
     public static boolean isFullScreen(Context context) {
         if (sFullScreenMode != null) {
             if (sVerbose) Slog.v(TAG, "forcing full-screen mode to " + sFullScreenMode);
@@ -135,17 +140,22 @@ final class FillUi {
     FillUi(@NonNull Context context, @NonNull FillResponse response,
             @NonNull AutofillId focusedViewId, @Nullable String filterText,
             @NonNull OverlayControl overlayControl, @NonNull CharSequence serviceLabel,
-            @NonNull Drawable serviceIcon, boolean nightMode, @NonNull Callback callback) {
-        if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
+            @NonNull Drawable serviceIcon, boolean nightMode, int maxInputLengthForAutofill,
+            @NonNull Callback callback) {
+        if (sVerbose) {
+            Slogf.v(TAG, "nightMode: %b displayId: %d", nightMode, context.getDisplayId());
+        }
         mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mCallback = callback;
         mFullScreen = isFullScreen(context);
         mContext = new ContextThemeWrapper(context, mThemeId);
+        mMaxInputLengthForAutofill = maxInputLengthForAutofill;
 
         final LayoutInflater inflater = LayoutInflater.from(mContext);
 
-        final RemoteViews headerPresentation = response.getHeader();
-        final RemoteViews footerPresentation = response.getFooter();
+        final RemoteViews headerPresentation = Helper.sanitizeRemoteView(response.getHeader());
+        final RemoteViews footerPresentation = Helper.sanitizeRemoteView(response.getFooter());
+
         final ViewGroup decor;
         if (mFullScreen) {
             decor = (ViewGroup) inflater.inflate(R.layout.autofill_dataset_picker_fullscreen, null);
@@ -223,6 +233,9 @@ final class FillUi {
             ViewGroup container = decor.findViewById(R.id.autofill_dataset_picker);
             final View content;
             try {
+                if (Helper.sanitizeRemoteView(response.getPresentation()) == null) {
+                    throw new RuntimeException("Permission error accessing RemoteView");
+                }
                 content = response.getPresentation().applyWithTheme(
                         mContext, decor, interceptionHandler, mThemeId);
                 container.addView(content);
@@ -302,7 +315,8 @@ final class FillUi {
                 final Dataset dataset = response.getDatasets().get(i);
                 final int index = dataset.getFieldIds().indexOf(focusedViewId);
                 if (index >= 0) {
-                    final RemoteViews presentation = dataset.getFieldPresentation(index);
+                    final RemoteViews presentation = Helper.sanitizeRemoteView(
+                            dataset.getFieldPresentation(index));
                     if (presentation == null) {
                         Slog.w(TAG, "not displaying UI on field " + focusedViewId + " because "
                                 + "service didn't provide a presentation for it on " + dataset);
@@ -416,10 +430,17 @@ final class FillUi {
             if (mDestroyed) {
                 return;
             }
+            final int size = mFilterText == null ? 0 : mFilterText.length();
             if (count <= 0) {
                 if (sDebug) {
-                    final int size = mFilterText == null ? 0 : mFilterText.length();
                     Slog.d(TAG, "No dataset matches filter with " + size + " chars");
+                }
+                mCallback.requestHideFillUi();
+            } else if (size > mMaxInputLengthForAutofill) {
+                // Do not show suggestion if user entered more than the maximum suggesiton length
+                if (sDebug) {
+                    Slog.d(TAG, "Not showing fill UI because user entered more than "
+                            + mMaxInputLengthForAutofill + " characters");
                 }
                 mCallback.requestHideFillUi();
             } else {
@@ -473,7 +494,7 @@ final class FillUi {
         }
         mCallback.onDestroy();
         if (notifyClient) {
-            mCallback.requestHideFillUi();
+            mCallback.requestHideFillUiWhenDestroyed();
         }
         mDestroyed = true;
     }
@@ -706,6 +727,7 @@ final class FillUi {
                     mWm.addView(mContentView, params);
                     mOverlayControl.hideOverlays();
                     mShowing = true;
+                    mCallback.onShown();
                 } else {
                     mWm.updateViewLayout(mContentView, params);
                 }
@@ -772,6 +794,7 @@ final class FillUi {
         pw.print(prefix); pw.print("mContentWidth: "); pw.println(mContentWidth);
         pw.print(prefix); pw.print("mContentHeight: "); pw.println(mContentHeight);
         pw.print(prefix); pw.print("mDestroyed: "); pw.println(mDestroyed);
+        pw.print(prefix); pw.print("mContext: "); pw.println(mContext);
         pw.print(prefix); pw.print("theme id: "); pw.print(mThemeId);
         switch (mThemeId) {
             case THEME_ID_DARK:

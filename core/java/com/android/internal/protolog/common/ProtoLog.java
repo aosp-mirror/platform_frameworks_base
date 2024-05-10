@@ -16,17 +16,20 @@
 
 package com.android.internal.protolog.common;
 
+import android.util.Log;
+
 /**
  * ProtoLog API - exposes static logging methods. Usage of this API is similar
  * to {@code android.utils.Log} class. Instead of plain text log messages each call consists of
  * a messageString, which is a format string for the log message (has to be a string literal or
  * a concatenation of string literals) and a vararg array of parameters for the formatter.
  *
- * The syntax for the message string is a subset of {@code java.util.Formatter} syntax.
+ * The syntax for the message string depends on
+ * {@link android.text.TextUtils#formatSimple(String, Object...)}}.
  * Supported conversions:
  * %b - boolean
- * %d, %o and %x - integral type (Short, Integer or Long)
- * %f, %e and %g - floating point type (Float or Double)
+ * %d %x - integral type (Short, Integer or Long)
+ * %f - floating point type (Float or Double)
  * %s - string
  * %% - a literal percent character
  * The width and precision modifiers are supported, argument_index and flags are not.
@@ -52,6 +55,9 @@ public class ProtoLog {
             throw new UnsupportedOperationException(
                     "ProtoLog calls MUST be processed with ProtoLogTool");
         }
+        if (group.isLogToLogcat()) {
+            Log.d(group.getTag(), String.format(messageString, args));
+        }
     }
 
     /**
@@ -66,6 +72,9 @@ public class ProtoLog {
         if (REQUIRE_PROTOLOGTOOL) {
             throw new UnsupportedOperationException(
                     "ProtoLog calls MUST be processed with ProtoLogTool");
+        }
+        if (group.isLogToLogcat()) {
+            Log.v(group.getTag(), String.format(messageString, args));
         }
     }
 
@@ -82,6 +91,9 @@ public class ProtoLog {
             throw new UnsupportedOperationException(
                     "ProtoLog calls MUST be processed with ProtoLogTool");
         }
+        if (group.isLogToLogcat()) {
+            Log.i(group.getTag(), String.format(messageString, args));
+        }
     }
 
     /**
@@ -96,6 +108,9 @@ public class ProtoLog {
         if (REQUIRE_PROTOLOGTOOL) {
             throw new UnsupportedOperationException(
                     "ProtoLog calls MUST be processed with ProtoLogTool");
+        }
+        if (group.isLogToLogcat()) {
+            Log.w(group.getTag(), String.format(messageString, args));
         }
     }
 
@@ -112,6 +127,9 @@ public class ProtoLog {
             throw new UnsupportedOperationException(
                     "ProtoLog calls MUST be processed with ProtoLogTool");
         }
+        if (group.isLogToLogcat()) {
+            Log.e(group.getTag(), String.format(messageString, args));
+        }
     }
 
     /**
@@ -126,6 +144,9 @@ public class ProtoLog {
         if (REQUIRE_PROTOLOGTOOL) {
             throw new UnsupportedOperationException(
                     "ProtoLog calls MUST be processed with ProtoLogTool");
+        }
+        if (group.isLogToLogcat()) {
+            Log.wtf(group.getTag(), String.format(messageString, args));
         }
     }
 }

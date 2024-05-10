@@ -67,7 +67,7 @@ void printStringPool(const ResStringPool* pool)
     const size_t NS = pool->size();
     for (size_t s=0; s<NS; s++) {
         auto str = pool->string8ObjectAt(s);
-        printf("String #" ZD ": %s\n", (ZD_TYPE) s, (str.has_value() ? str->string() : ""));
+        printf("String #" ZD ": %s\n", (ZD_TYPE) s, (str.has_value() ? str->c_str() : ""));
     }
 }
 
@@ -139,7 +139,7 @@ ssize_t StringPool::add(const String16& value,
     if (eidx < 0) {
         eidx = mEntries.add(entry(value));
         if (eidx < 0) {
-            fprintf(stderr, "Failure adding string %s\n", String8(value).string());
+            fprintf(stderr, "Failure adding string %s\n", String8(value).c_str());
             return eidx;
         }
     }
@@ -148,7 +148,7 @@ ssize_t StringPool::add(const String16& value,
         entry& ent = mEntries.editItemAt(eidx);
         if (kIsDebug) {
             printf("*** adding config type name %s, was %s\n",
-                    configTypeName->string(), ent.configTypeName.string());
+                    configTypeName->c_str(), ent.configTypeName.c_str());
         }
         if (ent.configTypeName.size() <= 0) {
             ent.configTypeName = *configTypeName;
@@ -166,7 +166,7 @@ ssize_t StringPool::add(const String16& value,
             if (cmp >= 0) {
                 if (cmp > 0) {
                     if (kIsDebug) {
-                        printf("*** inserting config: %s\n", config->toString().string());
+                        printf("*** inserting config: %s\n", config->toString().c_str());
                     }
                     ent.configs.insertAt(*config, addPos);
                 }
@@ -175,7 +175,7 @@ ssize_t StringPool::add(const String16& value,
         }
         if (addPos >= ent.configs.size()) {
             if (kIsDebug) {
-                printf("*** adding config: %s\n", config->toString().string());
+                printf("*** adding config: %s\n", config->toString().c_str());
             }
             ent.configs.add(*config);
         }
@@ -195,7 +195,7 @@ ssize_t StringPool::add(const String16& value,
 
     if (kIsDebug) {
         printf("Adding string %s to pool: pos=%zd eidx=%zd vidx=%zd\n",
-                String8(value).string(), pos, eidx, vidx);
+                String8(value).c_str(), pos, eidx, vidx);
     }
 
     return pos;
@@ -286,13 +286,13 @@ void StringPool::sortByConfig()
 
     for (size_t i=0; i<N; i++) {
         printf("#%d was %d: %s\n", i, newPosToOriginalPos[i],
-                mEntries[mEntryArray[newPosToOriginalPos[i]]].makeConfigsString().string());
+                mEntries[mEntryArray[newPosToOriginalPos[i]]].makeConfigsString().c_str());
         entries.add(mEntries[mEntryArray[i]]);
     }
 
     for (size_t i=0; i<entries.size(); i++) {
         printf("Sorted config #%d: %s\n", i,
-                entries[i].makeConfigsString().string());
+                entries[i].makeConfigsString().c_str());
     }
 #endif
 
@@ -363,8 +363,8 @@ void StringPool::sortByConfig()
     printf("FINAL SORTED STRING CONFIGS:\n");
     for (size_t i=0; i<mEntries.size(); i++) {
         const entry& ent = mEntries[i];
-        printf("#" ZD " %s: %s\n", (ZD_TYPE)i, ent.makeConfigsString().string(),
-                String8(ent.value).string());
+        printf("#" ZD " %s: %s\n", (ZD_TYPE)i, ent.makeConfigsString().c_str(),
+                String8(ent.value).c_str());
     }
 #endif
 }
@@ -415,7 +415,7 @@ status_t StringPool::writeStringBlock(const sp<AaptFile>& pool)
             ssize_t idx = add(span.name, true);
             if (idx < 0) {
                 fprintf(stderr, "Error adding span for style tag '%s'\n",
-                        String8(span.name).string());
+                        String8(span.name).c_str());
                 return idx;
             }
             span.span.name.index = (uint32_t)idx;
@@ -472,13 +472,13 @@ status_t StringPool::writeStringBlock(const sp<AaptFile>& pool)
 
             ENCODE_LENGTH(strings, sizeof(uint8_t), encSize)
 
-            strncpy((char*)strings, encStr, encSize+1);
+            strncpy((char*)strings, encStr.c_str(), encSize + 1);
         } else {
             char16_t* strings = (char16_t*)dat;
 
             ENCODE_LENGTH(strings, sizeof(char16_t), strSize)
 
-            strcpy16_htod(strings, ent.value);
+            strcpy16_htod(strings, ent.value.c_str());
         }
 
         strPos += totalSize;
@@ -571,7 +571,7 @@ status_t StringPool::writeStringBlock(const sp<AaptFile>& pool)
         if (kIsDebug) {
             printf("Writing entry #%zu: \"%s\" ent=%zu off=%zu\n",
                     i,
-                    String8(ent.value).string(),
+                    String8(ent.value).c_str(),
                     mEntryArray[i],
                     ent.offset);
         }
@@ -591,8 +591,8 @@ ssize_t StringPool::offsetForString(const String16& val) const
     const Vector<size_t>* indices = offsetsForString(val);
     ssize_t res = indices != NULL && indices->size() > 0 ? indices->itemAt(0) : -1;
     if (kIsDebug) {
-        printf("Offset for string %s: %zd (%s)\n", String8(val).string(), res,
-                res >= 0 ? String8(mEntries[mEntryArray[res]].value).string() : String8());
+        printf("Offset for string %s: %zd (%s)\n", String8(val).c_str(), res,
+               res >= 0 ? String8(mEntries[mEntryArray[res]].value).c_str() : "");
     }
     return res;
 }

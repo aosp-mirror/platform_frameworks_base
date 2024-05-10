@@ -14,6 +14,7 @@
   ~ limitations under the License.
   -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="?android:attr/textColorPrimary" android:alpha=".6" />
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
+    <item android:color="?androidprv:attr/materialColorOnSurfaceVariant" android:alpha=".6" />
 </selector>

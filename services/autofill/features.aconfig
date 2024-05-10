@@ -1,0 +1,9 @@
+package: "android.service.autofill"
+container: "system"
+
+flag {
+  name: "autofill_credman_integration"
+  namespace: "autofill"
+  description: "Guards Autofill Framework against Autofill-Credman integration"
+  bug: "296907283"
+}

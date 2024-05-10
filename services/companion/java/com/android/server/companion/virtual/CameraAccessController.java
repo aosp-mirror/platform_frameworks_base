@@ -19,6 +19,8 @@ package com.android.server.companion.virtual;
 import static android.hardware.camera2.CameraInjectionSession.InjectionStatusCallback.ERROR_INJECTION_UNSUPPORTED;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -44,6 +46,7 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
     private static final String TAG = "CameraAccessController";
 
     private final Object mLock = new Object();
+    private final Object mObserverLock = new Object();
 
     private final Context mContext;
     private final VirtualDeviceManagerInternal mVirtualDeviceManagerInternal;
@@ -52,7 +55,7 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
 
-    @GuardedBy("mLock")
+    @GuardedBy("mObserverLock")
     private int mObserverCount = 0;
 
     @GuardedBy("mLock")
@@ -95,11 +98,28 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
     }
 
     /**
+     * Returns the userId for which the camera access should be blocked.
+     */
+    @UserIdInt
+    public int getUserId() {
+        return mContext.getUserId();
+    }
+
+    /**
+     * Returns the number of observers currently relying on this controller.
+     */
+    public int getObserverCount() {
+        synchronized (mObserverLock) {
+            return mObserverCount;
+        }
+    }
+
+    /**
      * Starts watching for camera access by uids running on a virtual device, if we were not
      * already doing so.
      */
     public void startObservingIfNeeded() {
-        synchronized (mLock) {
+        synchronized (mObserverLock) {
             if (mObserverCount == 0) {
                 mCameraManager.registerAvailabilityCallback(mContext.getMainExecutor(), this);
             }
@@ -111,7 +131,7 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
      * Stop watching for camera access.
      */
     public void stopObservingIfNeeded() {
-        synchronized (mLock) {
+        synchronized (mObserverLock) {
             mObserverCount--;
             if (mObserverCount <= 0) {
                 close();
@@ -127,6 +147,7 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
      *
      * @param runningUids uids of the application running on the virtual display
      */
+    @RequiresPermission(android.Manifest.permission.CAMERA_INJECT_EXTERNAL_CAMERA)
     public void blockCameraAccessIfNeeded(Set<Integer> runningUids) {
         synchronized (mLock) {
             for (int i = 0; i < mAppsToBlockOnVirtualDevice.size(); i++) {
@@ -151,7 +172,7 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
 
     @Override
     public void close() {
-        synchronized (mLock) {
+        synchronized (mObserverLock) {
             if (mObserverCount < 0) {
                 Slog.wtf(TAG, "Unexpected negative mObserverCount: " + mObserverCount);
             } else if (mObserverCount > 0) {
@@ -162,6 +183,7 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
     }
 
     @Override
+    @RequiresPermission(android.Manifest.permission.CAMERA_INJECT_EXTERNAL_CAMERA)
     public void onCameraOpened(@NonNull String cameraId, @NonNull String packageName) {
         synchronized (mLock) {
             InjectionSessionData data = mPackageToSessionData.get(packageName);
@@ -224,6 +246,7 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
     /**
      * Turns on blocking for a particular camera and package.
      */
+    @RequiresPermission(android.Manifest.permission.CAMERA_INJECT_EXTERNAL_CAMERA)
     private void startBlocking(String packageName, String cameraId) {
         try {
             Slog.d(

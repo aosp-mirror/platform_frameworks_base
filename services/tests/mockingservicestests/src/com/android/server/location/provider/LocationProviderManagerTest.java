@@ -32,7 +32,6 @@ import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
 import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 import static com.android.server.location.LocationUtils.createLocation;
 import static com.android.server.location.LocationUtils.createLocationResult;
-import static com.android.server.location.listeners.RemoteListenerRegistration.IN_PROCESS_EXECUTOR;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -81,8 +80,12 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.WorkSource;
 import android.platform.test.annotations.Presubmit;
+import android.provider.DeviceConfig;
+import android.provider.Settings;
 import android.util.Log;
 
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -103,6 +106,7 @@ import org.mockito.Mock;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -134,6 +138,7 @@ public class LocationProviderManagerTest {
     private static final CallerIdentity IDENTITY = CallerIdentity.forTest(CURRENT_USER, 1,
             "mypackage", "attribution", "listener");
     private static final WorkSource WORK_SOURCE = new WorkSource(IDENTITY.getUid());
+    private static final String MISSING_PERMISSION = "missing_permission";
 
     private Random mRandom;
 
@@ -173,10 +178,17 @@ public class LocationProviderManagerTest {
         doReturn(mResources).when(mContext).getResources();
         doReturn(mPackageManager).when(mContext).getPackageManager();
         doReturn(mPowerManager).when(mContext).getSystemService(PowerManager.class);
+        doReturn(ApplicationProvider.getApplicationContext()).when(
+                mContext).getApplicationContext();
         doReturn(mWakeLock).when(mPowerManager).newWakeLock(anyInt(), anyString());
+        doReturn(PackageManager.PERMISSION_DENIED)
+                .when(mContext)
+                .checkCallingOrSelfPermission(MISSING_PERMISSION);
 
         mInjector = new TestInjector(mContext);
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, true);
         mInjector.getUserInfoHelper().startUser(OTHER_USER);
+        mInjector.getUserInfoHelper().setUserVisible(OTHER_USER, true);
 
         mPassive = new PassiveLocationProviderManager(mContext, mInjector);
         mPassive.startManager(null);
@@ -186,18 +198,26 @@ public class LocationProviderManagerTest {
     }
 
     private void createManager(String name) {
+        createManager(name, Collections.emptyList());
+    }
+
+    private void createManager(String name, Collection<String> requiredPermissions) {
         mStateChangedListener = mock(LocationProviderManager.StateChangedListener.class);
 
         mProvider = new TestProvider(PROPERTIES, PROVIDER_IDENTITY);
         mProvider.setProviderAllowed(true);
 
-        mManager = new LocationProviderManager(mContext, mInjector, name, mPassive);
+        mManager =
+                new LocationProviderManager(
+                        mContext, mInjector, name, mPassive, requiredPermissions);
         mManager.startManager(mStateChangedListener);
         mManager.setRealProvider(mProvider);
     }
 
     @After
     public void tearDown() throws Exception {
+        DeviceConfig.resetToDefaults(Settings.RESET_MODE_PACKAGE_DEFAULTS,
+                DeviceConfig.NAMESPACE_LOCATION);
         LocalServices.removeServiceForTest(LocationManagerInternal.class);
 
         // some test failures may leave the fg thread stuck, interrupt until we get out of it
@@ -329,6 +349,20 @@ public class LocationProviderManagerTest {
                 IDENTITY, PERMISSION_COARSE);
         assertThat(coarse).isNotEqualTo(loc);
         assertThat(coarse).isNearby(loc, 5000);
+    }
+
+    @Test
+    public void testGetLastLocation_InvisibleUser() {
+        Location loc = createLocation(NAME, mRandom);
+        mProvider.setProviderLocation(loc);
+
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, false);
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isNull();
+
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, true);
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isEqualTo(loc);
     }
 
     @Test
@@ -534,7 +568,7 @@ public class LocationProviderManagerTest {
                 listener);
 
         CountDownLatch blocker = new CountDownLatch(1);
-        IN_PROCESS_EXECUTOR.execute(() -> {
+        FgThread.getExecutor().execute(() -> {
             try {
                 blocker.await();
             } catch (InterruptedException e) {
@@ -567,6 +601,25 @@ public class LocationProviderManagerTest {
 
         verify(listener, times(5)).onLocationChanged(any(List.class),
                 nullable(IRemoteCallback.class));
+    }
+
+    @Test
+    public void testRegisterListener_InvisibleUser() throws Exception {
+        ILocationListener listener = createMockLocationListener();
+        LocationRequest request = new LocationRequest.Builder(0)
+                .setWorkSource(WORK_SOURCE)
+                .build();
+        mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
+
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, false);
+        mProvider.setProviderLocation(createLocationResult(NAME, mRandom));
+        verify(listener, never()).onLocationChanged(any(List.class),
+                nullable(IRemoteCallback.class));
+
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, true);
+        LocationResult loc = createLocationResult(NAME, mRandom);
+        mProvider.setProviderLocation(loc);
+        verify(listener).onLocationChanged(eq(loc.asList()), nullable(IRemoteCallback.class));
     }
 
     @Test
@@ -661,7 +714,7 @@ public class LocationProviderManagerTest {
                 listener);
 
         CountDownLatch blocker = new CountDownLatch(1);
-        IN_PROCESS_EXECUTOR.execute(() -> {
+        FgThread.getExecutor().execute(() -> {
             try {
                 blocker.await();
             } catch (InterruptedException e) {
@@ -797,6 +850,17 @@ public class LocationProviderManagerTest {
 
         mInjector.getAlarmHelper().incrementAlarmTime(60000);
         verify(listener, times(1)).onLocation(isNull());
+    }
+
+    @Test
+    public void testGetCurrentLocation_InvisibleUser() throws Exception {
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, false);
+
+        ILocationCallback listener = createMockGetCurrentLocationListener();
+        LocationRequest request = new LocationRequest.Builder(0).setWorkSource(WORK_SOURCE).build();
+        mManager.getCurrentLocation(request, IDENTITY, PERMISSION_FINE, listener);
+
+        verify(listener).onLocation(isNull());
     }
 
     @Test
@@ -1009,6 +1073,21 @@ public class LocationProviderManagerTest {
     }
 
     @Test
+    public void testProviderRequest_InvisibleUser() {
+        ILocationListener listener = createMockLocationListener();
+        LocationRequest request = new LocationRequest.Builder(5)
+                .setWorkSource(WORK_SOURCE)
+                .build();
+        mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
+
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, false);
+        assertThat(mProvider.getRequest().isActive()).isFalse();
+
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, true);
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+    }
+
+    @Test
     public void testProviderRequest_IgnoreLocationSettings() {
         mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
                 new PackageTagsList.Builder().add(
@@ -1217,6 +1296,193 @@ public class LocationProviderManagerTest {
 
         mInjector.getScreenInteractiveHelper().setScreenInteractive(false);
         assertThat(mProvider.getRequest().isActive()).isFalse();
+    }
+
+    @Test
+    public void testQueryPackageReset() {
+        assertThat(mInjector.getPackageResetHelper().isResetableForPackage("mypackage")).isFalse();
+
+        ILocationListener listener1 = createMockLocationListener();
+        mManager.registerLocationRequest(new LocationRequest.Builder(0).setWorkSource(
+                WORK_SOURCE).build(), IDENTITY, PERMISSION_FINE, listener1);
+        assertThat(mInjector.getPackageResetHelper().isResetableForPackage("mypackage")).isTrue();
+
+        ILocationListener listener2 = createMockLocationListener();
+        mManager.registerLocationRequest(new LocationRequest.Builder(0).setWorkSource(
+                WORK_SOURCE).build(), IDENTITY, PERMISSION_FINE, listener2);
+        assertThat(mInjector.getPackageResetHelper().isResetableForPackage("mypackage")).isTrue();
+
+        mManager.unregisterLocationRequest(listener1);
+        assertThat(mInjector.getPackageResetHelper().isResetableForPackage("mypackage")).isTrue();
+
+        mManager.unregisterLocationRequest(listener2);
+        assertThat(mInjector.getPackageResetHelper().isResetableForPackage("mypackage")).isFalse();
+    }
+
+    @Test
+    public void testPackageReset() {
+        ILocationListener listener1 = createMockLocationListener();
+        mManager.registerLocationRequest(new LocationRequest.Builder(0).setWorkSource(
+                WORK_SOURCE).build(), IDENTITY, PERMISSION_FINE, listener1);
+        ILocationListener listener2 = createMockLocationListener();
+        mManager.registerLocationRequest(new LocationRequest.Builder(0).setWorkSource(
+                WORK_SOURCE).build(), IDENTITY, PERMISSION_FINE, listener2);
+
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+        assertThat(mInjector.getPackageResetHelper().isResetableForPackage("mypackage")).isTrue();
+
+        mInjector.getPackageResetHelper().reset("mypackage");
+        assertThat(mProvider.getRequest().isActive()).isFalse();
+        assertThat(mInjector.getPackageResetHelper().isResetableForPackage("mypackage")).isFalse();
+    }
+
+    @Test
+    public void testIsVisibleToCaller() {
+        assertThat(mManager.isVisibleToCaller()).isTrue();
+    }
+
+    @Test
+    public void testIsVisibleToCaller_noPermissions() {
+        createManager("any_name", Collections.singletonList(MISSING_PERMISSION));
+        assertThat(mManager.isVisibleToCaller()).isFalse();
+    }
+
+    @MediumTest
+    @Test
+    public void testEnableMsl_expectedBehavior() throws Exception {
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_LOCATION,
+                "enable_location_provider_manager_msl", Boolean.toString(true), false);
+
+        // Create a random location and set provider location to cache necessary MSL assets.
+        Location loc = createLocation(NAME, mRandom);
+        loc.setAltitude(mRandom.nextDouble());
+        loc.setVerticalAccuracyMeters(mRandom.nextFloat());
+        mProvider.setProviderLocation(LocationResult.wrap(loc));
+        Thread.sleep(1000);
+
+        // Register listener and reset provider location to capture.
+        ILocationListener listener = createMockLocationListener();
+        LocationRequest request = new LocationRequest.Builder(0).setWorkSource(WORK_SOURCE).build();
+        mPassive.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
+        mProvider.setProviderLocation(LocationResult.wrap(loc));
+        ArgumentCaptor<List<Location>> captor = ArgumentCaptor.forClass(List.class);
+        verify(listener).onLocationChanged(captor.capture(), nullable(IRemoteCallback.class));
+
+        // Assert that MSL fields are populated.
+        Location actual = captor.getValue().get(0);
+        assertThat(actual.hasMslAltitude()).isTrue();
+        assertThat(actual.hasMslAltitudeAccuracy()).isTrue();
+    }
+
+    @MediumTest
+    @Test
+    public void testEnableMsl_noVerticalAccuracy() throws Exception {
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_LOCATION,
+                "enable_location_provider_manager_msl", Boolean.toString(true), false);
+
+        // Create a random location and set provider location to cache necessary MSL assets.
+        Location loc = createLocation(NAME, mRandom);
+        loc.setAltitude(mRandom.nextDouble());
+        loc.setVerticalAccuracyMeters(mRandom.nextFloat());
+        mProvider.setProviderLocation(LocationResult.wrap(loc));
+        Thread.sleep(1000);
+
+        // Register listener and reset provider location with no vertical accuracy to capture.
+        ILocationListener listener = createMockLocationListener();
+        LocationRequest request = new LocationRequest.Builder(0).setWorkSource(WORK_SOURCE).build();
+        mPassive.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
+        loc.removeVerticalAccuracy();
+        mProvider.setProviderLocation(LocationResult.wrap(loc));
+        ArgumentCaptor<List<Location>> captor = ArgumentCaptor.forClass(List.class);
+        verify(listener).onLocationChanged(captor.capture(), nullable(IRemoteCallback.class));
+
+        // Assert that only the MSL accuracy field is populated.
+        Location actual = captor.getValue().get(0);
+        assertThat(actual.hasMslAltitude()).isTrue();
+        assertThat(actual.hasMslAltitudeAccuracy()).isFalse();
+    }
+
+    @MediumTest
+    @Test
+    public void testEnableMsl_noAltitude() throws Exception {
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_LOCATION,
+                "enable_location_provider_manager_msl", Boolean.toString(true), false);
+
+        // Create a random location and set provider location to cache necessary MSL assets.
+        Location loc = createLocation(NAME, mRandom);
+        loc.setAltitude(mRandom.nextDouble());
+        loc.setVerticalAccuracyMeters(mRandom.nextFloat());
+        mProvider.setProviderLocation(LocationResult.wrap(loc));
+        Thread.sleep(1000);
+
+        // Register listener and reset provider location with no altitude to capture.
+        ILocationListener listener = createMockLocationListener();
+        LocationRequest request = new LocationRequest.Builder(0).setWorkSource(WORK_SOURCE).build();
+        mPassive.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
+        loc.removeAltitude();
+        mProvider.setProviderLocation(LocationResult.wrap(loc));
+        ArgumentCaptor<List<Location>> captor = ArgumentCaptor.forClass(List.class);
+        verify(listener).onLocationChanged(captor.capture(), nullable(IRemoteCallback.class));
+
+        // Assert that no MSL fields are populated.
+        Location actual = captor.getValue().get(0);
+        assertThat(actual.hasMslAltitude()).isFalse();
+        assertThat(actual.hasMslAltitudeAccuracy()).isFalse();
+    }
+
+    @MediumTest
+    @Test
+    public void testEnableMsl_invalidAltitude() throws Exception {
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_LOCATION,
+                "enable_location_provider_manager_msl", Boolean.toString(true), false);
+
+        // Create a random location and set provider location to cache necessary MSL assets.
+        Location loc = createLocation(NAME, mRandom);
+        loc.setAltitude(mRandom.nextDouble());
+        loc.setVerticalAccuracyMeters(mRandom.nextFloat());
+        mProvider.setProviderLocation(LocationResult.wrap(loc));
+        Thread.sleep(1000);
+
+        // Register listener and reset provider location with invalid altitude to capture.
+        ILocationListener listener = createMockLocationListener();
+        LocationRequest request = new LocationRequest.Builder(0).setWorkSource(WORK_SOURCE).build();
+        mPassive.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
+        loc.setAltitude(Double.POSITIVE_INFINITY);
+        mProvider.setProviderLocation(LocationResult.wrap(loc));
+        ArgumentCaptor<List<Location>> captor = ArgumentCaptor.forClass(List.class);
+        verify(listener).onLocationChanged(captor.capture(), nullable(IRemoteCallback.class));
+
+        // Assert that no MSL fields are populated.
+        Location actual = captor.getValue().get(0);
+        assertThat(actual.hasMslAltitude()).isFalse();
+        assertThat(actual.hasMslAltitudeAccuracy()).isFalse();
+    }
+
+    @MediumTest
+    @Test
+    public void testDisableMsl_expectedBehavior() throws Exception {
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_LOCATION,
+                "enable_location_provider_manager_msl", Boolean.toString(false), false);
+
+        // Create a random location and set provider location to cache necessary MSL assets.
+        Location loc = createLocation(NAME, mRandom);
+        loc.setAltitude(mRandom.nextDouble());
+        loc.setVerticalAccuracyMeters(mRandom.nextFloat());
+        mProvider.setProviderLocation(LocationResult.wrap(loc));
+        Thread.sleep(1000);
+
+        // Register listener and reset provider location to capture.
+        ILocationListener listener = createMockLocationListener();
+        LocationRequest request = new LocationRequest.Builder(0).setWorkSource(WORK_SOURCE).build();
+        mPassive.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
+        mProvider.setProviderLocation(LocationResult.wrap(loc));
+        ArgumentCaptor<List<Location>> captor = ArgumentCaptor.forClass(List.class);
+        verify(listener).onLocationChanged(captor.capture(), nullable(IRemoteCallback.class));
+
+        // Assert that no MSL fields are populated.
+        Location actual = captor.getValue().get(0);
+        assertThat(actual.hasMslAltitude()).isFalse();
+        assertThat(actual.hasMslAltitudeAccuracy()).isFalse();
     }
 
     private ILocationListener createMockLocationListener() {

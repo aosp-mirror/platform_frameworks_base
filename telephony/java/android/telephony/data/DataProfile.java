@@ -431,6 +431,8 @@ public final class DataProfile implements Parcelable {
                 return ApnSetting.TYPE_VSIM;
             case NetworkCapabilities.NET_CAPABILITY_ENTERPRISE:
                 return ApnSetting.TYPE_ENTERPRISE;
+            case NetworkCapabilities.NET_CAPABILITY_RCS:
+                return ApnSetting.TYPE_RCS;
             default:
                 return ApnSetting.TYPE_NONE;
         }

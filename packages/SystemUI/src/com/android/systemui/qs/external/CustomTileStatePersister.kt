@@ -18,17 +18,19 @@ package com.android.systemui.qs.external
 
 import android.content.ComponentName
 import android.content.Context
+import android.content.SharedPreferences
 import android.service.quicksettings.Tile
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
+import javax.inject.Inject
 import org.json.JSONException
 import org.json.JSONObject
-import javax.inject.Inject
 
 data class TileServiceKey(val componentName: ComponentName, val user: Int) {
     private val string = "${componentName.flattenToString()}:$user"
     override fun toString() = string
 }
+
 private const val STATE = "state"
 private const val LABEL = "label"
 private const val SUBTITLE = "subtitle"
@@ -44,12 +46,7 @@ private const val STATE_DESCRIPTION = "state_description"
  * It persists the state from a [Tile] necessary to present the view in the same state when
  * retrieved, with the exception of the icon.
  */
-class CustomTileStatePersister @Inject constructor(context: Context) {
-    companion object {
-        private const val FILE_NAME = "custom_tiles_state"
-    }
-
-    private val sharedPreferences = context.getSharedPreferences(FILE_NAME, 0)
+interface CustomTileStatePersister {
 
     /**
      * Read the state from [SharedPreferences].
@@ -58,7 +55,31 @@ class CustomTileStatePersister @Inject constructor(context: Context) {
      *
      * Any fields that have not been saved will be set to `null`
      */
-    fun readState(key: TileServiceKey): Tile? {
+    fun readState(key: TileServiceKey): Tile?
+    /**
+     * Persists the state into [SharedPreferences].
+     *
+     * The implementation does not store fields that are `null` or icons.
+     */
+    fun persistState(key: TileServiceKey, tile: Tile)
+    /**
+     * Removes the state for a given tile, user pair.
+     *
+     * Used when the tile is removed by the user.
+     */
+    fun removeState(key: TileServiceKey)
+}
+
+// TODO(b/299909989) Merge this class into into CustomTileRepository
+class CustomTileStatePersisterImpl @Inject constructor(context: Context) :
+    CustomTileStatePersister {
+    companion object {
+        private const val FILE_NAME = "custom_tiles_state"
+    }
+
+    private val sharedPreferences: SharedPreferences = context.getSharedPreferences(FILE_NAME, 0)
+
+    override fun readState(key: TileServiceKey): Tile? {
         val state = sharedPreferences.getString(key.toString(), null) ?: return null
         return try {
             readTileFromString(state)
@@ -68,23 +89,13 @@ class CustomTileStatePersister @Inject constructor(context: Context) {
         }
     }
 
-    /**
-     * Persists the state into [SharedPreferences].
-     *
-     * The implementation does not store fields that are `null` or icons.
-     */
-    fun persistState(key: TileServiceKey, tile: Tile) {
+    override fun persistState(key: TileServiceKey, tile: Tile) {
         val state = writeToString(tile)
 
         sharedPreferences.edit().putString(key.toString(), state).apply()
     }
 
-    /**
-     * Removes the state for a given tile, user pair.
-     *
-     * Used when the tile is removed by the user.
-     */
-    fun removeState(key: TileServiceKey) {
+    override fun removeState(key: TileServiceKey) {
         sharedPreferences.edit().remove(key.toString()).apply()
     }
 }
@@ -113,7 +124,7 @@ internal fun writeToString(tile: Tile): String {
     return with(tile) {
         JSONObject()
             .put(STATE, state)
-            .put(LABEL, label)
+            .put(LABEL, customLabel)
             .put(SUBTITLE, subtitle)
             .put(CONTENT_DESCRIPTION, contentDescription)
             .put(STATE_DESCRIPTION, stateDescription)

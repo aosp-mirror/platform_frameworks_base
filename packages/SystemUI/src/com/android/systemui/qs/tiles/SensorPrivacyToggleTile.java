@@ -23,6 +23,7 @@ import android.hardware.SensorPrivacyManager.Sensors.Sensor;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.safetycenter.SafetyCenterManager;
 import android.service.quicksettings.Tile;
 import android.view.View;
 import android.widget.Switch;
@@ -31,7 +32,6 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -39,8 +39,10 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -52,6 +54,8 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
 
     private final KeyguardStateController mKeyguard;
     protected IndividualSensorPrivacyController mSensorPrivacyController;
+
+    private final Boolean mIsSafetyCenterEnabled;
 
     /**
      * @return Id of the sensor that will be toggled
@@ -68,7 +72,9 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
      */
     public abstract String getRestriction();
 
-    protected SensorPrivacyToggleTile(QSHost host,
+    protected SensorPrivacyToggleTile(
+            QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -77,11 +83,13 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             IndividualSensorPrivacyController sensorPrivacyController,
-            KeyguardStateController keyguardStateController) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+            KeyguardStateController keyguardStateController,
+            SafetyCenterManager safetyCenterManager) {
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mSensorPrivacyController = sensorPrivacyController;
         mKeyguard = keyguardStateController;
+        mIsSafetyCenterEnabled = safetyCenterManager.isSafetyCenterEnabled();
         mSensorPrivacyController.observe(getLifecycle(), this);
     }
 
@@ -130,7 +138,11 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(Settings.ACTION_PRIVACY_SETTINGS);
+        if (mIsSafetyCenterEnabled) {
+            return new Intent(Settings.ACTION_PRIVACY_CONTROLS);
+        } else {
+            return new Intent(Settings.ACTION_PRIVACY_SETTINGS);
+        }
     }
 
     @Override

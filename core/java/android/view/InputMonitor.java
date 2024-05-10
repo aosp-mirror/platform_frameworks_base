@@ -43,7 +43,8 @@ public final class InputMonitor implements Parcelable {
     private final InputChannel mInputChannel;
     @NonNull
     private final IInputMonitorHost mHost;
-
+    @NonNull
+    private final SurfaceControl mSurface;
 
     /**
      * Takes all of the current pointer events streams that are currently being sent to this
@@ -70,6 +71,7 @@ public final class InputMonitor implements Parcelable {
      */
     public void dispose() {
         mInputChannel.dispose();
+        mSurface.release();
         try {
             mHost.dispose();
         } catch (RemoteException e) {
@@ -95,13 +97,17 @@ public final class InputMonitor implements Parcelable {
     @DataClass.Generated.Member
     public InputMonitor(
             @NonNull InputChannel inputChannel,
-            @NonNull IInputMonitorHost host) {
+            @NonNull IInputMonitorHost host,
+            @NonNull SurfaceControl surface) {
         this.mInputChannel = inputChannel;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mInputChannel);
         this.mHost = host;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mHost);
+        this.mSurface = surface;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mSurface);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -116,6 +122,11 @@ public final class InputMonitor implements Parcelable {
         return mHost;
     }
 
+    @DataClass.Generated.Member
+    public @NonNull SurfaceControl getSurface() {
+        return mSurface;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -124,7 +135,8 @@ public final class InputMonitor implements Parcelable {
 
         return "InputMonitor { " +
                 "inputChannel = " + mInputChannel + ", " +
-                "host = " + mHost +
+                "host = " + mHost + ", " +
+                "surface = " + mSurface +
         " }";
     }
 
@@ -136,6 +148,7 @@ public final class InputMonitor implements Parcelable {
 
         dest.writeTypedObject(mInputChannel, flags);
         dest.writeStrongInterface(mHost);
+        dest.writeTypedObject(mSurface, flags);
     }
 
     @Override
@@ -151,6 +164,7 @@ public final class InputMonitor implements Parcelable {
 
         InputChannel inputChannel = (InputChannel) in.readTypedObject(InputChannel.CREATOR);
         IInputMonitorHost host = IInputMonitorHost.Stub.asInterface(in.readStrongBinder());
+        SurfaceControl surface = (SurfaceControl) in.readTypedObject(SurfaceControl.CREATOR);
 
         this.mInputChannel = inputChannel;
         com.android.internal.util.AnnotationValidations.validate(
@@ -158,6 +172,9 @@ public final class InputMonitor implements Parcelable {
         this.mHost = host;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mHost);
+        this.mSurface = surface;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mSurface);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -177,10 +194,10 @@ public final class InputMonitor implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1637697281750L,
+            time = 1679692514588L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/InputMonitor.java",
-            inputSignatures = "private static final  java.lang.String TAG\nprivate static final  boolean DEBUG\nprivate final @android.annotation.NonNull android.view.InputChannel mInputChannel\nprivate final @android.annotation.NonNull android.view.IInputMonitorHost mHost\npublic  void pilferPointers()\npublic  void dispose()\nclass InputMonitor extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true)")
+            inputSignatures = "private static final  java.lang.String TAG\nprivate static final  boolean DEBUG\nprivate final @android.annotation.NonNull android.view.InputChannel mInputChannel\nprivate final @android.annotation.NonNull android.view.IInputMonitorHost mHost\nprivate final @android.annotation.NonNull android.view.SurfaceControl mSurface\npublic  void pilferPointers()\npublic  void dispose()\nclass InputMonitor extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true)")
     @Deprecated
     private void __metadata() {}
 

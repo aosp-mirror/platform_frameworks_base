@@ -23,6 +23,7 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.IntDef;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -342,11 +343,13 @@ public class PreparationCoordinator implements Coordinator {
     private void inflateEntry(NotificationEntry entry,
             NotifUiAdjustment newAdjustment,
             String reason) {
+        Trace.beginSection("PrepCoord.inflateEntry");
         abortInflation(entry, reason);
         mInflationAdjustments.put(entry, newAdjustment);
         mInflatingNotifs.add(entry);
         NotifInflater.Params params = getInflaterParams(newAdjustment, reason);
         mNotifInflater.inflateViews(entry, params, this::onInflationFinished);
+        Trace.endSection();
     }
 
     private void rebind(NotificationEntry entry,
@@ -359,7 +362,8 @@ public class PreparationCoordinator implements Coordinator {
     }
 
     NotifInflater.Params getInflaterParams(NotifUiAdjustment adjustment, String reason) {
-        return new NotifInflater.Params(adjustment.isMinimized(), reason);
+        return new NotifInflater.Params(adjustment.isMinimized(), reason,
+                adjustment.isSnoozeEnabled());
     }
 
     private void abortInflation(NotificationEntry entry, String reason) {
@@ -407,7 +411,10 @@ public class PreparationCoordinator implements Coordinator {
             mLogger.logGroupInflationTookTooLong(group);
             return false;
         }
-        if (mInflatingNotifs.contains(group.getSummary())) {
+        // Only delay release if the summary is not inflated.
+        // TODO(253454977): Once we ensure that all other pipeline filtering and pruning has been
+        //  done by this point, we can revert back to checking for mInflatingNotifs.contains(...)
+        if (group.getSummary() != null && !isInflated(group.getSummary())) {
             mLogger.logDelayingGroupRelease(group, group.getSummary());
             return true;
         }

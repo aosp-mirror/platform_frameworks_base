@@ -16,7 +16,6 @@
 
 package android.security.keystore2;
 
-import android.security.KeyStore;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyInfo;
 
@@ -38,8 +37,6 @@ import java.security.spec.X509EncodedKeySpec;
  * @hide
  */
 public class AndroidKeyStoreKeyFactorySpi extends KeyFactorySpi {
-
-    private final KeyStore mKeyStore = KeyStore.getInstance();
 
     @Override
     protected <T extends KeySpec> T engineGetKeySpec(Key key, Class<T> keySpecClass)

@@ -23,6 +23,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <limits>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -38,6 +39,7 @@
 #include "idmap2/PrettyPrintVisitor.h"
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
+#include <fcntl.h>
 
 using android::base::StringPrintf;
 using android::binder::Status;
@@ -57,7 +59,7 @@ using PolicyBitmask = android::ResTable_overlayable_policy_header::PolicyBitmask
 
 namespace {
 
-constexpr const char* kFrameworkPath = "/system/framework/framework-res.apk";
+constexpr std::string_view kFrameworkPath = "/system/framework/framework-res.apk";
 
 Status ok() {
   return Status::ok();
@@ -205,23 +207,47 @@ Status Idmap2Service::createIdmap(const std::string& target_path, const std::str
 
 idmap2::Result<Idmap2Service::TargetResourceContainerPtr> Idmap2Service::GetTargetContainer(
     const std::string& target_path) {
-  if (target_path == kFrameworkPath) {
-    if (framework_apk_cache_ == nullptr) {
-      // Initialize the framework APK cache.
-      auto target = TargetResourceContainer::FromPath(target_path);
-      if (!target) {
-        return target.GetError();
+  const bool is_framework = target_path == kFrameworkPath;
+  bool use_cache;
+  struct stat st = {};
+  if (is_framework || !::stat(target_path.c_str(), &st)) {
+    use_cache = true;
+  } else {
+    LOG(WARNING) << "failed to stat target path '" << target_path << "' for the cache";
+    use_cache = false;
+  }
+
+  if (use_cache) {
+    std::lock_guard lock(container_cache_mutex_);
+    if (auto cache_it = container_cache_.find(target_path); cache_it != container_cache_.end()) {
+      const auto& item = cache_it->second;
+      if (is_framework ||
+        (item.dev == st.st_dev && item.inode == st.st_ino && item.size == st.st_size
+          && item.mtime.tv_sec == st.st_mtim.tv_sec && item.mtime.tv_nsec == st.st_mtim.tv_nsec)) {
+        return {item.apk.get()};
       }
-      framework_apk_cache_ = std::move(*target);
+      container_cache_.erase(cache_it);
     }
-    return {framework_apk_cache_.get()};
   }
 
   auto target = TargetResourceContainer::FromPath(target_path);
   if (!target) {
     return target.GetError();
   }
-  return {std::move(*target)};
+  if (!use_cache) {
+    return {std::move(*target)};
+  }
+
+  const auto res = target->get();
+  std::lock_guard lock(container_cache_mutex_);
+  container_cache_.emplace(target_path, CachedContainer {
+    .dev = dev_t(st.st_dev),
+    .inode = ino_t(st.st_ino),
+    .size = st.st_size,
+    .mtime = st.st_mtim,
+    .apk = std::move(*target)
+  });
+  return {res};
 }
 
 Status Idmap2Service::createFabricatedOverlay(
@@ -234,7 +260,18 @@ Status Idmap2Service::createFabricatedOverlay(
   }
 
   for (const auto& res : overlay.entries) {
-    builder.SetResourceValue(res.resourceName, res.dataType, res.data);
+    if (res.dataType == Res_value::TYPE_STRING) {
+      builder.SetResourceValue(res.resourceName, res.dataType, res.stringData.value(),
+            res.configuration.value_or(std::string()));
+    } else if (res.binaryData.has_value()) {
+      builder.SetResourceValue(res.resourceName, res.binaryData->get(),
+                               res.binaryDataOffset, res.binaryDataSize,
+                               res.configuration.value_or(std::string()),
+                               res.isNinePatch);
+    } else {
+      builder.SetResourceValue(res.resourceName, res.dataType, res.data,
+            res.configuration.value_or(std::string()));
+    }
   }
 
   // Generate the file path of the fabricated overlay and ensure it does not collide with an
@@ -246,7 +283,7 @@ Status Idmap2Service::createFabricatedOverlay(
     const std::string random_suffix = RandomStringForPath(kSuffixLength);
     file_name = StringPrintf("%s-%s-%s.frro", overlay.packageName.c_str(),
                              overlay.overlayName.c_str(), random_suffix.c_str());
-    path = StringPrintf("%s/%s", kIdmapCacheDir, file_name.c_str());
+    path = StringPrintf("%s/%s", kIdmapCacheDir.data(), file_name.c_str());
 
     // Invoking std::filesystem::exists with a file name greater than 255 characters will cause this
     // process to abort since the name exceeds the maximum file name size.
@@ -257,6 +294,7 @@ Status Idmap2Service::createFabricatedOverlay(
                              file_name.c_str(), kMaxFileNameLength));
     }
   } while (std::filesystem::exists(path));
+  builder.setFrroPath(path);
 
   const uid_t uid = IPCThreadState::self()->getCallingUid();
   if (!UidHasWriteAccessToPath(uid, path)) {
@@ -295,26 +333,42 @@ Status Idmap2Service::createFabricatedOverlay(
   return ok();
 }
 
-Status Idmap2Service::acquireFabricatedOverlayIterator() {
+Status Idmap2Service::acquireFabricatedOverlayIterator(int32_t* _aidl_return) {
+  std::lock_guard l(frro_iter_mutex_);
   if (frro_iter_.has_value()) {
     LOG(WARNING) << "active ffro iterator was not previously released";
   }
   frro_iter_ = std::filesystem::directory_iterator(kIdmapCacheDir);
+  if (frro_iter_id_ == std::numeric_limits<int32_t>::max()) {
+    frro_iter_id_ = 0;
+  } else {
+    ++frro_iter_id_;
+  }
+  *_aidl_return = frro_iter_id_;
   return ok();
 }
 
-Status Idmap2Service::releaseFabricatedOverlayIterator() {
+Status Idmap2Service::releaseFabricatedOverlayIterator(int32_t iteratorId) {
+  std::lock_guard l(frro_iter_mutex_);
   if (!frro_iter_.has_value()) {
     LOG(WARNING) << "no active ffro iterator to release";
+  } else if (frro_iter_id_ != iteratorId) {
+    LOG(WARNING) << "incorrect iterator id in a call to release";
+  } else {
+    frro_iter_.reset();
   }
   return ok();
 }
 
-Status Idmap2Service::nextFabricatedOverlayInfos(
+Status Idmap2Service::nextFabricatedOverlayInfos(int32_t iteratorId,
     std::vector<os::FabricatedOverlayInfo>* _aidl_return) {
+  std::lock_guard l(frro_iter_mutex_);
+
   constexpr size_t kMaxEntryCount = 100;
   if (!frro_iter_.has_value()) {
     return error("no active frro iterator");
+  } else if (frro_iter_id_ != iteratorId) {
+    return error("incorrect iterator id in a call to next");
   }
 
   size_t count = 0;
@@ -322,22 +376,22 @@ Status Idmap2Service::nextFabricatedOverlayInfos(
   auto entry_iter_end = end(*frro_iter_);
   for (; entry_iter != entry_iter_end && count < kMaxEntryCount; ++entry_iter) {
     auto& entry = *entry_iter;
-    if (!entry.is_regular_file() || !android::IsFabricatedOverlay(entry.path())) {
+    if (!entry.is_regular_file() || !android::IsFabricatedOverlay(entry.path().native())) {
       continue;
     }
 
-    const auto overlay = FabricatedOverlayContainer::FromPath(entry.path());
+    const auto overlay = FabricatedOverlayContainer::FromPath(entry.path().native());
     if (!overlay) {
       LOG(WARNING) << "Failed to open '" << entry.path() << "': " << overlay.GetErrorMessage();
       continue;
     }
 
-    const auto info = (*overlay)->GetManifestInfo();
+    auto info = (*overlay)->GetManifestInfo();
     os::FabricatedOverlayInfo out_info;
-    out_info.packageName = info.package_name;
-    out_info.overlayName = info.name;
-    out_info.targetPackageName = info.target_package;
-    out_info.targetOverlayable = info.target_name;
+    out_info.packageName = std::move(info.package_name);
+    out_info.overlayName = std::move(info.name);
+    out_info.targetPackageName = std::move(info.target_package);
+    out_info.targetOverlayable = std::move(info.target_name);
     out_info.path = entry.path();
     _aidl_return->emplace_back(std::move(out_info));
     count++;

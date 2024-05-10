@@ -26,6 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Ilova o‘rnatildi."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Bu ilovani oʻrnatmoqchimisiz?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Bu ilova yangilansinmi?"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Bu ilovani bundan yangilash: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Bu ilova odatda yangilanishlarni bundan oladi: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Boshqa manbadan yangilash orqali kelgusi yangilanishlarni planshetda istalgan manbadan olishingiz mumkin. Ilova funksiyalari oʻzgarishi mumkin.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Bu ilovani bundan yangilash: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Bu ilova odatda yangilanishlarni bundan oladi: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Boshqa manbadan yangilash orqali kelgusi yangilanishlarni televizorda istalgan manbadan olishingiz mumkin. Ilova funksiyalari oʻzgarishi mumkin.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Bu ilovani bundan yangilash: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Bu ilova odatda yangilanishlarni bundan oladi: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Boshqa manbadan yangilash orqali kelgusi yangilanishlarni telefonda istalgan manbadan olishingiz mumkin. Ilova funksiyalari oʻzgarishi mumkin.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Ilova o‘rnatilmadi."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paket o‘rnatilishga qarshi bloklangan."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Paket mavjud paket bilan zid kelganligi uchun ilovani o‘rnatib bo‘lmadi."</string>
@@ -41,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Notanish ilovalarni bu foydalanuvchi tomonidan o‘rnatib bo‘lmaydi"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Bu foydalanuvchiga ilovalarni o‘rnatish uchun ruxsat berilmagan"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Baribir yangilansin"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Ilovalarni boshqarish"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Joy qolmadi"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> o‘rnatilmadi. Xotiradan biroz joy bo‘shating va qaytadan urining."</string>
@@ -60,14 +64,19 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Bu ilova boshlang‘ich versiyasi bilan almashtirilsinmi? Barcha axborotlar o‘chirib tashlanadi."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Bu ilova boshlang‘ich versiyasi bilan almashtirilsinmi? Barcha axborotlar o‘chirib tashlanadi. Bu qurilmaning barcha foydalanuvchilariga, jumladan, ularning ishchi profillariga ham ta’sir qiladi."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> hajmdagi ilova axborotlari saqlab qolinsin"</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Bu ilova oʻchirilsinmi?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Bu ilovani oʻchirib tashlamoqchimisiz? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> nusxasi ham oʻchib ketadi."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Bu ilovani maxfiy joydan olib tashlamoqchimisiz?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Davom etayotganlar"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Amalga oshmaganlar"</string>
     <string name="uninstalling" msgid="8709566347688966845">"O‘chirilmoqda…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> o‘chirilmoqda…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"O‘chirib tashlandi."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> o‘chirib tashlandi"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> nusxasi oʻchirildi"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"O‘chirib tashlanmadi."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ilovasini o‘chirib bo‘lmadi."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> nusxasi oʻchirilmoqda…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Faol qurilma administratori ilovasini o‘chirib bo‘lmaydi"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> profilida faol qurilma administratori ilovasini o‘chirib bo‘lmaydi"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Bu ilova ba’zi foydalanuvchi yoki profillar uchun zarur, boshqalar uchun esa o‘chirib tashlangan"</string>
@@ -83,14 +92,36 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Noaniq"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Xavfsizlik yuzasidan, planshetingizga hozirda bu manbadan notanish ilovalarni o‘rnatishga ruxsat berilmagan. Buni sozlamalardan oʻzgartirish mumkin."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Xavfsizlik yuzasidan, televizoringizga hozirda bu manbadan notanish ilovalarni o‘rnatishga ruxsat berilmagan. Buni sozlamalardan oʻzgartirish mumkin."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Xavfsizlik yuzasidan, soatingizga hozirda bu manbadan notanish ilovalarni oʻrnatishga ruxsat berilmagan. Buni sozlamalardan oʻzgartirish mumkin."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Xavfsizlik yuzasidan, telefoningizga hozir ushbu manbadan notanish ilovalarni o‘rnatishga ruxsat berilmagan. Buni Sozlamalarda oʻzgartirishingiz mumkin."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefoningiz va shaxsiy axborotlaringiz notanish ilovalar hujumiga zaif bo‘ladi. Bu ilovani o‘rnatish bilan telefoningizga yetkaziladigan shikast va axborotlaringizni o‘chirib yuborilishiga javobgarlikni o‘z zimmangizga olasiz."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Planshetingiz va shaxsiy axborotlaringiz notanish ilovalar hujumiga zaif bo‘ladi. Bu ilovani o‘rnatish bilan planshetingizga yetkaziladigan shikast va axborotlaringizni o‘chirib yuborilishiga javobgarlikni o‘z zimmangizga olasiz."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV va shaxsiy axborotlaringiz notanish ilovalar hujumiga zaif bo‘ladi. Bu ilovani o‘rnatish bilan televizoringizga yetkaziladigan shikast va axborotlaringizni o‘chirib yuborilishiga javobgarlikni o‘z zimmangizga olasiz."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> nusxasi"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Davom etish"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Sozlamalar"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear ilovalarini o‘rnatish/o‘chirish"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Ilova oʻrnatilgani haqida bildirishnoma"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"O‘rnatildi"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"“<xliff:g id="APPNAME">%1$s</xliff:g>” o‘rnatildi"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="APPNAME">%1$s</xliff:g> ilovasi <xliff:g id="INSTALLERNAME">%1$s</xliff:g> orqali tiklansinmi?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Bu ilova orqa fonda yuklab olinishi boshlanadi"</string>
+    <string name="restore" msgid="8460854736328970444">"Tiklash"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Siz internetga ulanmagansiz"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Internetga ulanganingizda bu ilova avtomatik ravishda tiklanadi"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Nimadir xato ketdi"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Bu ilovani tiklashda muammo chiqdi"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Xotirada yetarli boʻsh joy yoʻq"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Bu ilovani tiklash uchun ushbu qurilmada joy ochishingiz mumkin. Kerakli joy: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Amal bajarish zarur"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Bu ilovani tiklash uchun keyingi qadamlarga rioya qiling"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> faolsizlantirilgan"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> oʻchirib tashlandi"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Bu ilovani tiklash uchun <xliff:g id="INSTALLERNAME">%1$s</xliff:g> oʻrnatilishi kerak"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Davom etish"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Xotirani tozalash"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Sozlamalar"</string>
+    <string name="close" msgid="5214897374055647996">"Yopish"</string>
 </resources>

@@ -16,18 +16,86 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Color;
+import android.provider.DeviceConfig;
+import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.function.Function;
 
 /** Reads letterbox configs from resources and controls their overrides at runtime. */
 final class LetterboxConfiguration {
+
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "LetterboxConfiguration" : TAG_ATM;
+
+    // Whether camera compatibility treatment is enabled.
+    // See DisplayRotationCompatPolicy for context.
+    private static final String KEY_ENABLE_CAMERA_COMPAT_TREATMENT =
+            "enable_compat_camera_treatment";
+
+    private static final boolean DEFAULT_VALUE_ENABLE_CAMERA_COMPAT_TREATMENT = true;
+
+    // Whether enabling rotation compat policy for immersive apps that prevents auto
+    // rotation into non-optimal screen orientation while in fullscreen. This is needed
+    // because immersive apps, such as games, are often not optimized for all
+    // orientations and can have a poor UX when rotated. Additionally, some games rely
+    // on sensors for the gameplay so  users can trigger such rotations accidentally
+    // when auto rotation is on.
+    private static final String KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY =
+            "enable_display_rotation_immersive_app_compat_policy";
+
+    private static final boolean DEFAULT_VALUE_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY =
+            true;
+
+    // Whether ignore orientation request is allowed
+    private static final String KEY_ALLOW_IGNORE_ORIENTATION_REQUEST =
+            "allow_ignore_orientation_request";
+
+    private static final boolean DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST = true;
+
+    // Whether sending compat fake focus is enabled for unfocused apps in splitscreen.
+    // Some game engines wait to get focus before drawing the content of the app so
+    // this needs  to be used otherwise the apps get blacked out when they are resumed
+    // and do not have focus yet.
+    private static final String KEY_ENABLE_COMPAT_FAKE_FOCUS = "enable_compat_fake_focus";
+
+    private static final boolean DEFAULT_VALUE_ENABLE_COMPAT_FAKE_FOCUS = true;
+
+    // Whether translucent activities policy is enabled
+    private static final String KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY =
+            "enable_letterbox_translucent_activity";
+
+    private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY = true;
+
+    // Whether per-app user aspect ratio override settings is enabled
+    private static final String KEY_ENABLE_USER_ASPECT_RATIO_SETTINGS =
+            "enable_app_compat_aspect_ratio_user_settings";
+
+    // TODO(b/288142656): Enable user aspect ratio settings by default.
+    private static final boolean DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_SETTINGS = true;
+
+    // Whether per-app fullscreen user aspect ratio override option is enabled
+    private static final String KEY_ENABLE_USER_ASPECT_RATIO_FULLSCREEN =
+            "enable_app_compat_user_aspect_ratio_fullscreen";
+    private static final boolean DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_FULLSCREEN = true;
+
+    // Whether the letterbox wallpaper style is enabled by default
+    private static final String KEY_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER =
+            "enable_letterbox_background_wallpaper";
+
+    // TODO(b/290048978): Enable wallpaper as default letterbox background.
+    private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER = false;
 
     /**
      * Override of aspect ratio for fixed orientation letterboxing that is set via ADB with
@@ -37,11 +105,24 @@ final class LetterboxConfiguration {
      */
     static final float MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO = 1.0f;
 
+    /** The default aspect ratio for a letterboxed app in multi-window mode. */
+    static final float DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW = 1.01f;
+
+    /** Letterboxed app window position multiplier indicating center position. */
+    static final float LETTERBOX_POSITION_MULTIPLIER_CENTER = 0.5f;
+
     /** Enum for Letterbox background type. */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({LETTERBOX_BACKGROUND_SOLID_COLOR, LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND,
-            LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING, LETTERBOX_BACKGROUND_WALLPAPER})
+    @IntDef({LETTERBOX_BACKGROUND_OVERRIDE_UNSET,
+            LETTERBOX_BACKGROUND_SOLID_COLOR,
+            LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND,
+            LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING,
+            LETTERBOX_BACKGROUND_WALLPAPER})
     @interface LetterboxBackgroundType {};
+
+    /** No letterbox background style set. Using the one defined by DeviceConfig. */
+    static final int LETTERBOX_BACKGROUND_OVERRIDE_UNSET = -1;
+
     /** Solid background using color specified in R.color.config_letterboxBackgroundColor. */
     static final int LETTERBOX_BACKGROUND_SOLID_COLOR = 0;
 
@@ -100,6 +181,10 @@ final class LetterboxConfiguration {
 
     final Context mContext;
 
+    // Responsible for the persistence of letterbox[Horizontal|Vertical]PositionMultiplier
+    @NonNull
+    private final LetterboxConfigurationPersister mLetterboxConfigurationPersister;
+
     // Aspect ratio of letterbox for fixed orientation, values <=
     // MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO will be ignored.
     private float mFixedOrientationLetterboxAspectRatio;
@@ -117,14 +202,14 @@ final class LetterboxConfiguration {
     @Nullable private Integer mLetterboxBackgroundColorResourceIdOverride;
 
     @LetterboxBackgroundType
-    private int mLetterboxBackgroundType;
+    private final int mLetterboxBackgroundType;
 
-    // Blur radius for LETTERBOX_BACKGROUND_WALLPAPER option in mLetterboxBackgroundType.
+    // Blur radius for LETTERBOX_BACKGROUND_WALLPAPER option from getLetterboxBackgroundType().
     // Values <= 0 are ignored and 0 is used instead.
-    private int mLetterboxBackgroundWallpaperBlurRadius;
+    private int mLetterboxBackgroundWallpaperBlurRadiusPx;
 
     // Alpha of a black scrim shown over wallpaper letterbox background when
-    // LETTERBOX_BACKGROUND_WALLPAPER option is selected for mLetterboxBackgroundType.
+    // LETTERBOX_BACKGROUND_WALLPAPER option is returned from getLetterboxBackgroundType().
     // Values < 0 or >= 1 are ignored and 0.0 (transparent) is used instead.
     private float mLetterboxBackgroundWallpaperDarkScrimAlpha;
 
@@ -135,6 +220,14 @@ final class LetterboxConfiguration {
     // Vertical position of a center of the letterboxed app window. 0 corresponds to the top
     // side of the screen and 1.0 to the bottom side.
     private float mLetterboxVerticalPositionMultiplier;
+
+    // Horizontal position of a center of the letterboxed app window when the device is half-folded.
+    // 0 corresponds to the left side of the screen and 1.0 to the right side.
+    private float mLetterboxBookModePositionMultiplier;
+
+    // Vertical position of a center of the letterboxed app window when the device is half-folded.
+    // 0 corresponds to the top side of the screen and 1.0 to the bottom side.
+    private float mLetterboxTabletopModePositionMultiplier;
 
     // Default horizontal position the letterboxed app window when horizontal reachability is
     // enabled and an app is fullscreen in landscape device orientation.
@@ -156,26 +249,9 @@ final class LetterboxConfiguration {
     // portrait device orientation.
     private boolean mIsVerticalReachabilityEnabled;
 
-
-    // Horizontal position of a center of the letterboxed app window which is global to prevent
-    // "jumps" when switching between letterboxed apps. It's updated to reposition the app window
-    // in response to a double tap gesture (see LetterboxUiController#handleDoubleTap). Used in
-    // LetterboxUiController#getHorizontalPositionMultiplier which is called from
-    // ActivityRecord#updateResolvedBoundsPosition.
-    // TODO(b/199426138): Global reachability setting causes a jump when resuming an app from
-    // Overview after changing position in another app.
-    @LetterboxHorizontalReachabilityPosition
-    private volatile int mLetterboxPositionForHorizontalReachability;
-
-    // Vertical position of a center of the letterboxed app window which is global to prevent
-    // "jumps" when switching between letterboxed apps. It's updated to reposition the app window
-    // in response to a double tap gesture (see LetterboxUiController#handleDoubleTap). Used in
-    // LetterboxUiController#getVerticalPositionMultiplier which is called from
-    // ActivityRecord#updateResolvedBoundsPosition.
-    // TODO(b/199426138): Global reachability setting causes a jump when resuming an app from
-    // Overview after changing position in another app.
-    @LetterboxVerticalReachabilityPosition
-    private volatile int mLetterboxPositionForVerticalReachability;
+    // Whether book mode automatic horizontal reachability positioning is allowed for letterboxed
+    // fullscreen apps in landscape device orientation.
+    private boolean mIsAutomaticReachabilityInBookModeEnabled;
 
     // Whether education is allowed for letterboxed fullscreen apps.
     private boolean mIsEducationEnabled;
@@ -183,14 +259,71 @@ final class LetterboxConfiguration {
     // Whether using split screen aspect ratio as a default aspect ratio for unresizable apps.
     private boolean mIsSplitScreenAspectRatioForUnresizableAppsEnabled;
 
-    LetterboxConfiguration(Context systemUiContext) {
+    // Whether using display aspect ratio as a default aspect ratio for all letterboxed apps.
+    // mIsSplitScreenAspectRatioForUnresizableAppsEnabled and
+    // config_letterboxDefaultMinAspectRatioForUnresizableApps take priority over this for
+    // unresizable apps
+    private boolean mIsDisplayAspectRatioEnabledForFixedOrientationLetterbox;
+
+    // Allows to enable letterboxing strategy for translucent activities ignoring flags.
+    private boolean mTranslucentLetterboxingOverrideEnabled;
+
+    // Allows to enable user aspect ratio settings ignoring flags.
+    private boolean mUserAppAspectRatioSettingsOverrideEnabled;
+
+    // Allows to enable fullscreen option in user aspect ratio settings ignoring flags.
+    private boolean mUserAppAspectRatioFullscreenOverrideEnabled;
+
+    // The override for letterbox background type in case it's different from
+    // LETTERBOX_BACKGROUND_OVERRIDE_UNSET
+    @LetterboxBackgroundType
+    private int mLetterboxBackgroundTypeOverride = LETTERBOX_BACKGROUND_OVERRIDE_UNSET;
+
+    // Whether we should use split screen aspect ratio for the activity when camera compat treatment
+    // is enabled and activity is connected to the camera in fullscreen.
+    private final boolean mIsCameraCompatSplitScreenAspectRatioEnabled;
+
+    // Whether activity "refresh" in camera compatibility treatment is enabled.
+    // See RefreshCallbackItem for context.
+    private boolean mIsCameraCompatTreatmentRefreshEnabled = true;
+
+    // Whether activity "refresh" in camera compatibility treatment should happen using the
+    // "stopped -> resumed" cycle rather than "paused -> resumed" cycle. Using "stop -> resumed"
+    // cycle by default due to higher success rate confirmed with app compatibility testing.
+    // See RefreshCallbackItem for context.
+    private boolean mIsCameraCompatRefreshCycleThroughStopEnabled = true;
+
+    // Whether should ignore app requested orientation in response to an app
+    // calling Activity#setRequestedOrientation. See
+    // LetterboxUiController#shouldIgnoreRequestedOrientation for details.
+    private final boolean mIsPolicyForIgnoringRequestedOrientationEnabled;
+
+    // Flags dynamically updated with {@link android.provider.DeviceConfig}.
+    @NonNull private final SynchedDeviceConfig mDeviceConfig;
+
+    LetterboxConfiguration(@NonNull final Context systemUiContext) {
+        this(systemUiContext, new LetterboxConfigurationPersister(
+                () -> readLetterboxHorizontalReachabilityPositionFromConfig(
+                        systemUiContext, /* forBookMode */ false),
+                () -> readLetterboxVerticalReachabilityPositionFromConfig(
+                        systemUiContext, /* forTabletopMode */ false),
+                () -> readLetterboxHorizontalReachabilityPositionFromConfig(
+                        systemUiContext, /* forBookMode */ true),
+                () -> readLetterboxVerticalReachabilityPositionFromConfig(
+                        systemUiContext, /* forTabletopMode */ true)));
+    }
+
+    @VisibleForTesting
+    LetterboxConfiguration(@NonNull final Context systemUiContext,
+            @NonNull final LetterboxConfigurationPersister letterboxConfigurationPersister) {
         mContext = systemUiContext;
+
         mFixedOrientationLetterboxAspectRatio = mContext.getResources().getFloat(
                 R.dimen.config_fixedOrientationLetterboxAspectRatio);
+        mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(mContext);
         mLetterboxActivityCornersRadius = mContext.getResources().getInteger(
                 R.integer.config_letterboxActivityCornersRadius);
-        mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(mContext);
-        mLetterboxBackgroundWallpaperBlurRadius = mContext.getResources().getDimensionPixelSize(
+        mLetterboxBackgroundWallpaperBlurRadiusPx = mContext.getResources().getDimensionPixelSize(
                 R.dimen.config_letterboxBackgroundWallpaperBlurRadius);
         mLetterboxBackgroundWallpaperDarkScrimAlpha = mContext.getResources().getFloat(
                 R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha);
@@ -198,22 +331,75 @@ final class LetterboxConfiguration {
                 R.dimen.config_letterboxHorizontalPositionMultiplier);
         mLetterboxVerticalPositionMultiplier = mContext.getResources().getFloat(
                 R.dimen.config_letterboxVerticalPositionMultiplier);
+        mLetterboxBookModePositionMultiplier = mContext.getResources().getFloat(
+                R.dimen.config_letterboxBookModePositionMultiplier);
+        mLetterboxTabletopModePositionMultiplier = mContext.getResources().getFloat(
+                R.dimen.config_letterboxTabletopModePositionMultiplier);
         mIsHorizontalReachabilityEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsHorizontalReachabilityEnabled);
         mIsVerticalReachabilityEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsVerticalReachabilityEnabled);
+        mIsAutomaticReachabilityInBookModeEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsAutomaticReachabilityInBookModeEnabled);
         mDefaultPositionForHorizontalReachability =
-                readLetterboxHorizontalReachabilityPositionFromConfig(mContext);
+                readLetterboxHorizontalReachabilityPositionFromConfig(mContext, false);
         mDefaultPositionForVerticalReachability =
-                readLetterboxVerticalReachabilityPositionFromConfig(mContext);
-        mLetterboxPositionForHorizontalReachability = mDefaultPositionForHorizontalReachability;
-        mLetterboxPositionForVerticalReachability = mDefaultPositionForVerticalReachability;
+                readLetterboxVerticalReachabilityPositionFromConfig(mContext, false);
         mIsEducationEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsEducationEnabled);
         setDefaultMinAspectRatioForUnresizableApps(mContext.getResources().getFloat(
                 R.dimen.config_letterboxDefaultMinAspectRatioForUnresizableApps));
         mIsSplitScreenAspectRatioForUnresizableAppsEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled);
+        mIsDisplayAspectRatioEnabledForFixedOrientationLetterbox = mContext.getResources()
+                .getBoolean(R.bool
+                        .config_letterboxIsDisplayAspectRatioForFixedOrientationLetterboxEnabled);
+        mIsCameraCompatSplitScreenAspectRatioEnabled = mContext.getResources().getBoolean(
+                R.bool.config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled);
+        mIsPolicyForIgnoringRequestedOrientationEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsPolicyForIgnoringRequestedOrientationEnabled);
+
+        mLetterboxConfigurationPersister = letterboxConfigurationPersister;
+        mLetterboxConfigurationPersister.start();
+
+        mDeviceConfig = SynchedDeviceConfig.builder(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                        systemUiContext.getMainExecutor())
+                .addDeviceConfigEntry(KEY_ENABLE_CAMERA_COMPAT_TREATMENT,
+                        DEFAULT_VALUE_ENABLE_CAMERA_COMPAT_TREATMENT,
+                        mContext.getResources().getBoolean(
+                                R.bool.config_isWindowManagerCameraCompatTreatmentEnabled))
+                .addDeviceConfigEntry(KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY,
+                        DEFAULT_VALUE_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY,
+                        mContext.getResources().getBoolean(R.bool
+                                .config_letterboxIsDisplayRotationImmersiveAppCompatPolicyEnabled))
+                .addDeviceConfigEntry(KEY_ALLOW_IGNORE_ORIENTATION_REQUEST,
+                        DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST, /* enabled */ true)
+                .addDeviceConfigEntry(KEY_ENABLE_COMPAT_FAKE_FOCUS,
+                        DEFAULT_VALUE_ENABLE_COMPAT_FAKE_FOCUS,
+                        mContext.getResources().getBoolean(R.bool.config_isCompatFakeFocusEnabled))
+                .addDeviceConfigEntry(KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY,
+                        DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY,
+                        mContext.getResources().getBoolean(
+                                R.bool.config_letterboxIsEnabledForTranslucentActivities))
+                .addDeviceConfigEntry(KEY_ENABLE_USER_ASPECT_RATIO_SETTINGS,
+                        DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_SETTINGS,
+                        mContext.getResources().getBoolean(
+                                R.bool.config_appCompatUserAppAspectRatioSettingsIsEnabled))
+                .addDeviceConfigEntry(KEY_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER,
+                        DEFAULT_VALUE_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER, /* enabled */ true)
+                .addDeviceConfigEntry(KEY_ENABLE_USER_ASPECT_RATIO_FULLSCREEN,
+                        DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_FULLSCREEN,
+                        mContext.getResources().getBoolean(
+                                R.bool.config_appCompatUserAppAspectRatioFullscreenIsEnabled))
+                .build();
+    }
+
+    /**
+     * Whether enabling ignoreOrientationRequest is allowed on the device. This value is controlled
+     * via {@link android.provider.DeviceConfig}.
+     */
+    boolean isIgnoreOrientationRequestAllowed() {
+        return mDeviceConfig.getFlagValue(KEY_ALLOW_IGNORE_ORIENTATION_REQUEST);
     }
 
     /**
@@ -343,25 +529,39 @@ final class LetterboxConfiguration {
     }
 
     /**
-     * Gets {@link LetterboxBackgroundType} specified in {@link
-     * com.android.internal.R.integer.config_letterboxBackgroundType} or over via ADB command.
+     * Gets {@link LetterboxBackgroundType} specified via ADB command or the default one.
      */
     @LetterboxBackgroundType
     int getLetterboxBackgroundType() {
-        return mLetterboxBackgroundType;
+        return mLetterboxBackgroundTypeOverride != LETTERBOX_BACKGROUND_OVERRIDE_UNSET
+                ? mLetterboxBackgroundTypeOverride
+                : getDefaultLetterboxBackgroundType();
     }
 
-    /** Sets letterbox background type. */
-    void setLetterboxBackgroundType(@LetterboxBackgroundType int backgroundType) {
-        mLetterboxBackgroundType = backgroundType;
+    /** Overrides the letterbox background type. */
+    void setLetterboxBackgroundTypeOverride(@LetterboxBackgroundType int backgroundType) {
+        mLetterboxBackgroundTypeOverride = backgroundType;
     }
 
     /**
-     * Resets cletterbox background type to {@link
-     * com.android.internal.R.integer.config_letterboxBackgroundType}.
+     * Resets letterbox background type value depending on the
+     * {@link #KEY_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER} built time and runtime flags.
+     *
+     * <p>If enabled, the letterbox background type value is set toZ
+     * {@link #LETTERBOX_BACKGROUND_WALLPAPER}. When disabled the letterbox background type value
+     * comes from {@link R.integer.config_letterboxBackgroundType}.
      */
     void resetLetterboxBackgroundType() {
-        mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(mContext);
+        mLetterboxBackgroundTypeOverride = LETTERBOX_BACKGROUND_OVERRIDE_UNSET;
+    }
+
+    // Returns KEY_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER if the DeviceConfig flag is enabled
+    // or the value in com.android.internal.R.integer.config_letterboxBackgroundType if the flag
+    // is disabled.
+    @LetterboxBackgroundType
+    private int getDefaultLetterboxBackgroundType() {
+        return mDeviceConfig.getFlagValue(KEY_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER)
+                ? LETTERBOX_BACKGROUND_WALLPAPER : mLetterboxBackgroundType;
     }
 
     /** Returns a string representing the given {@link LetterboxBackgroundType}. */
@@ -394,7 +594,7 @@ final class LetterboxConfiguration {
 
     /**
      * Overrides alpha of a black scrim shown over wallpaper for {@link
-     * #LETTERBOX_BACKGROUND_WALLPAPER} option in {@link mLetterboxBackgroundType}.
+     * #LETTERBOX_BACKGROUND_WALLPAPER} option returned from {@link getLetterboxBackgroundType()}.
      *
      * <p>If given value is < 0 or >= 1, both it and a value of {@link
      * com.android.internal.R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha} are ignored
@@ -421,33 +621,33 @@ final class LetterboxConfiguration {
     }
 
     /**
-     * Overrides blur radius for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option in
-     * {@link mLetterboxBackgroundType}.
+     * Overrides blur radius for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option from
+     * {@link getLetterboxBackgroundType()}.
      *
      * <p> If given value <= 0, both it and a value of {@link
      * com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius} are ignored
      * and 0 is used instead.
      */
-    void setLetterboxBackgroundWallpaperBlurRadius(int radius) {
-        mLetterboxBackgroundWallpaperBlurRadius = radius;
+    void setLetterboxBackgroundWallpaperBlurRadiusPx(int radius) {
+        mLetterboxBackgroundWallpaperBlurRadiusPx = radius;
     }
 
     /**
-     * Resets blur raidus for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option in {@link
-     * mLetterboxBackgroundType} to {@link
+     * Resets blur raidus for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option returned by {@link
+     * getLetterboxBackgroundType()} to {@link
      * com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius}.
      */
-    void resetLetterboxBackgroundWallpaperBlurRadius() {
-        mLetterboxBackgroundWallpaperBlurRadius = mContext.getResources().getDimensionPixelSize(
+    void resetLetterboxBackgroundWallpaperBlurRadiusPx() {
+        mLetterboxBackgroundWallpaperBlurRadiusPx = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.config_letterboxBackgroundWallpaperBlurRadius);
     }
 
     /**
-     * Gets blur raidus for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option in {@link
-     * mLetterboxBackgroundType}.
+     * Gets blur raidus for {@link #LETTERBOX_BACKGROUND_WALLPAPER} option returned by {@link
+     * getLetterboxBackgroundType()}.
      */
-    int getLetterboxBackgroundWallpaperBlurRadius() {
-        return mLetterboxBackgroundWallpaperBlurRadius;
+    int getLetterboxBackgroundWallpaperBlurRadiusPx() {
+        return mLetterboxBackgroundWallpaperBlurRadiusPx;
     }
 
     /*
@@ -456,11 +656,30 @@ final class LetterboxConfiguration {
      * or via an ADB command. 0 corresponds to the left side of the screen and 1 to the
      * right side.
      */
-    float getLetterboxHorizontalPositionMultiplier() {
-        return (mLetterboxHorizontalPositionMultiplier < 0.0f
-                || mLetterboxHorizontalPositionMultiplier > 1.0f)
-                        // Default to central position if invalid value is provided.
-                        ? 0.5f : mLetterboxHorizontalPositionMultiplier;
+    float getLetterboxHorizontalPositionMultiplier(boolean isInBookMode) {
+        if (isInBookMode) {
+            if (mLetterboxBookModePositionMultiplier < 0.0f
+                    || mLetterboxBookModePositionMultiplier > 1.0f) {
+                Slog.w(TAG,
+                        "mLetterboxBookModePositionMultiplier out of bounds (isInBookMode=true): "
+                        + mLetterboxBookModePositionMultiplier);
+                // Default to left position if invalid value is provided.
+                return 0.0f;
+            } else {
+                return mLetterboxBookModePositionMultiplier;
+            }
+        } else {
+            if (mLetterboxHorizontalPositionMultiplier < 0.0f
+                    || mLetterboxHorizontalPositionMultiplier > 1.0f) {
+                Slog.w(TAG,
+                        "mLetterboxBookModePositionMultiplier out of bounds (isInBookMode=false):"
+                        + mLetterboxBookModePositionMultiplier);
+                // Default to central position if invalid value is provided.
+                return 0.5f;
+            } else {
+                return mLetterboxHorizontalPositionMultiplier;
+            }
+        }
     }
 
     /*
@@ -469,11 +688,18 @@ final class LetterboxConfiguration {
      * or via an ADB command. 0 corresponds to the top side of the screen and 1 to the
      * bottom side.
      */
-    float getLetterboxVerticalPositionMultiplier() {
-        return (mLetterboxVerticalPositionMultiplier < 0.0f
-                || mLetterboxVerticalPositionMultiplier > 1.0f)
-                        // Default to central position if invalid value is provided.
-                        ? 0.5f : mLetterboxVerticalPositionMultiplier;
+    float getLetterboxVerticalPositionMultiplier(boolean isInTabletopMode) {
+        if (isInTabletopMode) {
+            return (mLetterboxTabletopModePositionMultiplier < 0.0f
+                    || mLetterboxTabletopModePositionMultiplier > 1.0f)
+                    // Default to top position if invalid value is provided.
+                    ? 0.0f : mLetterboxTabletopModePositionMultiplier;
+        } else {
+            return (mLetterboxVerticalPositionMultiplier < 0.0f
+                    || mLetterboxVerticalPositionMultiplier > 1.0f)
+                    // Default to central position if invalid value is provided.
+                    ? 0.5f : mLetterboxVerticalPositionMultiplier;
+        }
     }
 
     /**
@@ -530,6 +756,14 @@ final class LetterboxConfiguration {
         return mIsVerticalReachabilityEnabled;
     }
 
+    /*
+     * Whether automatic horizontal reachability repositioning in book mode is allowed for
+     * letterboxed fullscreen apps in landscape device orientation.
+     */
+    boolean getIsAutomaticReachabilityInBookModeEnabled() {
+        return mIsAutomaticReachabilityInBookModeEnabled;
+    }
+
     /**
      * Overrides whether horizontal reachability repositioning is allowed for letterboxed fullscreen
      * apps in landscape device orientation.
@@ -544,6 +778,14 @@ final class LetterboxConfiguration {
      */
     void setIsVerticalReachabilityEnabled(boolean enabled) {
         mIsVerticalReachabilityEnabled = enabled;
+    }
+
+    /**
+     * Overrides whether automatic horizontal reachability repositioning in book mode is allowed for
+     * letterboxed fullscreen apps in landscape device orientation.
+     */
+    void setIsAutomaticReachabilityInBookModeEnabled(boolean enabled) {
+        mIsAutomaticReachabilityInBookModeEnabled = enabled;
     }
 
     /**
@@ -564,6 +806,16 @@ final class LetterboxConfiguration {
     void resetIsVerticalReachabilityEnabled() {
         mIsVerticalReachabilityEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsVerticalReachabilityEnabled);
+    }
+
+    /**
+     * Resets whether automatic horizontal reachability repositioning in book mode is
+     * allowed for letterboxed fullscreen apps in landscape device orientation to
+     * {@link R.bool.config_letterboxIsAutomaticReachabilityInBookModeEnabled}.
+     */
+    void resetEnabledAutomaticReachabilityInBookMode() {
+        mIsAutomaticReachabilityInBookModeEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsAutomaticReachabilityInBookModeEnabled);
     }
 
     /*
@@ -614,7 +866,8 @@ final class LetterboxConfiguration {
      */
     void resetDefaultPositionForHorizontalReachability() {
         mDefaultPositionForHorizontalReachability =
-                readLetterboxHorizontalReachabilityPositionFromConfig(mContext);
+                readLetterboxHorizontalReachabilityPositionFromConfig(mContext,
+                        false /* forBookMode */);
     }
 
     /**
@@ -623,27 +876,86 @@ final class LetterboxConfiguration {
      */
     void resetDefaultPositionForVerticalReachability() {
         mDefaultPositionForVerticalReachability =
-                readLetterboxVerticalReachabilityPositionFromConfig(mContext);
+                readLetterboxVerticalReachabilityPositionFromConfig(mContext,
+                        false /* forTabletopMode */);
+    }
+
+    /**
+     * Overrides persistent horizontal position of the letterboxed app window when horizontal
+     * reachability is enabled.
+     */
+    void setPersistentLetterboxPositionForHorizontalReachability(boolean forBookMode,
+            @LetterboxHorizontalReachabilityPosition int position) {
+        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(
+                forBookMode, position);
+    }
+
+    /**
+     * Overrides persistent vertical position of the letterboxed app window when vertical
+     * reachability is enabled.
+     */
+    void setPersistentLetterboxPositionForVerticalReachability(boolean forTabletopMode,
+            @LetterboxVerticalReachabilityPosition int position) {
+        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
+                forTabletopMode, position);
+    }
+
+    /**
+     * Resets persistent horizontal position of the letterboxed app window when horizontal
+     * reachability
+     * is enabled to default position.
+     */
+    void resetPersistentLetterboxPositionForHorizontalReachability() {
+        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(
+                false /* forBookMode */,
+                readLetterboxHorizontalReachabilityPositionFromConfig(mContext,
+                        false /* forBookMode */));
+        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(
+                true /* forBookMode */,
+                readLetterboxHorizontalReachabilityPositionFromConfig(mContext,
+                        true /* forBookMode */));
+    }
+
+    /**
+     * Resets persistent vertical position of the letterboxed app window when vertical reachability
+     * is
+     * enabled to default position.
+     */
+    void resetPersistentLetterboxPositionForVerticalReachability() {
+        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
+                false /* forTabletopMode */,
+                readLetterboxVerticalReachabilityPositionFromConfig(mContext,
+                        false /* forTabletopMode */));
+        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
+                true /* forTabletopMode */,
+                readLetterboxVerticalReachabilityPositionFromConfig(mContext,
+                        true /* forTabletopMode */));
     }
 
     @LetterboxHorizontalReachabilityPosition
-    private static int readLetterboxHorizontalReachabilityPositionFromConfig(Context context) {
+    private static int readLetterboxHorizontalReachabilityPositionFromConfig(Context context,
+            boolean forBookMode) {
         int position = context.getResources().getInteger(
-                R.integer.config_letterboxDefaultPositionForHorizontalReachability);
+                forBookMode
+                    ? R.integer.config_letterboxDefaultPositionForBookModeReachability
+                    : R.integer.config_letterboxDefaultPositionForHorizontalReachability);
         return position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT
-                    || position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER
-                    || position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT
+                || position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER
+                || position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT
                     ? position : LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER;
     }
 
     @LetterboxVerticalReachabilityPosition
-    private static int readLetterboxVerticalReachabilityPositionFromConfig(Context context) {
+    private static int readLetterboxVerticalReachabilityPositionFromConfig(Context context,
+            boolean forTabletopMode) {
         int position = context.getResources().getInteger(
-                R.integer.config_letterboxDefaultPositionForVerticalReachability);
+                forTabletopMode
+                    ? R.integer.config_letterboxDefaultPositionForTabletopModeReachability
+                    : R.integer.config_letterboxDefaultPositionForVerticalReachability);
         return position == LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP
                 || position == LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER
                 || position == LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM
-                ? position : LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
+                    ? position : LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
     }
 
     /*
@@ -652,8 +964,11 @@ final class LetterboxConfiguration {
      *
      * <p>The position multiplier is changed after each double tap in the letterbox area.
      */
-    float getHorizontalMultiplierForReachability() {
-        switch (mLetterboxPositionForHorizontalReachability) {
+    float getHorizontalMultiplierForReachability(boolean isDeviceInBookMode) {
+        final int letterboxPositionForHorizontalReachability =
+                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability(
+                        isDeviceInBookMode);
+        switch (letterboxPositionForHorizontalReachability) {
             case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT:
                 return 0.0f;
             case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER:
@@ -662,18 +977,22 @@ final class LetterboxConfiguration {
                 return 1.0f;
             default:
                 throw new AssertionError(
-                    "Unexpected letterbox position type: "
-                            + mLetterboxPositionForHorizontalReachability);
+                        "Unexpected letterbox position type: "
+                                + letterboxPositionForHorizontalReachability);
         }
     }
+
     /*
      * Gets vertical position of a center of the letterboxed app window when reachability
      * is enabled specified. 0 corresponds to the top side of the screen and 1 to the bottom side.
      *
      * <p>The position multiplier is changed after each double tap in the letterbox area.
      */
-    float getVerticalMultiplierForReachability() {
-        switch (mLetterboxPositionForVerticalReachability) {
+    float getVerticalMultiplierForReachability(boolean isDeviceInTabletopMode) {
+        final int letterboxPositionForVerticalReachability =
+                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability(
+                        isDeviceInTabletopMode);
+        switch (letterboxPositionForVerticalReachability) {
             case LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP:
                 return 0.0f;
             case LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER:
@@ -683,7 +1002,7 @@ final class LetterboxConfiguration {
             default:
                 throw new AssertionError(
                         "Unexpected letterbox position type: "
-                                + mLetterboxPositionForVerticalReachability);
+                                + letterboxPositionForVerticalReachability);
         }
     }
 
@@ -692,8 +1011,9 @@ final class LetterboxConfiguration {
      * enabled.
      */
     @LetterboxHorizontalReachabilityPosition
-    int getLetterboxPositionForHorizontalReachability() {
-        return mLetterboxPositionForHorizontalReachability;
+    int getLetterboxPositionForHorizontalReachability(boolean isInFullScreenBookMode) {
+        return mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability(
+                isInFullScreenBookMode);
     }
 
     /*
@@ -701,8 +1021,9 @@ final class LetterboxConfiguration {
      * enabled.
      */
     @LetterboxVerticalReachabilityPosition
-    int getLetterboxPositionForVerticalReachability() {
-        return mLetterboxPositionForVerticalReachability;
+    int getLetterboxPositionForVerticalReachability(boolean isInFullScreenTabletopMode) {
+        return mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability(
+                isInFullScreenTabletopMode);
     }
 
     /** Returns a string representing the given {@link LetterboxHorizontalReachabilityPosition}. */
@@ -741,38 +1062,41 @@ final class LetterboxConfiguration {
      * Changes letterbox position for horizontal reachability to the next available one on the
      * right side.
      */
-    void movePositionForHorizontalReachabilityToNextRightStop() {
-        mLetterboxPositionForHorizontalReachability = Math.min(
-                mLetterboxPositionForHorizontalReachability + 1,
-                LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT);
+    void movePositionForHorizontalReachabilityToNextRightStop(boolean isDeviceInBookMode) {
+        updatePositionForHorizontalReachability(isDeviceInBookMode, prev -> Math.min(
+                prev + (isDeviceInBookMode ? 2 : 1), // Move 2 stops in book mode to avoid center.
+                LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT));
     }
 
     /**
      * Changes letterbox position for horizontal reachability to the next available one on the left
      * side.
      */
-    void movePositionForHorizontalReachabilityToNextLeftStop() {
-        mLetterboxPositionForHorizontalReachability =
-                Math.max(mLetterboxPositionForHorizontalReachability - 1, 0);
+    void movePositionForHorizontalReachabilityToNextLeftStop(boolean isDeviceInBookMode) {
+        updatePositionForHorizontalReachability(isDeviceInBookMode, prev -> Math.max(
+                prev - (isDeviceInBookMode ? 2 : 1), 0)); // Move 2 stops in book mode to avoid
+                                                          // center.
     }
 
     /**
      * Changes letterbox position for vertical reachability to the next available one on the bottom
      * side.
      */
-    void movePositionForVerticalReachabilityToNextBottomStop() {
-        mLetterboxPositionForVerticalReachability = Math.min(
-                mLetterboxPositionForVerticalReachability + 1,
-                LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM);
+    void movePositionForVerticalReachabilityToNextBottomStop(boolean isDeviceInTabletopMode) {
+        updatePositionForVerticalReachability(isDeviceInTabletopMode, prev -> Math.min(
+                prev + (isDeviceInTabletopMode ? 2 : 1), // Move 2 stops in tabletop mode to avoid
+                                                         // center.
+                LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM));
     }
 
     /**
      * Changes letterbox position for vertical reachability to the next available one on the top
      * side.
      */
-    void movePositionForVerticalReachabilityToNextTopStop() {
-        mLetterboxPositionForVerticalReachability =
-                Math.max(mLetterboxPositionForVerticalReachability - 1, 0);
+    void movePositionForVerticalReachabilityToNextTopStop(boolean isDeviceInTabletopMode) {
+        updatePositionForVerticalReachability(isDeviceInTabletopMode, prev -> Math.max(
+                prev - (isDeviceInTabletopMode ? 2 : 1), 0)); // Move 2 stops in tabletop mode to
+                                                              // avoid center.
     }
 
     /**
@@ -806,11 +1130,26 @@ final class LetterboxConfiguration {
     }
 
     /**
+     * Whether using display aspect ratio as a default aspect ratio for all letterboxed apps.
+     */
+    boolean getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox() {
+        return mIsDisplayAspectRatioEnabledForFixedOrientationLetterbox;
+    }
+
+    /**
      * Overrides whether using split screen aspect ratio as a default aspect ratio for unresizable
      * apps.
      */
     void setIsSplitScreenAspectRatioForUnresizableAppsEnabled(boolean enabled) {
         mIsSplitScreenAspectRatioForUnresizableAppsEnabled = enabled;
+    }
+
+    /**
+     * Overrides whether using display aspect ratio as a default aspect ratio for all letterboxed
+     * apps.
+     */
+    void setIsDisplayAspectRatioEnabledForFixedOrientationLetterbox(boolean enabled) {
+        mIsDisplayAspectRatioEnabledForFixedOrientationLetterbox = enabled;
     }
 
     /**
@@ -822,4 +1161,199 @@ final class LetterboxConfiguration {
                 R.bool.config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled);
     }
 
+    /**
+     * Resets whether using display aspect ratio as a default aspect ratio for all letterboxed
+     * apps {@link R.bool.config_letterboxIsDisplayAspectRatioForFixedOrientationLetterboxEnabled}.
+     */
+    void resetIsDisplayAspectRatioEnabledForFixedOrientationLetterbox() {
+        mIsDisplayAspectRatioEnabledForFixedOrientationLetterbox = mContext.getResources()
+                .getBoolean(R.bool
+                        .config_letterboxIsDisplayAspectRatioForFixedOrientationLetterboxEnabled);
+    }
+
+    boolean isTranslucentLetterboxingEnabled() {
+        return mTranslucentLetterboxingOverrideEnabled
+                || mDeviceConfig.getFlagValue(KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY);
+    }
+
+    void setTranslucentLetterboxingOverrideEnabled(
+            boolean translucentLetterboxingOverrideEnabled) {
+        mTranslucentLetterboxingOverrideEnabled = translucentLetterboxingOverrideEnabled;
+    }
+
+    /**
+     * Resets whether we use the constraints override strategy for letterboxing when dealing
+     * with translucent activities
+     * {@link mDeviceConfig.getFlagValue(KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY)}.
+     */
+    void resetTranslucentLetterboxingEnabled() {
+        setTranslucentLetterboxingOverrideEnabled(false);
+    }
+
+    /** Calculates a new letterboxPositionForHorizontalReachability value and updates the store */
+    private void updatePositionForHorizontalReachability(boolean isDeviceInBookMode,
+            Function<Integer, Integer> newHorizonalPositionFun) {
+        final int letterboxPositionForHorizontalReachability =
+                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability(
+                        isDeviceInBookMode);
+        final int nextHorizontalPosition = newHorizonalPositionFun.apply(
+                letterboxPositionForHorizontalReachability);
+        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(
+                isDeviceInBookMode, nextHorizontalPosition);
+    }
+
+    /** Calculates a new letterboxPositionForVerticalReachability value and updates the store */
+    private void updatePositionForVerticalReachability(boolean isDeviceInTabletopMode,
+            Function<Integer, Integer> newVerticalPositionFun) {
+        final int letterboxPositionForVerticalReachability =
+                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability(
+                        isDeviceInTabletopMode);
+        final int nextVerticalPosition = newVerticalPositionFun.apply(
+                letterboxPositionForVerticalReachability);
+        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
+                isDeviceInTabletopMode, nextVerticalPosition);
+    }
+
+    /** Whether fake sending focus is enabled for unfocused apps in splitscreen */
+    boolean isCompatFakeFocusEnabled() {
+        return mDeviceConfig.getFlagValue(KEY_ENABLE_COMPAT_FAKE_FOCUS);
+    }
+
+    /**
+     * Whether should ignore app requested orientation in response to an app calling
+     * {@link android.app.Activity#setRequestedOrientation}. See {@link
+     * LetterboxUiController#shouldIgnoreRequestedOrientation} for details.
+     */
+    boolean isPolicyForIgnoringRequestedOrientationEnabled() {
+        return mIsPolicyForIgnoringRequestedOrientationEnabled;
+    }
+
+    /**
+     * Whether we should use split screen aspect ratio for the activity when camera compat treatment
+     * is enabled and activity is connected to the camera in fullscreen.
+     */
+    boolean isCameraCompatSplitScreenAspectRatioEnabled() {
+        return mIsCameraCompatSplitScreenAspectRatioEnabled;
+    }
+
+    /**
+     * @return Whether camera compatibility treatment is currently enabled.
+     */
+    boolean isCameraCompatTreatmentEnabled() {
+        return mDeviceConfig.getFlagValue(KEY_ENABLE_CAMERA_COMPAT_TREATMENT);
+    }
+
+    /**
+     * @return Whether camera compatibility treatment is enabled at build time. This is used when
+     * we need to safely initialize a component before the {@link DeviceConfig} flag value is
+     * available.
+     */
+    boolean isCameraCompatTreatmentEnabledAtBuildTime() {
+        return mDeviceConfig.isBuildTimeFlagEnabled(KEY_ENABLE_CAMERA_COMPAT_TREATMENT);
+    }
+
+    /** Whether camera compatibility refresh is enabled. */
+    boolean isCameraCompatRefreshEnabled() {
+        return mIsCameraCompatTreatmentRefreshEnabled;
+    }
+
+    /** Overrides whether camera compatibility treatment is enabled. */
+    void setCameraCompatRefreshEnabled(boolean enabled) {
+        mIsCameraCompatTreatmentRefreshEnabled = enabled;
+    }
+
+    /**
+     * Resets whether camera compatibility treatment is enabled to {@code true}.
+     */
+    void resetCameraCompatRefreshEnabled() {
+        mIsCameraCompatTreatmentRefreshEnabled = true;
+    }
+
+    /**
+     * Whether activity "refresh" in camera compatibility treatment should happen using the
+     * "stopped -> resumed" cycle rather than "paused -> resumed" cycle.
+     */
+    boolean isCameraCompatRefreshCycleThroughStopEnabled() {
+        return mIsCameraCompatRefreshCycleThroughStopEnabled;
+    }
+
+    /**
+     * Overrides whether activity "refresh" in camera compatibility treatment should happen using
+     * "stopped -> resumed" cycle rather than "paused -> resumed" cycle.
+     */
+    void setCameraCompatRefreshCycleThroughStopEnabled(boolean enabled) {
+        mIsCameraCompatRefreshCycleThroughStopEnabled = enabled;
+    }
+
+    /**
+     * Resets  whether activity "refresh" in camera compatibility treatment should happen using
+     * "stopped -> resumed" cycle rather than "paused -> resumed" cycle to {@code true}.
+     */
+    void resetCameraCompatRefreshCycleThroughStopEnabled() {
+        mIsCameraCompatRefreshCycleThroughStopEnabled = true;
+    }
+
+    /**
+     * Checks whether rotation compat policy for immersive apps that prevents auto rotation
+     * into non-optimal screen orientation while in fullscreen is enabled at build time. This is
+     * used when we need to safely initialize a component before the {@link DeviceConfig} flag
+     * value is available.
+     *
+     * <p>This is needed because immersive apps, such as games, are often not optimized for all
+     * orientations and can have a poor UX when rotated. Additionally, some games rely on sensors
+     * for the gameplay so users can trigger such rotations accidentally when auto rotation is on.
+     */
+    boolean isDisplayRotationImmersiveAppCompatPolicyEnabledAtBuildTime() {
+        return mDeviceConfig.isBuildTimeFlagEnabled(
+                KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY);
+    }
+
+    /**
+     * Checks whether rotation compat policy for immersive apps that prevents auto rotation
+     * into non-optimal screen orientation while in fullscreen is currently enabled.
+     *
+     * <p>This is needed because immersive apps, such as games, are often not optimized for all
+     * orientations and can have a poor UX when rotated. Additionally, some games rely on sensors
+     * for the gameplay so users can trigger such rotations accidentally when auto rotation is on.
+     */
+    boolean isDisplayRotationImmersiveAppCompatPolicyEnabled() {
+        return mDeviceConfig.getFlagValue(KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY);
+    }
+
+    /**
+     * Whether per-app user aspect ratio override settings is enabled
+     */
+    boolean isUserAppAspectRatioSettingsEnabled() {
+        return mUserAppAspectRatioSettingsOverrideEnabled
+                || mDeviceConfig.getFlagValue(KEY_ENABLE_USER_ASPECT_RATIO_SETTINGS);
+    }
+
+    void setUserAppAspectRatioSettingsOverrideEnabled(boolean enabled) {
+        mUserAppAspectRatioSettingsOverrideEnabled = enabled;
+    }
+
+    /**
+     * Resets whether per-app user aspect ratio override settings is enabled
+     * {@code mDeviceConfig.getFlagValue(KEY_ENABLE_USER_ASPECT_RATIO_SETTINGS)}.
+     */
+    void resetUserAppAspectRatioSettingsEnabled() {
+        setUserAppAspectRatioSettingsOverrideEnabled(false);
+    }
+
+    /**
+     * Whether fullscreen option in per-app user aspect ratio settings is enabled
+     */
+    boolean isUserAppAspectRatioFullscreenEnabled() {
+        return isUserAppAspectRatioSettingsEnabled()
+                && (mUserAppAspectRatioFullscreenOverrideEnabled
+                    || mDeviceConfig.getFlagValue(KEY_ENABLE_USER_ASPECT_RATIO_FULLSCREEN));
+    }
+
+    void setUserAppAspectRatioFullscreenOverrideEnabled(boolean enabled) {
+        mUserAppAspectRatioFullscreenOverrideEnabled = enabled;
+    }
+
+    void resetUserAppAspectRatioFullscreenEnabled() {
+        setUserAppAspectRatioFullscreenOverrideEnabled(false);
+    }
 }

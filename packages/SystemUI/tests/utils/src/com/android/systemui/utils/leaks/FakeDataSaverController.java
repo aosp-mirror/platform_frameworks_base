@@ -19,7 +19,13 @@ import android.testing.LeakCheck;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DataSaverController.Listener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FakeDataSaverController extends BaseLeakChecker<Listener> implements DataSaverController {
+
+    private boolean mIsEnabled = false;
+    private List<Listener> mListeners = new ArrayList<>();
 
     public FakeDataSaverController(LeakCheck test) {
         super(test, "datasaver");
@@ -27,11 +33,24 @@ public class FakeDataSaverController extends BaseLeakChecker<Listener> implement
 
     @Override
     public boolean isDataSaverEnabled() {
-        return false;
+        return mIsEnabled;
     }
 
     @Override
     public void setDataSaverEnabled(boolean enabled) {
+        mIsEnabled = enabled;
+        for (Listener listener: mListeners) {
+            listener.onDataSaverChanged(enabled);
+        }
+    }
 
+    @Override
+    public void addCallback(Listener listener) {
+        mListeners.add(listener);
+    }
+
+    @Override
+    public void removeCallback(Listener listener) {
+        mListeners.remove(listener);
     }
 }

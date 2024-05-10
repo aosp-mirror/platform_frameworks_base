@@ -355,13 +355,7 @@ public class AidlConversion {
                         case AudioChannelLayout.LAYOUT_5POINT1POINT4:
                             return AudioFormat.CHANNEL_OUT_5POINT1POINT4;
                         case AudioChannelLayout.LAYOUT_6POINT1:
-                            return AudioFormat.CHANNEL_OUT_FRONT_LEFT
-                                    | AudioFormat.CHANNEL_OUT_FRONT_RIGHT
-                                    | AudioFormat.CHANNEL_OUT_FRONT_CENTER
-                                    | AudioFormat.CHANNEL_OUT_LOW_FREQUENCY
-                                    | AudioFormat.CHANNEL_OUT_BACK_LEFT
-                                    | AudioFormat.CHANNEL_OUT_BACK_RIGHT
-                                    | AudioFormat.CHANNEL_OUT_BACK_CENTER;
+                            return AudioFormat.CHANNEL_OUT_6POINT1;
                         case AudioChannelLayout.LAYOUT_7POINT1:
                             return AudioFormat.CHANNEL_OUT_7POINT1_SURROUND;
                         case AudioChannelLayout.LAYOUT_7POINT1POINT2:
@@ -591,6 +585,10 @@ public class AidlConversion {
         switch (standard) {
             case AudioDescriptor.STANDARD_EDID:
                 return AudioStandard.EDID;
+            case AudioDescriptor.STANDARD_SADB:
+                return AudioStandard.SADB;
+            case AudioDescriptor.STANDARD_VSADB:
+                return AudioStandard.VSADB;
             case AudioDescriptor.STANDARD_NONE:
             default:
                 return AudioStandard.NONE;
@@ -605,6 +603,10 @@ public class AidlConversion {
         switch (standard) {
             case AudioStandard.EDID:
                 return AudioDescriptor.STANDARD_EDID;
+            case AudioStandard.SADB:
+                return AudioDescriptor.STANDARD_SADB;
+            case AudioStandard.VSADB:
+                return AudioDescriptor.STANDARD_VSADB;
             case AudioStandard.NONE:
             default:
                 return AudioDescriptor.STANDARD_NONE;
@@ -620,6 +622,8 @@ public class AidlConversion {
         switch (type) {
             case android.media.AudioProfile.AUDIO_ENCAPSULATION_TYPE_IEC61937:
                 return AudioEncapsulationType.IEC61937;
+            case android.media.AudioProfile.AUDIO_ENCAPSULATION_TYPE_PCM:
+                return AudioEncapsulationType.PCM;
             case android.media.AudioProfile.AUDIO_ENCAPSULATION_TYPE_NONE:
             default:
                 return AudioEncapsulationType.NONE;
@@ -635,6 +639,8 @@ public class AidlConversion {
         switch (type) {
             case AudioEncapsulationType.IEC61937:
                 return android.media.AudioProfile.AUDIO_ENCAPSULATION_TYPE_IEC61937;
+            case AudioEncapsulationType.PCM:
+                return android.media.AudioProfile.AUDIO_ENCAPSULATION_TYPE_PCM;
             case AudioEncapsulationType.NONE:
             default:
                 return android.media.AudioProfile.AUDIO_ENCAPSULATION_TYPE_NONE;

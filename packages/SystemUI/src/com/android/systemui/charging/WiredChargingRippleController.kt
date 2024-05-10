@@ -20,23 +20,22 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.PixelFormat
 import android.os.SystemProperties
-import android.util.DisplayMetrics
+import android.view.Surface
 import android.view.View
 import android.view.WindowManager
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.Utils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.ripple.RippleView
+import com.android.systemui.surfaceeffects.ripple.RippleView
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.leak.RotationUtils
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -73,7 +72,7 @@ class WiredChargingRippleController @Inject constructor(
         height = WindowManager.LayoutParams.MATCH_PARENT
         layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
         format = PixelFormat.TRANSLUCENT
-        type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY
+        type = WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG
         fitInsetsTypes = 0 // Ignore insets from all system bars
         title = "Wired Charging Animation"
         flags = (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -149,7 +148,7 @@ class WiredChargingRippleController @Inject constructor(
     }
 
     fun startRipple() {
-        if (rippleView.rippleInProgress || rippleView.parent != null) {
+        if (rippleView.rippleInProgress() || rippleView.parent != null) {
             // Skip if ripple is still playing, or not playing but already added the parent
             // (which might happen just before the animation starts or right after
             // the animation ends.)
@@ -157,9 +156,9 @@ class WiredChargingRippleController @Inject constructor(
         }
         windowLayoutParams.packageName = context.opPackageName
         rippleView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-            override fun onViewDetachedFromWindow(view: View?) {}
+            override fun onViewDetachedFromWindow(view: View) {}
 
-            override fun onViewAttachedToWindow(view: View?) {
+            override fun onViewAttachedToWindow(view: View) {
                 layoutRipple()
                 rippleView.startRipple(Runnable {
                     windowManager.removeView(rippleView)
@@ -172,29 +171,27 @@ class WiredChargingRippleController @Inject constructor(
     }
 
     private fun layoutRipple() {
-        val displayMetrics = DisplayMetrics()
-        context.display.getRealMetrics(displayMetrics)
-        val width = displayMetrics.widthPixels
-        val height = displayMetrics.heightPixels
+        val bounds = windowManager.currentWindowMetrics.bounds
+        val width = bounds.width()
+        val height = bounds.height()
         val maxDiameter = Integer.max(width, height) * 2f
         rippleView.setMaxSize(maxDiameter, maxDiameter)
-        when (RotationUtils.getExactRotation(context)) {
-            RotationUtils.ROTATION_LANDSCAPE -> {
+        when (context.display?.rotation) {
+            Surface.ROTATION_0 -> {
+                rippleView.setCenter(
+                        width * normalizedPortPosX, height * normalizedPortPosY)
+            }
+            Surface.ROTATION_90 -> {
                 rippleView.setCenter(
                         width * normalizedPortPosY, height * (1 - normalizedPortPosX))
             }
-            RotationUtils.ROTATION_UPSIDE_DOWN -> {
+            Surface.ROTATION_180 -> {
                 rippleView.setCenter(
                         width * (1 - normalizedPortPosX), height * (1 - normalizedPortPosY))
             }
-            RotationUtils.ROTATION_SEASCAPE -> {
+            Surface.ROTATION_270 -> {
                 rippleView.setCenter(
                         width * (1 - normalizedPortPosY), height * normalizedPortPosX)
-            }
-            else -> {
-                // ROTATION_NONE
-                rippleView.setCenter(
-                        width * normalizedPortPosX, height * normalizedPortPosY)
             }
         }
     }

@@ -37,7 +37,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.plugins.ActivityStarter;
@@ -179,6 +179,25 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
 
         GetWalletCardsRequest request = mRequestCaptor.getValue();
         assertEquals(1, mRequestCaptor.getValue().getMaxCards());
+        assertEquals(
+                mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_width),
+                request.getCardWidthPx());
+        assertEquals(
+                mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_height),
+                request.getCardHeightPx());
+    }
+
+    @Test
+    public void queryWalletCards_walletEnabled_queryMultipleCards() {
+        mController.queryWalletCards(mCardsRetriever, 5);
+
+        verify(mQuickAccessWalletClient)
+                .getWalletCards(
+                        eq(MoreExecutors.directExecutor()), mRequestCaptor.capture(),
+                        eq(mCardsRetriever));
+
+        GetWalletCardsRequest request = mRequestCaptor.getValue();
+        assertEquals(5, mRequestCaptor.getValue().getMaxCards());
         assertEquals(
                 mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_width),
                 request.getCardWidthPx());

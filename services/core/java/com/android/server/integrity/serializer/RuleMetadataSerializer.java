@@ -19,9 +19,9 @@ package com.android.server.integrity.serializer;
 import static com.android.server.integrity.parser.RuleMetadataParser.RULE_PROVIDER_TAG;
 import static com.android.server.integrity.parser.RuleMetadataParser.VERSION_TAG;
 
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.integrity.model.RuleMetadata;
 
 import org.xmlpull.v1.XmlSerializer;

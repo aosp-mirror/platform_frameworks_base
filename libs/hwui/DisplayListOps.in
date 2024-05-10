@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-X(Flush)
 X(Save)
 X(Restore)
 X(SaveLayer)
@@ -52,3 +51,5 @@ X(DrawShadowRec)
 X(DrawVectorDrawable)
 X(DrawRippleDrawable)
 X(DrawWebView)
+X(DrawSkMesh)
+X(DrawMesh)

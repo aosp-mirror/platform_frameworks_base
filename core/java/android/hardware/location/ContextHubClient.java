@@ -31,8 +31,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A class describing a client of the Context Hub Service.
- * <p>
- * Clients can send messages to nanoapps at a Context Hub through this object. The APIs supported
+ *
+ * <p>Clients can send messages to nanoapps at a Context Hub through this object. The APIs supported
  * by this object are thread-safe and can be used without external synchronization.
  *
  * @hide
@@ -75,13 +75,13 @@ public class ContextHubClient implements Closeable {
     }
 
     /**
-     * Sets the proxy interface of the client at the service. This method should always be called
-     * by the ContextHubManager after the client is registered at the service, and should only be
+     * Sets the proxy interface of the client at the service. This method should always be called by
+     * the ContextHubManager after the client is registered at the service, and should only be
      * called once.
      *
      * @param clientProxy the proxy of the client at the service
      */
-    /* package */ void setClientProxy(IContextHubClient clientProxy) {
+    /* package */ synchronized void setClientProxy(IContextHubClient clientProxy) {
         Objects.requireNonNull(clientProxy, "IContextHubClient cannot be null");
         if (mClientProxy != null) {
             throw new IllegalStateException("Cannot change client proxy multiple times");
@@ -89,10 +89,11 @@ public class ContextHubClient implements Closeable {
 
         mClientProxy = clientProxy;
         try {
-            mId = Integer.valueOf(mClientProxy.getId());
+            mId = mClientProxy.getId();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+        this.notifyAll();
     }
 
     /**
@@ -108,16 +109,16 @@ public class ContextHubClient implements Closeable {
     /**
      * Returns the system-wide unique identifier for this ContextHubClient.
      *
-     * This value can be used as an identifier for the messaging channel between a
-     * ContextHubClient and the Context Hub. This may be used as a routing mechanism
-     * between various ContextHubClient objects within an application.
-     * <p>
-     * The value returned by this method will remain the same if it is associated with
-     * the same client reference at the ContextHubService (for instance, the ID of a
-     * PendingIntent ContextHubClient will remain the same even if the local object
-     * has been regenerated with the equivalent PendingIntent). If the ContextHubClient
-     * is newly generated (e.g. any regeneration of a callback client, or generation
-     * of a non-equal PendingIntent client), the ID will not be the same.
+     * <p>This value can be used as an identifier for the messaging channel between a
+     * ContextHubClient and the Context Hub. This may be used as a routing mechanism between various
+     * ContextHubClient objects within an application.
+     *
+     * <p>The value returned by this method will remain the same if it is associated with the same
+     * client reference at the ContextHubService (for instance, the ID of a PendingIntent
+     * ContextHubClient will remain the same even if the local object has been regenerated with the
+     * equivalent PendingIntent). If the ContextHubClient is newly generated (e.g. any regeneration
+     * of a callback client, or generation of a non-equal PendingIntent client), the ID will not be
+     * the same.
      *
      * @return The ID of this ContextHubClient, in the range [0, 65535].
      */
@@ -132,13 +133,13 @@ public class ContextHubClient implements Closeable {
     /**
      * Closes the connection for this client and the Context Hub Service.
      *
-     * When this function is invoked, the messaging associated with this client is invalidated.
+     * <p>When this function is invoked, the messaging associated with this client is invalidated.
      * All futures messages targeted for this client are dropped at the service, and the
      * ContextHubClient is unregistered from the service.
-     * <p>
-     * If this object has a PendingIntent, i.e. the object was generated via
-     * {@link ContextHubManager.createClient(PendingIntent, ContextHubInfo, long)}, then the
-     * Intent events corresponding to the PendingIntent will no longer be triggered.
+     *
+     * <p>If this object has a PendingIntent, i.e. the object was generated via {@link
+     * ContextHubManager#createClient(ContextHubInfo, PendingIntent, long)}, then the Intent events
+     * corresponding to the PendingIntent will no longer be triggered.
      */
     public void close() {
         if (!mIsClosed.getAndSet(true)) {
@@ -174,13 +175,10 @@ public class ContextHubClient implements Closeable {
      *    have sent it a message.
      *
      * @param message the message object to send
-     *
      * @return the result of sending the message defined as in ContextHubTransaction.Result
-     *
      * @throws NullPointerException if NanoAppMessage is null
      * @throws SecurityException if this client doesn't have permissions to send a message to the
-     * nanoapp.
-     *
+     *     nanoapp.
      * @see NanoAppMessage
      * @see ContextHubTransaction.Result
      */
@@ -192,8 +190,13 @@ public class ContextHubClient implements Closeable {
         int maxPayloadBytes = mAttachedHub.getMaxPacketLengthBytes();
         byte[] payload = message.getMessageBody();
         if (payload != null && payload.length > maxPayloadBytes) {
-            Log.e(TAG, "Message (" + payload.length + " bytes) exceeds max payload length ("
-                    + maxPayloadBytes + " bytes)");
+            Log.e(
+                    TAG,
+                    "Message ("
+                            + payload.length
+                            + " bytes) exceeds max payload length ("
+                            + maxPayloadBytes
+                            + " bytes)");
             return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
         }
 
@@ -215,6 +218,22 @@ public class ContextHubClient implements Closeable {
             }
         } finally {
             super.finalize();
+        }
+    }
+
+    /** @hide */
+    public synchronized void callbackFinished() {
+        try {
+            while (mClientProxy == null) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            mClientProxy.callbackFinished();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }

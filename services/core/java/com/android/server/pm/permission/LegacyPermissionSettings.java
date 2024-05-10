@@ -21,17 +21,17 @@ import android.annotation.Nullable;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.pm.DumpState;
 import com.android.server.pm.PackageManagerService;
+import com.android.server.pm.PackageManagerTracedLock;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -59,11 +59,7 @@ public class LegacyPermissionSettings {
     private final ArrayMap<String, LegacyPermission> mPermissionTrees = new ArrayMap<>();
 
     @NonNull
-    private final Object mLock;
-
-    public LegacyPermissionSettings(@NonNull Object lock) {
-        mLock = lock;
-    }
+    private final PackageManagerTracedLock mLock = new PackageManagerTracedLock();
 
     @NonNull
     public List<LegacyPermission> getPermissions() {

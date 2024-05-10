@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import java.util.Objects;
 
 /** @hide */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ObjectUtils {
     private ObjectUtils() {}
 

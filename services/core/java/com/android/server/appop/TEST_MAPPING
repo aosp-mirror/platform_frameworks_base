@@ -1,7 +1,12 @@
 {
     "presubmit": [
         {
-            "name": "CtsAppOpsTestCases"
+            "name": "CtsAppOpsTestCases",
+            "options": [
+                {
+                  "exclude-annotation": "androidx.test.filters.FlakyTest"
+                }
+            ]
         },
         {
             "name": "CtsAppOps2TestCases"
@@ -25,6 +30,9 @@
         {
             "name": "CtsPermissionTestCases",
             "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
                 {
                     "include-filter": "android.permission.cts.BackgroundPermissionsTest"
                 },
@@ -55,5 +63,27 @@
                 }
             ]
         }        
+    ],
+    "postsubmit": [
+        {
+            "name": "CtsAppOpsTestCases"
+        },
+        {
+            "name": "CtsPermissionTestCases",
+            "options": [
+                {
+                    "include-filter": "android.permission.cts.BackgroundPermissionsTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.SplitPermissionTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.PermissionFlagsTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.SharedUidPermissionsTest"
+                }
+            ]
+        }
     ]
 }

@@ -235,4 +235,30 @@ public class SettingsValidators {
             }
         }
     };
+
+    static final Validator CREDENTIAL_SERVICE_VALIDATOR = new Validator() {
+        @Override
+        public boolean validate(String value) {
+            if (value == null || value.equals("")) {
+                return true;
+            }
+
+            return COLON_SEPARATED_COMPONENT_LIST_VALIDATOR.validate(value);
+        }
+    };
+
+    static final Validator AUTOFILL_SERVICE_VALIDATOR = new Validator() {
+        @Override
+        public boolean validate(String value) {
+            if (value == null || value.equals("")) {
+                return true;
+            }
+
+            if (value.equals("credential-provider")) {
+               return true;
+            }
+
+            return NULLABLE_COMPONENT_NAME_VALIDATOR.validate(value);
+        }
+    };
 }

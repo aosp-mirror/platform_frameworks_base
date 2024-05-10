@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
@@ -29,21 +30,24 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.screenrecord.RecordingController;
-import com.android.systemui.screenrecord.ScreenRecordDialog;
+import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -54,6 +58,9 @@ import javax.inject.Inject;
  */
 public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         implements RecordingController.RecordingStateChangeCallback {
+
+    public static final String TILE_SPEC = "screenrecord";
+
     private static final String TAG = "ScreenRecordTile";
     private static final String INTERACTION_JANK_TAG = "screen_record";
 
@@ -63,12 +70,16 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
     private final Callback mCallback = new Callback();
     private final DialogLaunchAnimator mDialogLaunchAnimator;
     private final FeatureFlags mFlags;
+    private final PanelInteractor mPanelInteractor;
+    private final MediaProjectionMetricsLogger mMediaProjectionMetricsLogger;
+    private final UserContextProvider mUserContextProvider;
 
     private long mMillisUntilFinished = 0;
 
     @Inject
     public ScreenRecordTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -80,9 +91,12 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             RecordingController controller,
             KeyguardDismissUtil keyguardDismissUtil,
             KeyguardStateController keyguardStateController,
-            DialogLaunchAnimator dialogLaunchAnimator
+            DialogLaunchAnimator dialogLaunchAnimator,
+            PanelInteractor panelInteractor,
+            MediaProjectionMetricsLogger mediaProjectionMetricsLogger,
+            UserContextProvider userContextProvider
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = controller;
         mController.observe(this, mCallback);
@@ -90,6 +104,9 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         mKeyguardDismissUtil = keyguardDismissUtil;
         mKeyguardStateController = keyguardStateController;
         mDialogLaunchAnimator = dialogLaunchAnimator;
+        mPanelInteractor = panelInteractor;
+        mMediaProjectionMetricsLogger = mediaProjectionMetricsLogger;
+        mUserContextProvider = userContextProvider;
     }
 
     @Override
@@ -168,9 +185,10 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             // disable the exit animation which looks weird when it happens at the same time as the
             // shade collapsing.
             mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
-            getHost().collapsePanels();
+            mPanelInteractor.collapsePanels();
         };
-        ScreenRecordDialog dialog = mController.createScreenRecordDialog(mContext, mFlags,
+
+        final Dialog dialog = mController.createScreenRecordDialog(mContext, mFlags,
                 mDialogLaunchAnimator, mActivityStarter, onStartRecordingClicked);
 
         ActivityStarter.OnDismissAction dismissAction = () -> {
@@ -180,6 +198,10 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             } else {
                 dialog.show();
             }
+
+            int uid = mUserContextProvider.getUserContext().getUserId();
+            mMediaProjectionMetricsLogger.notifyPermissionRequestDisplayed(uid);
+
             return false;
         };
 

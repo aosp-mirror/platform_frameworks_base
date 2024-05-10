@@ -1,0 +1,47 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+filegroup {
+    name: "services.permission-sources",
+    srcs: [
+        "java/**/*.java",
+        "java/**/*.kt",
+    ],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
+java_library {
+    name: "services.permission-pre-jarjar",
+    defaults: ["platform_service_defaults"],
+    srcs: [":services.permission-sources"],
+    libs: [
+        "services.core",
+        // Soong fails to automatically add this dependency because all the
+        // *.kt sources are inside a filegroup.
+        "kotlin-annotations",
+    ],
+    static_libs: [
+        "kotlin-stdlib",
+        // Adds reflection-less suppressed exceptions and AutoCloseable.use().
+        "kotlin-stdlib-jdk7",
+    ],
+    kotlincflags: [
+        "-Xjvm-default=all",
+        "-Xno-call-assertions",
+        "-Xno-param-assertions",
+        "-Xno-receiver-assertions",
+    ],
+}
+
+java_library {
+    name: "services.permission",
+    static_libs: ["services.permission-pre-jarjar"],
+    jarjar_rules: "jarjar-rules.txt",
+}

@@ -33,6 +33,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -44,12 +45,12 @@ import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.RemoteAnimationAdapter;
-import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -97,8 +98,6 @@ public class ActivityStartController {
     /** Whether an {@link ActivityStarter} is currently executing (starting an Activity). */
     private boolean mInExecution = false;
 
-    private final BackgroundActivityStartController mBalController;
-
     /**
      * TODO(b/64750076): Capture information necessary for dump and
      * {@link #postStartActivityProcessingForLastStarter} rather than keeping the entire object
@@ -121,7 +120,6 @@ public class ActivityStartController {
         mFactory.setController(this);
         mPendingRemoteAnimationRegistry = new PendingRemoteAnimationRegistry(service.mGlobalLock,
                 service.mH);
-        mBalController = new BackgroundActivityStartController(mService, mSupervisor);
     }
 
     /**
@@ -271,12 +269,27 @@ public class ActivityStartController {
         }
     }
 
+    /**
+     * Start intent as a package.
+     *
+     * @param uid Make a call as if this UID did.
+     * @param callingPackage Make a call as if this package did.
+     * @param callingFeatureId Make a call as if this feature in the package did.
+     * @param intent Intent to start.
+     * @param userId Start the intents on this user.
+     * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
+     * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
+     *        null if not originated by PendingIntent
+     * @param forcedBalByPiSender If set to allow, the
+     *        PendingIntent's sender will try to force allow background activity starts.
+     *        This is only possible if the sender of the PendingIntent is a system process.
+     */
     final int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
             String callingPackage, @Nullable String callingFeatureId, Intent intent,
             String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, SafeActivityOptions options, int userId, Task inTask, String reason,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart) {
+            BackgroundStartPrivileges forcedBalByPiSender) {
 
         userId = checkTargetUser(userId, validateIncomingUser, realCallingPid, realCallingUid,
                 reason);
@@ -297,7 +310,7 @@ public class ActivityStartController {
                 .setUserId(userId)
                 .setInTask(inTask)
                 .setOriginatingPendingIntent(originatingPendingIntent)
-                .setAllowBackgroundActivityStart(allowBackgroundActivityStart)
+                .setBackgroundStartPrivileges(forcedBalByPiSender)
                 .execute();
     }
 
@@ -312,14 +325,18 @@ public class ActivityStartController {
      * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
      * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
      *        null if not originated by PendingIntent
+     * @param forcedBalByPiSender If set to allow, the
+     *        PendingIntent's sender will try to force allow background activity starts.
+     *        This is only possible if the sender of the PendingIntent is a system process.
      */
     final int startActivitiesInPackage(int uid, String callingPackage,
             @Nullable String callingFeatureId, Intent[] intents, String[] resolvedTypes,
             IBinder resultTo, SafeActivityOptions options, int userId, boolean validateIncomingUser,
-            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
+            PendingIntentRecord originatingPendingIntent,
+            BackgroundStartPrivileges forcedBalByPiSender) {
         return startActivitiesInPackage(uid, 0 /* realCallingPid */, -1 /* realCallingUid */,
                 callingPackage, callingFeatureId, intents, resolvedTypes, resultTo, options, userId,
-                validateIncomingUser, originatingPendingIntent, allowBackgroundActivityStart);
+                validateIncomingUser, originatingPendingIntent, forcedBalByPiSender);
     }
 
     /**
@@ -334,12 +351,15 @@ public class ActivityStartController {
      * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
      * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
      *        null if not originated by PendingIntent
+     * @param forcedBalByPiSender If set to allow, the
+     *        PendingIntent's sender will try to force allow background activity starts.
+     *        This is only possible if the sender of the PendingIntent is a system process.
      */
     final int startActivitiesInPackage(int uid, int realCallingPid, int realCallingUid,
             String callingPackage, @Nullable String callingFeatureId, Intent[] intents,
             String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart) {
+            BackgroundStartPrivileges forcedBalByPiSender) {
 
         final String reason = "startActivityInPackage";
 
@@ -349,14 +369,14 @@ public class ActivityStartController {
         // TODO: Switch to user app stacks here.
         return startActivities(null, uid, realCallingPid, realCallingUid, callingPackage,
                 callingFeatureId, intents, resolvedTypes, resultTo, options, userId, reason,
-                originatingPendingIntent, allowBackgroundActivityStart);
+                originatingPendingIntent, forcedBalByPiSender);
     }
 
     int startActivities(IApplicationThread caller, int callingUid, int incomingRealCallingPid,
             int incomingRealCallingUid, String callingPackage, @Nullable String callingFeatureId,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options,
             int userId, String reason, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart) {
+            BackgroundStartPrivileges forcedBalByPiSender) {
         if (intents == null) {
             throw new NullPointerException("intents is null");
         }
@@ -391,9 +411,9 @@ public class ActivityStartController {
         SafeActivityOptions bottomOptions = null;
         if (options != null) {
             // To ensure the first N-1 activities (N == total # of activities) are also launched
-            // into the correct display, use a copy of the passed-in options (keeping only
-            // display-related info) for these activities.
-            bottomOptions = options.selectiveCloneDisplayOptions();
+            // into the correct display and root task, use a copy of the passed-in options (keeping
+            // only display-related and launch-root-task information) for these activities.
+            bottomOptions = options.selectiveCloneLaunchOptions();
         }
         try {
             intents = ArrayUtils.filterNotNull(intents, Intent[]::new);
@@ -416,7 +436,8 @@ public class ActivityStartController {
 
                 // Collect information about the target of the Intent.
                 ActivityInfo aInfo = mSupervisor.resolveActivity(intent, resolvedTypes[i],
-                        0 /* startFlags */, null /* profilerInfo */, userId, filterCallingUid);
+                        0 /* startFlags */, null /* profilerInfo */, userId, filterCallingUid,
+                        callingPid);
                 aInfo = mService.mAmInternal.getActivityInfoForUser(aInfo, userId);
 
                 if (aInfo != null) {
@@ -463,7 +484,7 @@ public class ActivityStartController {
                         // top one as otherwise an activity below might consume it.
                         .setAllowPendingRemoteAnimationRegistryLookup(top /* allowLookup*/)
                         .setOriginatingPendingIntent(originatingPendingIntent)
-                        .setAllowBackgroundActivityStart(allowBackgroundActivityStart);
+                        .setBackgroundStartPrivileges(forcedBalByPiSender);
             }
             // Log if the activities to be started have different uids.
             if (startingUidPkgs.size() > 1) {
@@ -552,15 +573,35 @@ public class ActivityStartController {
                 .execute();
     }
 
+    /**
+     * A quick path (skip general intent/task resolving) to start recents animation if the recents
+     * (or home) activity is available in background.
+     * @return {@code true} if the recents activity is moved to front.
+     */
     boolean startExistingRecentsIfPossible(Intent intent, ActivityOptions options) {
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startExistingRecents");
+            if (startExistingRecents(intent, options)) {
+                return true;
+            }
+            // Else follow the standard launch procedure.
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+        return false;
+    }
+
+    private boolean startExistingRecents(Intent intent, ActivityOptions options) {
         final int activityType = mService.getRecentTasks().getRecentsComponent()
                 .equals(intent.getComponent()) ? ACTIVITY_TYPE_RECENTS : ACTIVITY_TYPE_HOME;
         final Task rootTask = mService.mRootWindowContainer.getDefaultTaskDisplayArea()
                 .getRootTask(WINDOWING_MODE_UNDEFINED, activityType);
         if (rootTask == null) return false;
         final ActivityRecord r = rootTask.topRunningActivity();
-        if (r == null || r.mVisibleRequested || !r.attachedToProcess()
+        if (r == null || (r.isVisibleRequested() && rootTask.isTopRootTaskInDisplayArea())
+                || !r.attachedToProcess()
                 || !r.mActivityComponent.equals(intent.getComponent())
+                || !mService.isCallerRecents(r.getUid())
                 // Recents keeps invisible while device is locked.
                 || r.mDisplayContent.isKeyguardLocked()) {
             return false;
@@ -571,11 +612,12 @@ public class ActivityStartController {
         final Task task = r.getTask();
         mService.deferWindowLayout();
         try {
-            task.mTransitionController.requestTransitionIfNeeded(WindowManager.TRANSIT_TO_FRONT,
-                    0 /* flags */, task, task /* readyGroupRef */,
-                    options.getRemoteTransition(), null /* displayChange */);
-            r.mTransitionController.setTransientLaunch(r,
-                    TaskDisplayArea.getRootTaskAbove(rootTask));
+            final TransitionController controller = r.mTransitionController;
+            final Transition transition = controller.getCollectingTransition();
+            if (transition != null) {
+                transition.setRemoteAnimationApp(r.app.getThread());
+                controller.setTransientLaunch(r, TaskDisplayArea.getRootTaskAbove(rootTask));
+            }
             task.moveToFront("startExistingRecents");
             task.mInResumeTopActivity = true;
             task.resumeTopActivity(null /* prev */, options, true /* deferPause */);
@@ -642,9 +684,5 @@ public class ActivityStartController {
             pw.print(prefix);
             pw.println("(nothing)");
         }
-    }
-
-    BackgroundActivityStartController getBackgroundActivityLaunchController() {
-        return mBalController;
     }
 }

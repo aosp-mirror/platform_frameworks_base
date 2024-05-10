@@ -17,7 +17,6 @@
 package com.android.keyguard
 
 import android.app.StatusBarManager.SESSION_KEYGUARD
-import android.content.Context
 import android.hardware.biometrics.BiometricSourceType
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.logging.UiEvent
@@ -30,6 +29,7 @@ import com.android.keyguard.KeyguardBiometricLockoutLogger.PrimaryAuthRequiredEv
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.SessionTracker
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -41,11 +41,11 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class KeyguardBiometricLockoutLogger @Inject constructor(
-    context: Context?,
     private val uiEventLogger: UiEventLogger,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    private val sessionTracker: SessionTracker
-) : CoreStartable(context) {
+    private val sessionTracker: SessionTracker,
+    private val selectedUserInteractor: SelectedUserInteractor
+) : CoreStartable {
     private var fingerprintLockedOut = false
     private var faceLockedOut = false
     private var encryptedOrLockdown = false
@@ -54,7 +54,7 @@ class KeyguardBiometricLockoutLogger @Inject constructor(
 
     override fun start() {
         mKeyguardUpdateMonitorCallback.onStrongAuthStateChanged(
-                KeyguardUpdateMonitor.getCurrentUser())
+                selectedUserInteractor.getSelectedUserId())
         keyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback)
     }
 
@@ -81,7 +81,7 @@ class KeyguardBiometricLockoutLogger @Inject constructor(
         }
 
         override fun onStrongAuthStateChanged(userId: Int) {
-            if (userId != KeyguardUpdateMonitor.getCurrentUser()) {
+            if (userId != selectedUserInteractor.getSelectedUserId()) {
                 return
             }
             val strongAuthFlags = keyguardUpdateMonitor.strongAuthTracker

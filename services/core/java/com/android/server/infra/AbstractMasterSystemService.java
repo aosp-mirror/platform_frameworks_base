@@ -684,6 +684,16 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      */
     @GuardedBy("mLock")
     protected List<S> updateCachedServiceListLocked(@UserIdInt int userId, boolean disabled) {
+        if (mServiceNameResolver != null
+                && mServiceNameResolver.isConfiguredInMultipleMode()) {
+            // In multiple mode, we have multiple instances of AbstractPerUserSystemService, per
+            // user where each instance holds information needed to connect to a backend. An
+            // update operation in this mode needs to account for addition, deletion, change
+            // of backends and cannot be executed in the scope of a given
+            // AbstractPerUserSystemService.
+            return updateCachedServiceListMultiModeLocked(userId, disabled);
+        }
+        // isConfiguredInMultipleMode is false
         final List<S> services = getServiceListForUserLocked(userId);
         if (services == null) {
             return null;
@@ -700,6 +710,19 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                     }
                 }
             }
+        }
+        return services;
+    }
+
+    @GuardedBy("mLock")
+    private List<S> updateCachedServiceListMultiModeLocked(int userId, boolean disabled) {
+        final int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, false, null,
+                null);
+        List<S> services = new ArrayList<>();
+        synchronized (mLock) {
+            removeCachedServiceListLocked(resolvedUserId);
+            services = getServiceListForUserLocked(userId);
         }
         return services;
     }
@@ -1026,6 +1049,15 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
 
             @Override
             public void onPackageRemoved(String packageName, int uid) {
+                if (mServiceNameResolver != null
+                        && mServiceNameResolver.isConfiguredInMultipleMode()) {
+                    final int userId = getChangingUserId();
+                    synchronized (mLock) {
+                        handlePackageRemovedMultiModeLocked(packageName, userId);
+                    }
+                    return;
+                }
+
                 synchronized (mLock) {
                     final int userId = getChangingUserId();
                     final S service = peekServiceForUserLocked(userId);
@@ -1069,6 +1101,15 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             public void onPackageDataCleared(String packageName, int uid) {
                 if (verbose) Slog.v(mTag, "onPackageDataCleared(): " + packageName);
                 final int userId = getChangingUserId();
+
+                if (mServiceNameResolver != null
+                        && mServiceNameResolver.isConfiguredInMultipleMode()) {
+                    synchronized (mLock) {
+                        onServicePackageDataClearedMultiModeLocked(packageName, userId);
+                    }
+                    return;
+                }
+
                 synchronized (mLock) {
                     final S service = peekServiceForUserLocked(userId);
                     if (service != null) {
@@ -1187,6 +1228,49 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
 
         // package changes
         monitor.register(getContext(), null, UserHandle.ALL, true);
+    }
+
+    @GuardedBy("mLock")
+    @SuppressWarnings("unused")
+    protected void onServicePackageDataClearedMultiModeLocked(String packageName, int userId) {
+        if (verbose) {
+            Slog.v(mTag, "onServicePackageDataClearedMultiModeLocked("
+                    + userId + ")");
+        }
+    }
+
+    @GuardedBy("mLock")
+    @SuppressWarnings("unused")
+    protected void handlePackageRemovedMultiModeLocked(String packageName, int userId) {
+        if (verbose) Slog.v(mTag, "handlePackageRemovedMultiModeLocked(" + userId + ")");
+    }
+
+    @GuardedBy("mLock")
+    protected void removeServiceFromCache(@NonNull S service, int userId) {
+        if (mServicesCacheList.get(userId) != null) {
+            mServicesCacheList.get(userId).remove(service);
+        }
+    }
+
+    @GuardedBy("mLock")
+    protected void removeServiceFromMultiModeSettings(String serviceComponentName, int userId) {
+        final String serviceSettingsProperty = getServiceSettingsProperty();
+        if (serviceSettingsProperty == null || mServiceNameResolver == null
+                || !mServiceNameResolver.isConfiguredInMultipleMode()) {
+            if (verbose) {
+                Slog.v(mTag, "removeServiceFromSettings not implemented "
+                        + " for single backend implementation");
+            }
+            return;
+        }
+        String[] settingComponentNames = mServiceNameResolver.getServiceNameList(userId);
+        List<String> remainingServices = new ArrayList<>();
+        for (String settingComponentName : settingComponentNames) {
+            if (!settingComponentName.equals(serviceComponentName)) {
+                remainingServices.add(settingComponentName);
+            }
+        }
+        mServiceNameResolver.setServiceNameList(remainingServices, userId);
     }
 
     /**

@@ -24,6 +24,8 @@ import android.util.Printer;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import java.util.Objects;
+
 /**
   * Class used to run a message loop for a thread.  Threads by default do
   * not have a message loop associated with them; to create one, call
@@ -54,6 +56,7 @@ import android.util.proto.ProtoOutputStream;
   *      }
   *  }</pre>
   */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class Looper {
     /*
      * API Implementation Note:
@@ -144,6 +147,30 @@ public final class Looper {
     }
 
     /**
+     * Force the application's main looper to the given value.  The main looper is typically
+     * configured automatically by the OS, so this capability is only intended to enable testing.
+     *
+     * @hide
+     */
+    public static void setMainLooperForTest(@NonNull Looper looper) {
+        synchronized (Looper.class) {
+            sMainLooper = Objects.requireNonNull(looper);
+        }
+    }
+
+    /**
+     * Clear the application's main looper to be undefined.  The main looper is typically
+     * configured automatically by the OS, so this capability is only intended to enable testing.
+     *
+     * @hide
+     */
+    public static void clearMainLooperForTest() {
+        synchronized (Looper.class) {
+            sMainLooper = null;
+        }
+    }
+
+    /**
      * Set the transaction observer for all Loopers in this process.
      *
      * @hide
@@ -155,7 +182,8 @@ public final class Looper {
     /**
      * Poll and deliver single message, return true if the outer loop should continue.
      */
-    @SuppressWarnings("AndroidFrameworkBinderIdentity")
+    @SuppressWarnings({"UnusedTokenOfOriginalCallingIdentity",
+            "ClearIdentityCallNotFollowedByTryFinally"})
     private static boolean loopOnce(final Looper me,
             final long ident, final int thresholdOverride) {
         Message msg = me.mQueue.next(); // might block
@@ -176,12 +204,15 @@ public final class Looper {
         final long traceTag = me.mTraceTag;
         long slowDispatchThresholdMs = me.mSlowDispatchThresholdMs;
         long slowDeliveryThresholdMs = me.mSlowDeliveryThresholdMs;
-        if (thresholdOverride > 0) {
+
+        final boolean hasOverride = thresholdOverride >= 0;
+        if (hasOverride) {
             slowDispatchThresholdMs = thresholdOverride;
             slowDeliveryThresholdMs = thresholdOverride;
         }
-        final boolean logSlowDelivery = (slowDeliveryThresholdMs > 0) && (msg.when > 0);
-        final boolean logSlowDispatch = (slowDispatchThresholdMs > 0);
+        final boolean logSlowDelivery = (slowDeliveryThresholdMs > 0 || hasOverride)
+                && (msg.when > 0);
+        final boolean logSlowDispatch = (slowDispatchThresholdMs > 0 || hasOverride);
 
         final boolean needStartTime = logSlowDelivery || logSlowDispatch;
         final boolean needEndTime = logSlowDispatch;
@@ -256,7 +287,9 @@ public final class Looper {
      * Run the message queue in this thread. Be sure to call
      * {@link #quit()} to end the loop.
      */
-    @SuppressWarnings("AndroidFrameworkBinderIdentity")
+    @SuppressWarnings({"UnusedTokenOfOriginalCallingIdentity",
+            "ClearIdentityCallNotFollowedByTryFinally",
+            "ResultOfClearIdentityCallNotStoredInVariable"})
     public static void loop() {
         final Looper me = myLooper();
         if (me == null) {
@@ -276,11 +309,7 @@ public final class Looper {
 
         // Allow overriding a threshold with a system prop. e.g.
         // adb shell 'setprop log.looper.1000.main.slow 1 && stop && start'
-        final int thresholdOverride =
-                SystemProperties.getInt("log.looper."
-                        + Process.myUid() + "."
-                        + Thread.currentThread().getName()
-                        + ".slow", 0);
+        final int thresholdOverride = getThresholdOverride();
 
         me.mSlowDeliveryDetected = false;
 
@@ -289,6 +318,18 @@ public final class Looper {
                 return;
             }
         }
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static int getThresholdOverride() {
+        return SystemProperties.getInt("log.looper."
+                + Process.myUid() + "."
+                + Thread.currentThread().getName()
+                + ".slow", -1);
+    }
+
+    private static int getThresholdOverride$ravenwood() {
+        return -1;
     }
 
     private static boolean showSlowLog(long threshold, long measureStart, long measureEnd,

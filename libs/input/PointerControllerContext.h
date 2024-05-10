@@ -75,11 +75,13 @@ public:
     virtual void loadPointerIcon(SpriteIcon* icon, int32_t displayId) = 0;
     virtual void loadPointerResources(PointerResources* outResources, int32_t displayId) = 0;
     virtual void loadAdditionalMouseResources(
-            std::map<int32_t, SpriteIcon>* outResources,
-            std::map<int32_t, PointerAnimation>* outAnimationResources, int32_t displayId) = 0;
-    virtual int32_t getDefaultPointerIconId() = 0;
-    virtual int32_t getCustomPointerIconId() = 0;
-    virtual void onPointerDisplayIdChanged(int32_t displayId, float xPos, float yPos) = 0;
+            std::map<PointerIconStyle, SpriteIcon>* outResources,
+            std::map<PointerIconStyle, PointerAnimation>* outAnimationResources,
+            int32_t displayId) = 0;
+    virtual PointerIconStyle getDefaultPointerIconId() = 0;
+    virtual PointerIconStyle getDefaultStylusIconId() = 0;
+    virtual PointerIconStyle getCustomPointerIconId() = 0;
+    virtual void onPointerDisplayIdChanged(int32_t displayId, const FloatPoint& position) = 0;
 };
 
 /*
@@ -90,7 +92,7 @@ public:
 class PointerControllerContext {
 public:
     PointerControllerContext(const sp<PointerControllerPolicyInterface>& policy,
-                             const sp<Looper>& looper, const sp<SpriteController>& spriteController,
+                             const sp<Looper>& looper, SpriteController& spriteController,
                              PointerController& controller);
     ~PointerControllerContext();
 
@@ -107,7 +109,7 @@ public:
     void setCallbackController(std::shared_ptr<PointerController> controller);
 
     sp<PointerControllerPolicyInterface> getPolicy();
-    sp<SpriteController> getSpriteController();
+    SpriteController& getSpriteController();
 
     void handleDisplayEvents();
 
@@ -161,7 +163,7 @@ private:
 
     sp<PointerControllerPolicyInterface> mPolicy;
     sp<Looper> mLooper;
-    sp<SpriteController> mSpriteController;
+    SpriteController& mSpriteController;
     sp<MessageHandler> mHandler;
     sp<LooperCallback> mCallback;
 

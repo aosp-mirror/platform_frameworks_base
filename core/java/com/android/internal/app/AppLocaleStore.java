@@ -30,7 +30,10 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-class AppLocaleStore {
+/**
+ * A class used to access an application's supporting locales.
+ */
+public class AppLocaleStore {
     private static final String TAG = AppLocaleStore.class.getSimpleName();
 
     public static AppLocaleResult getAppSupportedLocales(
@@ -148,8 +151,11 @@ class AppLocaleStore {
         return false;
     }
 
-    static class AppLocaleResult {
-        enum LocaleStatus {
+    /**
+     * A class used to store an application's supporting locales.
+     */
+    public static class AppLocaleResult {
+        public enum LocaleStatus {
             UNKNOWN_FAILURE,
             NO_SUPPORTED_LANGUAGE_IN_APP,
             ASSET_LOCALE_IS_EMPTY,
@@ -158,7 +164,7 @@ class AppLocaleStore {
         }
 
         LocaleStatus mLocaleStatus;
-        HashSet<Locale> mAppSupportedLocales;
+        public HashSet<Locale> mAppSupportedLocales;
 
         public AppLocaleResult(LocaleStatus localeStatus, HashSet<Locale> appSupportedLocales) {
             this.mLocaleStatus = localeStatus;

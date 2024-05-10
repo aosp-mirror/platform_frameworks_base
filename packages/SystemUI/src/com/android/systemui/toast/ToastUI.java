@@ -32,6 +32,7 @@ import android.os.IBinder;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Log;
+import android.view.Display;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.widget.ToastPresenter;
@@ -50,13 +51,14 @@ import javax.inject.Inject;
  * Controls display of text toasts.
  */
 @SysUISingleton
-public class ToastUI extends CoreStartable implements CommandQueue.Callbacks {
+public class ToastUI implements CoreStartable, CommandQueue.Callbacks {
     // values from NotificationManagerService#LONG_DELAY and NotificationManagerService#SHORT_DELAY
     private static final int TOAST_LONG_TIME = 3500; // 3.5 seconds
     private static final int TOAST_SHORT_TIME = 2000; // 2 seconds
 
     private static final String TAG = "ToastUI";
 
+    private final Context mContext;
     private final CommandQueue mCommandQueue;
     private final INotificationManager mNotificationManager;
     private final IAccessibilityManager mIAccessibilityManager;
@@ -65,7 +67,7 @@ public class ToastUI extends CoreStartable implements CommandQueue.Callbacks {
     private final ToastLogger mToastLogger;
     @Nullable private ToastPresenter mPresenter;
     @Nullable private ITransientNotificationCallback mCallback;
-    private ToastOutAnimatorListener mToastOutAnimatorListener;
+    @VisibleForTesting ToastOutAnimatorListener mToastOutAnimatorListener;
 
     @VisibleForTesting SystemUIToast mToast;
     private int mOrientation = ORIENTATION_PORTRAIT;
@@ -90,7 +92,7 @@ public class ToastUI extends CoreStartable implements CommandQueue.Callbacks {
             @Nullable IAccessibilityManager accessibilityManager,
             ToastFactory toastFactory, ToastLogger toastLogger
     ) {
-        super(context);
+        mContext = context;
         mCommandQueue = commandQueue;
         mNotificationManager = notificationManager;
         mIAccessibilityManager = accessibilityManager;
@@ -114,8 +116,14 @@ public class ToastUI extends CoreStartable implements CommandQueue.Callbacks {
             Context context = mContext.createContextAsUser(userHandle, 0);
 
             DisplayManager mDisplayManager = mContext.getSystemService(DisplayManager.class);
-            Context displayContext = context.createDisplayContext(
-                    mDisplayManager.getDisplay(displayId));
+            Display display = mDisplayManager.getDisplay(displayId);
+            if (display == null) {
+                // Display for which this toast was scheduled for is no longer available.
+                mToastLogger.logOnSkipToastForInvalidDisplay(packageName, token.toString(),
+                        displayId);
+                return;
+            }
+            Context displayContext = context.createDisplayContext(display);
             mToast = mToastFactory.createToast(mContext /* sysuiContext */, text, packageName,
                     userHandle.getIdentifier(), mOrientation);
 
@@ -164,7 +172,7 @@ public class ToastUI extends CoreStartable implements CommandQueue.Callbacks {
         if (mToast.getOutAnimation() != null) {
             Animator animator = mToast.getOutAnimation();
             mToastOutAnimatorListener = new ToastOutAnimatorListener(mPresenter, mCallback,
-                    runnable);
+                    runnable, animator);
             animator.addListener(mToastOutAnimatorListener);
             animator.start();
         } else {
@@ -179,7 +187,7 @@ public class ToastUI extends CoreStartable implements CommandQueue.Callbacks {
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(Configuration newConfig) {
         if (newConfig.orientation != mOrientation) {
             mOrientation = newConfig.orientation;
             if (mToast != null) {
@@ -203,14 +211,17 @@ public class ToastUI extends CoreStartable implements CommandQueue.Callbacks {
         final ToastPresenter mPrevPresenter;
         final ITransientNotificationCallback mPrevCallback;
         @Nullable Runnable mShowNextToastRunnable;
+        @NonNull private final Animator mAnimator;
 
         ToastOutAnimatorListener(
                 @NonNull ToastPresenter presenter,
                 @NonNull ITransientNotificationCallback callback,
-                @Nullable Runnable runnable) {
+                @Nullable Runnable runnable,
+                @NonNull Animator animator) {
             mPrevPresenter = presenter;
             mPrevCallback = callback;
             mShowNextToastRunnable = runnable;
+            mAnimator = animator;
         }
 
         void setShowNextToastRunnable(Runnable runnable) {
@@ -223,6 +234,8 @@ public class ToastUI extends CoreStartable implements CommandQueue.Callbacks {
             if (mShowNextToastRunnable != null) {
                 mShowNextToastRunnable.run();
             }
+            mAnimator.removeListener(this);
+            mShowNextToastRunnable = null;
             mToastOutAnimatorListener = null;
         }
     }

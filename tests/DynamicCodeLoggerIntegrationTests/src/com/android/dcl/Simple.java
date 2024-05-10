@@ -16,7 +16,7 @@
 
 package com.android.dcl;
 
-/** Dummy class which is built into a jar purely so we can pass it to DexClassLoader. */
+/** Placeholder class which is built into a jar purely so we can pass it to DexClassLoader. */
 public final class Simple {
     public Simple() {}
 }

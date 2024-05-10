@@ -21,14 +21,25 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import com.android.server.pm.pkg.component.ParsedActivity
 import android.os.Binder
 import android.os.UserHandle
 import android.util.ArrayMap
-import com.android.server.pm.*
-import com.android.server.pm.parsing.pkg.AndroidPackage
-import com.android.server.pm.parsing.pkg.PackageImpl
-import com.android.server.pm.parsing.pkg.ParsedPackage
+import com.android.internal.pm.parsing.pkg.AndroidPackageInternal
+import com.android.internal.pm.parsing.pkg.PackageImpl
+import com.android.internal.pm.parsing.pkg.ParsedPackage
+import com.android.internal.pm.pkg.component.ParsedActivity
+import com.android.server.pm.AppsFilterImpl
+import com.android.server.pm.PackageManagerService
+import com.android.server.pm.PackageManagerServiceInjector
+import com.android.server.pm.PackageManagerServiceTestParams
+import com.android.server.pm.PackageManagerTracedLock
+import com.android.server.pm.PackageSetting
+import com.android.server.pm.PendingPackageBroadcasts
+import com.android.server.pm.Settings
+import com.android.server.pm.SharedLibrariesImpl
+import com.android.server.pm.UserManagerInternal
+import com.android.server.pm.UserManagerService
+import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.resolution.ComponentResolver
 import com.android.server.pm.snapshot.PackageDataSnapshot
 import com.android.server.pm.test.override.PackageManagerComponentLabelIconOverrideTest.Companion.Params.AppType
@@ -38,6 +49,8 @@ import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import com.android.server.wm.ActivityTaskManagerInternal
 import com.google.common.truth.Truth.assertThat
+import java.io.File
+import java.util.UUID
 import org.junit.After
 import org.junit.Before
 import org.junit.BeforeClass
@@ -50,8 +63,6 @@ import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.intThat
 import org.mockito.Mockito.same
 import org.testng.Assert.assertThrows
-import java.io.File
-import java.util.UUID
 
 @RunWith(Parameterized::class)
 class PackageManagerComponentLabelIconOverrideTest {
@@ -132,8 +143,8 @@ class PackageManagerComponentLabelIconOverrideTest {
             val result: Result,
             val componentName: ComponentName? = ComponentName(pkgName, COMPONENT_CLASS_NAME)
         ) {
-            constructor(pkgName: String, appType: AppType, exception: Class<out Exception>)
-                    : this(pkgName, appType, Result.Exception(exception))
+            constructor(pkgName: String, appType: AppType, exception: Class<out Exception>) :
+                    this(pkgName, appType, Result.Exception(exception))
 
             val expectedLabel = when (result) {
                 Result.Changed, Result.ChangedWithoutNotify, Result.NotChanged -> TEST_LABEL
@@ -168,7 +179,7 @@ class PackageManagerComponentLabelIconOverrideTest {
     lateinit var params: Params
 
     private lateinit var mockPendingBroadcasts: PendingPackageBroadcasts
-    private lateinit var mockPkg: AndroidPackage
+    private lateinit var mockPkg: AndroidPackageInternal
     private lateinit var mockPkgSetting: PackageSetting
     private lateinit var service: PackageManagerService
 
@@ -287,17 +298,15 @@ class PackageManagerComponentLabelIconOverrideTest {
                     .apply(block)
                     .hideAsFinal()
 
-    private fun makePkgSetting(pkgName: String, pkg: AndroidPackage) =
-        PackageSetting(
-            pkgName, null, File("/test"),
-            null, null, null, null, 0, 0, 0, 0, null, null, null, null, null,
-            UUID.fromString("3f9d52b7-d7b4-406a-a1da-d9f19984c72c")
-        ).apply {
+    private fun makePkgSetting(pkgName: String, pkg: AndroidPackageInternal) =
+        PackageSetting(pkgName, null, File("/test"), 0, 0,
+                UUID.fromString("3f9d52b7-d7b4-406a-a1da-d9f19984c72c"))
+        .apply {
             if (params.isSystem) {
                 this.flags = this.flags or ApplicationInfo.FLAG_SYSTEM
             }
             this.pkgState.isUpdatedSystemApp = params.isUpdatedSystemApp
-            this.pkg = pkg
+            setPkg(pkg)
         }
 
     private fun makeTestData() {
@@ -362,7 +371,7 @@ class PackageManagerComponentLabelIconOverrideTest {
             whenever(this.isCallerRecents(anyInt())) { false }
         }
         val mockAppsFilter: AppsFilterImpl = mockThrowOnUnmocked {
-            whenever(this.shouldFilterApplication(any<PackageDataSnapshot>(), anyInt(), 
+            whenever(this.shouldFilterApplication(any<PackageDataSnapshot>(), anyInt(),
                     any<PackageSetting>(), any<PackageSetting>(), anyInt())) { false }
             whenever(this.snapshot()) { this@mockThrowOnUnmocked }
             whenever(registerObserver(any())).thenCallRealMethod()

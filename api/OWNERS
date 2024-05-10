@@ -3,7 +3,10 @@ hansson@google.com
 # Modularization team
 file:platform/packages/modules/common:/OWNERS
 
+# Soong plugin owned by Soong team.
+per-file *.go,go.mod,go.work,go.work.sum = file:platform/build/soong:/OWNERS
+
 per-file Android.bp = file:platform/build/soong:/OWNERS #{LAST_RESORT_SUGGESTION}
 
 # For metalava team to disable lint checks in platform
-per-file Android.bp = aurimas@google.com,emberrose@google.com,sjgilbert@google.com
+per-file Android.bp = aurimas@google.com,emberrose@google.com

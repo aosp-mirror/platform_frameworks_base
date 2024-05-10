@@ -20,9 +20,8 @@ package com.android.systemui.user.legacyhelper.ui
 import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.user.data.source.UserRecord
-import kotlin.math.ceil
 
 /**
  * Defines utility functions for helping with legacy UI code for users.
@@ -33,16 +32,6 @@ import kotlin.math.ceil
  */
 object LegacyUserUiHelper {
 
-    /** Returns the maximum number of columns for user items in the user switcher. */
-    fun getMaxUserSwitcherItemColumns(userCount: Int): Int {
-        // TODO(b/243844097): remove this once we remove the old user switcher implementation.
-        return if (userCount < 5) {
-            4
-        } else {
-            ceil(userCount / 2.0).toInt()
-        }
-    }
-
     @JvmStatic
     @DrawableRes
     fun getUserSwitcherActionIconResourceId(
@@ -50,15 +39,18 @@ object LegacyUserUiHelper {
         isGuest: Boolean,
         isAddSupervisedUser: Boolean,
         isTablet: Boolean = false,
+        isManageUsers: Boolean,
     ): Int {
         return if (isAddUser && isTablet) {
-            R.drawable.ic_account_circle_filled
+            com.android.settingslib.R.drawable.ic_account_circle_filled
         } else if (isAddUser) {
             R.drawable.ic_add
         } else if (isGuest) {
-            R.drawable.ic_account_circle
+            com.android.settingslib.R.drawable.ic_account_circle
         } else if (isAddSupervisedUser) {
-            R.drawable.ic_add_supervised_user
+            com.android.settingslib.R.drawable.ic_add_supervised_user
+        } else if (isManageUsers) {
+            R.drawable.ic_manage_users
         } else {
             R.drawable.ic_avatar_user
         }
@@ -75,7 +67,7 @@ object LegacyUserUiHelper {
         val resourceId: Int? = getGuestUserRecordNameResourceId(record)
         return when {
             resourceId != null -> context.getString(resourceId)
-            record.info != null -> record.info.name
+            record.info != null -> checkNotNull(record.info.name)
             else ->
                 context.getString(
                     getUserSwitcherActionTextResourceId(
@@ -85,6 +77,7 @@ object LegacyUserUiHelper {
                         isAddUser = record.isAddUser,
                         isAddSupervisedUser = record.isAddSupervisedUser,
                         isTablet = isTablet,
+                        isManageUsers = record.isManageUsers,
                     )
                 )
         }
@@ -114,8 +107,9 @@ object LegacyUserUiHelper {
         isAddUser: Boolean,
         isAddSupervisedUser: Boolean,
         isTablet: Boolean = false,
+        isManageUsers: Boolean,
     ): Int {
-        check(isGuest || isAddUser || isAddSupervisedUser)
+        check(isGuest || isAddUser || isAddSupervisedUser || isManageUsers)
 
         return when {
             isGuest && isGuestUserAutoCreated && isGuestUserResetting ->
@@ -125,6 +119,7 @@ object LegacyUserUiHelper {
             isGuest -> com.android.internal.R.string.guest_name
             isAddUser -> com.android.settingslib.R.string.user_add_user
             isAddSupervisedUser -> R.string.add_user_supervised
+            isManageUsers -> R.string.manage_users
             else -> error("This should never happen!")
         }
     }

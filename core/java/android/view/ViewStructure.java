@@ -397,6 +397,13 @@ public abstract class ViewStructure {
     public void setImportantForAutofill(@AutofillImportance int mode) {}
 
     /**
+     * Sets whether the node is a credential. See {@link View#isCredential}.
+     *
+     * @hide
+     */
+    public void setIsCredential(boolean isCredential) {}
+
+    /**
      * Sets the MIME types accepted by this view. See {@link View#getReceiveContentMimeTypes()}.
      *
      * <p>Should only be set when the node is used for Autofill or Content Capture purposes - it

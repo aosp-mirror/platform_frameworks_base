@@ -33,6 +33,7 @@ import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_GESTURE;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__TRIPLE_TAP;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__TWO_FINGER_TRIPLE_TAP;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__UNKNOWN_TYPE;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__VOLUME_KEY;
 import static com.android.internal.util.FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_ALL;
@@ -131,6 +132,18 @@ public final class AccessibilityStatsLogUtils {
     }
 
     /**
+     * Logs magnification that is assigned to the two finger triple tap shortcut. Calls this when
+     * triggering the magnification two finger triple tap shortcut.
+     */
+    public static void logMagnificationTwoFingerTripleTap(boolean enabled) {
+        FrameworkStatsLog.write(FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED,
+                MAGNIFICATION_COMPONENT_NAME.flattenToString(),
+                // jean update
+                ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__TWO_FINGER_TRIPLE_TAP,
+                convertToLoggingServiceStatus(enabled));
+    }
+
+    /**
      * Logs accessibility feature name that is assigned to the long pressed accessibility button
      * shortcut. Calls this when clicking the long pressed accessibility button shortcut.
      *
@@ -149,11 +162,13 @@ public final class AccessibilityStatsLogUtils {
      *
      * @param mode The activated magnification mode.
      * @param duration The duration in milliseconds during the magnification is activated.
+     * @param scale The last magnification scale for the activation
      */
-    public static void logMagnificationUsageState(int mode, long duration) {
+    public static void logMagnificationUsageState(int mode, long duration, float scale) {
         FrameworkStatsLog.write(FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED,
                 convertToLoggingMagnificationMode(mode),
-                duration);
+                duration,
+                convertToLoggingMagnificationScale(scale));
     }
 
     /**
@@ -253,5 +268,13 @@ public final class AccessibilityStatsLogUtils {
             default:
                 return MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_UNKNOWN_MODE;
         }
+    }
+
+    private static int convertToLoggingMagnificationScale(float scale) {
+        // per b/269366674, we make every 10% a bucket for both privacy and readability concern.
+        // For example
+        // 1. both 2.30f(230%) and 2.36f(236%) would return 230 as bucket id.
+        // 2. bucket id 370 means scale range in [370%, 379%]
+        return ((int) (scale * 10)) * 10;
     }
 }

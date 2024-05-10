@@ -29,9 +29,9 @@ import static org.mockito.Mockito.when;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.UserInfo;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.quicksettings.Tile;
@@ -41,19 +41,21 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,7 +71,7 @@ public class DreamTileTest extends SysuiTestCase {
     @Mock
     private ActivityStarter mActivityStarter;
     @Mock
-    private QSTileHost mHost;
+    private QSHost mHost;
     @Mock
     private MetricsLogger mMetricsLogger;
     @Mock
@@ -82,6 +84,8 @@ public class DreamTileTest extends SysuiTestCase {
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private UserTracker mUserTracker;
+    @Mock
+    private QsEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
 
@@ -112,6 +116,12 @@ public class DreamTileTest extends SysuiTestCase {
         mTile.initialize();
     }
 
+    @After
+    public void tearDown() {
+        mTile.destroy();
+        mTestableLooper.processAllMessages();
+    }
+
     @Test
     public void testNotAvailable() throws RemoteException {
         // Should not be available if screensaver is disabled
@@ -123,7 +133,7 @@ public class DreamTileTest extends SysuiTestCase {
 
         // Should not be available if component is not set
         mSecureSettings.putInt(Settings.Secure.SCREENSAVER_ENABLED, 1);
-        when(mDreamManager.getDreamComponents()).thenReturn(null);
+        when(mDreamManager.getDreamComponentsForUser(mUserTracker.getUserId())).thenReturn(null);
 
         mTestableLooper.processAllMessages();
         assertEquals(Tile.STATE_UNAVAILABLE, mTile.getState().state);
@@ -134,9 +144,8 @@ public class DreamTileTest extends SysuiTestCase {
     public void testInactiveWhenDreaming() throws RemoteException {
         setScreensaverEnabled(true);
 
-        when(mDreamManager.getDreamComponents()).thenReturn(new ComponentName[]{
-                COLORS_DREAM_COMPONENT_NAME
-        });
+        when(mDreamManager.getDreamComponentsForUser(mUserTracker.getUserId()))
+             .thenReturn(new ComponentName[]{COLORS_DREAM_COMPONENT_NAME});
         when(mDreamManager.isDreaming()).thenReturn(false);
 
         mTile.refreshState();
@@ -148,9 +157,8 @@ public class DreamTileTest extends SysuiTestCase {
     public void testActive() throws RemoteException {
         setScreensaverEnabled(true);
 
-        when(mDreamManager.getDreamComponents()).thenReturn(new ComponentName[]{
-                COLORS_DREAM_COMPONENT_NAME
-        });
+        when(mDreamManager.getDreamComponentsForUser(mUserTracker.getUserId()))
+             .thenReturn(new ComponentName[]{COLORS_DREAM_COMPONENT_NAME});
         when(mDreamManager.isDreaming()).thenReturn(true);
 
         mTile.refreshState();
@@ -162,9 +170,8 @@ public class DreamTileTest extends SysuiTestCase {
     public void testClick() throws RemoteException {
         // Set the AOSP dream enabled as the base setup.
         setScreensaverEnabled(true);
-        when(mDreamManager.getDreamComponents()).thenReturn(new ComponentName[]{
-                COLORS_DREAM_COMPONENT_NAME
-        });
+        when(mDreamManager.getDreamComponentsForUser(mUserTracker.getUserId()))
+             .thenReturn(new ComponentName[]{COLORS_DREAM_COMPONENT_NAME});
         when(mDreamManager.isDreaming()).thenReturn(false);
 
         mTile.refreshState();
@@ -203,22 +210,26 @@ public class DreamTileTest extends SysuiTestCase {
 
         DreamTile supportedTileAllUsers = constructTileForTest(true, false);
 
-        UserHandle systemUserHandle = mock(UserHandle.class);
-        when(systemUserHandle.isSystem()).thenReturn(true);
+        UserInfo mainUserInfo = mock(UserInfo.class);
+        when(mainUserInfo.isMain()).thenReturn(true);
 
-        UserHandle nonSystemUserHandle = mock(UserHandle.class);
-        when(nonSystemUserHandle.isSystem()).thenReturn(false);
+        UserInfo nonMainUserInfo = mock(UserInfo.class);
+        when(nonMainUserInfo.isMain()).thenReturn(false);
 
-        when(mUserTracker.getUserHandle()).thenReturn(systemUserHandle);
+        when(mUserTracker.getUserInfo()).thenReturn(mainUserInfo);
         assertTrue(supportedTileAllUsers.isAvailable());
-        when(mUserTracker.getUserHandle()).thenReturn(nonSystemUserHandle);
+        when(mUserTracker.getUserInfo()).thenReturn(nonMainUserInfo);
         assertTrue(supportedTileAllUsers.isAvailable());
 
         DreamTile supportedTileOnlySystemUser = constructTileForTest(true, true);
-        when(mUserTracker.getUserHandle()).thenReturn(systemUserHandle);
+        when(mUserTracker.getUserInfo()).thenReturn(mainUserInfo);
         assertTrue(supportedTileOnlySystemUser.isAvailable());
-        when(mUserTracker.getUserHandle()).thenReturn(nonSystemUserHandle);
+        when(mUserTracker.getUserInfo()).thenReturn(nonMainUserInfo);
         assertFalse(supportedTileOnlySystemUser.isAvailable());
+
+        destroyTile(unsupportedTile);
+        destroyTile(supportedTileAllUsers);
+        destroyTile(supportedTileOnlySystemUser);
     }
 
     @Test
@@ -243,6 +254,8 @@ public class DreamTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         assertEquals(QSTileImpl.ResourceIcon.get(R.drawable.ic_qs_screen_saver_undocked),
                 dockedTile.getState().icon);
+
+        destroyTile(dockedTile);
     }
 
     private void setScreensaverEnabled(boolean enabled) {
@@ -250,10 +263,16 @@ public class DreamTileTest extends SysuiTestCase {
                 DEFAULT_USER);
     }
 
+    private void destroyTile(QSTileImpl<?> tile) {
+        tile.destroy();
+        mTestableLooper.processAllMessages();
+    }
+
     private DreamTile constructTileForTest(boolean dreamSupported,
             boolean dreamOnlyEnabledForSystemUser) {
         return new DreamTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

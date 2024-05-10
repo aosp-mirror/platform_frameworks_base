@@ -41,6 +41,7 @@ import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -48,7 +49,7 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
@@ -59,7 +60,6 @@ import com.android.server.utils.WatchedLongSparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -91,7 +91,7 @@ import java.util.Set;
  * other hand, not overriding in {@link ComputerLocked} may leave a function walking
  * unstable data.
  */
-@VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public interface Computer extends PackageDataSnapshot {
 
     int getVersion();
@@ -125,6 +125,14 @@ public interface Computer extends PackageDataSnapshot {
     ActivityInfo getActivityInfo(ComponentName component, long flags, int userId);
 
     /**
+     * Similar to {@link Computer#getActivityInfo(android.content.ComponentName, long, int)} but
+     * only visible as internal service. This method bypass INTERACT_ACROSS_USERS or
+     * INTERACT_ACROSS_USERS_FULL permission checks and only to be used for intent resolution across
+     * chained cross profiles
+     */
+    ActivityInfo getActivityInfoCrossProfile(ComponentName component, long flags, int userId);
+
+    /**
      * Important: The provided filterCallingUid is used exclusively to filter out activities
      * that can be seen based on user state. It's typically the original caller uid prior
      * to clearing. Because it can only be provided by trusted code, its value can be
@@ -132,7 +140,6 @@ public interface Computer extends PackageDataSnapshot {
      */
     ActivityInfo getActivityInfoInternal(ComponentName component, long flags,
             int filterCallingUid, int userId);
-    @Override
     AndroidPackage getPackage(String packageName);
     AndroidPackage getPackage(int uid);
     ApplicationInfo generateApplicationInfoFromSettings(String packageName, long flags,
@@ -188,6 +195,8 @@ public interface Computer extends PackageDataSnapshot {
 
     PackageStateInternal getPackageStateInternal(String packageName);
     PackageStateInternal getPackageStateInternal(String packageName, int callingUid);
+    PackageStateInternal getPackageStateFiltered(@NonNull String packageName, int callingUid,
+            @UserIdInt int userId);
     ParceledListSlice<PackageInfo> getInstalledPackages(long flags, int userId);
     ResolveInfo createForwardingResolveInfoUnchecked(WatchedIntentFilter filter,
             int sourceUserId, int targetUserId);
@@ -202,6 +211,12 @@ public interface Computer extends PackageDataSnapshot {
     boolean filterSharedLibPackage(@Nullable PackageStateInternal ps, int uid, int userId,
             long flags);
     boolean isCallerSameApp(String packageName, int uid);
+    /**
+     * Returns true if the package name and the uid represent the same app.
+     *
+     * @param resolveIsolatedUid if true, resolves an isolated uid into the real uid.
+     */
+    boolean isCallerSameApp(String packageName, int uid, boolean resolveIsolatedUid);
     boolean isComponentVisibleToInstantApp(@Nullable ComponentName component);
     boolean isComponentVisibleToInstantApp(@Nullable ComponentName component,
             @PackageManager.ComponentType int type);
@@ -222,11 +237,50 @@ public interface Computer extends PackageDataSnapshot {
     boolean isSameProfileGroup(@UserIdInt int callerUserId, @UserIdInt int userId);
     boolean shouldFilterApplication(@Nullable PackageStateInternal ps, int callingUid,
             @Nullable ComponentName component, @PackageManager.ComponentType int componentType,
+            int userId, boolean filterUninstall);
+    boolean shouldFilterApplication(@Nullable PackageStateInternal ps, int callingUid,
+            @Nullable ComponentName component, @PackageManager.ComponentType int componentType,
             int userId);
     boolean shouldFilterApplication(@Nullable PackageStateInternal ps, int callingUid,
             int userId);
     boolean shouldFilterApplication(@NonNull SharedUserSetting sus, int callingUid,
             int userId);
+    /**
+     * Different form {@link #shouldFilterApplication(PackageStateInternal, int, int)}, the function
+     * returns {@code true} if the target package is not found in the device or uninstalled in the
+     * current user. Unless the caller's function needs to handle the package's uninstalled state
+     * by itself, using this function to keep the consistent behavior between conditions of package
+     * uninstalled and visibility not allowed to avoid the side channel leakage of package
+     * existence.
+     * <p>
+     * Package with {@link PackageManager#SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_HIDDEN} is not
+     * treated as an uninstalled package for the carrier apps customization. Bypassing the
+     * uninstalled package check if the caller is system, shell or root uid.
+     */
+    boolean shouldFilterApplicationIncludingUninstalled(@Nullable PackageStateInternal ps,
+            int callingUid, int userId);
+
+    /**
+     * Different from
+     * {@link #shouldFilterApplicationIncludingUninstalled(PackageStateInternal, int, int)}, the
+     * function returns {@code true} if:
+     * <ul>
+     * <li>The target package is not archived.
+     * <li>The package cannot be found in the device or has been uninstalled in the current user.
+     * </ul>
+     */
+    boolean shouldFilterApplicationIncludingUninstalledNotArchived(
+            @Nullable PackageStateInternal ps,
+            int callingUid, int userId);
+    /**
+     * Different from {@link #shouldFilterApplication(SharedUserSetting, int, int)}, the function
+     * returns {@code true} if packages with the same shared user are all uninstalled in the current
+     * user.
+     *
+     * @see #shouldFilterApplicationIncludingUninstalled(PackageStateInternal, int, int)
+     */
+    boolean shouldFilterApplicationIncludingUninstalled(@NonNull SharedUserSetting sus,
+            int callingUid, int userId);
     int checkUidPermission(String permName, int uid);
     int getPackageUidInternal(String packageName, long flags, int userId, int callingUid);
     long updateFlagsForApplication(long flags, int userId);
@@ -282,7 +336,8 @@ public interface Computer extends PackageDataSnapshot {
     SigningDetails getSigningDetails(@NonNull String packageName);
     SigningDetails getSigningDetails(int uid);
     boolean filterAppAccess(AndroidPackage pkg, int callingUid, int userId);
-    boolean filterAppAccess(String packageName, int callingUid, int userId);
+    boolean filterAppAccess(String packageName, int callingUid, int userId,
+            boolean filterUninstalled);
     boolean filterAppAccess(int uid, int callingUid);
     void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState);
     PackageManagerService.FindPreferredActivityBodyResult findPreferredActivityInternal(
@@ -294,8 +349,10 @@ public interface Computer extends PackageDataSnapshot {
     PreferredIntentResolver getPreferredActivities(@UserIdInt int userId);
 
     @NonNull
-    @Override
     ArrayMap<String, ? extends PackageStateInternal> getPackageStates();
+
+    @NonNull
+    ArrayMap<String, ? extends PackageStateInternal> getDisabledSystemPackageStates();
 
     @Nullable
     String getRenamedPackage(@NonNull String packageName);
@@ -312,6 +369,8 @@ public interface Computer extends PackageDataSnapshot {
 
     boolean isPackageAvailable(String packageName, @UserIdInt int userId);
 
+    boolean isApexPackage(String packageName);
+
     @NonNull
     String[] currentToCanonicalPackageNames(@NonNull String[] names);
 
@@ -324,8 +383,9 @@ public interface Computer extends PackageDataSnapshot {
 
     int getTargetSdkVersion(@NonNull String packageName);
 
-    boolean activitySupportsIntent(@NonNull ComponentName resolveComponentName,
-            @NonNull ComponentName component, @NonNull Intent intent, String resolvedType);
+    boolean activitySupportsIntentAsUser(@NonNull ComponentName resolveComponentName,
+            @NonNull ComponentName component, @NonNull Intent intent, String resolvedType,
+            int userId);
 
     @Nullable
     ActivityInfo getReceiverInfo(@NonNull ComponentName component,
@@ -345,9 +405,19 @@ public interface Computer extends PackageDataSnapshot {
     boolean isInstallDisabledForPackage(@NonNull String packageName, int uid,
             @UserIdInt int userId);
 
-    @Nullable
-    List<VersionedPackage> getPackagesUsingSharedLibrary(@NonNull SharedLibraryInfo libInfo,
-            @PackageManager.PackageInfoFlagsBits long flags, int callingUid, @UserIdInt int userId);
+    /**
+     * Returns a Pair that contains a list of packages that depend on the target library and the
+     * package library dependency information. The List&lt;VersionedPackage&gt; indicates a list of
+     * packages that depend on the target library, it may be null if no package depends on
+     * the target library. The List&lt;Boolean&gt; indicates whether each VersionedPackage in
+     * the List&lt;VersionedPackage&gt; optionally depends on the target library, where true means
+     * optional and false means required. It may be null if no package depends on
+     * the target library or without dependency information, e.g. uses-static-library.
+     */
+    @NonNull
+    Pair<List<VersionedPackage>, List<Boolean>> getPackagesUsingSharedLibrary(
+            @NonNull SharedLibraryInfo libInfo, @PackageManager.PackageInfoFlagsBits long flags,
+            int callingUid, @UserIdInt int userId);
 
     @Nullable
     ParceledListSlice<SharedLibraryInfo> getDeclaredSharedLibraries(
@@ -358,20 +428,21 @@ public interface Computer extends PackageDataSnapshot {
     ProviderInfo getProviderInfo(@NonNull ComponentName component,
             @PackageManager.ComponentInfoFlagsBits long flags, @UserIdInt int userId);
 
-    @Nullable
-    String[] getSystemSharedLibraryNames();
+    ArrayMap<String, String> getSystemSharedLibraryNamesAndPaths();
 
     /**
-     * @return the state if the given package has a state and isn't filtered by visibility.
+     * @return the state if the given package is installed and isn't filtered by visibility.
      * Provides no guarantee that the package is in any usable state.
      */
     @Nullable
-    PackageStateInternal getPackageStateFiltered(@NonNull String packageName, int callingUid,
-            @UserIdInt int userId);
+    PackageStateInternal getPackageStateForInstalledAndFiltered(@NonNull String packageName,
+            int callingUid, @UserIdInt int userId);
 
-    int checkSignatures(@NonNull String pkg1, @NonNull String pkg2);
+    int checkSignatures(@NonNull String pkg1, @NonNull String pkg2, int userId);
 
     int checkUidSignatures(int uid1, int uid2);
+
+    int checkUidSignaturesForAllUsers(int uid1, int uid2);
 
     boolean hasSigningCertificate(@NonNull String packageName, @NonNull byte[] certificate,
             @PackageManager.CertificateInputType int type);
@@ -397,7 +468,7 @@ public interface Computer extends PackageDataSnapshot {
     boolean isUidPrivileged(int uid);
 
     @NonNull
-    String[] getAppOpPermissionPackages(@NonNull String permissionName);
+    String[] getAppOpPermissionPackages(@NonNull String permissionName, int userId);
 
     @NonNull
     ParceledListSlice<PackageInfo> getPackagesHoldingPermissions(@NonNull String[] permissions,
@@ -406,7 +477,7 @@ public interface Computer extends PackageDataSnapshot {
     @NonNull
     List<ApplicationInfo> getInstalledApplications(
             @PackageManager.ApplicationInfoFlagsBits long flags, @UserIdInt int userId,
-            int callingUid);
+            int callingUid, boolean forceAllowCrossUser);
 
     @Nullable
     ProviderInfo resolveContentProvider(@NonNull String name,
@@ -424,11 +495,12 @@ public interface Computer extends PackageDataSnapshot {
             @PackageManager.ComponentInfoFlagsBits long flags, @Nullable String metaDataKey);
 
     @Nullable
-    InstrumentationInfo getInstrumentationInfo(@NonNull ComponentName component, int flags);
+    InstrumentationInfo getInstrumentationInfoAsUser(@NonNull ComponentName component, int flags,
+            int userId);
 
     @NonNull
-    ParceledListSlice<InstrumentationInfo> queryInstrumentation(
-            @NonNull String targetPackage, int flags);
+    ParceledListSlice<InstrumentationInfo> queryInstrumentationAsUser(
+            @NonNull String targetPackage, int flags, int userId);
 
     @NonNull
     List<PackageStateInternal> findSharedNonSystemLibraries(
@@ -436,9 +508,19 @@ public interface Computer extends PackageDataSnapshot {
 
     boolean getApplicationHiddenSettingAsUser(@NonNull String packageName, @UserIdInt int userId);
 
-    boolean isPackageSuspendedForUser(@NonNull String packageName, @UserIdInt int userId);
+    boolean isPackageSuspendedForUser(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException;
 
-    boolean isSuspendingAnyPackages(@NonNull String suspendingPackage, @UserIdInt int userId);
+    boolean isPackageQuarantinedForUser(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException;
+
+    /** Check if the package is in a stopped state for a given user. */
+    boolean isPackageStoppedForUser(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException;
+
+    /** Check if the package is suspending any package. */
+    boolean isSuspendingAnyPackages(@NonNull String suspendingPackage,
+            @UserIdInt int suspendingUserId, int targetUserId);
 
     @NonNull
     ParceledListSlice<IntentFilter> getAllIntentFilters(@NonNull String packageName);
@@ -446,14 +528,10 @@ public interface Computer extends PackageDataSnapshot {
     boolean getBlockUninstallForUser(@NonNull String packageName, @UserIdInt int userId);
 
     @Nullable
-    SparseArray<int[]> getBroadcastAllowList(@NonNull String packageName, @UserIdInt int[] userIds,
-            boolean isInstantApp);
+    String getInstallerPackageName(@NonNull String packageName, @UserIdInt int userId);
 
     @Nullable
-    String getInstallerPackageName(@NonNull String packageName);
-
-    @Nullable
-    InstallSourceInfo getInstallSourceInfo(@NonNull String packageName);
+    InstallSourceInfo getInstallSourceInfo(@NonNull String packageName, @UserIdInt int userId);
 
     @PackageManager.EnabledState
     int getApplicationEnabledSetting(@NonNull String packageName, @UserIdInt int userId);
@@ -473,7 +551,15 @@ public interface Computer extends PackageDataSnapshot {
      * returns false.
      */
     boolean isComponentEffectivelyEnabled(@NonNull ComponentInfo componentInfo,
-            @UserIdInt int userId);
+            @NonNull UserHandle userHandle);
+
+    /**
+     * @return true if the runtime app user enabled state and the install-time app manifest enabled
+     * state are both effectively enabled for the given app. Or if the app cannot be found,
+     * returns false.
+     */
+    boolean isApplicationEffectivelyEnabled(@NonNull String packageName,
+            @NonNull UserHandle userHandle);
 
     @Nullable
     KeySet getKeySetByAlias(@NonNull String packageName, @NonNull String alias);
@@ -485,6 +571,16 @@ public interface Computer extends PackageDataSnapshot {
 
     boolean isPackageSignedByKeySetExactly(@NonNull String packageName, @NonNull KeySet ks);
 
+    /**
+     * See {@link AppsFilterSnapshot#getVisibilityAllowList(PackageStateInternal, int[], ArrayMap)}
+     */
+    @Nullable
+    SparseArray<int[]> getVisibilityAllowLists(@NonNull String packageName,
+            @UserIdInt int[] userIds);
+
+    /**
+     * See {@link AppsFilterSnapshot#getVisibilityAllowList(PackageStateInternal, int[], ArrayMap)}
+     */
     @Nullable
     int[] getVisibilityAllowList(@NonNull String packageName, @UserIdInt int userId);
 
@@ -507,8 +603,9 @@ public interface Computer extends PackageDataSnapshot {
     @PackageManager.InstallReason
     int getInstallReason(@NonNull String packageName, @UserIdInt int userId);
 
-    boolean canPackageQuery(@NonNull String sourcePackageName, @NonNull String targetPackageName,
-            @UserIdInt int userId);
+    @NonNull
+    boolean[] canPackageQuery(@NonNull String sourcePackageName,
+            @NonNull String[] targetPackageNames, @UserIdInt int userId);
 
     boolean canForwardTo(@NonNull Intent intent, @Nullable String resolvedType,
             @UserIdInt int sourceUserId, @UserIdInt int targetUserId);
@@ -529,7 +626,7 @@ public interface Computer extends PackageDataSnapshot {
     CharSequence getHarmfulAppWarning(@NonNull String packageName, @UserIdInt int userId);
 
     /**
-     * Only keep package names that refer to {@link AndroidPackage#isSystem system} packages.
+     * Only keep package names that refer to {@link PackageState#isSystem system} packages.
      *
      * @param pkgNames The packages to filter
      *
@@ -609,11 +706,9 @@ public interface Computer extends PackageDataSnapshot {
     @NonNull
     List<? extends PackageStateInternal> getVolumePackages(@NonNull String volumeUuid);
 
-    @Override
     @NonNull
     UserInfo[] getUserInfos();
 
-    @Override
     @NonNull
-    Collection<SharedUserSetting> getAllSharedUsers();
+    ArrayMap<String, ? extends SharedUserApi> getSharedUsers();
 }

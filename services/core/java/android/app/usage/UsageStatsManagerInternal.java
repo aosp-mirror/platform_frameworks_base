@@ -27,6 +27,7 @@ import android.content.ComponentName;
 import android.content.LocusId;
 import android.content.res.Configuration;
 import android.os.IBinder;
+import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -134,6 +135,18 @@ public abstract class UsageStatsManagerInternal {
             @Nullable LocusId locusId, @NonNull IBinder appToken);
 
     /**
+     * Report a user interaction event to UsageStatsManager
+     *
+     * @param pkgName The package for which this user interaction event occurred.
+     * @param userId The user id to which component belongs to.
+     * @param extras The extra details about this user interaction event.
+     * {@link UsageEvents.Event#USER_INTERACTION}
+     * {@link UsageStatsManager#reportUserInteraction(String, int, PersistableBundle)}
+     */
+    public abstract void reportUserInteractionEvent(@NonNull String pkgName, @UserIdInt int userId,
+            @NonNull PersistableBundle extras);
+
+    /**
      * Prepares the UsageStatsService for shutdown.
      */
     public abstract void prepareShutdown();
@@ -201,6 +214,16 @@ public abstract class UsageStatsManagerInternal {
      * @param userId the userId to which the admin apps belong.
      */
     public abstract void setActiveAdminApps(Set<String> adminApps, int userId);
+
+    /**
+     * Called by DevicePolicyManagerService to inform about the protected packages for a user.
+     * User control will be disabled for protected packages.
+     *
+     * @param packageNames the set of protected packages for {@code userId}.
+     * @param userId the userId to which the protected packages belong.
+     */
+    public abstract void setAdminProtectedPackages(@Nullable Set<String> packageNames,
+            @UserIdInt int userId);
 
     /**
      * Called by DevicePolicyManagerService during boot to inform that admin data is loaded and
@@ -329,11 +352,11 @@ public abstract class UsageStatsManagerInternal {
      * when the user is first unlocked to update the usage stats package mappings data that might
      * be stale or have existed from a restore and belongs to packages that are not installed for
      * this user anymore.
-     * Note: this is only executed for the system user.
      *
+     * @param userId The user to update
      * @return {@code true} if the updating was successful, {@code false} otherwise
      */
-    public abstract boolean updatePackageMappingsData();
+    public abstract boolean updatePackageMappingsData(@UserIdInt int userId);
 
     /**
      * Listener interface for usage events.

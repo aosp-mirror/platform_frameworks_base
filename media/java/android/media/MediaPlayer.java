@@ -158,6 +158,9 @@ import java.util.concurrent.Executor;
  *         the user supplied callback method OnErrorListener.onError() will be
  *         invoked by the internal player engine and the object will be
  *         transfered to the <em>Error</em> state. </li>
+ *         <li>You must keep a reference to a MediaPlayer instance to prevent it from being garbage
+ *         collected. If a MediaPlayer instance is garbage collected, {@link #release} will be
+ *         called, causing any ongoing playback to stop.
  *         <li>You must call {@link #release()} once you have finished using an instance to release
  *         acquired resources, such as memory and codecs. Once you have called {@link #release}, you
  *         must no longer interact with the released instance.
@@ -658,10 +661,26 @@ public class MediaPlayer extends PlayerBase
      * Doing so frees any resources you have previously acquired.
      */
     public MediaPlayer() {
-        this(AudioSystem.AUDIO_SESSION_ALLOCATE);
+        this(/*context=*/null, AudioSystem.AUDIO_SESSION_ALLOCATE);
     }
 
-    private MediaPlayer(int sessionId) {
+
+    /**
+     * Default constructor with context.
+     *
+     *  <p>Consider using one of the create() methods for synchronously instantiating a
+     *  MediaPlayer from a Uri or resource.
+     *
+     * @param context non-null context. This context will be used to pull information,
+     *  such as {@link android.content.AttributionSource} and device specific session ids, which
+     *  will be associated with the {@link MediaPlayer}.
+     *  However, the context itself will not be retained by the MediaPlayer.
+     */
+    public MediaPlayer(@NonNull Context context) {
+        this(Objects.requireNonNull(context), AudioSystem.AUDIO_SESSION_ALLOCATE);
+    }
+
+    private MediaPlayer(Context context, int sessionId) {
         super(new AudioAttributes.Builder().build(),
                 AudioPlaybackConfiguration.PLAYER_TYPE_JAM_MEDIAPLAYER);
 
@@ -677,7 +696,9 @@ public class MediaPlayer extends PlayerBase
         mTimeProvider = new TimeProvider(this);
         mOpenSubtitleSources = new Vector<InputStream>();
 
-        AttributionSource attributionSource = AttributionSource.myAttributionSource();
+        AttributionSource attributionSource =
+                context == null ? AttributionSource.myAttributionSource()
+                        : context.getAttributionSource();
         // set the package name to empty if it was null
         if (attributionSource.getPackageName() == null) {
             attributionSource = attributionSource.withPackageName("");
@@ -687,10 +708,17 @@ public class MediaPlayer extends PlayerBase
          * It's easier to create it here than in C++.
          */
         try (ScopedParcelState attributionSourceState = attributionSource.asScopedParcelState()) {
-            native_setup(new WeakReference<MediaPlayer>(this), attributionSourceState.getParcel());
+            native_setup(new WeakReference<>(this), attributionSourceState.getParcel(),
+                    resolvePlaybackSessionId(context, sessionId));
         }
+        baseRegisterPlayer(getAudioSessionId());
+    }
 
-        baseRegisterPlayer(sessionId);
+    private Parcel createPlayerIIdParcel() {
+        Parcel parcel = newRequest();
+        parcel.writeInt(INVOKE_ID_SET_PLAYER_IID);
+        parcel.writeInt(mPlayerIId);
+        return parcel;
     }
 
     /*
@@ -709,6 +737,7 @@ public class MediaPlayer extends PlayerBase
     private static final int INVOKE_ID_DESELECT_TRACK = 5;
     private static final int INVOKE_ID_SET_VIDEO_SCALE_MODE = 6;
     private static final int INVOKE_ID_GET_SELECTED_TRACK = 7;
+    private static final int INVOKE_ID_SET_PLAYER_IID = 8;
 
     /**
      * Create a request parcel which can be routed to the native media
@@ -902,8 +931,7 @@ public class MediaPlayer extends PlayerBase
      * @return a MediaPlayer object, or null if creation failed
      */
     public static MediaPlayer create(Context context, Uri uri, SurfaceHolder holder) {
-        int s = AudioSystem.newAudioSessionId();
-        return create(context, uri, holder, null, s > 0 ? s : 0);
+        return create(context, uri, holder, null, AudioSystem.AUDIO_SESSION_ALLOCATE);
     }
 
     /**
@@ -921,11 +949,10 @@ public class MediaPlayer extends PlayerBase
             AudioAttributes audioAttributes, int audioSessionId) {
 
         try {
-            MediaPlayer mp = new MediaPlayer(audioSessionId);
+            MediaPlayer mp = new MediaPlayer(context, audioSessionId);
             final AudioAttributes aa = audioAttributes != null ? audioAttributes :
                 new AudioAttributes.Builder().build();
             mp.setAudioAttributes(aa);
-            mp.native_setAudioSessionId(audioSessionId);
             mp.setDataSource(context, uri);
             if (holder != null) {
                 mp.setDisplay(holder);
@@ -966,8 +993,7 @@ public class MediaPlayer extends PlayerBase
      * @return a MediaPlayer object, or null if creation failed
      */
     public static MediaPlayer create(Context context, int resid) {
-        int s = AudioSystem.newAudioSessionId();
-        return create(context, resid, null, s > 0 ? s : 0);
+        return create(context, resid, null, AudioSystem.AUDIO_SESSION_ALLOCATE);
     }
 
     /**
@@ -987,13 +1013,11 @@ public class MediaPlayer extends PlayerBase
             AssetFileDescriptor afd = context.getResources().openRawResourceFd(resid);
             if (afd == null) return null;
 
-            MediaPlayer mp = new MediaPlayer(audioSessionId);
+            MediaPlayer mp = new MediaPlayer(context, audioSessionId);
 
             final AudioAttributes aa = audioAttributes != null ? audioAttributes :
                 new AudioAttributes.Builder().build();
             mp.setAudioAttributes(aa);
-            mp.native_setAudioSessionId(audioSessionId);
-
             mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
             afd.close();
             mp.prepare();
@@ -1031,7 +1055,7 @@ public class MediaPlayer extends PlayerBase
      * this API to pass the cookies as a list of HttpCookie. If the app has not installed
      * a CookieHandler already, this API creates a CookieManager and populates its CookieStore with
      * the provided cookies. If the app has installed its own handler already, this API requires the
-     * handler to be of CookieManager type such that the API can update the manager’s CookieStore.
+     * handler to be of CookieManager type such that the API can update the manager's CookieStore.
      *
      * <p><strong>Note</strong> that the cross domain redirection is allowed by default,
      * but that can be changed with key/value pairs through the headers parameter with
@@ -1130,6 +1154,7 @@ public class MediaPlayer extends PlayerBase
             setDataSource(afd);
             return true;
         } catch (NullPointerException | SecurityException | IOException ex) {
+            Log.w(TAG, "Error setting data source via ContentResolver", ex);
             return false;
         }
     }
@@ -1306,16 +1331,26 @@ public class MediaPlayer extends PlayerBase
      * @throws IllegalStateException if it is called in an invalid state
      */
     public void prepare() throws IOException, IllegalStateException {
-        _prepare();
+        Parcel piidParcel = createPlayerIIdParcel();
+        try {
+            int retCode = _prepare(piidParcel);
+            if (retCode != 0) {
+                Log.w(TAG, "prepare(): could not set piid " + mPlayerIId);
+            }
+        } finally {
+            piidParcel.recycle();
+        }
         scanInternalSubtitleTracks();
 
         // DrmInfo, if any, has been resolved by now.
         synchronized (mDrmLock) {
             mDrmInfoResolved = true;
         }
+
     }
 
-    private native void _prepare() throws IOException, IllegalStateException;
+    /** Returns the result of sending the {@code piidParcel} to the MediaPlayerService. */
+    private native int _prepare(Parcel piidParcel) throws IOException, IllegalStateException;
 
     /**
      * Prepares the player for playback, asynchronously.
@@ -1327,7 +1362,20 @@ public class MediaPlayer extends PlayerBase
      *
      * @throws IllegalStateException if it is called in an invalid state
      */
-    public native void prepareAsync() throws IllegalStateException;
+    public void prepareAsync() throws IllegalStateException {
+        Parcel piidParcel = createPlayerIIdParcel();
+        try {
+            int retCode = _prepareAsync(piidParcel);
+            if (retCode != 0) {
+                Log.w(TAG, "prepareAsync(): could not set piid " + mPlayerIId);
+            }
+        } finally {
+            piidParcel.recycle();
+        }
+    }
+
+    /** Returns the result of sending the {@code piidParcel} to the MediaPlayerService. */
+    private native int _prepareAsync(Parcel piidParcel) throws IllegalStateException;
 
     /**
      * Starts or resumes playback. If playback had previously been paused,
@@ -2368,6 +2416,9 @@ public class MediaPlayer extends PlayerBase
      * However, it is possible to force this player to be part of an already existing audio session
      * by calling this method.
      * This method must be called before one of the overloaded <code> setDataSource </code> methods.
+     * Note that session id set using this method will override device-specific audio session id,
+     * if the {@link MediaPlayer} was instantiated using device-specific {@link Context} -
+     * see {@link MediaPlayer#MediaPlayer(Context)}.
      * @throws IllegalStateException if it is called in an invalid state
      */
     public void setAudioSessionId(int sessionId)
@@ -2465,7 +2516,7 @@ public class MediaPlayer extends PlayerBase
 
     private static native final void native_init();
     private native void native_setup(Object mediaplayerThis,
-            @NonNull Parcel attributionSource);
+            @NonNull Parcel attributionSource, int audioSessionId);
     private native final void native_finalize();
 
     /**
@@ -2496,10 +2547,20 @@ public class MediaPlayer extends PlayerBase
         }
 
         /**
+         * Returns whether this track contains haptic channels in the audio track.
+         * @hide
+         */
+        public boolean hasHapticChannels() {
+            return mFormat != null && mFormat.containsKey(MediaFormat.KEY_HAPTIC_CHANNEL_COUNT)
+                    && mFormat.getInteger(MediaFormat.KEY_HAPTIC_CHANNEL_COUNT) > 0;
+        }
+
+        /**
          * Gets the {@link MediaFormat} of the track.  If the format is
          * unknown or could not be determined, null is returned.
          */
         public MediaFormat getFormat() {
+            // Note: The format isn't exposed for audio because it is incomplete.
             if (mTrackType == MEDIA_TRACK_TYPE_TIMEDTEXT
                     || mTrackType == MEDIA_TRACK_TYPE_SUBTITLE) {
                 return mFormat;
@@ -2542,6 +2603,11 @@ public class MediaPlayer extends PlayerBase
                 mFormat.setInteger(MediaFormat.KEY_IS_AUTOSELECT, in.readInt());
                 mFormat.setInteger(MediaFormat.KEY_IS_DEFAULT, in.readInt());
                 mFormat.setInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE, in.readInt());
+            } else if (mTrackType == MEDIA_TRACK_TYPE_AUDIO) {
+                boolean hasHapticChannels = in.readBoolean();
+                if (hasHapticChannels) {
+                    mFormat.setInteger(MediaFormat.KEY_HAPTIC_CHANNEL_COUNT, in.readInt());
+                }
             }
         }
 
@@ -2572,6 +2638,13 @@ public class MediaPlayer extends PlayerBase
                 dest.writeInt(mFormat.getInteger(MediaFormat.KEY_IS_AUTOSELECT));
                 dest.writeInt(mFormat.getInteger(MediaFormat.KEY_IS_DEFAULT));
                 dest.writeInt(mFormat.getInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE));
+            } else if (mTrackType == MEDIA_TRACK_TYPE_AUDIO) {
+                boolean hasHapticChannels =
+                        mFormat.containsKey(MediaFormat.KEY_HAPTIC_CHANNEL_COUNT);
+                dest.writeBoolean(hasHapticChannels);
+                if (hasHapticChannels) {
+                    dest.writeInt(mFormat.getInteger(MediaFormat.KEY_HAPTIC_CHANNEL_COUNT));
+                }
             }
         }
 

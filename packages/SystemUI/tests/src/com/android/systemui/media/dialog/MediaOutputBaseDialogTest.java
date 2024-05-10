@@ -47,12 +47,14 @@ import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 
 import org.junit.Before;
@@ -61,7 +63,6 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -89,6 +90,8 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     private final AudioManager mAudioManager = mock(AudioManager.class);
     private PowerExemptionManager mPowerExemptionManager = mock(PowerExemptionManager.class);
     private KeyguardManager mKeyguardManager = mock(KeyguardManager.class);
+    private FeatureFlags mFlags = mock(FeatureFlags.class);
+    private UserTracker mUserTracker = mock(UserTracker.class);
 
     private List<MediaController> mMediaControllers = new ArrayList<>();
     private MediaOutputBaseDialogImpl mMediaOutputBaseDialogImpl;
@@ -120,8 +123,8 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotifCollection, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
-                mKeyguardManager);
+                mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
+                mKeyguardManager, mFlags, mUserTracker);
         mMediaOutputBaseDialogImpl = new MediaOutputBaseDialogImpl(mContext, mBroadcastSender,
                 mMediaOutputController);
         mMediaOutputBaseDialogImpl.onCreate(new Bundle());
@@ -237,7 +240,14 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         when(mMediaOutputBaseAdapter.isDragging()).thenReturn(false);
         mMediaOutputBaseDialogImpl.refresh();
 
-        verify(mMediaOutputBaseAdapter).notifyDataSetChanged();
+        verify(mMediaOutputBaseAdapter).updateItems();
+    }
+
+    @Test
+    public void dismissDialog_closesDialogByBroadcastSender() {
+        mMediaOutputBaseDialogImpl.dismissDialog();
+
+        verify(mBroadcastSender).closeSystemDialogs();
     }
 
     @Test
@@ -246,10 +256,10 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
                 mLocalBluetoothLeBroadcast);
         mIsBroadcasting = true;
 
-        mMediaOutputBaseDialogImpl.onStart();
+        mMediaOutputBaseDialogImpl.start();
         verify(mLocalBluetoothLeBroadcast).registerServiceCallBack(any(), any());
 
-        mMediaOutputBaseDialogImpl.onStop();
+        mMediaOutputBaseDialogImpl.stop();
         verify(mLocalBluetoothLeBroadcast).unregisterServiceCallBack(any());
     }
 
@@ -260,11 +270,26 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
                 mLocalBluetoothLeBroadcast);
         mIsBroadcasting = false;
 
-        mMediaOutputBaseDialogImpl.onStart();
-        mMediaOutputBaseDialogImpl.onStop();
+        mMediaOutputBaseDialogImpl.start();
+        mMediaOutputBaseDialogImpl.stop();
 
         verify(mLocalBluetoothLeBroadcast, never()).registerServiceCallBack(any(), any());
         verify(mLocalBluetoothLeBroadcast, never()).unregisterServiceCallBack(any());
+    }
+
+    @Test
+    public void
+            whenNotBroadcasting_verifyLeBroadcastServiceCallBackIsUnregisteredIfProfileEnabled() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        mIsBroadcasting = true;
+
+        mMediaOutputBaseDialogImpl.start();
+        verify(mLocalBluetoothLeBroadcast).registerServiceCallBack(any(), any());
+
+        mIsBroadcasting = false;
+        mMediaOutputBaseDialogImpl.stop();
+        verify(mLocalBluetoothLeBroadcast).unregisterServiceCallBack(any());
     }
 
     @Test
@@ -280,7 +305,11 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
 
         MediaOutputBaseDialogImpl(Context context, BroadcastSender broadcastSender,
                 MediaOutputController mediaOutputController) {
-            super(context, broadcastSender, mediaOutputController);
+            super(
+                    context,
+                    broadcastSender,
+                    mediaOutputController, /* includePlaybackAndAppMetadata */
+                    true);
 
             mAdapter = mMediaOutputBaseAdapter;
         }

@@ -32,13 +32,13 @@ import java.util.function.Supplier;
 /**
  * Fingerprint-specific revokeChallenge client for the {@link IFingerprint} AIDL HAL interface.
  */
-class FingerprintRevokeChallengeClient extends RevokeChallengeClient<AidlSession> {
+public class FingerprintRevokeChallengeClient extends RevokeChallengeClient<AidlSession> {
 
-    private static final String TAG = "FingerpirntRevokeChallengeClient";
+    private static final String TAG = "FingerprintRevokeChallengeClient";
 
     private final long mChallenge;
 
-    FingerprintRevokeChallengeClient(@NonNull Context context,
+    public FingerprintRevokeChallengeClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token,
             int userId, @NonNull String owner, int sensorId,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
@@ -57,7 +57,7 @@ class FingerprintRevokeChallengeClient extends RevokeChallengeClient<AidlSession
         }
     }
 
-    void onChallengeRevoked(int sensorId, int userId, long challenge) {
+    void onChallengeRevoked(long challenge) {
         final boolean success = challenge == mChallenge;
         mCallback.onClientFinished(FingerprintRevokeChallengeClient.this, success);
     }

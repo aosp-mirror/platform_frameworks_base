@@ -19,7 +19,7 @@
 
 #include <memory>
 
-#include "StringPool.h"
+#include "androidfw/StringPool.h"
 
 namespace aapt {
 
@@ -82,7 +82,7 @@ struct Macro;
 struct ValueTransformer {
   // `new_pool` is the new StringPool that newly created Values should use for string storing string
   // values.
-  explicit ValueTransformer(StringPool* new_pool);
+  explicit ValueTransformer(android::StringPool* new_pool);
   virtual ~ValueTransformer() = default;
 
   AAPT_TRANSFORM_ITEM(Id);
@@ -101,7 +101,7 @@ struct ValueTransformer {
   AAPT_TRANSFORM_VALUE(Macro);
 
  protected:
-  StringPool* const pool_;
+  android::StringPool* const pool_;
 };
 
 #undef AAPT_TRANSFORM_VALUE

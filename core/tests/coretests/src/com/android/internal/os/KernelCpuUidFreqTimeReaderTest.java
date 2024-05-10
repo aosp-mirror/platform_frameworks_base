@@ -18,13 +18,14 @@ package com.android.internal.os;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.FileUtils;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
@@ -34,6 +35,7 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -56,7 +58,11 @@ import java.util.Random;
  */
 @SmallTest
 @RunWith(Parameterized.class)
+@IgnoreUnderRavenwood(reason = "Needs kernel support")
 public class KernelCpuUidFreqTimeReaderTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private File mTestDir;
     private File mTestFile;
     private KernelCpuUidFreqTimeReader mReader;
@@ -100,63 +106,6 @@ public class KernelCpuUidFreqTimeReaderTest {
     }
 
     @Test
-    public void testReadFreqs_perClusterTimesNotAvailable() throws Exception {
-        final long[][] freqs = {
-                {1, 12, 123, 1234},
-                {1, 12, 123, 23, 123, 1234, 12345, 123456},
-                {1, 12, 123, 23, 123, 1234, 12345, 123456, 12, 123, 12345},
-                {1, 12, 123, 23, 2345, 234567}
-        };
-        final int[] numClusters = {2, 2, 3, 1};
-        final int[][] numFreqs = {{3, 6}, {4, 5}, {3, 5, 4}, {3}};
-        for (int i = 0; i < freqs.length; ++i) {
-            mReader = new KernelCpuUidFreqTimeReader(mTestFile.getAbsolutePath(),
-                    new KernelCpuProcStringReader(mTestFile.getAbsolutePath()), mBpfMapReader, false);
-            setCpuClusterFreqs(numClusters[i], numFreqs[i]);
-            setFreqs(freqs[i]);
-            long[] actualFreqs = mReader.readFreqs(mPowerProfile);
-            assertArrayEquals(freqs[i], actualFreqs);
-            final String errMsg = String.format("Freqs=%s, nClusters=%d, nFreqs=%s",
-                    Arrays.toString(freqs[i]), numClusters[i], Arrays.toString(numFreqs[i]));
-            assertFalse(errMsg, mReader.perClusterTimesAvailable());
-
-            // Verify that a second call won't re-read the freqs
-            clearFreqsAndData();
-            actualFreqs = mReader.readFreqs(mPowerProfile);
-            assertArrayEquals(freqs[i], actualFreqs);
-            assertFalse(errMsg, mReader.perClusterTimesAvailable());
-        }
-    }
-
-    @Test
-    public void testReadFreqs_perClusterTimesAvailable() throws Exception {
-        final long[][] freqs = {
-                {1, 12, 123, 1234},
-                {1, 12, 123, 23, 123, 1234, 12345, 123456},
-                {1, 12, 123, 23, 123, 1234, 12345, 123456, 12, 123, 12345, 1234567}
-        };
-        final int[] numClusters = {1, 2, 3};
-        final int[][] numFreqs = {{4}, {3, 5}, {3, 5, 4}};
-        for (int i = 0; i < freqs.length; ++i) {
-            mReader = new KernelCpuUidFreqTimeReader(mTestFile.getAbsolutePath(),
-                    new KernelCpuProcStringReader(mTestFile.getAbsolutePath()), mBpfMapReader, false);
-            setCpuClusterFreqs(numClusters[i], numFreqs[i]);
-            setFreqs(freqs[i]);
-            long[] actualFreqs = mReader.readFreqs(mPowerProfile);
-            assertArrayEquals(freqs[i], actualFreqs);
-            final String errMsg = String.format("Freqs=%s, nClusters=%d, nFreqs=%s",
-                    Arrays.toString(freqs[i]), numClusters[i], Arrays.toString(numFreqs[i]));
-            assertTrue(errMsg, mReader.perClusterTimesAvailable());
-
-            // Verify that a second call won't re-read the freqs
-            clearFreqsAndData();
-            actualFreqs = mReader.readFreqs(mPowerProfile);
-            assertArrayEquals(freqs[i], actualFreqs);
-            assertTrue(errMsg, mReader.perClusterTimesAvailable());
-        }
-    }
-
-    @Test
     public void testReadDelta() throws Exception {
         final long[] freqs = {110, 123, 145, 167, 289, 997};
         final long[][] times = increaseTime(new long[mUids.length][freqs.length]);
@@ -170,8 +119,6 @@ public class KernelCpuUidFreqTimeReaderTest {
 
         // Verify that readDelta also reads the frequencies if not already available.
         clearFreqsAndData();
-        long[] actualFreqs = mReader.readFreqs(mPowerProfile);
-        assertArrayEquals(freqs, actualFreqs);
 
         // Verify that a second call will only return deltas.
         mCallback.clear();
@@ -222,8 +169,6 @@ public class KernelCpuUidFreqTimeReaderTest {
 
         // Verify that readDelta also reads the frequencies if not already available.
         clearFreqsAndData();
-        long[] actualFreqs = mReader.readFreqs(mPowerProfile);
-        assertArrayEquals(freqs, actualFreqs);
 
         // Verify that a second call should still return absolute values
         mCallback.clear();

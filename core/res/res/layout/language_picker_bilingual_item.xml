@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/language_item"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp"
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+    >
+
+<LinearLayout
+    android:id="@+id/frame"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    >
+
+    <TextView
+        android:id="@+id/locale_native"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@drawable/language_picker_item_text_color_selector"
+        android:textSize="18sp"
+        android:textAppearance="?android:attr/textAppearanceListItem"
+        />
+
+    <TextView
+        android:id="@+id/locale_secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@drawable/language_picker_item_text_color2_selector"
+        android:textSize="16sp"
+        android:textAppearance="?android:attr/textAppearanceListItem"
+        />
+</LinearLayout>
+
+<ImageView
+    android:id="@+id/indicator"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentEnd="true"
+    android:adjustViewBounds="true"
+    android:layout_marginEnd="10dp"
+    android:layout_centerVertical="true"
+    android:src="@drawable/bilingual_language_item_selection_indicator"
+    android:visibility="gone" />
+</RelativeLayout>

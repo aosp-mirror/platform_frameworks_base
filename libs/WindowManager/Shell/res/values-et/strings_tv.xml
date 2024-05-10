@@ -24,7 +24,7 @@
     <string name="pip_move" msgid="158770205886688553">"Teisalda"</string>
     <string name="pip_expand" msgid="1051966011679297308">"Laienda"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"Ahenda"</string>
-    <string name="pip_edu_text" msgid="3672999496647508701">" Nuppude nägemiseks vajutage 2 korda nuppu "<annotation icon="home_icon">"AVAKUVA"</annotation></string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"Nuppude nägemiseks vajutage 2 korda nuppu "<annotation icon="home_icon">"AVAKUVA"</annotation></string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Menüü Pilt pildis."</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Teisalda vasakule"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Teisalda paremale"</string>

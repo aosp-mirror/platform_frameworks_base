@@ -18,15 +18,13 @@ package com.android.wm.shell.back;
 
 import static android.window.BackNavigationInfo.KEY_TRIGGER_BACK;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -39,35 +37,38 @@ import android.app.WindowConfiguration;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.HardwareBuffer;
+import android.hardware.input.InputManager;
+import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContentResolver;
-import android.testing.TestableContext;
 import android.testing.TestableLooper;
+import android.view.IRemoteAnimationRunner;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.BackEvent;
+import android.window.BackMotionEvent;
 import android.window.BackNavigationInfo;
-import android.window.IBackNaviAnimationController;
+import android.window.IBackAnimationFinishedCallback;
 import android.window.IOnBackInvokedCallback;
 
+import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
-import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.ShellSharedConstants;
+
 
 import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -84,33 +85,42 @@ public class BackAnimationControllerTest extends ShellTestCase {
 
     private static final String ANIMATION_ENABLED = "1";
     private final TestShellExecutor mShellExecutor = new TestShellExecutor();
+
     private ShellInit mShellInit;
-
-    @Rule
-    public TestableContext mContext =
-            new TestableContext(InstrumentationRegistry.getInstrumentation().getContext());
-
-    @Mock
-    private SurfaceControl.Transaction mTransaction;
-
     @Mock
     private IActivityTaskManager mActivityTaskManager;
 
     @Mock
-    private IOnBackInvokedCallback mIOnBackInvokedCallback;
+    private IOnBackInvokedCallback mAppCallback;
 
     @Mock
-    private IBackNaviAnimationController mIBackNaviAnimationController;
+    private IOnBackInvokedCallback mAnimatorCallback;
+
+    @Mock
+    private IBackAnimationFinishedCallback mBackAnimationFinishedCallback;
+
+    @Mock
+    private IRemoteAnimationRunner mBackAnimationRunner;
+
+    @Mock
+    private ShellController mShellController;
+
+    @Mock
+    private BackAnimationBackground mAnimationBackground;
+
+    @Mock
+    private InputManager mInputManager;
 
     private BackAnimationController mController;
-
-    private int mEventTime = 0;
     private TestableContentResolver mContentResolver;
     private TestableLooper mTestableLooper;
+
+    private ShellBackAnimationRegistry mShellBackAnimationRegistry;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mContext.addMockSystemService(InputManager.class, mInputManager);
         mContext.getApplicationInfo().privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
         mContentResolver = new TestableContentResolver(mContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
@@ -118,29 +128,38 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 ANIMATION_ENABLED);
         mTestableLooper = TestableLooper.get(this);
         mShellInit = spy(new ShellInit(mShellExecutor));
-        mController = new BackAnimationController(mShellInit,
-                mShellExecutor, new Handler(mTestableLooper.getLooper()), mTransaction,
-                mActivityTaskManager, mContext,
-                mContentResolver);
+        mShellBackAnimationRegistry =
+                new ShellBackAnimationRegistry(
+                        new CrossActivityBackAnimation(mContext, mAnimationBackground),
+                        new CrossTaskBackAnimation(mContext, mAnimationBackground),
+                        /* dialogCloseAnimation= */ null,
+                        new CustomizeActivityAnimation(mContext, mAnimationBackground),
+                        /* defaultBackToHomeAnimation= */ null);
+        mController =
+                new BackAnimationController(
+                        mShellInit,
+                        mShellController,
+                        mShellExecutor,
+                        new Handler(mTestableLooper.getLooper()),
+                        mActivityTaskManager,
+                        mContext,
+                        mContentResolver,
+                        mAnimationBackground,
+                        mShellBackAnimationRegistry);
         mShellInit.init();
-        mEventTime = 0;
         mShellExecutor.flushAll();
     }
 
-    private void createNavigationInfo(RemoteAnimationTarget topAnimationTarget,
-            SurfaceControl screenshotSurface,
-            HardwareBuffer hardwareBuffer,
-            int backType,
-            IOnBackInvokedCallback onBackInvokedCallback, boolean prepareAnimation) {
-        BackNavigationInfo.Builder builder = new BackNavigationInfo.Builder()
-                .setType(backType)
-                .setDepartingAnimationTarget(topAnimationTarget)
-                .setScreenshotSurface(screenshotSurface)
-                .setScreenshotBuffer(hardwareBuffer)
-                .setTaskWindowConfiguration(new WindowConfiguration())
-                .setOnBackNavigationDone(new RemoteCallback((bundle) -> {}))
-                .setOnBackInvokedCallback(onBackInvokedCallback)
-                .setPrepareAnimation(prepareAnimation);
+    private void createNavigationInfo(int backType,
+            boolean enableAnimation,
+            boolean isAnimationCallback) {
+        BackNavigationInfo.Builder builder =
+                new BackNavigationInfo.Builder()
+                        .setType(backType)
+                        .setOnBackNavigationDone(new RemoteCallback((bundle) -> {}))
+                        .setOnBackInvokedCallback(mAppCallback)
+                        .setPrepareRemoteAnimation(enableAnimation)
+                        .setAnimationCallback(isAnimationCallback);
 
         createNavigationInfo(builder);
     }
@@ -148,7 +167,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
     private void createNavigationInfo(BackNavigationInfo.Builder builder) {
         try {
             doReturn(builder.build()).when(mActivityTaskManager)
-                    .startBackNavigation(anyBoolean(), any(), any());
+                    .startBackNavigation(any(), any());
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();
         }
@@ -163,9 +182,11 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     private void triggerBackGesture() {
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-        doMotionEvent(MotionEvent.ACTION_MOVE, 0);
+        doStartEvents(0, 0);
         mController.setTriggerBack(true);
+    }
+
+    private void releaseBackGesture() {
         doMotionEvent(MotionEvent.ACTION_UP, 0);
     }
 
@@ -175,74 +196,91 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     @Test
-    @Ignore("b/207481538")
-    public void crossActivity_screenshotAttachedAndVisible() {
-        SurfaceControl screenshotSurface = new SurfaceControl();
-        HardwareBuffer hardwareBuffer = mock(HardwareBuffer.class);
-        createNavigationInfo(createAnimationTarget(), screenshotSurface, hardwareBuffer,
-                BackNavigationInfo.TYPE_CROSS_ACTIVITY, null, true);
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-        verify(mTransaction).setBuffer(screenshotSurface, hardwareBuffer);
-        verify(mTransaction).setVisibility(screenshotSurface, true);
-        verify(mTransaction).apply();
+    public void instantiateController_addExternalInterface() {
+        verify(mShellController, times(1)).addExternalInterface(
+                eq(ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION), any(), any());
     }
 
     @Test
-    public void crossActivity_surfaceMovesWithGesture() {
-        SurfaceControl screenshotSurface = new SurfaceControl();
-        HardwareBuffer hardwareBuffer = mock(HardwareBuffer.class);
-        RemoteAnimationTarget animationTarget = createAnimationTarget();
-        createNavigationInfo(animationTarget, screenshotSurface, hardwareBuffer,
-                BackNavigationInfo.TYPE_CROSS_ACTIVITY, null, true);
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
-        // b/207481538, we check that the surface is not moved for now, we can re-enable this once
-        // we implement the animation
-        verify(mTransaction, never()).setScale(eq(screenshotSurface), anyInt(), anyInt());
-        verify(mTransaction, never()).setPosition(
-                animationTarget.leash, 100, 100);
-        verify(mTransaction, atLeastOnce()).apply();
-    }
+    public void verifyNavigationFinishes() throws RemoteException {
+        final int[] testTypes =
+                new int[] {
+                    BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                    BackNavigationInfo.TYPE_CROSS_TASK,
+                    BackNavigationInfo.TYPE_CROSS_ACTIVITY,
+                    BackNavigationInfo.TYPE_DIALOG_CLOSE,
+                    BackNavigationInfo.TYPE_CALLBACK
+                };
 
-    @Test
-    public void verifyAnimationFinishes() {
-        RemoteAnimationTarget animationTarget = createAnimationTarget();
-        boolean[] backNavigationDone = new boolean[]{false};
-        boolean[] triggerBack = new boolean[]{false};
-        createNavigationInfo(new BackNavigationInfo.Builder()
-                .setDepartingAnimationTarget(animationTarget)
-                .setType(BackNavigationInfo.TYPE_CROSS_ACTIVITY)
-                .setOnBackNavigationDone(
-                        new RemoteCallback(result -> {
-                            backNavigationDone[0] = true;
-                            triggerBack[0] = result.getBoolean(KEY_TRIGGER_BACK);
-                        })));
-        triggerBackGesture();
-        assertTrue("Navigation Done callback not called", backNavigationDone[0]);
-        assertTrue("TriggerBack should have been true", triggerBack[0]);
+        for (int type : testTypes) {
+            registerAnimation(type);
+        }
+
+        for (int type : testTypes) {
+            final ResultListener result = new ResultListener();
+            createNavigationInfo(new BackNavigationInfo.Builder()
+                    .setType(type)
+                    .setOnBackInvokedCallback(mAppCallback)
+                    .setPrepareRemoteAnimation(true)
+                    .setOnBackNavigationDone(new RemoteCallback(result)));
+            triggerBackGesture();
+            simulateRemoteAnimationStart();
+            mShellExecutor.flushAll();
+            releaseBackGesture();
+            simulateRemoteAnimationFinished();
+            mShellExecutor.flushAll();
+
+            assertTrue("Navigation Done callback not called for "
+                    + BackNavigationInfo.typeToString(type), result.mBackNavigationDone);
+            assertTrue("TriggerBack should have been true", result.mTriggerBack);
+        }
     }
 
     @Test
     public void backToHome_dispatchesEvents() throws RemoteException {
-        mController.setBackToLauncherCallback(mIOnBackInvokedCallback);
-        RemoteAnimationTarget animationTarget = createAnimationTarget();
-        createNavigationInfo(animationTarget, null, null,
-                BackNavigationInfo.TYPE_RETURN_TO_HOME, null, true);
+        registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ false);
 
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
+        doStartEvents(0, 100);
 
-        // Check that back start and progress is dispatched when first move.
-        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
-        simulateRemoteAnimationStart(BackNavigationInfo.TYPE_RETURN_TO_HOME, animationTarget);
-        verify(mIOnBackInvokedCallback).onBackStarted();
-        ArgumentCaptor<BackEvent> backEventCaptor = ArgumentCaptor.forClass(BackEvent.class);
-        verify(mIOnBackInvokedCallback, atLeastOnce()).onBackProgressed(backEventCaptor.capture());
-        assertEquals(animationTarget, backEventCaptor.getValue().getDepartingAnimationTarget());
+        simulateRemoteAnimationStart();
+
+        verify(mAnimatorCallback).onBackStarted(any(BackMotionEvent.class));
+        verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
+        ArgumentCaptor<BackMotionEvent> backEventCaptor =
+                ArgumentCaptor.forClass(BackMotionEvent.class);
+        verify(mAnimatorCallback, atLeastOnce()).onBackProgressed(backEventCaptor.capture());
 
         // Check that back invocation is dispatched.
         mController.setTriggerBack(true);   // Fake trigger back
         doMotionEvent(MotionEvent.ACTION_UP, 0);
-        verify(mIOnBackInvokedCallback).onBackInvoked();
+        verify(mAnimatorCallback).onBackInvoked();
+    }
+
+    @Test
+    public void backToHomeWithAnimationCallback_dispatchesEvents() throws RemoteException {
+        registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ true);
+
+        // Check that back start and progress is dispatched when first move.
+        doStartEvents(0, 100);
+
+        simulateRemoteAnimationStart();
+
+        verify(mAnimatorCallback).onBackStarted(any(BackMotionEvent.class));
+        verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
+        ArgumentCaptor<BackMotionEvent> backEventCaptor =
+                ArgumentCaptor.forClass(BackMotionEvent.class);
+        verify(mAnimatorCallback, atLeastOnce()).onBackProgressed(backEventCaptor.capture());
+
+        // Check that back invocation is dispatched.
+        mController.setTriggerBack(true);   // Fake trigger back
+        doMotionEvent(MotionEvent.ACTION_UP, 0);
+        verify(mAnimatorCallback).onBackInvoked();
     }
 
     @Test
@@ -250,124 +288,343 @@ public class BackAnimationControllerTest extends ShellTestCase {
         // Toggle the setting off
         Settings.Global.putString(mContentResolver, Settings.Global.ENABLE_BACK_ANIMATION, "0");
         ShellInit shellInit = new ShellInit(mShellExecutor);
-        mController = new BackAnimationController(shellInit,
-                mShellExecutor, new Handler(mTestableLooper.getLooper()), mTransaction,
-                mActivityTaskManager, mContext,
-                mContentResolver);
+        mController =
+                new BackAnimationController(
+                        shellInit,
+                        mShellController,
+                        mShellExecutor,
+                        new Handler(mTestableLooper.getLooper()),
+                        mActivityTaskManager,
+                        mContext,
+                        mContentResolver,
+                        mAnimationBackground,
+                        mShellBackAnimationRegistry);
         shellInit.init();
-        mController.setBackToLauncherCallback(mIOnBackInvokedCallback);
+        registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
 
-        RemoteAnimationTarget animationTarget = createAnimationTarget();
-        IOnBackInvokedCallback appCallback = mock(IOnBackInvokedCallback.class);
-        ArgumentCaptor<BackEvent> backEventCaptor = ArgumentCaptor.forClass(BackEvent.class);
-        createNavigationInfo(animationTarget, null, null,
-                BackNavigationInfo.TYPE_RETURN_TO_HOME, appCallback, false);
+        ArgumentCaptor<BackMotionEvent> backEventCaptor =
+                ArgumentCaptor.forClass(BackMotionEvent.class);
+
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ false,
+                /* isAnimationCallback = */ false);
 
         triggerBackGesture();
+        releaseBackGesture();
 
-        verify(appCallback, never()).onBackStarted();
-        verify(appCallback, never()).onBackProgressed(backEventCaptor.capture());
-        verify(appCallback, times(1)).onBackInvoked();
+        verify(mAppCallback, times(1)).onBackInvoked();
 
-        verify(mIOnBackInvokedCallback, never()).onBackStarted();
-        verify(mIOnBackInvokedCallback, never()).onBackProgressed(backEventCaptor.capture());
-        verify(mIOnBackInvokedCallback, never()).onBackInvoked();
+        verify(mAnimatorCallback, never()).onBackStarted(any());
+        verify(mAnimatorCallback, never()).onBackProgressed(backEventCaptor.capture());
+        verify(mAnimatorCallback, never()).onBackInvoked();
+        verify(mBackAnimationRunner, never()).onAnimationStart(
+                anyInt(), any(), any(), any(), any());
     }
 
     @Test
-    public void ignoresGesture_transitionInProgress() throws RemoteException {
-        mController.setBackToLauncherCallback(mIOnBackInvokedCallback);
-        RemoteAnimationTarget animationTarget = createAnimationTarget();
-        createNavigationInfo(animationTarget, null, null,
-                BackNavigationInfo.TYPE_RETURN_TO_HOME, null, true);
+    public void gestureQueued_WhenPreviousTransitionHasNotYetEnded() throws RemoteException {
+        registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ false);
 
         triggerBackGesture();
-        simulateRemoteAnimationStart(BackNavigationInfo.TYPE_RETURN_TO_HOME, animationTarget);
+        simulateRemoteAnimationStart();
+        releaseBackGesture();
+
         // Check that back invocation is dispatched.
-        verify(mIOnBackInvokedCallback).onBackInvoked();
+        verify(mAnimatorCallback).onBackInvoked();
+        verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
 
-        reset(mIOnBackInvokedCallback);
-        // Verify that we prevent animation from restarting if another gestures happens before
-        // the previous transition is finished.
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-        verifyNoMoreInteractions(mIOnBackInvokedCallback);
-        mController.onBackToLauncherAnimationFinished();
+        reset(mAnimatorCallback);
+        reset(mBackAnimationRunner);
 
-        // Verify that more events from a rejected swipe cannot start animation.
-        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
-        doMotionEvent(MotionEvent.ACTION_UP, 0);
-        verifyNoMoreInteractions(mIOnBackInvokedCallback);
+        // Verify that we prevent any interaction with the animator callback in case a new gesture
+        // starts while the current back animation has not ended, instead the gesture is queued
+        triggerBackGesture();
+        verifyNoMoreInteractions(mAnimatorCallback);
+
+        // Finish previous back navigation.
+        simulateRemoteAnimationFinished();
+
+        // Verify that releasing the gesture causes back key to be injected
+        releaseBackGesture();
+        verify(mInputManager, times(2))
+                .injectInputEvent(any(KeyEvent.class), any(Integer.class));
 
         // Verify that we start accepting gestures again once transition finishes.
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
-        simulateRemoteAnimationStart(BackNavigationInfo.TYPE_RETURN_TO_HOME, animationTarget);
-        verify(mIOnBackInvokedCallback).onBackStarted();
+        doStartEvents(0, 100);
+
+        simulateRemoteAnimationStart();
+        verify(mAnimatorCallback).onBackStarted(any());
+        verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void queuedFinishedGesture_RunsAfterPreviousTransitionEnded() throws RemoteException {
+        registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ false);
+
+        triggerBackGesture();
+        simulateRemoteAnimationStart();
+        releaseBackGesture();
+
+        // Check that back invocation is dispatched.
+        verify(mAnimatorCallback).onBackInvoked();
+        verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
+
+        reset(mAnimatorCallback);
+        reset(mBackAnimationRunner);
+
+        // Verify that we prevent any interaction with the animator callback in case a new gesture
+        // starts while the current back animation has not ended, instead the gesture is queued
+        triggerBackGesture();
+        releaseBackGesture();
+        verifyNoMoreInteractions(mAnimatorCallback);
+
+        // Finish previous back navigation.
+        simulateRemoteAnimationFinished();
+
+        // Verify that back key press is injected after previous back navigation has ended
+        verify(mInputManager, times(2))
+                .injectInputEvent(any(KeyEvent.class), any(Integer.class));
+
+        // Verify that we start accepting gestures again once transition finishes.
+        doStartEvents(0, 100);
+
+        simulateRemoteAnimationStart();
+        verify(mAnimatorCallback).onBackStarted(any());
+        verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
     }
 
     @Test
     public void acceptsGesture_transitionTimeout() throws RemoteException {
-        mController.setBackToLauncherCallback(mIOnBackInvokedCallback);
-        RemoteAnimationTarget animationTarget = createAnimationTarget();
-        createNavigationInfo(animationTarget, null, null,
-                BackNavigationInfo.TYPE_RETURN_TO_HOME, null, true);
+        registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ false);
+
+        // In case it is still running in animation.
+        doNothing().when(mAnimatorCallback).onBackInvoked();
 
         triggerBackGesture();
-        simulateRemoteAnimationStart(BackNavigationInfo.TYPE_RETURN_TO_HOME, animationTarget);
-        reset(mIOnBackInvokedCallback);
+        simulateRemoteAnimationStart();
+        mShellExecutor.flushAll();
+
+        releaseBackGesture();
 
         // Simulate transition timeout.
         mShellExecutor.flushAll();
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
-        simulateRemoteAnimationStart(BackNavigationInfo.TYPE_RETURN_TO_HOME, animationTarget);
-        verify(mIOnBackInvokedCallback).onBackStarted();
-    }
+        reset(mAnimatorCallback);
 
+        doStartEvents(0, 100);
+        simulateRemoteAnimationStart();
+        verify(mAnimatorCallback).onBackStarted(any());
+    }
 
     @Test
     public void cancelBackInvokeWhenLostFocus() throws RemoteException {
-        mController.setBackToLauncherCallback(mIOnBackInvokedCallback);
-        RemoteAnimationTarget animationTarget = createAnimationTarget();
+        registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
 
-        createNavigationInfo(animationTarget, null, null,
-                BackNavigationInfo.TYPE_RETURN_TO_HOME, null, true);
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ false);
 
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-        // Check that back start and progress is dispatched when first move.
-        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
-        simulateRemoteAnimationStart(BackNavigationInfo.TYPE_RETURN_TO_HOME, animationTarget);
-        verify(mIOnBackInvokedCallback).onBackStarted();
+        doStartEvents(0, 100);
+
+        simulateRemoteAnimationStart();
+        verify(mAnimatorCallback).onBackStarted(any());
+        verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
 
         // Check that back invocation is dispatched.
         mController.setTriggerBack(true);   // Fake trigger back
 
         // In case the focus has been changed.
-        IBinder token = mock(IBinder.class);
-        mController.mFocusObserver.focusLost(token);
+        mController.mNavigationObserver.sendResult(null);
         mShellExecutor.flushAll();
-        verify(mIOnBackInvokedCallback).onBackCancelled();
+        verify(mAnimatorCallback).onBackCancelled();
 
         // No more back invoke.
         doMotionEvent(MotionEvent.ACTION_UP, 0);
-        verify(mIOnBackInvokedCallback, never()).onBackInvoked();
+        verify(mAnimatorCallback, never()).onBackInvoked();
+    }
+
+    @Test
+    public void animationNotDefined() throws RemoteException {
+        final int[] testTypes =
+                new int[] {
+                    BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                    BackNavigationInfo.TYPE_CROSS_TASK,
+                    BackNavigationInfo.TYPE_CROSS_ACTIVITY,
+                    BackNavigationInfo.TYPE_DIALOG_CLOSE
+                };
+
+        for (int type : testTypes) {
+            unregisterAnimation(type);
+        }
+
+        for (int type : testTypes) {
+            final ResultListener result = new ResultListener();
+            createNavigationInfo(new BackNavigationInfo.Builder()
+                    .setType(type)
+                    .setOnBackInvokedCallback(mAppCallback)
+                    .setPrepareRemoteAnimation(true)
+                    .setOnBackNavigationDone(new RemoteCallback(result)));
+            triggerBackGesture();
+            simulateRemoteAnimationStart();
+            mShellExecutor.flushAll();
+
+            releaseBackGesture();
+            mShellExecutor.flushAll();
+
+            assertTrue("Navigation Done callback not called for "
+                    + BackNavigationInfo.typeToString(type), result.mBackNavigationDone);
+            assertTrue("TriggerBack should have been true", result.mTriggerBack);
+        }
+
+        verify(mAppCallback, never()).onBackStarted(any());
+        verify(mAppCallback, never()).onBackProgressed(any());
+        verify(mAppCallback, times(testTypes.length)).onBackInvoked();
+
+        verify(mAnimatorCallback, never()).onBackStarted(any());
+        verify(mAnimatorCallback, never()).onBackProgressed(any());
+        verify(mAnimatorCallback, never()).onBackInvoked();
+    }
+
+    @Test
+    public void callbackShouldDeliverProgress() throws RemoteException {
+        registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
+
+        final int type = BackNavigationInfo.TYPE_CALLBACK;
+        final ResultListener result = new ResultListener();
+        createNavigationInfo(new BackNavigationInfo.Builder()
+                .setType(type)
+                .setOnBackInvokedCallback(mAppCallback)
+                .setOnBackNavigationDone(new RemoteCallback(result)));
+        triggerBackGesture();
+        mShellExecutor.flushAll();
+        releaseBackGesture();
+        mShellExecutor.flushAll();
+
+        assertTrue("Navigation Done callback not called for "
+                + BackNavigationInfo.typeToString(type), result.mBackNavigationDone);
+        assertTrue("TriggerBack should have been true", result.mTriggerBack);
+
+        verify(mAppCallback, times(1)).onBackStarted(any());
+        verify(mAppCallback, times(1)).onBackProgressed(any());
+        verify(mAppCallback, times(1)).onBackInvoked();
+
+        verify(mAnimatorCallback, never()).onBackStarted(any());
+        verify(mAnimatorCallback, never()).onBackProgressed(any());
+        verify(mAnimatorCallback, never()).onBackInvoked();
+    }
+
+    @Test
+    public void testBackToActivity() throws RemoteException {
+        final CrossActivityBackAnimation animation = new CrossActivityBackAnimation(mContext,
+                mAnimationBackground);
+        verifySystemBackBehavior(BackNavigationInfo.TYPE_CROSS_ACTIVITY, animation.getRunner());
+    }
+
+    @Test
+    public void testBackToTask() throws RemoteException {
+        final CrossTaskBackAnimation animation = new CrossTaskBackAnimation(mContext,
+                mAnimationBackground);
+        verifySystemBackBehavior(BackNavigationInfo.TYPE_CROSS_TASK, animation.getRunner());
+    }
+
+    private void verifySystemBackBehavior(int type, BackAnimationRunner animation)
+            throws RemoteException {
+        final BackAnimationRunner animationRunner = spy(animation);
+        final IRemoteAnimationRunner runner = spy(animationRunner.getRunner());
+        final IOnBackInvokedCallback callback = spy(animationRunner.getCallback());
+
+        // Set up the monitoring objects.
+        doNothing().when(runner).onAnimationStart(anyInt(), any(), any(), any(), any());
+        doReturn(runner).when(animationRunner).getRunner();
+        doReturn(callback).when(animationRunner).getCallback();
+
+        mController.registerAnimation(type, animationRunner);
+
+        createNavigationInfo(type,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ false);
+
+        // Check that back start and progress is dispatched when first move.
+        doStartEvents(0, 100);
+
+        simulateRemoteAnimationStart();
+
+        verify(callback).onBackStarted(any(BackMotionEvent.class));
+        verify(animationRunner).startAnimation(any(), any(), any(), any());
+
+        // Check that back invocation is dispatched.
+        mController.setTriggerBack(true);   // Fake trigger back
+        doMotionEvent(MotionEvent.ACTION_UP, 0);
+        verify(callback).onBackInvoked();
     }
 
     private void doMotionEvent(int actionDown, int coordinate) {
-        mController.onMotionEvent(
-                coordinate, coordinate,
-                actionDown,
-                BackEvent.EDGE_LEFT);
-        mEventTime += 10;
+        doMotionEvent(actionDown, coordinate, 0);
     }
 
-    private void simulateRemoteAnimationStart(int type, RemoteAnimationTarget animationTarget)
-            throws RemoteException {
-        if (mController.mIBackAnimationRunner != null) {
-            final RemoteAnimationTarget[] targets = new RemoteAnimationTarget[]{animationTarget};
-            mController.mIBackAnimationRunner.onAnimationStart(mIBackNaviAnimationController, type,
-                    targets, null, null);
+    private void doMotionEvent(int actionDown, int coordinate, float velocity) {
+        mController.onMotionEvent(
+                /* touchX */ coordinate,
+                /* touchY */ coordinate,
+                /* velocityX = */ velocity,
+                /* velocityY = */ velocity,
+                /* keyAction */ actionDown,
+                /* swipeEdge */ BackEvent.EDGE_LEFT);
+    }
+
+    /**
+     * Simulate event sequence that starts a back navigation.
+     */
+    private void doStartEvents(int startX, int moveX) {
+        doMotionEvent(MotionEvent.ACTION_DOWN, startX);
+        mController.onPilferPointers();
+        doMotionEvent(MotionEvent.ACTION_MOVE, moveX);
+    }
+
+    private void simulateRemoteAnimationStart() throws RemoteException {
+        RemoteAnimationTarget animationTarget = createAnimationTarget();
+        RemoteAnimationTarget[] targets = new RemoteAnimationTarget[]{animationTarget};
+        if (mController.mBackAnimationAdapter != null) {
+            mController.mBackAnimationAdapter.getRunner().onAnimationStart(
+                    targets, null, null, mBackAnimationFinishedCallback);
             mShellExecutor.flushAll();
+        }
+    }
+
+    private void simulateRemoteAnimationFinished() {
+        mController.onBackAnimationFinished();
+        mController.finishBackNavigation(/*triggerBack*/ true);
+    }
+
+    private void registerAnimation(int type) {
+        mController.registerAnimation(
+                type,
+                new BackAnimationRunner(
+                        mAnimatorCallback,
+                        mBackAnimationRunner,
+                        mContext));
+    }
+
+    private void unregisterAnimation(int type) {
+        mController.unregisterAnimation(type);
+    }
+
+    private static class ResultListener implements RemoteCallback.OnResultListener {
+        boolean mBackNavigationDone = false;
+        boolean mTriggerBack = false;
+
+        @Override
+        public void onResult(@Nullable Bundle result) {
+            mBackNavigationDone = true;
+            mTriggerBack = result.getBoolean(KEY_TRIGGER_BACK);
         }
     }
 }

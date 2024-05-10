@@ -16,6 +16,9 @@
 
 package com.android.server.policy;
 
+import static android.app.AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -37,7 +40,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PackageTagsList;
 import android.os.Process;
+import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.permission.flags.Flags;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
 import android.text.TextUtils;
@@ -45,11 +50,11 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.function.HeptFunction;
+import com.android.internal.util.function.DodecFunction;
+import com.android.internal.util.function.HexConsumer;
 import com.android.internal.util.function.HexFunction;
+import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
-import com.android.internal.util.function.QuintConsumer;
-import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.UndecFunction;
 import com.android.server.LocalServices;
 
@@ -68,6 +73,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     private static final String ACTIVITY_RECOGNITION_TAGS =
             "android:activity_recognition_allow_listed_tags";
     private static final String ACTIVITY_RECOGNITION_TAGS_SEPARATOR = ";";
+    private static final boolean SYSPROP_HOTWORD_DETECTION_SERVICE_REQUIRED =
+            SystemProperties.getBoolean("ro.hotword.detection_service_required", false);
 
     @NonNull
     private final Object mLock = new Object();
@@ -199,16 +206,34 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         }
     }
 
-    private static boolean isHotwordDetectionServiceRequired(PackageManager pm) {
-        // Usage of the HotwordDetectionService won't be enforced until a later release.
-        return false;
+    /**
+     * @return the op that should be noted for the voice activations of the app by detected hotword.
+     */
+    public static int getVoiceActivationOp() {
+        if (Flags.voiceActivationPermissionApis()) {
+            return OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
+        }
+        return OP_RECORD_AUDIO_HOTWORD;
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean isHotwordDetectionServiceRequired(PackageManager pm) {
+        // The HotwordDetectionService APIs aren't ready yet for Auto or TV.
+        if (pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
+                || pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+            return false;
+        }
+        return SYSPROP_HOTWORD_DETECTION_SERVICE_REQUIRED;
     }
 
     @Override
     public int checkOperation(int code, int uid, String packageName,
-            @Nullable String attributionTag, boolean raw,
-            QuintFunction<Integer, Integer, String, String, Boolean, Integer> superImpl) {
-        return superImpl.apply(code, resolveUid(code, uid), packageName, attributionTag, raw);
+            @Nullable String attributionTag, int virtualDeviceId, boolean raw,
+            HexFunction<Integer, Integer, String, String, Integer, Boolean, Integer> superImpl) {
+        return superImpl.apply(code, resolveUid(code, uid), packageName, attributionTag,
+                virtualDeviceId, raw);
     }
 
     @Override
@@ -219,12 +244,13 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
 
     @Override
     public SyncNotedAppOp noteOperation(int code, int uid, @Nullable String packageName,
-            @Nullable String attributionTag, boolean shouldCollectAsyncNotedOp, @Nullable
-            String message, boolean shouldCollectMessage, @NonNull HeptFunction<Integer, Integer,
-                    String, String, Boolean, String, Boolean, SyncNotedAppOp> superImpl) {
+            @Nullable String attributionTag, int virtualDeviceId,
+            boolean shouldCollectAsyncNotedOp, @Nullable String message,
+            boolean shouldCollectMessage, @NonNull OctFunction<Integer, Integer, String, String,
+                    Integer, Boolean, String, Boolean, SyncNotedAppOp> superImpl) {
         return superImpl.apply(resolveDatasourceOp(code, uid, packageName, attributionTag),
-                resolveUid(code, uid), packageName, attributionTag, shouldCollectAsyncNotedOp,
-                message, shouldCollectMessage);
+                resolveUid(code, uid), packageName, attributionTag, virtualDeviceId,
+                shouldCollectAsyncNotedOp, message, shouldCollectMessage);
     }
 
     @Override
@@ -241,16 +267,16 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
 
     @Override
     public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
-            @Nullable String packageName, @Nullable String attributionTag,
+            @Nullable String packageName, @Nullable String attributionTag, int virtualDeviceId,
             boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
             boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
-            int attributionChainId, @NonNull UndecFunction<IBinder, Integer, Integer, String,
-                    String, Boolean, Boolean, String, Boolean, Integer, Integer,
-            SyncNotedAppOp> superImpl) {
+            int attributionChainId, @NonNull DodecFunction<IBinder, Integer, Integer, String,
+                    String, Integer, Boolean, Boolean, String, Boolean, Integer, Integer,
+                    SyncNotedAppOp> superImpl) {
         return superImpl.apply(token, resolveDatasourceOp(code, uid, packageName, attributionTag),
-                resolveUid(code, uid), packageName, attributionTag, startIfModeDefault,
-                shouldCollectAsyncNotedOp, message, shouldCollectMessage, attributionFlags,
-                attributionChainId);
+                resolveUid(code, uid), packageName, attributionTag, virtualDeviceId,
+                startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                attributionFlags, attributionChainId);
     }
 
     @Override
@@ -270,10 +296,10 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
 
     @Override
     public void finishOperation(IBinder clientId, int code, int uid, String packageName,
-            String attributionTag,
-            @NonNull QuintConsumer<IBinder, Integer, Integer, String, String> superImpl) {
+            String attributionTag, int virtualDeviceId,
+            @NonNull HexConsumer<IBinder, Integer, Integer, String, String, Integer> superImpl) {
         superImpl.accept(clientId, resolveDatasourceOp(code, uid, packageName, attributionTag),
-                resolveUid(code, uid), packageName, attributionTag);
+                resolveUid(code, uid), packageName, attributionTag, virtualDeviceId);
     }
 
     @Override
@@ -311,10 +337,10 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         }
     }
 
-
     private int resolveDatasourceOp(int code, int uid, @NonNull String packageName,
             @Nullable String attributionTag) {
         code = resolveRecordAudioOp(code, uid);
+        code = resolveSandboxedServiceOp(code, uid);
         if (attributionTag == null) {
             return code;
         }
@@ -438,6 +464,28 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         return code;
     }
 
+    private int resolveSandboxedServiceOp(int code, int uid) {
+        if (!Process.isIsolated(uid) // simple check which fails-fast for the common case
+                 || !(code == AppOpsManager.OP_RECORD_AUDIO || code == AppOpsManager.OP_CAMERA)) {
+            return code;
+        }
+        final HotwordDetectionServiceIdentity hotwordDetectionServiceIdentity =
+                mVoiceInteractionManagerInternal.getHotwordDetectionServiceIdentity();
+        if (hotwordDetectionServiceIdentity != null
+                && uid == hotwordDetectionServiceIdentity.getIsolatedUid()) {
+            // Upgrade the op such that no indicators is shown for camera or audio service. This
+            // will bypass the permission checking for the original OP_RECORD_AUDIO and OP_CAMERA.
+            switch (code) {
+                case AppOpsManager.OP_RECORD_AUDIO:
+                    return AppOpsManager.OP_RECORD_AUDIO_SANDBOXED;
+                case AppOpsManager.OP_CAMERA:
+                    return AppOpsManager.OP_CAMERA_SANDBOXED;
+            }
+        }
+        return code;
+    }
+
+
     private int resolveUid(int code, int uid) {
         // The HotwordDetectionService is an isolated service, which ordinarily cannot hold
         // permissions. So we allow it to assume the owning package identity for certain
@@ -446,7 +494,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         // package, so we don't need to modify it.
         if (Process.isIsolated(uid) // simple check which fails-fast for the common case
                 && (code == AppOpsManager.OP_RECORD_AUDIO
-                || code == AppOpsManager.OP_RECORD_AUDIO_HOTWORD)) {
+                || code == AppOpsManager.OP_RECORD_AUDIO_HOTWORD
+                || code == AppOpsManager.OP_CAMERA)) {
             final HotwordDetectionServiceIdentity hotwordDetectionServiceIdentity =
                     mVoiceInteractionManagerInternal.getHotwordDetectionServiceIdentity();
             if (hotwordDetectionServiceIdentity != null

@@ -16,22 +16,21 @@
 
 #include "io/ZipArchive.h"
 
-#include "utils/FileMap.h"
-#include "ziparchive/zip_archive.h"
-
-#include "Source.h"
+#include "androidfw/Source.h"
 #include "trace/TraceBuffer.h"
 #include "util/Files.h"
 #include "util/Util.h"
+#include "utils/FileMap.h"
+#include "ziparchive/zip_archive.h"
 
 using ::android::StringPiece;
 
 namespace aapt {
 namespace io {
 
-ZipFile::ZipFile(ZipArchiveHandle handle, const ZipEntry& entry,
-                 const Source& source)
-    : zip_handle_(handle), zip_entry_(entry), source_(source) {}
+ZipFile::ZipFile(ZipArchiveHandle handle, const ZipEntry& entry, const android::Source& source)
+    : zip_handle_(handle), zip_entry_(entry), source_(source) {
+}
 
 std::unique_ptr<IData> ZipFile::OpenAsData() {
   // The file will fail to be mmaped if it is empty
@@ -64,16 +63,24 @@ std::unique_ptr<IData> ZipFile::OpenAsData() {
   }
 }
 
-std::unique_ptr<io::InputStream> ZipFile::OpenInputStream() {
+std::unique_ptr<android::InputStream> ZipFile::OpenInputStream() {
   return OpenAsData();
 }
 
-const Source& ZipFile::GetSource() const {
+const android::Source& ZipFile::GetSource() const {
   return source_;
 }
 
 bool ZipFile::WasCompressed() {
   return zip_entry_.method != kCompressStored;
+}
+
+bool ZipFile::GetModificationTime(struct tm* buf) const {
+  if (buf == nullptr) {
+    return false;
+  }
+  *buf = zip_entry_.GetModificationTime();
+  return true;
 }
 
 ZipFileCollectionIterator::ZipFileCollectionIterator(
@@ -92,8 +99,8 @@ IFile* ZipFileCollectionIterator::Next() {
 
 ZipFileCollection::ZipFileCollection() : handle_(nullptr) {}
 
-std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
-    const StringPiece& path, std::string* out_error) {
+std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(StringPiece path,
+                                                             std::string* out_error) {
   TRACE_CALL();
   constexpr static const int32_t kEmptyArchive = -6;
 
@@ -132,7 +139,7 @@ std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
     }
 
     std::unique_ptr<IFile> file = util::make_unique<ZipFile>(collection->handle_, zip_data,
-        Source(zip_entry_path, path.to_string()));
+                                                             android::Source(zip_entry_path, path));
     collection->files_by_name_[zip_entry_path] = file.get();
     collection->files_.push_back(std::move(file));
   }
@@ -145,8 +152,8 @@ std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
   return collection;
 }
 
-IFile* ZipFileCollection::FindFile(const StringPiece& path) {
-  auto iter = files_by_name_.find(path.to_string());
+IFile* ZipFileCollection::FindFile(StringPiece path) {
+  auto iter = files_by_name_.find(path);
   if (iter != files_by_name_.end()) {
     return iter->second;
   }

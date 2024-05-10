@@ -19,7 +19,6 @@ package android.app;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -37,8 +36,6 @@ import android.os.Parcel;
 import android.view.DisplayCutout;
 import android.window.WindowContainerToken;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -47,6 +44,12 @@ import java.util.Objects;
  */
 public class TaskInfo {
     private static final String TAG = "TaskInfo";
+
+    /**
+     * The value to use when the property has not a specific value.
+     * @hide
+     */
+    public static final int PROPERTY_VALUE_UNSET = -1;
 
     /**
      * The id of the user the task was running as if this is a leaf task. The id of the current
@@ -188,6 +191,14 @@ public class TaskInfo {
     public int launchIntoPipHostTaskId;
 
     /**
+     * The task id of the parent Task of the launch-into-pip Activity, i.e., if task have more than
+     * one activity it will create new task for this activity, this id is the origin task id and
+     * the pip activity will be reparent to origin task when it exit pip mode.
+     * @hide
+     */
+    public int lastParentTaskIdBeforePip;
+
+    /**
      * The {@link Rect} copied from {@link DisplayCutout#getSafeInsets()} if the cutout is not of
      * (LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES, LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS),
      * {@code null} otherwise.
@@ -208,18 +219,6 @@ public class TaskInfo {
      */
     @Nullable
     public ActivityInfo topActivityInfo;
-
-    /**
-     * Whether the direct top activity is in size compat mode on foreground.
-     * @hide
-     */
-    public boolean topActivityInSizeCompat;
-
-    /**
-     * Whether the direct top activity is eligible for letterbox education.
-     * @hide
-     */
-    public boolean topActivityEligibleForLetterboxEducation;
 
     /**
      * Whether this task is resizable. Unlike {@link #resizeMode} (which is what the top activity
@@ -280,55 +279,28 @@ public class TaskInfo {
     public boolean isVisible;
 
     /**
+     * Whether this task is request visible.
+     * @hide
+     */
+    public boolean isVisibleRequested;
+
+    /**
      * Whether this task is sleeping due to sleeping display.
      * @hide
      */
     public boolean isSleeping;
 
     /**
-     * Camera compat control isn't shown because it's not requested by heuristics.
+     * Whether the top activity fillsParent() is false
      * @hide
      */
-    public static final int CAMERA_COMPAT_CONTROL_HIDDEN = 0;
+    public boolean isTopActivityTransparent;
 
     /**
-     * Camera compat control is shown with the treatment suggested.
+     * Encapsulate specific App Compat information.
      * @hide
      */
-    public static final int CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED = 1;
-
-    /**
-     * Camera compat control is shown to allow reverting the applied treatment.
-     * @hide
-     */
-    public static final int CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED = 2;
-
-    /**
-     * Camera compat control is dismissed by user.
-     * @hide
-     */
-    public static final int CAMERA_COMPAT_CONTROL_DISMISSED = 3;
-
-    /**
-     * Enum for the Camera app compat control states.
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "CAMERA_COMPAT_CONTROL_" }, value = {
-            CAMERA_COMPAT_CONTROL_HIDDEN,
-            CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED,
-            CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED,
-            CAMERA_COMPAT_CONTROL_DISMISSED,
-    })
-    public @interface CameraCompatControlState {};
-
-    /**
-     * State of the Camera app compat control which is used to correct stretched viewfinder
-     * in apps that don't handle all possible configurations and changes between them correctly.
-     * @hide
-     */
-    @CameraCompatControlState
-    public int cameraCompatControlState = CAMERA_COMPAT_CONTROL_HIDDEN;
+    public AppCompatTaskInfo appCompatTaskInfo = AppCompatTaskInfo.create();
 
     TaskInfo() {
         // Do nothing
@@ -390,18 +362,6 @@ public class TaskInfo {
         launchCookies.add(cookie);
     }
 
-    /** @hide */
-    public boolean hasCameraCompatControl() {
-        return cameraCompatControlState != CAMERA_COMPAT_CONTROL_HIDDEN
-                && cameraCompatControlState != CAMERA_COMPAT_CONTROL_DISMISSED;
-    }
-
-    /** @hide */
-    public boolean hasCompatUI() {
-        return hasCameraCompatControl() || topActivityInSizeCompat
-                || topActivityEligibleForLetterboxEducation;
-    }
-
     /**
      * @return {@code true} if this task contains the launch cookie.
      * @hide
@@ -427,6 +387,15 @@ public class TaskInfo {
     }
 
     /**
+     * @return The id of the display this task is associated with.
+     * @hide
+     */
+    @TestApi
+    public int getDisplayId() {
+        return displayId;
+    }
+
+    /**
      * Returns {@code true} if the parameters that are important for task organizers are equal
      * between this {@link TaskInfo} and {@param that}.
      * @hide
@@ -444,12 +413,17 @@ public class TaskInfo {
                 && Objects.equals(shouldDockBigOverlays, that.shouldDockBigOverlays)
                 && Objects.equals(displayCutoutInsets, that.displayCutoutInsets)
                 && getWindowingMode() == that.getWindowingMode()
+                && configuration.uiMode == that.configuration.uiMode
                 && Objects.equals(taskDescription, that.taskDescription)
                 && isFocused == that.isFocused
                 && isVisible == that.isVisible
+                && isVisibleRequested == that.isVisibleRequested
                 && isSleeping == that.isSleeping
                 && Objects.equals(mTopActivityLocusId, that.mTopActivityLocusId)
-                && parentTaskId == that.parentTaskId;
+                && parentTaskId == that.parentTaskId
+                && Objects.equals(topActivity, that.topActivity)
+                && isTopActivityTransparent == that.isTopActivityTransparent
+                && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo);
     }
 
     /**
@@ -460,18 +434,19 @@ public class TaskInfo {
         if (that == null) {
             return false;
         }
+        final boolean hasCompatUI = appCompatTaskInfo.hasCompatUI();
         return displayId == that.displayId
                 && taskId == that.taskId
-                && topActivityInSizeCompat == that.topActivityInSizeCompat
-                && topActivityEligibleForLetterboxEducation
-                    == that.topActivityEligibleForLetterboxEducation
-                && cameraCompatControlState == that.cameraCompatControlState
+                && isFocused == that.isFocused
+                && isTopActivityTransparent == that.isTopActivityTransparent
+                && appCompatTaskInfo.equalsForCompatUi(that.appCompatTaskInfo)
                 // Bounds are important if top activity has compat controls.
-                && (!hasCompatUI() || configuration.windowConfiguration.getBounds()
+                && (!hasCompatUI || configuration.windowConfiguration.getBounds()
                     .equals(that.configuration.windowConfiguration.getBounds()))
-                && (!hasCompatUI() || configuration.getLayoutDirection()
+                && (!hasCompatUI || configuration.getLayoutDirection()
                     == that.configuration.getLayoutDirection())
-                && (!hasCompatUI() || isVisible == that.isVisible);
+                && (!hasCompatUI || configuration.uiMode == that.configuration.uiMode)
+                && (!hasCompatUI || isVisible == that.isVisible);
     }
 
     /**
@@ -500,6 +475,7 @@ public class TaskInfo {
         pictureInPictureParams = source.readTypedObject(PictureInPictureParams.CREATOR);
         shouldDockBigOverlays = source.readBoolean();
         launchIntoPipHostTaskId = source.readInt();
+        lastParentTaskIdBeforePip = source.readInt();
         displayCutoutInsets = source.readTypedObject(Rect.CREATOR);
         topActivityInfo = source.readTypedObject(ActivityInfo.CREATOR);
         isResizeable = source.readBoolean();
@@ -511,12 +487,12 @@ public class TaskInfo {
         parentTaskId = source.readInt();
         isFocused = source.readBoolean();
         isVisible = source.readBoolean();
+        isVisibleRequested = source.readBoolean();
         isSleeping = source.readBoolean();
-        topActivityInSizeCompat = source.readBoolean();
-        topActivityEligibleForLetterboxEducation = source.readBoolean();
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
         displayAreaFeatureId = source.readInt();
-        cameraCompatControlState = source.readInt();
+        isTopActivityTransparent = source.readBoolean();
+        appCompatTaskInfo = source.readTypedObject(AppCompatTaskInfo.CREATOR);
     }
 
     /**
@@ -546,6 +522,7 @@ public class TaskInfo {
         dest.writeTypedObject(pictureInPictureParams, flags);
         dest.writeBoolean(shouldDockBigOverlays);
         dest.writeInt(launchIntoPipHostTaskId);
+        dest.writeInt(lastParentTaskIdBeforePip);
         dest.writeTypedObject(displayCutoutInsets, flags);
         dest.writeTypedObject(topActivityInfo, flags);
         dest.writeBoolean(isResizeable);
@@ -557,12 +534,12 @@ public class TaskInfo {
         dest.writeInt(parentTaskId);
         dest.writeBoolean(isFocused);
         dest.writeBoolean(isVisible);
+        dest.writeBoolean(isVisibleRequested);
         dest.writeBoolean(isSleeping);
-        dest.writeBoolean(topActivityInSizeCompat);
-        dest.writeBoolean(topActivityEligibleForLetterboxEducation);
         dest.writeTypedObject(mTopActivityLocusId, flags);
         dest.writeInt(displayAreaFeatureId);
-        dest.writeInt(cameraCompatControlState);
+        dest.writeBoolean(isTopActivityTransparent);
+        dest.writeTypedObject(appCompatTaskInfo, flags);
     }
 
     @Override
@@ -586,6 +563,7 @@ public class TaskInfo {
                 + " pictureInPictureParams=" + pictureInPictureParams
                 + " shouldDockBigOverlays=" + shouldDockBigOverlays
                 + " launchIntoPipHostTaskId=" + launchIntoPipHostTaskId
+                + " lastParentTaskIdBeforePip=" + lastParentTaskIdBeforePip
                 + " displayCutoutSafeInsets=" + displayCutoutInsets
                 + " topActivityInfo=" + topActivityInfo
                 + " launchCookies=" + launchCookies
@@ -593,28 +571,12 @@ public class TaskInfo {
                 + " parentTaskId=" + parentTaskId
                 + " isFocused=" + isFocused
                 + " isVisible=" + isVisible
+                + " isVisibleRequested=" + isVisibleRequested
                 + " isSleeping=" + isSleeping
-                + " topActivityInSizeCompat=" + topActivityInSizeCompat
-                + " topActivityEligibleForLetterboxEducation= "
-                        + topActivityEligibleForLetterboxEducation
                 + " locusId=" + mTopActivityLocusId
                 + " displayAreaFeatureId=" + displayAreaFeatureId
-                + " cameraCompatControlState="
-                        + cameraCompatControlStateToString(cameraCompatControlState)
+                + " isTopActivityTransparent=" + isTopActivityTransparent
+                + " appCompatTaskInfo=" + appCompatTaskInfo
                 + "}";
-    }
-
-    /** @hide */
-    public static String cameraCompatControlStateToString(
-            @CameraCompatControlState int cameraCompatControlState) {
-        switch (cameraCompatControlState) {
-            case CAMERA_COMPAT_CONTROL_HIDDEN: return "hidden";
-            case CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED: return "treatment-suggested";
-            case CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED: return "treatment-applied";
-            case CAMERA_COMPAT_CONTROL_DISMISSED: return "dismissed";
-            default:
-                throw new AssertionError(
-                    "Unexpected camera compat control state: " + cameraCompatControlState);
-        }
     }
 }

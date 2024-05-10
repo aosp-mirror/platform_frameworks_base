@@ -17,7 +17,6 @@
 package com.android.server.accessibility;
 
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_ACCESSIBILITY_ACTIONS;
-import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
@@ -76,14 +75,18 @@ public class SystemActionPerformerTest {
     private static final String DESCRIPTION1 = "description1";
     private static final String DESCRIPTION2 = "description2";
     private static final PendingIntent TEST_PENDING_INTENT_1 = PendingIntent.getBroadcast(
-            InstrumentationRegistry.getTargetContext(), 0, new Intent(INTENT_ACTION1), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+            InstrumentationRegistry.getTargetContext(), 0, new Intent(INTENT_ACTION1)
+                    .setPackage(InstrumentationRegistry.getTargetContext().getPackageName()),
+            PendingIntent.FLAG_MUTABLE_UNAUDITED);
     private static final RemoteAction NEW_TEST_ACTION_1 = new RemoteAction(
             Icon.createWithContentUri("content://test"),
             LABEL_1,
             DESCRIPTION1,
             TEST_PENDING_INTENT_1);
     private static final PendingIntent TEST_PENDING_INTENT_2 = PendingIntent.getBroadcast(
-            InstrumentationRegistry.getTargetContext(), 0, new Intent(INTENT_ACTION2), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+            InstrumentationRegistry.getTargetContext(), 0, new Intent(INTENT_ACTION2)
+                    .setPackage(InstrumentationRegistry.getTargetContext().getPackageName()),
+            PendingIntent.FLAG_MUTABLE_UNAUDITED);
     private static final RemoteAction NEW_TEST_ACTION_2 = new RemoteAction(
             Icon.createWithContentUri("content://test"),
             LABEL_2,
@@ -105,6 +108,7 @@ public class SystemActionPerformerTest {
     @Mock private StatusBarManager mMockStatusBarManager;
     @Mock private ScreenshotHelper mMockScreenshotHelper;
     @Mock private SystemActionPerformer.SystemActionsChangedListener mMockListener;
+    @Mock private SystemActionPerformer.DisplayUpdateCallBack mMockCallback;
 
     @Before
     public void setup() {
@@ -122,7 +126,7 @@ public class SystemActionPerformerTest {
                 mMockContext,
                 mMockWindowManagerInternal,
                 () -> mMockScreenshotHelper,
-                mMockListener);
+                mMockListener, mMockCallback);
     }
 
     private void setupWithRealContext() {
@@ -130,7 +134,7 @@ public class SystemActionPerformerTest {
                 InstrumentationRegistry.getContext(),
                 mMockWindowManagerInternal,
                 () -> mMockScreenshotHelper,
-                mMockListener);
+                mMockListener, mMockCallback);
     }
 
     // We need below two help functions because AccessbilityAction.equals function only compares
@@ -301,9 +305,7 @@ public class SystemActionPerformerTest {
         mSystemActionPerformer.performSystemAction(
                 AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT);
         verify(mMockScreenshotHelper).takeScreenshot(
-                eq(TAKE_SCREENSHOT_FULLSCREEN),
-                eq(SCREENSHOT_ACCESSIBILITY_ACTIONS),
-                any(Handler.class), any());
+                eq(SCREENSHOT_ACCESSIBILITY_ACTIONS), any(Handler.class), any());
     }
 
     // PendingIntent is a final class and cannot be mocked. So we are using this
@@ -326,7 +328,7 @@ public class SystemActionPerformerTest {
 
         void register(Context context) {
             if (!mRegistered) {
-                context.registerReceiver(this, mFilter);
+                context.registerReceiver(this, mFilter, Context.RECEIVER_EXPORTED_UNAUDITED);
                 mRegistered = true;
             }
         }

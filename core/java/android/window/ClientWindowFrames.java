@@ -22,6 +22,8 @@ import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * The window frame container class used by client side for layout.
  * @hide
@@ -49,7 +51,7 @@ public class ClientWindowFrames implements Parcelable {
 
     public boolean isParentFrameClippedByDisplayCutout;
 
-    public float sizeCompatScale = 1f;
+    public float compatScale = 1f;
 
     public ClientWindowFrames() {
     }
@@ -62,7 +64,7 @@ public class ClientWindowFrames implements Parcelable {
             attachedFrame = new Rect(other.attachedFrame);
         }
         isParentFrameClippedByDisplayCutout = other.isParentFrameClippedByDisplayCutout;
-        sizeCompatScale = other.sizeCompatScale;
+        compatScale = other.compatScale;
     }
 
     private ClientWindowFrames(Parcel in) {
@@ -76,7 +78,7 @@ public class ClientWindowFrames implements Parcelable {
         parentFrame.readFromParcel(in);
         attachedFrame = in.readTypedObject(Rect.CREATOR);
         isParentFrameClippedByDisplayCutout = in.readBoolean();
-        sizeCompatScale = in.readFloat();
+        compatScale = in.readFloat();
     }
 
     @Override
@@ -86,7 +88,7 @@ public class ClientWindowFrames implements Parcelable {
         parentFrame.writeToParcel(dest, flags);
         dest.writeTypedObject(attachedFrame, flags);
         dest.writeBoolean(isParentFrameClippedByDisplayCutout);
-        dest.writeFloat(sizeCompatScale);
+        dest.writeFloat(compatScale);
     }
 
     @Override
@@ -97,7 +99,30 @@ public class ClientWindowFrames implements Parcelable {
                 + " parentFrame=" + parentFrame.toShortString(sb)
                 + (attachedFrame != null ? " attachedFrame=" + attachedFrame.toShortString() : "")
                 + (isParentFrameClippedByDisplayCutout ? " parentClippedByDisplayCutout" : "")
-                + (sizeCompatScale != 1f ? " sizeCompatScale=" + sizeCompatScale : "") +  "}";
+                + (compatScale != 1f ? " sizeCompatScale=" + compatScale : "") +  "}";
+    }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final ClientWindowFrames other = (ClientWindowFrames) o;
+        return frame.equals(other.frame)
+                && displayFrame.equals(other.displayFrame)
+                && parentFrame.equals(other.parentFrame)
+                && Objects.equals(attachedFrame, other.attachedFrame)
+                && isParentFrameClippedByDisplayCutout == other.isParentFrameClippedByDisplayCutout
+                && compatScale == other.compatScale;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(frame, displayFrame, parentFrame, attachedFrame,
+                isParentFrameClippedByDisplayCutout, compatScale);
     }
 
     @Override

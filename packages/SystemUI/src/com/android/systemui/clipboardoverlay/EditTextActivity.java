@@ -31,7 +31,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Lightweight activity for editing text clipboard contents
@@ -72,7 +72,7 @@ public class EditTextActivity extends Activity
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Package not found: " + mClipboardManager.getPrimaryClipSource(), e);
         }
-        mEditText.setText(clip.getItemAt(0).getText());
+        mEditText.setText(clip.getItemAt(0).getText().toString());
         mEditText.requestFocus();
         mEditText.setSelection(0);
         mSensitive = clip.getDescription().getExtras() != null

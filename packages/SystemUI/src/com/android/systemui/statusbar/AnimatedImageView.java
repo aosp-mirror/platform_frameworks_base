@@ -25,7 +25,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RemoteViews.RemoteView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 @RemoteView
 public class AnimatedImageView extends ImageView {

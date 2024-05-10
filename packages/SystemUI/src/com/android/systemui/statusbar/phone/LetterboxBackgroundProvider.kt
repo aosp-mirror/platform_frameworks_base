@@ -22,28 +22,25 @@ import android.graphics.Color
 import android.os.Handler
 import android.os.RemoteException
 import android.view.IWindowManager
+import com.android.systemui.CoreStartable
 import com.android.systemui.Dumpable
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /** Responsible for providing information about the background of letterboxed apps. */
-@CentralSurfacesScope
+@SysUISingleton
 class LetterboxBackgroundProvider
 @Inject
 constructor(
     private val windowManager: IWindowManager,
     @Background private val backgroundExecutor: Executor,
-    private val dumpManager: DumpManager,
     private val wallpaperManager: WallpaperManager,
     @Main private val mainHandler: Handler,
-) : CentralSurfacesComponent.Startable, Dumpable {
-
+) : CoreStartable, Dumpable {
     @ColorInt
     var letterboxBackgroundColor: Int = Color.BLACK
         private set
@@ -57,7 +54,6 @@ constructor(
         }
 
     override fun start() {
-        dumpManager.registerDumpable(javaClass.simpleName, this)
         fetchBackgroundColorInfo()
         wallpaperManager.addOnColorsChangedListener(wallpaperColorsListener, mainHandler)
     }
@@ -72,11 +68,6 @@ constructor(
                 e.rethrowFromSystemServer()
             }
         }
-    }
-
-    override fun stop() {
-        dumpManager.unregisterDumpable(javaClass.simpleName)
-        wallpaperManager.removeOnColorsChangedListener(wallpaperColorsListener)
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {

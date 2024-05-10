@@ -47,6 +47,7 @@ constructor(source: UnfoldTransitionProgressProvider? = null) :
     /**
      * Sets the source for the unfold transition progress updates. Replaces current provider if it
      * is already set
+     *
      * @param provider transition provider that emits transition progress updates
      */
     fun setSourceProvider(provider: UnfoldTransitionProgressProvider?) {
@@ -108,6 +109,12 @@ constructor(source: UnfoldTransitionProgressProvider? = null) :
             listeners.forEach { it.onTransitionProgress(progress) }
         }
         lastTransitionProgress = progress
+    }
+
+    override fun onTransitionFinishing() {
+        if (isReadyToHandleTransition) {
+            listeners.forEach { it.onTransitionFinishing() }
+        }
     }
 
     override fun onTransitionFinished() {

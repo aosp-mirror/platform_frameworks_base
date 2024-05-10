@@ -17,32 +17,26 @@
 package com.android.systemui.statusbar.phone.fragment.dagger;
 
 import android.view.View;
+import android.view.ViewStub;
 
-import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
-import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
-import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
-import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
+import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherController;
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherControllerImpl;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 
-import java.util.Optional;
-import java.util.Set;
-
-import javax.inject.Named;
-
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.Multibinds;
+
+import java.util.Optional;
+
+import javax.inject.Named;
 
 /** Dagger module for {@link StatusBarFragmentComponent}. */
 @Module
@@ -56,18 +50,16 @@ public interface StatusBarFragmentModule {
 
     /** */
     @Provides
-    @RootView
     @StatusBarFragmentScope
-    static PhoneStatusBarView providePhoneStatusBarView(
-            CollapsedStatusBarFragment collapsedStatusBarFragment) {
-        return (PhoneStatusBarView) collapsedStatusBarFragment.getView();
+    static BatteryMeterView provideBatteryMeterView(@RootView PhoneStatusBarView view) {
+        return view.findViewById(R.id.battery);
     }
 
     /** */
     @Provides
     @StatusBarFragmentScope
-    static BatteryMeterView provideBatteryMeterView(@RootView PhoneStatusBarView view) {
-        return view.findViewById(R.id.battery);
+    static StatusBarLocation getStatusBarLocation() {
+        return StatusBarLocation.HOME;
     }
 
     /** */
@@ -99,7 +91,7 @@ public interface StatusBarFragmentModule {
     @StatusBarFragmentScope
     @Named(OPERATOR_NAME_VIEW)
     static View provideOperatorNameView(@RootView PhoneStatusBarView view) {
-        return view.findViewById(R.id.operator_name);
+        return ((ViewStub) view.findViewById(R.id.operator_name_stub)).inflate();
     }
 
     /** */
@@ -126,21 +118,13 @@ public interface StatusBarFragmentModule {
     }
 
     /** */
-    @Binds
-    @StatusBarFragmentScope
-    StatusBarUserSwitcherController bindStatusBarUserSwitcherController(
-            StatusBarUserSwitcherControllerImpl controller);
-
-    /** */
     @Provides
     @StatusBarFragmentScope
     static PhoneStatusBarViewController providePhoneStatusBarViewController(
             PhoneStatusBarViewController.Factory phoneStatusBarViewControllerFactory,
-            @RootView PhoneStatusBarView phoneStatusBarView,
-            NotificationPanelViewController notificationPanelViewController) {
+            @RootView PhoneStatusBarView phoneStatusBarView) {
         return phoneStatusBarViewControllerFactory.create(
-                phoneStatusBarView,
-                notificationPanelViewController.getStatusBarTouchEventHandler());
+                phoneStatusBarView);
     }
 
     /** */
@@ -159,8 +143,4 @@ public interface StatusBarFragmentModule {
     static HeadsUpStatusBarView providesHeasdUpStatusBarView(@RootView PhoneStatusBarView view) {
         return view.findViewById(R.id.heads_up_status_bar_view);
     }
-
-    /** */
-    @Multibinds
-    Set<StatusBarBoundsProvider.BoundsChangeListener> boundsChangeListeners();
 }

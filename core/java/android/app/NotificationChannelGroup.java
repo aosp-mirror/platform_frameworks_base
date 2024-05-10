@@ -20,12 +20,14 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,7 +69,7 @@ public final class NotificationChannelGroup implements Parcelable {
     private CharSequence mName;
     private String mDescription;
     private boolean mBlocked;
-    private List<NotificationChannel> mChannels = new ArrayList<>();
+    private List<NotificationChannel> mChannels = new ArrayList();
     // Bitwise representation of fields that have been changed by the user
     private int mUserLockedFields;
 
@@ -105,7 +107,12 @@ public final class NotificationChannelGroup implements Parcelable {
         } else {
             mDescription = null;
         }
-        in.readParcelableList(mChannels, NotificationChannel.class.getClassLoader(), android.app.NotificationChannel.class);
+        if (in.readByte() != 0) {
+            mChannels = in.readParcelable(NotificationChannelGroup.class.getClassLoader(),
+                    ParceledListSlice.class).getList();
+        } else {
+            mChannels = new ArrayList<>();
+        }
         mBlocked = in.readBoolean();
         mUserLockedFields = in.readInt();
     }
@@ -137,7 +144,12 @@ public final class NotificationChannelGroup implements Parcelable {
         } else {
             dest.writeByte((byte) 0);
         }
-        dest.writeParcelableList(mChannels, flags);
+        if (mChannels != null) {
+            dest.writeByte((byte) 1);
+            dest.writeParcelable(new ParceledListSlice<>(mChannels), flags);
+        } else {
+            dest.writeByte((byte) 0);
+        }
         dest.writeBoolean(mBlocked);
         dest.writeInt(mUserLockedFields);
     }

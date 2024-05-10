@@ -77,6 +77,14 @@ public class HorizontalScrollView extends FrameLayout {
 
     private static final String TAG = "HorizontalScrollView";
 
+    /**
+     * When flinging the stretch towards scrolling content, it should destretch quicker than the
+     * fling would normally do. The visual effect of flinging the stretch looks strange as little
+     * appears to happen at first and then when the stretch disappears, the content starts
+     * scrolling quickly.
+     */
+    private static final float FLING_DESTRETCH_FACTOR = 4f;
+
     private long mLastScroll;
 
     private final Rect mTempRect = new Rect();
@@ -872,13 +880,37 @@ public class HorizontalScrollView extends FrameLayout {
                         final int range = getScrollRange();
                         int oldScrollX = mScrollX;
                         int newScrollX = oldScrollX + delta;
+
+                        final int overscrollMode = getOverScrollMode();
+                        boolean canOverscroll = !event.isFromSource(InputDevice.SOURCE_MOUSE)
+                                && (overscrollMode == OVER_SCROLL_ALWAYS
+                                || (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0));
+                        boolean absorbed = false;
+
                         if (newScrollX < 0) {
+                            if (canOverscroll) {
+                                mEdgeGlowLeft.onPullDistance(-(float) newScrollX / getWidth(),
+                                        0.5f);
+                                mEdgeGlowLeft.onRelease();
+                                invalidate();
+                                absorbed = true;
+                            }
                             newScrollX = 0;
                         } else if (newScrollX > range) {
+                            if (canOverscroll) {
+                                mEdgeGlowRight.onPullDistance(
+                                        (float) (newScrollX - range) / getWidth(), 0.5f);
+                                mEdgeGlowRight.onRelease();
+                                invalidate();
+                                absorbed = true;
+                            }
                             newScrollX = range;
                         }
                         if (newScrollX != oldScrollX) {
                             super.scrollTo(newScrollX, mScrollY);
+                            return true;
+                        }
+                        if (absorbed) {
                             return true;
                         }
                     }
@@ -1432,18 +1464,19 @@ public class HorizontalScrollView extends FrameLayout {
             int oldY = mScrollY;
             int x = mScroller.getCurrX();
             int y = mScroller.getCurrY();
+            int deltaX = consumeFlingInStretch(x - oldX);
 
-            if (oldX != x || oldY != y) {
+            if (deltaX != 0 || oldY != y) {
                 final int range = getScrollRange();
                 final int overscrollMode = getOverScrollMode();
                 final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
                         (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0);
 
-                overScrollBy(x - oldX, y - oldY, oldX, oldY, range, 0,
+                overScrollBy(deltaX, y - oldY, oldX, oldY, range, 0,
                         mOverflingDistance, 0, false);
                 onScrollChanged(mScrollX, mScrollY, oldX, oldY);
 
-                if (canOverscroll) {
+                if (canOverscroll && deltaX != 0) {
                     if (x < 0 && oldX >= 0) {
                         mEdgeGlowLeft.onAbsorb((int) mScroller.getCurrVelocity());
                     } else if (x > range && oldX <= range) {
@@ -1456,6 +1489,41 @@ public class HorizontalScrollView extends FrameLayout {
                 postInvalidateOnAnimation();
             }
         }
+    }
+
+    /**
+     * Used by consumeFlingInHorizontalStretch() and consumeFlinInVerticalStretch() for
+     * consuming deltas from EdgeEffects
+     * @param unconsumed The unconsumed delta that the EdgeEffets may consume
+     * @return The unconsumed delta after the EdgeEffects have had an opportunity to consume.
+     */
+    private int consumeFlingInStretch(int unconsumed) {
+        int scrollX = getScrollX();
+        if (scrollX < 0 || scrollX > getScrollRange()) {
+            // We've overscrolled, so don't stretch
+            return unconsumed;
+        }
+        if (unconsumed > 0 && mEdgeGlowLeft != null && mEdgeGlowLeft.getDistance() != 0f) {
+            int size = getWidth();
+            float deltaDistance = -unconsumed * FLING_DESTRETCH_FACTOR / size;
+            int consumed = Math.round(-size / FLING_DESTRETCH_FACTOR
+                    * mEdgeGlowLeft.onPullDistance(deltaDistance, 0.5f));
+            if (consumed != unconsumed) {
+                mEdgeGlowLeft.finish();
+            }
+            return unconsumed - consumed;
+        }
+        if (unconsumed < 0 && mEdgeGlowRight != null && mEdgeGlowRight.getDistance() != 0f) {
+            int size = getWidth();
+            float deltaDistance = unconsumed * FLING_DESTRETCH_FACTOR / size;
+            int consumed = Math.round(size / FLING_DESTRETCH_FACTOR
+                    * mEdgeGlowRight.onPullDistance(deltaDistance, 0.5f));
+            if (consumed != unconsumed) {
+                mEdgeGlowRight.finish();
+            }
+            return unconsumed - consumed;
+        }
+        return unconsumed;
     }
 
     /**
@@ -1722,11 +1790,23 @@ public class HorizontalScrollView extends FrameLayout {
 
             int maxScroll = Math.max(0, right - width);
 
+            boolean shouldFling = false;
             if (mScrollX == 0 && !mEdgeGlowLeft.isFinished()) {
-                mEdgeGlowLeft.onAbsorb(-velocityX);
+                if (shouldAbsorb(mEdgeGlowLeft, -velocityX)) {
+                    mEdgeGlowLeft.onAbsorb(-velocityX);
+                } else {
+                    shouldFling = true;
+                }
             } else if (mScrollX == maxScroll && !mEdgeGlowRight.isFinished()) {
-                mEdgeGlowRight.onAbsorb(velocityX);
+                if (shouldAbsorb(mEdgeGlowRight, velocityX)) {
+                    mEdgeGlowRight.onAbsorb(velocityX);
+                } else {
+                    shouldFling = true;
+                }
             } else {
+                shouldFling = true;
+            }
+            if (shouldFling) {
                 mScroller.fling(mScrollX, mScrollY, velocityX, 0, 0,
                         maxScroll, 0, 0, width / 2, 0);
 
@@ -1747,6 +1827,27 @@ public class HorizontalScrollView extends FrameLayout {
 
             postInvalidateOnAnimation();
         }
+    }
+
+    /**
+     * Returns true if edgeEffect should call onAbsorb() with veclocity or false if it should
+     * animate with a fling. It will animate with a fling if the velocity will remove the
+     * EdgeEffect through its normal operation.
+     *
+     * @param edgeEffect The EdgeEffect that might absorb the velocity.
+     * @param velocity The velocity of the fling motion
+     * @return true if the velocity should be absorbed or false if it should be flung.
+     */
+    private boolean shouldAbsorb(EdgeEffect edgeEffect, int velocity) {
+        if (velocity > 0) {
+            return true;
+        }
+        float distance = edgeEffect.getDistance() * getWidth();
+
+        // This is flinging without the spring, so let's see if it will fling past the overscroll
+        float flingDistance = (float) mScroller.getSplineFlingDistance(-velocity);
+
+        return flingDistance < distance;
     }
 
     /**

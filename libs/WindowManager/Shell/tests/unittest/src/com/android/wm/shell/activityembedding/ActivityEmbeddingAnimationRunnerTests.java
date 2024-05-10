@@ -35,10 +35,14 @@ import android.window.TransitionInfo;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.transition.TransitionInfoBuilder;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+
+import java.util.ArrayList;
 
 /**
  * Tests for {@link ActivityEmbeddingAnimationRunner}.
@@ -58,17 +62,18 @@ public class ActivityEmbeddingAnimationRunnerTests extends ActivityEmbeddingAnim
 
     @Test
     public void testStartAnimation() {
-        final TransitionInfo info = new TransitionInfo(TRANSIT_OPEN, 0);
-        final TransitionInfo.Change embeddingChange = createChange();
-        embeddingChange.setFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
-        info.addChange(embeddingChange);
-        doReturn(mAnimator).when(mAnimRunner).createAnimator(any(), any(), any(), any());
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
+                .addChange(createChange(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY))
+                .build();
+        doReturn(mAnimator).when(mAnimRunner).createAnimator(any(), any(), any(), any(),
+                any());
 
         mAnimRunner.startAnimation(mTransition, info, mStartTransaction, mFinishTransaction);
 
         final ArgumentCaptor<Runnable> finishCallback = ArgumentCaptor.forClass(Runnable.class);
-        verify(mAnimRunner).createAnimator(eq(info), eq(mStartTransaction), eq(mFinishTransaction),
-                finishCallback.capture());
+        verify(mAnimRunner).createAnimator(eq(info), eq(mStartTransaction),
+                eq(mFinishTransaction),
+                finishCallback.capture(), any());
         verify(mStartTransaction).apply();
         verify(mAnimator).start();
         verifyNoMoreInteractions(mFinishTransaction);
@@ -82,15 +87,32 @@ public class ActivityEmbeddingAnimationRunnerTests extends ActivityEmbeddingAnim
 
     @Test
     public void testChangesBehindStartingWindow() {
-        final TransitionInfo info = new TransitionInfo(TRANSIT_OPEN, 0);
-        final TransitionInfo.Change embeddingChange = createChange();
-        embeddingChange.setFlags(FLAG_IS_BEHIND_STARTING_WINDOW);
-        info.addChange(embeddingChange);
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
+                .addChange(createChange(FLAG_IS_BEHIND_STARTING_WINDOW))
+                .build();
         final Animator animator = mAnimRunner.createAnimator(
                 info, mStartTransaction, mFinishTransaction,
-                () -> mFinishCallback.onTransitionFinished(null /* wct */, null /* wctCB */));
+                () -> mFinishCallback.onTransitionFinished(null /* wct */),
+                new ArrayList());
 
         // The animation should be empty when it is behind starting window.
+        assertEquals(0, animator.getDuration());
+    }
+
+    @Test
+    public void testInvalidCustomAnimation() {
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
+                .addChange(createChange(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY))
+                .build();
+        info.setAnimationOptions(TransitionInfo.AnimationOptions
+                .makeCustomAnimOptions("packageName", 0 /* enterResId */, 0 /* exitResId */,
+                        0 /* backgroundColor */, false /* overrideTaskTransition */));
+        final Animator animator = mAnimRunner.createAnimator(
+                info, mStartTransaction, mFinishTransaction,
+                () -> mFinishCallback.onTransitionFinished(null /* wct */),
+                new ArrayList<>());
+
+        // An invalid custom animation is equivalent to jump-cut.
         assertEquals(0, animator.getDuration());
     }
 }

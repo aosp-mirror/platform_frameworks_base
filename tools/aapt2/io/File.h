@@ -22,8 +22,7 @@
 #include <vector>
 
 #include "android-base/macros.h"
-
-#include "Source.h"
+#include "androidfw/Source.h"
 #include "io/Data.h"
 #include "util/Files.h"
 #include "util/Util.h"
@@ -44,12 +43,12 @@ class IFile {
   // Returns nullptr on failure.
   virtual std::unique_ptr<IData> OpenAsData() = 0;
 
-  virtual std::unique_ptr<io::InputStream> OpenInputStream() = 0;
+  virtual std::unique_ptr<android::InputStream> OpenInputStream() = 0;
 
   // Returns the source of this file. This is for presentation to the user and
   // may not be a valid file system path (for example, it may contain a '@' sign to separate
   // the files within a ZIP archive from the path to the containing ZIP archive.
-  virtual const Source& GetSource() const = 0;
+  virtual const android::Source& GetSource() const = 0;
 
   IFile* CreateFileSegment(size_t offset, size_t len);
 
@@ -57,6 +56,11 @@ class IFile {
   virtual bool WasCompressed() {
     return false;
   }
+
+  // Fills in buf with the last modification time of the file. Returns true if successful,
+  // otherwise false (i.e., the operation is not supported or the file system is unable to provide
+  // a last modification time).
+  virtual bool GetModificationTime(struct tm* buf) const = 0;
 
  private:
   // Any segments created from this IFile need to be owned by this IFile, so
@@ -74,11 +78,15 @@ class FileSegment : public IFile {
       : file_(file), offset_(offset), len_(len) {}
 
   std::unique_ptr<IData> OpenAsData() override;
-  std::unique_ptr<io::InputStream> OpenInputStream() override;
+  std::unique_ptr<android::InputStream> OpenInputStream() override;
 
-  const Source& GetSource() const override {
+  const android::Source& GetSource() const override {
     return file_->GetSource();
   }
+
+  bool GetModificationTime(struct tm* buf) const override {
+    return file_->GetModificationTime(buf);
+  };
 
  private:
   DISALLOW_COPY_AND_ASSIGN(FileSegment);
@@ -102,7 +110,7 @@ class IFileCollection {
  public:
   virtual ~IFileCollection() = default;
 
-  virtual IFile* FindFile(const android::StringPiece& path) = 0;
+  virtual IFile* FindFile(android::StringPiece path) = 0;
   virtual std::unique_ptr<IFileCollectionIterator> Iterator() = 0;
   virtual char GetDirSeparator() = 0;
 };

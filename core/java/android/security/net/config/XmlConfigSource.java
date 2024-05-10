@@ -171,6 +171,11 @@ public class XmlConfigSource implements ConfigSource {
         return new Domain(domain, includeSubdomains);
     }
 
+    private boolean parseCertificateTransparency(XmlResourceParser parser)
+            throws IOException, XmlPullParserException, ParserException {
+        return parser.getAttributeBooleanValue(null, "enabled", false);
+    }
+
     private CertificatesEntryRef parseCertificatesEntry(XmlResourceParser parser,
             boolean defaultOverridePins)
             throws IOException, XmlPullParserException, ParserException {
@@ -226,7 +231,6 @@ public class XmlConfigSource implements ConfigSource {
         boolean seenPinSet = false;
         boolean seenTrustAnchors = false;
         boolean defaultOverridePins = configType == CONFIG_DEBUG;
-        String configName = parser.getName();
         int outerDepth = parser.getDepth();
         // Add this builder now so that this builder occurs before any of its children. This
         // makes the final build pass easier.
@@ -279,6 +283,15 @@ public class XmlConfigSource implements ConfigSource {
                             "Nested domain-config not allowed in " + getConfigString(configType));
                 }
                 builders.addAll(parseConfigEntry(parser, seenDomains, builder, configType));
+            } else if ("certificateTransparency".equals(tagName)) {
+                if (configType != CONFIG_BASE && configType != CONFIG_DOMAIN) {
+                    throw new ParserException(
+                            parser,
+                            "certificateTransparency not allowed in "
+                                    + getConfigString(configType));
+                }
+                builder.setCertificateTransparencyVerificationRequired(
+                        parseCertificateTransparency(parser));
             } else {
                 XmlUtils.skipCurrentTag(parser);
             }

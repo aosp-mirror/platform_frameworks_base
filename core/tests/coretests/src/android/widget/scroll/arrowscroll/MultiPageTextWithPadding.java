@@ -16,7 +16,7 @@
 
 package android.widget.scroll.arrowscroll;
 
-import android.util.ScrollViewScenario;
+import android.widget.ScrollViewScenario;
 
 /**
  * One TextView with a text covering several pages. Padding is added

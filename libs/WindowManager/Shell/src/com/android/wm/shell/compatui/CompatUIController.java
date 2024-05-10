@@ -16,18 +16,28 @@
 
 package com.android.wm.shell.compatui;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
-import android.app.TaskInfo.CameraCompatControlState;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
+import android.net.Uri;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -37,23 +47,24 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayInsetsController.OnInsetsChangedListener;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
-import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
+import dagger.Lazy;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
-
-import dagger.Lazy;
 
 /**
  * Controller to show/update compat UI components on Tasks based on whether the foreground
@@ -74,6 +85,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
 
     private static final String TAG = "CompatUIController";
 
+    // The time to wait before education and button hiding
+    private static final int DISAPPEAR_DELAY_MS = 5000;
+
     /** Whether the IME is shown on display id. */
     private final Set<Integer> mDisplaysWithIme = new ArraySet<>(1);
 
@@ -90,6 +104,25 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private final SparseArray<CompatUIWindowManager> mActiveCompatLayouts = new SparseArray<>(0);
 
     /**
+     * {@link SparseArray} that maps task ids to {@link RestartDialogWindowManager} that are
+     * currently visible
+     */
+    private final SparseArray<RestartDialogWindowManager> mTaskIdToRestartDialogWindowManagerMap =
+            new SparseArray<>(0);
+
+    /**
+     * {@link Set} of task ids for which we need to display a restart confirmation dialog
+     */
+    private Set<Integer> mSetOfTaskIdsShowingRestartDialog = new HashSet<>();
+
+    /**
+     * The active user aspect ratio settings button layout if there is one (there can be at most
+     * one active).
+     */
+    @Nullable
+    private UserAspectRatioSettingsWindowManager mUserAspectRatioSettingsLayout;
+
+    /**
      * The active Letterbox Education layout if there is one (there can be at most one active).
      *
      * <p>An active layout is a layout that is eligible to be shown for the associated task but
@@ -98,36 +131,76 @@ public class CompatUIController implements OnDisplaysChangedListener,
     @Nullable
     private LetterboxEduWindowManager mActiveLetterboxEduLayout;
 
+    /**
+     * The active Reachability UI layout.
+     */
+    @Nullable
+    private ReachabilityEduWindowManager mActiveReachabilityEduLayout;
+
     /** Avoid creating display context frequently for non-default display. */
     private final SparseArray<WeakReference<Context>> mDisplayContextCache = new SparseArray<>(0);
 
+    @NonNull
     private final Context mContext;
+    @NonNull
     private final ShellController mShellController;
+    @NonNull
     private final DisplayController mDisplayController;
+    @NonNull
     private final DisplayInsetsController mDisplayInsetsController;
+    @NonNull
     private final DisplayImeController mImeController;
+    @NonNull
     private final SyncTransactionQueue mSyncQueue;
+    @NonNull
     private final ShellExecutor mMainExecutor;
+    @NonNull
     private final Lazy<Transitions> mTransitionsLazy;
-
-    private CompatUICallback mCallback;
-
+    @NonNull
+    private final DockStateReader mDockStateReader;
+    @NonNull
+    private final CompatUIConfiguration mCompatUIConfiguration;
     // Only show each hint once automatically in the process life.
+    @NonNull
     private final CompatUIHintsState mCompatUIHintsState;
+    @NonNull
+    private final CompatUIShellCommandHandler mCompatUIShellCommandHandler;
+
+    @NonNull
+    private final Function<Integer, Integer> mDisappearTimeSupplier;
+
+    @Nullable
+    private CompatUICallback mCompatUICallback;
 
     // Indicates if the keyguard is currently showing, in which case compat UIs shouldn't
     // be shown.
     private boolean mKeyguardShowing;
 
-    public CompatUIController(Context context,
-            ShellInit shellInit,
-            ShellController shellController,
-            DisplayController displayController,
-            DisplayInsetsController displayInsetsController,
-            DisplayImeController imeController,
-            SyncTransactionQueue syncQueue,
-            ShellExecutor mainExecutor,
-            Lazy<Transitions> transitionsLazy) {
+    /**
+     * The id of the task for the application we're currently attempting to show the user aspect
+     * ratio settings button for, or have most recently shown the button for.
+     */
+    private int mTopActivityTaskId;
+
+    /**
+     * Whether the user aspect ratio settings button has been shown for the current application
+     * associated with the task id stored in {@link CompatUIController#mTopActivityTaskId}.
+     */
+    private boolean mHasShownUserAspectRatioSettingsButton = false;
+
+    public CompatUIController(@NonNull Context context,
+            @NonNull ShellInit shellInit,
+            @NonNull ShellController shellController,
+            @NonNull DisplayController displayController,
+            @NonNull DisplayInsetsController displayInsetsController,
+            @NonNull DisplayImeController imeController,
+            @NonNull SyncTransactionQueue syncQueue,
+            @NonNull ShellExecutor mainExecutor,
+            @NonNull Lazy<Transitions> transitionsLazy,
+            @NonNull DockStateReader dockStateReader,
+            @NonNull CompatUIConfiguration compatUIConfiguration,
+            @NonNull CompatUIShellCommandHandler compatUIShellCommandHandler,
+            @NonNull AccessibilityManager accessibilityManager) {
         mContext = context;
         mShellController = shellController;
         mDisplayController = displayController;
@@ -137,6 +210,11 @@ public class CompatUIController implements OnDisplaysChangedListener,
         mMainExecutor = mainExecutor;
         mTransitionsLazy = transitionsLazy;
         mCompatUIHintsState = new CompatUIHintsState();
+        mDockStateReader = dockStateReader;
+        mCompatUIConfiguration = compatUIConfiguration;
+        mCompatUIShellCommandHandler = compatUIShellCommandHandler;
+        mDisappearTimeSupplier = flags -> accessibilityManager.getRecommendedTimeoutMillis(
+                DISAPPEAR_DELAY_MS, flags);
         shellInit.addInitCallback(this::onInit, this);
     }
 
@@ -144,11 +222,12 @@ public class CompatUIController implements OnDisplaysChangedListener,
         mShellController.addKeyguardChangeListener(this);
         mDisplayController.addDisplayWindowListener(this);
         mImeController.addPositionProcessor(this);
+        mCompatUIShellCommandHandler.onInit();
     }
 
-    /** Sets the callback for UI interactions. */
-    public void setCompatUICallback(CompatUICallback callback) {
-        mCallback = callback;
+    /** Sets the callback for Compat UI interactions. */
+    public void setCompatUICallback(@NonNull CompatUICallback compatUiCallback) {
+        mCompatUICallback = compatUiCallback;
     }
 
     /**
@@ -158,8 +237,16 @@ public class CompatUIController implements OnDisplaysChangedListener,
      * @param taskInfo {@link TaskInfo} task the activity is in.
      * @param taskListener listener to handle the Task Surface placement.
      */
-    public void onCompatInfoChanged(TaskInfo taskInfo,
+    public void onCompatInfoChanged(@NonNull TaskInfo taskInfo,
             @Nullable ShellTaskOrganizer.TaskListener taskListener) {
+        if (taskInfo != null && !taskInfo.appCompatTaskInfo.topActivityInSizeCompat) {
+            mSetOfTaskIdsShowingRestartDialog.remove(taskInfo.taskId);
+        }
+
+        if (taskInfo != null && taskListener != null) {
+            updateActiveTaskInfo(taskInfo);
+        }
+
         if (taskInfo.configuration == null || taskListener == null) {
             // Null token means the current foreground activity is not in compatibility mode.
             removeLayouts(taskInfo.taskId);
@@ -168,6 +255,22 @@ public class CompatUIController implements OnDisplaysChangedListener,
 
         createOrUpdateCompatLayout(taskInfo, taskListener);
         createOrUpdateLetterboxEduLayout(taskInfo, taskListener);
+        createOrUpdateRestartDialogLayout(taskInfo, taskListener);
+        if (mCompatUIConfiguration.getHasSeenLetterboxEducation(taskInfo.userId)) {
+            createOrUpdateReachabilityEduLayout(taskInfo, taskListener);
+            // The user aspect ratio button should not be handled when a new TaskInfo is
+            // sent because of a double tap or when in multi-window mode.
+            if (taskInfo.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
+                if (mUserAspectRatioSettingsLayout != null) {
+                    mUserAspectRatioSettingsLayout.release();
+                    mUserAspectRatioSettingsLayout = null;
+                }
+                return;
+            }
+            if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap) {
+                createOrUpdateUserAspectRatioSettingsLayout(taskInfo, taskListener);
+            }
+        }
     }
 
     @Override
@@ -236,6 +339,47 @@ public class CompatUIController implements OnDisplaysChangedListener,
         forAllLayouts(layout -> layout.updateVisibility(showOnDisplay(layout.getDisplayId())));
     }
 
+    /**
+     * Invoked when a new task is created or the info of an existing task has changed. Updates the
+     * shown status of the user aspect ratio settings button and the task id it relates to.
+     */
+    void updateActiveTaskInfo(@NonNull TaskInfo taskInfo) {
+        // If the activity belongs to the task we are currently tracking, don't update any variables
+        // as they are still relevant. Else, if the activity is visible and focused (the one the
+        // user can see and is using), the user aspect ratio button can potentially be displayed so
+        // start tracking the buttons visibility for this task.
+        if (mTopActivityTaskId != taskInfo.taskId
+                && !taskInfo.isTopActivityTransparent
+                && taskInfo.isVisible && taskInfo.isFocused) {
+            mTopActivityTaskId = taskInfo.taskId;
+            setHasShownUserAspectRatioSettingsButton(false);
+        }
+    }
+
+    /**
+     * Informs the system that the user aspect ratio button has been displayed for the application
+     * associated with the task id in {@link CompatUIController#mTopActivityTaskId}.
+     */
+    void setHasShownUserAspectRatioSettingsButton(boolean state) {
+        mHasShownUserAspectRatioSettingsButton = state;
+    }
+
+    /**
+     * Returns whether the user aspect ratio settings button has been show for the application
+     * associated with the task id in {@link CompatUIController#mTopActivityTaskId}.
+     */
+    boolean hasShownUserAspectRatioSettingsButton() {
+        return mHasShownUserAspectRatioSettingsButton;
+    }
+
+    /**
+     * Returns the task id of the application we are currently attempting to show, of have most
+     * recently shown, the user aspect ratio settings button for.
+     */
+    int getTopActivityTaskId() {
+        return mTopActivityTaskId;
+    }
+
     private boolean showOnDisplay(int displayId) {
         return !mKeyguardShowing && !isImeShowingOnDisplay(displayId);
     }
@@ -244,17 +388,22 @@ public class CompatUIController implements OnDisplaysChangedListener,
         return mDisplaysWithIme.contains(displayId);
     }
 
-    private void createOrUpdateCompatLayout(TaskInfo taskInfo,
-            ShellTaskOrganizer.TaskListener taskListener) {
+    private void createOrUpdateCompatLayout(@NonNull TaskInfo taskInfo,
+            @Nullable ShellTaskOrganizer.TaskListener taskListener) {
         CompatUIWindowManager layout = mActiveCompatLayouts.get(taskInfo.taskId);
         if (layout != null) {
-            // UI already exists, update the UI layout.
-            if (!layout.updateCompatInfo(taskInfo, taskListener,
-                    showOnDisplay(layout.getDisplayId()))) {
-                // The layout is no longer eligible to be shown, remove from active layouts.
+            if (layout.needsToBeRecreated(taskInfo, taskListener)) {
                 mActiveCompatLayouts.remove(taskInfo.taskId);
+                layout.release();
+            } else {
+                // UI already exists, update the UI layout.
+                if (!layout.updateCompatInfo(taskInfo, taskListener,
+                        showOnDisplay(layout.getDisplayId()))) {
+                    // The layout is no longer eligible to be shown, remove from active layouts.
+                    mActiveCompatLayouts.remove(taskInfo.taskId);
+                }
+                return;
             }
-            return;
         }
 
         // Create a new UI layout.
@@ -273,23 +422,40 @@ public class CompatUIController implements OnDisplaysChangedListener,
     CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
             ShellTaskOrganizer.TaskListener taskListener) {
         return new CompatUIWindowManager(context,
-                taskInfo, mSyncQueue, mCallback, taskListener,
-                mDisplayController.getDisplayLayout(taskInfo.displayId), mCompatUIHintsState);
+                taskInfo, mSyncQueue, mCompatUICallback, taskListener,
+                mDisplayController.getDisplayLayout(taskInfo.displayId), mCompatUIHintsState,
+                mCompatUIConfiguration, this::onRestartButtonClicked);
     }
 
-    private void createOrUpdateLetterboxEduLayout(TaskInfo taskInfo,
-            ShellTaskOrganizer.TaskListener taskListener) {
-        if (mActiveLetterboxEduLayout != null
-                && mActiveLetterboxEduLayout.getTaskId() == taskInfo.taskId) {
-            // UI already exists, update the UI layout.
-            if (!mActiveLetterboxEduLayout.updateCompatInfo(taskInfo, taskListener,
-                    showOnDisplay(mActiveLetterboxEduLayout.getDisplayId()))) {
-                // The layout is no longer eligible to be shown, clear active layout.
-                mActiveLetterboxEduLayout = null;
-            }
-            return;
+    private void onRestartButtonClicked(
+            Pair<TaskInfo, ShellTaskOrganizer.TaskListener> taskInfoState) {
+        if (mCompatUIConfiguration.isRestartDialogEnabled()
+                && mCompatUIConfiguration.shouldShowRestartDialogAgain(
+                taskInfoState.first)) {
+            // We need to show the dialog
+            mSetOfTaskIdsShowingRestartDialog.add(taskInfoState.first.taskId);
+            onCompatInfoChanged(taskInfoState.first, taskInfoState.second);
+        } else {
+            mCompatUICallback.onSizeCompatRestartButtonClicked(taskInfoState.first.taskId);
         }
+    }
 
+    private void createOrUpdateLetterboxEduLayout(@NonNull TaskInfo taskInfo,
+            @Nullable ShellTaskOrganizer.TaskListener taskListener) {
+        if (mActiveLetterboxEduLayout != null) {
+            if (mActiveLetterboxEduLayout.needsToBeRecreated(taskInfo, taskListener)) {
+                mActiveLetterboxEduLayout.release();
+                mActiveLetterboxEduLayout = null;
+            } else {
+                if (!mActiveLetterboxEduLayout.updateCompatInfo(taskInfo, taskListener,
+                        showOnDisplay(mActiveLetterboxEduLayout.getDisplayId()))) {
+                    // The layout is no longer eligible to be shown, clear active layout.
+                    mActiveLetterboxEduLayout.release();
+                    mActiveLetterboxEduLayout = null;
+                }
+                return;
+            }
+        }
         // Create a new UI layout.
         final Context context = getOrCreateDisplayContext(taskInfo.displayId);
         if (context == null) {
@@ -315,23 +481,202 @@ public class CompatUIController implements OnDisplaysChangedListener,
         return new LetterboxEduWindowManager(context, taskInfo,
                 mSyncQueue, taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
                 mTransitionsLazy.get(),
-                this::onLetterboxEduDismissed);
+                stateInfo -> createOrUpdateReachabilityEduLayout(stateInfo.first, stateInfo.second),
+                mDockStateReader, mCompatUIConfiguration);
     }
 
-    private void onLetterboxEduDismissed() {
-        mActiveLetterboxEduLayout = null;
+    private void createOrUpdateRestartDialogLayout(@NonNull TaskInfo taskInfo,
+            @Nullable ShellTaskOrganizer.TaskListener taskListener) {
+        RestartDialogWindowManager layout =
+                mTaskIdToRestartDialogWindowManagerMap.get(taskInfo.taskId);
+        if (layout != null) {
+            if (layout.needsToBeRecreated(taskInfo, taskListener)) {
+                mTaskIdToRestartDialogWindowManagerMap.remove(taskInfo.taskId);
+                layout.release();
+            } else {
+                layout.setRequestRestartDialog(
+                        mSetOfTaskIdsShowingRestartDialog.contains(taskInfo.taskId));
+                // UI already exists, update the UI layout.
+                if (!layout.updateCompatInfo(taskInfo, taskListener,
+                        showOnDisplay(layout.getDisplayId()))) {
+                    // The layout is no longer eligible to be shown, remove from active layouts.
+                    mTaskIdToRestartDialogWindowManagerMap.remove(taskInfo.taskId);
+                }
+                return;
+            }
+        }
+        // Create a new UI layout.
+        final Context context = getOrCreateDisplayContext(taskInfo.displayId);
+        if (context == null) {
+            return;
+        }
+        layout = createRestartDialogWindowManager(context, taskInfo, taskListener);
+        layout.setRequestRestartDialog(
+                mSetOfTaskIdsShowingRestartDialog.contains(taskInfo.taskId));
+        if (layout.createLayout(showOnDisplay(taskInfo.displayId))) {
+            // The new layout is eligible to be shown, add it the active layouts.
+            mTaskIdToRestartDialogWindowManagerMap.put(taskInfo.taskId, layout);
+        }
+    }
+
+    @VisibleForTesting
+    RestartDialogWindowManager createRestartDialogWindowManager(Context context, TaskInfo taskInfo,
+            ShellTaskOrganizer.TaskListener taskListener) {
+        return new RestartDialogWindowManager(context, taskInfo, mSyncQueue, taskListener,
+                mDisplayController.getDisplayLayout(taskInfo.displayId), mTransitionsLazy.get(),
+                this::onRestartDialogCallback, this::onRestartDialogDismissCallback,
+                mCompatUIConfiguration);
+    }
+
+    private void onRestartDialogCallback(
+            Pair<TaskInfo, ShellTaskOrganizer.TaskListener> stateInfo) {
+        mTaskIdToRestartDialogWindowManagerMap.remove(stateInfo.first.taskId);
+        mCompatUICallback.onSizeCompatRestartButtonClicked(stateInfo.first.taskId);
+    }
+
+    private void onRestartDialogDismissCallback(
+            Pair<TaskInfo, ShellTaskOrganizer.TaskListener> stateInfo) {
+        mSetOfTaskIdsShowingRestartDialog.remove(stateInfo.first.taskId);
+        onCompatInfoChanged(stateInfo.first, stateInfo.second);
+    }
+
+    private void createOrUpdateReachabilityEduLayout(@NonNull TaskInfo taskInfo,
+            @Nullable ShellTaskOrganizer.TaskListener taskListener) {
+        if (mActiveReachabilityEduLayout != null) {
+            if (mActiveReachabilityEduLayout.needsToBeRecreated(taskInfo, taskListener)) {
+                mActiveReachabilityEduLayout.release();
+                mActiveReachabilityEduLayout = null;
+            } else {
+                // UI already exists, update the UI layout.
+                if (!mActiveReachabilityEduLayout.updateCompatInfo(taskInfo, taskListener,
+                        showOnDisplay(mActiveReachabilityEduLayout.getDisplayId()))) {
+                    // The layout is no longer eligible to be shown, remove from active layouts.
+                    mActiveReachabilityEduLayout.release();
+                    mActiveReachabilityEduLayout = null;
+                }
+                return;
+            }
+        }
+        // Create a new UI layout.
+        final Context context = getOrCreateDisplayContext(taskInfo.displayId);
+        if (context == null) {
+            return;
+        }
+        ReachabilityEduWindowManager newLayout = createReachabilityEduWindowManager(context,
+                taskInfo, taskListener);
+        if (newLayout.createLayout(showOnDisplay(taskInfo.displayId))) {
+            // The new layout is eligible to be shown, make it the active layout.
+            if (mActiveReachabilityEduLayout != null) {
+                // Release the previous layout since at most one can be active.
+                // Since letterbox reachability education is only shown once to the user,
+                // releasing the previous layout is only a precaution.
+                mActiveReachabilityEduLayout.release();
+            }
+            mActiveReachabilityEduLayout = newLayout;
+        }
+    }
+
+    @VisibleForTesting
+    ReachabilityEduWindowManager createReachabilityEduWindowManager(Context context,
+            TaskInfo taskInfo,
+            ShellTaskOrganizer.TaskListener taskListener) {
+        return new ReachabilityEduWindowManager(context, taskInfo, mSyncQueue,
+                taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
+                mCompatUIConfiguration, mMainExecutor, this::onInitialReachabilityEduDismissed,
+                mDisappearTimeSupplier);
+    }
+
+    private void onInitialReachabilityEduDismissed(@NonNull TaskInfo taskInfo,
+            @NonNull ShellTaskOrganizer.TaskListener taskListener) {
+        // We need to update the UI otherwise it will not be shown until the user relaunches the app
+        createOrUpdateUserAspectRatioSettingsLayout(taskInfo, taskListener);
+    }
+
+    private void createOrUpdateUserAspectRatioSettingsLayout(@NonNull TaskInfo taskInfo,
+            @Nullable ShellTaskOrganizer.TaskListener taskListener) {
+        if (mUserAspectRatioSettingsLayout != null) {
+            if (mUserAspectRatioSettingsLayout.needsToBeRecreated(taskInfo, taskListener)) {
+                mUserAspectRatioSettingsLayout.release();
+                mUserAspectRatioSettingsLayout = null;
+            } else {
+                // UI already exists, update the UI layout.
+                if (!mUserAspectRatioSettingsLayout.updateCompatInfo(taskInfo, taskListener,
+                        showOnDisplay(mUserAspectRatioSettingsLayout.getDisplayId()))) {
+                    mUserAspectRatioSettingsLayout.release();
+                    mUserAspectRatioSettingsLayout = null;
+                }
+                return;
+            }
+        }
+
+        // Create a new UI layout.
+        final Context context = getOrCreateDisplayContext(taskInfo.displayId);
+        if (context == null) {
+            return;
+        }
+        final UserAspectRatioSettingsWindowManager newLayout =
+                createUserAspectRatioSettingsWindowManager(context, taskInfo, taskListener);
+        if (newLayout.createLayout(showOnDisplay(taskInfo.displayId))) {
+            // The new layout is eligible to be shown, add it the active layouts.
+            mUserAspectRatioSettingsLayout = newLayout;
+        }
+    }
+
+    @VisibleForTesting
+    @NonNull
+    UserAspectRatioSettingsWindowManager createUserAspectRatioSettingsWindowManager(
+            @NonNull Context context, @NonNull TaskInfo taskInfo,
+            @Nullable ShellTaskOrganizer.TaskListener taskListener) {
+        return new UserAspectRatioSettingsWindowManager(context, taskInfo, mSyncQueue,
+                taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
+                mCompatUIHintsState, this::launchUserAspectRatioSettings, mMainExecutor,
+                mDisappearTimeSupplier, this::hasShownUserAspectRatioSettingsButton,
+                this::setHasShownUserAspectRatioSettingsButton);
+    }
+
+    private void launchUserAspectRatioSettings(
+            @NonNull TaskInfo taskInfo, @NonNull ShellTaskOrganizer.TaskListener taskListener) {
+        final Intent intent = new Intent(Settings.ACTION_MANAGE_USER_ASPECT_RATIO_SETTINGS);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        final ComponentName appComponent = taskInfo.topActivity;
+        if (appComponent != null) {
+            final Uri packageUri = Uri.parse("package:" + appComponent.getPackageName());
+            intent.setData(packageUri);
+        }
+        final UserHandle userHandle = UserHandle.of(taskInfo.userId);
+        mContext.startActivityAsUser(intent, userHandle);
     }
 
     private void removeLayouts(int taskId) {
-        final CompatUIWindowManager layout = mActiveCompatLayouts.get(taskId);
-        if (layout != null) {
-            layout.release();
+        final CompatUIWindowManager compatLayout = mActiveCompatLayouts.get(taskId);
+        if (compatLayout != null) {
+            compatLayout.release();
             mActiveCompatLayouts.remove(taskId);
         }
 
         if (mActiveLetterboxEduLayout != null && mActiveLetterboxEduLayout.getTaskId() == taskId) {
             mActiveLetterboxEduLayout.release();
             mActiveLetterboxEduLayout = null;
+        }
+
+        final RestartDialogWindowManager restartLayout =
+                mTaskIdToRestartDialogWindowManagerMap.get(taskId);
+        if (restartLayout != null) {
+            restartLayout.release();
+            mTaskIdToRestartDialogWindowManagerMap.remove(taskId);
+            mSetOfTaskIdsShowingRestartDialog.remove(taskId);
+        }
+        if (mActiveReachabilityEduLayout != null
+                && mActiveReachabilityEduLayout.getTaskId() == taskId) {
+            mActiveReachabilityEduLayout.release();
+            mActiveReachabilityEduLayout = null;
+        }
+
+        if (mUserAspectRatioSettingsLayout != null
+                && mUserAspectRatioSettingsLayout.getTaskId() == taskId) {
+            mUserAspectRatioSettingsLayout.release();
+            mUserAspectRatioSettingsLayout = null;
         }
     }
 
@@ -377,6 +722,21 @@ public class CompatUIController implements OnDisplaysChangedListener,
         if (mActiveLetterboxEduLayout != null && condition.test(mActiveLetterboxEduLayout)) {
             callback.accept(mActiveLetterboxEduLayout);
         }
+        for (int i = 0; i < mTaskIdToRestartDialogWindowManagerMap.size(); i++) {
+            final int taskId = mTaskIdToRestartDialogWindowManagerMap.keyAt(i);
+            final RestartDialogWindowManager layout =
+                    mTaskIdToRestartDialogWindowManagerMap.get(taskId);
+            if (layout != null && condition.test(layout)) {
+                callback.accept(layout);
+            }
+        }
+        if (mActiveReachabilityEduLayout != null && condition.test(mActiveReachabilityEduLayout)) {
+            callback.accept(mActiveReachabilityEduLayout);
+        }
+        if (mUserAspectRatioSettingsLayout != null && condition.test(
+                mUserAspectRatioSettingsLayout)) {
+            callback.accept(mUserAspectRatioSettingsLayout);
+        }
     }
 
     /** An implementation of {@link OnInsetsChangedListener} for a given display id. */
@@ -410,5 +770,15 @@ public class CompatUIController implements OnDisplaysChangedListener,
                 InsetsSourceControl[] activeControls) {
             insetsChanged(insetsState);
         }
+    }
+
+    /**
+     * A class holding the state of the compat UI hints, which is shared between all compat UI
+     * window managers.
+     */
+    static class CompatUIHintsState {
+        boolean mHasShownSizeCompatHint;
+        boolean mHasShownCameraCompatHint;
+        boolean mHasShownUserAspectRatioSettingsButtonHint;
     }
 }

@@ -30,6 +30,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +52,12 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
     public void setUp() throws Exception {
         mWallpaperManager = mock(IWallpaperManager.class);
         mWakefulness =
-                new WakefulnessLifecycle(mContext, mWallpaperManager, mock(DumpManager.class));
+                new WakefulnessLifecycle(
+                        mContext,
+                        mWallpaperManager,
+                        new FakeSystemClock(),
+                        mock(DumpManager.class)
+                );
         mWakefulnessObserver = mock(WakefulnessLifecycle.Observer.class);
         mWakefulness.addObserver(mWakefulnessObserver);
     }

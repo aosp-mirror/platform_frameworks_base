@@ -16,6 +16,7 @@
 package android.hardware;
 
 import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.params.ColorSpaceProfiles;
 import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -50,6 +51,7 @@ public class CameraStreamStats implements Parcelable {
     private long[] mHistogramCounts;
     private long mDynamicRangeProfile;
     private long mStreamUseCase;
+    private int mColorSpace;
 
     private static final String TAG = "CameraStreamStats";
 
@@ -68,12 +70,13 @@ public class CameraStreamStats implements Parcelable {
         mHistogramType = HISTOGRAM_TYPE_UNKNOWN;
         mDynamicRangeProfile = DynamicRangeProfiles.STANDARD;
         mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
+        mColorSpace = ColorSpaceProfiles.UNSPECIFIED;
     }
 
     public CameraStreamStats(int width, int height, int format, float maxPreviewFps,
             int dataSpace, long usage, long requestCount, long errorCount,
             int startLatencyMs, int maxHalBuffers, int maxAppBuffers, long dynamicRangeProfile,
-            long streamUseCase) {
+            long streamUseCase, int colorSpace) {
         mWidth = width;
         mHeight = height;
         mFormat = format;
@@ -88,6 +91,7 @@ public class CameraStreamStats implements Parcelable {
         mHistogramType = HISTOGRAM_TYPE_UNKNOWN;
         mDynamicRangeProfile = dynamicRangeProfile;
         mStreamUseCase = streamUseCase;
+        mColorSpace = colorSpace;
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<CameraStreamStats> CREATOR =
@@ -136,6 +140,7 @@ public class CameraStreamStats implements Parcelable {
         dest.writeLongArray(mHistogramCounts);
         dest.writeLong(mDynamicRangeProfile);
         dest.writeLong(mStreamUseCase);
+        dest.writeInt(mColorSpace);
     }
 
     public void readFromParcel(Parcel in) {
@@ -155,6 +160,7 @@ public class CameraStreamStats implements Parcelable {
         mHistogramCounts = in.createLongArray();
         mDynamicRangeProfile = in.readLong();
         mStreamUseCase = in.readLong();
+        mColorSpace = in.readInt();
     }
 
     public int getWidth() {
@@ -215,6 +221,10 @@ public class CameraStreamStats implements Parcelable {
 
     public long getDynamicRangeProfile() {
         return mDynamicRangeProfile;
+    }
+
+    public int getColorSpace() {
+        return mColorSpace;
     }
 
     public long getStreamUseCase() {

@@ -16,17 +16,23 @@
 
 #pragma once
 
+#include <FileBlobCache.h>
 #include <GrContextOptions.h>
+#include <SkRefCnt.h>
 #include <cutils/compiler.h>
+#include <ftl/shared_mutex.h>
+#include <utils/Mutex.h>
+
 #include <memory>
-#include <mutex>
 #include <string>
 #include <vector>
+
+class GrDirectContext;
+class SkData;
 
 namespace android {
 
 class BlobCache;
-class FileBlobCache;
 
 namespace uirenderer {
 namespace skiapipeline {
@@ -45,7 +51,7 @@ public:
      * and puts the ShaderCache into an initialized state, such that it is
      * able to insert and retrieve entries from the cache. If identity is
      * non-null and validation fails, the cache is initialized but contains
-     * no data. If size is less than zero, the cache is initilaized but
+     * no data. If size is less than zero, the cache is initialized but
      * contains no data.
      *
      * This should be called when HWUI pipeline is initialized. When not in
@@ -91,25 +97,23 @@ private:
     void operator=(const ShaderCache&) = delete;
 
     /**
-     * "getBlobCacheLocked" returns the BlobCache object being used to store the
-     * key/value blob pairs.  If the BlobCache object has not yet been created,
-     * this will do so, loading the serialized cache contents from disk if
-     * possible.
-     */
-    BlobCache* getBlobCacheLocked();
-
-    /**
      * "validateCache" updates the cache to match the given identity.  If the
      * cache currently has the wrong identity, all entries in the cache are cleared.
      */
-    bool validateCache(const void* identity, ssize_t size);
+    bool validateCache(const void* identity, ssize_t size) REQUIRES(mMutex);
 
     /**
-     * "saveToDiskLocked" attemps to save the current contents of the cache to
+     * Helper for BlobCache::set to trace the result and ensure the identity hash
+     * does not get evicted.
+     */
+    void set(const void* key, size_t keySize, const void* value, size_t valueSize) REQUIRES(mMutex);
+
+    /**
+     * "saveToDiskLocked" attempts to save the current contents of the cache to
      * disk. If the identity hash exists, we will insert the identity hash into
      * the cache for next validation.
      */
-    void saveToDiskLocked();
+    void saveToDiskLocked() REQUIRES(mMutex);
 
     /**
      * "mInitialized" indicates whether the ShaderCache is in the initialized
@@ -119,16 +123,14 @@ private:
      * the load and store methods will return without performing any cache
      * operations.
      */
-    bool mInitialized = false;
+    bool mInitialized GUARDED_BY(mMutex) = false;
 
     /**
-     * "mBlobCache" is the cache in which the key/value blob pairs are stored.  It
-     * is initially NULL, and will be initialized by getBlobCacheLocked the
-     * first time it's needed.
-     * The blob cache contains the Android build number. We treat version mismatches as an empty
-     * cache (logic implemented in BlobCache::unflatten).
+     * "mBlobCache" is the cache in which the key/value blob pairs are stored.
+     * The blob cache contains the Android build number. We treat version mismatches
+     * as an empty cache (logic implemented in BlobCache::unflatten).
      */
-    std::unique_ptr<FileBlobCache> mBlobCache;
+    std::unique_ptr<FileBlobCache> mBlobCache GUARDED_BY(mMutex);
 
     /**
      * "mFilename" is the name of the file for storing cache contents in between
@@ -137,7 +139,7 @@ private:
      * empty string indicates that the cache should not be saved to or restored
      * from disk.
      */
-    std::string mFilename;
+    std::string mFilename GUARDED_BY(mMutex);
 
     /**
      * "mIDHash" is the current identity hash for the cache validation. It is
@@ -146,16 +148,17 @@ private:
      * indicates that cache validation is not performed, and the hash should
      * not be stored on disk.
      */
-    std::vector<uint8_t> mIDHash;
+    std::vector<uint8_t> mIDHash GUARDED_BY(mMutex);
 
     /**
      * "mSavePending" indicates whether or not a deferred save operation is
      * pending.  Each time a key/value pair is inserted into the cache via
      * load, a deferred save is initiated if one is not already pending.
      * This will wait some amount of time and then trigger a save of the cache
-     * contents to disk.
+     * contents to disk, unless mDeferredSaveDelayMs is 0 in which case saving
+     * is disabled.
      */
-    bool mSavePending = false;
+    bool mSavePending GUARDED_BY(mMutex) = false;
 
     /**
      *  "mObservedBlobValueSize" is the maximum value size observed by the cache reading function.
@@ -163,21 +166,23 @@ private:
     size_t mObservedBlobValueSize = 20 * 1024;
 
     /**
-     *  The time in seconds to wait before saving newly inserted cache entries.
+     *  The time in milliseconds to wait before saving newly inserted cache entries.
+     *
+     *  WARNING: setting this to 0 will disable writing the cache to disk.
      */
-    unsigned int mDeferredSaveDelay = 4;
+    unsigned int mDeferredSaveDelayMs = 4 * 1000;
 
     /**
-     * "mMutex" is the mutex used to prevent concurrent access to the member
+     * "mMutex" is the shared mutex used to prevent concurrent access to the member
      * variables. It must be locked whenever the member variables are accessed.
      */
-    mutable std::mutex mMutex;
+    mutable ftl::SharedMutex mMutex;
 
     /**
      *  If set to "true", the next call to onVkFrameFlushed, will invoke
      * GrCanvas::storeVkPipelineCacheData. This does not guarantee that data will be stored on disk.
      */
-    bool mTryToStorePipelineCache = true;
+    bool mTryToStorePipelineCache GUARDED_BY(mMutex) = true;
 
     /**
      * This flag is used by "ShaderCache::store" to distinguish between shader data and
@@ -189,16 +194,16 @@ private:
      *  "mNewPipelineCacheSize" has the size of the new Vulkan pipeline cache data. It is used
      *  to prevent unnecessary disk writes, if the pipeline cache size has not changed.
      */
-    size_t mNewPipelineCacheSize = -1;
+    size_t mNewPipelineCacheSize GUARDED_BY(mMutex) = -1;
     /**
      *  "mOldPipelineCacheSize" has the size of the Vulkan pipeline cache data stored on disk.
      */
-    size_t mOldPipelineCacheSize = -1;
+    size_t mOldPipelineCacheSize GUARDED_BY(mMutex) = -1;
 
     /**
      *  "mCacheDirty" is true when there is new shader cache data, which is not saved to disk.
      */
-    bool mCacheDirty = false;
+    bool mCacheDirty GUARDED_BY(mMutex) = false;
 
     /**
      * "sCache" is the singleton ShaderCache object.
@@ -215,7 +220,7 @@ private:
      * interesting to keep track of how many shaders are stored in RAM. This
      * class provides a convenient entry point for that.
      */
-    int mNumShadersCachedInRam = 0;
+    int mNumShadersCachedInRam GUARDED_BY(mMutex) = 0;
 
     friend class ShaderCacheTestUtils;  // used for unit testing
 };

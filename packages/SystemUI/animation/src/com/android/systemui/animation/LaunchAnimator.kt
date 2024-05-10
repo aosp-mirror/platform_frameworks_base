@@ -28,7 +28,7 @@ import android.util.MathUtils
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Interpolator
-import com.android.systemui.animation.Interpolators.LINEAR
+import com.android.app.animation.Interpolators.LINEAR
 import kotlin.math.roundToInt
 
 private const val TAG = "LaunchAnimator"
@@ -75,7 +75,7 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
          * - Get the associated [Context].
          * - Compute whether we are expanding fully above the launch container.
          * - Get to overlay to which we initially put the window background layer, until the opening
-         * window is made visible (see [openingWindowSyncView]).
+         *   window is made visible (see [openingWindowSyncView]).
          *
          * This container can be changed to force this [Controller] to animate the expanding view
          * inside a different location, for instance to ensure correct layering during the
@@ -283,7 +283,7 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
 
         animator.addListener(
             object : AnimatorListenerAdapter() {
-                override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
+                override fun onAnimationStart(animation: Animator, isReverse: Boolean) {
                     if (DEBUG) {
                         Log.d(TAG, "Animation started")
                     }
@@ -295,7 +295,7 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
                     launchContainerOverlay.add(windowBackgroundLayer)
                 }
 
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     if (DEBUG) {
                         Log.d(TAG, "Animation ended")
                     }

@@ -22,11 +22,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackagePartitions;
 import android.content.pm.PackagePartitions.SystemPartition;
+import android.os.Build;
 import android.os.FileUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Xml;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.om.OverlayScanner.ParsedOverlayInfo;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
@@ -53,8 +55,39 @@ import java.util.Map;
  *
  * @see #parseOverlay(File, XmlPullParser, OverlayScanner, ParsingContext)
  * @see #parseMerge(File, XmlPullParser, OverlayScanner, ParsingContext)
+ *
+ * @hide
  **/
-final class OverlayConfigParser {
+@VisibleForTesting
+public final class OverlayConfigParser {
+
+    /** Represents a part of a parsed overlay configuration XML file. */
+    public static class ParsedConfigFile {
+        @NonNull public final String path;
+        @NonNull public final int line;
+        @Nullable public final String xml;
+
+        ParsedConfigFile(@NonNull String path, int line, @Nullable String xml) {
+            this.path = path;
+            this.line = line;
+            this.xml = xml;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(getClass().getSimpleName());
+            sb.append("{path=");
+            sb.append(path);
+            sb.append(", line=");
+            sb.append(line);
+            if (xml != null) {
+                sb.append(", xml=");
+                sb.append(xml);
+            }
+            sb.append("}");
+            return sb.toString();
+        }
+    }
 
     // Default values for overlay configurations.
     static final boolean DEFAULT_ENABLED_STATE = false;
@@ -94,28 +127,48 @@ final class OverlayConfigParser {
         @NonNull
         public final String policy;
 
-        /** Information extracted from the manifest of the overlay. */
-        @NonNull
+        /**
+         * Information extracted from the manifest of the overlay.
+         * Null if the information was read from a config file instead of a manifest.
+         *
+         * @see parsedConfigFile
+         **/
+        @Nullable
         public final ParsedOverlayInfo parsedInfo;
 
+        /**
+         * The config file used to configure this overlay.
+         * Null if no config file was used, in which case the overlay's manifest was used instead.
+         *
+         * @see parsedInfo
+         **/
+        @Nullable
+        public final ParsedConfigFile parsedConfigFile;
+
         ParsedConfiguration(@NonNull String packageName, boolean enabled, boolean mutable,
-                @NonNull String policy, @NonNull ParsedOverlayInfo parsedInfo) {
+                @NonNull String policy, @Nullable ParsedOverlayInfo parsedInfo,
+                @Nullable ParsedConfigFile parsedConfigFile) {
             this.packageName = packageName;
             this.enabled = enabled;
             this.mutable = mutable;
             this.policy = policy;
             this.parsedInfo = parsedInfo;
+            this.parsedConfigFile = parsedConfigFile;
         }
 
         @Override
         public String toString() {
             return getClass().getSimpleName() + String.format("{packageName=%s, enabled=%s"
-                            + ", mutable=%s, policy=%s, parsedInfo=%s}", packageName, enabled,
-                    mutable, policy, parsedInfo);
+                            + ", mutable=%s, policy=%s, parsedInfo=%s, parsedConfigFile=%s}",
+                    packageName, enabled, mutable, policy, parsedInfo, parsedConfigFile);
         }
     }
 
-    static class OverlayPartition extends SystemPartition {
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static class OverlayPartition extends SystemPartition {
         // Policies passed to idmap2 during idmap creation.
         // Keep partition policy constants in sync with f/b/cmds/idmap2/include/idmap2/Policies.h.
         static final String POLICY_ODM = "odm";
@@ -128,7 +181,11 @@ final class OverlayConfigParser {
         @NonNull
         public final String policy;
 
-        OverlayPartition(@NonNull SystemPartition partition) {
+        /**
+         * @hide
+         **/
+        @VisibleForTesting
+        public OverlayPartition(@NonNull SystemPartition partition) {
             super(partition);
             this.policy = policyForPartition(partition);
         }
@@ -417,9 +474,26 @@ final class OverlayConfigParser {
             Log.w(TAG, "found default-disabled immutable overlay " + packageName);
         }
 
-        final ParsedConfiguration Config = new ParsedConfiguration(packageName, isEnabled,
-                isMutable, parsingContext.mPartition.policy, info);
+        final ParsedConfigFile parsedConfigFile = new ParsedConfigFile(
+                configFile.getPath().intern(), parser.getLineNumber(),
+                (Build.IS_ENG || Build.IS_USERDEBUG) ? currentParserContextToString(parser) : null);
+        final ParsedConfiguration config = new ParsedConfiguration(packageName, isEnabled,
+                isMutable, parsingContext.mPartition.policy, info, parsedConfigFile);
         parsingContext.mConfiguredOverlays.add(packageName);
-        parsingContext.mOrderedConfigurations.add(Config);
+        parsingContext.mOrderedConfigurations.add(config);
+    }
+
+    private static String currentParserContextToString(@NonNull XmlPullParser parser) {
+        StringBuilder sb = new StringBuilder("<");
+        sb.append(parser.getName());
+        sb.append(" ");
+        for (int i = 0; i < parser.getAttributeCount(); i++) {
+            sb.append(parser.getAttributeName(i));
+            sb.append("=\"");
+            sb.append(parser.getAttributeValue(i));
+            sb.append("\" ");
+        }
+        sb.append("/>");
+        return sb.toString();
     }
 }

@@ -18,17 +18,26 @@ package com.android.internal.os;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
+
+import android.os.BadParcelableException;
 import android.os.Parcel;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@IgnoreUnderRavenwood(blockedBy = LongArrayMultiStateCounter.class)
 public class LongArrayMultiStateCounterTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     @Test
     public void setStateAndUpdateValue() {
@@ -45,6 +54,16 @@ public class LongArrayMultiStateCounterTest {
 
         assertThat(counter.toString()).isEqualTo(
                 "[0: {75, 150, 225, 300}, 1: {25, 50, 75, 100}] updated: 9000 currentState: 0");
+    }
+
+    @Test
+    public void setValue() {
+        LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 4);
+
+        counter.setValues(0, new long[]{1, 2, 3, 4});
+        counter.setValues(1, new long[]{5, 6, 7, 8});
+        assertCounts(counter, 0, new long[]{1, 2, 3, 4});
+        assertCounts(counter, 1, new long[]{5, 6, 7, 8});
     }
 
     @Test
@@ -148,5 +167,83 @@ public class LongArrayMultiStateCounterTest {
         counter.getCounts(container, state);
         container.getValues(counts);
         assertThat(counts).isEqualTo(expected);
+    }
+
+    @Test
+    public void createFromBadParcel() {
+        // Check we don't crash the runtime if the Parcel data is bad (b/243434675).
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(2);
+        parcel.setDataPosition(0);
+        assertThrows(RuntimeException.class,
+                () -> LongArrayMultiStateCounter.CREATOR.createFromParcel(parcel));
+    }
+
+    @Test
+    public void createFromBadBundle() {
+        Parcel data = Parcel.obtain();
+        int bundleLenPos = data.dataPosition();
+        data.writeInt(0);
+        data.writeInt(0x4C444E42);      // BaseBundle.BUNDLE_MAGIC
+
+        int bundleStart = data.dataPosition();
+
+        data.writeInt(1);
+        data.writeString("key");
+        data.writeInt(4);
+        int lazyValueLenPos = data.dataPosition();
+        data.writeInt(0);
+        int lazyValueStart = data.dataPosition();
+        data.writeString("com.android.internal.os.LongArrayMultiStateCounter");
+
+        // Invalid int16 value
+        data.writeInt(0x10000);     // stateCount
+        data.writeInt(10);          // arrayLength
+        for (int i = 0; i < 0x10000; ++i) {
+            data.writeLong(0);
+        }
+
+        backPatchLength(data, lazyValueLenPos, lazyValueStart);
+        backPatchLength(data, bundleLenPos, bundleStart);
+        data.setDataPosition(0);
+
+        assertThrows(BadParcelableException.class,
+                () -> data.readBundle().getParcelable("key", LongArrayMultiStateCounter.class));
+    }
+
+    private static void backPatchLength(Parcel parcel, int lengthPos, int startPos) {
+        int endPos = parcel.dataPosition();
+        parcel.setDataPosition(lengthPos);
+        parcel.writeInt(endPos - startPos);
+        parcel.setDataPosition(endPos);
+    }
+
+    @Test
+    public void combineValues() {
+        long[] values = new long[] {0, 1, 2, 3, 42};
+        LongArrayMultiStateCounter.LongArrayContainer container =
+                new LongArrayMultiStateCounter.LongArrayContainer(values.length);
+        container.setValues(values);
+
+        long[] out = new long[3];
+        int[] indexes = {2, 1, 1, 0, 0};
+        boolean nonZero = container.combineValues(out, indexes);
+        assertThat(nonZero).isTrue();
+        assertThat(out).isEqualTo(new long[]{45, 3, 0});
+
+        // All zeros
+        container.setValues(new long[]{0, 0, 0, 0, 0});
+        nonZero = container.combineValues(out, indexes);
+        assertThat(nonZero).isFalse();
+        assertThat(out).isEqualTo(new long[]{0, 0, 0});
+
+        // Index out of range
+        IndexOutOfBoundsException e1 = assertThrows(
+                IndexOutOfBoundsException.class,
+                () -> container.combineValues(out, new int[]{0, 1, -1, 0, 0}));
+        assertThat(e1.getMessage()).isEqualTo("Index -1 is out of bounds: [0, 2]");
+        IndexOutOfBoundsException e2 = assertThrows(IndexOutOfBoundsException.class,
+                () -> container.combineValues(out, new int[]{0, 1, 4, 0, 0}));
+        assertThat(e2.getMessage()).isEqualTo("Index 4 is out of bounds: [0, 2]");
     }
 }

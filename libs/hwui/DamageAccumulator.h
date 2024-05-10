@@ -61,6 +61,8 @@ public:
 
     void computeCurrentTransform(Matrix4* outMatrix) const;
 
+    SkRect computeClipAndTransform(const SkRect& bounds, Matrix4* outMatrix) const;
+
     void finish(SkRect* totalDirty);
 
     struct StretchResult {
@@ -70,9 +72,9 @@ public:
         const StretchEffect* stretchEffect;
 
         /**
-         * Bounds of the child relative to the stretch container
+         * Bounds of the stretching container
          */
-        const SkRect childRelativeBounds;
+        const SkRect parentBounds;
 
         /**
          * Width of the stretch container

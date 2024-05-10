@@ -18,21 +18,20 @@ package com.android.systemui.shade
 
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintSet
-import com.android.systemui.R
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
+import com.android.systemui.res.R
+import com.android.systemui.dagger.SysUISingleton
 
 /**
  * Standard implementation of [CombinedShadeHeadersConstraintManager].
  */
-@CentralSurfacesComponent.CentralSurfacesScope
+@SysUISingleton
 object CombinedShadeHeadersConstraintManagerImpl : CombinedShadeHeadersConstraintManager {
 
     override fun privacyChipVisibilityConstraints(visible: Boolean): ConstraintsChanges {
         val constraintAlpha = if (visible) 0f else 1f
         return ConstraintsChanges(
             qqsConstraintsChanges = {
-                setAlpha(R.id.statusIcons, constraintAlpha)
-                setAlpha(R.id.batteryRemainingIcon, constraintAlpha)
+                setAlpha(R.id.shade_header_system_icons, constraintAlpha)
             }
         )
     }
@@ -45,12 +44,15 @@ object CombinedShadeHeadersConstraintManagerImpl : CombinedShadeHeadersConstrain
                     R.id.barrier,
                     ConstraintSet.START,
                     0,
-                    R.id.statusIcons,
+                    R.id.shade_header_system_icons,
                     R.id.privacy_container
                 )
-                connect(R.id.statusIcons, ConstraintSet.START, R.id.date, ConstraintSet.END)
+                connect(R.id.shade_header_system_icons, ConstraintSet.START, R.id.date,
+                    ConstraintSet.END)
                 connect(R.id.privacy_container, ConstraintSet.START, R.id.date, ConstraintSet.END)
-                constrainWidth(R.id.statusIcons, ViewGroup.LayoutParams.WRAP_CONTENT)
+                constrainWidth(R.id.shade_header_system_icons, ViewGroup.LayoutParams.WRAP_CONTENT)
+                constrainedWidth(R.id.date, true)
+                constrainedWidth(R.id.shade_header_system_icons, true)
             }
         )
     }
@@ -67,7 +69,8 @@ object CombinedShadeHeadersConstraintManagerImpl : CombinedShadeHeadersConstrain
         }
         return ConstraintsChanges(
             qqsConstraintsChanges = change,
-            qsConstraintsChanges = change
+            qsConstraintsChanges = change,
+            largeScreenConstraintsChanges = change,
         )
     }
 
@@ -81,7 +84,7 @@ object CombinedShadeHeadersConstraintManagerImpl : CombinedShadeHeadersConstrain
                 setGuidelineEnd(centerEnd, offsetFromEdge)
                 connect(R.id.date, ConstraintSet.END, centerStart, ConstraintSet.START)
                 connect(
-                    R.id.statusIcons,
+                    R.id.shade_header_system_icons,
                     ConstraintSet.START,
                     centerEnd,
                     ConstraintSet.END
@@ -92,7 +95,8 @@ object CombinedShadeHeadersConstraintManagerImpl : CombinedShadeHeadersConstrain
                     centerEnd,
                     ConstraintSet.END
                 )
-                constrainWidth(R.id.statusIcons, 0)
+                constrainedWidth(R.id.date, true)
+                constrainedWidth(R.id.shade_header_system_icons, true)
             },
             qsConstraintsChanges = {
                 setGuidelineBegin(centerStart, offsetFromEdge)

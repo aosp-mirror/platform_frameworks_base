@@ -18,6 +18,7 @@ package com.android.settingslib.display;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.hardware.display.DisplayManager;
 import android.os.AsyncTask;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -32,6 +33,9 @@ import android.view.WindowManagerGlobal;
 import com.android.settingslib.R;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Predicate;
 
 /**
  * Utility methods for working with display density.
@@ -70,120 +74,169 @@ public class DisplayDensityUtils {
      */
     private static final int MIN_DIMENSION_DP = 320;
 
-    private final String[] mEntries;
-    private final int[] mValues;
+    private static final Predicate<DisplayInfo> INTERNAL_ONLY =
+            (info) -> info.type == Display.TYPE_INTERNAL;
 
-    private final int mDefaultDensity;
-    private final int mCurrentIndex;
+    private final Predicate<DisplayInfo> mPredicate;
+
+    private final DisplayManager mDisplayManager;
+
+    /**
+     * The text description of the density values of the default display.
+     */
+    private String[] mDefaultDisplayDensityEntries;
+
+    /**
+     * The density values of the default display.
+     */
+    private int[] mDefaultDisplayDensityValues;
+
+    /**
+     * The density values, indexed by display unique ID.
+     */
+    private final Map<String, int[]> mValuesPerDisplay = new HashMap();
+
+    private int mDefaultDensityForDefaultDisplay;
+    private int mCurrentIndex = -1;
 
     public DisplayDensityUtils(Context context) {
-        final int defaultDensity = DisplayDensityUtils.getDefaultDisplayDensity(
-                Display.DEFAULT_DISPLAY);
-        if (defaultDensity <= 0) {
-            mEntries = null;
-            mValues = null;
-            mDefaultDensity = 0;
-            mCurrentIndex = -1;
-            return;
-        }
+        this(context, INTERNAL_ONLY);
+    }
 
-        final Resources res = context.getResources();
-        DisplayInfo info = new DisplayInfo();
-        context.getDisplayNoVerify().getDisplayInfo(info);
+    /**
+     * Creates an instance that stores the density values for the displays that satisfy
+     * the predicate.
+     * @param context The context
+     * @param predicate Determines what displays the density should be set for. The default display
+     *                  must satisfy this predicate.
+     */
+    public DisplayDensityUtils(Context context, Predicate predicate) {
+        mPredicate = predicate;
+        mDisplayManager = context.getSystemService(DisplayManager.class);
 
-        final int currentDensity = info.logicalDensityDpi;
-        int currentDensityIndex = -1;
-
-        // Compute number of "larger" and "smaller" scales for this display.
-        final int minDimensionPx = Math.min(info.logicalWidth, info.logicalHeight);
-        final int maxDensity = DisplayMetrics.DENSITY_MEDIUM * minDimensionPx / MIN_DIMENSION_DP;
-        final float maxScaleDimen = context.getResources().getFraction(
-                R.fraction.display_density_max_scale, 1, 1);
-        final float maxScale = Math.min(maxScaleDimen, maxDensity / (float) defaultDensity);
-        final float minScale = context.getResources().getFraction(
-                R.fraction.display_density_min_scale, 1, 1);
-        final float minScaleInterval = context.getResources().getFraction(
-                R.fraction.display_density_min_scale_interval, 1, 1);
-        final int numLarger = (int) MathUtils.constrain((maxScale - 1) / minScaleInterval,
-                0, SUMMARIES_LARGER.length);
-        final int numSmaller = (int) MathUtils.constrain((1 - minScale) / minScaleInterval,
-                0, SUMMARIES_SMALLER.length);
-
-        String[] entries = new String[1 + numSmaller + numLarger];
-        int[] values = new int[entries.length];
-        int curIndex = 0;
-
-        if (numSmaller > 0) {
-            final float interval = (1 - minScale) / numSmaller;
-            for (int i = numSmaller - 1; i >= 0; i--) {
-                // Round down to a multiple of 2 by truncating the low bit.
-                final int density = ((int) (defaultDensity * (1 - (i + 1) * interval))) & ~1;
-                if (currentDensity == density) {
-                    currentDensityIndex = curIndex;
-                }
-                entries[curIndex] = res.getString(SUMMARIES_SMALLER[i]);
-                values[curIndex] = density;
-                curIndex++;
+        for (Display display : mDisplayManager.getDisplays(
+                DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)) {
+            DisplayInfo info = new DisplayInfo();
+            if (!display.getDisplayInfo(info)) {
+                Log.w(LOG_TAG, "Cannot fetch display info for display " + display.getDisplayId());
+                continue;
             }
-        }
-
-        if (currentDensity == defaultDensity) {
-            currentDensityIndex = curIndex;
-        }
-        values[curIndex] = defaultDensity;
-        entries[curIndex] = res.getString(SUMMARY_DEFAULT);
-        curIndex++;
-
-        if (numLarger > 0) {
-            final float interval = (maxScale - 1) / numLarger;
-            for (int i = 0; i < numLarger; i++) {
-                // Round down to a multiple of 2 by truncating the low bit.
-                final int density = ((int) (defaultDensity * (1 + (i + 1) * interval))) & ~1;
-                if (currentDensity == density) {
-                    currentDensityIndex = curIndex;
+            if (!mPredicate.test(info)) {
+                if (display.getDisplayId() == Display.DEFAULT_DISPLAY) {
+                    throw new IllegalArgumentException("Predicate must not filter out the default "
+                            + "display.");
                 }
-                values[curIndex] = density;
-                entries[curIndex] = res.getString(SUMMARIES_LARGER[i]);
-                curIndex++;
+                continue;
             }
+
+            final int defaultDensity = DisplayDensityUtils.getDefaultDensityForDisplay(
+                    display.getDisplayId());
+            if (defaultDensity <= 0) {
+                Log.w(LOG_TAG, "Cannot fetch default density for display "
+                        + display.getDisplayId());
+                continue;
+            }
+
+            final Resources res = context.getResources();
+
+            final int currentDensity = info.logicalDensityDpi;
+            int currentDensityIndex = -1;
+
+            // Compute number of "larger" and "smaller" scales for this display.
+            final int minDimensionPx = Math.min(info.logicalWidth, info.logicalHeight);
+            final int maxDensity =
+                    DisplayMetrics.DENSITY_MEDIUM * minDimensionPx / MIN_DIMENSION_DP;
+            final float maxScaleDimen = context.getResources().getFraction(
+                    R.fraction.display_density_max_scale, 1, 1);
+            final float maxScale = Math.min(maxScaleDimen, maxDensity / (float) defaultDensity);
+            final float minScale = context.getResources().getFraction(
+                    R.fraction.display_density_min_scale, 1, 1);
+            final float minScaleInterval = context.getResources().getFraction(
+                    R.fraction.display_density_min_scale_interval, 1, 1);
+            final int numLarger = (int) MathUtils.constrain((maxScale - 1) / minScaleInterval,
+                    0, SUMMARIES_LARGER.length);
+            final int numSmaller = (int) MathUtils.constrain((1 - minScale) / minScaleInterval,
+                    0, SUMMARIES_SMALLER.length);
+
+            String[] entries = new String[1 + numSmaller + numLarger];
+            int[] values = new int[entries.length];
+            int curIndex = 0;
+
+            if (numSmaller > 0) {
+                final float interval = (1 - minScale) / numSmaller;
+                for (int i = numSmaller - 1; i >= 0; i--) {
+                    // Round down to a multiple of 2 by truncating the low bit.
+                    final int density = ((int) (defaultDensity * (1 - (i + 1) * interval))) & ~1;
+                    if (currentDensity == density) {
+                        currentDensityIndex = curIndex;
+                    }
+                    entries[curIndex] = res.getString(SUMMARIES_SMALLER[i]);
+                    values[curIndex] = density;
+                    curIndex++;
+                }
+            }
+
+            if (currentDensity == defaultDensity) {
+                currentDensityIndex = curIndex;
+            }
+            values[curIndex] = defaultDensity;
+            entries[curIndex] = res.getString(SUMMARY_DEFAULT);
+            curIndex++;
+
+            if (numLarger > 0) {
+                final float interval = (maxScale - 1) / numLarger;
+                for (int i = 0; i < numLarger; i++) {
+                    // Round down to a multiple of 2 by truncating the low bit.
+                    final int density = ((int) (defaultDensity * (1 + (i + 1) * interval))) & ~1;
+                    if (currentDensity == density) {
+                        currentDensityIndex = curIndex;
+                    }
+                    values[curIndex] = density;
+                    entries[curIndex] = res.getString(SUMMARIES_LARGER[i]);
+                    curIndex++;
+                }
+            }
+
+            final int displayIndex;
+            if (currentDensityIndex >= 0) {
+                displayIndex = currentDensityIndex;
+            } else {
+                // We don't understand the current density. Must have been set by
+                // someone else. Make room for another entry...
+                int newLength = values.length + 1;
+                values = Arrays.copyOf(values, newLength);
+                values[curIndex] = currentDensity;
+
+                entries = Arrays.copyOf(entries, newLength);
+                entries[curIndex] = res.getString(SUMMARY_CUSTOM, currentDensity);
+
+                displayIndex = curIndex;
+            }
+
+            if (display.getDisplayId() == Display.DEFAULT_DISPLAY) {
+                mDefaultDensityForDefaultDisplay = defaultDensity;
+                mCurrentIndex = displayIndex;
+                mDefaultDisplayDensityEntries = entries;
+                mDefaultDisplayDensityValues = values;
+            }
+            mValuesPerDisplay.put(info.uniqueId, values);
         }
-
-        final int displayIndex;
-        if (currentDensityIndex >= 0) {
-            displayIndex = currentDensityIndex;
-        } else {
-            // We don't understand the current density. Must have been set by
-            // someone else. Make room for another entry...
-            int newLength = values.length + 1;
-            values = Arrays.copyOf(values, newLength);
-            values[curIndex] = currentDensity;
-
-            entries = Arrays.copyOf(entries, newLength);
-            entries[curIndex] = res.getString(SUMMARY_CUSTOM, currentDensity);
-
-            displayIndex = curIndex;
-        }
-
-        mDefaultDensity = defaultDensity;
-        mCurrentIndex = displayIndex;
-        mEntries = entries;
-        mValues = values;
     }
 
-    public String[] getEntries() {
-        return mEntries;
+    public String[] getDefaultDisplayDensityEntries() {
+        return mDefaultDisplayDensityEntries;
     }
 
-    public int[] getValues() {
-        return mValues;
+    public int[] getDefaultDisplayDensityValues() {
+        return mDefaultDisplayDensityValues;
     }
 
-    public int getCurrentIndex() {
+    public int getCurrentIndexForDefaultDisplay() {
         return mCurrentIndex;
     }
 
-    public int getDefaultDensity() {
-        return mDefaultDensity;
+    public int getDefaultDensityForDefaultDisplay() {
+        return mDefaultDensityForDefaultDisplay;
     }
 
     /**
@@ -193,7 +246,7 @@ public class DisplayDensityUtils {
      * @return the default density of the specified display, or {@code -1} if
      *         the display does not exist or the density could not be obtained
      */
-    private static int getDefaultDisplayDensity(int displayId) {
+    private static int getDefaultDensityForDisplay(int displayId) {
        try {
            final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
            return wm.getInitialDisplayDensity(displayId);
@@ -203,19 +256,31 @@ public class DisplayDensityUtils {
     }
 
     /**
-     * Asynchronously applies display density changes to the specified display.
+     * Asynchronously applies display density changes to the displays that satisfy the predicate.
      * <p>
      * The change will be applied to the user specified by the value of
      * {@link UserHandle#myUserId()} at the time the method is called.
-     *
-     * @param displayId the identifier of the display to modify
      */
-    public static void clearForcedDisplayDensity(final int displayId) {
+    public void clearForcedDisplayDensity() {
         final int userId = UserHandle.myUserId();
         AsyncTask.execute(() -> {
             try {
-                final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-                wm.clearForcedDisplayDensityForUser(displayId, userId);
+                for (Display display : mDisplayManager.getDisplays(
+                        DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)) {
+                    int displayId = display.getDisplayId();
+                    DisplayInfo info = new DisplayInfo();
+                    if (!display.getDisplayInfo(info)) {
+                        Log.w(LOG_TAG, "Unable to clear forced display density setting "
+                                + "for display " + displayId);
+                        continue;
+                    }
+                    if (!mPredicate.test(info)) {
+                        continue;
+                    }
+
+                    final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+                    wm.clearForcedDisplayDensityForUser(displayId, userId);
+                }
             } catch (RemoteException exc) {
                 Log.w(LOG_TAG, "Unable to clear forced display density setting");
             }
@@ -223,20 +288,39 @@ public class DisplayDensityUtils {
     }
 
     /**
-     * Asynchronously applies display density changes to the specified display.
+     * Asynchronously applies display density changes to the displays that satisfy the predicate.
      * <p>
      * The change will be applied to the user specified by the value of
      * {@link UserHandle#myUserId()} at the time the method is called.
      *
-     * @param displayId the identifier of the display to modify
-     * @param density the density to force for the specified display
+     * @param index The index of the density value
      */
-    public static void setForcedDisplayDensity(final int displayId, final int density) {
+    public void setForcedDisplayDensity(final int index) {
         final int userId = UserHandle.myUserId();
         AsyncTask.execute(() -> {
             try {
-                final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-                wm.setForcedDisplayDensityForUser(displayId, density, userId);
+                for (Display display : mDisplayManager.getDisplays(
+                        DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)) {
+                    int displayId = display.getDisplayId();
+                    DisplayInfo info = new DisplayInfo();
+                    if (!display.getDisplayInfo(info)) {
+                        Log.w(LOG_TAG, "Unable to save forced display density setting "
+                                + "for display " + displayId);
+                        continue;
+                    }
+                    if (!mPredicate.test(info)) {
+                        continue;
+                    }
+                    if (!mValuesPerDisplay.containsKey(info.uniqueId)) {
+                        Log.w(LOG_TAG, "Unable to save forced display density setting "
+                                + "for display " + info.uniqueId);
+                        continue;
+                    }
+
+                    final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+                    wm.setForcedDisplayDensityForUser(displayId,
+                            mValuesPerDisplay.get(info.uniqueId)[index], userId);
+                }
             } catch (RemoteException exc) {
                 Log.w(LOG_TAG, "Unable to save forced display density setting");
             }

@@ -29,22 +29,28 @@
       ]
     },
     {
-      "name": "CtsPermission2TestCases",
+      "name": "CtsPermissionPolicyTestCases",
       "options": [
         {
-          "include-filter": "android.permission2.cts.RestrictedPermissionsTest"
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
         },
         {
-          "include-filter": "android.permission2.cts.RestrictedStoragePermissionSharedUidTest"
+          "include-filter": "android.permissionpolicy.cts.RestrictedPermissionsTest"
         },
         {
-          "include-filter": "android.permission2.cts.RestrictedStoragePermissionTest"
+          "include-filter": "android.permissionpolicy.cts.RestrictedStoragePermissionSharedUidTest"
+        },
+        {
+          "include-filter": "android.permissionpolicy.cts.RestrictedStoragePermissionTest"
         }
       ]
     },
     {
       "name": "CtsPermissionTestCases",
       "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
         {
           "include-filter": "android.permission.cts.SplitPermissionTest"
         },
@@ -76,6 +82,31 @@
       "options": [
         {
           "include-filter": "com.android.server.policy."
+        }
+      ]
+    },
+    {
+      "name": "CtsPermissionPolicyTestCases",
+      "options": [
+        {
+          "include-filter": "android.permissionpolicy.cts.RestrictedPermissionsTest"
+        },
+        {
+          "include-filter": "android.permissionpolicy.cts.RestrictedStoragePermissionSharedUidTest"
+        },
+        {
+          "include-filter": "android.permissionpolicy.cts.RestrictedStoragePermissionTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsPermissionTestCases",
+      "options": [
+        {
+          "include-filter": "android.permission.cts.SplitPermissionTest"
+        },
+        {
+          "include-filter": "android.permission.cts.BackgroundPermissionsTest"
         }
       ]
     }

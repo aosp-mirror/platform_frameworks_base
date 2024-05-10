@@ -32,8 +32,9 @@ import android.content.rollback.PackageRollbackInfo;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
+import com.android.internal.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.PackageList;
-import com.android.server.pm.parsing.pkg.PackageImpl;
+
 import com.google.common.collect.Range;
 
 import org.junit.Before;
@@ -415,7 +416,7 @@ public class RollbackUnitTest {
 
     private void addPkgWithMinExtVersions(String pkg, int[][] minExtVersions) {
         mPackages.add(pkg);
-        PackageImpl pkgImpl = new PackageImpl(pkg, "baseCodePath", "codePath", null, false);
+        PackageImpl pkgImpl = new PackageImpl(pkg, "baseCodePath", "codePath", null, false, null);
         pkgImpl.setMinExtensionVersions(sparseArrayFrom(minExtVersions));
 
         when(mMockPmi.getPackage(pkg)).thenReturn(pkgImpl);

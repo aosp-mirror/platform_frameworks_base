@@ -142,8 +142,11 @@ public class ActivityMetricsLaunchObserver {
      *           if the launching activity is started from an existing launch sequence (trampoline)
      *           but cannot coalesce to the existing one, e.g. to a different display.
      * @param name The launching activity name.
+     * @param temperature The temperature at which a launch sequence had started.
+     * @param userId The id of the user the activity is being launched for.
      */
-    public void onActivityLaunched(long id, ComponentName name, @Temperature int temperature) {
+    public void onActivityLaunched(long id, ComponentName name, @Temperature int temperature,
+            int userId) {
     }
 
     /**
@@ -177,13 +180,15 @@ public class ActivityMetricsLaunchObserver {
      * @param timestampNanos the timestamp of ActivityLaunchFinished event in nanoseconds.
      *        To compute the TotalTime duration, deduct the timestamp {@link #onIntentStarted}
      *        from {@code timestampNanos}.
+     * @param launchMode The activity launch mode.
      *
      * @apiNote The finishing activity isn't necessarily the same as the starting activity;
      *          in the case of a trampoline, multiple activities could've been started
      *          and only the latest activity that was top-most during first-frame drawn
      *          is reported here.
      */
-    public void onActivityLaunchFinished(long id, ComponentName name, long timestampNanos) {
+    public void onActivityLaunchFinished(long id, ComponentName name, long timestampNanos,
+            int launchMode) {
     }
 
     /**

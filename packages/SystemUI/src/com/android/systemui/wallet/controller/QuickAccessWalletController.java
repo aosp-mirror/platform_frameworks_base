@@ -19,6 +19,7 @@ package com.android.systemui.wallet.controller;
 import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE;
 import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE;
 
+import android.annotation.WorkerThread;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -30,7 +31,7 @@ import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.QuickAccessWalletClientImpl;
 import android.util.Log;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -146,7 +147,9 @@ public class QuickAccessWalletController {
 
     /**
      * Update the "show wallet" preference.
+     * This should not be called on the main thread.
      */
+    @WorkerThread
     public void updateWalletPreference() {
         mWalletEnabled = mQuickAccessWalletClient.isWalletServiceAvailable()
                 && mQuickAccessWalletClient.isWalletFeatureAvailable()
@@ -155,11 +158,14 @@ public class QuickAccessWalletController {
 
     /**
      * Query the wallet cards from {@link QuickAccessWalletClient}.
+     * This should not be called on the main thread.
      *
      * @param cardsRetriever a callback to retrieve wallet cards.
+     * @param maxCards the maximum number of cards requested from the QuickAccessWallet
      */
+    @WorkerThread
     public void queryWalletCards(
-            QuickAccessWalletClient.OnWalletCardsRetrievedCallback cardsRetriever) {
+            QuickAccessWalletClient.OnWalletCardsRetrievedCallback cardsRetriever, int maxCards) {
         if (mClock.elapsedRealtime() - mQawClientCreatedTimeMillis
                 > RECREATION_TIME_WINDOW) {
             Log.i(TAG, "Re-creating the QAW client to avoid stale.");
@@ -175,9 +181,22 @@ public class QuickAccessWalletController {
                 mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_height);
         int iconSizePx = mContext.getResources().getDimensionPixelSize(R.dimen.wallet_icon_size);
         GetWalletCardsRequest request =
-                new GetWalletCardsRequest(cardWidth, cardHeight, iconSizePx, /* maxCards= */ 1);
+                new GetWalletCardsRequest(cardWidth, cardHeight, iconSizePx, maxCards);
         mQuickAccessWalletClient.getWalletCards(mBgExecutor, request, cardsRetriever);
     }
+
+    /**
+     * Query the wallet cards from {@link QuickAccessWalletClient}.
+     * This should not be called on the main thread.
+     *
+     * @param cardsRetriever a callback to retrieve wallet cards.
+     */
+    @WorkerThread
+    public void queryWalletCards(
+            QuickAccessWalletClient.OnWalletCardsRetrievedCallback cardsRetriever) {
+        queryWalletCards(cardsRetriever, /* maxCards= */ 1);
+    }
+
 
     /**
      * Re-create the {@link QuickAccessWalletClient} of the controller.
@@ -273,7 +292,7 @@ public class QuickAccessWalletController {
             };
 
             mSecureSettings.registerContentObserverForUser(
-                    Settings.Secure.getUriFor(Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT),
+                    Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT,
                     false /* notifyForDescendants */,
                     mDefaultPaymentAppObserver,
                     UserHandle.USER_ALL);
@@ -293,7 +312,7 @@ public class QuickAccessWalletController {
             };
 
             mSecureSettings.registerContentObserverForUser(
-                    Settings.Secure.getUriFor(QuickAccessWalletClientImpl.SETTING_KEY),
+                    QuickAccessWalletClientImpl.SETTING_KEY,
                     false /* notifyForDescendants */,
                     mWalletPreferenceObserver,
                     UserHandle.USER_ALL);

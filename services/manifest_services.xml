@@ -4,4 +4,9 @@
         <version>1</version>
         <fqname>IAltitudeService/default</fqname>
     </hal>
+    <hal format="aidl">
+        <name>android.frameworks.vibrator</name>
+        <version>1</version>
+        <fqname>IVibratorControlService/default</fqname>
+    </hal>
 </manifest>

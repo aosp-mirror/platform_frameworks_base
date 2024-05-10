@@ -17,17 +17,21 @@
 package com.android.wm.shell.recents;
 
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_50_50;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -44,6 +48,7 @@ import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
@@ -57,7 +62,9 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.sysui.ShellCommandHandler;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.ShellSharedConstants;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
 import com.android.wm.shell.util.SplitBounds;
 
@@ -92,7 +99,9 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
     private ShellTaskOrganizer mShellTaskOrganizer;
     private RecentTasksController mRecentTasksController;
+    private RecentTasksController mRecentTasksControllerReal;
     private ShellInit mShellInit;
+    private ShellController mShellController;
     private TestShellExecutor mMainExecutor;
 
     @Before
@@ -100,9 +109,12 @@ public class RecentTasksControllerTest extends ShellTestCase {
         mMainExecutor = new TestShellExecutor();
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
         mShellInit = spy(new ShellInit(mMainExecutor));
-        mRecentTasksController = spy(new RecentTasksController(mContext, mShellInit,
-                mShellCommandHandler, mTaskStackListener, mActivityTaskManager,
-                Optional.of(mDesktopModeTaskRepository), mMainExecutor));
+        mShellController = spy(new ShellController(mContext, mShellInit, mShellCommandHandler,
+                mMainExecutor));
+        mRecentTasksControllerReal = new RecentTasksController(mContext, mShellInit,
+                mShellController, mShellCommandHandler, mTaskStackListener, mActivityTaskManager,
+                Optional.of(mDesktopModeTaskRepository), mMainExecutor);
+        mRecentTasksController = spy(mRecentTasksControllerReal);
         mShellTaskOrganizer = new ShellTaskOrganizer(mShellInit, mShellCommandHandler,
                 null /* sizeCompatUI */, Optional.empty(), Optional.of(mRecentTasksController),
                 mMainExecutor);
@@ -118,6 +130,26 @@ public class RecentTasksControllerTest extends ShellTestCase {
     public void instantiateController_addDumpCallback() {
         verify(mShellCommandHandler, times(1)).addDumpCallback(any(),
                 isA(RecentTasksController.class));
+    }
+
+    @Test
+    public void instantiateController_addExternalInterface() {
+        verify(mShellController, times(1)).addExternalInterface(
+                eq(ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS), any(), any());
+    }
+
+    @Test
+    public void testInvalidateExternalInterface_unregistersListener() {
+        // Note: We have to use the real instance of the controller here since that is the instance
+        // that is passed to ShellController internally, and the instance that the listener will be
+        // unregistered from
+        mRecentTasksControllerReal.registerRecentTasksListener(new IRecentTasksListener.Default());
+        assertTrue(mRecentTasksControllerReal.hasRecentTasksListener());
+        // Create initial interface
+        mShellController.createExternalInterfaces(new Bundle());
+        // Recreate the interface to trigger invalidation of the previous instance
+        mShellController.createExternalInterfaces(new Bundle());
+        assertFalse(mRecentTasksControllerReal.hasRecentTasksListener());
     }
 
     @Test
@@ -142,10 +174,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         // Verify only one update if the split info is the same
         SplitBounds bounds1 = new SplitBounds(new Rect(0, 0, 50, 50),
-                new Rect(50, 50, 100, 100), t1.taskId, t2.taskId);
+                new Rect(50, 50, 100, 100), t1.taskId, t2.taskId, SNAP_TO_50_50);
         mRecentTasksController.addSplitPair(t1.taskId, t2.taskId, bounds1);
         SplitBounds bounds2 = new SplitBounds(new Rect(0, 0, 50, 50),
-                new Rect(50, 50, 100, 100), t1.taskId, t2.taskId);
+                new Rect(50, 50, 100, 100), t1.taskId, t2.taskId, SNAP_TO_50_50);
         mRecentTasksController.addSplitPair(t1.taskId, t2.taskId, bounds2);
         verify(mRecentTasksController, times(1)).notifyRecentTasksChanged();
     }
@@ -176,8 +208,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
         setRawList(t1, t2, t3, t4, t5, t6);
 
         // Mark a couple pairs [t2, t4], [t3, t5]
-        SplitBounds pair1Bounds = new SplitBounds(new Rect(), new Rect(), 2, 4);
-        SplitBounds pair2Bounds = new SplitBounds(new Rect(), new Rect(), 3, 5);
+        SplitBounds pair1Bounds =
+                new SplitBounds(new Rect(), new Rect(), 2, 4, SNAP_TO_50_50);
+        SplitBounds pair2Bounds =
+                new SplitBounds(new Rect(), new Rect(), 3, 5, SNAP_TO_50_50);
 
         mRecentTasksController.addSplitPair(t2.taskId, t4.taskId, pair1Bounds);
         mRecentTasksController.addSplitPair(t3.taskId, t5.taskId, pair2Bounds);
@@ -205,8 +239,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
         setRawList(t1, t2, t3, t4, t5, t6);
 
         // Mark a couple pairs [t2, t4], [t3, t5]
-        SplitBounds pair1Bounds = new SplitBounds(new Rect(), new Rect(), 2, 4);
-        SplitBounds pair2Bounds = new SplitBounds(new Rect(), new Rect(), 3, 5);
+        SplitBounds pair1Bounds =
+                new SplitBounds(new Rect(), new Rect(), 2, 4, SNAP_TO_50_50);
+        SplitBounds pair2Bounds =
+                new SplitBounds(new Rect(), new Rect(), 3, 5, SNAP_TO_50_50);
 
         mRecentTasksController.addSplitPair(t2.taskId, t4.taskId, pair1Bounds);
         mRecentTasksController.addSplitPair(t3.taskId, t5.taskId, pair2Bounds);
@@ -223,10 +259,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void testGetRecentTasks_groupActiveFreeformTasks() {
+    public void testGetRecentTasks_hasActiveDesktopTasks_proto2Enabled_groupFreeformTasks() {
         StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
                 DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isActive(any())).thenReturn(true);
+        when(DesktopModeStatus.isEnabled()).thenReturn(true);
 
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
@@ -263,6 +299,39 @@ public class RecentTasksControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void testGetRecentTasks_hasActiveDesktopTasks_proto2Disabled_doNotGroupFreeformTasks() {
+        StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
+                DesktopModeStatus.class).startMocking();
+        when(DesktopModeStatus.isEnabled()).thenReturn(false);
+
+        ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
+        ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
+        ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
+        ActivityManager.RecentTaskInfo t4 = makeTaskInfo(4);
+        setRawList(t1, t2, t3, t4);
+
+        when(mDesktopModeTaskRepository.isActiveTask(1)).thenReturn(true);
+        when(mDesktopModeTaskRepository.isActiveTask(3)).thenReturn(true);
+
+        ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
+                MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
+
+        // Expect no grouping of tasks
+        assertEquals(4, recentTasks.size());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, recentTasks.get(0).getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, recentTasks.get(1).getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, recentTasks.get(2).getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, recentTasks.get(3).getType());
+
+        assertEquals(t1, recentTasks.get(0).getTaskInfo1());
+        assertEquals(t2, recentTasks.get(1).getTaskInfo1());
+        assertEquals(t3, recentTasks.get(2).getTaskInfo1());
+        assertEquals(t4, recentTasks.get(3).getTaskInfo1());
+
+        mockitoSession.finishMocking();
+    }
+
+    @Test
     public void testRemovedTaskRemovesSplit() {
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
@@ -270,7 +339,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
         setRawList(t1, t2, t3);
 
         // Add a pair
-        SplitBounds pair1Bounds = new SplitBounds(new Rect(), new Rect(), 2, 3);
+        SplitBounds pair1Bounds =
+                new SplitBounds(new Rect(), new Rect(), 2, 3, SNAP_TO_50_50);
         mRecentTasksController.addSplitPair(t2.taskId, t3.taskId, pair1Bounds);
         reset(mRecentTasksController);
 
@@ -302,6 +372,37 @@ public class RecentTasksControllerTest extends ShellTestCase {
         mShellTaskOrganizer.onTaskInfoChanged(rt2MultiWIndow);
 
         verify(mRecentTasksController).notifyRecentTasksChanged();
+    }
+
+    @Test
+    public void getNullSplitBoundsNonSplitTask() {
+        SplitBounds sb = mRecentTasksController.getSplitBoundsForTaskId(3);
+        assertNull("splitBounds should be null for non-split task", sb);
+    }
+
+    @Test
+    public void getNullSplitBoundsInvalidTask() {
+        SplitBounds sb = mRecentTasksController.getSplitBoundsForTaskId(INVALID_TASK_ID);
+        assertNull("splitBounds should be null for invalid taskID", sb);
+    }
+
+    @Test
+    public void getSplitBoundsForSplitTask() {
+        SplitBounds pair1Bounds = mock(SplitBounds.class);
+        SplitBounds pair2Bounds = mock(SplitBounds.class);
+
+        mRecentTasksController.addSplitPair(1, 2, pair1Bounds);
+        mRecentTasksController.addSplitPair(4, 3, pair2Bounds);
+
+        SplitBounds splitBounds2 = mRecentTasksController.getSplitBoundsForTaskId(2);
+        SplitBounds splitBounds1 = mRecentTasksController.getSplitBoundsForTaskId(1);
+        assertEquals("Different splitBounds for same pair", splitBounds1, splitBounds2);
+        assertEquals(splitBounds1, pair1Bounds);
+
+        SplitBounds splitBounds3 = mRecentTasksController.getSplitBoundsForTaskId(3);
+        SplitBounds splitBounds4 = mRecentTasksController.getSplitBoundsForTaskId(4);
+        assertEquals("Different splitBounds for same pair", splitBounds3, splitBounds4);
+        assertEquals(splitBounds4, pair2Bounds);
     }
 
     /**

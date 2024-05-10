@@ -27,8 +27,15 @@ import android.view.MotionEvent
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
+import org.junit.Assert.assertNull
+
 private fun <T> getEvent(queue: LinkedBlockingQueue<T>): T? {
     return queue.poll(DEFAULT_DISPATCHING_TIMEOUT_MILLIS.toLong(), TimeUnit.MILLISECONDS)
+}
+
+private fun <T> assertNoEvents(queue: LinkedBlockingQueue<T>) {
+    // Poll the queue with a shorter timeout, to make the check faster.
+    assertNull(queue.poll(100L, TimeUnit.MILLISECONDS))
 }
 
 class SpyInputEventReceiver(channel: InputChannel, looper: Looper) :
@@ -71,5 +78,10 @@ class SpyInputEventSender(channel: InputChannel, looper: Looper) :
 
     fun getTimeline(): Timeline? {
         return getEvent(mTimelines)
+    }
+
+    fun assertNoEvents() {
+        assertNoEvents(mFinishedSignals)
+        assertNoEvents(mTimelines)
     }
 }

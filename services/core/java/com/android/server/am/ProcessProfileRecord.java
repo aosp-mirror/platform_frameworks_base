@@ -17,11 +17,14 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_EMPTY;
 
-import android.annotation.IntDef;
 import android.app.IApplicationThread;
+import android.app.ProcessMemoryState.HostingComponentType;
 import android.content.pm.ApplicationInfo;
 import android.os.Debug;
+import android.os.Flags;
+import android.os.Process;
 import android.os.SystemClock;
 import android.util.DebugUtils;
 import android.util.TimeUtils;
@@ -30,9 +33,8 @@ import com.android.internal.annotations.CompositeRWLock;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.os.BatteryStatsImpl;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.ProcessList.ProcStateMemTracker;
+import com.android.server.power.stats.BatteryStatsImpl;
 
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -40,90 +42,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Profiling info of the process, such as PSS, cpu, etc.
+ *
+ * TODO(b/297542292): Update PSS names with RSS once AppProfiler's PSS profiling has been replaced.
  */
 final class ProcessProfileRecord {
-    // Keep below types in sync with the HostingComponentType in the atoms.proto.
-    /**
-     * The type of the component this process is hosting;
-     * this means not hosting any components (cached).
-     */
-    static final int HOSTING_COMPONENT_TYPE_EMPTY = 0x0;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's a system process.
-     */
-    static final int HOSTING_COMPONENT_TYPE_SYSTEM = 0x00000001;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's a persistent process.
-     */
-    static final int HOSTING_COMPONENT_TYPE_PERSISTENT = 0x00000002;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's hosting a backup/restore agent.
-     */
-    static final int HOSTING_COMPONENT_TYPE_BACKUP = 0x00000004;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's hosting an instrumentation.
-     */
-    static final int HOSTING_COMPONENT_TYPE_INSTRUMENTATION = 0x00000008;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's hosting an activity.
-     */
-    static final int HOSTING_COMPONENT_TYPE_ACTIVITY = 0x00000010;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's hosting a broadcast receiver.
-     */
-    static final int HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER = 0x00000020;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's hosting a content provider.
-     */
-    static final int HOSTING_COMPONENT_TYPE_PROVIDER = 0x00000040;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's hosting a started service.
-     */
-    static final int HOSTING_COMPONENT_TYPE_STARTED_SERVICE = 0x00000080;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's hosting a foreground service.
-     */
-    static final int HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE = 0x00000100;
-
-    /**
-     * The type of the component this process is hosting;
-     * this means it's being bound via a service binding.
-     */
-    static final int HOSTING_COMPONENT_TYPE_BOUND_SERVICE = 0x00000200;
-
-    @IntDef(flag = true, prefix = { "HOSTING_COMPONENT_TYPE_" }, value = {
-            HOSTING_COMPONENT_TYPE_EMPTY,
-            HOSTING_COMPONENT_TYPE_SYSTEM,
-            HOSTING_COMPONENT_TYPE_PERSISTENT,
-            HOSTING_COMPONENT_TYPE_BACKUP,
-            HOSTING_COMPONENT_TYPE_INSTRUMENTATION,
-            HOSTING_COMPONENT_TYPE_ACTIVITY,
-            HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER,
-            HOSTING_COMPONENT_TYPE_PROVIDER,
-            HOSTING_COMPONENT_TYPE_STARTED_SERVICE,
-            HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE,
-            HOSTING_COMPONENT_TYPE_BOUND_SERVICE,
-    })
-    @interface HostingComponentType {}
-
     final ProcessRecord mApp;
 
     private final ActivityManagerService mService;
@@ -156,7 +78,7 @@ final class ProcessProfileRecord {
      * Initial memory pss of process for idle maintenance.
      */
     @GuardedBy("mProfilerLock")
-    private long mInitialIdlePss;
+    private long mInitialIdlePssOrRss;
 
     /**
      * Last computed memory pss.
@@ -187,6 +109,14 @@ final class ProcessProfileRecord {
      */
     @GuardedBy("mProfilerLock")
     private long mLastRss;
+
+    /**
+     * Last computed rss when in cached state.
+     *
+     * This value is not set or retrieved unless Flags.removeAppProfilerPssCollection() is true.
+     */
+    @GuardedBy("mProfilerLock")
+    private long mLastCachedRss;
 
     /**
      * Cache of last retrieve memory info, to throttle how frequently apps can request it.
@@ -221,6 +151,11 @@ final class ProcessProfileRecord {
      * How long proc has run CPU most recently.
      */
     final AtomicLong mCurCpuTime = new AtomicLong(0);
+
+    /**
+     * How long the process has spent on waiting in the runqueue since fork.
+     */
+    final AtomicLong mLastCpuDelayTime = new AtomicLong(0);
 
     /**
      * Last selected memory trimming level.
@@ -306,6 +241,32 @@ final class ProcessProfileRecord {
         mBaseProcessTracker = baseProcessTracker;
     }
 
+    void onProcessFrozen() {
+        synchronized (mService.mProcessStats.mLock) {
+            final ProcessState tracker = mBaseProcessTracker;
+            if (tracker != null) {
+                final PackageList pkgList = mApp.getPkgList();
+                final long now = SystemClock.uptimeMillis();
+                synchronized (pkgList) {
+                    tracker.onProcessFrozen(now, pkgList.getPackageListLocked());
+                }
+            }
+        }
+    }
+
+    void onProcessUnfrozen() {
+        synchronized (mService.mProcessStats.mLock) {
+            final ProcessState tracker = mBaseProcessTracker;
+            if (tracker != null) {
+                final PackageList pkgList = mApp.getPkgList();
+                final long now = SystemClock.uptimeMillis();
+                synchronized (pkgList) {
+                    tracker.onProcessUnfrozen(now, pkgList.getPackageListLocked());
+                }
+            }
+        }
+    }
+
     void onProcessActive(IApplicationThread thread, ProcessStatsService tracker) {
         if (mThread == null) {
             synchronized (mProfilerLock) {
@@ -321,15 +282,17 @@ final class ProcessProfileRecord {
                         origBase.makeInactive();
                     }
                     final ApplicationInfo info = mApp.info;
+                    final int attributionUid = getUidForAttribution(mApp);
                     final ProcessState baseProcessTracker = tracker.getProcessStateLocked(
-                            info.packageName, info.uid, info.longVersionCode, mApp.processName);
+                            info.packageName, attributionUid, info.longVersionCode,
+                            mApp.processName);
                     setBaseProcessTracker(baseProcessTracker);
                     baseProcessTracker.makeActive();
                     pkgList.forEachPackage((pkgName, holder) -> {
                         if (holder.state != null && holder.state != origBase) {
                             holder.state.makeInactive();
                         }
-                        tracker.updateProcessStateHolderLocked(holder, pkgName, mApp.info.uid,
+                        tracker.updateProcessStateHolderLocked(holder, pkgName, attributionUid,
                                 mApp.info.longVersionCode, mApp.processName);
                         if (holder.state != baseProcessTracker) {
                             holder.state.makeActive();
@@ -394,13 +357,13 @@ final class ProcessProfileRecord {
     }
 
     @GuardedBy("mProfilerLock")
-    long getInitialIdlePss() {
-        return mInitialIdlePss;
+    long getInitialIdlePssOrRss() {
+        return mInitialIdlePssOrRss;
     }
 
     @GuardedBy("mProfilerLock")
-    void setInitialIdlePss(long initialIdlePss) {
-        mInitialIdlePss = initialIdlePss;
+    void setInitialIdlePssOrRss(long initialIdlePssOrRss) {
+        mInitialIdlePssOrRss = initialIdlePssOrRss;
     }
 
     @GuardedBy("mProfilerLock")
@@ -421,6 +384,16 @@ final class ProcessProfileRecord {
     @GuardedBy("mProfilerLock")
     void setLastCachedPss(long lastCachedPss) {
         mLastCachedPss = lastCachedPss;
+    }
+
+    @GuardedBy("mProfilerLock")
+    long getLastCachedRss() {
+        return mLastCachedRss;
+    }
+
+    @GuardedBy("mProfilerLock")
+    void setLastCachedRss(long lastCachedRss) {
+        mLastCachedRss = lastCachedRss;
     }
 
     @GuardedBy("mProfilerLock")
@@ -577,26 +550,6 @@ final class ProcessProfileRecord {
         }
     }
 
-    void reportCachedKill() {
-        synchronized (mService.mProcessStats.mLock) {
-            final ProcessState tracker = mBaseProcessTracker;
-            if (tracker != null) {
-                final PackageList pkgList = mApp.getPkgList();
-                synchronized (pkgList) {
-                    tracker.reportCachedKill(pkgList.getPackageListLocked(), mLastCachedPss);
-                    pkgList.forEachPackageProcessStats(holder ->
-                            FrameworkStatsLog.write(FrameworkStatsLog.CACHED_KILL_REPORTED,
-                                mApp.info.uid,
-                                holder.state.getName(),
-                                holder.state.getPackage(),
-                                mLastCachedPss,
-                                holder.appVersion)
-                    );
-                }
-            }
-        }
-    }
-
     void setProcessTrackerState(int procState, int memFactor) {
         synchronized (mService.mProcessStats.mLock) {
             final ProcessState tracker = mBaseProcessTracker;
@@ -625,7 +578,11 @@ final class ProcessProfileRecord {
 
     @GuardedBy("mProfilerLock")
     long computeNextPssTime(int procState, boolean test, boolean sleeping, long now) {
-        return ProcessList.computeNextPssTime(procState, mProcStateMemTracker, test, sleeping, now);
+        return ProcessList.computeNextPssTime(procState, mProcStateMemTracker, test, sleeping, now,
+                // Cap the Pss time to make sure no Pss is collected during the very few
+                // minutes after the system is boot, given the system is already busy.
+                Math.max(mService.mBootCompletedTimestamp, mService.mLastIdleTime)
+                + mService.mConstants.FULL_PSS_MIN_INTERVAL);
     }
 
     private static void commitNextPssTime(ProcStateMemTracker tracker) {
@@ -639,6 +596,21 @@ final class ProcessProfileRecord {
 
     private static void abortNextPssTime(ProcStateMemTracker tracker) {
         tracker.mPendingMemState = -1;
+    }
+
+    /**
+     * Returns the uid that should be used for attribution purposes in profiling / stats.
+     *
+     * In most cases this returns the uid of the process itself. For isolated processes though,
+     * since the process uid is dynamically allocated and can't easily be traced back to the app,
+     * for attribution we use the app package uid.
+     */
+    private static int getUidForAttribution(ProcessRecord processRecord) {
+        if (Process.isIsolatedUid(processRecord.uid)) {
+            return processRecord.info.uid;
+        } else {
+            return processRecord.uid;
+        }
     }
 
     @GuardedBy("mProfilerLock")
@@ -704,27 +676,46 @@ final class ProcessProfileRecord {
     @GuardedBy("mService")
     void dumpPss(PrintWriter pw, String prefix, long nowUptime) {
         synchronized (mProfilerLock) {
-            pw.print(prefix);
-            pw.print("lastPssTime=");
-            TimeUtils.formatDuration(mLastPssTime, nowUptime, pw);
-            pw.print(" pssProcState=");
-            pw.print(mPssProcState);
-            pw.print(" pssStatType=");
-            pw.print(mPssStatType);
-            pw.print(" nextPssTime=");
-            TimeUtils.formatDuration(mNextPssTime, nowUptime, pw);
-            pw.println();
-            pw.print(prefix);
-            pw.print("lastPss=");
-            DebugUtils.printSizeValue(pw, mLastPss * 1024);
-            pw.print(" lastSwapPss=");
-            DebugUtils.printSizeValue(pw, mLastSwapPss * 1024);
-            pw.print(" lastCachedPss=");
-            DebugUtils.printSizeValue(pw, mLastCachedPss * 1024);
-            pw.print(" lastCachedSwapPss=");
-            DebugUtils.printSizeValue(pw, mLastCachedSwapPss * 1024);
-            pw.print(" lastRss=");
-            DebugUtils.printSizeValue(pw, mLastRss * 1024);
+            // TODO(b/297542292): Remove this case once PSS profiling is replaced
+            if (!Flags.removeAppProfilerPssCollection()) {
+                pw.print(prefix);
+                pw.print("lastPssTime=");
+                TimeUtils.formatDuration(mLastPssTime, nowUptime, pw);
+                pw.print(" pssProcState=");
+                pw.print(mPssProcState);
+                pw.print(" pssStatType=");
+                pw.print(mPssStatType);
+                pw.print(" nextPssTime=");
+                TimeUtils.formatDuration(mNextPssTime, nowUptime, pw);
+                pw.println();
+                pw.print(prefix);
+                pw.print("lastPss=");
+                DebugUtils.printSizeValue(pw, mLastPss * 1024);
+                pw.print(" lastSwapPss=");
+                DebugUtils.printSizeValue(pw, mLastSwapPss * 1024);
+                pw.print(" lastCachedPss=");
+                DebugUtils.printSizeValue(pw, mLastCachedPss * 1024);
+                pw.print(" lastCachedSwapPss=");
+                DebugUtils.printSizeValue(pw, mLastCachedSwapPss * 1024);
+                pw.print(" lastRss=");
+                DebugUtils.printSizeValue(pw, mLastRss * 1024);
+            } else {
+                pw.print(prefix);
+                pw.print("lastRssTime=");
+                TimeUtils.formatDuration(mLastPssTime, nowUptime, pw);
+                pw.print(" rssProcState=");
+                pw.print(mPssProcState);
+                pw.print(" rssStatType=");
+                pw.print(mPssStatType);
+                pw.print(" nextRssTime=");
+                TimeUtils.formatDuration(mNextPssTime, nowUptime, pw);
+                pw.println();
+                pw.print(prefix);
+                pw.print("lastRss=");
+                DebugUtils.printSizeValue(pw, mLastRss * 1024);
+                pw.print(" lastCachedRss=");
+                DebugUtils.printSizeValue(pw, mLastCachedRss * 1024);
+            }
             pw.println();
             pw.print(prefix);
             pw.print("trimMemoryLevel=");

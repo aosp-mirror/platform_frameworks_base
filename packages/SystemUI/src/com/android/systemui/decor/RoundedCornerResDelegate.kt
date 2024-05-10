@@ -24,47 +24,53 @@ import android.util.DisplayUtils
 import android.util.Size
 import android.view.RoundedCorners
 import com.android.systemui.Dumpable
-import com.android.systemui.R
+import com.android.systemui.res.R
 import java.io.PrintWriter
 
-class RoundedCornerResDelegate(
+interface RoundedCornerResDelegate {
+    val hasTop: Boolean
+    val topRoundedDrawable: Drawable?
+    val topRoundedSize: Size
+
+    val hasBottom: Boolean
+    val bottomRoundedDrawable: Drawable?
+    val bottomRoundedSize: Size
+
+    var physicalPixelDisplaySizeRatio: Float
+
+    fun updateDisplayUniqueId(newDisplayUniqueId: String?, newReloadToken: Int?)
+}
+
+/**
+ * Delegate for the device-default rounded corners. These will always be loaded from the config
+ * values `R.array.config_roundedCornerTopDrawableArray` and `R.drawable.rounded_corner_top`
+ */
+class RoundedCornerResDelegateImpl(
     private val res: Resources,
     private var displayUniqueId: String?
-) : Dumpable {
-
-    private val density: Float
-        get() = res.displayMetrics.density
+) : RoundedCornerResDelegate, Dumpable {
 
     private var reloadToken: Int = 0
 
-    var hasTop: Boolean = false
+    override var hasTop: Boolean = false
         private set
 
-    var hasBottom: Boolean = false
+    override var hasBottom: Boolean = false
         private set
 
-    var topRoundedDrawable: Drawable? = null
+    override var topRoundedDrawable: Drawable? = null
         private set
 
-    var bottomRoundedDrawable: Drawable? = null
+    override var bottomRoundedDrawable: Drawable? = null
         private set
 
-    var topRoundedSize = Size(0, 0)
+    override var topRoundedSize = Size(0, 0)
         private set
 
-    var bottomRoundedSize = Size(0, 0)
+    override var bottomRoundedSize = Size(0, 0)
         private set
 
-    var tuningSizeFactor: Int? = null
-        set(value) {
-            if (field == value) {
-                return
-            }
-            field = value
-            reloadMeasures()
-        }
-
-    var physicalPixelDisplaySizeRatio: Float = 1f
+    override var physicalPixelDisplaySizeRatio: Float = 1f
         set(value) {
             if (field == value) {
                 return
@@ -78,23 +84,18 @@ class RoundedCornerResDelegate(
         reloadMeasures()
     }
 
-    private fun reloadAll(newReloadToken: Int) {
-        if (reloadToken == newReloadToken) {
-            return
-        }
-        reloadToken = newReloadToken
-        reloadRes()
-        reloadMeasures()
-    }
-
-    fun updateDisplayUniqueId(newDisplayUniqueId: String?, newReloadToken: Int?) {
+    override fun updateDisplayUniqueId(newDisplayUniqueId: String?, newReloadToken: Int?) {
         if (displayUniqueId != newDisplayUniqueId) {
             displayUniqueId = newDisplayUniqueId
             newReloadToken ?.let { reloadToken = it }
             reloadRes()
             reloadMeasures()
-        } else {
-            newReloadToken?.let { reloadAll(it) }
+        } else if (newReloadToken != null) {
+            if (reloadToken == newReloadToken) {
+                return
+            }
+            reloadToken = newReloadToken
+            reloadMeasures()
         }
     }
 
@@ -125,19 +126,6 @@ class RoundedCornerResDelegate(
         }
         bottomRoundedDrawable?.let {
             bottomRoundedSize = Size(it.intrinsicWidth, it.intrinsicHeight)
-        }
-
-        tuningSizeFactor?.let {
-            if (it <= 0) {
-                return
-            }
-            val length: Int = (it * density).toInt()
-            if (topRoundedSize.width > 0) {
-                topRoundedSize = Size(length, length)
-            }
-            if (bottomRoundedSize.width > 0) {
-                bottomRoundedSize = Size(length, length)
-            }
         }
 
         if (physicalPixelDisplaySizeRatio != 1f) {

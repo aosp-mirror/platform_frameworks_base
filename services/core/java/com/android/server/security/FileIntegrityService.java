@@ -23,27 +23,40 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
 import android.os.UserHandle;
+import android.os.storage.StorageManagerInternal;
 import android.security.IFileIntegrityService;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.security.VerityUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Objects;
 
 /**
  * A {@link SystemService} that provides file integrity related operations.
@@ -52,9 +65,19 @@ import java.util.Collection;
 public class FileIntegrityService extends SystemService {
     private static final String TAG = "FileIntegrityService";
 
+    /** The maximum size of signature file.  This is just to avoid potential abuse. */
+    private static final int MAX_SIGNATURE_FILE_SIZE_BYTES = 8192;
+
     private static CertificateFactory sCertFactory;
 
-    private Collection<X509Certificate> mTrustedCertificates = new ArrayList<X509Certificate>();
+    @GuardedBy("mTrustedCertificates")
+    private final ArrayList<X509Certificate> mTrustedCertificates =
+            new ArrayList<X509Certificate>();
+
+    /** Gets the instance of the service */
+    public static FileIntegrityService getService() {
+        return LocalServices.getService(FileIntegrityService.class);
+    }
 
     private final IBinder mService = new IFileIntegrityService.Stub() {
         @Override
@@ -67,6 +90,13 @@ public class FileIntegrityService extends SystemService {
                 @NonNull String packageName) {
             checkCallerPermission(packageName);
 
+            if (android.security.Flags.deprecateFsvSig()) {
+                // When deprecated, stop telling the caller that any app source certificate is
+                // trusted on the current device. This behavior is also consistent with devices
+                // without this feature support.
+                return false;
+            }
+
             try {
                 if (!VerityUtils.isFsVeritySupported()) {
                     return false;
@@ -75,14 +105,24 @@ public class FileIntegrityService extends SystemService {
                     Slog.w(TAG, "Received a null certificate");
                     return false;
                 }
-                return mTrustedCertificates.contains(toCertificate(certificateBytes));
+                synchronized (mTrustedCertificates) {
+                    return mTrustedCertificates.contains(toCertificate(certificateBytes));
+                }
             } catch (CertificateException e) {
                 Slog.e(TAG, "Failed to convert the certificate: " + e);
                 return false;
             }
         }
 
-        private void checkCallerPermission(String packageName) {
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out,
+                FileDescriptor err, String[] args, ShellCallback callback,
+                ResultReceiver resultReceiver) {
+            new FileIntegrityServiceShellCommand()
+                    .exec(this, in, out, err, args, callback, resultReceiver);
+        }
+
+        private void checkCallerPackageName(String packageName) {
             final int callingUid = Binder.getCallingUid();
             final int callingUserId = UserHandle.getUserId(callingUid);
             final PackageManagerInternal packageManager =
@@ -93,7 +133,10 @@ public class FileIntegrityService extends SystemService {
                 throw new SecurityException(
                         "Calling uid " + callingUid + " does not own package " + packageName);
             }
+        }
 
+        private void checkCallerPermission(String packageName) {
+            checkCallerPackageName(packageName);
             if (getContext().checkCallingPermission(android.Manifest.permission.INSTALL_PACKAGES)
                     == PackageManager.PERMISSION_GRANTED) {
                 return;
@@ -101,10 +144,41 @@ public class FileIntegrityService extends SystemService {
 
             final AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
             final int mode = appOpsManager.checkOpNoThrow(
-                    AppOpsManager.OP_REQUEST_INSTALL_PACKAGES, callingUid, packageName);
+                    AppOpsManager.OP_REQUEST_INSTALL_PACKAGES, Binder.getCallingUid(), packageName);
             if (mode != AppOpsManager.MODE_ALLOWED) {
                 throw new SecurityException(
                         "Caller should have INSTALL_PACKAGES or REQUEST_INSTALL_PACKAGES");
+            }
+        }
+
+        @Override
+        public android.os.IInstalld.IFsveritySetupAuthToken createAuthToken(
+                ParcelFileDescriptor authFd) throws RemoteException {
+            Objects.requireNonNull(authFd);
+            try {
+                var authToken = getStorageManagerInternal().createFsveritySetupAuthToken(authFd,
+                        Binder.getCallingUid());
+                // fs-verity setup requires no writable fd to the file. Release the dup now that
+                // it's passed.
+                authFd.close();
+                return authToken;
+            } catch (IOException e) {
+                throw new RemoteException(e);
+            }
+        }
+
+        @Override
+        public int setupFsverity(android.os.IInstalld.IFsveritySetupAuthToken authToken,
+                String filePath, String packageName) throws RemoteException {
+            Objects.requireNonNull(authToken);
+            Objects.requireNonNull(filePath);
+            Objects.requireNonNull(packageName);
+            checkCallerPackageName(packageName);
+
+            try {
+                return getStorageManagerInternal().enableFsverity(authToken, filePath, packageName);
+            } catch (IOException e) {
+                throw new RemoteException(e);
             }
         }
     };
@@ -116,6 +190,17 @@ public class FileIntegrityService extends SystemService {
         } catch (CertificateException e) {
             Slog.wtf(TAG, "Cannot get an instance of X.509 certificate factory");
         }
+
+        LocalServices.addService(FileIntegrityService.class, this);
+    }
+
+    /**
+     * Returns StorageManagerInternal as a proxy to fs-verity related calls. This is to plumb
+     * the call through the canonical Installer instance in StorageManagerService, since the
+     * Installer instance isn't directly accessible.
+     */
+    private StorageManagerInternal getStorageManagerInternal() {
+        return LocalServices.getService(StorageManagerInternal.class);
     }
 
     @Override
@@ -124,14 +209,36 @@ public class FileIntegrityService extends SystemService {
         publishBinderService(Context.FILE_INTEGRITY_SERVICE, mService);
     }
 
-    private void loadAllCertificates() {
-        // A better alternative to load certificates would be to read from .fs-verity kernel
-        // keyring, which fsverity_init loads to during earlier boot time from the same sources
-        // below. But since the read operation from keyring is not provided in kernel, we need to
-        // duplicate the same loading logic here.
+    /**
+     * Returns whether the signature over the file's fs-verity digest can be verified by one of the
+     * known certiticates.
+     */
+    public boolean verifyPkcs7DetachedSignature(String signaturePath, String filePath)
+            throws IOException {
+        if (Files.size(Paths.get(signaturePath)) > MAX_SIGNATURE_FILE_SIZE_BYTES) {
+            throw new SecurityException("Signature file is unexpectedly large: "
+                    + signaturePath);
+        }
+        byte[] signatureBytes = Files.readAllBytes(Paths.get(signaturePath));
+        byte[] digest = VerityUtils.getFsverityDigest(filePath);
+        synchronized (mTrustedCertificates) {
+            for (var cert : mTrustedCertificates) {
+                try {
+                    byte[] derEncoded = cert.getEncoded();
+                    if (VerityUtils.verifyPkcs7DetachedSignature(signatureBytes, digest,
+                            new ByteArrayInputStream(derEncoded))) {
+                        return true;
+                    }
+                } catch (CertificateEncodingException e) {
+                    Slog.w(TAG, "Ignoring ill-formed certificate: " + e);
+                }
+            }
+        }
+        return false;
+    }
 
+    private void loadAllCertificates() {
         // Load certificates trusted by the device manufacturer.
-        // NB: Directories need to be synced with system/security/fsverity_init/fsverity_init.cpp.
         final String relativeDir = "etc/security/fsverity";
         loadCertificatesFromDirectory(Environment.getRootDirectory().toPath()
                 .resolve(relativeDir));
@@ -148,10 +255,6 @@ public class FileIntegrityService extends SystemService {
 
             for (File cert : files) {
                 byte[] certificateBytes = Files.readAllBytes(cert.toPath());
-                if (certificateBytes == null) {
-                    Slog.w(TAG, "The certificate file is empty, ignoring " + cert);
-                    continue;
-                }
                 collectCertificate(certificateBytes);
             }
         } catch (IOException e) {
@@ -165,7 +268,9 @@ public class FileIntegrityService extends SystemService {
      */
     private void collectCertificate(@NonNull byte[] bytes) {
         try {
-            mTrustedCertificates.add(toCertificate(bytes));
+            synchronized (mTrustedCertificates) {
+                mTrustedCertificates.add(toCertificate(bytes));
+            }
         } catch (CertificateException e) {
             Slog.e(TAG, "Invalid certificate, ignored: " + e);
         }
@@ -183,5 +288,72 @@ public class FileIntegrityService extends SystemService {
             throw new CertificateException("Expected to contain an X.509 certificate");
         }
         return (X509Certificate) certificate;
+    }
+
+
+    private class FileIntegrityServiceShellCommand extends ShellCommand {
+        @Override
+        public int onCommand(String cmd) {
+            if (!Build.IS_DEBUGGABLE) {
+                return -1;
+            }
+            if (cmd == null) {
+                return handleDefaultCommands(cmd);
+            }
+            final PrintWriter pw = getOutPrintWriter();
+            switch (cmd) {
+                case "append-cert":
+                    String nextArg = getNextArg();
+                    if (nextArg == null) {
+                        pw.println("Invalid argument");
+                        pw.println("");
+                        onHelp();
+                        return -1;
+                    }
+                    ParcelFileDescriptor pfd = openFileForSystem(nextArg, "r");
+                    if (pfd == null) {
+                        pw.println("Cannot open the file");
+                        return -1;
+                    }
+                    InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+                    try {
+                        collectCertificate(is.readAllBytes());
+                    } catch (IOException e) {
+                        pw.println("Failed to add certificate: " + e);
+                        return -1;
+                    }
+                    pw.println("Certificate is added successfully");
+                    return 0;
+
+                case "remove-last-cert":
+                    synchronized (mTrustedCertificates) {
+                        if (mTrustedCertificates.size() == 0) {
+                            pw.println("Certificate list is already empty");
+                            return -1;
+                        }
+                        mTrustedCertificates.remove(mTrustedCertificates.size() - 1);
+                    }
+                    pw.println("Certificate is removed successfully");
+                    return 0;
+                default:
+                    pw.println("Unknown action");
+                    pw.println("");
+                    onHelp();
+            }
+            return -1;
+        }
+
+        @Override
+        public void onHelp() {
+            final PrintWriter pw = getOutPrintWriter();
+            pw.println("File integrity service commands:");
+            pw.println("  help");
+            pw.println("    Print this help text.");
+            pw.println("  append-cert path/to/cert.der");
+            pw.println("    Add the DER-encoded certificate (only in debug builds)");
+            pw.println("  remove-last-cert");
+            pw.println("    Remove the last certificate in the key list (only in debug builds)");
+            pw.println("");
+        }
     }
 }

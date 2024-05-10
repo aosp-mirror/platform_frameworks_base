@@ -25,6 +25,7 @@ import android.media.AudioSystem;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
+import android.media.PlayerBase;
 import android.media.SoundPool;
 import android.os.Environment;
 import android.os.Handler;
@@ -34,6 +35,7 @@ import android.util.Log;
 import android.util.PrintWriterPrinter;
 
 import com.android.internal.util.XmlUtils;
+import com.android.server.utils.EventLogger;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -46,6 +48,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * A helper class for managing sound effects loading / unloading
@@ -74,7 +77,8 @@ class SoundEffectsHelper {
         void run(boolean success);
     }
 
-    private final AudioEventLogger mSfxLogger = new AudioEventLogger(
+    private final EventLogger
+            mSfxLogger = new EventLogger(
             AudioManager.NUM_SOUND_EFFECTS + 10, "Sound Effects Loading");
 
     private final Context mContext;
@@ -107,11 +111,14 @@ class SoundEffectsHelper {
     private final int[] mEffects = new int[AudioManager.NUM_SOUND_EFFECTS]; // indexes in mResources
     private SoundPool mSoundPool;
     private SoundPoolLoader mSoundPoolLoader;
+    /** callback to provide handle to the player of the sound effects */
+    private final Consumer<PlayerBase> mPlayerAvailableCb;
 
-    SoundEffectsHelper(Context context) {
+    SoundEffectsHelper(Context context, Consumer<PlayerBase> playerAvailableCb) {
         mContext = context;
         mSfxAttenuationDb = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_soundEffectVolumeDb);
+        mPlayerAvailableCb = playerAvailableCb;
         startWorker();
     }
 
@@ -162,7 +169,7 @@ class SoundEffectsHelper {
     }
 
     private void logEvent(String msg) {
-        mSfxLogger.log(new AudioEventLogger.StringEvent(msg));
+        mSfxLogger.enqueue(new EventLogger.StringEvent(msg));
     }
 
     // All the methods below run on the worker thread
@@ -187,6 +194,7 @@ class SoundEffectsHelper {
                         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         .build())
                 .build();
+        mPlayerAvailableCb.accept(mSoundPool);
         loadSoundAssets();
 
         mSoundPoolLoader = new SoundPoolLoader();

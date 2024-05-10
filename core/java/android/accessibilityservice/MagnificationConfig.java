@@ -76,6 +76,7 @@ public final class MagnificationConfig implements Parcelable {
     }
 
     private int mMode = MAGNIFICATION_MODE_DEFAULT;
+    private boolean mActivated = false;
     private float mScale = Float.NaN;
     private float mCenterX = Float.NaN;
     private float mCenterY = Float.NaN;
@@ -86,6 +87,7 @@ public final class MagnificationConfig implements Parcelable {
 
     private MagnificationConfig(@NonNull Parcel parcel) {
         mMode = parcel.readInt();
+        mActivated = parcel.readBoolean();
         mScale = parcel.readFloat();
         mCenterX = parcel.readFloat();
         mCenterY = parcel.readFloat();
@@ -102,9 +104,20 @@ public final class MagnificationConfig implements Parcelable {
     }
 
     /**
+     * Returns the activated state of the controlling magnifier. The controlling magnifier can be
+     * activated even if the scale returned by {@link MagnificationConfig#getScale()} equals to 1.0.
+     *
+     * @return {@code true} if the magnifier is activated and showing on screen,
+     *         {@code false} otherwise.
+     */
+    public boolean isActivated() {
+        return mActivated;
+    }
+
+    /**
      * Returns the magnification scale of the controlling magnifier
      *
-     * @return the scale If the controlling magnifier is not activated, it returns 1 by default
+     * @return The magnification scale
      */
     public float getScale() {
         return mScale;
@@ -113,9 +126,7 @@ public final class MagnificationConfig implements Parcelable {
     /**
      * Returns the screen-relative X coordinate of the center of the magnification viewport.
      *
-     * @return the X coordinate. If the controlling magnifier is {@link #MAGNIFICATION_MODE_WINDOW}
-     * but not enabled, it returns {@link Float#NaN}. If the controlling magnifier is {@link
-     * #MAGNIFICATION_MODE_FULLSCREEN} but not enabled, it returns 0
+     * @return The X coordinate
      */
     public float getCenterX() {
         return mCenterX;
@@ -124,9 +135,7 @@ public final class MagnificationConfig implements Parcelable {
     /**
      * Returns the screen-relative Y coordinate of the center of the magnification viewport.
      *
-     * @return the Y coordinate If the controlling magnifier is {@link #MAGNIFICATION_MODE_WINDOW}
-     * but not enabled, it returns {@link Float#NaN}. If the controlling magnifier is {@link
-     * #MAGNIFICATION_MODE_FULLSCREEN} but not enabled, it returns 0
+     * @return The Y coordinate
      */
     public float getCenterY() {
         return mCenterY;
@@ -137,6 +146,8 @@ public final class MagnificationConfig implements Parcelable {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("MagnificationConfig[");
         stringBuilder.append("mode: ").append(getMode());
+        stringBuilder.append(", ");
+        stringBuilder.append("activated: ").append(isActivated());
         stringBuilder.append(", ");
         stringBuilder.append("scale: ").append(getScale());
         stringBuilder.append(", ");
@@ -155,6 +166,7 @@ public final class MagnificationConfig implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeInt(mMode);
+        parcel.writeBoolean(mActivated);
         parcel.writeFloat(mScale);
         parcel.writeFloat(mCenterX);
         parcel.writeFloat(mCenterY);
@@ -166,6 +178,7 @@ public final class MagnificationConfig implements Parcelable {
     public static final class Builder {
 
         private int mMode = MAGNIFICATION_MODE_DEFAULT;
+        private boolean mActivated = true;
         private float mScale = Float.NaN;
         private float mCenterX = Float.NaN;
         private float mCenterY = Float.NaN;
@@ -185,6 +198,18 @@ public final class MagnificationConfig implements Parcelable {
         @NonNull
         public MagnificationConfig.Builder setMode(@MagnificationMode int mode) {
             mMode = mode;
+            return this;
+        }
+
+        /**
+         * Sets magnification activated state.
+         *
+         * @param activated The magnification activated state
+         * @return This builder
+         */
+        @NonNull
+        public MagnificationConfig.Builder setActivated(boolean activated) {
+            mActivated = activated;
             return this;
         }
 
@@ -237,6 +262,7 @@ public final class MagnificationConfig implements Parcelable {
         public MagnificationConfig build() {
             MagnificationConfig magnificationConfig = new MagnificationConfig();
             magnificationConfig.mMode = mMode;
+            magnificationConfig.mActivated = mActivated;
             magnificationConfig.mScale = mScale;
             magnificationConfig.mCenterX = mCenterX;
             magnificationConfig.mCenterY = mCenterY;

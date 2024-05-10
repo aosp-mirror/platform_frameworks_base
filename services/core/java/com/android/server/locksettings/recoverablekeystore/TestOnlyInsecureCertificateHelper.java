@@ -29,6 +29,7 @@ import android.util.Pair;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,6 +66,18 @@ public class TestOnlyInsecureCertificateHelper {
                     ERROR_INVALID_CERTIFICATE, "The provided root certificate alias is invalid");
         }
         return rootCertificate;
+    }
+
+    /**
+     * Returns hardcoded validation date for e2e tests.
+     */
+    public @Nullable Date getValidationDate(String rootCertificateAlias) {
+        if (isTestOnlyCertificateAlias(rootCertificateAlias)) {
+            // Certificate used for e2e test is expired.
+            return new Date(2019 - 1900, 1, 30);
+        } else {
+            return null; // Use current time
+        }
     }
 
     public @NonNull String getDefaultCertificateAliasIfEmpty(

@@ -16,12 +16,15 @@
 package com.android.systemui.shared.shadow
 
 import android.content.Context
+import android.content.res.Resources
+import android.content.res.TypedArray
 import android.graphics.Canvas
 import android.util.AttributeSet
 import android.widget.TextClock
 import com.android.systemui.shared.R
 import com.android.systemui.shared.shadow.DoubleShadowTextHelper.ShadowInfo
 import com.android.systemui.shared.shadow.DoubleShadowTextHelper.applyShadows
+import kotlin.math.floor
 
 /** Extension of [TextClock] which draws two shadows on the text (ambient and key shadows) */
 class DoubleShadowTextClock
@@ -30,19 +33,40 @@ constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-    defStyleRes: Int = 0
+    defStyleRes: Int = 0,
 ) : TextClock(context, attrs, defStyleAttr, defStyleRes) {
-    private val mAmbientShadowInfo: ShadowInfo
-    private val mKeyShadowInfo: ShadowInfo
+    private lateinit var mAmbientShadowInfo: ShadowInfo
+    private lateinit var mKeyShadowInfo: ShadowInfo
+    private var attributesInput: TypedArray? = null
+    private var resources: Resources? = null
 
+    constructor(
+        resources: Resources,
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0,
+        defStyleRes: Int = 0,
+        attributesInput: TypedArray? = null
+    ) : this(context, attrs, defStyleAttr, defStyleRes) {
+        this.attributesInput = attributesInput
+        this.resources = resources
+        this.initializeAttributes(attrs, defStyleAttr, defStyleRes)
+    }
     init {
-        val attributes =
-            context.obtainStyledAttributes(
-                attrs,
-                R.styleable.DoubleShadowTextClock,
-                defStyleAttr,
-                defStyleRes
-            )
+        initializeAttributes(attrs, defStyleAttr, defStyleRes)
+    }
+
+    private fun initializeAttributes(attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) {
+        var attributes: TypedArray =
+            this.attributesInput
+                ?: context.obtainStyledAttributes(
+                    attrs,
+                    R.styleable.DoubleShadowTextClock,
+                    defStyleAttr,
+                    defStyleRes
+                )
+
+        var resource: Resources = this.resources ?: context.resources
         try {
             val keyShadowBlur =
                 attributes.getDimensionPixelSize(R.styleable.DoubleShadowTextClock_keyShadowBlur, 0)
@@ -89,9 +113,33 @@ constructor(
                     ambientShadowOffsetY.toFloat(),
                     ambientShadowAlpha
                 )
+            val removeTextDescent =
+                attributes.getBoolean(R.styleable.DoubleShadowTextClock_removeTextDescent, false)
+            val textDescentExtraPadding =
+                attributes.getDimensionPixelSize(
+                    R.styleable.DoubleShadowTextClock_textDescentExtraPadding,
+                    0
+                )
+            if (removeTextDescent) {
+                val addBottomPaddingToClock =
+                    resource.getBoolean(R.bool.dream_overlay_complication_clock_bottom_padding)
+                val metrics = paint.fontMetrics
+                val padding =
+                    if (addBottomPaddingToClock) {
+                        textDescentExtraPadding +
+                            floor(metrics.descent.toDouble()).toInt() / paddingDividedOffset
+                    } else {
+                        textDescentExtraPadding - floor(metrics.descent.toDouble()).toInt()
+                    }
+                setPaddingRelative(0, 0, 0, padding)
+            }
         } finally {
             attributes.recycle()
         }
+    }
+
+    companion object {
+        private val paddingDividedOffset = 2
     }
 
     public override fun onDraw(canvas: Canvas) {

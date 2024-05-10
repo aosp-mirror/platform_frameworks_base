@@ -16,8 +16,6 @@
 
 package com.android.server.backup.restore;
 
-import static android.app.backup.BackupManager.OperationType;
-
 import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSION_TIMEOUT;
@@ -26,6 +24,8 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.backup.BackupAgent;
+import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IRestoreObserver;
 import android.app.backup.IRestoreSession;
@@ -33,11 +33,15 @@ import android.app.backup.RestoreSet;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.LocalServices;
+import com.android.server.backup.Flags;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
@@ -46,6 +50,7 @@ import com.android.server.backup.params.RestoreParams;
 import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.utils.BackupEligibilityRules;
 
+import java.util.List;
 import java.util.function.BiFunction;
 
 /**
@@ -61,7 +66,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
     private final int mUserId;
     private final BackupEligibilityRules mBackupEligibilityRules;
     @Nullable private final String mPackageName;
-    public RestoreSet[] mRestoreSets = null;
+    public List<RestoreSet> mRestoreSets = null;
     boolean mEnded = false;
     boolean mTimedOut = false;
 
@@ -175,10 +180,10 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         }
 
         synchronized (mBackupManagerService.getQueueLock()) {
-            for (int i = 0; i < mRestoreSets.length; i++) {
-                if (token == mRestoreSets[i].token) {
+            for (int i = 0; i < mRestoreSets.size(); i++) {
+                if (token == mRestoreSets.get(i).token) {
                     final long oldId = Binder.clearCallingIdentity();
-                    RestoreSet restoreSet = mRestoreSets[i];
+                    RestoreSet restoreSet = mRestoreSets.get(i);
                     try {
                         return sendRestoreToHandlerLocked(
                                 (transportClient, listener) ->
@@ -268,10 +273,10 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         }
 
         synchronized (mBackupManagerService.getQueueLock()) {
-            for (int i = 0; i < mRestoreSets.length; i++) {
-                if (token == mRestoreSets[i].token) {
+            for (int i = 0; i < mRestoreSets.size(); i++) {
+                if (token == mRestoreSets.get(i).token) {
                     final long oldId = Binder.clearCallingIdentity();
-                    RestoreSet restoreSet = mRestoreSets[i];
+                    RestoreSet restoreSet = mRestoreSets.get(i);
                     try {
                         return sendRestoreToHandlerLocked(
                                 (transportClient, listener) ->
@@ -296,12 +301,26 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         return -1;
     }
 
-    private BackupEligibilityRules getBackupEligibilityRules(RestoreSet restoreSet) {
+    @VisibleForTesting
+    BackupEligibilityRules getBackupEligibilityRules(RestoreSet restoreSet) {
         // TODO(b/182986784): Remove device name comparison once a designated field for operation
         //  type is added to RestoreSet object.
-        int operationType = DEVICE_NAME_FOR_D2D_SET.equals(restoreSet.device)
-                ? OperationType.MIGRATION : OperationType.BACKUP;
-        return mBackupManagerService.getEligibilityRulesForOperation(operationType);
+        int backupDestination = DEVICE_NAME_FOR_D2D_SET.equals(restoreSet.device)
+                ? BackupDestination.DEVICE_TRANSFER : BackupDestination.CLOUD;
+
+        if (!Flags.enableSkippingRestoreLaunchedApps()) {
+            return mBackupManagerService.getEligibilityRulesForOperation(backupDestination);
+        }
+
+        boolean skipRestoreForLaunchedApps = (restoreSet.backupTransportFlags
+                & BackupAgent.FLAG_SKIP_RESTORE_FOR_LAUNCHED_APPS) != 0;
+
+        return new BackupEligibilityRules(mBackupManagerService.getPackageManager(),
+                LocalServices.getService(PackageManagerInternal.class),
+                mUserId,
+                mBackupManagerService.getContext(),
+                backupDestination,
+                skipRestoreForLaunchedApps);
     }
 
     public synchronized int restorePackage(String packageName, IRestoreObserver observer,
@@ -391,7 +410,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         }
     }
 
-    public void setRestoreSets(RestoreSet[] restoreSets) {
+    public void setRestoreSets(List<RestoreSet> restoreSets) {
         mRestoreSets = restoreSets;
     }
 

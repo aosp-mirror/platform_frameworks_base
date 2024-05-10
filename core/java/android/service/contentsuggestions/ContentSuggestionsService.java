@@ -72,7 +72,7 @@ public abstract class ContentSuggestionsService extends Service {
             Bitmap wrappedBuffer = null;
             if (imageContextRequestExtras.containsKey(ContentSuggestionsManager.EXTRA_BITMAP)) {
                 wrappedBuffer = imageContextRequestExtras.getParcelable(
-                        ContentSuggestionsManager.EXTRA_BITMAP);
+                        ContentSuggestionsManager.EXTRA_BITMAP, android.graphics.Bitmap.class);
             } else {
                 if (contextImage != null) {
                     ColorSpace colorSpace = null;

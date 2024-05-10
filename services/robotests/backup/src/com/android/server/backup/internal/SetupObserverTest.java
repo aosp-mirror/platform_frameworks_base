@@ -33,6 +33,7 @@ import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.testing.BackupManagerServiceTestUtils;
 import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 import com.android.server.testing.shadows.ShadowSystemServiceRegistry;
+import com.android.server.testing.shadows.ShadowUserManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +57,8 @@ import java.io.File;
         shadows = {
             ShadowApplicationPackageManager.class,
             ShadowJobScheduler.class,
-            ShadowSystemServiceRegistry.class
+            ShadowSystemServiceRegistry.class,
+            ShadowUserManager.class
         })
 @Presubmit
 public class SetupObserverTest {

@@ -305,12 +305,13 @@ public final class CertUtils {
      *
      * @param trustedRoot the trusted root certificate
      * @param certPath the certificate path to be validated
+     * @param validationDate use null for current time
      * @throws CertValidationException if the given certificate path is invalid, e.g., is expired,
      *                                 or does not have a valid signature
      */
-    public static void validateCertPath(X509Certificate trustedRoot, CertPath certPath)
-            throws CertValidationException {
-        validateCertPath(/*validationDate=*/ null, trustedRoot, certPath);
+    public static void validateCertPath(X509Certificate trustedRoot, CertPath certPath,
+                @Nullable Date validationDate) throws CertValidationException {
+        validateCertPath(validationDate, trustedRoot, certPath);
     }
 
     /**

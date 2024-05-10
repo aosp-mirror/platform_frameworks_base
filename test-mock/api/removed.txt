@@ -9,7 +9,7 @@ package android.test.mock {
   @Deprecated public class MockPackageManager extends android.content.pm.PackageManager {
     method @Deprecated public String getDefaultBrowserPackageName(int);
     method @Deprecated public boolean setDefaultBrowserPackageName(String, int);
-    method public boolean setInstantAppCookie(@NonNull byte[]);
+    method @Deprecated public boolean setInstantAppCookie(@NonNull byte[]);
   }
 
 }

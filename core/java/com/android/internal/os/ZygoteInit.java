@@ -26,7 +26,6 @@ import android.app.ApplicationLoaders;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.SharedLibraryInfo;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Environment;
 import android.os.IInstalld;
@@ -51,6 +50,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TimingsTraceLog;
+import android.view.WindowManager;
 import android.webkit.WebViewFactory;
 import android.widget.TextView;
 
@@ -72,6 +72,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.Provider;
 import java.security.Security;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Startup class for the zygote process.
@@ -102,20 +104,9 @@ public class ZygoteInit {
     private static final String SOCKET_NAME_ARG = "--socket-name=";
 
     /**
-     * Used to pre-load resources.
-     */
-    @UnsupportedAppUsage
-    private static Resources mResources;
-
-    /**
      * The path of a file that contains classes to preload.
      */
     private static final String PRELOADED_CLASSES = "/system/etc/preloaded-classes";
-
-    /**
-     * Controls whether we should preload resources during zygote init.
-     */
-    private static final boolean PRELOAD_RESOURCES = true;
 
     private static final int UNPRIVILEGED_UID = 9999;
     private static final int UNPRIVILEGED_GID = 9999;
@@ -143,7 +134,7 @@ public class ZygoteInit {
         cacheNonBootClasspathClassLoaders();
         bootTimingsTraceLog.traceEnd(); // CacheNonBootClasspathClassLoaders
         bootTimingsTraceLog.traceBegin("PreloadResources");
-        preloadResources();
+        Resources.preloadResources();
         bootTimingsTraceLog.traceEnd(); // PreloadResources
         Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadAppProcessHALs");
         nativePreloadAppProcessHALs();
@@ -185,8 +176,13 @@ public class ZygoteInit {
     private static void preloadSharedLibraries() {
         Log.i(TAG, "Preloading shared libraries...");
         System.loadLibrary("android");
-        System.loadLibrary("compiler_rt");
         System.loadLibrary("jnigraphics");
+
+        // TODO(b/206676167): This library is only used for renderscript today. When renderscript is
+        // removed, this load can be removed as well.
+        if (!SystemProperties.getBoolean("config.disable_renderscript", false)) {
+            System.loadLibrary("compiler_rt");
+        }
     }
 
     native private static void nativePreloadAppProcessHALs();
@@ -379,114 +375,49 @@ public class ZygoteInit {
      * classpath.
      */
     private static void cacheNonBootClasspathClassLoaders() {
+        // Ordered dependencies first
+        final List<SharedLibraryInfo> libs = new ArrayList<>();
         // These libraries used to be part of the bootclasspath, but had to be removed.
         // Old system applications still get them for backwards compatibility reasons,
         // so they are cached here in order to preserve performance characteristics.
-        SharedLibraryInfo hidlBase = new SharedLibraryInfo(
+        libs.add(new SharedLibraryInfo(
                 "/system/framework/android.hidl.base-V1.0-java.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
                 null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
-                false /*isNative*/);
-        SharedLibraryInfo hidlManager = new SharedLibraryInfo(
+                false /*isNative*/));
+        libs.add(new SharedLibraryInfo(
                 "/system/framework/android.hidl.manager-V1.0-java.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
                 null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
-                false /*isNative*/);
+                false /*isNative*/));
 
-        SharedLibraryInfo androidTestBase = new SharedLibraryInfo(
+        libs.add(new SharedLibraryInfo(
                 "/system/framework/android.test.base.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
                 null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
-                false /*isNative*/);
+                false /*isNative*/));
 
-        ApplicationLoaders.getDefault().createAndCacheNonBootclasspathSystemClassLoaders(
-                new SharedLibraryInfo[]{
-                    // ordered dependencies first
-                    hidlBase,
-                    hidlManager,
-                    androidTestBase,
-                });
-    }
-
-    /**
-     * Load in commonly used resources, so they can be shared across processes.
-     *
-     * These tend to be a few Kbytes, but are frequently in the 20-40K range, and occasionally even
-     * larger.
-     */
-    private static void preloadResources() {
-        try {
-            mResources = Resources.getSystem();
-            mResources.startPreloading();
-            if (PRELOAD_RESOURCES) {
-                Log.i(TAG, "Preloading resources...");
-
-                long startTime = SystemClock.uptimeMillis();
-                TypedArray ar = mResources.obtainTypedArray(
-                        com.android.internal.R.array.preloaded_drawables);
-                int N = preloadDrawables(ar);
-                ar.recycle();
-                Log.i(TAG, "...preloaded " + N + " resources in "
-                        + (SystemClock.uptimeMillis() - startTime) + "ms.");
-
-                startTime = SystemClock.uptimeMillis();
-                ar = mResources.obtainTypedArray(
-                        com.android.internal.R.array.preloaded_color_state_lists);
-                N = preloadColorStateLists(ar);
-                ar.recycle();
-                Log.i(TAG, "...preloaded " + N + " resources in "
-                        + (SystemClock.uptimeMillis() - startTime) + "ms.");
-
-                if (mResources.getBoolean(
-                        com.android.internal.R.bool.config_freeformWindowManagement)) {
-                    startTime = SystemClock.uptimeMillis();
-                    ar = mResources.obtainTypedArray(
-                            com.android.internal.R.array.preloaded_freeform_multi_window_drawables);
-                    N = preloadDrawables(ar);
-                    ar.recycle();
-                    Log.i(TAG, "...preloaded " + N + " resource in "
-                            + (SystemClock.uptimeMillis() - startTime) + "ms.");
-                }
-            }
-            mResources.finishPreloading();
-        } catch (RuntimeException e) {
-            Log.w(TAG, "Failure preloading resources", e);
+        // WindowManager Extensions is an optional shared library that is required for WindowManager
+        // Jetpack to fully function. Since it is a widely used library, preload it to improve apps
+        // startup performance.
+        if (WindowManager.hasWindowExtensionsEnabled()) {
+            final String systemExtFrameworkPath =
+                    new File(Environment.getSystemExtDirectory(), "framework").getPath();
+            libs.add(new SharedLibraryInfo(
+                    systemExtFrameworkPath + "/androidx.window.extensions.jar",
+                    "androidx.window.extensions", null /*codePaths*/,
+                    "androidx.window.extensions", SharedLibraryInfo.VERSION_UNDEFINED,
+                    SharedLibraryInfo.TYPE_BUILTIN, null /*declaringPackage*/,
+                    null /*dependentPackages*/, null /*dependencies*/, false /*isNative*/));
+            libs.add(new SharedLibraryInfo(
+                    systemExtFrameworkPath + "/androidx.window.sidecar.jar",
+                    "androidx.window.sidecar", null /*codePaths*/,
+                    "androidx.window.sidecar", SharedLibraryInfo.VERSION_UNDEFINED,
+                    SharedLibraryInfo.TYPE_BUILTIN, null /*declaringPackage*/,
+                    null /*dependentPackages*/, null /*dependencies*/, false /*isNative*/));
         }
-    }
 
-    private static int preloadColorStateLists(TypedArray ar) {
-        int N = ar.length();
-        for (int i = 0; i < N; i++) {
-            int id = ar.getResourceId(i, 0);
-
-            if (id != 0) {
-                if (mResources.getColorStateList(id, null) == null) {
-                    throw new IllegalArgumentException(
-                            "Unable to find preloaded color resource #0x"
-                                    + Integer.toHexString(id)
-                                    + " (" + ar.getString(i) + ")");
-                }
-            }
-        }
-        return N;
-    }
-
-
-    private static int preloadDrawables(TypedArray ar) {
-        int N = ar.length();
-        for (int i = 0; i < N; i++) {
-            int id = ar.getResourceId(i, 0);
-
-            if (id != 0) {
-                if (mResources.getDrawable(id, null) == null) {
-                    throw new IllegalArgumentException(
-                            "Unable to find preloaded drawable resource #0x"
-                                    + Integer.toHexString(id)
-                                    + " (" + ar.getString(i) + ")");
-                }
-            }
-        }
-        return N;
+        ApplicationLoaders.getDefault().createAndCacheNonBootclasspathSystemClassLoaders(libs);
     }
 
     /**
@@ -716,7 +647,8 @@ public class ZygoteInit {
         } catch (ErrnoException ex) {
             throw new RuntimeException("Failed to capget()", ex);
         }
-        capabilities &= ((long) data[0].effective) | (((long) data[1].effective) << 32);
+        capabilities &= Integer.toUnsignedLong(data[0].effective) |
+                (Integer.toUnsignedLong(data[1].effective) << 32);
 
         /* Hardcoded command line to start the system server */
         String[] args = {
@@ -746,7 +678,7 @@ public class ZygoteInit {
             Zygote.applyInvokeWithSystemProperty(parsedArgs);
 
             if (Zygote.nativeSupportsMemoryTagging()) {
-                String mode = SystemProperties.get("arm64.memtag.process.system_server", "");
+                String mode = SystemProperties.get("persist.arm64.memtag.system_server", "");
                 if (mode.isEmpty()) {
                   /* The system server has ASYNC MTE by default, in order to allow
                    * system services to specify their own MTE level later, as you

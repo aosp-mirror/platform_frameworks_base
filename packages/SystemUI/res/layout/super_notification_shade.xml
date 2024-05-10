@@ -21,53 +21,54 @@
 <com.android.systemui.shade.NotificationShadeWindowView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/legacy_window_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
-
-    <com.android.systemui.statusbar.BackDropView
-            android:id="@+id/backdrop"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            sysui:ignoreRightInset="true"
-            >
-        <ImageView android:id="@+id/backdrop_back"
-                   android:layout_width="match_parent"
-                   android:scaleType="centerCrop"
-                   android:layout_height="match_parent" />
-        <ImageView android:id="@+id/backdrop_front"
-                   android:layout_width="match_parent"
-                   android:layout_height="match_parent"
-                   android:scaleType="centerCrop"
-                   android:visibility="invisible" />
-    </com.android.systemui.statusbar.BackDropView>
 
     <com.android.systemui.scrim.ScrimView
         android:id="@+id/scrim_behind"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
-        />
+    />
 
     <com.android.systemui.scrim.ScrimView
         android:id="@+id/scrim_notifications"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
-        />
+    />
 
     <com.android.systemui.statusbar.LightRevealScrim
-            android:id="@+id/light_reveal_scrim"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    <include layout="@layout/status_bar_expanded"
+        android:id="@+id/light_reveal_scrim"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible" />
+        sysui:ignoreRightInset="true" />
+
+    <include layout="@layout/status_bar_expanded"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:visibility="invisible" />
+
+    <!-- Root for all keyguard content. It was previously located within the shade. -->
+    <com.android.systemui.keyguard.ui.view.KeyguardRootView
+        android:id="@id/keyguard_root_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Shared container for the notification stack. Can be positioned by either
+         the keyguard_root_view or notification_panel -->
+    <com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
+        android:id="@+id/shared_notification_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Placeholder for the communal UI that will be replaced if the feature is enabled. -->
+    <ViewStub
+        android:id="@+id/communal_ui_stub"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <include layout="@layout/brightness_mirror_container" />
 
@@ -75,7 +76,6 @@
         android:id="@+id/scrim_in_front"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
     />
 
@@ -98,15 +98,23 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             android:focusable="true" />
-        <FrameLayout android:id="@+id/keyguard_bouncer_container"
-                     android:layout_height="0dp"
-                     android:layout_width="match_parent"
-                     android:layout_weight="1"
-                     android:background="@android:color/transparent"
-                     android:visibility="invisible"
-                     android:clipChildren="false"
-                     android:clipToPadding="false" />
     </LinearLayout>
+
+    <FrameLayout android:id="@+id/keyguard_bouncer_container"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:visibility="invisible"
+        android:clipChildren="false"
+        android:clipToPadding="false" />
+
+    <ViewStub
+        android:id="@+id/multi_shade_stub"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:inflatedId="@+id/multi_shade"
+        android:layout="@layout/multi_shade" />
 
     <com.android.systemui.biometrics.AuthRippleView
         android:id="@+id/auth_ripple"

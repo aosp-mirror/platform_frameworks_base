@@ -16,9 +16,11 @@
 
 package com.android.server.hdmi;
 
+import static android.media.AudioDeviceVolumeManager.OnAudioDeviceVolumeChangedListener;
+import static android.media.AudioDeviceVolumeManager.OnDeviceVolumeBehaviorChangedListener;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
-import android.content.Context;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceVolumeManager;
 import android.media.VolumeInfo;
@@ -26,42 +28,48 @@ import android.media.VolumeInfo;
 import java.util.concurrent.Executor;
 
 /**
- * Wrapper for {@link AudioDeviceVolumeManager}. Creates an instance of the class and directly
- * passes method calls to that instance.
+ * Interface with the methods from {@link AudioDeviceVolumeManager} used by the HDMI framework.
+ * Allows the class to be faked for tests.
+ *
+ * See implementations {@link DefaultAudioDeviceVolumeManagerWrapper} and
+ * {@link FakeAudioFramework.FakeAudioDeviceVolumeManagerWrapper}.
  */
-public class AudioDeviceVolumeManagerWrapper
-        implements AudioDeviceVolumeManagerWrapperInterface {
+public interface AudioDeviceVolumeManagerWrapper {
 
-    private static final String TAG = "AudioDeviceVolumeManagerWrapper";
-
-    private final AudioDeviceVolumeManager mAudioDeviceVolumeManager;
-
-    public AudioDeviceVolumeManagerWrapper(Context context) {
-        mAudioDeviceVolumeManager = new AudioDeviceVolumeManager(context);
-    }
-
-    @Override
-    public void addOnDeviceVolumeBehaviorChangedListener(
+    /**
+     * Wrapper for {@link AudioDeviceVolumeManager#addOnDeviceVolumeBehaviorChangedListener(
+     * Executor, OnDeviceVolumeBehaviorChangedListener)}
+     */
+    void addOnDeviceVolumeBehaviorChangedListener(
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull AudioDeviceVolumeManager.OnDeviceVolumeBehaviorChangedListener listener)
-            throws SecurityException {
-        mAudioDeviceVolumeManager.addOnDeviceVolumeBehaviorChangedListener(executor, listener);
-    }
+            @NonNull AudioDeviceVolumeManager.OnDeviceVolumeBehaviorChangedListener listener);
 
-    @Override
-    public void removeOnDeviceVolumeBehaviorChangedListener(
-            @NonNull AudioDeviceVolumeManager.OnDeviceVolumeBehaviorChangedListener listener) {
-        mAudioDeviceVolumeManager.removeOnDeviceVolumeBehaviorChangedListener(listener);
-    }
+    /**
+     * Wrapper for {@link AudioDeviceVolumeManager#removeOnDeviceVolumeBehaviorChangedListener(
+     * OnDeviceVolumeBehaviorChangedListener)}
+     */
+    void removeOnDeviceVolumeBehaviorChangedListener(
+            @NonNull AudioDeviceVolumeManager.OnDeviceVolumeBehaviorChangedListener listener);
 
-    @Override
-    public void setDeviceAbsoluteVolumeBehavior(
+    /**
+     * Wrapper for {@link AudioDeviceVolumeManager#setDeviceAbsoluteVolumeBehavior(
+     * AudioDeviceAttributes, VolumeInfo, Executor, OnAudioDeviceVolumeChangedListener, boolean)}
+     */
+    void setDeviceAbsoluteVolumeBehavior(
             @NonNull AudioDeviceAttributes device,
             @NonNull VolumeInfo volume,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AudioDeviceVolumeManager.OnAudioDeviceVolumeChangedListener vclistener,
-            boolean handlesVolumeAdjustment) {
-        mAudioDeviceVolumeManager.setDeviceAbsoluteVolumeBehavior(device, volume, executor,
-                vclistener, handlesVolumeAdjustment);
-    }
+            boolean handlesVolumeAdjustment);
+
+    /**
+     * Wrapper for {@link AudioDeviceVolumeManager#setDeviceAbsoluteVolumeAdjustOnlyBehavior(
+     * AudioDeviceAttributes, VolumeInfo, Executor, OnAudioDeviceVolumeChangedListener, boolean)}
+     */
+    void setDeviceAbsoluteVolumeAdjustOnlyBehavior(
+            @NonNull AudioDeviceAttributes device,
+            @NonNull VolumeInfo volume,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull AudioDeviceVolumeManager.OnAudioDeviceVolumeChangedListener vclistener,
+            boolean handlesVolumeAdjustment);
 }

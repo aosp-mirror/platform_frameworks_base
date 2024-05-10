@@ -21,7 +21,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.hardware.soundtrigger.SoundTrigger;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Slog;
@@ -35,7 +37,7 @@ import java.util.Objects;
  * This class provides management of voice based sound recognition models. Usage of this class is
  * restricted to system or signature applications only. This allows OEMs to write apps that can
  * manage voice based sound trigger models.
- * Callers of this class are expected to have whitelist manifest permission MANAGE_VOICE_KEYPHRASES.
+ * Callers of this class are expected to have allowlist manifest permission MANAGE_VOICE_KEYPHRASES.
  * Callers of this class are expected to be the designated voice interaction service via
  * {@link Settings.Secure.VOICE_INTERACTION_SERVICE} or a bundled voice model enrollment application
  * detected by {@link android.hardware.soundtrigger.KeyphraseEnrollmentInfo}.
@@ -150,6 +152,25 @@ public final class KeyphraseModelManager {
             if (status != SoundTrigger.STATUS_OK) {
                 throw new ServiceSpecificException(status);
             }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Override the persistent enrolled model database with an in-memory
+     * fake for testing purposes.
+     *
+     * @param enabled - {@code true} if the model enrollment database should be overridden with an
+     * in-memory fake. {@code false} if the real, persistent model enrollment database should be
+     * used.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES)
+    @TestApi
+    public void setModelDatabaseForTestEnabled(boolean enabled) {
+        try {
+            mVoiceInteractionManagerService.setModelDatabaseForTestEnabled(enabled, new Binder());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

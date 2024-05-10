@@ -28,7 +28,8 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.NotifPanelEvents;
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
+import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -38,6 +39,7 @@ import com.android.systemui.statusbar.notification.collection.provider.VisualSta
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -54,14 +56,15 @@ import javax.inject.Inject;
  */
 // TODO(b/204468557): Move to @CoordinatorScope
 @SysUISingleton
-public class VisualStabilityCoordinator implements Coordinator, Dumpable,
-        NotifPanelEvents.Listener {
+public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     public static final String TAG = "VisualStability";
     public static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
     private final DelayableExecutor mDelayableExecutor;
     private final HeadsUpManager mHeadsUpManager;
-    private final NotifPanelEvents mNotifPanelEvents;
+    private final ShadeAnimationInteractor mShadeAnimationInteractor;
     private final StatusBarStateController mStatusBarStateController;
+    private final JavaAdapter mJavaAdapter;
+    private final VisibilityLocationProvider mVisibilityLocationProvider;
     private final VisualStabilityProvider mVisualStabilityProvider;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
 
@@ -92,16 +95,20 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
             DelayableExecutor delayableExecutor,
             DumpManager dumpManager,
             HeadsUpManager headsUpManager,
-            NotifPanelEvents notifPanelEvents,
+            ShadeAnimationInteractor shadeAnimationInteractor,
+            JavaAdapter javaAdapter,
             StatusBarStateController statusBarStateController,
+            VisibilityLocationProvider visibilityLocationProvider,
             VisualStabilityProvider visualStabilityProvider,
             WakefulnessLifecycle wakefulnessLifecycle) {
         mHeadsUpManager = headsUpManager;
+        mShadeAnimationInteractor = shadeAnimationInteractor;
+        mJavaAdapter = javaAdapter;
+        mVisibilityLocationProvider = visibilityLocationProvider;
         mVisualStabilityProvider = visualStabilityProvider;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mStatusBarStateController = statusBarStateController;
         mDelayableExecutor = delayableExecutor;
-        mNotifPanelEvents = notifPanelEvents;
 
         dumpManager.registerDumpable(this);
     }
@@ -114,7 +121,10 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
 
         mStatusBarStateController.addCallback(mStatusBarStateControllerListener);
         mPulsing = mStatusBarStateController.isPulsing();
-        mNotifPanelEvents.registerListener(this);
+        mJavaAdapter.alwaysCollectFlow(mShadeAnimationInteractor.isAnyCloseAnimationRunning(),
+                this::onShadeOrQsClosingChanged);
+        mJavaAdapter.alwaysCollectFlow(mShadeAnimationInteractor.isLaunchingActivity(),
+                this::onLaunchingActivityChanged);
 
         pipeline.setVisualStabilityManager(mNotifStabilityManager);
     }
@@ -123,6 +133,11 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
     //  HUNs to the top of the shade
     private final NotifStabilityManager mNotifStabilityManager =
             new NotifStabilityManager("VisualStabilityCoordinator") {
+                private boolean canMoveForHeadsUp(NotificationEntry entry) {
+                    return entry != null && mHeadsUpManager.isAlerting(entry.getKey())
+                            && !mVisibilityLocationProvider.isInVisibleLocation(entry);
+                }
+
                 @Override
                 public void onBeginRun() {
                     mIsSuppressingPipelineRun = false;
@@ -140,7 +155,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
                 @Override
                 public boolean isGroupChangeAllowed(@NonNull NotificationEntry entry) {
                     final boolean isGroupChangeAllowedForEntry =
-                            mReorderingAllowed || mHeadsUpManager.isAlerting(entry.getKey());
+                            mReorderingAllowed || canMoveForHeadsUp(entry);
                     mIsSuppressingGroupChange |= !isGroupChangeAllowedForEntry;
                     return isGroupChangeAllowedForEntry;
                 }
@@ -156,7 +171,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
                 public boolean isSectionChangeAllowed(@NonNull NotificationEntry entry) {
                     final boolean isSectionChangeAllowedForEntry =
                             mReorderingAllowed
-                                    || mHeadsUpManager.isAlerting(entry.getKey())
+                                    || canMoveForHeadsUp(entry)
                                     || mEntriesThatCanChangeSection.containsKey(entry.getKey());
                     if (!isSectionChangeAllowedForEntry) {
                         mEntriesWithSuppressedSectionChange.add(entry.getKey());
@@ -165,8 +180,8 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
                 }
 
                 @Override
-                public boolean isEntryReorderingAllowed(@NonNull ListEntry section) {
-                    return mReorderingAllowed;
+                public boolean isEntryReorderingAllowed(@NonNull ListEntry entry) {
+                    return mReorderingAllowed || canMoveForHeadsUp(entry.getRepresentativeEntry());
                 }
 
                 @Override
@@ -313,14 +328,12 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
         }
     }
 
-    @Override
-    public void onPanelCollapsingChanged(boolean isCollapsing) {
-        mNotifPanelCollapsing = isCollapsing;
-        updateAllowedStates("notifPanelCollapsing", isCollapsing);
+    private void onShadeOrQsClosingChanged(boolean isClosing) {
+        mNotifPanelCollapsing = isClosing;
+        updateAllowedStates("notifPanelCollapsing", isClosing);
     }
 
-    @Override
-    public void onLaunchingActivityChanged(boolean isLaunchingActivity) {
+    private void onLaunchingActivityChanged(boolean isLaunchingActivity) {
         mNotifPanelLaunchingActivity = isLaunchingActivity;
         updateAllowedStates("notifPanelLaunchingActivity", isLaunchingActivity);
     }

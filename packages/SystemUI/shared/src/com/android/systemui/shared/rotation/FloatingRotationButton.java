@@ -35,6 +35,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 
+import androidx.annotation.BoolRes;
 import androidx.core.view.OneShotPreDrawListener;
 
 import com.android.systemui.shared.rotation.FloatingRotationButtonPositionCalculator.Position;
@@ -65,10 +66,11 @@ public class FloatingRotationButton implements RotationButton {
     private final int mTaskbarBottomMarginResource;
     @DimenRes
     private final int mButtonDiameterResource;
+    @BoolRes
+    private final int mFloatingRotationBtnPositionLeftResource;
 
     private AnimatedVectorDrawable mAnimatedDrawable;
     private boolean mIsShowing;
-    private boolean mCanShow = true;
     private int mDisplayRotation;
 
     private boolean mIsTaskbarVisible = false;
@@ -84,15 +86,14 @@ public class FloatingRotationButton implements RotationButton {
             @LayoutRes int layout, @IdRes int keyButtonId, @DimenRes int minMargin,
             @DimenRes int roundedContentPadding, @DimenRes int taskbarLeftMargin,
             @DimenRes int taskbarBottomMargin, @DimenRes int buttonDiameter,
-            @DimenRes int rippleMaxWidth) {
-        mWindowManager = context.getSystemService(WindowManager.class);
-        mKeyButtonContainer = (ViewGroup) LayoutInflater.from(context).inflate(layout, null);
+            @DimenRes int rippleMaxWidth, @BoolRes int floatingRotationBtnPositionLeftResource) {
+        mContext = context;
+        mWindowManager = mContext.getSystemService(WindowManager.class);
+        mKeyButtonContainer = (ViewGroup) LayoutInflater.from(mContext).inflate(layout, null);
         mKeyButtonView = mKeyButtonContainer.findViewById(keyButtonId);
         mKeyButtonView.setVisibility(View.VISIBLE);
-        mKeyButtonView.setContentDescription(context.getString(contentDescriptionResource));
+        mKeyButtonView.setContentDescription(mContext.getString(contentDescriptionResource));
         mKeyButtonView.setRipple(rippleMaxWidth);
-
-        mContext = context;
 
         mContentDescriptionResource = contentDescriptionResource;
         mMinMarginResource = minMargin;
@@ -100,6 +101,7 @@ public class FloatingRotationButton implements RotationButton {
         mTaskbarLeftMarginResource = taskbarLeftMargin;
         mTaskbarBottomMarginResource = taskbarBottomMargin;
         mButtonDiameterResource = buttonDiameter;
+        mFloatingRotationBtnPositionLeftResource = floatingRotationBtnPositionLeftResource;
 
         updateDimensionResources();
     }
@@ -116,8 +118,11 @@ public class FloatingRotationButton implements RotationButton {
         int taskbarMarginBottom =
                 res.getDimensionPixelSize(mTaskbarBottomMarginResource);
 
+        boolean floatingRotationButtonPositionLeft =
+                res.getBoolean(mFloatingRotationBtnPositionLeftResource);
+
         mPositionCalculator = new FloatingRotationButtonPositionCalculator(defaultMargin,
-                taskbarMarginLeft, taskbarMarginBottom);
+                taskbarMarginLeft, taskbarMarginBottom, floatingRotationButtonPositionLeft);
 
         final int diameter = res.getDimensionPixelSize(mButtonDiameterResource);
         mContainerSize = diameter + Math.max(defaultMargin, Math.max(taskbarMarginLeft,
@@ -143,7 +148,7 @@ public class FloatingRotationButton implements RotationButton {
 
     @Override
     public boolean show() {
-        if (!mCanShow || mIsShowing) {
+        if (mIsShowing) {
             return false;
         }
 
@@ -212,14 +217,6 @@ public class FloatingRotationButton implements RotationButton {
     @Override
     public void setDarkIntensity(float darkIntensity) {
         mKeyButtonView.setDarkIntensity(darkIntensity);
-    }
-
-    @Override
-    public void setCanShowRotationButton(boolean canShow) {
-        mCanShow = canShow;
-        if (!mCanShow) {
-            hide();
-        }
     }
 
     @Override

@@ -21,24 +21,36 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.util.DisplayMetrics;
 
 /**
  * Helper class for drawing round scroll bars on round Wear devices.
  */
 class RoundScrollbarRenderer {
     // The range of the scrollbar position represented as an angle in degrees.
-    private static final int SCROLLBAR_ANGLE_RANGE = 90;
-    private static final int MAX_SCROLLBAR_ANGLE_SWIPE = 16;
-    private static final int MIN_SCROLLBAR_ANGLE_SWIPE = 6;
-    private static final float WIDTH_PERCENTAGE = 0.02f;
-    private static final int DEFAULT_THUMB_COLOR = 0xFFE8EAED;
+    private static final float SCROLLBAR_ANGLE_RANGE = 28.8f;
+    private static final float MAX_SCROLLBAR_ANGLE_SWIPE = 26.3f; // 90%
+    private static final float MIN_SCROLLBAR_ANGLE_SWIPE = 3.1f; // 10%
+    private static final float THUMB_WIDTH_DP = 4f;
+    private static final float OUTER_PADDING_DP = 2f;
+    private static final int DEFAULT_THUMB_COLOR = 0xFFFFFFFF;
     private static final int DEFAULT_TRACK_COLOR = 0x4CFFFFFF;
+
+    // Rate at which the scrollbar will resize itself when the size of the view changes
+    private static final float RESIZING_RATE = 0.8f;
+    // Threshold at which the scrollbar will stop resizing smoothly and jump to the correct size
+    private static final int RESIZING_THRESHOLD_PX = 20;
 
     private final Paint mThumbPaint = new Paint();
     private final Paint mTrackPaint = new Paint();
     private final RectF mRect = new RectF();
     private final View mParent;
     private final int mMaskThickness;
+
+    private float mPreviousMaxScroll = 0;
+    private float mMaxScrollDiff = 0;
+    private float mPreviousCurrentScroll = 0;
+    private float mCurrentScrollDiff = 0;
 
     public RoundScrollbarRenderer(View parent) {
         // Paints for the round scrollbar.
@@ -61,19 +73,50 @@ class RoundScrollbarRenderer {
                 com.android.internal.R.dimen.circular_display_mask_thickness);
     }
 
-    public void drawRoundScrollbars(Canvas canvas, float alpha, Rect bounds) {
+    public void drawRoundScrollbars(Canvas canvas, float alpha, Rect bounds, boolean drawToLeft) {
         if (alpha == 0) {
             return;
         }
         // Get information about the current scroll state of the parent view.
         float maxScroll = mParent.computeVerticalScrollRange();
         float scrollExtent = mParent.computeVerticalScrollExtent();
-        if (scrollExtent <= 0 || maxScroll <= scrollExtent) {
+        float newScroll = mParent.computeVerticalScrollOffset();
+
+        if (scrollExtent <= 0) {
+            if (!mParent.canScrollVertically(1) && !mParent.canScrollVertically(-1)) {
+                return;
+            } else {
+                scrollExtent = 0;
+            }
+        } else if (maxScroll <= scrollExtent) {
             return;
         }
-        float currentScroll = Math.max(0, mParent.computeVerticalScrollOffset());
-        float linearThumbLength = mParent.computeVerticalScrollExtent();
-        float thumbWidth = mParent.getWidth() * WIDTH_PERCENTAGE;
+
+        // Make changes to the VerticalScrollRange happen gradually
+        if (Math.abs(maxScroll - mPreviousMaxScroll) > RESIZING_THRESHOLD_PX
+                && mPreviousMaxScroll != 0) {
+            mMaxScrollDiff += maxScroll - mPreviousMaxScroll;
+            mCurrentScrollDiff += newScroll - mPreviousCurrentScroll;
+        }
+
+        mPreviousMaxScroll = maxScroll;
+        mPreviousCurrentScroll = newScroll;
+
+        if (Math.abs(mMaxScrollDiff) > RESIZING_THRESHOLD_PX
+                || Math.abs(mCurrentScrollDiff) > RESIZING_THRESHOLD_PX) {
+            mMaxScrollDiff *= RESIZING_RATE;
+            mCurrentScrollDiff *= RESIZING_RATE;
+
+            maxScroll -= mMaxScrollDiff;
+            newScroll -= mCurrentScrollDiff;
+        } else {
+            mMaxScrollDiff = 0;
+            mCurrentScrollDiff = 0;
+        }
+
+        float currentScroll = Math.max(0, newScroll);
+        float linearThumbLength = scrollExtent;
+        float thumbWidth = dpToPx(THUMB_WIDTH_DP);
         mThumbPaint.setStrokeWidth(thumbWidth);
         mTrackPaint.setStrokeWidth(thumbWidth);
 
@@ -85,9 +128,9 @@ class RoundScrollbarRenderer {
         sweepAngle = clamp(sweepAngle, MIN_SCROLLBAR_ANGLE_SWIPE, MAX_SCROLLBAR_ANGLE_SWIPE);
         // Normalize the start angle so that it falls on the track.
         float startAngle = (currentScroll * (SCROLLBAR_ANGLE_RANGE - sweepAngle))
-                / (maxScroll - linearThumbLength) - SCROLLBAR_ANGLE_RANGE / 2;
-        startAngle = clamp(startAngle, -SCROLLBAR_ANGLE_RANGE / 2,
-                SCROLLBAR_ANGLE_RANGE / 2 - sweepAngle);
+                / (maxScroll - linearThumbLength) - SCROLLBAR_ANGLE_RANGE / 2f;
+        startAngle = clamp(startAngle, -SCROLLBAR_ANGLE_RANGE / 2f,
+                SCROLLBAR_ANGLE_RANGE / 2f - sweepAngle);
 
         // Draw the track and the thumb.
         float inset = thumbWidth / 2 + mMaskThickness;
@@ -96,9 +139,26 @@ class RoundScrollbarRenderer {
                 bounds.top + inset,
                 bounds.right - inset,
                 bounds.bottom - inset);
-        canvas.drawArc(mRect, -SCROLLBAR_ANGLE_RANGE / 2, SCROLLBAR_ANGLE_RANGE, false,
-                mTrackPaint);
-        canvas.drawArc(mRect, startAngle, sweepAngle, false, mThumbPaint);
+
+        if (drawToLeft) {
+            canvas.drawArc(mRect, 180 + SCROLLBAR_ANGLE_RANGE / 2f, -SCROLLBAR_ANGLE_RANGE, false,
+                    mTrackPaint);
+            canvas.drawArc(mRect, 180 - startAngle, -sweepAngle, false, mThumbPaint);
+        } else {
+            canvas.drawArc(mRect, -SCROLLBAR_ANGLE_RANGE / 2f, SCROLLBAR_ANGLE_RANGE, false,
+                    mTrackPaint);
+            canvas.drawArc(mRect, startAngle, sweepAngle, false, mThumbPaint);
+        }
+    }
+
+    void getRoundVerticalScrollBarBounds(Rect bounds) {
+        float padding = dpToPx(OUTER_PADDING_DP);
+        final int width = mParent.mRight - mParent.mLeft;
+        final int height = mParent.mBottom - mParent.mTop;
+        bounds.left = mParent.mScrollX + (int) padding;
+        bounds.top = mParent.mScrollY + (int) padding;
+        bounds.right = mParent.mScrollX + width - (int) padding;
+        bounds.bottom = mParent.mScrollY + height - (int) padding;
     }
 
     private static float clamp(float val, float min, float max) {
@@ -126,5 +186,10 @@ class RoundScrollbarRenderer {
         if (mTrackPaint.getColor() != trackColor) {
             mTrackPaint.setColor(trackColor);
         }
+    }
+
+    private float dpToPx(float dp) {
+        return dp * ((float) mParent.getContext().getResources().getDisplayMetrics().densityDpi)
+                / DisplayMetrics.DENSITY_DEFAULT;
     }
 }

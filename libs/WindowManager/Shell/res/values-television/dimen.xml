@@ -21,4 +21,7 @@
 
     <!-- Padding between PIP and keep clear areas that caused it to move. -->
     <dimen name="pip_keep_clear_area_padding">16dp</dimen>
+
+    <!-- The corner radius for PiP window. -->
+    <dimen name="pip_corner_radius">0dp</dimen>
 </resources>

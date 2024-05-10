@@ -9,6 +9,7 @@ package {
 
 android_library {
     name: "SettingsLibTopIntroPreference",
+    use_resource_processor: true,
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
@@ -23,5 +24,7 @@ android_library {
     apex_available: [
         "//apex_available:platform",
         "com.android.cellbroadcast",
+        "com.android.devicelock",
+        "com.android.healthfitness",
     ],
 }

@@ -62,6 +62,7 @@ public class DelayedWakeLock implements WakeLock {
      */
     public static class Builder {
         private final Context mContext;
+        private final WakeLockLogger mLogger;
         private String mTag;
         private Handler mHandler;
 
@@ -69,8 +70,9 @@ public class DelayedWakeLock implements WakeLock {
          * Constructor for DelayedWakeLock.Builder
          */
         @Inject
-        public Builder(Context context) {
+        public Builder(Context context, WakeLockLogger logger) {
             mContext = context;
+            mLogger = logger;
         }
 
         /**
@@ -95,7 +97,7 @@ public class DelayedWakeLock implements WakeLock {
          * Build the DelayedWakeLock.
          */
         public DelayedWakeLock build() {
-            return new DelayedWakeLock(mHandler, WakeLock.createPartial(mContext, mTag));
+            return new DelayedWakeLock(mHandler, WakeLock.createPartial(mContext, mLogger, mTag));
         }
     }
 }

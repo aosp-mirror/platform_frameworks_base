@@ -21,15 +21,19 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import android.net.Uri;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.FalsingManager;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 /**
  * Simple Fake for testing where {@link FalsingManager} is required.
  */
+@SysUISingleton
 public class FalsingManagerFake implements FalsingManager {
     private boolean mIsFalseTouch;
     private boolean mIsSimpleTap;
@@ -39,11 +43,16 @@ public class FalsingManagerFake implements FalsingManager {
     private boolean mShouldEnforceBouncer;
     private boolean mIsReportingEnabled;
     private boolean mIsFalseRobustTap;
+    private boolean mIsFalseLongTap;
     private boolean mDestroyed;
     private boolean mIsProximityNear;
 
     private final List<FalsingBeliefListener> mFalsingBeliefListeners = new ArrayList<>();
     private final List<FalsingTapListener> mTapListeners = new ArrayList<>();
+
+    @Inject
+    public FalsingManagerFake() {
+    }
 
     @Override
     public void onSuccessfulUnlock() {
@@ -87,6 +96,10 @@ public class FalsingManagerFake implements FalsingManager {
         mIsProximityNear = proxNear;
     }
 
+    public void setFalseLongTap(boolean falseLongTap) {
+        mIsFalseLongTap = falseLongTap;
+    }
+
     @Override
     public boolean isSimpleTap() {
         checkDestroyed();
@@ -97,6 +110,12 @@ public class FalsingManagerFake implements FalsingManager {
     public boolean isFalseTap(@Penalty int penalty) {
         checkDestroyed();
         return mIsFalseRobustTap;
+    }
+
+    @Override
+    public boolean isFalseLongTap(int penalty) {
+        checkDestroyed();
+        return mIsFalseLongTap;
     }
 
     @Override

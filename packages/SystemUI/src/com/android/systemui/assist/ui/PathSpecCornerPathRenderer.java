@@ -23,7 +23,7 @@ import android.graphics.RectF;
 import android.util.Log;
 import android.util.PathParser;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Parses a path describing rounded corners from a string.

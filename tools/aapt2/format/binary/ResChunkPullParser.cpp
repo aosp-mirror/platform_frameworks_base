@@ -17,12 +17,13 @@
 #include "format/binary/ResChunkPullParser.h"
 
 #include <inttypes.h>
+
 #include <cstddef>
 
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
 #include "androidfw/ResourceTypes.h"
-
+#include "androidfw/Util.h"
 #include "util/Util.h"
 
 namespace aapt {
@@ -32,8 +33,9 @@ using android::base::StringPrintf;
 
 static std::string ChunkHeaderDump(const ResChunk_header* header) {
   return StringPrintf("(type=%02" PRIx16 " header_size=%" PRIu16 " size=%" PRIu32 ")",
-                      util::DeviceToHost16(header->type), util::DeviceToHost16(header->headerSize),
-                      util::DeviceToHost32(header->size));
+                      android::util::DeviceToHost16(header->type),
+                      android::util::DeviceToHost16(header->headerSize),
+                      android::util::DeviceToHost32(header->size));
 }
 
 ResChunkPullParser::Event ResChunkPullParser::Next() {
@@ -45,7 +47,7 @@ ResChunkPullParser::Event ResChunkPullParser::Next() {
     current_chunk_ = data_;
   } else {
     current_chunk_ = (const ResChunk_header*)(((const char*)current_chunk_) +
-                                              util::DeviceToHost32(current_chunk_->size));
+                                              android::util::DeviceToHost32(current_chunk_->size));
   }
 
   const std::ptrdiff_t diff = (const char*)current_chunk_ - (const char*)data_;
@@ -61,16 +63,16 @@ ResChunkPullParser::Event ResChunkPullParser::Next() {
     return (event_ = Event::kBadDocument);
   }
 
-  if (util::DeviceToHost16(current_chunk_->headerSize) < sizeof(ResChunk_header)) {
+  if (android::util::DeviceToHost16(current_chunk_->headerSize) < sizeof(ResChunk_header)) {
     error_ = "chunk has too small header";
     current_chunk_ = nullptr;
     return (event_ = Event::kBadDocument);
-  } else if (util::DeviceToHost32(current_chunk_->size) <
-             util::DeviceToHost16(current_chunk_->headerSize)) {
+  } else if (android::util::DeviceToHost32(current_chunk_->size) <
+             android::util::DeviceToHost16(current_chunk_->headerSize)) {
     error_ = "chunk's total size is smaller than header " + ChunkHeaderDump(current_chunk_);
     current_chunk_ = nullptr;
     return (event_ = Event::kBadDocument);
-  } else if (offset + util::DeviceToHost32(current_chunk_->size) > len_) {
+  } else if (offset + android::util::DeviceToHost32(current_chunk_->size) > len_) {
     error_ = "chunk's data extends past the end of the document " + ChunkHeaderDump(current_chunk_);
     current_chunk_ = nullptr;
     return (event_ = Event::kBadDocument);

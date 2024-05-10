@@ -20,6 +20,7 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.util.mockito.mock
@@ -39,6 +40,7 @@ class AmbientStateTest : SysuiTestCase() {
     private val sectionProvider = StackScrollAlgorithm.SectionProvider { _, _ -> false }
     private val bypassController = StackScrollAlgorithm.BypassController { false }
     private val statusBarKeyguardViewManager = mock<StatusBarKeyguardViewManager>()
+    private val largeScreenShadeInterpolator = mock<LargeScreenShadeInterpolator>()
 
     private lateinit var sut: AmbientState
 
@@ -51,6 +53,7 @@ class AmbientStateTest : SysuiTestCase() {
                 sectionProvider,
                 bypassController,
                 statusBarKeyguardViewManager,
+                largeScreenShadeInterpolator
             )
     }
 
@@ -359,6 +362,22 @@ class AmbientStateTest : SysuiTestCase() {
         sut.setStatusBarState(StatusBarState.SHADE)
 
         assertThat(sut.isOnKeyguard).isFalse()
+    }
+    // endregion
+
+    // region mIsClosing
+    @Test
+    fun isClosing_whenShadeClosing_shouldReturnTrue() {
+        sut.setIsClosing(true)
+
+        assertThat(sut.isClosing).isTrue()
+    }
+
+    @Test
+    fun isClosing_whenShadeFinishClosing_shouldReturnFalse() {
+        sut.setIsClosing(false)
+
+        assertThat(sut.isClosing).isFalse()
     }
     // endregion
 }

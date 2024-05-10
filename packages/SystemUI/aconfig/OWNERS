@@ -1,0 +1,2 @@
+per-file accessibility.aconfig = file:/core/java/android/view/accessibility/OWNERS
+per-file biometrics_framework.aconfig = file:/services/core/java/com/android/server/biometrics/OWNERS

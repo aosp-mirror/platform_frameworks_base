@@ -94,7 +94,6 @@ class FloatingContentCoordinator constructor() {
          * non-overlapping.
          * @return The new bounds for this content.
          */
-        @JvmDefault
         fun calculateNewBoundsOnOverlap(
             overlappingContentBounds: Rect,
             otherContentBounds: List<Rect>

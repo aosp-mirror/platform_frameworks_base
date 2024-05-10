@@ -18,6 +18,7 @@ package android.hardware.radio;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -36,6 +37,7 @@ import android.os.ServiceManager.ServiceNotFoundException;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -81,6 +83,24 @@ public class RadioManager {
     /** Method return status: time out before operation completion */
     public static final int STATUS_TIMED_OUT = -110;
 
+    /**
+     *  Radio operation status types
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "STATUS_" }, value = {
+            STATUS_OK,
+            STATUS_ERROR,
+            STATUS_PERMISSION_DENIED,
+            STATUS_NO_INIT,
+            STATUS_BAD_VALUE,
+            STATUS_DEAD_OBJECT,
+            STATUS_INVALID_OPERATION,
+            STATUS_TIMED_OUT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RadioStatusType{}
+
 
     // keep in sync with radio_class_t in /system/core/incluse/system/radio.h
     /** Radio module class supporting FM (including HD radio) and AM */
@@ -103,6 +123,7 @@ public class RadioManager {
     /** AM HD radio or DRM band.
      * @see BandDescriptor */
     public static final int BAND_AM_HD = 3;
+    /** @removed mistakenly exposed previously */
     @IntDef(prefix = { "BAND_" }, value = {
         BAND_INVALID,
         BAND_AM,
@@ -140,12 +161,17 @@ public class RadioManager {
     /**
      * Forces the analog playback for the supporting radio technology.
      *
-     * User may disable digital playback for FM HD Radio or hybrid FM/DAB with
-     * this option. This is purely user choice, ie. does not reflect digital-
+     * <p>User may disable digital playback for FM HD Radio or hybrid FM/DAB with
+     * this option. This is purely user choice, i.e. does not reflect digital-
      * analog handover state managed from the HAL implementation side.
      *
-     * Some radio technologies may not support this, ie. DAB.
+     * <p>Some radio technologies may not support this, i.e. DAB.
+     *
+     * @deprecated Use {@link #CONFIG_FORCE_ANALOG_FM} instead. If {@link #CONFIG_FORCE_ANALOG_FM}
+     * is supported in HAL, {@link RadioTuner#setConfigFlag} and {@link RadioTuner#isConfigFlagSet}
+     * with CONFIG_FORCE_ANALOG will set/get the value of {@link #CONFIG_FORCE_ANALOG_FM}.
      */
+    @Deprecated
     public static final int CONFIG_FORCE_ANALOG = 2;
     /**
      * Forces the digital playback for the supporting radio technology.
@@ -180,6 +206,30 @@ public class RadioManager {
     /** Enables DAB-FM soft-linking (related content). */
     public static final int CONFIG_DAB_FM_SOFT_LINKING = 9;
 
+    /**
+     * Forces the FM analog playback for the supporting radio technology.
+     *
+     * <p>User may disable FM digital playback for FM HD Radio or hybrid FM/DAB
+     * with this option. This is purely user choice, i.e. does not reflect
+     * digital-analog handover state managed from the HAL implementation side.
+     *
+     * <p>Some radio technologies may not support this, i.e. DAB.
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final int CONFIG_FORCE_ANALOG_FM = 10;
+
+    /**
+     * Forces the AM analog playback for the supporting radio technology.
+     *
+     * <p>User may disable FM digital playback for AM HD Radio or hybrid AM/DAB
+     * with this option. This is purely user choice, i.e. does not reflect
+     * digital-analog handover state managed from the HAL implementation side.
+     *
+     * <p>Some radio technologies may not support this, i.e. DAB.
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final int CONFIG_FORCE_ANALOG_AM = 11;
+
     /** @hide */
     @IntDef(prefix = { "CONFIG_" }, value = {
         CONFIG_FORCE_MONO,
@@ -191,6 +241,8 @@ public class RadioManager {
         CONFIG_DAB_FM_LINKING,
         CONFIG_DAB_DAB_SOFT_LINKING,
         CONFIG_DAB_FM_SOFT_LINKING,
+        CONFIG_FORCE_ANALOG_FM,
+        CONFIG_FORCE_ANALOG_AM,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ConfigFlag {}
@@ -250,7 +302,8 @@ public class RadioManager {
                     Objects.requireNonNull(entry.getValue());
                 }
             }
-            mDabFrequencyTable = dabFrequencyTable;
+            mDabFrequencyTable = (dabFrequencyTable == null || dabFrequencyTable.isEmpty())
+                    ? null : dabFrequencyTable;
             mVendorInfo = (vendorInfo == null) ? new HashMap<>() : vendorInfo;
         }
 
@@ -328,6 +381,7 @@ public class RadioManager {
          * program list.
          * @return the number of audio sources available.
          */
+        @RadioStatusType
         public int getNumAudioSources() {
             return mNumAudioSources;
         }
@@ -445,7 +499,8 @@ public class RadioManager {
             mIsBgScanSupported = in.readInt() == 1;
             mSupportedProgramTypes = arrayToSet(in.createIntArray());
             mSupportedIdentifierTypes = arrayToSet(in.createIntArray());
-            mDabFrequencyTable = Utils.readStringIntMap(in);
+            Map<String, Integer> dabFrequencyTableIn = Utils.readStringIntMap(in);
+            mDabFrequencyTable = (dabFrequencyTableIn.isEmpty()) ? null : dabFrequencyTableIn;
             mVendorInfo = Utils.readStringMap(in);
         }
 
@@ -918,7 +973,10 @@ public class RadioManager {
         @NonNull final BandDescriptor mDescriptor;
 
         BandConfig(BandDescriptor descriptor) {
-            mDescriptor = Objects.requireNonNull(descriptor);
+            Objects.requireNonNull(descriptor, "Descriptor cannot be null");
+            mDescriptor = new BandDescriptor(descriptor.getRegion(), descriptor.getType(),
+                    descriptor.getLowerLimit(), descriptor.getUpperLimit(),
+                    descriptor.getSpacing());
         }
 
         BandConfig(int region, int type, int lowerLimit, int upperLimit, int spacing) {
@@ -1416,6 +1474,9 @@ public class RadioManager {
         private static final int FLAG_TRAFFIC_ANNOUNCEMENT = 1 << 3;
         private static final int FLAG_TUNED = 1 << 4;
         private static final int FLAG_STEREO = 1 << 5;
+        private static final int FLAG_SIGNAL_ACQUIRED = 1 << 6;
+        private static final int FLAG_HD_SIS_ACQUIRED = 1 << 7;
+        private static final int FLAG_HD_AUDIO_ACQUIRED = 1 << 8;
 
         @NonNull private final ProgramSelector mSelector;
         @Nullable private final ProgramSelector.Identifier mLogicallyTunedTo;
@@ -1570,7 +1631,7 @@ public class RadioManager {
         }
 
         /**
-         * {@code true} if radio stream is not playing, ie. due to bad reception
+         * {@code true} if radio stream is not playing, i.e. due to bad reception
          * conditions or buffering. In this state volume knob MAY be disabled to
          * prevent user increasing volume too much.
          * It does NOT mean the user has muted audio.
@@ -1593,6 +1654,28 @@ public class RadioManager {
          */
         public boolean isTrafficAnnouncementActive() {
             return (mInfoFlags & FLAG_TRAFFIC_ANNOUNCEMENT) != 0;
+        }
+
+        /**
+         * @return {@code true} if the signal has been acquired.
+         */
+        @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+        public boolean isSignalAcquired() {
+            return (mInfoFlags & FLAG_SIGNAL_ACQUIRED) != 0;
+        }
+        /**
+         * @return {@code true} if HD Station Information Service (SIS) information is available.
+         */
+        @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+        public boolean isHdSisAvailable() {
+            return (mInfoFlags & FLAG_HD_SIS_ACQUIRED) != 0;
+        }
+        /**
+         * @return {@code true} if HD audio is available.
+         */
+        @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+        public boolean isHdAudioAvailable() {
+            return (mInfoFlags & FLAG_HD_AUDIO_ACQUIRED) != 0;
         }
 
         /**
@@ -1691,7 +1774,7 @@ public class RadioManager {
             if (!(obj instanceof ProgramInfo)) return false;
             ProgramInfo other = (ProgramInfo) obj;
 
-            if (!Objects.equals(mSelector, other.mSelector)) return false;
+            if (!mSelector.strictEquals(other.mSelector)) return false;
             if (!Objects.equals(mLogicallyTunedTo, other.mLogicallyTunedTo)) return false;
             if (!Objects.equals(mPhysicallyTunedTo, other.mPhysicallyTunedTo)) return false;
             if (!Objects.equals(mRelatedContent, other.mRelatedContent)) return false;
@@ -1718,6 +1801,7 @@ public class RadioManager {
      * </ul>
      */
     @RequiresPermission(Manifest.permission.ACCESS_BROADCAST_RADIO)
+    @RadioStatusType
     public int listModules(List<ModuleProperties> modules) {
         if (modules == null) {
             Log.e(TAG, "the output list must not be empty");
@@ -1851,9 +1935,17 @@ public class RadioManager {
     /**
      * @hide
      */
-    public RadioManager(@NonNull Context context) throws ServiceNotFoundException {
+    public RadioManager(Context context) throws ServiceNotFoundException {
+        this(context, IRadioService.Stub.asInterface(ServiceManager.getServiceOrThrow(
+                Context.RADIO_SERVICE)));
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public RadioManager(Context context, IRadioService service) {
         mContext = context;
-        mService = IRadioService.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(Context.RADIO_SERVICE));
+        mService = service;
     }
 }

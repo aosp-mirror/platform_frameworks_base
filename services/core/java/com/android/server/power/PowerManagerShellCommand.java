@@ -16,10 +16,15 @@
 
 package com.android.server.power;
 
+import android.content.Context;
 import android.content.Intent;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.ShellCommand;
+import android.util.SparseArray;
+import android.view.Display;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -27,9 +32,13 @@ import java.util.List;
 class PowerManagerShellCommand extends ShellCommand {
     private static final int LOW_POWER_MODE_ON = 1;
 
-    final PowerManagerService.BinderService mService;
+    private final Context mContext;
+    private final PowerManagerService.BinderService mService;
 
-    PowerManagerShellCommand(PowerManagerService.BinderService service) {
+    private SparseArray<WakeLock> mProxWakelocks = new SparseArray<>();
+
+    PowerManagerShellCommand(Context context, PowerManagerService.BinderService service) {
+        mContext = context;
         mService = service;
     }
 
@@ -52,6 +61,8 @@ class PowerManagerShellCommand extends ShellCommand {
                     return runSuppressAmbientDisplay();
                 case "list-ambient-display-suppression-tokens":
                     return runListAmbientDisplaySuppressionTokens();
+                case "set-prox":
+                    return runSetProx();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -117,6 +128,56 @@ class PowerManagerShellCommand extends ShellCommand {
 
         return 0;
     }
+
+    /** TODO: Consider updating this code to support all wakelock types. */
+    private int runSetProx() throws RemoteException {
+        PrintWriter pw = getOutPrintWriter();
+        final boolean acquire;
+        switch (getNextArgRequired().toLowerCase()) {
+            case "list":
+                pw.println("Wakelocks:");
+                pw.println(mProxWakelocks);
+                return 0;
+            case "acquire":
+                acquire = true;
+                break;
+            case "release":
+                acquire = false;
+                break;
+            default:
+                pw.println("Error: Allowed options are 'list' 'enable' and 'disable'.");
+                return -1;
+        }
+
+        int displayId = Display.INVALID_DISPLAY;
+        String displayOption = getNextArg();
+        if ("-d".equals(displayOption)) {
+            String idStr = getNextArg();
+            displayId = Integer.parseInt(idStr);
+            if (displayId < 0) {
+                pw.println("Error: Specified displayId (" + idStr + ") must a non-negative int.");
+                return -1;
+            }
+        }
+
+        int wakelockIndex = displayId + 1; // SparseArray doesn't support negative indexes
+        WakeLock wakelock = mProxWakelocks.get(wakelockIndex);
+        if (wakelock == null) {
+            PowerManager pm = mContext.getSystemService(PowerManager.class);
+            wakelock = pm.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK,
+                        "PowerManagerShellCommand[" + displayId + "]", displayId);
+            mProxWakelocks.put(wakelockIndex, wakelock);
+        }
+
+        if (acquire) {
+            wakelock.acquire();
+        } else {
+            wakelock.release();
+        }
+        pw.println(wakelock);
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -138,6 +199,11 @@ class PowerManagerShellCommand extends ShellCommand {
         pw.println("    ambient display");
         pw.println("  list-ambient-display-suppression-tokens");
         pw.println("    prints the tokens used to suppress ambient display");
+        pw.println("  set-prox [list|acquire|release] (-d <display_id>)");
+        pw.println("    Acquires the proximity sensor wakelock. Wakelock is associated with");
+        pw.println("    a specific display if specified. 'list' lists wakelocks previously");
+        pw.println("    created by set-prox including their held status.");
+
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }

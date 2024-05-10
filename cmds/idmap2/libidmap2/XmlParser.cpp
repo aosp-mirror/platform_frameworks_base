@@ -16,8 +16,6 @@
 
 #include "idmap2/XmlParser.h"
 
-#include <iostream>
-#include <map>
 #include <memory>
 #include <string>
 #include <utility>
@@ -111,7 +109,7 @@ Result<std::string> GetStringValue(const ResXMLParser& parser, const Res_value& 
   switch (value.dataType) {
     case Res_value::TYPE_STRING: {
       if (auto str = parser.getStrings().string8ObjectAt(value.data); str.ok()) {
-        return std::string(str->string());
+        return std::string(str->c_str());
       }
       break;
     }
@@ -132,11 +130,14 @@ Result<Res_value> XmlParser::Node::GetAttributeValue(ResourceId attr,
 }
 
 Result<Res_value> XmlParser::Node::GetAttributeValue(const std::string& name) const {
+  String16 name16;
   return FindAttribute(parser_, name, [&](size_t index) -> bool {
-    size_t len;
-    const String16 key16(parser_.getAttributeName(index, &len));
-    std::string key = String8(key16).c_str();
-    return key == name;
+    if (name16.empty()) {
+        name16 = String16(name.c_str(), name.size());
+    }
+    size_t key_len;
+    const auto key16 = parser_.getAttributeName(index, &key_len);
+    return key16 && name16.size() == key_len && name16 == key16;
   });
 }
 

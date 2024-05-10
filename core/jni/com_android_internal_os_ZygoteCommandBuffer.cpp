@@ -63,6 +63,7 @@ class NativeCommandBuffer {
   std::optional<std::pair<char*, char*>> readLine(FailFn fail_fn) {
     char* result = mBuffer + mNext;
     while (true) {
+      // We have scanned up to, but not including mNext for this line's newline.
       if (mNext == mEnd) {
         if (mEnd == MAX_COMMAND_BYTES) {
           return {};
@@ -76,7 +77,7 @@ class NativeCommandBuffer {
             return {};
           }
           fail_fn(CREATE_ERROR("session socket read failed: %s", strerror(errno)));
-        } else if (nread == MAX_COMMAND_BYTES - mEnd) {
+        } else if (nread == static_cast<ssize_t>(MAX_COMMAND_BYTES - mEnd)) {
           // This is pessimistic by one character, but close enough.
           fail_fn("ZygoteCommandBuffer overflowed: command too long");
         }
@@ -89,7 +90,7 @@ class NativeCommandBuffer {
       } else {
         mNext = nl - mBuffer + 1;
         if (--mLinesLeft < 0) {
-          fail_fn("ZygoteCommandBuffer.readLine attempted to read past mEnd of command");
+          fail_fn("ZygoteCommandBuffer.readLine attempted to read past end of command");
         }
         return std::make_pair(result, nl);
       }
@@ -125,8 +126,8 @@ class NativeCommandBuffer {
     mEnd += lineLen + 1;
   }
 
-  // Clear mBuffer, start reading new command, return the number of arguments, leaving mBuffer
-  // positioned at the beginning of first argument. Return 0 on EOF.
+  // Start reading new command, return the number of arguments, leaving mBuffer positioned at the
+  // beginning of first argument. Return 0 on EOF.
   template<class FailFn>
   int getCount(FailFn fail_fn) {
     mLinesLeft = 1;
@@ -136,7 +137,7 @@ class NativeCommandBuffer {
     }
     char* countString = line.value().first;  // Newline terminated.
     long nArgs = atol(countString);
-    if (nArgs <= 0 || nArgs >= MAX_COMMAND_BYTES / 2) {
+    if (nArgs <= 0 || nArgs >= static_cast<long>(MAX_COMMAND_BYTES / 2)) {
       fail_fn(CREATE_ERROR("Unreasonable argument count %ld", nArgs));
     }
     mLinesLeft = nArgs;
@@ -153,7 +154,7 @@ class NativeCommandBuffer {
   // As a side effect, this sets mNiceName to a non-empty string, if possible.
   template<class FailFn>
   bool isSimpleForkCommand(int minUid, FailFn fail_fn) {
-    if (mLinesLeft <= 0 || mLinesLeft  >= MAX_COMMAND_BYTES / 2) {
+    if (mLinesLeft <= 0 || mLinesLeft >= static_cast<int32_t>(MAX_COMMAND_BYTES / 2)) {
       return false;
     }
     static const char* RUNTIME_ARGS = "--runtime-args";
@@ -179,14 +180,14 @@ class NativeCommandBuffer {
       if (!read_result.has_value()) {
         return false;
       }
-      auto [arg_start, arg_end] = read_result.value();
-      if (arg_end - arg_start == RA_LENGTH
-          && strncmp(arg_start, RUNTIME_ARGS, RA_LENGTH) == 0) {
+      const auto [arg_start, arg_end] = read_result.value();
+      if (static_cast<size_t>(arg_end - arg_start) == RA_LENGTH &&
+          strncmp(arg_start, RUNTIME_ARGS, RA_LENGTH) == 0) {
         saw_runtime_args = true;
         continue;
       }
-      if (arg_end - arg_start >= NN_LENGTH
-          && strncmp(arg_start, NICE_NAME, NN_LENGTH) == 0) {
+      if (static_cast<size_t>(arg_end - arg_start) >= NN_LENGTH &&
+          strncmp(arg_start, NICE_NAME, NN_LENGTH) == 0) {
         size_t name_len = arg_end - (arg_start + NN_LENGTH);
         size_t copy_len = std::min(name_len, NICE_NAME_BYTES - 1);
         memcpy(mNiceName, arg_start + NN_LENGTH, copy_len);
@@ -196,21 +197,21 @@ class NativeCommandBuffer {
         }
         continue;
       }
-      if (arg_end - arg_start == IW_LENGTH
-          && strncmp(arg_start, INVOKE_WITH, IW_LENGTH) == 0) {
+      if (static_cast<size_t>(arg_end - arg_start) == IW_LENGTH &&
+          strncmp(arg_start, INVOKE_WITH, IW_LENGTH) == 0) {
         // This also removes the need for invoke-with security checks here.
         return false;
       }
-      if (arg_end - arg_start == CZ_LENGTH
-          && strncmp(arg_start, CHILD_ZYGOTE, CZ_LENGTH) == 0) {
+      if (static_cast<size_t>(arg_end - arg_start) == CZ_LENGTH &&
+          strncmp(arg_start, CHILD_ZYGOTE, CZ_LENGTH) == 0) {
         return false;
       }
-      if (arg_end - arg_start >= CA_LENGTH
-          && strncmp(arg_start, CAPABILITIES, CA_LENGTH) == 0) {
+      if (static_cast<size_t>(arg_end - arg_start) >= CA_LENGTH &&
+          strncmp(arg_start, CAPABILITIES, CA_LENGTH) == 0) {
         return false;
       }
-      if (arg_end - arg_start >= SU_LENGTH
-          && strncmp(arg_start, SETUID, SU_LENGTH) == 0) {
+      if (static_cast<size_t>(arg_end - arg_start) >= SU_LENGTH &&
+          strncmp(arg_start, SETUID, SU_LENGTH) == 0) {
         int uid = digitsVal(arg_start + SU_LENGTH, arg_end);
         if (uid < minUid) {
           return false;
@@ -218,8 +219,8 @@ class NativeCommandBuffer {
         saw_setuid = true;
         continue;
       }
-      if (arg_end - arg_start >= SG_LENGTH
-          && strncmp(arg_start, SETGID, SG_LENGTH) == 0) {
+      if (static_cast<size_t>(arg_end - arg_start) >= SG_LENGTH &&
+          strncmp(arg_start, SETGID, SG_LENGTH) == 0) {
         int gid = digitsVal(arg_start + SG_LENGTH, arg_end);
         if (gid == -1) {
           return false;
@@ -422,7 +423,7 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
 
   bool first_time = true;
   do {
-    if (credentials.uid != expected_uid) {
+    if (credentials.uid != static_cast<uid_t>(expected_uid)) {
       return JNI_FALSE;
     }
     n_buffer->readAllLines(first_time ? fail_fn_1 : fail_fn_n);
@@ -451,11 +452,14 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
             (CREATE_ERROR("Write unexpectedly returned short: %d < 5", res));
       }
     }
-    // Clear buffer and get count from next command.
-    n_buffer->clear();
     for (;;) {
+      // Clear buffer and get count from next command.
+      n_buffer->clear();
       // Poll isn't strictly necessary for now. But without it, disconnect is hard to detect.
       int poll_res = TEMP_FAILURE_RETRY(poll(fd_structs, 2, -1 /* infinite timeout */));
+      if (poll_res < 0) {
+        fail_fn_z(CREATE_ERROR("Poll failed: %d: %s", errno, strerror(errno)));
+      }
       if ((fd_structs[SESSION_IDX].revents & POLLIN) != 0) {
         if (n_buffer->getCount(fail_fn_z) != 0) {
           break;

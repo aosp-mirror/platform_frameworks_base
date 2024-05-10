@@ -111,6 +111,8 @@ public class ParcelableCallAnalytics implements Parcelable {
         public static final int FILTERING_INITIATED = 106;
         public static final int FILTERING_COMPLETED = 107;
         public static final int FILTERING_TIMED_OUT = 108;
+        public static final int DND_CHECK_INITIATED = 109;
+        public static final int DND_CHECK_COMPLETED = 110;
 
         public static final int SKIP_RINGING = 200;
         public static final int SILENCE = 201;
@@ -195,6 +197,7 @@ public class ParcelableCallAnalytics implements Parcelable {
         public static final int BLOCK_CHECK_FINISHED_TIMING = 9;
         public static final int FILTERING_COMPLETED_TIMING = 10;
         public static final int FILTERING_TIMED_OUT_TIMING = 11;
+        public static final int DND_PRE_CALL_PRE_CHECK_TIMING = 12;
         /** {@hide} */
         public static final int START_CONNECTION_TO_REQUEST_DISCONNECT_TIMING = 12;
 
@@ -359,7 +362,7 @@ public class ParcelableCallAnalytics implements Parcelable {
         eventTimings = new ArrayList<>();
         in.readTypedList(eventTimings, EventTiming.CREATOR);
         isVideoCall = readByteAsBoolean(in);
-        videoEvents = new LinkedList<>();
+        videoEvents = new ArrayList<>();
         in.readTypedList(videoEvents, VideoEvent.CREATOR);
         callSource = in.readInt();
     }

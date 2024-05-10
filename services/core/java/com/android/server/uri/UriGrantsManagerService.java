@@ -41,6 +41,7 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
@@ -62,6 +63,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -71,14 +73,14 @@ import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -144,17 +146,31 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
             mGrantedUriPermissions = new SparseArray<>();
 
     private UriGrantsManagerService() {
-        this(SystemServiceManager.ensureSystemDir());
+        this(SystemServiceManager.ensureSystemDir(), "uri-grants");
     }
 
-    private UriGrantsManagerService(File systemDir) {
+    private UriGrantsManagerService(File systemDir, String commitTag) {
         mH = new H(IoThread.get().getLooper());
-        mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"), "uri-grants");
+        final File file = new File(systemDir, "urigrants.xml");
+        mGrantFile = (commitTag != null) ? new AtomicFile(file, commitTag) : new AtomicFile(file);
     }
 
     @VisibleForTesting
     static UriGrantsManagerService createForTest(File systemDir) {
-        final UriGrantsManagerService service = new UriGrantsManagerService(systemDir);
+        final UriGrantsManagerService service = new UriGrantsManagerService(systemDir, null) {
+            @VisibleForTesting
+            protected int checkUidPermission(String permission, int uid) {
+                // Tests have no permission granted
+                return PackageManager.PERMISSION_DENIED;
+            }
+
+            @VisibleForTesting
+            protected int checkComponentPermission(String permission, int uid, int owningUid,
+                    boolean exported) {
+                // Tests have no permission granted
+                return PackageManager.PERMISSION_DENIED;
+            }
+        };
         service.mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         service.mPmInternal = LocalServices.getService(PackageManagerInternal.class);
         return service;
@@ -200,12 +216,19 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
         }
     }
 
-    private int checkUidPermission(String permission, int uid) {
+    @VisibleForTesting
+    protected int checkUidPermission(String permission, int uid) {
         try {
             return AppGlobals.getPackageManager().checkUidPermission(permission, uid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @VisibleForTesting
+    protected int checkComponentPermission(String permission, int uid, int owningUid,
+            boolean exported) {
+        return ActivityManager.checkComponentPermission(permission, uid, owningUid, exported);
     }
 
     /**
@@ -914,7 +937,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
             ProviderInfo pi, GrantUri grantUri, int uid, final int modeFlags) {
         if (DEBUG) Slog.v(TAG, "checkHoldingPermissions: uri=" + grantUri + " uid=" + uid);
         if (UserHandle.getUserId(uid) != grantUri.sourceUserId) {
-            if (ActivityManager.checkComponentPermission(INTERACT_ACROSS_USERS, uid, -1, true)
+            if (checkComponentPermission(INTERACT_ACROSS_USERS, uid, -1, true)
                     != PERMISSION_GRANTED) {
                 return false;
             }
@@ -1302,6 +1325,46 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
         }
 
         return false;
+    }
+
+    /**
+     * Check if the targetPkg can be granted permission to access uri by
+     * the callingUid using the given modeFlags. See {@link #checkGrantUriPermissionUnlocked}.
+     *
+     * @param callingUid The uid of the grantor app that has permissions to the uri.
+     * @param targetPkg The package name of the granted app that needs permissions to the uri.
+     * @param uri The uri for which permissions should be granted.
+     * @param modeFlags The modes to grant. See {@link Intent#FLAG_GRANT_READ_URI_PERMISSION}, etc.
+     * @param userId The userId in which the uri is to be resolved.
+     * @return uid of the target or -1 if permission grant not required. Returns -1 if the caller
+     *  does not hold INTERACT_ACROSS_USERS_FULL
+     * @throws SecurityException if the grant is not allowed.
+     */
+    @Override
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    public int checkGrantUriPermission_ignoreNonSystem(int callingUid, String targetPkg, Uri uri,
+            int modeFlags, int userId) {
+        if (!isCallerIsSystemOrPrivileged()) {
+            return Process.INVALID_UID;
+        }
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            return checkGrantUriPermissionUnlocked(callingUid, targetPkg, uri, modeFlags,
+                        userId);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    private boolean isCallerIsSystemOrPrivileged() {
+        final int uid = Binder.getCallingUid();
+        if (uid == Process.SYSTEM_UID || uid == Process.ROOT_UID) {
+            return true;
+        }
+        return checkComponentPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    uid, /* owningUid = */-1, /* exported = */ true)
+                    == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override

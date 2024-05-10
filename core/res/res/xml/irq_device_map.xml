@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2022, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License")
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<irq-device-map>
+  <!--  This file maps devices (chips) that can send interrupts to the main processor (and bring it
+        out of sleep) to logical subsystems in userspace code. Since each Android device can have
+        a differently designed chipset, this mapping is expected to be empty by default and should
+        be overridden by device-specific configs.
+        This mapping helps the system to meaningfully attribute CPU wakeups to logical work that
+        happened on the device and the app activity that caused it. The devices are referred to by
+        their names as defined in the kernel. Currently, defined subsystems are:
+            - Alarm: Use this to denote wakeup alarms requested by apps via the AlarmManager API.
+            - Wifi: Use this to denote network traffic that uses the wifi transport.
+            - Sound_trigger: Use this to denote sound phrase detection, like the ones supported by
+        SoundTriggerManager.
+            - Sensor: Use this to denote wakeups due to sensor events.
+            - Cellular_data: Use this to denote network traffic on the cellular transport.
+
+        The overlay should use tags <device> and <subsystem> to describe this mapping in the
+        following way:
+
+        <irq-device-map>
+            <device name="device_name_1">
+                <subsystem>Subsystem1</subsystem>
+                <subsystem>Subsystem2</subsystem>
+                :
+                :
+            </device>
+            <device name="device_name_2">
+                :
+            </device>
+            :
+        </irq-device-map>
+
+        The tag <device> should have a "name" attribute specifying the kernel name of the device.
+        Each <device> tag can then enclose multiple <subsystem> tags. Each <subsystem> tag should
+        enclose the name of the logical subsystems (one of the ones defined above) as text.
+        Undefined subsystem names will be ignored by the framework.
+  -->
+</irq-device-map>

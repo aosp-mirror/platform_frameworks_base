@@ -26,32 +26,48 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.TestableLooper;
+import android.view.ContextThemeWrapper;
+import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.tileimpl.QSTileViewImpl;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class TileLayoutTest extends SysuiTestCase {
-    private TileLayout mTileLayout;
+    private Resources mResources;
     private int mLayoutSizeForOneTile;
+    private TileLayout mTileLayout; // under test
+    private Context mSpyContext;
+
 
     @Before
     public void setUp() throws Exception {
-        mTileLayout = new TileLayout(mContext);
+        mSpyContext = Mockito.spy(
+                new ContextThemeWrapper(mContext, R.style.Theme_SystemUI_QuickSettings));
+        mResources = Mockito.spy(mSpyContext.getResources());
+        when(mSpyContext.getResources()).thenReturn(mResources);
+
+        mTileLayout = new TileLayout(mSpyContext);
         // Layout needs to leave space for the tile margins. Three times the margin size is
         // sufficient for any number of columns.
         mLayoutSizeForOneTile =
@@ -61,7 +77,7 @@ public class TileLayoutTest extends SysuiTestCase {
     private QSPanelControllerBase.TileRecord createTileRecord() {
         return new QSPanelControllerBase.TileRecord(
                 mock(QSTile.class),
-                spy(new QSTileViewImpl(mContext, new QSIconViewImpl(mContext))));
+                spy(new QSTileViewImpl(mSpyContext)));
     }
 
     @Test
@@ -149,7 +165,7 @@ public class TileLayoutTest extends SysuiTestCase {
                 .layout(left2.capture(), top2.capture(), right2.capture(), bottom2.capture());
 
         // We assume two tiles will always fit side-by-side.
-        assertTrue(mContext.getResources().getInteger(R.integer.quick_settings_num_columns) > 1);
+        assertTrue(mSpyContext.getResources().getInteger(R.integer.quick_settings_num_columns) > 1);
 
         // left <= right, top <= bottom
         assertTrue(left1.getValue() <= right1.getValue());
@@ -202,5 +218,72 @@ public class TileLayoutTest extends SysuiTestCase {
 
         verify(tileRecord1.tileView).setPosition(0);
         verify(tileRecord2.tileView).setPosition(1);
+    }
+
+    @Test
+    public void resourcesChanged_updateResources_returnsTrue() {
+        when(mResources.getInteger(R.integer.quick_settings_num_columns)).thenReturn(1);
+        mTileLayout.updateResources(); // setup with 1
+        when(mResources.getInteger(R.integer.quick_settings_num_columns)).thenReturn(2);
+
+        assertEquals(true, mTileLayout.updateResources());
+    }
+
+    @Test
+    public void resourcesSame_updateResources_returnsFalse() {
+        when(mResources.getInteger(R.integer.quick_settings_num_columns)).thenReturn(1);
+        mTileLayout.updateResources(); // setup with 1
+
+        assertEquals(false, mTileLayout.updateResources());
+    }
+
+    @Test
+    public void fontScalingChanged_updateResources_cellHeightEnoughForTileContent() {
+        final float originalFontScale = mContext.getResources().getConfiguration().fontScale;
+        float[] testScales = {0.8f, 1.0f, 1.4f, 1.6f, 2.0f};
+        for (float scale: testScales) {
+            changeFontScaling_updateResources_cellHeightEnoughForTileContent(scale);
+        }
+
+        changeFontScaling(originalFontScale);
+    }
+
+    private void changeFontScaling_updateResources_cellHeightEnoughForTileContent(float scale) {
+        changeFontScaling(scale);
+
+        QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
+        mTileLayout.addTile(tileRecord);
+
+        FakeTileView tileView = new FakeTileView(mSpyContext);
+        QSTile.State state = new QSTile.State();
+        state.label = "TEST LABEL";
+        state.secondaryLabel = "TEST SECONDARY LABEL";
+        tileView.changeState(state);
+
+        mTileLayout.updateResources();
+
+        int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        tileView.measure(spec, spec);
+        assertTrue(mTileLayout.getCellHeight() >= tileView.getMeasuredHeight());
+
+        mTileLayout.removeTile(tileRecord);
+    }
+
+    private static class FakeTileView extends QSTileViewImpl {
+        FakeTileView(Context context) {
+            super(context, /* collapsed= */ false);
+        }
+
+        void changeState(QSTile.State state) {
+            handleStateChanged(state);
+        }
+    }
+
+    private void changeFontScaling(float scale) {
+        Configuration configuration =
+                new Configuration(mSpyContext.getResources().getConfiguration());
+        configuration.fontScale = scale;
+        // updateConfiguration could help update on both resource configuration and displayMetrics
+        mSpyContext.getResources().updateConfiguration(configuration, null, null);
     }
 }

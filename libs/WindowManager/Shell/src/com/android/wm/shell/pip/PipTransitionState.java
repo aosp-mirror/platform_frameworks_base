@@ -93,6 +93,11 @@ public class PipTransitionState {
         return hasEnteredPip(mState);
     }
 
+    /** Returns true if activity is currently entering PiP mode. */
+    public boolean isEnteringPip() {
+        return isEnteringPip(mState);
+    }
+
     public void setInSwipePipToHomeTransition(boolean inSwipePipToHomeTransition) {
         mInSwipePipToHomeTransition = inSwipePipToHomeTransition;
     }
@@ -128,6 +133,29 @@ public class PipTransitionState {
     /** Returns true if activity has fully entered PiP mode. */
     public static boolean hasEnteredPip(@TransitionState int state) {
         return state == ENTERED_PIP;
+    }
+
+    /** Returns true if activity is currently entering PiP mode. */
+    public static boolean isEnteringPip(@TransitionState int state) {
+        return state == ENTERING_PIP;
+    }
+
+    private String stateToString() {
+        switch (mState) {
+            case UNDEFINED: return "undefined";
+            case TASK_APPEARED: return "task-appeared";
+            case ENTRY_SCHEDULED: return "entry-scheduled";
+            case ENTERING_PIP: return "entering-pip";
+            case ENTERED_PIP: return "entered-pip";
+            case EXITING_PIP: return "exiting-pip";
+        }
+        throw new IllegalStateException("Unknown state: " + mState);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("PipTransitionState(mState=%s, mInSwipePipToHomeTransition=%b)",
+                stateToString(), mInSwipePipToHomeTransition);
     }
 
     public interface OnPipTransitionStateChangedListener {

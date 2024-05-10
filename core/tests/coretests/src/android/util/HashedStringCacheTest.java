@@ -26,28 +26,37 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.os.storage.StorageManager;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.InstrumentationRegistry;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
 
-
 /**
  * Unit tests for {@link HashedStringCache}.
  */
+@IgnoreUnderRavenwood(blockedBy = HashedStringCache.class)
 public class HashedStringCacheTest {
     private static final String TAG = "HashedStringCacheTest";
     private Context mContext;
     private static final String TEST_STRING = "test_string";
 
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     @Before
     public void setup() {
-        mContext = null;
-        mContext = InstrumentationRegistry.getContext();
-        clearSharedPreferences();
+        if (!RavenwoodRule.isUnderRavenwood()) {
+            mContext = InstrumentationRegistry.getContext();
+            clearSharedPreferences();
+        } else {
+            mContext = null;
+        }
     }
 
     @Test

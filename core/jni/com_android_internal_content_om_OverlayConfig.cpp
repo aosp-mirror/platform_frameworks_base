@@ -66,23 +66,23 @@ static jobjectArray createIdmap(JNIEnv* env, jclass /*clazz*/, jstring targetPat
     argv.emplace_back("--ignore-overlayable");
   }
 
-  const auto result = ExecuteBinary(argv);
+  auto result = ExecuteBinary(argv);
   if (!result) {
       LOG(ERROR) << "failed to execute idmap2";
       return nullptr;
   }
 
-  if (result->status != 0) {
-      LOG(ERROR) << "idmap2: " << result->stderr_str;
+  if (result.status != 0) {
+      LOG(ERROR) << "idmap2: " << result.stderr_str;
       return nullptr;
   }
 
   // Return the paths of the idmaps created or updated during the idmap invocation.
   std::vector<std::string> idmap_paths;
-  std::istringstream input(result->stdout_str);
+  std::istringstream input(std::move(result.stdout_str));
   std::string path;
   while (std::getline(input, path)) {
-    idmap_paths.push_back(path);
+      idmap_paths.push_back(std::move(path));
   }
 
   jobjectArray array = env->NewObjectArray(idmap_paths.size(), g_stringClass, nullptr);
@@ -90,11 +90,11 @@ static jobjectArray createIdmap(JNIEnv* env, jclass /*clazz*/, jstring targetPat
     return nullptr;
   }
   for (size_t i = 0; i < idmap_paths.size(); i++) {
-    const std::string path = idmap_paths[i];
-    jstring java_string = env->NewStringUTF(path.c_str());
-    if (env->ExceptionCheck()) {
-      return nullptr;
-    }
+      const std::string& path = idmap_paths[i];
+      jstring java_string = env->NewStringUTF(path.c_str());
+      if (env->ExceptionCheck()) {
+          return nullptr;
+      }
     env->SetObjectArrayElement(array, i, java_string);
     env->DeleteLocalRef(java_string);
   }

@@ -128,7 +128,7 @@ public class DiskStatsService extends Binder {
         reportFreeSpace(Environment.getMetadataDirectory(), "Metadata", pw, proto,
                 DiskStatsFreeSpaceProto.FOLDER_METADATA);
 
-        boolean fileBased = StorageManager.isFileEncryptedNativeOnly();
+        boolean fileBased = StorageManager.isFileEncrypted();
         if (protoFormat) {
             if (fileBased) {
                 proto.write(DiskStatsServiceDumpProto.ENCRYPTION,

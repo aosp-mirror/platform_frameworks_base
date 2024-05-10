@@ -17,7 +17,6 @@
 package com.android.settingslib.utils;
 
 import android.os.Build;
-import android.os.Build.VERSION;
 
 import androidx.annotation.ChecksSdkIntAtLeast;
 

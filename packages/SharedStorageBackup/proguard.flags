@@ -1,2 +1,0 @@
--keep class com.android.sharedstoragebackup.SharedStorageAgent
--keep class com.android.sharedstoragebackup.ObbBackupService

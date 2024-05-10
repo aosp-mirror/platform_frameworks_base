@@ -21,7 +21,7 @@ import android.view.DisplayCutout
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.ScreenDecorations.DisplayCutoutView
 
 class CutoutDecorProviderImpl(
@@ -59,7 +59,7 @@ class CutoutDecorProviderImpl(
         (view as? DisplayCutoutView)?.let { cutoutView ->
             cutoutView.setColor(tintColor)
             cutoutView.updateRotation(rotation)
-            cutoutView.onDisplayChanged(displayUniqueId)
+            cutoutView.updateConfiguration(displayUniqueId)
         }
     }
 }

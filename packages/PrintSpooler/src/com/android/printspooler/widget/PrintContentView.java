@@ -383,9 +383,7 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
         if (focused != null && focused.isFocused()) {
             InputMethodManager imm = (InputMethodManager) mContext.getSystemService(
                     Context.INPUT_METHOD_SERVICE);
-            if (imm.isActive(focused)) {
-                imm.hideSoftInputFromWindow(getWindowToken(), 0);
-            }
+            imm.hideSoftInputFromView(focused, 0);
             focused.clearFocus();
         }
     }

@@ -217,7 +217,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
 
         beforeRemote();
         try {
-            return mContentProvider.getType(url);
+            return mContentProvider.getType(mAttributionSource, url);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -237,7 +237,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
 
         beforeRemote();
         try {
-            return mContentProvider.getStreamTypes(url, mimeTypeFilter);
+            return mContentProvider.getStreamTypes(mAttributionSource, url, mimeTypeFilter);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);

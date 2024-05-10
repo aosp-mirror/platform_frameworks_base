@@ -26,6 +26,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Singleton;
 import android.view.RemoteAnimationAdapter;
+import android.view.SurfaceControl;
 
 /**
  * Base class for organizing specific types of windows like Tasks and DisplayAreas
@@ -39,14 +40,11 @@ public class WindowOrganizer {
      * Apply multiple WindowContainer operations at once.
      *
      * Note that using this API requires the caller to hold
-     * {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS}, unless the caller is using
-     * {@link TaskFragmentOrganizer}, in which case it is allowed to change TaskFragment that is
-     * created by itself.
+     * {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS}.
      *
      * @param t The transaction to apply.
      */
-    @RequiresPermission(value = android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
-            conditional = true)
+    @RequiresPermission(value = android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void applyTransaction(@NonNull WindowContainerTransaction t) {
         try {
             if (!t.isEmpty()) {
@@ -61,9 +59,7 @@ public class WindowOrganizer {
      * Apply multiple WindowContainer operations at once.
      *
      * Note that using this API requires the caller to hold
-     * {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS}, unless the caller is using
-     * {@link TaskFragmentOrganizer}, in which case it is allowed to change TaskFragment that is
-     * created by itself.
+     * {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS}.
      *
      * @param t The transaction to apply.
      * @param callback This transaction will use the synchronization scheme described in
@@ -72,8 +68,7 @@ public class WindowOrganizer {
      * @return An ID for the sync operation which will later be passed to transactionReady callback.
      *         This lets the caller differentiate overlapping sync operations.
      */
-    @RequiresPermission(value = android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
-            conditional = true)
+    @RequiresPermission(value = android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public int applySyncTransaction(@NonNull WindowContainerTransaction t,
             @NonNull WindowContainerTransactionCallback callback) {
         try {
@@ -84,9 +79,8 @@ public class WindowOrganizer {
     }
 
     /**
-     * Start a transition.
+     * Starts a new transition, don't use this to start an already created one.
      * @param type The type of the transition. This is ignored if a transitionToken is provided.
-     * @param transitionToken An existing transition to start. If null, a new transition is created.
      * @param t The set of window operations that are part of this transition.
      * @return A token identifying the transition. This will be the same as transitionToken if it
      *         was provided.
@@ -94,10 +88,24 @@ public class WindowOrganizer {
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @NonNull
-    public IBinder startTransition(int type, @Nullable IBinder transitionToken,
+    public IBinder startNewTransition(int type, @Nullable WindowContainerTransaction t) {
+        try {
+            return getWindowOrganizerController().startNewTransition(type, t);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Starts an already created transition.
+     * @param transitionToken An existing transition to start.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    public void startTransition(@NonNull IBinder transitionToken,
             @Nullable WindowContainerTransaction t) {
         try {
-            return getWindowOrganizerController().startTransition(type, transitionToken, t);
+            getWindowOrganizerController().startTransition(transitionToken, t);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -107,19 +115,15 @@ public class WindowOrganizer {
      * Finishes a running transition.
      * @param transitionToken The transition to finish. Can't be null.
      * @param t A set of window operations to apply before finishing.
-     * @param callback A sync callback (if provided). See {@link #applySyncTransaction}.
-     * @return An ID for the sync operation if performed. See {@link #applySyncTransaction}.
      *
      * @hide
      */
     @SuppressLint("ExecutorRegistration")
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public int finishTransition(@NonNull IBinder transitionToken,
-            @Nullable WindowContainerTransaction t,
-            @Nullable WindowContainerTransactionCallback callback) {
+    public void finishTransition(@NonNull IBinder transitionToken,
+            @Nullable WindowContainerTransaction t) {
         try {
-            return getWindowOrganizerController().finishTransition(transitionToken, t,
-                    callback != null ? callback.mInterface : null);
+            getWindowOrganizerController().finishTransition(transitionToken, t);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -169,6 +173,26 @@ public class WindowOrganizer {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Use WM's transaction-queue instead of Shell's independent one. This is necessary
+     * if WM and Shell need to coordinate transactions (eg. for shell transitions).
+     * @return true if successful, false otherwise.
+     * @hide
+     */
+    public boolean shareTransactionQueue() {
+        final IBinder wmApplyToken;
+        try {
+            wmApplyToken = getWindowOrganizerController().getApplyToken();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        if (wmApplyToken == null) {
+            return false;
+        }
+        SurfaceControl.Transaction.setDefaultApplyToken(wmApplyToken);
+        return true;
     }
 
     static IWindowOrganizerController getWindowOrganizerController() {

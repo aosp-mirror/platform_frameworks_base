@@ -114,10 +114,10 @@ PageTypeInfoParser::Parse(const int in, const int out) const
     }
 
     if (!proto.flush(out)) {
-        fprintf(stderr, "[%s]Error writing proto back\n", this->name.string());
+        fprintf(stderr, "[%s]Error writing proto back\n", this->name.c_str());
         return -1;
     }
 
-    fprintf(stderr, "[%s]Proto size: %zu bytes\n", this->name.string(), proto.size());
+    fprintf(stderr, "[%s]Proto size: %zu bytes\n", this->name.c_str(), proto.size());
     return NO_ERROR;
 }

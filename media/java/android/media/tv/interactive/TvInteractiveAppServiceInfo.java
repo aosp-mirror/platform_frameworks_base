@@ -57,6 +57,8 @@ public final class TvInteractiveAppServiceInfo implements Parcelable {
             INTERACTIVE_APP_TYPE_HBBTV,
             INTERACTIVE_APP_TYPE_ATSC,
             INTERACTIVE_APP_TYPE_GINGA,
+            INTERACTIVE_APP_TYPE_TARGETED_AD,
+            INTERACTIVE_APP_TYPE_OTHER
     })
     public @interface InteractiveAppType {}
 
@@ -66,10 +68,15 @@ public final class TvInteractiveAppServiceInfo implements Parcelable {
     public static final int INTERACTIVE_APP_TYPE_ATSC = 0x2;
     /** Ginga interactive app type */
     public static final int INTERACTIVE_APP_TYPE_GINGA = 0x4;
+    /** Targeted Advertisement interactive app type */
+    public static final int INTERACTIVE_APP_TYPE_TARGETED_AD = 0x8;
+    /** Other interactive app type */
+    public static final int INTERACTIVE_APP_TYPE_OTHER = 0x80000000;
 
     private final ResolveInfo mService;
     private final String mId;
     private int mTypes;
+    private final List<String> mExtraTypes = new ArrayList<>();
 
     /**
      * Constructs a TvInteractiveAppServiceInfo object.
@@ -98,18 +105,21 @@ public final class TvInteractiveAppServiceInfo implements Parcelable {
 
         mService = resolveInfo;
         mId = id;
-        mTypes = toTypesFlag(types);
+        toTypesFlag(types);
     }
-    private TvInteractiveAppServiceInfo(ResolveInfo service, String id, int types) {
+    private TvInteractiveAppServiceInfo(
+            ResolveInfo service, String id, int types, List<String> extraTypes) {
         mService = service;
         mId = id;
         mTypes = types;
+        mExtraTypes.addAll(extraTypes);
     }
 
     private TvInteractiveAppServiceInfo(@NonNull Parcel in) {
         mService = ResolveInfo.CREATOR.createFromParcel(in);
         mId = in.readString();
         mTypes = in.readInt();
+        in.readStringList(mExtraTypes);
     }
 
     public static final @NonNull Creator<TvInteractiveAppServiceInfo> CREATOR =
@@ -135,6 +145,7 @@ public final class TvInteractiveAppServiceInfo implements Parcelable {
         mService.writeToParcel(dest, flags);
         dest.writeString(mId);
         dest.writeInt(mTypes);
+        dest.writeStringList(mExtraTypes);
     }
 
     /**
@@ -163,12 +174,35 @@ public final class TvInteractiveAppServiceInfo implements Parcelable {
     }
 
     /**
-     * Gets supported interactive app types
+     * Gets supported interactive app types.
+     *
+     * <p>The supported interactive app types is in a bit map format. For example:
+     * <pre><code>
+     *   int types = tvInteractiveAppInfo.getSupportedTypes();
+     *   if (types & TvInteractiveAppInfo.INTERACTIVE_APP_TYPE_HBBTV != 0) {
+     *     // HbbTV type is supported. Do something...
+     *   }
+     *   if (types & TvInteractiveAppInfo.INTERACTIVE_APP_TYPE_ATSC == 0) {
+     *     // ATSC type is not supported. Do something...
+     *   }
+     * </code></pre>
+     *
+     * @return An int bit map representing supported types.
      */
     @InteractiveAppType
     @NonNull
     public int getSupportedTypes() {
         return mTypes;
+    }
+
+    /**
+     * Gets custom supported interactive app types which are not listed.
+     *
+     * @see #getSupportedTypes()
+     */
+    @NonNull
+    public List<String> getCustomSupportedTypes() {
+        return mExtraTypes;
     }
 
     private static String generateInteractiveAppServiceId(ComponentName name) {
@@ -219,23 +253,27 @@ public final class TvInteractiveAppServiceInfo implements Parcelable {
         }
     }
 
-    private static int toTypesFlag(List<String> types) {
-        int flag = 0;
+    private void toTypesFlag(List<String> types) {
+        mTypes = 0;
+        mExtraTypes.clear();
         for (String type : types) {
             switch (type) {
                 case "hbbtv":
-                    flag |= INTERACTIVE_APP_TYPE_HBBTV;
+                    mTypes |= INTERACTIVE_APP_TYPE_HBBTV;
                     break;
                 case "atsc":
-                    flag |= INTERACTIVE_APP_TYPE_ATSC;
+                    mTypes |= INTERACTIVE_APP_TYPE_ATSC;
                     break;
                 case "ginga":
-                    flag |= INTERACTIVE_APP_TYPE_GINGA;
+                    mTypes |= INTERACTIVE_APP_TYPE_GINGA;
                     break;
+                case "targeted_ad":
+                    mTypes |= INTERACTIVE_APP_TYPE_TARGETED_AD;
                 default:
+                    mTypes |= INTERACTIVE_APP_TYPE_OTHER;
+                    mExtraTypes.add(type);
                     break;
             }
         }
-        return flag;
     }
 }

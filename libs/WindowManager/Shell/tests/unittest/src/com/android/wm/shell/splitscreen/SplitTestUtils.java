@@ -31,12 +31,14 @@ import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import java.util.Optional;
 
@@ -44,11 +46,15 @@ public class SplitTestUtils {
 
     static SplitLayout createMockSplitLayout() {
         final Rect dividerBounds = new Rect(48, 0, 52, 100);
+        final Rect bounds1 = new Rect(0, 0, 40, 100);
+        final Rect bounds2 = new Rect(60, 0, 100, 100);
         final SurfaceControl leash = createMockSurface();
         SplitLayout out = mock(SplitLayout.class);
         doReturn(dividerBounds).when(out).getDividerBounds();
         doReturn(dividerBounds).when(out).getRefDividerBounds();
         doReturn(leash).when(out).getDividerLeash();
+        doReturn(bounds1).when(out).getBounds1();
+        doReturn(bounds2).when(out).getBounds2();
         return out;
     }
 
@@ -72,10 +78,13 @@ public class SplitTestUtils {
                 DisplayInsetsController insetsController, SplitLayout splitLayout,
                 Transitions transitions, TransactionPool transactionPool,
                 ShellExecutor mainExecutor,
-                Optional<RecentTasksController> recentTasks) {
+                Optional<RecentTasksController> recentTasks,
+                LaunchAdjacentController launchAdjacentController,
+                Optional<WindowDecorViewModel> windowDecorViewModel) {
             super(context, displayId, syncQueue, taskOrganizer, mainStage,
                     sideStage, displayController, imeController, insetsController, splitLayout,
-                    transitions, transactionPool, mainExecutor, recentTasks);
+                    transitions, transactionPool, mainExecutor, recentTasks,
+                    launchAdjacentController, windowDecorViewModel);
 
             // Prepare root task for testing.
             mRootTask = new TestRunningTaskInfoBuilder().build();

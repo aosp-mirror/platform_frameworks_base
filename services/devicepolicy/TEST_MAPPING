@@ -4,10 +4,10 @@
       "name": "CtsDevicePolicyManagerTestCases",
       "options": [
         {
-          "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
         },
         {
-          "exclude-annotation": "android.platform.test.annotations.LargeTest"
+          "exclude-annotation": "androidx.test.filters.LargeTest"
         }
       ]
     }
@@ -25,6 +25,13 @@
           "include-filter": "com.android.cts.devicepolicy.ManagedProfileTest#testParentProfileApiDisabled"
         }
       ]
+    }
+  ],
+  "postsubmit": [
+    {
+      // TODO(b/332974906): Promote in presubmit presubmit-devicepolicy.
+      "name": "CtsDevicePolicyManagerTestCases_NoFlakes_NoLarge",
+      "name": "CtsDevicePolicyManagerTestCases_ParentProfileApiDisabled"
     }
   ]
 }

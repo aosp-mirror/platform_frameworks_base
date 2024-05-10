@@ -87,7 +87,7 @@ public class SystemUIDialogManager implements Dumpable {
 
     private void updateDialogListeners() {
         if (shouldHideAffordance()) {
-            mKeyguardViewController.resetAlternateAuth(true);
+            mKeyguardViewController.hideAlternateBouncer(true);
         }
 
         for (Listener listener : mListeners) {

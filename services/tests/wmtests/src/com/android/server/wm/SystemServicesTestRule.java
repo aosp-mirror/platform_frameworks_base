@@ -38,10 +38,13 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.nullable;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import android.app.ActivityManagerInternal;
+import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.app.usage.UsageStatsManagerInternal;
@@ -55,7 +58,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
 import android.hardware.devicestate.DeviceStateManager;
-import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.Uri;
 import android.os.Handler;
@@ -67,6 +70,7 @@ import android.os.StrictMode;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.Log;
+import android.view.DisplayInfo;
 import android.view.InputChannel;
 import android.view.SurfaceControl;
 
@@ -78,13 +82,16 @@ import com.android.server.LockGuard;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.display.DisplayControl;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.input.InputManagerService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.testutils.StubTransaction;
 import com.android.server.uri.UriGrantsManagerInternal;
 
 import org.junit.rules.TestRule;
@@ -93,8 +100,10 @@ import org.junit.runners.model.Statement;
 import org.mockito.MockSettings;
 import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -128,10 +137,19 @@ public class SystemServicesTestRule implements TestRule {
     private WindowState.PowerManagerWrapper mPowerManagerWrapper;
     private InputManagerService mImService;
     private InputChannel mInputChannel;
+    private Runnable mOnBeforeServicesCreated;
     /**
      * Spied {@link SurfaceControl.Transaction} class than can be used to verify calls.
      */
     SurfaceControl.Transaction mTransaction;
+
+    public SystemServicesTestRule(Runnable onBeforeServicesCreated) {
+        mOnBeforeServicesCreated = onBeforeServicesCreated;
+    }
+
+    public SystemServicesTestRule() {
+        this(/* onBeforeServicesCreated= */ null);
+    }
 
     @Override
     public Statement apply(Statement base, Description description) {
@@ -162,6 +180,10 @@ public class SystemServicesTestRule implements TestRule {
     }
 
     private void setUp() {
+        if (mOnBeforeServicesCreated != null) {
+            mOnBeforeServicesCreated.run();
+        }
+
         // Use stubOnly() to reduce memory usage if it doesn't need verification.
         final MockSettings spyStubOnly = withSettings().stubOnly()
                 .defaultAnswer(CALLS_REAL_METHODS);
@@ -174,6 +196,7 @@ public class SystemServicesTestRule implements TestRule {
                 .mockStatic(LocalServices.class, spyStubOnly)
                 .mockStatic(DeviceConfig.class, spyStubOnly)
                 .mockStatic(SurfaceControl.class, mockStubOnly)
+                .mockStatic(DisplayControl.class, mockStubOnly)
                 .mockStatic(LockGuard.class, mockStubOnly)
                 .mockStatic(Watchdog.class, mockStubOnly)
                 .strictness(Strictness.LENIENT)
@@ -188,21 +211,28 @@ public class SystemServicesTestRule implements TestRule {
     private void setUpSystemCore() {
         doReturn(mock(Watchdog.class)).when(Watchdog::getInstance);
         doAnswer(invocation -> {
-            // Exclude CONSTRAIN_DISPLAY_APIS because ActivityRecord#sConstrainDisplayApisConfig
-            // only registers once and it doesn't reference to outside.
-            if (!NAMESPACE_CONSTRAIN_DISPLAY_APIS.equals(invocation.getArgument(0))) {
-                mDeviceConfigListeners.add(invocation.getArgument(2));
+            if ("addOnPropertiesChangedListener".equals(invocation.getMethod().getName())) {
+                // Exclude CONSTRAIN_DISPLAY_APIS because ActivityRecord#sConstrainDisplayApisConfig
+                // only registers once and it doesn't reference to outside.
+                if (!NAMESPACE_CONSTRAIN_DISPLAY_APIS.equals(invocation.getArgument(0))) {
+                    mDeviceConfigListeners.add(invocation.getArgument(2));
+                }
+                // SizeCompatTests uses setNeverConstrainDisplayApisFlag, and ActivityRecordTests
+                // uses splash_screen_exception_list. So still execute real registration.
             }
-            // SizeCompatTests uses setNeverConstrainDisplayApisFlag, and ActivityRecordTests
-            // uses splash_screen_exception_list. So still execute real registration.
             return invocation.callRealMethod();
-        }).when(() -> DeviceConfig.addOnPropertiesChangedListener(anyString(), any(), any()));
+        }).when(() -> DeviceConfig.addOnPropertiesChangedListener(
+                anyString(), any(), any(DeviceConfig.OnPropertiesChangedListener.class)));
 
         mContext = getInstrumentation().getTargetContext();
         spyOn(mContext);
 
         doReturn(null).when(mContext)
-                .registerReceiver(nullable(BroadcastReceiver.class), any(IntentFilter.class));
+                .registerReceiver(nullable(BroadcastReceiver.class), any(IntentFilter.class),
+                        nullable(String.class), nullable(Handler.class));
+        doReturn(null).when(mContext)
+                .registerReceiver(nullable(BroadcastReceiver.class), any(IntentFilter.class),
+                        nullable(String.class), nullable(Handler.class), anyInt());
         doReturn(null).when(mContext)
                 .registerReceiverAsUser(any(BroadcastReceiver.class), any(UserHandle.class),
                         any(IntentFilter.class), nullable(String.class), nullable(Handler.class));
@@ -212,6 +242,12 @@ public class SystemServicesTestRule implements TestRule {
         doNothing().when(contentResolver)
                 .registerContentObserver(any(Uri.class), anyBoolean(), any(ContentObserver.class),
                         anyInt());
+
+        // Unit test should not register listener to the real service.
+        final DisplayManagerGlobal dmg = DisplayManagerGlobal.getInstance();
+        spyOn(dmg);
+        doNothing().when(dmg).registerDisplayListener(
+                any(), any(Executor.class), anyLong(), anyString());
     }
 
     private void setUpLocalServices() {
@@ -240,6 +276,12 @@ public class SystemServicesTestRule implements TestRule {
         // DisplayManagerInternal
         final DisplayManagerInternal dmi = mock(DisplayManagerInternal.class);
         doReturn(dmi).when(() -> LocalServices.getService(eq(DisplayManagerInternal.class)));
+        doAnswer(invocation -> {
+            int displayId = invocation.getArgument(0);
+            DisplayInfo displayInfo = invocation.getArgument(1);
+            mWmService.mRoot.getDisplayContent(displayId).getDisplay().getDisplayInfo(displayInfo);
+            return null;
+        }).when(dmi).getNonOverrideDisplayInfo(anyInt(), any());
 
         // ColorDisplayServiceInternal
         final ColorDisplayService.ColorDisplayServiceInternal cds =
@@ -283,6 +325,16 @@ public class SystemServicesTestRule implements TestRule {
         // StatusBarManagerInternal
         final StatusBarManagerInternal sbmi = mock(StatusBarManagerInternal.class);
         doReturn(sbmi).when(() -> LocalServices.getService(eq(StatusBarManagerInternal.class)));
+
+        // UserManagerInternal
+        final UserManagerInternal umi = mock(UserManagerInternal.class);
+        doReturn(umi).when(() -> LocalServices.getService(UserManagerInternal.class));
+        Answer<Boolean> isUserVisibleAnswer = invocation -> {
+            int userId = invocation.getArgument(0);
+            return userId == mWmService.mCurrentUserId;
+        };
+        when(umi.isUserVisible(anyInt())).thenAnswer(isUserVisibleAnswer);
+        when(umi.isUserVisible(anyInt(), anyInt())).thenAnswer(isUserVisibleAnswer);
     }
 
     private void setUpActivityTaskManagerService() {
@@ -301,6 +353,10 @@ public class SystemServicesTestRule implements TestRule {
                 mock(ActivityManagerService.class, withSettings().stubOnly());
         mAtmService = new TestActivityTaskManagerService(mContext, amService);
         LocalServices.addService(ActivityTaskManagerInternal.class, mAtmService.getAtmInternal());
+        // Create a fake WindowProcessController for the system process.
+        final WindowProcessController wpc =
+                addProcess("android", "system", 1485 /* pid */, 1000 /* uid */);
+        wpc.setThread(ActivityThread.currentActivityThread().getApplicationThread());
     }
 
     private void setUpWindowManagerService() {
@@ -311,7 +367,7 @@ public class SystemServicesTestRule implements TestRule {
         // Suppress StrictMode violation (DisplayWindowSettings) to avoid log flood.
         DisplayThread.getHandler().post(StrictMode::allowThreadDiskWritesMask);
         mWmService = WindowManagerService.main(
-                mContext, mImService, false, false, wmPolicy, mAtmService,
+                mContext, mImService, false, wmPolicy, mAtmService,
                 testDisplayWindowSettingsProvider, StubTransaction::new,
                 (unused) -> new MockSurfaceControlBuilder());
         spyOn(mWmService);
@@ -337,6 +393,7 @@ public class SystemServicesTestRule implements TestRule {
         mAtmService.setWindowManager(mWmService);
         mWmService.mDisplayEnabled = true;
         mWmService.mDisplayReady = true;
+        mAtmService.getTransitionController().mIsWaitingForDisplayEnabled = false;
         // Set configuration for default display
         mWmService.getDefaultDisplayContentLocked().reconfigureDisplayLocked();
 
@@ -358,11 +415,18 @@ public class SystemServicesTestRule implements TestRule {
     }
 
     private void tearDown() {
-        mWmService.mRoot.forAllDisplayPolicies(DisplayPolicy::release);
-
-        // Unregister display listener from root to avoid issues with subsequent tests.
-        mContext.getSystemService(DisplayManager.class)
-                .unregisterDisplayListener(mAtmService.mRootWindowContainer);
+        if (mWmService != null) {
+            for (int i = mWmService.mRoot.getChildCount() - 1; i >= 0; i--) {
+                final DisplayContent dc = mWmService.mRoot.getChildAt(i);
+                // Unregister SettingsObserver.
+                dc.getDisplayPolicy().release();
+                // Unregister SensorEventListener (foldable device may register for hinge angle).
+                dc.getDisplayRotation().onDisplayRemoved();
+                if (dc.mDisplayRotationCompatPolicy != null) {
+                    dc.mDisplayRotationCompatPolicy.dispose();
+                }
+            }
+        }
 
         for (int i = mDeviceConfigListeners.size() - 1; i >= 0; i--) {
             DeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigListeners.get(i));
@@ -371,8 +435,6 @@ public class SystemServicesTestRule implements TestRule {
         // This makes sure the posted messages without delay are processed, e.g.
         // DisplayPolicy#release, WindowManagerService#setAnimationScale.
         waitUntilWindowManagerHandlersIdle();
-        // Clear all posted messages with delay, so they don't be executed at unexpected times.
-        cleanupWindowManagerHandlers();
         // Needs to explicitly dispose current static threads because there could be messages
         // scheduled at a later time, and all mocks are invalid when it's executed.
         DisplayThread.dispose();
@@ -382,7 +444,9 @@ public class SystemServicesTestRule implements TestRule {
         SurfaceAnimationThread.dispose();
         AnimationThread.dispose();
         UiThread.dispose();
-        mInputChannel.dispose();
+        if (mInputChannel != null) {
+            mInputChannel.dispose();
+        }
 
         tearDownLocalServices();
         // Reset priority booster because animation thread has been changed.
@@ -405,6 +469,8 @@ public class SystemServicesTestRule implements TestRule {
         LocalServices.removeServiceForTest(ColorDisplayService.ColorDisplayServiceInternal.class);
         LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
+        LocalServices.removeServiceForTest(ImeTargetVisibilityPolicy.class);
     }
 
     Description getDescription() {
@@ -459,18 +525,6 @@ public class SystemServicesTestRule implements TestRule {
             atmService.mProcessMap.put(pid, proc);
         }
         return proc;
-    }
-
-    void cleanupWindowManagerHandlers() {
-        final WindowManagerService wm = getWindowManagerService();
-        if (wm == null) {
-            return;
-        }
-        wm.mH.removeCallbacksAndMessages(null);
-        wm.mAnimationHandler.removeCallbacksAndMessages(null);
-        // This is a different handler object than the wm.mAnimationHandler above.
-        AnimationThread.getHandler().removeCallbacksAndMessages(null);
-        SurfaceAnimationThread.getHandler().removeCallbacksAndMessages(null);
     }
 
     void waitUntilWindowManagerHandlersIdle() {
@@ -541,7 +595,6 @@ public class SystemServicesTestRule implements TestRule {
             mDevEnableNonResizableMultiWindow = false;
             mMinPercentageMultiWindowSupportHeight = 0.3f;
             mMinPercentageMultiWindowSupportWidth = 0.5f;
-            mLargeScreenSmallestScreenWidthDp = 600;
             mSupportsNonResizableMultiWindow = 0;
             mRespectsActivityMinWidthHeightMultiWindow = 0;
             mForceResizableActivities = false;

@@ -37,6 +37,7 @@ using Result = expected<T, std::string>;
 
 template <typename Id, typename Key>
 struct NextIdFinder {
+  std::map<Id, Key> pre_assigned_ids_;
   explicit NextIdFinder(Id start_id = 0u) : next_id_(start_id){};
 
   // Attempts to reserve an identifier for the specified key.
@@ -55,7 +56,6 @@ struct NextIdFinder {
   Id next_id_;
   bool next_id_called_ = false;
   bool exhausted_ = false;
-  std::map<Id, Key> pre_assigned_ids_;
   typename std::map<Id, Key>::iterator next_preassigned_id_;
 };
 
@@ -107,10 +107,10 @@ struct IdAssignerContext {
   // Returns whether the id was reserved successfully.
   // Reserving identifiers must be completed before `NextId` is called for the first time.
   bool ReserveId(const ResourceName& name, ResourceId id, const Visibility& visibility,
-                 IDiagnostics* diag);
+                 android::IDiagnostics* diag);
 
   // Retrieves the next available resource id that has not been reserved.
-  std::optional<ResourceId> NextId(const ResourceName& name, IDiagnostics* diag);
+  std::optional<ResourceId> NextId(const ResourceName& name, android::IDiagnostics* diag);
 
  private:
   std::string package_name_;
@@ -128,7 +128,7 @@ bool IdAssigner::Consume(IAaptContext* context, ResourceTable* table) {
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {
-        const ResourceName name(package->name, type->type, entry->name);
+        const ResourceName name(package->name, type->named_type, entry->name);
         if (entry->id && !assigned_ids.ReserveId(name, entry->id.value(), entry->visibility,
                                                  context->GetDiagnostics())) {
           return false;
@@ -158,7 +158,7 @@ bool IdAssigner::Consume(IAaptContext* context, ResourceTable* table) {
   }
 
   if (assigned_id_map_) {
-    // Reserve all the IDs mentioned in the stable ID map. That way we won't assig IDs that were
+    // Reserve all the IDs mentioned in the stable ID map. That way we won't assign IDs that were
     // listed in the map if they don't exist in the table.
     for (const auto& stable_id_entry : *assigned_id_map_) {
       const ResourceName& pre_assigned_name = stable_id_entry.first;
@@ -175,7 +175,7 @@ bool IdAssigner::Consume(IAaptContext* context, ResourceTable* table) {
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {
-        const ResourceName name(package->name, type->type, entry->name);
+        const ResourceName name(package->name, type->named_type, entry->name);
         if (entry->id) {
           continue;
         }
@@ -191,6 +191,11 @@ bool IdAssigner::Consume(IAaptContext* context, ResourceTable* table) {
 }
 
 namespace {
+static const std::string_view staged_type_overlap_error =
+    "Staged public resource type IDs have conflict with non staged public resources type "
+    "IDs, please restart staged resource type ID assignment at 0xff in public-staging.xml "
+    "and also delete all the overlapping groups in public-final.xml";
+
 template <typename Id, typename Key>
 Result<Id> NextIdFinder<Id, Key>::ReserveId(Key key, Id id) {
   CHECK(!next_id_called_) << "ReserveId cannot be called after NextId";
@@ -267,11 +272,11 @@ Result<ResourceId> TypeGroup::NextId() {
 }
 
 bool IdAssignerContext::ReserveId(const ResourceName& name, ResourceId id,
-                                  const Visibility& visibility, IDiagnostics* diag) {
+                                  const Visibility& visibility, android::IDiagnostics* diag) {
   if (package_id_ != id.package_id()) {
-    diag->Error(DiagMessage() << "can't assign ID " << id << " to resource " << name
-                              << " because package already has ID " << std::hex
-                              << (int)id.package_id());
+    diag->Error(android::DiagMessage()
+                << "can't assign ID " << id << " to resource " << name
+                << " because package already has ID " << std::hex << (int)id.package_id());
     return false;
   }
 
@@ -282,8 +287,20 @@ bool IdAssignerContext::ReserveId(const ResourceName& name, ResourceId id,
     // another type.
     auto assign_result = type_id_finder_.ReserveId(key, id.type_id());
     if (!assign_result.has_value()) {
-      diag->Error(DiagMessage() << "can't assign ID " << id << " to resource " << name
-                                << " because type " << assign_result.error());
+      auto pre_assigned_type = type_id_finder_.pre_assigned_ids_[id.type_id()].type;
+      bool pre_assigned_type_staged =
+          non_staged_type_ids_.find(pre_assigned_type) == non_staged_type_ids_.end();
+      auto hex_type_id = fmt::format("{:#04x}", (int)id.type_id());
+      bool current_type_staged = visibility.staged_api;
+      diag->Error(android::DiagMessage()
+                  << "can't assign type ID " << hex_type_id << " to "
+                  << (current_type_staged ? "staged type " : "non staged type ") << name.type.type
+                  << " because this type ID have been assigned to "
+                  << (pre_assigned_type_staged ? "staged type " : "non staged type ")
+                  << pre_assigned_type);
+      if (pre_assigned_type_staged || current_type_staged) {
+        diag->Error(android::DiagMessage() << staged_type_overlap_error);
+      }
       return false;
     }
     type = types_.emplace(key, TypeGroup(package_id_, id.type_id())).first;
@@ -293,24 +310,39 @@ bool IdAssignerContext::ReserveId(const ResourceName& name, ResourceId id,
     // Ensure that non-staged resources can only exist in one type ID.
     auto non_staged_type = non_staged_type_ids_.emplace(name.type.type, id.type_id());
     if (!non_staged_type.second && non_staged_type.first->second != id.type_id()) {
-      diag->Error(DiagMessage() << "can't assign ID " << id << " to resource " << name
-                                << " because type already has ID " << std::hex
-                                << (int)id.type_id());
+      diag->Error(android::DiagMessage()
+                  << "can't assign ID " << id << " to resource " << name
+                  << " because type already has ID " << std::hex << (int)id.type_id());
+      return false;
+    }
+  } else {
+    // Ensure that staged public resources cannot have the same type name and type id with
+    // non staged public resources.
+    auto non_staged_type = non_staged_type_ids_.find(name.type.type);
+    if (non_staged_type != non_staged_type_ids_.end() && non_staged_type->second == id.type_id()) {
+      diag->Error(
+          android::DiagMessage()
+          << "can`t assign type ID " << fmt::format("{:#04x}", (int)id.type_id())
+          << " to staged type " << name.type.type << " because type ID "
+          << fmt::format("{:#04x}", (int)id.type_id())
+          << " already has been assigned to a non staged resource type with the same type name");
+      diag->Error(android::DiagMessage() << staged_type_overlap_error);
       return false;
     }
   }
 
   auto assign_result = type->second.ReserveId(name, id);
   if (!assign_result.has_value()) {
-    diag->Error(DiagMessage() << "can't assign ID " << id << " to resource " << name << " because "
-                              << assign_result.error());
+    diag->Error(android::DiagMessage() << "can't assign ID " << id << " to resource " << name
+                                       << " because " << assign_result.error());
     return false;
   }
 
   return true;
 }
 
-std::optional<ResourceId> IdAssignerContext::NextId(const ResourceName& name, IDiagnostics* diag) {
+std::optional<ResourceId> IdAssignerContext::NextId(const ResourceName& name,
+                                                    android::IDiagnostics* diag) {
   // The package name is not known during the compile stage.
   // Resources without a package name are considered a part of the app being linked.
   CHECK(name.package.empty() || name.package == package_name_);
@@ -331,8 +363,8 @@ std::optional<ResourceId> IdAssignerContext::NextId(const ResourceName& name, ID
 
   auto assign_result = type->second.NextId();
   if (!assign_result.has_value()) {
-    diag->Error(DiagMessage() << "can't assign resource ID to resource " << name << " because "
-                              << assign_result.error());
+    diag->Error(android::DiagMessage() << "can't assign resource ID to resource " << name
+                                       << " because " << assign_result.error());
     return {};
   }
   return assign_result.value();

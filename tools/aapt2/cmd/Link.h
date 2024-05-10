@@ -17,15 +17,21 @@
 #ifndef AAPT2_LINK_H
 #define AAPT2_LINK_H
 
+#include <optional>
 #include <regex>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 #include "Command.h"
-#include "Diagnostics.h"
 #include "Resource.h"
-#include "split/TableSplitter.h"
+#include "androidfw/IDiagnostics.h"
+#include "cmd/Util.h"
 #include "format/binary/TableFlattener.h"
 #include "format/proto/ProtoSerialize.h"
 #include "link/ManifestFixer.h"
+#include "split/TableSplitter.h"
 #include "trace/TraceBuffer.h"
 
 namespace aapt {
@@ -69,8 +75,10 @@ struct LinkOptions {
   bool no_resource_removal = false;
   bool no_xml_namespaces = false;
   bool do_not_compress_anything = false;
+  bool use_sparse_encoding = false;
   std::unordered_set<std::string> extensions_to_not_compress;
   std::optional<std::regex> regex_to_not_compress;
+  FeatureFlagValues feature_flag_values;
 
   // Static lib options.
   bool no_static_lib_packages = false;
@@ -111,8 +119,7 @@ struct LinkOptions {
 
 class LinkCommand : public Command {
  public:
-  explicit LinkCommand(IDiagnostics* diag) : Command("link", "l"),
-                                             diag_(diag) {
+  explicit LinkCommand(android::IDiagnostics* diag) : Command("link", "l"), diag_(diag) {
     SetDescription("Links resources into an apk.");
     AddRequiredFlag("-o", "Output path.", &options_.output_path, Command::kPath);
     AddRequiredFlag("--manifest", "Path to the Android manifest to build.",
@@ -157,8 +164,11 @@ class LinkCommand : public Command {
             "defaults. Use this only when building runtime resource overlay packages.",
         &options_.no_resource_removal);
     AddOptionalSwitch("--enable-sparse-encoding",
-        "This decreases APK size at the cost of resource retrieval performance.",
-        &options_.table_flattener_options.use_sparse_entries);
+                      "This decreases APK size at the cost of resource retrieval performance.",
+                      &options_.use_sparse_encoding);
+    AddOptionalSwitch("--enable-compact-entries",
+        "This decreases APK size by using compact resource entries for simple data types.",
+        &options_.table_flattener_options.use_compact_entries);
     AddOptionalSwitch("-x", "Legacy flag that specifies to use the package identifier 0x01.",
         &legacy_x_flag_);
     AddOptionalSwitch("-z", "Require localization of strings marked 'suggested'.",
@@ -206,6 +216,13 @@ class LinkCommand : public Command {
     AddOptionalFlag("--compile-sdk-version-name",
         "Version name to inject into the AndroidManifest.xml if none is present.",
         &options_.manifest_fixer_options.compile_sdk_version_codename);
+    AddOptionalSwitch(
+        "--no-compile-sdk-metadata",
+        "Suppresses output of compile SDK-related attributes in AndroidManifest.xml,\n"
+        "including android:compileSdkVersion and platformBuildVersion.",
+        &options_.manifest_fixer_options.no_compile_sdk_metadata);
+    AddOptionalFlagList("--fingerprint-prefix", "Fingerprint prefix to add to install constraints.",
+                        &options_.manifest_fixer_options.fingerprint_prefixes);
     AddOptionalSwitch("--shared-lib", "Generates a shared Android runtime library.",
         &shared_lib_);
     AddOptionalSwitch("--static-lib", "Generate a static Android library.", &static_lib_);
@@ -313,12 +330,22 @@ class LinkCommand : public Command {
             "should only be used together with the --static-lib flag.",
         &options_.merge_only);
     AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
+    AddOptionalFlagList("--feature-flags",
+                        "Specify the values of feature flags. The pairs in the argument\n"
+                        "are separated by ',' and the name is separated from the value by '='.\n"
+                        "Example: \"flag1=true,flag2=false,flag3=\" (flag3 has no given value).",
+                        &feature_flags_args_);
+    AddOptionalSwitch("--non-updatable-system",
+                      "Mark the app as a non-updatable system app. This inserts\n"
+                      "updatableSystem=\"false\" to the root manifest node, overwriting any\n"
+                      "existing attribute. This is ignored if the manifest has a versionCode.",
+                      &options_.manifest_fixer_options.non_updatable_system);
   }
 
   int Action(const std::vector<std::string>& args) override;
 
  private:
-  IDiagnostics* diag_;
+  android::IDiagnostics* diag_;
   LinkOptions options_;
 
   std::vector<std::string> overlay_arg_list_;
@@ -337,6 +364,7 @@ class LinkCommand : public Command {
   std::optional<std::string> stable_id_file_path_;
   std::vector<std::string> split_args_;
   std::optional<std::string> trace_folder_;
+  std::vector<std::string> feature_flags_args_;
 };
 
 }// namespace aapt

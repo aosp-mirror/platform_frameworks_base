@@ -54,6 +54,9 @@ import java.util.concurrent.Executor;
  * IMS provisioning keys are defined per carrier or OEM using OMA-DM or other provisioning
  * applications and may vary. It is up to the carrier and OEM applications to ensure that the
  * correct provisioning keys are being used when integrating with a vendor's ImsService.
+ *
+ * Use {@link android.telephony.ims.ImsManager#getProvisioningManager(int)} to get an instance of
+ * this manager.
  */
 @RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS)
 public class ProvisioningManager {
@@ -1466,9 +1469,8 @@ public class ProvisioningManager {
     /**
      * Get the provisioning status for the IMS MmTel capability specified.
      *
-     * If provisioning is not required for the queried
-     * {@link MmTelFeature.MmTelCapabilities.MmTelCapability} and
-     * {@link ImsRegistrationImplBase.ImsRegistrationTech} combination specified, this method will
+     * If provisioning is not required for the queried {@code capability} and
+     * {@code tech} combination specified, this method will
      * always return {@code true}.
      *
      * <p> Requires Permission:
@@ -1500,7 +1502,7 @@ public class ProvisioningManager {
      * Get the provisioning status for the IMS RCS capability specified.
      *
      * If provisioning is not required for the queried
-     * {@link ImsRcsManager.RcsImsCapabilityFlag} or if the device does not support IMS
+     * {@code capability} or if the device does not support IMS
      * this method will always return {@code true}.
      *
      * @see CarrierConfigManager.Ims#KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL
@@ -1530,7 +1532,7 @@ public class ProvisioningManager {
      * Get the provisioning status for the IMS RCS capability specified.
      *
      * If provisioning is not required for the queried
-     * {@link ImsRcsManager.RcsImsCapabilityFlag} or if the device does not support IMS
+     * {@code capability} or if the device does not support IMS
      * this method will always return {@code true}.
      *
      * <p> Requires Permission:
@@ -1685,7 +1687,8 @@ public class ProvisioningManager {
 
     /**
      * Notify the framework that an RCS autoconfiguration XML file has been received for
-     * provisioning.
+     * provisioning. This API is only valid if the device supports IMS, which can be checked using
+     * {@link PackageManager#hasSystemFeature}.
      *
      * <p>Requires Permission:
      * <ul>
@@ -1923,7 +1926,8 @@ public class ProvisioningManager {
 
     /**
      * Reconfiguration triggered by the RCS application. Most likely cause
-     * is the 403 forbidden to a HTTP request.
+     * is the 403 forbidden to a HTTP request. This API is only valid if the device supports IMS,
+     * which can be checked using {@link PackageManager#hasSystemFeature}
      *
      * <p>When this api is called, the RCS configuration for the associated
      * subscription will be removed, and the application which has registered

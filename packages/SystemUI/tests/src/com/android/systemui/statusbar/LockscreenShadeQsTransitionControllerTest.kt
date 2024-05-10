@@ -18,11 +18,12 @@ package com.android.systemui.statusbar
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.statusbar.policy.FakeConfigurationController
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -59,7 +60,8 @@ class LockscreenShadeQsTransitionControllerTest : SysuiTestCase() {
                 context,
                 configurationController,
                 dumpManager,
-                qsProvider = { qS }
+                qsProvider = { qS },
+                ResourcesSplitShadeStateController()
             )
     }
 

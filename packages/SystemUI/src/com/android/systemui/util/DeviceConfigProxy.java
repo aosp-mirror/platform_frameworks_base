@@ -19,7 +19,6 @@ package com.android.systemui.util;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Context;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 
@@ -48,13 +47,6 @@ public class DeviceConfigProxy {
             @NonNull DeviceConfig.OnPropertiesChangedListener onPropertiesChangedListener) {
         DeviceConfig.addOnPropertiesChangedListener(
                 namespace, executor, onPropertiesChangedListener);
-    }
-
-    /**
-     * Wrapped version of {@link DeviceConfig#enforceReadPermission}.
-     */
-    public void enforceReadPermission(Context context, String namespace) {
-        DeviceConfig.enforceReadPermission(context, namespace);
     }
 
     /**

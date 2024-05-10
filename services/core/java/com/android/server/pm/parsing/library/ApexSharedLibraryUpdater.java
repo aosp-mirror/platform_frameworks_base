@@ -19,9 +19,9 @@ package com.android.server.pm.parsing.library;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.modules.utils.build.UnboundedSdkLevel;
 import com.android.server.SystemConfig;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 /**
  * Updates packages to add or remove dependencies on shared libraries as per attributes
@@ -43,7 +43,8 @@ public class ApexSharedLibraryUpdater extends PackageSharedLibraryUpdater {
     }
 
     @Override
-    public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
+    public void updatePackage(ParsedPackage parsedPackage, boolean isSystemApp,
+            boolean isUpdatedSystemApp) {
         final int builtInLibCount = mSharedLibraries.size();
         for (int i = 0; i < builtInLibCount; i++) {
             updateSharedLibraryForPackage(mSharedLibraries.valueAt(i), parsedPackage);

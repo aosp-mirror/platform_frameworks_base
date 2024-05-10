@@ -63,6 +63,7 @@ import java.lang.reflect.Modifier;
  * your new thread.  The given Runnable or Message will then be scheduled
  * in the Handler's message queue and processed when appropriate.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Handler {
     /*
      * Set this flag to true to detect anonymous, local or member classes
@@ -119,7 +120,7 @@ public class Handler {
      *   crashes (if a handler is sometimes created on a thread without a Looper active), or race
      *   conditions, where the thread a handler is associated with is not what the author
      *   anticipated. Instead, use an {@link java.util.concurrent.Executor} or specify the Looper
-     *   explicitly, using {@link Looper#getMainLooper}, {link android.view.View#getHandler}, or
+     *   explicitly, using {@link Looper#getMainLooper}, {@link android.view.View#getHandler}, or
      *   similar. If the implicit thread local behavior is required for compatibility, use
      *   {@code new Handler(Looper.myLooper())} to make it clear to readers.
      *
@@ -144,7 +145,7 @@ public class Handler {
      *   crashes (if a handler is sometimes created on a thread without a Looper active), or race
      *   conditions, where the thread a handler is associated with is not what the author
      *   anticipated. Instead, use an {@link java.util.concurrent.Executor} or specify the Looper
-     *   explicitly, using {@link Looper#getMainLooper}, {link android.view.View#getHandler}, or
+     *   explicitly, using {@link Looper#getMainLooper}, {@link android.view.View#getHandler}, or
      *   similar. If the implicit thread local behavior is required for compatibility, use
      *   {@code new Handler(Looper.myLooper(), callback)} to make it clear to readers.
      */
@@ -182,7 +183,7 @@ public class Handler {
      *
      * Asynchronous messages represent interrupts or events that do not require global ordering
      * with respect to synchronous messages.  Asynchronous messages are not subject to
-     * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
+     * the synchronization barriers introduced by {@link MessageQueue#postSyncBarrier()}.
      *
      * @param async If true, the handler calls {@link Message#setAsynchronous(boolean)} for
      * each {@link Message} that is sent to it or {@link Runnable} that is posted to it.
@@ -203,7 +204,7 @@ public class Handler {
      *
      * Asynchronous messages represent interrupts or events that do not require global ordering
      * with respect to synchronous messages.  Asynchronous messages are not subject to
-     * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
+     * the synchronization barriers introduced by {@link MessageQueue#postSyncBarrier()}.
      *
      * @param callback The callback interface in which to handle messages, or null.
      * @param async If true, the handler calls {@link Message#setAsynchronous(boolean)} for
@@ -230,6 +231,7 @@ public class Handler {
         mQueue = mLooper.mQueue;
         mCallback = callback;
         mAsynchronous = async;
+        mIsShared = false;
     }
 
     /**
@@ -253,10 +255,17 @@ public class Handler {
      */
     @UnsupportedAppUsage
     public Handler(@NonNull Looper looper, @Nullable Callback callback, boolean async) {
+        this(looper, callback, async, /* shared= */ false);
+    }
+
+    /** @hide */
+    public Handler(@NonNull Looper looper, @Nullable Callback callback, boolean async,
+            boolean shared) {
         mLooper = looper;
         mQueue = looper.mQueue;
         mCallback = callback;
         mAsynchronous = async;
+        mIsShared = shared;
     }
 
     /**
@@ -743,7 +752,7 @@ public class Handler {
         MessageQueue queue = mQueue;
         if (queue == null) {
             RuntimeException e = new RuntimeException(
-                this + " sendMessageAtTime() called with no mQueue");
+                    this + " sendMessageAtFrontOfQueue() called with no mQueue");
             Log.w("Looper", e.getMessage(), e);
             return false;
         }
@@ -778,6 +787,14 @@ public class Handler {
         return queue.enqueueMessage(msg, uptimeMillis);
     }
 
+    private Object disallowNullArgumentIfShared(@Nullable Object arg) {
+        if (mIsShared && arg == null) {
+            throw new IllegalArgumentException("Null argument disallowed for shared handler."
+                    + " Consider creating your own Handler instance.");
+        }
+        return arg;
+    }
+
     /**
      * Remove any pending posts of messages with code 'what' that are in the
      * message queue.
@@ -792,7 +809,7 @@ public class Handler {
      * all messages will be removed.
      */
     public final void removeMessages(int what, @Nullable Object object) {
-        mQueue.removeMessages(this, what, object);
+        mQueue.removeMessages(this, what, disallowNullArgumentIfShared(object));
     }
 
     /**
@@ -807,7 +824,7 @@ public class Handler {
      *@hide
      */
     public final void removeEqualMessages(int what, @Nullable Object object) {
-        mQueue.removeEqualMessages(this, what, object);
+        mQueue.removeEqualMessages(this, what, disallowNullArgumentIfShared(object));
     }
 
     /**
@@ -816,7 +833,7 @@ public class Handler {
      * all callbacks and messages will be removed.
      */
     public final void removeCallbacksAndMessages(@Nullable Object token) {
-        mQueue.removeCallbacksAndMessages(this, token);
+        mQueue.removeCallbacksAndMessages(this, disallowNullArgumentIfShared(token));
     }
 
     /**
@@ -827,7 +844,7 @@ public class Handler {
      *@hide
      */
     public final void removeCallbacksAndEqualMessages(@Nullable Object token) {
-        mQueue.removeCallbacksAndEqualMessages(this, token);
+        mQueue.removeCallbacksAndEqualMessages(this, disallowNullArgumentIfShared(token));
     }
     /**
      * Check if there are any pending posts of messages with code 'what' in
@@ -950,6 +967,9 @@ public class Handler {
     final boolean mAsynchronous;
     @UnsupportedAppUsage
     IMessenger mMessenger;
+
+    /** If it's a shared handler, we disallow certain dangeraous operations. */
+    private final boolean mIsShared;
 
     private static final class BlockingRunnable implements Runnable {
         private final Runnable mTask;

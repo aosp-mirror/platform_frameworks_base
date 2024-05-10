@@ -14,7 +14,6 @@
  */
 package com.android.systemui.unfold.util
 
-import android.animation.ValueAnimator
 import android.content.ContentResolver
 import android.database.ContentObserver
 import android.provider.Settings
@@ -46,13 +45,15 @@ constructor(
         contentResolver.registerContentObserver(
             Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
             /* notifyForDescendants= */ false,
-            animatorDurationScaleObserver)
+            animatorDurationScaleObserver
+        )
         onAnimatorScaleChanged()
     }
 
     private fun onAnimatorScaleChanged() {
-        val animationsEnabled = ValueAnimator.areAnimatorsEnabled()
-        scopedUnfoldTransitionProgressProvider.setReadyToHandleTransition(animationsEnabled)
+        scopedUnfoldTransitionProgressProvider.setReadyToHandleTransition(
+            contentResolver.areAnimationsEnabled()
+        )
     }
 
     override fun addCallback(listener: TransitionProgressListener) {
@@ -73,5 +74,18 @@ constructor(
         fun wrap(
             progressProvider: UnfoldTransitionProgressProvider
         ): ScaleAwareTransitionProgressProvider
+    }
+
+    companion object {
+        fun ContentResolver.areAnimationsEnabled(): Boolean {
+            val animationScale =
+                Settings.Global.getString(
+                        this,
+                        Settings.Global.ANIMATOR_DURATION_SCALE,
+                    )
+                    ?.toFloatOrNull()
+                    ?: 1f
+            return animationScale != 0f
+        }
     }
 }

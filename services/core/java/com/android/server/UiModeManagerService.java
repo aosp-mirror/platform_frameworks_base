@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.app.UiModeManager.ContrastUtils.CONTRAST_DEFAULT_VALUE;
 import static android.app.UiModeManager.DEFAULT_PRIORITY;
 import static android.app.UiModeManager.MODE_NIGHT_AUTO;
 import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
@@ -27,7 +28,11 @@ import static android.app.UiModeManager.MODE_NIGHT_YES;
 import static android.app.UiModeManager.PROJECTION_TYPE_AUTOMOTIVE;
 import static android.app.UiModeManager.PROJECTION_TYPE_NONE;
 import static android.os.UserHandle.USER_SYSTEM;
+import static android.os.UserHandle.getCallingUserId;
+import static android.provider.Settings.Secure.CONTRAST_LEVEL;
 import static android.util.TimeUtils.isTimeBetween;
+
+import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -38,6 +43,7 @@ import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.IOnProjectionStateChangedListener;
 import android.app.IUiModeManager;
+import android.app.IUiModeManagerCallback;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -59,6 +65,7 @@ import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PermissionEnforcer;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
@@ -71,7 +78,9 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.service.dreams.DreamManagerInternal;
 import android.service.dreams.Sandman;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -134,10 +143,10 @@ final class UiModeManagerService extends SystemService {
     private boolean mCarModeEnabled = false;
     private boolean mCharging = false;
     private boolean mPowerSave = false;
-    // Do not change configuration now. wait until screen turns off.
+    // Do not change configuration now. wait until the device is inactive (eg screen off, dreaming)
     // This prevents jank and activity restart when the user
     // is actively using the device
-    private boolean mWaitForScreenOff = false;
+    private boolean mWaitForDeviceInactive = false;
     private int mDefaultUiModeType;
     private boolean mCarModeKeepsScreenOn;
     private boolean mDeskModeKeepsScreenOn;
@@ -152,6 +161,8 @@ final class UiModeManagerService extends SystemService {
 
     // flag set by resource, whether to start dream immediately upon docking even if unlocked.
     private boolean mStartDreamImmediatelyOnDock = true;
+    // flag set by resource, whether to disable dreams when ambient mode suppression is enabled.
+    private boolean mDreamsDisabledByAmbientModeSuppression = false;
     // flag set by resource, whether to enable Car dock launch when starting car mode.
     private boolean mEnableCarDockLaunch = true;
     // flag set by resource, whether to lock UI mode to the default one or not.
@@ -189,6 +200,13 @@ final class UiModeManagerService extends SystemService {
 
     private final LocalService mLocalService = new LocalService();
     private PowerManagerInternal mLocalPowerManager;
+    private DreamManagerInternal mDreamManagerInternal;
+
+    private final IUiModeManager.Stub mService;
+
+    @GuardedBy("mLock")
+    private final SparseArray<RemoteCallbackList<IUiModeManagerCallback>> mUiModeManagerCallbacks =
+            new SparseArray<>();
 
     @GuardedBy("mLock")
     @Nullable
@@ -196,6 +214,9 @@ final class UiModeManagerService extends SystemService {
     @GuardedBy("mLock")
     @Nullable
     private SparseArray<RemoteCallbackList<IOnProjectionStateChangedListener>> mProjectionListeners;
+
+    @GuardedBy("mLock")
+    private final SparseArray<Float> mContrasts = new SparseArray<>();
 
     public UiModeManagerService(Context context) {
         this(context, /* setupWizardComplete= */ false, /* tm= */ null, new Injector());
@@ -205,6 +226,7 @@ final class UiModeManagerService extends SystemService {
     protected UiModeManagerService(Context context, boolean setupWizardComplete,
             TwilightManager tm, Injector injector) {
         super(context);
+        mService = new Stub(context);
         mConfiguration.setToDefaults();
         mSetupWizardComplete = setupWizardComplete;
         mTwilightManager = tm;
@@ -275,7 +297,7 @@ final class UiModeManagerService extends SystemService {
                     if (shouldApplyAutomaticChangesImmediately()) {
                         updateLocked(0, 0);
                     } else {
-                        registerScreenOffEventLocked();
+                        registerDeviceInactiveListenerLocked();
                     }
                 }
             }
@@ -286,12 +308,12 @@ final class UiModeManagerService extends SystemService {
      * DO NOT USE DIRECTLY
      * see register registerScreenOffEvent and unregisterScreenOffEvent
      */
-    private final BroadcastReceiver mOnScreenOffHandler = new BroadcastReceiver() {
+    private final BroadcastReceiver mDeviceInactiveListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             synchronized (mLock) {
                 // must unregister first before updating
-                unregisterScreenOffEventLocked();
+                unregisterDeviceInactiveListenerLocked();
                 updateLocked(0, 0);
             }
         }
@@ -350,6 +372,20 @@ final class UiModeManagerService extends SystemService {
         }
     };
 
+    private final ContentObserver mContrastObserver = new ContentObserver(mHandler) {
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            synchronized (mLock) {
+                if (updateContrastLocked()) {
+                    float contrast = getContrastLocked();
+                    mUiModeManagerCallbacks.get(mCurrentUser, new RemoteCallbackList<>())
+                            .broadcast(ignoreRemoteException(
+                                    callback -> callback.notifyContrastChanged(contrast)));
+                }
+            }
+        }
+    };
+
     private void updateSystemProperties() {
         int mode = Secure.getIntForUser(getContext().getContentResolver(), Secure.UI_NIGHT_MODE,
                 mNightMode, 0);
@@ -362,6 +398,11 @@ final class UiModeManagerService extends SystemService {
     @VisibleForTesting
     void setStartDreamImmediatelyOnDock(boolean startDreamImmediatelyOnDock) {
         mStartDreamImmediatelyOnDock = startDreamImmediatelyOnDock;
+    }
+
+    @VisibleForTesting
+    void setDreamsDisabledByAmbientModeSuppression(boolean disabledByAmbientModeSuppression) {
+        mDreamsDisabledByAmbientModeSuppression = disabledByAmbientModeSuppression;
     }
 
     @Override
@@ -393,6 +434,7 @@ final class UiModeManagerService extends SystemService {
                 if (twilightManager != null) mTwilightManager = twilightManager;
                 mLocalPowerManager =
                         LocalServices.getService(PowerManagerInternal.class);
+                mDreamManagerInternal = LocalServices.getService(DreamManagerInternal.class);
                 initPowerSave();
                 mCarModeEnabled = mDockState == Intent.EXTRA_DOCK_STATE_CAR;
                 registerVrStateListener();
@@ -400,6 +442,9 @@ final class UiModeManagerService extends SystemService {
                 context.getContentResolver()
                         .registerContentObserver(Secure.getUriFor(Secure.UI_NIGHT_MODE),
                                 false, mDarkThemeObserver, 0);
+                context.getContentResolver().registerContentObserver(
+                        Secure.getUriFor(Secure.CONTRAST_LEVEL), false,
+                        mContrastObserver, UserHandle.USER_ALL);
                 context.registerReceiver(mDockModeReceiver,
                         new IntentFilter(Intent.ACTION_DOCK_EVENT));
                 IntentFilter batteryFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
@@ -424,6 +469,8 @@ final class UiModeManagerService extends SystemService {
         final Resources res = context.getResources();
         mStartDreamImmediatelyOnDock = res.getBoolean(
                 com.android.internal.R.bool.config_startDreamImmediatelyOnDock);
+        mDreamsDisabledByAmbientModeSuppression = res.getBoolean(
+                com.android.internal.R.bool.config_dreamsDisabledByAmbientModeSuppressionConfig);
         mNightMode = res.getInteger(
                 com.android.internal.R.integer.config_defaultNightMode);
         mDefaultUiModeType = res.getInteger(
@@ -538,7 +585,7 @@ final class UiModeManagerService extends SystemService {
         if (shouldApplyAutomaticChangesImmediately()) {
             updateLocked(0, 0);
         } else {
-            registerScreenOffEventLocked();
+            registerDeviceInactiveListenerLocked();
         }
         scheduleNextCustomTimeListener();
     }
@@ -587,22 +634,23 @@ final class UiModeManagerService extends SystemService {
         return LocalTime.ofNanoOfDay(t * 1000);
     }
 
-    private void registerScreenOffEventLocked() {
+    private void registerDeviceInactiveListenerLocked() {
         if (mPowerSave) return;
-        mWaitForScreenOff = true;
+        mWaitForDeviceInactive = true;
         final IntentFilter intentFilter =
                 new IntentFilter(Intent.ACTION_SCREEN_OFF);
-        getContext().registerReceiver(mOnScreenOffHandler, intentFilter);
+        intentFilter.addAction(Intent.ACTION_DREAMING_STARTED);
+        getContext().registerReceiver(mDeviceInactiveListener, intentFilter);
     }
 
     private void cancelCustomAlarm() {
         mAlarmManager.cancel(mCustomTimeListener);
     }
 
-    private void unregisterScreenOffEventLocked() {
-        mWaitForScreenOff = false;
+    private void unregisterDeviceInactiveListenerLocked() {
+        mWaitForDeviceInactive = false;
         try {
-            getContext().unregisterReceiver(mOnScreenOffHandler);
+            getContext().unregisterReceiver(mDeviceInactiveListener);
         } catch (IllegalArgumentException e) {
             // we ignore this exception if the receiver is unregistered already.
         }
@@ -623,7 +671,22 @@ final class UiModeManagerService extends SystemService {
         }
     }
 
-    private final IUiModeManager.Stub mService = new IUiModeManager.Stub() {
+    private final class Stub extends IUiModeManager.Stub {
+        Stub(Context context) {
+            super(PermissionEnforcer.fromContext(context));
+        }
+
+        @Override
+        public void addCallback(IUiModeManagerCallback callback) {
+            int userId = getCallingUserId();
+            synchronized (mLock) {
+                if (!mUiModeManagerCallbacks.contains(userId)) {
+                    mUiModeManagerCallbacks.put(userId, new RemoteCallbackList<>());
+                }
+                mUiModeManagerCallbacks.get(userId).register(callback);
+            }
+        }
+
         @Override
         public void enableCarMode(@UiModeManager.EnableCarMode int flags,
                 @IntRange(from = 0) int priority, String callingPackage) {
@@ -769,7 +832,7 @@ final class UiModeManagerService extends SystemService {
                 synchronized (mLock) {
                     if (mNightMode != mode || mNightModeCustomType != customModeType) {
                         if (mNightMode == MODE_NIGHT_AUTO || mNightMode == MODE_NIGHT_CUSTOM) {
-                            unregisterScreenOffEventLocked();
+                            unregisterDeviceInactiveListenerLocked();
                             cancelCustomAlarm();
                         }
                         mNightModeCustomType = mode == MODE_NIGHT_CUSTOM
@@ -781,10 +844,10 @@ final class UiModeManagerService extends SystemService {
                         // on screen off will update configuration instead
                         if ((mNightMode != MODE_NIGHT_AUTO && mNightMode != MODE_NIGHT_CUSTOM)
                                 || shouldApplyAutomaticChangesImmediately()) {
-                            unregisterScreenOffEventLocked();
+                            unregisterDeviceInactiveListenerLocked();
                             updateLocked(0, 0);
                         } else {
-                            registerScreenOffEventLocked();
+                            registerDeviceInactiveListenerLocked();
                         }
                     }
                 }
@@ -800,25 +863,17 @@ final class UiModeManagerService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
         @Override
         public void setNightModeCustomType(@NightModeCustomType int nightModeCustomType) {
-            if (getContext().checkCallingOrSelfPermission(
-                    android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(
-                        "setNightModeCustomType requires MODIFY_DAY_NIGHT_MODE permission");
-            }
+            setNightModeCustomType_enforcePermission();
             setNightModeInternal(MODE_NIGHT_CUSTOM, nightModeCustomType);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
         @Override
         public  @NightModeCustomReturnType int getNightModeCustomType() {
-            if (getContext().checkCallingOrSelfPermission(
-                    android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(
-                        "getNightModeCustomType requires MODIFY_DAY_NIGHT_MODE permission");
-            }
+            getNightModeCustomType_enforcePermission();
             synchronized (mLock) {
                 return mNightModeCustomType;
             }
@@ -916,7 +971,7 @@ final class UiModeManagerService extends SystemService {
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     if (mNightMode == MODE_NIGHT_AUTO || mNightMode == MODE_NIGHT_CUSTOM) {
-                        unregisterScreenOffEventLocked();
+                        unregisterDeviceInactiveListenerLocked();
                         mOverrideNightModeOff = !active;
                         mOverrideNightModeOn = active;
                         mOverrideNightModeUser = mCurrentUser;
@@ -960,7 +1015,7 @@ final class UiModeManagerService extends SystemService {
                 persistNightMode(user);
                 onCustomTimeUpdated(user);
             } catch (DateTimeException e) {
-                unregisterScreenOffEventLocked();
+                unregisterDeviceInactiveListenerLocked();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -987,7 +1042,7 @@ final class UiModeManagerService extends SystemService {
                 mCustomAutoNightModeEndMilliseconds = newTime;
                 onCustomTimeUpdated(user);
             } catch (DateTimeException e) {
-                unregisterScreenOffEventLocked();
+                unregisterDeviceInactiveListenerLocked();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1047,10 +1102,10 @@ final class UiModeManagerService extends SystemService {
             return releaseProjectionUnchecked(projectionType, callingPackage);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.READ_PROJECTION_STATE)
         @Override
         public @UiModeManager.ProjectionType int getActiveProjectionTypes() {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PROJECTION_STATE, "getActiveProjectionTypes");
+            getActiveProjectionTypes_enforcePermission();
             @UiModeManager.ProjectionType int projectionTypeFlag = PROJECTION_TYPE_NONE;
             synchronized (mLock) {
                 if (mProjectionHolders != null) {
@@ -1064,11 +1119,11 @@ final class UiModeManagerService extends SystemService {
             return projectionTypeFlag;
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.READ_PROJECTION_STATE)
         @Override
         public List<String> getProjectingPackages(
                 @UiModeManager.ProjectionType int projectionType) {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PROJECTION_STATE, "getProjectionState");
+            getProjectingPackages_enforcePermission();
             synchronized (mLock) {
                 List<String> packageNames = new ArrayList<>();
                 populateWithRelevantActivePackageNames(projectionType, packageNames);
@@ -1076,11 +1131,10 @@ final class UiModeManagerService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.READ_PROJECTION_STATE)
         public void addOnProjectionStateChangedListener(IOnProjectionStateChangedListener listener,
                 @UiModeManager.ProjectionType int projectionType) {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PROJECTION_STATE,
-                    "addOnProjectionStateChangedListener");
+            addOnProjectionStateChangedListener_enforcePermission();
             if (projectionType == PROJECTION_TYPE_NONE) {
                 return;
             }
@@ -1110,17 +1164,23 @@ final class UiModeManagerService extends SystemService {
         }
 
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.READ_PROJECTION_STATE)
         public void removeOnProjectionStateChangedListener(
                 IOnProjectionStateChangedListener listener) {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PROJECTION_STATE,
-                    "removeOnProjectionStateChangedListener");
+            removeOnProjectionStateChangedListener_enforcePermission();
             synchronized (mLock) {
                 if (mProjectionListeners != null) {
                     for (int i = 0; i < mProjectionListeners.size(); ++i) {
                         mProjectionListeners.valueAt(i).unregister(listener);
                     }
                 }
+            }
+        }
+
+        @Override
+        public float getContrast() {
+            synchronized (mLock) {
+                return getContrastLocked();
             }
         }
     };
@@ -1203,6 +1263,30 @@ final class UiModeManagerService extends SystemService {
             }
             return removed;
         }
+    }
+
+    /**
+     * Return the contrast for the current user. If not cached, fetch it from the settings.
+     */
+    @GuardedBy("mLock")
+    private float getContrastLocked() {
+        if (!mContrasts.contains(mCurrentUser)) updateContrastLocked();
+        return mContrasts.get(mCurrentUser);
+    }
+
+    /**
+     * Read the contrast setting for the current user and update {@link #mContrasts}
+     * if the contrast changed. Returns true if {@link #mContrasts} was updated.
+     */
+    @GuardedBy("mLock")
+    private boolean updateContrastLocked() {
+        float contrast = Settings.Secure.getFloatForUser(getContext().getContentResolver(),
+                CONTRAST_LEVEL, CONTRAST_DEFAULT_VALUE, mCurrentUser);
+        if (Math.abs(mContrasts.get(mCurrentUser, Float.MAX_VALUE) - contrast) >= 1e-10) {
+            mContrasts.put(mCurrentUser, contrast);
+            return true;
+        }
+        return false;
     }
 
     private static class ProjectionHolder implements IBinder.DeathRecipient {
@@ -1303,10 +1387,10 @@ final class UiModeManagerService extends SystemService {
         persistNightMode(user);
         if (mNightMode != MODE_NIGHT_CUSTOM) return;
         if (shouldApplyAutomaticChangesImmediately()) {
-            unregisterScreenOffEventLocked();
+            unregisterDeviceInactiveListenerLocked();
             updateLocked(0, 0);
         } else {
-            registerScreenOffEventLocked();
+            registerDeviceInactiveListenerLocked();
         }
     }
 
@@ -1334,7 +1418,7 @@ final class UiModeManagerService extends SystemService {
                 pw.print(" ");
             }
             pw.println("");
-            pw.print(" waitScreenOff="); pw.print(mWaitForScreenOff);
+            pw.print(" mWaitForDeviceInactive="); pw.print(mWaitForDeviceInactive);
             pw.print(" mComputedNightMode="); pw.print(mComputedNightMode);
             pw.print(" customStart="); pw.print(mCustomAutoNightModeStartMilliseconds);
             pw.print(" customEnd"); pw.print(mCustomAutoNightModeEndMilliseconds);
@@ -1595,7 +1679,7 @@ final class UiModeManagerService extends SystemService {
         }
 
         mCurUiMode = uiMode;
-        if (!mHoldingConfiguration && (!mWaitForScreenOff || mPowerSave)) {
+        if (!mHoldingConfiguration && (!mWaitForDeviceInactive || mPowerSave)) {
             mConfiguration.uiMode = uiMode;
         }
     }
@@ -1632,7 +1716,8 @@ final class UiModeManagerService extends SystemService {
 
     private boolean shouldApplyAutomaticChangesImmediately() {
         return mCar || !mPowerManager.isInteractive()
-                || mNightModeCustomType == MODE_NIGHT_CUSTOM_TYPE_BEDTIME;
+                || mNightModeCustomType == MODE_NIGHT_CUSTOM_TYPE_BEDTIME
+                || mDreamManagerInternal.isDreaming();
     }
 
     private void scheduleNextCustomTimeListener() {
@@ -1827,11 +1912,15 @@ final class UiModeManagerService extends SystemService {
         // Send the new configuration.
         applyConfigurationExternallyLocked();
 
+        final boolean dreamsSuppressed = mDreamsDisabledByAmbientModeSuppression
+                && mLocalPowerManager.isAmbientDisplaySuppressed();
+
         // If we did not start a dock app, then start dreaming if appropriate.
-        if (category != null && !dockAppStarted && (mStartDreamImmediatelyOnDock
-                || mWindowManager.isKeyguardShowingAndNotOccluded()
-                || !mPowerManager.isInteractive())) {
-            Sandman.startDreamWhenDockedIfAppropriate(getContext());
+        if (category != null && !dockAppStarted && !dreamsSuppressed && (
+                mStartDreamImmediatelyOnDock
+                        || mWindowManager.isKeyguardShowingAndNotOccluded()
+                        || !mPowerManager.isInteractive())) {
+            mInjector.startDreamWhenDockedIfAppropriate(getContext());
         }
     }
 
@@ -2147,6 +2236,10 @@ final class UiModeManagerService extends SystemService {
     public static class Injector {
         public int getCallingUid() {
             return Binder.getCallingUid();
+        }
+
+        public void startDreamWhenDockedIfAppropriate(Context context) {
+            Sandman.startDreamWhenDockedIfAppropriate(context);
         }
     }
 }

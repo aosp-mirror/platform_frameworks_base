@@ -29,7 +29,7 @@ import androidx.recyclerview.widget.RecyclerView.Adapter;
 
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityTargetAdapter.ViewHolder;
 
 import java.lang.annotation.Retention;
@@ -100,12 +100,14 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
     @ItemType
     @Override
     public int getItemViewType(int position) {
-        if (position == 0) {
-            return ItemType.FIRST_ITEM;
-        }
-
+        // This LAST_ITEM condition should be checked before others to ensure proper padding when
+        // adding a second target via notifyItemInserted().
         if (position == (getItemCount() - 1)) {
             return ItemType.LAST_ITEM;
+        }
+
+        if (position == 0) {
+            return ItemType.FIRST_ITEM;
         }
 
         return ItemType.REGULAR_ITEM;

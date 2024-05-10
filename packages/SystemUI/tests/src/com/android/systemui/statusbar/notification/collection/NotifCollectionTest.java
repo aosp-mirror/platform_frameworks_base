@@ -26,6 +26,7 @@ import static android.service.notification.NotificationListenerService.REASON_CL
 import static android.service.notification.NotificationStats.DISMISSAL_SHADE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.notification.collection.NotifCollection.REASON_NOT_CANCELED;
 import static com.android.systemui.statusbar.notification.collection.NotifCollection.REASON_UNKNOWN;
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.DISMISSED;
@@ -47,6 +48,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -92,6 +94,8 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionLogger;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
+import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -104,6 +108,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -117,7 +122,7 @@ public class NotifCollectionTest extends SysuiTestCase {
 
     @Mock private IStatusBarService mStatusBarService;
     @Mock private NotifPipelineFlags mNotifPipelineFlags;
-    @Mock private NotifCollectionLogger mLogger;
+    private final NotifCollectionLogger mLogger = spy(new NotifCollectionLogger(logcatLogBuffer()));
     @Mock private LogBufferEulogizer mEulogizer;
     @Mock private Handler mMainHandler;
 
@@ -166,7 +171,8 @@ public class NotifCollectionTest extends SysuiTestCase {
                 mMainHandler,
                 mBgExecutor,
                 mEulogizer,
-                mock(DumpManager.class));
+                mock(DumpManager.class),
+                mock(NotificationDismissibilityProvider.class));
         mCollection.attach(mGroupCoalescer);
         mCollection.addCollectionListener(mCollectionListener);
         mCollection.setBuildListener(mBuildListener);
@@ -372,6 +378,90 @@ public class NotifCollectionTest extends SysuiTestCase {
                 entry.getSbn().getUser(),
                 channel,
                 NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
+    }
+
+    @Test
+    public void testScheduleBuildNotificationListWhenChannelChanged() {
+        // GIVEN
+        final NotificationEntryBuilder neb = buildNotif(TEST_PACKAGE, 48);
+        final NotificationChannel channel = new NotificationChannel(
+                "channelId",
+                "channelName",
+                NotificationManager.IMPORTANCE_DEFAULT);
+        neb.setChannel(channel);
+
+        final NotifEvent notif = mNoMan.postNotif(neb);
+        final NotificationEntry entry = mCollectionListener.getEntry(notif.key);
+
+        when(mMainHandler.hasCallbacks(any())).thenReturn(false);
+
+        clearInvocations(mBuildListener);
+
+        // WHEN
+        mNotifHandler.onNotificationChannelModified(TEST_PACKAGE,
+                entry.getSbn().getUser(), channel, NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
+
+        // THEN
+        verify(mMainHandler).postDelayed(any(), eq(1000L));
+    }
+
+    @Test
+    public void testCancelScheduledBuildNotificationListEventWhenNotifUpdatedSynchronously() {
+        // GIVEN
+        final NotificationEntry entry1 = buildNotif(TEST_PACKAGE, 1)
+                .setGroup(mContext, "group_1")
+                .build();
+        final NotificationEntry entry2 = buildNotif(TEST_PACKAGE, 2)
+                .setGroup(mContext, "group_1")
+                .setContentTitle(mContext, "New version")
+                .build();
+        final NotificationEntry entry3 = buildNotif(TEST_PACKAGE, 3)
+                .setGroup(mContext, "group_1")
+                .build();
+
+        final List<CoalescedEvent> entriesToBePosted = Arrays.asList(
+                new CoalescedEvent(entry1.getKey(), 0, entry1.getSbn(), entry1.getRanking(), null),
+                new CoalescedEvent(entry2.getKey(), 1, entry2.getSbn(), entry2.getRanking(), null),
+                new CoalescedEvent(entry3.getKey(), 2, entry3.getSbn(), entry3.getRanking(), null)
+        );
+
+        when(mMainHandler.hasCallbacks(any())).thenReturn(true);
+
+        // WHEN
+        mNotifHandler.onNotificationBatchPosted(entriesToBePosted);
+
+        // THEN
+        verify(mMainHandler).removeCallbacks(any());
+    }
+
+    @Test
+    public void testBuildNotificationListWhenChannelChanged() {
+        // GIVEN
+        final NotificationEntryBuilder neb = buildNotif(TEST_PACKAGE, 48);
+        final NotificationChannel channel = new NotificationChannel(
+                "channelId",
+                "channelName",
+                NotificationManager.IMPORTANCE_DEFAULT);
+        neb.setChannel(channel);
+
+        final NotifEvent notif = mNoMan.postNotif(neb);
+        final NotificationEntry entry = mCollectionListener.getEntry(notif.key);
+
+        when(mMainHandler.hasCallbacks(any())).thenReturn(false);
+        when(mMainHandler.postDelayed(any(), eq(1000L))).thenAnswer((Answer) invocation -> {
+            final Runnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        });
+
+        clearInvocations(mBuildListener);
+
+        // WHEN
+        mNotifHandler.onNotificationChannelModified(TEST_PACKAGE,
+                entry.getSbn().getUser(), channel, NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
+
+        // THEN
+        verifyBuiltList(List.of(entry));
     }
 
     @Test
@@ -741,22 +831,24 @@ public class NotifCollectionTest extends SysuiTestCase {
     @Test
     public void testGroupChildrenAreDismissedLocallyWhenSummaryIsDismissed() {
         // GIVEN a collection with two grouped notifs in it
-        CollectionEvent notif0 = postNotif(
+        CollectionEvent groupNotif = postNotif(
                 buildNotif(TEST_PACKAGE, 0)
                         .setGroup(mContext, GROUP_1)
                         .setGroupSummary(mContext, true));
-        CollectionEvent notif1 = postNotif(
+        CollectionEvent childNotif = postNotif(
                 buildNotif(TEST_PACKAGE, 1)
                         .setGroup(mContext, GROUP_1));
-        NotificationEntry entry0 = mCollectionListener.getEntry(notif0.key);
-        NotificationEntry entry1 = mCollectionListener.getEntry(notif1.key);
+        NotificationEntry groupEntry = mCollectionListener.getEntry(groupNotif.key);
+        NotificationEntry childEntry = mCollectionListener.getEntry(childNotif.key);
+        ExpandableNotificationRow childRow = mock(ExpandableNotificationRow.class);
+        childEntry.setRow(childRow);
 
         // WHEN the summary is dismissed
-        mCollection.dismissNotification(entry0, defaultStats(entry0));
+        mCollection.dismissNotification(groupEntry, defaultStats(groupEntry));
 
         // THEN all members of the group are marked as dismissed locally
-        assertEquals(DISMISSED, entry0.getDismissState());
-        assertEquals(PARENT_DISMISSED, entry1.getDismissState());
+        assertEquals(DISMISSED, groupEntry.getDismissState());
+        assertEquals(PARENT_DISMISSED, childEntry.getDismissState());
     }
 
     @Test
@@ -1498,45 +1590,8 @@ public class NotifCollectionTest extends SysuiTestCase {
     }
 
     @Test
-    public void testMissingRankingWhenRemovalFeatureIsDisabled() {
+    public void testMissingRanking() {
         // GIVEN a pipeline with one two notifications
-        when(mNotifPipelineFlags.removeUnrankedNotifs()).thenReturn(false);
-        String key1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 1, "myTag")).key;
-        String key2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 2, "myTag")).key;
-        NotificationEntry entry1 = mCollectionListener.getEntry(key1);
-        NotificationEntry entry2 = mCollectionListener.getEntry(key2);
-        clearInvocations(mCollectionListener);
-
-        // GIVEN the message for removing key1 gets does not reach NotifCollection
-        Ranking ranking1 = mNoMan.removeRankingWithoutEvent(key1);
-        // WHEN the message for removing key2 arrives
-        mNoMan.retractNotif(entry2.getSbn(), REASON_APP_CANCEL);
-
-        // THEN only entry2 gets removed
-        verify(mCollectionListener).onEntryRemoved(eq(entry2), eq(REASON_APP_CANCEL));
-        verify(mCollectionListener).onEntryCleanUp(eq(entry2));
-        verify(mCollectionListener).onRankingApplied();
-        verifyNoMoreInteractions(mCollectionListener);
-        verify(mLogger).logMissingRankings(eq(List.of(entry1)), eq(1), any());
-        verify(mLogger, never()).logRecoveredRankings(any(), anyInt());
-        clearInvocations(mCollectionListener, mLogger);
-
-        // WHEN a ranking update includes key1 again
-        mNoMan.setRanking(key1, ranking1);
-        mNoMan.issueRankingUpdate();
-
-        // VERIFY that we do nothing but log the 'recovery'
-        verify(mCollectionListener).onRankingUpdate(any());
-        verify(mCollectionListener).onRankingApplied();
-        verifyNoMoreInteractions(mCollectionListener);
-        verify(mLogger, never()).logMissingRankings(any(), anyInt(), any());
-        verify(mLogger).logRecoveredRankings(eq(List.of(key1)), eq(0));
-    }
-
-    @Test
-    public void testMissingRankingWhenRemovalFeatureIsEnabled() {
-        // GIVEN a pipeline with one two notifications
-        when(mNotifPipelineFlags.removeUnrankedNotifs()).thenReturn(true);
         String key1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 1, "myTag")).key;
         String key2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 2, "myTag")).key;
         NotificationEntry entry1 = mCollectionListener.getEntry(key1);
@@ -1622,11 +1677,21 @@ public class NotifCollectionTest extends SysuiTestCase {
     }
 
     @Test
+    public void testCanDismissOtherNotificationChildren() {
+        // GIVEN an ongoing notification
+        final NotificationEntry container = new NotificationEntryBuilder()
+                .setGroup(mContext, "group")
+                .build();
+
+        // THEN its children are dismissible
+        assertTrue(mCollection.shouldAutoDismissChildren(
+                container, container.getSbn().getGroupKey()));
+    }
+
+    @Test
     public void testCannotDismissOngoingNotificationChildren() {
         // GIVEN an ongoing notification
         final NotificationEntry container = new NotificationEntryBuilder()
-                .setPkg(TEST_PACKAGE)
-                .setId(47)
                 .setGroup(mContext, "group")
                 .setFlag(mContext, FLAG_ONGOING_EVENT, true)
                 .build();
@@ -1640,7 +1705,24 @@ public class NotifCollectionTest extends SysuiTestCase {
     public void testCannotDismissNoClearNotifications() {
         // GIVEN an no-clear notification
         final NotificationEntry container = new NotificationEntryBuilder()
+                .setGroup(mContext, "group")
                 .setFlag(mContext, FLAG_NO_CLEAR, true)
+                .build();
+
+        // THEN its children are not dismissible
+        assertFalse(mCollection.shouldAutoDismissChildren(
+                container, container.getSbn().getGroupKey()));
+    }
+
+    @Test
+    public void testCannotDismissPriorityConversations() {
+        // GIVEN an no-clear notification
+        NotificationChannel channel =
+                new NotificationChannel("foo", "Foo", NotificationManager.IMPORTANCE_HIGH);
+        channel.setImportantConversation(true);
+        final NotificationEntry container = new NotificationEntryBuilder()
+                .setGroup(mContext, "group")
+                .setChannel(channel)
                 .build();
 
         // THEN its children are not dismissible
@@ -1652,8 +1734,6 @@ public class NotifCollectionTest extends SysuiTestCase {
     public void testCanDismissFgsNotificationChildren() {
         // GIVEN an FGS but not ongoing notification
         final NotificationEntry container = new NotificationEntryBuilder()
-                .setPkg(TEST_PACKAGE)
-                .setId(47)
                 .setGroup(mContext, "group")
                 .setFlag(mContext, FLAG_FOREGROUND_SERVICE, true)
                 .build();

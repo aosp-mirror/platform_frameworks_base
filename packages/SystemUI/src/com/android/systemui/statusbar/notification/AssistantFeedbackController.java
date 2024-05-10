@@ -155,17 +155,17 @@ public class AssistantFeedbackController {
         int feedbackStatus = getFeedbackStatus(entry);
         switch (feedbackStatus) {
             case STATUS_ALERTED:
-                return com.android.systemui.R.string.notification_channel_summary_automatic_alerted;
+                return com.android.systemui.res.R.string.notification_channel_summary_automatic_alerted;
             case STATUS_SILENCED:
-                return com.android.systemui.R.string
+                return com.android.systemui.res.R.string
                         .notification_channel_summary_automatic_silenced;
             case STATUS_PROMOTED:
-                return com.android.systemui.R.string
+                return com.android.systemui.res.R.string
                         .notification_channel_summary_automatic_promoted;
             case STATUS_DEMOTED:
-                return com.android.systemui.R.string.notification_channel_summary_automatic_demoted;
+                return com.android.systemui.res.R.string.notification_channel_summary_automatic_demoted;
             default:
-                return com.android.systemui.R.string.notification_channel_summary_automatic;
+                return com.android.systemui.res.R.string.notification_channel_summary_automatic;
         }
     }
 }

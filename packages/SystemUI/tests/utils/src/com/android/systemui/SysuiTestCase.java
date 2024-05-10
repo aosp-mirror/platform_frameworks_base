@@ -15,37 +15,29 @@
  */
 package com.android.systemui;
 
-import static com.android.systemui.animation.FakeDialogLaunchAnimatorKt.fakeDialogLaunchAnimator;
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.ParcelFileDescriptor;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.testing.LeakCheck;
+import android.testing.TestWithLooperRule;
 import android.testing.TestableLooper;
 import android.util.Log;
 
+import androidx.core.animation.AndroidXAnimatorIsolationRule;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.settingslib.bluetooth.LocalBluetoothManager;
-import com.android.systemui.animation.DialogLaunchAnimator;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.FakeBroadcastDispatcher;
-import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger;
-import com.android.systemui.classifier.FalsingManagerFake;
-import com.android.systemui.dump.DumpManager;
-import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.SmartReplyController;
-import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -56,7 +48,6 @@ import org.mockito.Mockito;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
 /**
@@ -67,27 +58,38 @@ public abstract class SysuiTestCase {
     private static final String TAG = "SysuiTestCase";
 
     private Handler mHandler;
+
+    // set the lowest order so it's the outermost rule
+    @Rule(order = Integer.MIN_VALUE)
+    public AndroidXAnimatorIsolationRule mAndroidXAnimatorIsolationRule =
+            new AndroidXAnimatorIsolationRule();
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+
     @Rule
     public SysuiTestableContext mContext = new SysuiTestableContext(
             InstrumentationRegistry.getContext(), getLeakCheck());
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
+
+    // set the highest order so it's the innermost rule
+    @Rule(order = Integer.MAX_VALUE)
+    public TestWithLooperRule mlooperRule = new TestWithLooperRule();
+
     public TestableDependency mDependency;
     private Instrumentation mRealInstrumentation;
-    private FakeBroadcastDispatcher mFakeBroadcastDispatcher;
+    private SysuiTestDependency mSysuiDependency;
 
     @Before
     public void SysuiSetup() throws Exception {
-        SystemUIInitializer initializer =
-                SystemUIInitializerFactory.createFromConfigNoAssert(mContext);
-        initializer.init(true);
-        mDependency = new TestableDependency(initializer.getSysUIComponent().createDependency());
-        Dependency.setInstance(mDependency);
-        mFakeBroadcastDispatcher = new FakeBroadcastDispatcher(mContext, mock(Looper.class),
-                mock(Executor.class), mock(DumpManager.class),
-                mock(BroadcastDispatcherLogger.class), mock(UserTracker.class));
-
+        // Manually associate a Display to context for Robolectric test. Similar to b/214297409
+        if (isRobolectricTest()) {
+            mContext = mContext.createDefaultDisplayContext();
+        }
+        mSysuiDependency = new SysuiTestDependency(mContext, shouldFailOnLeakedReceiver());
+        mDependency = mSysuiDependency.install();
         mRealInstrumentation = InstrumentationRegistry.getInstrumentation();
         Instrumentation inst = spy(mRealInstrumentation);
         when(inst.getContext()).thenAnswer(invocation -> {
@@ -99,42 +101,29 @@ public abstract class SysuiTestCase {
                     "SysUI Tests should use SysuiTestCase#getContext or SysuiTestCase#mContext");
         });
         InstrumentationRegistry.registerInstance(inst, InstrumentationRegistry.getArguments());
-        // Many tests end up creating a BroadcastDispatcher. Instead, give them a fake that will
-        // record receivers registered. They are not actually leaked as they are kept just as a weak
-        // reference and are never sent to the Context. This will also prevent a real
-        // BroadcastDispatcher from actually registering receivers.
-        mDependency.injectTestDependency(BroadcastDispatcher.class, mFakeBroadcastDispatcher);
-        // A lot of tests get the FalsingManager, often via several layers of indirection.
-        // None of them actually need it.
-        mDependency.injectTestDependency(FalsingManager.class, new FalsingManagerFake());
-        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
+    }
 
-        // A lot of tests get the LocalBluetoothManager, often via several layers of indirection.
-        // None of them actually need it.
-        mDependency.injectMockDependency(LocalBluetoothManager.class);
-
-        // Notifications tests are injecting one of these, causing many classes (including
-        // KeyguardUpdateMonitor to be created (injected).
-        // TODO(b/1531701009) Clean up NotificationContentView creation to prevent this
-        mDependency.injectMockDependency(SmartReplyController.class);
-
-        // Make sure that all tests on any SystemUIDialog does not crash because this dependency
-        // is missing (constructing the actual one would throw).
-        // TODO(b/219008720): Remove this.
-        mDependency.injectMockDependency(SystemUIDialogManager.class);
-        mDependency.injectTestDependency(DialogLaunchAnimator.class, fakeDialogLaunchAnimator());
+    protected boolean shouldFailOnLeakedReceiver() {
+        return false;
     }
 
     @After
     public void SysuiTeardown() {
-        InstrumentationRegistry.registerInstance(mRealInstrumentation,
-                InstrumentationRegistry.getArguments());
+        if (mRealInstrumentation != null) {
+            InstrumentationRegistry.registerInstance(mRealInstrumentation,
+                    InstrumentationRegistry.getArguments());
+        }
         if (TestableLooper.get(this) != null) {
             TestableLooper.get(this).processAllMessages();
+            // Must remove static reference to this test object to prevent leak (b/261039202)
+            TestableLooper.remove(this);
         }
         disallowTestableLooperAsMainThread();
         mContext.cleanUpReceivers(this.getClass().getSimpleName());
-        mFakeBroadcastDispatcher.cleanUpReceivers(this.getClass().getSimpleName());
+        FakeBroadcastDispatcher dispatcher = getFakeBroadcastDispatcher();
+        if (dispatcher != null) {
+            dispatcher.cleanUpReceivers(this.getClass().getSimpleName());
+        }
     }
 
     @AfterClass
@@ -159,8 +148,8 @@ public abstract class SysuiTestCase {
         return null;
     }
 
-    protected FakeBroadcastDispatcher getFakeBroadcastDispatcher() {
-        return mFakeBroadcastDispatcher;
+    public FakeBroadcastDispatcher getFakeBroadcastDispatcher() {
+        return mSysuiDependency.getFakeBroadcastDispatcher();
     }
 
     public SysuiTestableContext getContext() {
@@ -204,6 +193,10 @@ public abstract class SysuiTestCase {
         // Ensure we are non-idle, so the idle handler can run.
         h.post(new EmptyRunnable());
         idler.waitForIdle();
+    }
+
+    public static boolean isRobolectricTest() {
+        return Build.FINGERPRINT.contains("robolectric");
     }
 
     private static final void validateThread(Looper l) {

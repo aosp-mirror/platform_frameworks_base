@@ -95,8 +95,7 @@ abstract public class SafetyWarningDialog extends SystemUIDialog
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void start() {
         mShowTime = System.currentTimeMillis();
     }
 

@@ -16,7 +16,14 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,8 +33,10 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController.DarkIntensityApplier;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -56,7 +65,8 @@ public class LightBarTransitionsControllerTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mLightBarTransitionsController = new LightBarTransitionsController(mContext, mApplier,
-                new CommandQueue(mContext), mKeyguardStateController, mStatusBarStateController);
+                new CommandQueue(mContext, new FakeDisplayTracker(mContext)),
+                mKeyguardStateController, mStatusBarStateController);
     }
 
     @Test
@@ -79,4 +89,39 @@ public class LightBarTransitionsControllerTest extends SysuiTestCase {
         verify(mApplier).applyDarkIntensity(eq(0f));
     }
 
+    @Test
+    public void gestureNav_noForceNavButtons_expectNotSupportsIconTint() {
+        GestureNavigationSettingsObserver observer = mock(GestureNavigationSettingsObserver.class);
+        doReturn(false).when(observer).areNavigationButtonForcedVisible();
+        mLightBarTransitionsController.setNavigationSettingsObserver(observer);
+        assertFalse(mLightBarTransitionsController.supportsIconTintForNavMode(
+                NAV_BAR_MODE_GESTURAL));
+    }
+
+    @Test
+    public void gestureNav_forceNavButtons_expectSupportsIconTint() {
+        GestureNavigationSettingsObserver observer = mock(GestureNavigationSettingsObserver.class);
+        doReturn(true).when(observer).areNavigationButtonForcedVisible();
+        mLightBarTransitionsController.setNavigationSettingsObserver(observer);
+        assertTrue(mLightBarTransitionsController.supportsIconTintForNavMode(
+                NAV_BAR_MODE_GESTURAL));
+    }
+
+    @Test
+    public void buttonNav_noForceNavButtons_expectNotSupportsIconTint() {
+        GestureNavigationSettingsObserver observer = mock(GestureNavigationSettingsObserver.class);
+        doReturn(false).when(observer).areNavigationButtonForcedVisible();
+        mLightBarTransitionsController.setNavigationSettingsObserver(observer);
+        assertTrue(mLightBarTransitionsController.supportsIconTintForNavMode(
+                NAV_BAR_MODE_3BUTTON));
+    }
+
+    @Test
+    public void buttonNav_forceNavButtons_expectSupportsIconTint() {
+        GestureNavigationSettingsObserver observer = mock(GestureNavigationSettingsObserver.class);
+        doReturn(true).when(observer).areNavigationButtonForcedVisible();
+        mLightBarTransitionsController.setNavigationSettingsObserver(observer);
+        assertTrue(mLightBarTransitionsController.supportsIconTintForNavMode(
+                NAV_BAR_MODE_3BUTTON));
+    }
 }

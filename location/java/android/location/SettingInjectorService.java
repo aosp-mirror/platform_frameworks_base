@@ -179,7 +179,7 @@ public abstract class SettingInjectorService extends Service {
      * intent.
      */
     private void sendStatus(Intent intent, String summary, boolean enabled) {
-        Messenger messenger = intent.getParcelableExtra(MESSENGER_KEY);
+        Messenger messenger = intent.getParcelableExtra(MESSENGER_KEY, android.os.Messenger.class);
         // Bail out to avoid crashing GmsCore with incoming malicious Intent.
         if (messenger == null) {
             return;

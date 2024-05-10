@@ -23,7 +23,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.BlendMode;
@@ -37,6 +36,9 @@ import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.inspector.InspectableProperty;
 import android.widget.RemoteViews.RemoteView;
+import android.widget.TextClock.ClockEventDelegate;
+
+import com.android.internal.util.Preconditions;
 
 import java.time.Clock;
 import java.time.DateTimeException;
@@ -49,15 +51,18 @@ import java.util.Formatter;
 import java.util.Locale;
 
 /**
- * This widget display an analogic clock with two hands for hours and
- * minutes.
+ * This widget displays an analogic clock with two hands for hours and minutes.
  *
  * @attr ref android.R.styleable#AnalogClock_dial
  * @attr ref android.R.styleable#AnalogClock_hand_hour
  * @attr ref android.R.styleable#AnalogClock_hand_minute
  * @attr ref android.R.styleable#AnalogClock_hand_second
  * @attr ref android.R.styleable#AnalogClock_timeZone
- * @deprecated This widget is no longer supported.
+ * @deprecated This widget is no longer supported; except for
+ * {@link android.widget.RemoteViews} use cases like
+ * <a href="https://developer.android.com/develop/ui/views/appwidgets/overview">
+ * app widgets</a>.
+ *
  */
 @RemoteView
 @Deprecated
@@ -109,6 +114,7 @@ public class AnalogClock extends View {
     public AnalogClock(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
+        mClockEventDelegate = new ClockEventDelegate(context);
         mSecondsHandFps = AppGlobals.getIntCoreSetting(
                 WidgetFlags.KEY_ANALOG_CLOCK_SECONDS_HAND_FPS,
                 context.getResources()
@@ -581,21 +587,9 @@ public class AnalogClock extends View {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        IntentFilter filter = new IntentFilter();
 
         if (!mReceiverAttached) {
-            filter.addAction(Intent.ACTION_TIME_CHANGED);
-            filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-
-            // OK, this is gross but needed. This class is supported by the
-            // remote views mechanism and as a part of that the remote views
-            // can be inflated by a context for another user without the app
-            // having interact users permission - just for loading resources.
-            // For example, when adding widgets from a user profile to the
-            // home screen. Therefore, we register the receiver as the current
-            // user not the one the context is for.
-            getContext().registerReceiverAsUser(mIntentReceiver,
-                    android.os.Process.myUserHandle(), filter, null, getHandler());
+            mClockEventDelegate.registerTimeChangeReceiver(mIntentReceiver, getHandler());
             mReceiverAttached = true;
         }
 
@@ -612,10 +606,21 @@ public class AnalogClock extends View {
     @Override
     protected void onDetachedFromWindow() {
         if (mReceiverAttached) {
-            getContext().unregisterReceiver(mIntentReceiver);
+            mClockEventDelegate.unregisterTimeChangeReceiver(mIntentReceiver);
             mReceiverAttached = false;
         }
         super.onDetachedFromWindow();
+    }
+
+    /**
+     * Sets a delegate to handle clock event registration. This must be called before the view is
+     * attached to the window
+     *
+     * @hide
+     */
+    public void setClockEventDelegate(ClockEventDelegate delegate) {
+        Preconditions.checkState(!mReceiverAttached, "Clock events already registered");
+        mClockEventDelegate = delegate;
     }
 
     private void onVisible() {
@@ -794,6 +799,7 @@ public class AnalogClock extends View {
         }
     };
     private boolean mReceiverAttached;
+    private ClockEventDelegate mClockEventDelegate;
 
     private final Runnable mTick = new Runnable() {
         @Override

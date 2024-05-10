@@ -51,16 +51,19 @@ interface IWindowOrganizerController {
             in IWindowContainerTransactionCallback callback);
 
     /**
-     * Starts a transition.
+     * Starts a new transition.
      * @param type The transition type.
-     * @param transitionToken A token associated with the transition to start. If null, a new
-     *                        transition will be created of the provided type.
      * @param t Operations that are part of the transition.
-     * @return a token representing the transition. This will just be transitionToken if it was
-     *         non-null.
+     * @return a token representing the transition.
      */
-    IBinder startTransition(int type, in @nullable IBinder transitionToken,
-            in @nullable WindowContainerTransaction t);
+    IBinder startNewTransition(int type, in @nullable WindowContainerTransaction t);
+
+    /**
+     * Starts the given transition.
+     * @param transitionToken A token associated with the transition to start.
+     * @param t Operations that are part of the transition.
+     */
+    void startTransition(IBinder transitionToken, in @nullable WindowContainerTransaction t);
 
     /**
      * Starts a legacy transition.
@@ -77,13 +80,8 @@ interface IWindowOrganizerController {
      * Finishes a transition. This must be called for all created transitions.
      * @param transitionToken Which transition to finish
      * @param t Changes to make before finishing but in the same SF Transaction. Can be null.
-     * @param callback Called when t is finished applying.
-     * @return An ID for the sync operation (see {@link #applySyncTransaction}. This will be
-     *         negative if no sync transaction was attached (null t or callback)
      */
-    int finishTransition(in IBinder transitionToken,
-            in @nullable WindowContainerTransaction t,
-            in IWindowContainerTransactionCallback callback);
+    void finishTransition(in IBinder transitionToken, in @nullable WindowContainerTransaction t);
 
     /** @return An interface enabling the management of task organizers. */
     ITaskOrganizerController getTaskOrganizerController();
@@ -102,4 +100,7 @@ interface IWindowOrganizerController {
 
     /** @return An interface enabling the transition players to report its metrics. */
     ITransitionMetricsReporter getTransitionMetricsReporter();
+
+    /** @return The transaction queue token used by WM. */
+    IBinder getApplyToken();
 }

@@ -20,19 +20,30 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.Settings;
 
+import androidx.annotation.NonNull;
+
+import com.android.systemui.settings.UserTracker;
+
 import javax.inject.Inject;
 
 class SecureSettingsImpl implements SecureSettings {
     private final ContentResolver mContentResolver;
+    private final UserTracker mUserTracker;
 
     @Inject
-    SecureSettingsImpl(ContentResolver contentResolver) {
+    SecureSettingsImpl(ContentResolver contentResolver, UserTracker userTracker) {
         mContentResolver = contentResolver;
+        mUserTracker = userTracker;
     }
 
     @Override
     public ContentResolver getContentResolver() {
         return mContentResolver;
+    }
+
+    @Override
+    public UserTracker getUserTracker() {
+        return mUserTracker;
     }
 
     @Override
@@ -42,7 +53,8 @@ class SecureSettingsImpl implements SecureSettings {
 
     @Override
     public String getStringForUser(String name, int userHandle) {
-        return Settings.Secure.getStringForUser(mContentResolver, name, userHandle);
+        return Settings.Secure.getStringForUser(mContentResolver, name,
+                getRealUserHandle(userHandle));
     }
 
     @Override
@@ -52,18 +64,20 @@ class SecureSettingsImpl implements SecureSettings {
 
     @Override
     public boolean putStringForUser(String name, String value, int userHandle) {
-        return Settings.Secure.putStringForUser(mContentResolver, name, value, userHandle);
+        return Settings.Secure.putStringForUser(mContentResolver, name, value,
+                getRealUserHandle(userHandle));
     }
 
     @Override
     public boolean putStringForUser(String name, String value, String tag, boolean makeDefault,
             int userHandle, boolean overrideableByRestore) {
         return Settings.Secure.putStringForUser(
-                mContentResolver, name, value, tag, makeDefault, userHandle, overrideableByRestore);
+                mContentResolver, name, value, tag, makeDefault, getRealUserHandle(userHandle),
+                overrideableByRestore);
     }
 
     @Override
-    public boolean putString(String name, String value, String tag, boolean makeDefault) {
+    public boolean putString(@NonNull String name, String value, String tag, boolean makeDefault) {
         return Settings.Secure.putString(mContentResolver, name, value, tag, makeDefault);
     }
 }

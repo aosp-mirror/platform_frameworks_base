@@ -22,10 +22,14 @@ import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 
-import com.android.internal.util.BinaryXmlPullParser;
-import com.android.internal.util.BinaryXmlSerializer;
+import com.android.internal.util.ArtBinaryXmlPullParser;
+import com.android.internal.util.ArtBinaryXmlSerializer;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.BinaryXmlPullParser;
+import com.android.modules.utils.BinaryXmlSerializer;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import libcore.util.XmlObjectFactory;
 
@@ -35,6 +39,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;
@@ -112,6 +117,7 @@ public class Xml {
     /**
      * Returns a new pull parser with namespace support.
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static XmlPullParser newPullParser() {
         try {
             XmlPullParser parser = XmlObjectFactory.newXmlPullParser();
@@ -121,6 +127,12 @@ public class Xml {
         } catch (XmlPullParserException e) {
             throw new AssertionError();
         }
+    }
+
+    /** @hide */
+    public static XmlPullParser newPullParser$ravenwood() {
+        // TODO: remove once we're linking against libcore
+        return new BinaryXmlPullParser();
     }
 
     /**
@@ -133,8 +145,15 @@ public class Xml {
      * @hide
      */
     @SuppressWarnings("AndroidFrameworkEfficientXml")
+    @android.ravenwood.annotation.RavenwoodReplace
     public static @NonNull TypedXmlPullParser newFastPullParser() {
         return XmlUtils.makeTyped(newPullParser());
+    }
+
+    /** @hide */
+    public static TypedXmlPullParser newFastPullParser$ravenwood() {
+        // TODO: remove once we're linking against libcore
+        return new BinaryXmlPullParser();
     }
 
     /**
@@ -145,7 +164,14 @@ public class Xml {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static @NonNull TypedXmlPullParser newBinaryPullParser() {
+        return new ArtBinaryXmlPullParser();
+    }
+
+    /** @hide */
+    public static TypedXmlPullParser newBinaryPullParser$ravenwood() {
+        // TODO: remove once we're linking against libcore
         return new BinaryXmlPullParser();
     }
 
@@ -163,6 +189,7 @@ public class Xml {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static @NonNull TypedXmlPullParser resolvePullParser(@NonNull InputStream in)
             throws IOException {
         final byte[] magic = new byte[4];
@@ -195,11 +222,31 @@ public class Xml {
         return xml;
     }
 
+    /** @hide */
+    public static @NonNull TypedXmlPullParser resolvePullParser$ravenwood(@NonNull InputStream in)
+            throws IOException {
+        // TODO: remove once we're linking against libcore
+        final TypedXmlPullParser xml = new BinaryXmlPullParser();
+        try {
+            xml.setInput(in, StandardCharsets.UTF_8.name());
+        } catch (XmlPullParserException e) {
+            throw new IOException(e);
+        }
+        return xml;
+    }
+
     /**
      * Creates a new xml serializer.
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static XmlSerializer newSerializer() {
         return XmlObjectFactory.newXmlSerializer();
+    }
+
+    /** @hide */
+    public static XmlSerializer newSerializer$ravenwood() {
+        // TODO: remove once we're linking against libcore
+        return new BinaryXmlSerializer();
     }
 
     /**
@@ -212,8 +259,15 @@ public class Xml {
      * @hide
      */
     @SuppressWarnings("AndroidFrameworkEfficientXml")
+    @android.ravenwood.annotation.RavenwoodReplace
     public static @NonNull TypedXmlSerializer newFastSerializer() {
         return XmlUtils.makeTyped(new FastXmlSerializer());
+    }
+
+    /** @hide */
+    public static @NonNull TypedXmlSerializer newFastSerializer$ravenwood() {
+        // TODO: remove once we're linking against libcore
+        return new BinaryXmlSerializer();
     }
 
     /**
@@ -224,7 +278,14 @@ public class Xml {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static @NonNull TypedXmlSerializer newBinarySerializer() {
+        return new ArtBinaryXmlSerializer();
+    }
+
+    /** @hide */
+    public static @NonNull TypedXmlSerializer newBinarySerializer$ravenwood() {
+        // TODO: remove once we're linking against libcore
         return new BinaryXmlSerializer();
     }
 
@@ -242,6 +303,7 @@ public class Xml {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static @NonNull TypedXmlSerializer resolveSerializer(@NonNull OutputStream out)
             throws IOException {
         final TypedXmlSerializer xml;
@@ -250,6 +312,15 @@ public class Xml {
         } else {
             xml = newFastSerializer();
         }
+        xml.setOutput(out, StandardCharsets.UTF_8.name());
+        return xml;
+    }
+
+    /** @hide */
+    public static @NonNull TypedXmlSerializer resolveSerializer$ravenwood(@NonNull OutputStream out)
+            throws IOException {
+        // TODO: remove once we're linking against libcore
+        final TypedXmlSerializer xml = new BinaryXmlSerializer();
         xml.setOutput(out, StandardCharsets.UTF_8.name());
         return xml;
     }
@@ -263,6 +334,7 @@ public class Xml {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static void copy(@NonNull XmlPullParser in, @NonNull XmlSerializer out)
             throws XmlPullParserException, IOException {
         // Some parsers may have already consumed the event that starts the
@@ -322,6 +394,7 @@ public class Xml {
      * unsupported, which can confuse serializers. This method normalizes empty
      * strings to be {@code null}.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     private static @Nullable String normalizeNamespace(@Nullable String namespace) {
         if (namespace == null || namespace.isEmpty()) {
             return null;

@@ -19,10 +19,13 @@ package com.android.systemui.keyguard
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
+import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.Matrix
 import android.graphics.Rect
+import android.os.DeadObjectException
 import android.os.Handler
+import android.os.PowerManager
 import android.os.RemoteException
 import android.util.Log
 import android.view.RemoteAnimationTarget
@@ -31,23 +34,24 @@ import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.core.math.MathUtils
+import com.android.app.animation.Interpolators
 import com.android.internal.R
 import com.android.keyguard.KeyguardClockSwitchController
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.Flags.fastUnlockTransition
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.shared.recents.utilities.Utilities
 import com.android.systemui.shared.system.ActivityManagerWrapper
-import com.android.systemui.shared.system.QuickStepContract
 import com.android.systemui.shared.system.smartspace.ILauncherUnlockAnimationController
 import com.android.systemui.shared.system.smartspace.ISysuiUnlockAnimationController
 import com.android.systemui.shared.system.smartspace.SmartspaceState
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
+import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK_FROM_DREAM
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
 import javax.inject.Inject
@@ -95,7 +99,8 @@ const val DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD = 0.3f
  * from a tap on the unlock icon, or from the bouncer. This is not relevant if the lockscreen is
  * swiped away via a touch gesture, or when it's flinging expanded/collapsed after a swipe.
  */
-const val UNLOCK_ANIMATION_DURATION_MS = 200L
+const val LEGACY_UNLOCK_ANIMATION_DURATION_MS = 200L
+const val UNLOCK_ANIMATION_DURATION_MS = 167L
 
 /**
  * How long the in-window launcher icon animation takes. This is used if the launcher is underneath
@@ -109,19 +114,22 @@ const val LAUNCHER_ICONS_ANIMATION_DURATION_MS = 633L
 /**
  * How long to wait for the shade to get out of the way before starting the canned unlock animation.
  */
-const val CANNED_UNLOCK_START_DELAY = 100L
+const val LEGACY_CANNED_UNLOCK_START_DELAY = 100L
+const val CANNED_UNLOCK_START_DELAY = 67L
 
 /**
  * Duration for the alpha animation on the surface behind. This plays to fade in the surface during
  * a swipe to unlock (and to fade it back out if the swipe is cancelled).
  */
-const val SURFACE_BEHIND_SWIPE_FADE_DURATION_MS = 175L
+const val LEGACY_SURFACE_BEHIND_SWIPE_FADE_DURATION_MS = 175L
+const val SURFACE_BEHIND_FADE_OUT_DURATION_MS = 83L
 
 /**
  * Start delay for the surface behind animation, used so that the lockscreen can get out of the way
  * before the surface begins appearing.
  */
-const val UNLOCK_ANIMATION_SURFACE_BEHIND_START_DELAY_MS = 75L
+const val LEGACY_UNLOCK_ANIMATION_SURFACE_BEHIND_START_DELAY_MS = 75L
+const val SURFACE_BEHIND_FADE_OUT_START_DELAY_MS = 0L
 
 /**
  * Initiates, controls, and ends the keyguard unlock animation.
@@ -145,7 +153,9 @@ class KeyguardUnlockAnimationController @Inject constructor(
     private val featureFlags: FeatureFlags,
     private val biometricUnlockControllerLazy: Lazy<BiometricUnlockController>,
     private val statusBarStateController: SysuiStatusBarStateController,
-    private val notificationShadeWindowController: NotificationShadeWindowController
+    private val notificationShadeWindowController: NotificationShadeWindowController,
+    private val powerManager: PowerManager,
+    private val wallpaperManager: WallpaperManager
 ) : KeyguardStateController.Callback, ISysuiUnlockAnimationController.Stub() {
 
     interface KeyguardUnlockAnimationListener {
@@ -165,10 +175,9 @@ class KeyguardUnlockAnimationController @Inject constructor(
          * for the canned animation (if applicable) so interested parties can sync with it. If no
          * canned animation is playing, these are both 0.
          */
-        @JvmDefault
         fun onUnlockAnimationStarted(
             playingCannedAnimation: Boolean,
-            fromWakeAndUnlock: Boolean,
+            isWakeAndUnlockNotFromDream: Boolean,
             unlockAnimationStartDelay: Long,
             unlockAnimationDuration: Long
         ) {}
@@ -178,7 +187,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
          * The keyguard is no longer visible in this state and the app/launcher behind the keyguard
          * is now completely visible.
          */
-        @JvmDefault
         fun onUnlockAnimationFinished() {}
     }
 
@@ -201,6 +209,12 @@ class KeyguardUnlockAnimationController @Inject constructor(
     var playingCannedUnlockAnimation = false
 
     /**
+     * Whether we reached the swipe gesture threshold to dismiss keyguard, or restore it, once
+     * and should ignore any future changes to the dismiss amount before the animation finishes.
+     */
+    var dismissAmountThresholdsReached = false
+
+    /**
      * Remote callback provided by Launcher that allows us to control the Launcher's unlock
      * animation and smartspace.
      *
@@ -209,6 +223,11 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     private var launcherUnlockController: ILauncherUnlockAnimationController? = null
 
+    /**
+     * Fully qualified class name of the launcher activity
+     */
+    private var launcherActivityClass: String? = null
+
     private val listeners = ArrayList<KeyguardUnlockAnimationListener>()
 
     /**
@@ -216,7 +235,11 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * doesn't happen, we won't use in-window animations or the smartspace shared element
      * transition, but that's okay!
      */
-    override fun setLauncherUnlockController(callback: ILauncherUnlockAnimationController?) {
+    override fun setLauncherUnlockController(
+            activityClass: String,
+            callback: ILauncherUnlockAnimationController?
+    ) {
+        launcherActivityClass = activityClass
         launcherUnlockController = callback
     }
 
@@ -242,6 +265,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
     @VisibleForTesting
     var surfaceTransactionApplier: SyncRtSurfaceTransactionApplier? = null
     private var surfaceBehindRemoteAnimationTargets: Array<RemoteAnimationTarget>? = null
+    private var wallpaperTargets: Array<RemoteAnimationTarget>? = null
     private var surfaceBehindRemoteAnimationStartTime: Long = 0
 
     /**
@@ -256,6 +280,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
     @VisibleForTesting
     var surfaceBehindAlphaAnimator = ValueAnimator.ofFloat(0f, 1f)
+
+    var wallpaperCannedUnlockAnimator = ValueAnimator.ofFloat(0f, 1f)
 
     /**
      * Matrix applied to [surfaceBehindRemoteAnimationTarget], which is the surface of the
@@ -306,7 +332,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
     init {
         with(surfaceBehindAlphaAnimator) {
-            duration = SURFACE_BEHIND_SWIPE_FADE_DURATION_MS
+            duration = surfaceBehindFadeOutDurationMs()
             interpolator = Interpolators.LINEAR
             addUpdateListener { valueAnimator: ValueAnimator ->
                 surfaceBehindAlpha = valueAnimator.animatedValue as Float
@@ -321,6 +347,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
                     // and unlock the device as well as hiding the surface.
                     if (surfaceBehindAlpha == 0f) {
                         Log.d(TAG, "surfaceBehindAlphaAnimator#onAnimationEnd")
+                        surfaceBehindRemoteAnimationTargets = null
+                        wallpaperTargets = null
                         keyguardViewMediator.get().finishSurfaceBehindRemoteAnimation(
                             false /* cancelled */)
                     } else {
@@ -331,9 +359,26 @@ class KeyguardUnlockAnimationController @Inject constructor(
             })
         }
 
+        with(wallpaperCannedUnlockAnimator) {
+            duration = if (fastUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
+                    else LAUNCHER_ICONS_ANIMATION_DURATION_MS
+            interpolator = if (fastUnlockTransition()) Interpolators.LINEAR
+                    else Interpolators.ALPHA_OUT
+            addUpdateListener { valueAnimator: ValueAnimator ->
+                setWallpaperAppearAmount(valueAnimator.animatedValue as Float)
+            }
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    Log.d(TAG, "wallpaperCannedUnlockAnimator#onAnimationEnd")
+                    keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
+                        false /* cancelled */)
+                }
+            })
+        }
+
         with(surfaceBehindEntryAnimator) {
-            duration = UNLOCK_ANIMATION_DURATION_MS
-            startDelay = UNLOCK_ANIMATION_SURFACE_BEHIND_START_DELAY_MS
+            duration = unlockAnimationDurationMs()
+            startDelay = surfaceBehindFadeOutStartDelayMs()
             interpolator = Interpolators.TOUCH_RESPONSE
             addUpdateListener { valueAnimator: ValueAnimator ->
                 surfaceBehindAlpha = valueAnimator.animatedValue as Float
@@ -343,7 +388,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 override fun onAnimationEnd(animation: Animator) {
                     Log.d(TAG, "surfaceBehindEntryAnimator#onAnimationEnd")
                     playingCannedUnlockAnimation = false
-                    keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(
+                    keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                         false /* cancelled */
                     )
                 }
@@ -373,14 +418,13 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * the device.
      */
     fun canPerformInWindowLauncherAnimations(): Boolean {
-        return isNexusLauncherUnderneath() &&
+        // TODO(b/278086361): Refactor in-window animations.
+        return !featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR) &&
+                isSupportedLauncherUnderneath() &&
                 // If the launcher is underneath, but we're about to launch an activity, don't do
                 // the animations since they won't be visible.
                 !notificationShadeWindowController.isLaunchingActivity &&
-                launcherUnlockController != null &&
-                // Temporarily disable for foldables since foldable launcher has two first pages,
-                // which breaks the in-window animation.
-                !isFoldable(context)
+                launcherUnlockController != null
     }
 
     /**
@@ -390,7 +434,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     private fun logInWindowAnimationConditions() {
         Log.wtf(TAG, "canPerformInWindowLauncherAnimations expected all of these to be true: ")
-        Log.wtf(TAG, "  isNexusLauncherUnderneath: ${isNexusLauncherUnderneath()}")
+        Log.wtf(TAG, "  isNexusLauncherUnderneath: ${isSupportedLauncherUnderneath()}")
         Log.wtf(TAG, "  !notificationShadeWindowController.isLaunchingActivity: " +
                 "${!notificationShadeWindowController.isLaunchingActivity}")
         Log.wtf(TAG, "  launcherUnlockController != null: ${launcherUnlockController != null}")
@@ -413,7 +457,15 @@ class KeyguardUnlockAnimationController @Inject constructor(
         // animate state.
         if (!keyguardStateController.isKeyguardGoingAway &&
                 willUnlockWithInWindowLauncherAnimations) {
-            launcherUnlockController?.setUnlockAmount(1f, true /* forceIfAnimating */)
+            try {
+                launcherUnlockController?.setUnlockAmount(1f,
+                        biometricUnlockControllerLazy.get().isWakeAndUnlock /* forceIfAnimating */)
+            } catch (e: DeadObjectException) {
+                Log.e(TAG, "launcherUnlockAnimationController was dead, but non-null in " +
+                        "onKeyguardGoingAwayChanged(). Catching exception as this should mean " +
+                        "Launcher is in the process of being destroyed, but the IPC to System UI " +
+                        "telling us hasn't arrived yet.")
+            }
         }
     }
 
@@ -491,6 +543,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     fun notifyStartSurfaceBehindRemoteAnimation(
         targets: Array<RemoteAnimationTarget>,
+        wallpapers: Array<RemoteAnimationTarget>,
         startTime: Long,
         requestedShowSurfaceBehindKeyguard: Boolean
     ) {
@@ -500,6 +553,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
 
         surfaceBehindRemoteAnimationTargets = targets
+        wallpaperTargets = wallpapers
         surfaceBehindRemoteAnimationStartTime = startTime
 
         // If we specifically requested that the surface behind be made visible (vs. it being made
@@ -507,7 +561,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
         // gesture and the surface behind the keyguard should be made visible so that we can animate
         // it in.
         if (requestedShowSurfaceBehindKeyguard) {
-
             // If we're flinging to dismiss here, it means the touch gesture ended in a fling during
             // the time it takes the keyguard exit animation to start. This is an edge case race
             // condition, which we handle by just playing a canned animation on the now-visible
@@ -524,10 +577,22 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 surfaceBehindAlpha = 1f
                 setSurfaceBehindAppearAmount(1f)
 
-                launcherUnlockController?.playUnlockAnimation(
-                        true,
-                        UNLOCK_ANIMATION_DURATION_MS + CANNED_UNLOCK_START_DELAY,
-                        0 /* startDelay */)
+                try {
+                    launcherUnlockController?.playUnlockAnimation(
+                            true,
+                            unlockAnimationDurationMs() + cannedUnlockStartDelayMs(),
+                            0 /* startDelay */)
+                } catch (e: DeadObjectException) {
+                    // Hello! If you are here investigating a bug where Launcher is blank (no icons)
+                    // then the below assumption about Launcher's destruction was incorrect. This
+                    // would mean prepareToUnlock was called (blanking Launcher in preparation for
+                    // the beginning of the unlock animation), but then somehow we were unable to
+                    // call playUnlockAnimation to animate the icons back in.
+                    Log.e(TAG, "launcherUnlockAnimationController was dead, but non-null. " +
+                            "Catching exception as this should mean Launcher is in the process " +
+                            "of being destroyed, but the IPC to System UI telling us hasn't " +
+                            "arrived yet.")
+                }
 
                 launcherPreparedForUnlock = false
             } else {
@@ -541,17 +606,25 @@ class KeyguardUnlockAnimationController @Inject constructor(
             playCannedUnlockAnimation()
         }
 
+        // Notify if waking from AOD only
+        val isWakeAndUnlockNotFromDream = biometricUnlockControllerLazy.get().isWakeAndUnlock &&
+            biometricUnlockControllerLazy.get().mode != MODE_WAKE_AND_UNLOCK_FROM_DREAM
+
+        val duration = if (fastUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
+                else LAUNCHER_ICONS_ANIMATION_DURATION_MS
         listeners.forEach {
             it.onUnlockAnimationStarted(
                 playingCannedUnlockAnimation /* playingCannedAnimation */,
-                biometricUnlockControllerLazy.get().isWakeAndUnlock /* isWakeAndUnlock */,
-                CANNED_UNLOCK_START_DELAY /* unlockStartDelay */,
-                LAUNCHER_ICONS_ANIMATION_DURATION_MS /* unlockAnimationDuration */) }
+                isWakeAndUnlockNotFromDream /* isWakeAndUnlockNotFromDream */,
+                cannedUnlockStartDelayMs() /* unlockStartDelay */,
+                duration /* unlockAnimationDuration */) }
 
         // Finish the keyguard remote animation if the dismiss amount has crossed the threshold.
         // Check it here in case there is no more change to the dismiss amount after the last change
         // that starts the keyguard animation. @see #updateKeyguardViewMediatorIfThresholdsReached()
-        finishKeyguardExitRemoteAnimationIfReachThreshold()
+        if (!playingCannedUnlockAnimation) {
+            finishKeyguardExitRemoteAnimationIfReachThreshold()
+        }
     }
 
     /**
@@ -578,7 +651,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
             biometricUnlockControllerLazy.get().isWakeAndUnlock -> {
                 Log.d(TAG, "playCannedUnlockAnimation, isWakeAndUnlock")
                 setSurfaceBehindAppearAmount(1f)
-                keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(
+                keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                     false /* cancelled */)
             }
 
@@ -601,23 +674,42 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * Unlock to the launcher, using in-window animations, and the smartspace shared element
      * transition if possible.
      */
-    private fun unlockToLauncherWithInWindowAnimations() {
-        setSurfaceBehindAppearAmount(1f)
 
-        // Begin the animation, waiting for the shade to animate out.
-        launcherUnlockController?.playUnlockAnimation(
-            true /* unlocked */,
-            LAUNCHER_ICONS_ANIMATION_DURATION_MS /* duration */,
-            CANNED_UNLOCK_START_DELAY /* startDelay */)
+    @VisibleForTesting
+    fun unlockToLauncherWithInWindowAnimations() {
+        surfaceBehindAlpha = 1f
+        setSurfaceBehindAppearAmount(1f, wallpapers = false)
+
+        try {
+            // Begin the animation, waiting for the shade to animate out.
+            launcherUnlockController?.playUnlockAnimation(
+                    true /* unlocked */,
+                    LAUNCHER_ICONS_ANIMATION_DURATION_MS /* duration */,
+                    cannedUnlockStartDelayMs() /* startDelay */)
+        } catch (e: DeadObjectException) {
+            // Hello! If you are here investigating a bug where Launcher is blank (no icons)
+            // then the below assumption about Launcher's destruction was incorrect. This
+            // would mean prepareToUnlock was called (blanking Launcher in preparation for
+            // the beginning of the unlock animation), but then somehow we were unable to
+            // call playUnlockAnimation to animate the icons back in.
+            Log.e(TAG, "launcherUnlockAnimationController was dead, but non-null. " +
+                    "Catching exception as this should mean Launcher is in the process " +
+                    "of being destroyed, but the IPC to System UI telling us hasn't " +
+                    "arrived yet.")
+        }
 
         launcherPreparedForUnlock = false
 
         // Now that the Launcher surface (with its smartspace positioned identically to ours) is
         // visible, hide our smartspace.
-        lockscreenSmartspace?.visibility = View.INVISIBLE
+        if (lockscreenSmartspace?.visibility == View.VISIBLE) {
+            lockscreenSmartspace?.visibility = View.INVISIBLE
+        }
 
-        // As soon as the shade has animated out of the way, finish the keyguard exit animation. The
-        // in-window animations in the Launcher window will end on their own.
+        // As soon as the shade starts animating out of the way, start the canned unlock animation,
+        // which will finish keyguard exit when it completes. The in-window animations in the
+        // Launcher window will end on their own.
+        if (fastUnlockTransition()) hideKeyguardViewAfterRemoteAnimation()
         handler.postDelayed({
             if (keyguardViewMediator.get().isShowingAndNotOccluded &&
                 !keyguardStateController.isKeyguardGoingAway) {
@@ -626,9 +718,14 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 return@postDelayed
             }
 
-            keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(
-                false /* cancelled */)
-        }, CANNED_UNLOCK_START_DELAY)
+            if ((wallpaperTargets?.isNotEmpty() == true)) {
+                fadeInWallpaper()
+                if (!fastUnlockTransition()) hideKeyguardViewAfterRemoteAnimation()
+            } else {
+                keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
+                    false /* cancelled */)
+            }
+        }, cannedUnlockStartDelayMs())
     }
 
     /**
@@ -662,11 +759,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
     }
 
     override fun onKeyguardDismissAmountChanged() {
-        if (!willHandleUnlockAnimation()) {
-            return
-        }
-
-        if (keyguardViewController.isShowing && !playingCannedUnlockAnimation) {
+        if (keyguardStateController.isShowing && !playingCannedUnlockAnimation) {
             showOrHideSurfaceIfDismissAmountThresholdsReached()
 
             // If the surface is visible or it's about to be, start updating its appearance to
@@ -698,6 +791,10 @@ class KeyguardUnlockAnimationController @Inject constructor(
             return
         }
 
+        if (dismissAmountThresholdsReached) {
+            return
+        }
+
         if (!keyguardStateController.isShowing) {
             return
         }
@@ -706,7 +803,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
         if (dismissAmount >= DISMISS_AMOUNT_SHOW_SURFACE_THRESHOLD &&
             !keyguardViewMediator.get().requestedShowSurfaceBehindKeyguard()) {
-
             keyguardViewMediator.get().showSurfaceBehindKeyguard()
         } else if (dismissAmount < DISMISS_AMOUNT_SHOW_SURFACE_THRESHOLD &&
                 keyguardViewMediator.get().requestedShowSurfaceBehindKeyguard()) {
@@ -725,8 +821,12 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     private fun finishKeyguardExitRemoteAnimationIfReachThreshold() {
         // no-op if keyguard is not showing or animation is not enabled.
-        if (!KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation ||
-                !keyguardViewController.isShowing) {
+        if (!keyguardStateController.isShowing) {
+            return
+        }
+
+        // no-op if we alreaddy reached a threshold.
+        if (dismissAmountThresholdsReached) {
             return
         }
 
@@ -744,7 +844,9 @@ class KeyguardUnlockAnimationController @Inject constructor(
                         !keyguardStateController.isFlingingToDismissKeyguardDuringSwipeGesture &&
                         dismissAmount >= DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD)) {
             setSurfaceBehindAppearAmount(1f)
-            keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(false /* cancelled */)
+            dismissAmountThresholdsReached = true
+            keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
+                    false /* cancelled */)
         }
     }
 
@@ -753,57 +855,93 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * animations and swipe gestures to animate the surface's entry (and exit, if the swipe is
      * cancelled).
      */
-    fun setSurfaceBehindAppearAmount(amount: Float) {
-        surfaceBehindRemoteAnimationTargets?.forEach { surfaceBehindRemoteAnimationTarget ->
-            val surfaceHeight: Int = surfaceBehindRemoteAnimationTarget.screenSpaceBounds.height()
-
-            var scaleFactor = (SURFACE_BEHIND_START_SCALE_FACTOR +
-                    (1f - SURFACE_BEHIND_START_SCALE_FACTOR) *
-                    MathUtils.clamp(amount, 0f, 1f))
-
-            // If we're dismissing via swipe to the Launcher, we'll play in-window scale animations,
-            // so don't also scale the window.
-            if (keyguardStateController.isDismissingFromSwipe &&
-                    willUnlockWithInWindowLauncherAnimations) {
-                scaleFactor = 1f
-            }
-
-            // Translate up from the bottom.
-            surfaceBehindMatrix.setTranslate(
-                    surfaceBehindRemoteAnimationTarget.screenSpaceBounds.left.toFloat(),
-                    surfaceHeight * SURFACE_BEHIND_START_TRANSLATION_Y * (1f - amount)
-            )
-
-            // Scale up from a point at the center-bottom of the surface.
-            surfaceBehindMatrix.postScale(
-                    scaleFactor,
-                    scaleFactor,
-                    keyguardViewController.viewRootImpl.width / 2f,
-                    surfaceHeight * SURFACE_BEHIND_SCALE_PIVOT_Y
-            )
-
+    fun setSurfaceBehindAppearAmount(amount: Float, wallpapers: Boolean = true) {
+        val animationAlpha = when {
             // If we're snapping the keyguard back, immediately begin fading it out.
-            val animationAlpha =
-                    if (keyguardStateController.isSnappingKeyguardBackAfterSwipe) amount
-                    else surfaceBehindAlpha
+            keyguardStateController.isSnappingKeyguardBackAfterSwipe -> amount
+            // If the screen has turned back off, the unlock animation is going to be cancelled,
+            // so set the surface alpha to 0f so it's no longer visible.
+            !powerManager.isInteractive -> 0f
+            else -> surfaceBehindAlpha
+        }
 
+        surfaceBehindRemoteAnimationTargets?.forEach { surfaceBehindRemoteAnimationTarget ->
+            if (!featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                val surfaceHeight: Int =
+                        surfaceBehindRemoteAnimationTarget.screenSpaceBounds.height()
+
+                var scaleFactor = (SURFACE_BEHIND_START_SCALE_FACTOR +
+                        (1f - SURFACE_BEHIND_START_SCALE_FACTOR) *
+                        MathUtils.clamp(amount, 0f, 1f))
+
+                // If we're dismissing via swipe to the Launcher, we'll play in-window scale
+                // animations, so don't also scale the window.
+                if (keyguardStateController.isDismissingFromSwipe &&
+                        willUnlockWithInWindowLauncherAnimations) {
+                    scaleFactor = 1f
+                }
+
+                // Translate up from the bottom.
+                surfaceBehindMatrix.setTranslate(
+                        surfaceBehindRemoteAnimationTarget.screenSpaceBounds.left.toFloat(),
+                        surfaceBehindRemoteAnimationTarget.screenSpaceBounds.top.toFloat() +
+                                surfaceHeight * SURFACE_BEHIND_START_TRANSLATION_Y * (1f - amount)
+                )
+
+                // Scale up from a point at the center-bottom of the surface.
+                surfaceBehindMatrix.postScale(
+                        scaleFactor,
+                        scaleFactor,
+                        keyguardViewController.viewRootImpl.width / 2f,
+                        surfaceHeight * SURFACE_BEHIND_SCALE_PIVOT_Y
+                )
+
+                // SyncRtSurfaceTransactionApplier cannot apply transaction when the target view is
+                // unable to draw
+                val sc: SurfaceControl? = surfaceBehindRemoteAnimationTarget.leash
+                if (keyguardViewController.viewRootImpl.view?.visibility != View.VISIBLE &&
+                        sc?.isValid == true) {
+                    with(SurfaceControl.Transaction()) {
+                        setMatrix(sc, surfaceBehindMatrix, tmpFloat)
+                        setCornerRadius(sc, roundedCornerRadius)
+                        setAlpha(sc, animationAlpha)
+                        apply()
+                    }
+                } else {
+                    applyParamsToSurface(
+                            SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(
+                                    surfaceBehindRemoteAnimationTarget.leash)
+                                    .withMatrix(surfaceBehindMatrix)
+                                    .withCornerRadius(roundedCornerRadius)
+                                    .withAlpha(animationAlpha)
+                                    .build()
+                    )
+                }
+            }
+        }
+
+        if (wallpapers) {
+            setWallpaperAppearAmount(amount)
+        }
+    }
+
+    fun setWallpaperAppearAmount(amount: Float) {
+        val animationAlpha = amount
+
+        wallpaperTargets?.forEach { wallpaper ->
             // SyncRtSurfaceTransactionApplier cannot apply transaction when the target view is
             // unable to draw
-            val sc: SurfaceControl? = surfaceBehindRemoteAnimationTarget.leash
+            val sc: SurfaceControl? = wallpaper.leash
             if (keyguardViewController.viewRootImpl.view?.visibility != View.VISIBLE &&
                     sc?.isValid == true) {
                 with(SurfaceControl.Transaction()) {
-                    setMatrix(sc, surfaceBehindMatrix, tmpFloat)
-                    setCornerRadius(sc, roundedCornerRadius)
                     setAlpha(sc, animationAlpha)
                     apply()
                 }
             } else {
                 applyParamsToSurface(
                         SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(
-                                surfaceBehindRemoteAnimationTarget.leash)
-                                .withMatrix(surfaceBehindMatrix)
-                                .withCornerRadius(roundedCornerRadius)
+                                wallpaper.leash)
                                 .withAlpha(animationAlpha)
                                 .build()
                 )
@@ -813,35 +951,50 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
     /**
      * Called by [KeyguardViewMediator] to let us know that the remote animation has finished, and
-     * we should clean up all of our state.
+     * we should clean up all of our state. [showKeyguard] will tell us which surface should be
+     * visible after the animation has been completed or canceled.
      *
      * This is generally triggered by us, calling
      * [KeyguardViewMediator.finishSurfaceBehindRemoteAnimation].
      */
-    fun notifyFinishedKeyguardExitAnimation(cancelled: Boolean) {
+    fun notifyFinishedKeyguardExitAnimation(showKeyguard: Boolean) {
         // Cancel any pending actions.
         handler.removeCallbacksAndMessages(null)
 
-        // Make sure we made the surface behind fully visible, just in case. It should already be
-        // fully visible. The exit animation is finished, and we should not hold the leash anymore,
-        // so forcing it to 1f.
+        // The lockscreen surface is gone, so it is now safe to re-show the smartspace.
+        if (lockscreenSmartspace?.visibility == View.INVISIBLE) {
+            lockscreenSmartspace?.visibility = View.VISIBLE
+        }
+
+        if (!showKeyguard) {
+            // Make sure we made the surface behind fully visible, just in case. It should already be
+            // fully visible. The exit animation is finished, and we should not hold the leash anymore,
+            // so forcing it to 1f.
+            surfaceBehindAlpha = 1f
+            setSurfaceBehindAppearAmount(1f)
+
+            try {
+                launcherUnlockController?.setUnlockAmount(1f, false /* forceIfAnimating */)
+            } catch (e: RemoteException) {
+                Log.e(TAG, "Remote exception in notifyFinishedKeyguardExitAnimation", e)
+            }
+        }
+
+        listeners.forEach { it.onUnlockAnimationFinished() }
+
+        // Reset all state
         surfaceBehindAlphaAnimator.cancel()
         surfaceBehindEntryAnimator.cancel()
-        surfaceBehindAlpha = 1f
-        setSurfaceBehindAppearAmount(1f)
-        launcherUnlockController?.setUnlockAmount(1f, false /* forceIfAnimating */)
+        wallpaperCannedUnlockAnimator.cancel()
 
         // That target is no longer valid since the animation finished, null it out.
         surfaceBehindRemoteAnimationTargets = null
+        wallpaperTargets = null
 
         playingCannedUnlockAnimation = false
+        dismissAmountThresholdsReached = false
         willUnlockWithInWindowLauncherAnimations = false
         willUnlockWithSmartspaceTransition = false
-
-        // The lockscreen surface is gone, so it is now safe to re-show the smartspace.
-        lockscreenSmartspace?.visibility = View.VISIBLE
-
-        listeners.forEach { it.onUnlockAnimationFinished() }
     }
 
     /**
@@ -849,15 +1002,17 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * animation.
      */
     fun hideKeyguardViewAfterRemoteAnimation() {
-        if (keyguardViewController.isShowing) {
+        if (keyguardStateController.isShowing) {
             // Hide the keyguard, with no fade out since we animated it away during the unlock.
 
-            keyguardViewController.hide(
-                surfaceBehindRemoteAnimationStartTime,
-                0 /* fadeOutDuration */
-            )
+            if (!featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                keyguardViewController.hide(
+                        surfaceBehindRemoteAnimationStartTime,
+                        0 /* fadeOutDuration */
+                )
+            }
         } else {
-            Log.e(TAG, "#hideKeyguardViewAfterRemoteAnimation called when keyguard view is not " +
+            Log.i(TAG, "#hideKeyguardViewAfterRemoteAnimation called when keyguard view is not " +
                     "showing. Ignoring...")
         }
     }
@@ -870,6 +1025,12 @@ class KeyguardUnlockAnimationController @Inject constructor(
         Log.d(TAG, "fadeInSurfaceBehind")
         surfaceBehindAlphaAnimator.cancel()
         surfaceBehindAlphaAnimator.start()
+    }
+
+    private fun fadeInWallpaper() {
+        Log.d(TAG, "fadeInWallpaper")
+        wallpaperCannedUnlockAnimator.cancel()
+        wallpaperCannedUnlockAnimator.start()
     }
 
     private fun fadeOutSurfaceBehind() {
@@ -900,7 +1061,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
         // If our launcher isn't underneath, then we're unlocking to an app or custom launcher,
         // neither of which have a smartspace.
-        if (!isNexusLauncherUnderneath()) {
+        if (!isSupportedLauncherUnderneath()) {
             return false
         }
 
@@ -920,7 +1081,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
 
         // The smartspace is not visible if the bouncer is showing, so don't shared element it.
-        if (keyguardStateController.isBouncerShowing) {
+        if (keyguardStateController.isPrimaryBouncerShowing) {
             return false
         }
 
@@ -937,9 +1098,9 @@ class KeyguardUnlockAnimationController @Inject constructor(
             return false
         }
 
-        // We don't do the shared element on tablets because they're large and the smartspace has to
-        // fly across large distances, which is distracting.
-        if (Utilities.isTablet(context)) {
+        // We don't do the shared element on large screens because the smartspace has to fly across
+        // large distances, which is distracting.
+        if (Utilities.isLargeScreen(context)) {
             return false
         }
 
@@ -952,17 +1113,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     fun isUnlockingWithSmartSpaceTransition(): Boolean {
         return willUnlockWithSmartspaceTransition
-    }
-
-    /**
-     * Whether this animation controller will be handling the unlock. We require remote animations
-     * to be enabled to do this.
-     *
-     * If this is not true, nothing in this class is relevant, and the unlock will be handled in
-     * [KeyguardViewMediator].
-     */
-    fun willHandleUnlockAnimation(): Boolean {
-        return KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation
     }
 
     /**
@@ -980,17 +1130,55 @@ class KeyguardUnlockAnimationController @Inject constructor(
         return playingCannedUnlockAnimation
     }
 
+    /**
+     * Return whether a launcher which supports coordinated transition is underneath the keyguard,
+     * vs. some other launcher or an app. If so, we can communicate with it to perform
+     * in-window/shared element transitions!
+     */
+    fun isSupportedLauncherUnderneath(): Boolean {
+        return launcherActivityClass?.let { ActivityManagerWrapper.getInstance()
+                .runningTask?.topActivity?.className?.equals(it) }
+                ?: false
+    }
+
+    /**
+     * Temporary method for b/298186160
+     * TODO (b/298186160) replace references with the constant itself when flag is removed
+     */
+    private fun cannedUnlockStartDelayMs(): Long {
+        return if (fastUnlockTransition()) CANNED_UNLOCK_START_DELAY
+                else LEGACY_CANNED_UNLOCK_START_DELAY
+    }
+
+    /**
+     * Temporary method for b/298186160
+     * TODO (b/298186160) replace references with the constant itself when flag is removed
+     */
+    private fun unlockAnimationDurationMs(): Long {
+        return if (fastUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
+                else LEGACY_UNLOCK_ANIMATION_DURATION_MS
+    }
+
+    /**
+     * Temporary method for b/298186160
+     * TODO (b/298186160) replace references with the constant itself when flag is removed
+     */
+    private fun surfaceBehindFadeOutDurationMs(): Long {
+        return if (fastUnlockTransition()) SURFACE_BEHIND_FADE_OUT_DURATION_MS
+                else LEGACY_SURFACE_BEHIND_SWIPE_FADE_DURATION_MS
+    }
+
+    /**
+     * Temporary method for b/298186160
+     * TODO (b/298186160) replace references with the constant itself when flag is removed
+     */
+    private fun surfaceBehindFadeOutStartDelayMs(): Long {
+        return if (fastUnlockTransition()) SURFACE_BEHIND_FADE_OUT_START_DELAY_MS
+                else LEGACY_UNLOCK_ANIMATION_SURFACE_BEHIND_START_DELAY_MS
+    }
+
+
     companion object {
-        /**
-         * Return whether the Google Nexus launcher is underneath the keyguard, vs. some other
-         * launcher or an app. If so, we can communicate with it to perform in-window/shared element
-         * transitions!
-         */
-        fun isNexusLauncherUnderneath(): Boolean {
-            return ActivityManagerWrapper.getInstance()
-                    .runningTask?.topActivity?.className?.equals(
-                            QuickStepContract.LAUNCHER_ACTIVITY_CLASS_NAME) ?: false
-        }
 
         fun isFoldable(context: Context): Boolean {
             return context.resources.getIntArray(R.array.config_foldedDeviceStates).isNotEmpty()

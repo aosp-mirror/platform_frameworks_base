@@ -16,7 +16,10 @@
 
 package com.android.server.adb;
 
+import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+
 import static com.android.internal.util.dump.DumpUtils.writeStringIfNotNull;
+import static com.android.server.adb.AdbService.ADBD;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -39,6 +42,7 @@ import android.debug.AdbManager;
 import android.debug.AdbNotifications;
 import android.debug.AdbProtoEnums;
 import android.debug.AdbTransportType;
+import android.debug.IAdbTransport;
 import android.debug.PairDevice;
 import android.net.ConnectivityManager;
 import android.net.LocalSocket;
@@ -58,15 +62,15 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.SystemService;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.service.adb.AdbDebuggingManagerProto;
+import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.Base64;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -75,6 +79,8 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.dump.DualDumpOutputStream;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.FgThread;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -99,6 +105,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -153,6 +160,10 @@ public class AdbDebuggingManager {
     private static final String WIFI_PERSISTENT_GUID =
             "persist.adb.wifi.guid";
     private static final int PAIRING_CODE_LENGTH = 6;
+    /**
+     * The maximum time to wait for the adbd service to change state when toggling.
+     */
+    private static final long ADBD_STATE_CHANGE_TIMEOUT = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
     private PairingThread mPairingThread = null;
     // A list of keys connected via wifi
     private final Set<String> mWifiConnectedKeys = new HashSet<>();
@@ -235,16 +246,6 @@ public class AdbDebuggingManager {
 
         @Override
         public void run() {
-            if (mGuid.isEmpty()) {
-                Slog.e(TAG, "adbwifi guid was not set");
-                return;
-            }
-            mPort = native_pairing_start(mGuid, mPairingCode);
-            if (mPort <= 0 || mPort > 65535) {
-                Slog.e(TAG, "Unable to start pairing server");
-                return;
-            }
-
             // Register the mdns service
             NsdServiceInfo serviceInfo = new NsdServiceInfo();
             serviceInfo.setServiceName(mServiceName);
@@ -275,6 +276,28 @@ public class AdbDebuggingManager {
                                              AdbDebuggingHandler.MSG_RESPONSE_PAIRING_RESULT,
                                              bundle);
             mHandler.sendMessage(message);
+        }
+
+        @Override
+        public void start() {
+            /*
+             * If a user is fast enough to click cancel, native_pairing_cancel can be invoked
+             * while native_pairing_start is running which run the destruction of the object
+             * while it is being constructed. Here we start the pairing server on foreground
+             * Thread so native_pairing_cancel can never be called concurrently. Then we let
+             * the pairing server run on a background Thread.
+             */
+            if (mGuid.isEmpty()) {
+                Slog.e(TAG, "adbwifi guid was not set");
+                return;
+            }
+            mPort = native_pairing_start(mGuid, mPairingCode);
+            if (mPort <= 0) {
+                Slog.e(TAG, "Unable to start pairing server");
+                return;
+            }
+
+            super.start();
         }
 
         public void cancelPairing() {
@@ -649,7 +672,7 @@ public class AdbDebuggingManager {
                 } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
                     // We only care about wifi type connections
                     NetworkInfo networkInfo = (NetworkInfo) intent.getParcelableExtra(
-                            WifiManager.EXTRA_NETWORK_INFO);
+                            WifiManager.EXTRA_NETWORK_INFO, android.net.NetworkInfo.class);
                     if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
                         // Check for network disconnect
                         if (!networkInfo.isConnected()) {
@@ -670,16 +693,17 @@ public class AdbDebuggingManager {
                             return;
                         }
 
-                        // Check for network change
-                        String bssid = wifiInfo.getBSSID();
-                        if (bssid == null || bssid.isEmpty()) {
-                            Slog.e(TAG, "Unable to get the wifi ap's BSSID. Disabling adbwifi.");
-                            Settings.Global.putInt(mContentResolver,
-                                    Settings.Global.ADB_WIFI_ENABLED, 0);
-                            return;
-                        }
                         synchronized (mAdbConnectionInfo) {
-                            if (!bssid.equals(mAdbConnectionInfo.getBSSID())) {
+                            // Check for network change
+                            final String bssid = wifiInfo.getBSSID();
+                            if (TextUtils.isEmpty(bssid)) {
+                                Slog.e(TAG,
+                                        "Unable to get the wifi ap's BSSID. Disabling adbwifi.");
+                                Settings.Global.putInt(mContentResolver,
+                                        Settings.Global.ADB_WIFI_ENABLED, 0);
+                                return;
+                            }
+                            if (!TextUtils.equals(bssid, mAdbConnectionInfo.getBSSID())) {
                                 Slog.i(TAG, "Detected wifi network change. Disabling adbwifi.");
                                 Settings.Global.putInt(mContentResolver,
                                         Settings.Global.ADB_WIFI_ENABLED, 0);
@@ -926,15 +950,6 @@ public class AdbDebuggingManager {
 
                 case MESSAGE_ADB_CONFIRM: {
                     String key = (String) msg.obj;
-                    if ("trigger_restart_min_framework".equals(
-                            SystemProperties.get("vold.decrypt"))) {
-                        Slog.w(TAG, "Deferring adb confirmation until after vold decrypt");
-                        if (mThread != null) {
-                            mThread.sendResponse("NO");
-                            logAdbConnectionChanged(key, AdbProtoEnums.DENIED_VOLD_DECRYPT, false);
-                        }
-                        break;
-                    }
                     String fingerprints = getFingerprints(key);
                     if ("".equals(fingerprints)) {
                         if (mThread != null) {
@@ -958,6 +973,31 @@ public class AdbDebuggingManager {
                     mWifiConnectedKeys.clear();
                     mAdbKeyStore.deleteKeyStore();
                     cancelJobToUpdateAdbKeyStore();
+                    // Disconnect all active sessions unless the user opted out through Settings.
+                    if (Settings.Global.getInt(mContentResolver,
+                            Settings.Global.ADB_DISCONNECT_SESSIONS_ON_REVOKE, 1) == 1) {
+                        // If adb is currently enabled, then toggle it off and back on to disconnect
+                        // any existing sessions.
+                        if (mAdbUsbEnabled) {
+                            try {
+                                SystemService.stop(ADBD);
+                                SystemService.waitForState(ADBD, SystemService.State.STOPPED,
+                                        ADBD_STATE_CHANGE_TIMEOUT);
+                                SystemService.start(ADBD);
+                                SystemService.waitForState(ADBD, SystemService.State.RUNNING,
+                                        ADBD_STATE_CHANGE_TIMEOUT);
+                            } catch (TimeoutException e) {
+                                Slog.e(TAG, "Timeout occurred waiting for adbd to cycle: ", e);
+                                // TODO(b/281758086): Display a dialog to the user to warn them
+                                // of this state and direct them to manually toggle adb.
+                                // If adbd fails to toggle within the timeout window, set adb to
+                                // disabled to alert the user that further action is required if
+                                // they want to continue using adb after revoking the grants.
+                                Settings.Global.putInt(mContentResolver,
+                                        Settings.Global.ADB_ENABLED, 0);
+                            }
+                        }
+                    }
                     break;
                 }
 
@@ -1372,7 +1412,7 @@ public class AdbDebuggingManager {
             }
 
             String bssid = wifiInfo.getBSSID();
-            if (bssid == null || bssid.isEmpty()) {
+            if (TextUtils.isEmpty(bssid)) {
                 Slog.e(TAG, "Unable to get the wifi ap's BSSID.");
                 return null;
             }
@@ -1772,8 +1812,13 @@ public class AdbDebuggingManager {
                 mFingerprints);
 
         try {
-            dump.write("user_keys", AdbDebuggingManagerProto.USER_KEYS,
-                    FileUtils.readTextFile(new File("/data/misc/adb/adb_keys"), 0, null));
+            File userKeys = new File("/data/misc/adb/adb_keys");
+            if (userKeys.exists()) {
+                dump.write("user_keys", AdbDebuggingManagerProto.USER_KEYS,
+                           FileUtils.readTextFile(userKeys, 0, null));
+            } else {
+                Slog.i(TAG, "No user keys on this device");
+            }
         } catch (IOException e) {
             Slog.i(TAG, "Cannot read user keys", e);
         }

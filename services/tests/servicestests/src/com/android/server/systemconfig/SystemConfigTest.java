@@ -405,12 +405,11 @@ public class SystemConfigTest {
 
         mSysConfig.readApexPrivAppPermissions(parser, permissionFile, apexDir.toPath());
 
-        assertThat(mSysConfig.getApexPrivAppPermissions("com.android.my_module",
-                "com.android.apk_in_apex"))
-            .containsExactly("android.permission.FOO");
-        assertThat(mSysConfig.getApexPrivAppDenyPermissions("com.android.my_module",
-                "com.android.apk_in_apex"))
-            .containsExactly("android.permission.BAR");
+        ArrayMap<String, Boolean> permissions = mSysConfig.getPermissionAllowlist()
+                .getApexPrivilegedAppAllowlists().get("com.android.my_module")
+                .get("com.android.apk_in_apex");
+        assertThat(permissions)
+            .containsExactly("android.permission.FOO", true, "android.permission.BAR", false);
     }
 
     /**
@@ -593,6 +592,58 @@ public class SystemConfigTest {
                 + " </permissions>";
         parseSharedLibraries(contents);
         assertFooIsOnlySharedLibrary();
+    }
+
+    /**
+     * Tests that readPermissions works correctly for the tag: {@code update-ownership}.
+     */
+    @Test
+    public void readPermissions_updateOwnership_successful() throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <update-ownership package=\"com.foo\" installer=\"com.bar\" />\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "update_ownership.xml", contents);
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getSystemAppUpdateOwnerPackageName("com.foo"))
+                .isEqualTo("com.bar");
+    }
+
+    /**
+     * Tests that readPermissions works correctly for the tag: {@code update-ownership}.
+     */
+    @Test
+    public void readPermissions_updateOwnership_noPackage() throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <update-ownership />\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "update_ownership.xml", contents);
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getSystemAppUpdateOwnerPackageName("com.foo")).isNull();
+    }
+
+    /**
+     * Tests that readPermissions works correctly for the tag: {@code update-ownership}.
+     */
+    @Test
+    public void readPermissions_updateOwnership_noInstaller() throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <update-ownership package=\"com.foo\" />\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "update_ownership.xml", contents);
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getSystemAppUpdateOwnerPackageName("com.foo")).isNull();
     }
 
     private void parseSharedLibraries(String contents) throws IOException {

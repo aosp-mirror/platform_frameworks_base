@@ -259,7 +259,7 @@ public class TrustAgentService extends Service {
                     Bundle data = msg.getData();
                     byte[] token = data.getByteArray(EXTRA_TOKEN);
                     long handle = data.getLong(EXTRA_TOKEN_HANDLE);
-                    UserHandle user = (UserHandle) data.getParcelable(EXTRA_USER_HANDLE);
+                    UserHandle user = (UserHandle) data.getParcelable(EXTRA_USER_HANDLE, android.os.UserHandle.class);
                     onEscrowTokenAdded(token, handle, user);
                     break;
                 }

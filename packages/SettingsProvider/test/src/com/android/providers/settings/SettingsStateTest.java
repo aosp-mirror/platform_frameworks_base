@@ -17,8 +17,9 @@ package com.android.providers.settings;
 
 import android.os.Looper;
 import android.test.AndroidTestCase;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
+
+import com.android.modules.utils.TypedXmlSerializer;
 
 import com.google.common.base.Strings;
 
@@ -30,25 +31,40 @@ import java.io.PrintStream;
 public class SettingsStateTest extends AndroidTestCase {
     public static final String CRAZY_STRING =
             "\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008\u0009\n\u000b\u000c\r" +
-            "\u000e\u000f\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001a" +
-            "\u001b\u001c\u001d\u001e\u001f\u0020" +
-            "fake_setting_value_1" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
-            "\u1000 \u2000 \u5000 \u8000 \uc000 \ue000" +
-            "\ud800\udc00\udbff\udfff" + // surrogate pairs
-            "\uD800ab\uDC00 " + // broken surrogate pairs
-            "日本語";
+                    "\u000e\u000f\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001a" +
+                    "\u001b\u001c\u001d\u001e\u001f\u0020" +
+                    "fake_setting_value_1" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" +
+                    "\u1000 \u2000 \u5000 \u8000 \uc000 \ue000" +
+                    "\ud800\udc00\udbff\udfff" + // surrogate pairs
+                    "\uD800ab\uDC00 " + // broken surrogate pairs
+                    "日本語";
 
     private static final String TEST_PACKAGE = "package";
     private static final String SYSTEM_PACKAGE = "android";
     private static final String SETTING_NAME = "test_setting";
+
+    private static final String FLAG_NAME_1 = "namespace123/flag456";
+    private static final String FLAG_NAME_1_STAGED = "staged/namespace123*flag456";
+    private static final String FLAG_NAME_2 = "not_staged/flag101";
+
+    private static final String INVALID_STAGED_FLAG_1 = "stagednamespace*flagName";
+    private static final String INVALID_STAGED_FLAG_2 = "staged/";
+    private static final String INVALID_STAGED_FLAG_3 = "staged/namespace*";
+    private static final String INVALID_STAGED_FLAG_4 = "staged/*flagName";
+
+    private static final String VALID_STAGED_FLAG_1 = "staged/namespace*flagName";
+    private static final String VALID_STAGED_FLAG_1_TRANSFORMED = "namespace/flagName";
+
+    private static final String VALUE1 = "5";
+    private static final String VALUE2 = "6";
 
     private final Object mLock = new Object();
 
@@ -58,6 +74,14 @@ public class SettingsStateTest extends AndroidTestCase {
     protected void setUp() {
         mSettingsFile = new File(getContext().getCacheDir(), "setting.xml");
         mSettingsFile.delete();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        if (mSettingsFile != null) {
+            mSettingsFile.delete();
+        }
+        super.tearDown();
     }
 
     public void testIsBinary() {
@@ -133,11 +157,10 @@ public class SettingsStateTest extends AndroidTestCase {
      * Make sure settings can be written to a file and also can be read.
      */
     public void testReadWrite() {
-        final File file = new File(getContext().getCacheDir(), "setting.xml");
-        file.delete();
         final Object lock = new Object();
 
-        final SettingsState ssWriter = new SettingsState(getContext(), lock, file, 1,
+        assertFalse(mSettingsFile.exists());
+        final SettingsState ssWriter = new SettingsState(getContext(), lock, mSettingsFile, 1,
                 SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
         ssWriter.setVersionLocked(SettingsState.SETTINGS_VERSION_NEW_ENCODING);
 
@@ -146,11 +169,13 @@ public class SettingsStateTest extends AndroidTestCase {
         ssWriter.insertSettingLocked("k3", null, null, false, "p2");
         ssWriter.insertSettingLocked("k4", CRAZY_STRING, null, false, "p3");
         synchronized (lock) {
-            ssWriter.persistSyncLocked();
+            ssWriter.persistSettingsLocked();
         }
-
-        final SettingsState ssReader = new SettingsState(getContext(), lock, file, 1,
+        ssWriter.waitForHandler();
+        assertTrue(mSettingsFile.exists());
+        final SettingsState ssReader = new SettingsState(getContext(), lock, mSettingsFile, 1,
                 SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
         synchronized (lock) {
             assertEquals("\u0000", ssReader.getSettingLocked("k1").getValue());
             assertEquals("abc", ssReader.getSettingLocked("k2").getValue());
@@ -163,20 +188,18 @@ public class SettingsStateTest extends AndroidTestCase {
      * In version 120, value "null" meant {code NULL}.
      */
     public void testUpgrade() throws Exception {
-        final File file = new File(getContext().getCacheDir(), "setting.xml");
-        file.delete();
         final Object lock = new Object();
-        final PrintStream os = new PrintStream(new FileOutputStream(file));
+        final PrintStream os = new PrintStream(new FileOutputStream(mSettingsFile));
         os.print(
                 "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>" +
-                "<settings version=\"120\">" +
-                "  <setting id=\"0\" name=\"k0\" value=\"null\" package=\"null\" />" +
-                "  <setting id=\"1\" name=\"k1\" value=\"\" package=\"\" />" +
-                "  <setting id=\"2\" name=\"k2\" value=\"v2\" package=\"p2\" />" +
-                "</settings>");
+                        "<settings version=\"120\">" +
+                        "  <setting id=\"0\" name=\"k0\" value=\"null\" package=\"null\" />" +
+                        "  <setting id=\"1\" name=\"k1\" value=\"\" package=\"\" />" +
+                        "  <setting id=\"2\" name=\"k2\" value=\"v2\" package=\"p2\" />" +
+                        "</settings>");
         os.close();
 
-        final SettingsState ss = new SettingsState(getContext(), lock, file, 1,
+        final SettingsState ss = new SettingsState(getContext(), lock, mSettingsFile, 1,
                 SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
         synchronized (lock) {
             SettingsState.Setting s;
@@ -197,7 +220,8 @@ public class SettingsStateTest extends AndroidTestCase {
     public void testInitializeSetting_preserveFlagNotSet() {
         SettingsState settingsWriter = getSettingStateObject();
         settingsWriter.insertSettingLocked(SETTING_NAME, "1", null, false, TEST_PACKAGE);
-        settingsWriter.persistSyncLocked();
+        settingsWriter.persistSettingsLocked();
+        settingsWriter.waitForHandler();
 
         SettingsState settingsReader = getSettingStateObject();
         assertFalse(settingsReader.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
@@ -207,7 +231,8 @@ public class SettingsStateTest extends AndroidTestCase {
         SettingsState settingsWriter = getSettingStateObject();
         settingsWriter.insertSettingLocked(SETTING_NAME, "1", null, false, TEST_PACKAGE);
         settingsWriter.insertSettingLocked(SETTING_NAME, "2", null, false, TEST_PACKAGE);
-        settingsWriter.persistSyncLocked();
+        settingsWriter.persistSettingsLocked();
+        settingsWriter.waitForHandler();
 
         SettingsState settingsReader = getSettingStateObject();
         assertTrue(settingsReader.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
@@ -218,7 +243,8 @@ public class SettingsStateTest extends AndroidTestCase {
         settingsWriter.insertSettingLocked(SETTING_NAME, "1", null, false, TEST_PACKAGE);
         settingsWriter.insertSettingLocked(SETTING_NAME, "2", null, false, false, TEST_PACKAGE,
                 /* overrideableByRestore */ true);
-        settingsWriter.persistSyncLocked();
+        settingsWriter.persistSettingsLocked();
+        settingsWriter.waitForHandler();
 
         SettingsState settingsReader = getSettingStateObject();
         assertFalse(settingsReader.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
@@ -234,7 +260,8 @@ public class SettingsStateTest extends AndroidTestCase {
         // already been set to true.
         settingsWriter.insertSettingLocked(SETTING_NAME, "2", null, false, false, TEST_PACKAGE,
                 /* overrideableByRestore */ true);
-        settingsWriter.persistSyncLocked();
+        settingsWriter.persistSettingsLocked();
+        settingsWriter.waitForHandler();
 
         SettingsState settingsReader = getSettingStateObject();
         assertTrue(settingsReader.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
@@ -280,8 +307,7 @@ public class SettingsStateTest extends AndroidTestCase {
     }
 
     public void testInsertSetting_memoryUsage() {
-        SettingsState settingsState = new SettingsState(getContext(), mLock, mSettingsFile, 1,
-                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+        SettingsState settingsState = getSettingStateObject();
         // No exception should be thrown when there is no cap
         settingsState.insertSettingLocked(SETTING_NAME, Strings.repeat("A", 20001),
                 null, false, "p1");
@@ -330,46 +356,47 @@ public class SettingsStateTest extends AndroidTestCase {
         final String testKey1 = SETTING_NAME;
         final String testValue1 = Strings.repeat("A", 100);
         settingsState.insertSettingLocked(testKey1, testValue1, null, true, TEST_PACKAGE);
-        int expectedMemUsage = testKey1.length() + testValue1.length()
-                + testValue1.length() /* size for default */;
+        int expectedMemUsage = (testKey1.length() + testValue1.length()
+                + testValue1.length() /* size for default */) * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test inserting another key
         final String testKey2 = SETTING_NAME + "2";
         settingsState.insertSettingLocked(testKey2, testValue1, null, false, TEST_PACKAGE);
-        expectedMemUsage += testKey2.length() + testValue1.length();
+        expectedMemUsage += (testKey2.length() + testValue1.length()) * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test updating first key with new default
         final String testValue2 = Strings.repeat("A", 300);
         settingsState.insertSettingLocked(testKey1, testValue2, null, true, TEST_PACKAGE);
-        expectedMemUsage += (testValue2.length() - testValue1.length()) * 2;
+        expectedMemUsage += (testValue2.length() - testValue1.length()) * 2 * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test updating first key without new default
         final String testValue3 = Strings.repeat("A", 50);
         settingsState.insertSettingLocked(testKey1, testValue3, null, false, TEST_PACKAGE);
-        expectedMemUsage -= testValue2.length() - testValue3.length();
+        expectedMemUsage -= (testValue2.length() - testValue3.length()) * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test updating second key
         settingsState.insertSettingLocked(testKey2, testValue2, null, false, TEST_PACKAGE);
-        expectedMemUsage -= testValue1.length() - testValue2.length();
+        expectedMemUsage -= (testValue1.length() - testValue2.length()) * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test resetting key
         settingsState.resetSettingLocked(testKey1);
-        expectedMemUsage += testValue2.length() - testValue3.length();
+        expectedMemUsage += (testValue2.length() - testValue3.length()) * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test resetting default value
         settingsState.resetSettingDefaultValueLocked(testKey1);
-        expectedMemUsage -= testValue2.length();
+        expectedMemUsage -= testValue2.length() * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test deletion
         settingsState.deleteSettingLocked(testKey2);
-        expectedMemUsage -= testValue2.length() + testKey2.length() /* key is deleted too */;
+        expectedMemUsage -= (testValue2.length() + testKey2.length() /* key is deleted too */)
+                * Character.BYTES;
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
 
         // Test another package with a different key
@@ -377,7 +404,8 @@ public class SettingsStateTest extends AndroidTestCase {
         final String testKey3 = SETTING_NAME + "3";
         settingsState.insertSettingLocked(testKey3, testValue1, null, true, testPackage2);
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
-        final int expectedMemUsage2 = testKey3.length() + testValue1.length() * 2;
+        final int expectedMemUsage2 = (testKey3.length() + testValue1.length() * 2)
+                * Character.BYTES;
         assertEquals(expectedMemUsage2, settingsState.getMemoryUsage(testPackage2));
 
         // Test system package
@@ -405,5 +433,121 @@ public class SettingsStateTest extends AndroidTestCase {
             assertTrue(ex.getMessage().contains("You are adding too many system settings"));
         }
         assertEquals(expectedMemUsage, settingsState.getMemoryUsage(TEST_PACKAGE));
+    }
+
+    public void testLargeSettingKey() {
+        SettingsState settingsState = new SettingsState(getContext(), mLock, mSettingsFile, 1,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_LIMITED, Looper.getMainLooper());
+        final String largeKey = Strings.repeat("A", SettingsState.MAX_LENGTH_PER_STRING + 1);
+        final String testValue = "testValue";
+        synchronized (mLock) {
+            // Test system package
+            try {
+                settingsState.insertSettingLocked(largeKey, testValue, null, true, SYSTEM_PACKAGE);
+                fail("Should throw because it exceeded max string length");
+            } catch (IllegalArgumentException ex) {
+                assertTrue(ex.getMessage().contains("The max length allowed for the string is "));
+            }
+            // Test non system package
+            try {
+                settingsState.insertSettingLocked(largeKey, testValue, null, true, TEST_PACKAGE);
+                fail("Should throw because it exceeded max string length");
+            } catch (IllegalArgumentException ex) {
+                assertTrue(ex.getMessage().contains("The max length allowed for the string is "));
+            }
+        }
+    }
+
+    public void testLargeSettingValue() {
+        SettingsState settingsState = new SettingsState(getContext(), mLock, mSettingsFile, 1,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+        final String testKey = "testKey";
+        final String largeValue = Strings.repeat("A", SettingsState.MAX_LENGTH_PER_STRING + 1);
+        synchronized (mLock) {
+            // Test system package
+            try {
+                settingsState.insertSettingLocked(testKey, largeValue, null, true, SYSTEM_PACKAGE);
+                fail("Should throw because it exceeded max string length");
+            } catch (IllegalArgumentException ex) {
+                assertTrue(ex.getMessage().contains("The max length allowed for the string is "));
+            }
+            // Test non system package
+            try {
+                settingsState.insertSettingLocked(testKey, largeValue, null, true, TEST_PACKAGE);
+                fail("Should throw because it exceeded max string length");
+            } catch (IllegalArgumentException ex) {
+                assertTrue(ex.getMessage().contains("The max length allowed for the string is "));
+            }
+        }
+    }
+
+    public void testApplyStagedConfigValues() {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+        Object lock = new Object();
+        SettingsState settingsState = new SettingsState(
+                getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        synchronized (lock) {
+            settingsState.insertSettingLocked(
+                    FLAG_NAME_1_STAGED, VALUE1, null, false, TEST_PACKAGE);
+            settingsState.insertSettingLocked(FLAG_NAME_2, VALUE2, null, false, TEST_PACKAGE);
+            settingsState.persistSettingsLocked();
+        }
+        settingsState.waitForHandler();
+
+        synchronized (lock) {
+            assertEquals(VALUE1, settingsState.getSettingLocked(FLAG_NAME_1_STAGED).getValue());
+            assertEquals(VALUE2, settingsState.getSettingLocked(FLAG_NAME_2).getValue());
+        }
+
+        settingsState = new SettingsState(getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        synchronized (lock) {
+            assertEquals(VALUE1, settingsState.getSettingLocked(FLAG_NAME_1).getValue());
+            assertEquals(VALUE2, settingsState.getSettingLocked(FLAG_NAME_2).getValue());
+
+            assertEquals(null, settingsState.getSettingLocked(FLAG_NAME_1_STAGED).getValue());
+        }
+    }
+
+    public void testStagingTransformation() {
+        assertEquals(INVALID_STAGED_FLAG_1,
+                SettingsState.createRealFlagName(INVALID_STAGED_FLAG_1));
+        assertEquals(INVALID_STAGED_FLAG_2,
+                SettingsState.createRealFlagName(INVALID_STAGED_FLAG_2));
+        assertEquals(INVALID_STAGED_FLAG_3,
+                SettingsState.createRealFlagName(INVALID_STAGED_FLAG_3));
+        assertEquals(INVALID_STAGED_FLAG_4,
+                SettingsState.createRealFlagName(INVALID_STAGED_FLAG_4));
+
+        assertEquals(VALID_STAGED_FLAG_1_TRANSFORMED,
+                SettingsState.createRealFlagName(VALID_STAGED_FLAG_1));
+    }
+
+    public void testInvalidStagedFlagsUnaffectedByReboot() {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+        Object lock = new Object();
+        SettingsState settingsState = new SettingsState(
+                getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        synchronized (lock) {
+            settingsState.insertSettingLocked(INVALID_STAGED_FLAG_1,
+                    VALUE2, null, false, TEST_PACKAGE);
+            settingsState.persistSettingsLocked();
+        }
+        settingsState.waitForHandler();
+        synchronized (lock) {
+            assertEquals(VALUE2, settingsState.getSettingLocked(INVALID_STAGED_FLAG_1).getValue());
+        }
+
+        settingsState = new SettingsState(getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        synchronized (lock) {
+            assertEquals(VALUE2, settingsState.getSettingLocked(INVALID_STAGED_FLAG_1).getValue());
+        }
     }
 }

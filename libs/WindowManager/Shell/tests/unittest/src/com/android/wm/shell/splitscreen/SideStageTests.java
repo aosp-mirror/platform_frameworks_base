@@ -46,6 +46,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
+import java.util.Optional;
+
 /** Tests for {@link SideStage} */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -66,7 +68,7 @@ public class SideStageTests extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mSideStage = new SideStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks,
-                mSyncQueue, mSurfaceSession, mIconProvider);
+                mSyncQueue, mSurfaceSession, mIconProvider, Optional.empty());
         mSideStage.onTaskAppeared(mRootTask, mRootLeash);
     }
 

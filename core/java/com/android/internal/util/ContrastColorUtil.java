@@ -40,6 +40,8 @@ import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.Arrays;
 import java.util.WeakHashMap;
 
@@ -278,6 +280,92 @@ public class ContrastColorUtil {
             return builder;
         }
         return charSequence;
+    }
+
+    /**
+     * Ensures contrast on color spans against a background color.
+     * Note that any full-length color spans will be removed instead of being contrasted.
+     *
+     * @param charSequence the charSequence on which the spans are
+     * @param background the background color to ensure the contrast against
+     * @return the contrasted charSequence
+     */
+    public static CharSequence ensureColorSpanContrast(CharSequence charSequence,
+            int background) {
+        if (charSequence == null) {
+            return charSequence;
+        }
+        if (charSequence instanceof Spanned) {
+            Spanned ss = (Spanned) charSequence;
+            Object[] spans = ss.getSpans(0, ss.length(), Object.class);
+            SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
+            for (Object span : spans) {
+                Object resultSpan = span;
+                int spanStart = ss.getSpanStart(span);
+                int spanEnd = ss.getSpanEnd(span);
+                boolean fullLength = (spanEnd - spanStart) == charSequence.length();
+                if (resultSpan instanceof CharacterStyle) {
+                    resultSpan = ((CharacterStyle) span).getUnderlying();
+                }
+                if (resultSpan instanceof TextAppearanceSpan) {
+                    TextAppearanceSpan originalSpan = (TextAppearanceSpan) resultSpan;
+                    ColorStateList textColor = originalSpan.getTextColor();
+                    if (textColor != null) {
+                        if (fullLength) {
+                            // Let's drop the color from the span
+                            textColor = null;
+                        } else {
+                            int[] colors = textColor.getColors();
+                            int[] newColors = new int[colors.length];
+                            for (int i = 0; i < newColors.length; i++) {
+                                boolean isBgDark = isColorDark(background);
+                                newColors[i] = ContrastColorUtil.ensureLargeTextContrast(
+                                        colors[i], background, isBgDark);
+                            }
+                            textColor = new ColorStateList(textColor.getStates().clone(),
+                                    newColors);
+                        }
+                        resultSpan = new TextAppearanceSpan(
+                                originalSpan.getFamily(),
+                                originalSpan.getTextStyle(),
+                                originalSpan.getTextSize(),
+                                textColor,
+                                originalSpan.getLinkTextColor());
+                    }
+                } else if (resultSpan instanceof ForegroundColorSpan) {
+                    if (fullLength) {
+                        resultSpan = null;
+                    } else {
+                        ForegroundColorSpan originalSpan = (ForegroundColorSpan) resultSpan;
+                        int foregroundColor = originalSpan.getForegroundColor();
+                        boolean isBgDark = isColorDark(background);
+                        foregroundColor = ContrastColorUtil.ensureLargeTextContrast(
+                                foregroundColor, background, isBgDark);
+                        resultSpan = new ForegroundColorSpan(foregroundColor);
+                    }
+                } else {
+                    resultSpan = span;
+                }
+                if (resultSpan != null) {
+                    builder.setSpan(resultSpan, spanStart, spanEnd, ss.getSpanFlags(span));
+                }
+            }
+            return builder;
+        }
+        return charSequence;
+    }
+
+    /**
+     * Determines if the color is light or dark.  Specifically, this is using the same metric as
+     * {@link ContrastColorUtil#resolvePrimaryColor(Context, int, boolean)} and peers so that
+     * the direction of color shift is consistent.
+     *
+     * @param color the color to check
+     * @return true if the color has higher contrast with white than black
+     */
+    public static boolean isColorDark(int color) {
+        // as per shouldUseDark(), this uses the color contrast midpoint.
+        return calculateLuminance(color) <= 0.17912878474;
     }
 
     private int processColor(int color) {

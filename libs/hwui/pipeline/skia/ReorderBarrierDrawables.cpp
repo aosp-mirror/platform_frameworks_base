@@ -19,7 +19,13 @@
 #include "SkiaDisplayList.h"
 #include "LightingInfo.h"
 
+#include <SkColor.h>
+#include <SkMatrix.h>
+#include <SkPath.h>
 #include <SkPathOps.h>
+#include <SkPoint3.h>
+#include <SkRect.h>
+#include <SkScalar.h>
 #include <SkShadowUtils.h>
 
 namespace android {

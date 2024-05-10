@@ -36,7 +36,7 @@ void AConfiguration_delete(AConfiguration* config) {
 
 void AConfiguration_fromAssetManager(AConfiguration* out, AAssetManager* am) {
     ScopedLock<AssetManager2> locked_mgr(*AssetManagerForNdkAssetManager(am));
-    ResTable_config config = locked_mgr->GetConfiguration();
+    ResTable_config config = locked_mgr->GetConfigurations()[0];
 
     // AConfiguration is not a virtual subclass, so we can memcpy.
     memcpy(out, &config, sizeof(config));
@@ -232,6 +232,14 @@ void AConfiguration_setSmallestScreenWidthDp(AConfiguration* config, int32_t val
 void AConfiguration_setLayoutDirection(AConfiguration* config, int32_t value) {
     config->screenLayout = (config->screenLayout&~ResTable_config::MASK_LAYOUTDIR)
             | ((value<<ResTable_config::SHIFT_LAYOUTDIR)&ResTable_config::MASK_LAYOUTDIR);
+}
+
+int32_t AConfiguration_getGrammaticalGender(AConfiguration* config) {
+    return config->grammaticalInflection;
+}
+
+void AConfiguration_setGrammaticalGender(AConfiguration* config, int32_t value) {
+    config->grammaticalInflection = value & ResTable_config::GRAMMATICAL_INFLECTION_GENDER_MASK;
 }
 
 // ----------------------------------------------------------------------

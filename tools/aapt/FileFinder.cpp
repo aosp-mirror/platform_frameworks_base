@@ -5,6 +5,7 @@
 // File Finder implementation.
 // Implementation for the functions declared and documented in FileFinder.h
 
+#include <androidfw/PathUtils.h>
 #include <utils/Vector.h>
 #include <utils/String8.h>
 #include <utils/KeyedVector.h>
@@ -57,16 +58,16 @@ bool SystemFileFinder::findFiles(String8 basePath, Vector<String8>& extensions,
         if (entry->d_name[0] == '.') // Skip hidden files and directories
             continue;
 
-        String8 fullPath = basePath.appendPathCopy(entryName);
+        String8 fullPath = appendPathCopy(basePath, entryName);
         // If this entry is a directory we'll recurse into it
-        if (isDirectory(fullPath.string()) ) {
+        if (isDirectory(fullPath.c_str()) ) {
             DirectoryWalker* copy = dw->clone();
             findFiles(fullPath, extensions, fileStore,copy);
             delete copy;
         }
 
         // If this entry is a file, we'll pass it over to checkAndAddFile
-        if (isFile(fullPath.string()) ) {
+        if (isFile(fullPath.c_str()) ) {
             checkAndAddFile(fullPath,dw->entryStats(),extensions,fileStore);
         }
     }
@@ -83,10 +84,10 @@ void SystemFileFinder::checkAndAddFile(const String8& path, const struct stat* s
 {
     // Loop over the extensions, checking for a match
     bool done = false;
-    String8 ext(path.getPathExtension());
+    String8 ext(getPathExtension(path));
     ext.toLower();
     for (size_t i = 0; i < extensions.size() && !done; ++i) {
-        String8 ext2 = extensions[i].getPathExtension();
+        String8 ext2 = getPathExtension(extensions[i]);
         ext2.toLower();
         // Compare the extensions. If a match is found, add to storage.
         if (ext == ext2) {

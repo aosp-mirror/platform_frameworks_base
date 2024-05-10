@@ -27,10 +27,14 @@ import android.annotation.UiContext;
 import android.app.ActivityThread;
 import android.app.LoadedApk;
 import android.app.Service;
+import android.content.ComponentCallbacks;
+import android.content.ComponentCallbacksController;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.WindowType;
@@ -49,11 +53,15 @@ import android.view.WindowManagerImpl;
 @UiContext
 public abstract class WindowProviderService extends Service implements WindowProvider {
 
+    private static final String TAG = WindowProviderService.class.getSimpleName();
+
     private final Bundle mOptions;
     private final WindowTokenClient mWindowToken = new WindowTokenClient();
     private final WindowContextController mController = new WindowContextController(mWindowToken);
     private WindowManager mWindowManager;
     private boolean mInitialized;
+    private final ComponentCallbacksController mCallbacksController =
+            new ComponentCallbacksController();
 
     /**
      * Returns {@code true} if the {@code windowContextOptions} declares that it is a
@@ -118,6 +126,47 @@ public abstract class WindowProviderService extends Service implements WindowPro
         return mOptions;
     }
 
+    @SuppressLint({"OnNameExpected", "ExecutorRegistration"})
+    // Suppress lint because this is a legacy named function and doesn't have an optional param
+    // for executor.
+    /**
+     * Here we override to prevent WindowProviderService from invoking
+     * {@link Application.registerComponentCallback}, which will result in callback registered
+     * for process-level Configuration change updates.
+     */
+    @Override
+    public void registerComponentCallbacks(@NonNull ComponentCallbacks callback) {
+        // For broadcasting Configuration Changes.
+        mCallbacksController.registerCallbacks(callback);
+    }
+
+    @SuppressLint("OnNameExpected")
+    @Override
+    public void unregisterComponentCallbacks(@NonNull ComponentCallbacks callback) {
+        mCallbacksController.unregisterCallbacks(callback);
+    }
+
+    @SuppressLint("OnNameExpected")
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration configuration) {
+        // This is only called from WindowTokenClient.
+        mCallbacksController.dispatchConfigurationChanged(configuration);
+    }
+
+    /**
+     * Override {@link Service}'s empty implementation and listen to {@code ActivityThread} for
+     * low memory and trim memory events.
+     */
+    @Override
+    public void onLowMemory() {
+        mCallbacksController.dispatchLowMemory();
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        mCallbacksController.dispatchTrimMemory(level);
+    }
+
     /**
      * Returns the display ID to launch this {@link WindowProviderService}.
      *
@@ -147,8 +196,16 @@ public abstract class WindowProviderService extends Service implements WindowPro
     public final Context createServiceBaseContext(ActivityThread mainThread,
             LoadedApk packageInfo) {
         final Context context = super.createServiceBaseContext(mainThread, packageInfo);
-        final Display display = context.getSystemService(DisplayManager.class)
-                .getDisplay(getInitialDisplayId());
+        final DisplayManager displayManager = context.getSystemService(DisplayManager.class);
+        final int initialDisplayId = getInitialDisplayId();
+        Display display = displayManager.getDisplay(initialDisplayId);
+        // Fallback to use the default display if the initial display to start WindowProviderService
+        // is detached.
+        if (display == null) {
+            Log.e(TAG, "Display with id " + initialDisplayId + " not found, falling back to "
+                    + "DEFAULT_DISPLAY");
+            display = displayManager.getDisplay(DEFAULT_DISPLAY);
+        }
         return context.createTokenContext(mWindowToken, display);
     }
 
@@ -181,5 +238,6 @@ public abstract class WindowProviderService extends Service implements WindowPro
     public void onDestroy() {
         super.onDestroy();
         mController.detachIfNeeded();
+        mCallbacksController.clearCallbacks();
     }
 }

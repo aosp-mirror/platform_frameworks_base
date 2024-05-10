@@ -30,7 +30,7 @@ please see styles_device_defaults.xml.
  -->
 <resources>
     <!-- Global Theme Styles -->
-    <eat-comment />
+    <eat-comment/>
 
     <style name="WindowTitleBackground">
         <item name="background">@drawable/title_bar</item>
@@ -69,6 +69,19 @@ please see styles_device_defaults.xml.
         <item name="needsDefaultBackgrounds">false</item>
     </style>
 
+    <!-- Base style for the alert dialog with emergency call button   -->
+    <style name="AlertDialogWithEmergencyButton" parent="AlertDialog">
+        <item name="buttonBarNeutralButtonStyle">@style/AlertDialogEmergencyButtonStyle</item>
+    </style>
+
+    <style name="AlertDialogEmergencyButtonStyle" parent="AlertDialogWithEmergencyButton">
+        <item name="background">@drawable/work_mode_emergency_button_background</item>
+        <item name="textColor">@color/text_color_on_accent_device_default</item>
+        <item name="paddingLeft">15dip</item>
+        <item name="paddingRight">15dip</item>
+        <item name="layout_marginStart">10dip</item>
+    </style>
+
     <style name="Widget.PreferenceFrameLayout">
         <item name="borderTop">0dip</item>
         <item name="borderBottom">0dip</item>
@@ -77,7 +90,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- Base style for animations.  This style specifies no animations. -->
-    <style name="Animation" />
+    <style name="Animation"/>
 
     <!-- Standard animations for a full-screen window or activity. -->
     <style name="Animation.Activity">
@@ -231,7 +244,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- A special animation value used internally for popup windows. -->
-    <style name="Animation.PopupWindow" />
+    <style name="Animation.PopupWindow"/>
 
     <!-- Window animations used for action mode UI in overlay mode. -->
     <style name="Animation.PopupWindow.ActionMode">
@@ -503,11 +516,16 @@ please see styles_device_defaults.xml.
         <item name="textEditSidePasteWindowLayout">?attr/textEditSidePasteWindowLayout</item>
         <item name="textEditSideNoPasteWindowLayout">?attr/textEditSideNoPasteWindowLayout</item>
         <item name="textEditSuggestionItemLayout">?attr/textEditSuggestionItemLayout</item>
-        <item name="textEditSuggestionContainerLayout">?attr/textEditSuggestionContainerLayout</item>
+        <item name="textEditSuggestionContainerLayout">?attr/textEditSuggestionContainerLayout
+        </item>
         <item name="textEditSuggestionHighlightStyle">?attr/textEditSuggestionHighlightStyle</item>
         <item name="textCursorDrawable">?attr/textCursorDrawable</item>
         <item name="breakStrategy">high_quality</item>
         <item name="hyphenationFrequency">@dimen/config_preferredHyphenationFrequency</item>
+        <item name="handwritingBoundsOffsetLeft">@dimen/handwriting_bounds_offset_left</item>
+        <item name="handwritingBoundsOffsetTop">@dimen/handwriting_bounds_offset_top</item>
+        <item name="handwritingBoundsOffsetRight">@dimen/handwriting_bounds_offset_right</item>
+        <item name="handwritingBoundsOffsetBottom">@dimen/handwriting_bounds_offset_bottom</item>
     </style>
 
     <style name="Widget.CheckedTextView">
@@ -543,6 +561,10 @@ please see styles_device_defaults.xml.
         <item name="breakStrategy">simple</item>
         <item name="hyphenationFrequency">@dimen/config_preferredHyphenationFrequency</item>
         <item name="defaultFocusHighlightEnabled">false</item>
+        <item name="handwritingBoundsOffsetLeft">@dimen/handwriting_bounds_offset_left</item>
+        <item name="handwritingBoundsOffsetTop">@dimen/handwriting_bounds_offset_top</item>
+        <item name="handwritingBoundsOffsetRight">@dimen/handwriting_bounds_offset_right</item>
+        <item name="handwritingBoundsOffsetBottom">@dimen/handwriting_bounds_offset_bottom</item>
     </style>
 
     <style name="Widget.ExpandableListView" parent="Widget.ListView">
@@ -585,7 +607,8 @@ please see styles_device_defaults.xml.
         <item name="weekNumberColor">#33FFFFFF</item>
         <item name="weekSeparatorLineColor">#19FFFFFF</item>
         <item name="selectedDateVerticalBar">@drawable/day_picker_week_view_dayline_holo</item>
-        <item name="weekDayTextAppearance">@style/TextAppearance.Small.CalendarViewWeekDayView</item>
+        <item name="weekDayTextAppearance">@style/TextAppearance.Small.CalendarViewWeekDayView
+        </item>
         <item name="dateTextAppearance">?attr/textAppearanceSmall</item>
         <item name="calendarViewMode">holo</item>
     </style>
@@ -681,12 +704,12 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.ListView.DropDown">
-    	<item name="cacheColorHint">@null</item>
+        <item name="cacheColorHint">@null</item>
         <item name="divider">@drawable/divider_horizontal_bright_opaque</item>
     </style>
 
     <style name="Widget.ListView.Menu" parent="Widget.Holo.ListView">
-		<item name="cacheColorHint">@null</item>
+        <item name="cacheColorHint">@null</item>
         <item name="scrollbars">vertical</item>
         <item name="fadingEdge">none</item>
         <!-- Light background for the list in menus, so the divider for bright themes -->
@@ -811,7 +834,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- Text Appearances -->
-    <eat-comment />
+    <eat-comment/>
 
     <style name="TextAppearance">
         <item name="textColor">?textColorPrimary</item>
@@ -870,9 +893,9 @@ please see styles_device_defaults.xml.
         <item name="textColorLink">?textColorLinkInverse</item>
     </style>
 
-    <style name="TextAppearance.Theme.Dialog" parent="TextAppearance.Theme" />
+    <style name="TextAppearance.Theme.Dialog" parent="TextAppearance.Theme"/>
 
-    <style name="TextAppearance.Widget" />
+    <style name="TextAppearance.Widget"/>
 
     <style name="TextAppearance.Widget.Button" parent="TextAppearance.Small.Inverse">
         <item name="textColor">@color/primary_text_light_nodisable</item>
@@ -938,22 +961,22 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- @hide -->
-     <style name="TextAppearance.SearchResult">
-         <item name="textStyle">normal</item>
-         <item name="textColor">?textColorPrimaryInverse</item>
-         <item name="textColorHint">?textColorHintInverse</item>
-     </style>
+    <style name="TextAppearance.SearchResult">
+        <item name="textStyle">normal</item>
+        <item name="textColor">?textColorPrimaryInverse</item>
+        <item name="textColorHint">?textColorHintInverse</item>
+    </style>
 
-     <!-- @hide -->
-     <style name="TextAppearance.SearchResult.Title">
-         <item name="textSize">18sp</item>
-     </style>
+    <!-- @hide -->
+    <style name="TextAppearance.SearchResult.Title">
+        <item name="textSize">18sp</item>
+    </style>
 
-     <!-- @hide -->
-     <style name="TextAppearance.SearchResult.Subtitle">
-         <item name="textSize">14sp</item>
-         <item name="textColor">?textColorSecondaryInverse</item>
-     </style>
+    <!-- @hide -->
+    <style name="TextAppearance.SearchResult.Subtitle">
+        <item name="textSize">14sp</item>
+        <item name="textColor">?textColorSecondaryInverse</item>
+    </style>
 
     <style name="TextAppearance.WindowTitle">
         <item name="textColor">#fff</item>
@@ -1157,7 +1180,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- Other Misc Styles -->
-    <eat-comment />
+    <eat-comment/>
 
     <style name="MediaButton">
         <item name="background">@null</item>
@@ -1290,10 +1313,12 @@ please see styles_device_defaults.xml.
         <item name="textColor">?attr/textColorSecondary</item>
     </style>
 
-    <style name="TextAppearance.Widget.Toolbar.Title" parent="TextAppearance.Widget.ActionBar.Title">
+    <style name="TextAppearance.Widget.Toolbar.Title"
+           parent="TextAppearance.Widget.ActionBar.Title">
     </style>
 
-    <style name="TextAppearance.Widget.Toolbar.Subtitle" parent="TextAppearance.Widget.ActionBar.Subtitle">
+    <style name="TextAppearance.Widget.Toolbar.Subtitle"
+           parent="TextAppearance.Widget.ActionBar.Subtitle">
     </style>
 
     <style name="Widget.ActionButton">
@@ -1394,6 +1419,7 @@ please see styles_device_defaults.xml.
         <item name="pointerIconZoomOut">@drawable/pointer_zoom_out_icon</item>
         <item name="pointerIconGrab">@drawable/pointer_grab_icon</item>
         <item name="pointerIconGrabbing">@drawable/pointer_grabbing_icon</item>
+        <item name="pointerIconHandwriting">@drawable/pointer_handwriting_icon</item>
     </style>
 
     <style name="LargePointer">
@@ -1430,6 +1456,7 @@ please see styles_device_defaults.xml.
         <item name="pointerIconZoomOut">@drawable/pointer_zoom_out_large_icon</item>
         <item name="pointerIconGrab">@drawable/pointer_grab_large_icon</item>
         <item name="pointerIconGrabbing">@drawable/pointer_grabbing_large_icon</item>
+        <item name="pointerIconHandwriting">@drawable/pointer_handwriting_icon</item>
     </style>
 
     <!-- @hide -->
@@ -1473,12 +1500,8 @@ please see styles_device_defaults.xml.
         <item name="fontFamily">google-sans-text-medium</item>
         <item name="textStyle">normal</item>
         <item name="textAllCaps">false</item>
-        <item name="layout_marginTop">6dp</item>
-        <item name="layout_marginBottom">6dp</item>
-        <item name="paddingStart">16dp</item>
-        <item name="paddingEnd">16dp</item>
-        <item name="paddingTop">8dp</item>
-        <item name="paddingBottom">8dp</item>
+        <item name="paddingStart">24dp</item>
+        <item name="paddingEnd">24dp</item>
     </style>
     <!-- @hide Tonal button for Autofill half screen dialog -->
     <style name="AutofillHalfSheetTonalButton" parent="AutofillHalfSheetButton">
@@ -1519,8 +1542,8 @@ please see styles_device_defaults.xml.
 
     <!-- The style for normal action button on notification -->
     <style name="NotificationAction" parent="Widget.Material.Light.Button.Borderless.Small">
-      <item name="textColor">@color/notification_action_button_text_color</item>
-      <item name="background">@drawable/notification_material_action_background</item>
+        <item name="textColor">@color/notification_action_button_text_color</item>
+        <item name="background">@drawable/notification_material_action_background</item>
     </style>
 
     <!-- The style for emphasized action button on notification: Colored bordered ink button -->
@@ -1531,42 +1554,93 @@ please see styles_device_defaults.xml.
 
     <!-- The style for disabled action button on notification -->
     <style name="NotificationTombstoneAction" parent="NotificationAction">
-      <item name="textColor">#555555</item>
+        <item name="textColor">#555555</item>
     </style>
 
-    <!-- The style for log access consent text -->
-    <style name="AllowLogAccess">
-        <item name="android:textSize">24sp</item>
-        <item name="android:fontFamily">google-sans</item>
+    <!-- The default style for input method switch dialog -->
+    <style name="InputMethodSwitchDialogStyle" parent="AlertDialog.DeviceDefault">
     </style>
 
-    <style name="PrimaryAllowLogAccess">
+    <style name="AccessibilityDialog">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:divider">@*android:drawable/list_divider_material</item>
+        <item name="android:showDividers">middle</item>
+    </style>
+
+    <style name="AccessibilityDialogServiceIcon">
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_marginBottom">16dp</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
+    <style name="AccessibilityDialogIcon">
+        <item name="android:layout_width">18dp</item>
+        <item name="android:layout_height">18dp</item>
+        <item name="android:layout_marginEnd">12dp</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
+    <style name="AccessibilityDialogTitle"
+           parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+    </style>
+
+    <style name="AccessibilityDialogDescription"
+           parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_marginBottom">32dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="AccessibilityDialogPermissionTitle"
+           parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+    </style>
+
+    <style name="AccessibilityDialogPermissionDescription"
+           parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:fontFamily">google-sans-text</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="PermissionGrantButtonTextAppearance">
-        <item name="android:fontFamily">google-sans-medium</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@android:color/system_neutral1_900</item>
+    <style name="AccessibilityDialogButtonBarSpace">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:visibility">gone</item>
     </style>
 
-    <style name="PermissionGrantButtonTop"
-           parent="@android:style/Widget.DeviceDefault.Button.Borderless.Colored">
-        <item name="android:layout_width">332dp</item>
+    <style name="AccessibilityDialogButtonList">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:divider">@*android:drawable/list_divider_material</item>
+        <item name="android:showDividers">middle</item>
+    </style>
+
+    <style name="AccessibilityDialogButton"
+           parent="@*android:style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog">
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">56dp</item>
-        <item name="android:layout_marginTop">2dp</item>
-        <item name="android:layout_marginBottom">2dp</item>
-        <item name="android:background">@drawable/grant_permissions_buttons_top</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
-
-    <style name="PermissionGrantButtonBottom"
-           parent="@android:style/Widget.DeviceDefault.Button.Borderless.Colored">
-        <item name="android:layout_width">332dp</item>
-        <item name="android:layout_height">56dp</item>
-        <item name="android:layout_marginTop">2dp</item>
-        <item name="android:layout_marginBottom">2dp</item>
-        <item name="android:background">@drawable/grant_permissions_buttons_bottom</item>
-    </style>
-
 </resources>

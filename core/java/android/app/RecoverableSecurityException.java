@@ -164,7 +164,7 @@ public final class RecoverableSecurityException extends SecurityException implem
     public static class LocalDialog extends DialogFragment {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            final RecoverableSecurityException e = getArguments().getParcelable(TAG);
+            final RecoverableSecurityException e = getArguments().getParcelable(TAG, android.app.RecoverableSecurityException.class);
             return new AlertDialog.Builder(getActivity())
                     .setMessage(e.mUserMessage)
                     .setPositiveButton(e.mUserAction.getTitle(), (dialog, which) -> {

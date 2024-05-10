@@ -29,6 +29,7 @@ message ImeInsetsSourceConsumerProto {
     optional InsetsSourceConsumerProto insets_source_consumer = 1;
     reserved 2; // focused_editor = 2
     optional bool is_requested_visible_awaiting_control = 3;
-    optional bool is_hide_animation_running = 4;
-    optional bool is_show_requested_during_hide_animation = 5;
+    optional bool is_hide_animation_running = 4 [deprecated=true];
+    optional bool is_show_requested_during_hide_animation = 5 [deprecated=true];
+    optional bool has_pending_request = 6;
 }

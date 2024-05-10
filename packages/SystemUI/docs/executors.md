@@ -14,10 +14,10 @@ Executor available, as well as our own sub-interface,
 [FakeExecutor][FakeExecutor] is available.
 
 [Executor]: https://developer.android.com/reference/java/util/concurrent/Executor.html
-[Handler]: https://developer.android.com/reference/android/os/Handler
+[Handler]: https://developer.android.com/reference/android/os/Handler.html
 [Runnable]: https://developer.android.com/reference/java/lang/Runnable.html
 [DelayableExecutor]: /packages/SystemUI/src/com/android/systemui/util/concurrency/DelayableExecutor.java
-[FakeExecutor]: /packages/SystemUI/tests/src/com/android/systemui/util/concurrency/FakeExecutor.java
+[FakeExecutor]: /packages/SystemUI/tests/utils/src/com/android/systemui/util/concurrency/FakeExecutor.java
 
 ## Rationale
 
@@ -117,7 +117,7 @@ post()        | execute() | execute()
 postDelayed() | `none`    | executeDelayed()
 postAtTime()  | `none`    | executeAtTime()
 
-There is one notable gap in this implementation: `Handler.postAtFrontOfQueue()`.
+There are some notable gaps in this implementation: `Handler.postAtFrontOfQueue()`.
 If you require this method, or similar, please reach out. The idea of a
 PriorityQueueExecutor has been floated, but will not be implemented until there
 is a clear need.
@@ -173,13 +173,20 @@ fields in your class.
 
 If you feel that you have a use case that this does not cover, please reach out.
 
+### ContentObserver
+
+One notable place where Handlers have been a requirement in the past is with
+[ContentObserver], which takes a Handler as an argument. However, we have created
+[ExecutorContentObserver], which is a hidden API that accepts an [Executor] in its
+constructor instead of a [Handler], and is otherwise identical.
+
+[ContentObserver]: https://developer.android.com/reference/android/database/ContentObserver.html
+[ExecutorContentObserver]: /core/java/android/database/ExecutorContentObserver.java
+
 ### Handlers Are Still Necessary
 
-Handlers aren't going away. There are Android APIs that still require them (even
-if future API development discourages them). A simple example is
-[ContentObserver][ContentObserver]. Use them where necessary.
-
-[ContentObserver]: https://developer.android.com/reference/android/database/ContentObserver
+Handlers aren't going away. There are other Android APIs that still require them.
+Avoid Handlers when possible, but use them where necessary.
 
 ## Testing (FakeExecutor)
 
@@ -313,6 +320,15 @@ clock.setUptimeMillis(500);
 
 The Runnables _will not_ interleave. All of one Executor's callbacks will run,
 then all of the other's.
+
+### Testing Handlers without Loopers
+
+If a [Handler] is required because it is used by Android APIs, but is only
+used in simple ways (i.e. just `Handler.post(Runnable)`), you may still
+want the benefits of [FakeExecutor] when writing your tests, which
+you can get by wrapping the [Executor] in a mock for testing. This can be
+done with `com.android.systemui.util.concurrency.mockExecutorHandler` in
+`MockExecutorHandler.kt`.
 
 ### TestableLooper.RunWithLooper
 

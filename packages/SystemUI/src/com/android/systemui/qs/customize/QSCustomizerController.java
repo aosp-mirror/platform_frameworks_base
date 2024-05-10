@@ -34,14 +34,14 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSEditEvent;
-import com.android.systemui.qs.QSFragment;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -57,7 +57,7 @@ import javax.inject.Inject;
 @QSScope
 public class QSCustomizerController extends ViewController<QSCustomizer> {
     private final TileQueryHelper mTileQueryHelper;
-    private final QSTileHost mQsTileHost;
+    private final QSHost mQsHost;
     private final TileAdapter mTileAdapter;
     private final ScreenLifecycle mScreenLifecycle;
     private final KeyguardStateController mKeyguardStateController;
@@ -104,12 +104,12 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
 
     @Inject
     protected QSCustomizerController(QSCustomizer view, TileQueryHelper tileQueryHelper,
-            QSTileHost qsTileHost, TileAdapter tileAdapter, ScreenLifecycle screenLifecycle,
+            QSHost qsHost, TileAdapter tileAdapter, ScreenLifecycle screenLifecycle,
             KeyguardStateController keyguardStateController, LightBarController lightBarController,
             ConfigurationController configurationController, UiEventLogger uiEventLogger) {
         super(view);
         mTileQueryHelper = tileQueryHelper;
-        mQsTileHost = qsTileHost;
+        mQsHost = qsHost;
         mTileAdapter = tileAdapter;
         mScreenLifecycle = screenLifecycle;
         mKeyguardStateController = keyguardStateController;
@@ -175,7 +175,7 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
 
 
     private void reset() {
-        mTileAdapter.resetTileSpecs(QSTileHost.getDefaultSpecs(getContext()));
+        mTileAdapter.resetTileSpecs(QSHost.getDefaultSpecs(getContext().getResources()));
     }
 
     public boolean isCustomizing() {
@@ -192,14 +192,14 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
                 mView.show(x, y, mTileAdapter);
                 mUiEventLogger.log(QSEditEvent.QS_EDIT_OPEN);
             }
-            mTileQueryHelper.queryTiles(mQsTileHost);
+            mTileQueryHelper.queryTiles(mQsHost);
             mKeyguardStateController.addCallback(mKeyguardCallback);
             mView.updateNavColors(mLightBarController);
         }
     }
 
     /** */
-    public void setQs(@Nullable QSFragment qsFragment) {
+    public void setQs(@Nullable QS qsFragment) {
         mView.setQs(qsFragment);
     }
 
@@ -244,7 +244,12 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
 
     /** Hice the customizer. */
     public void hide() {
-        final boolean animate = mScreenLifecycle.getScreenState() != ScreenLifecycle.SCREEN_OFF;
+        hide(true);
+    }
+
+    public void hide(boolean animated) {
+        final boolean animate = animated
+                && mScreenLifecycle.getScreenState() != ScreenLifecycle.SCREEN_OFF;
         if (mView.isShown()) {
             mUiEventLogger.log(QSEditEvent.QS_EDIT_CLOSED);
             mToolbar.dismissPopupMenus();
@@ -258,13 +263,13 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
 
     private void save() {
         if (mTileQueryHelper.isFinished()) {
-            mTileAdapter.saveSpecs(mQsTileHost);
+            mTileAdapter.saveSpecs(mQsHost);
         }
     }
 
     private void setTileSpecs() {
         List<String> specs = new ArrayList<>();
-        for (QSTile tile : mQsTileHost.getTiles()) {
+        for (QSTile tile : mQsHost.getTiles()) {
             specs.add(tile.getTileSpec());
         }
         mTileAdapter.setTileSpecs(specs);

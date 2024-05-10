@@ -50,7 +50,8 @@ public class DataLoaderManagerService extends SystemService {
     private final HandlerThread mThread;
     private final Handler mHandler;
     private final DataLoaderManagerBinderService mBinderService;
-    private SparseArray<DataLoaderServiceConnection> mServiceConnections = new SparseArray<>();
+    private final SparseArray<DataLoaderServiceConnection> mServiceConnections =
+            new SparseArray<>();
 
     public DataLoaderManagerService(Context context) {
         super(context);

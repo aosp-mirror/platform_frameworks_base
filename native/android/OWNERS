@@ -23,3 +23,9 @@ per-file hardware_buffer_jni.cpp = file:/graphics/java/android/graphics/OWNERS
 per-file native_window_jni.cpp = file:/graphics/java/android/graphics/OWNERS
 per-file surface_control.cpp = file:/graphics/java/android/graphics/OWNERS
 per-file surface_texture.cpp = file:/graphics/java/android/graphics/OWNERS
+
+# Input
+per-file input.cpp = file:/INPUT_OWNERS
+
+# PerformanceHint
+per-file performance_hint.cpp = file:/ADPF_OWNERS

@@ -17,17 +17,13 @@
 package com.android.packageinstaller;
 
 import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.content.pm.Flags.usePiaV2;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import static com.android.packageinstaller.PackageUtil.getMaxTargetSdkVersionForUid;
 
 import android.Manifest;
-import android.annotation.NonNull;
-import android.annotation.StringRes;
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityThread;
-import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.DialogFragment;
 import android.app.Fragment;
@@ -37,12 +33,9 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageDeleteObserver2;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
@@ -50,18 +43,20 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import com.android.packageinstaller.handheld.ErrorDialogFragment;
 import com.android.packageinstaller.handheld.UninstallAlertDialogFragment;
 import com.android.packageinstaller.television.ErrorFragment;
 import com.android.packageinstaller.television.UninstallAlertFragment;
 import com.android.packageinstaller.television.UninstallAppProgress;
+import com.android.packageinstaller.common.EventResultPersister;
+import com.android.packageinstaller.common.UninstallEventReceiver;
+import com.android.packageinstaller.v2.ui.UninstallLaunch;
 
 import java.util.List;
 
@@ -74,13 +69,15 @@ public class UninstallerActivity extends Activity {
     private static final String TAG = "UninstallerActivity";
 
     private static final String UNINSTALLING_CHANNEL = "uninstalling";
+    private boolean mIsClonedApp;
 
     public static class DialogInfo {
         public ApplicationInfo appInfo;
         public ActivityInfo activityInfo;
         public boolean allUsers;
         public UserHandle user;
-        public IBinder callback;
+        public PackageManager.UninstallCompleteCallback callback;
+        public int deleteFlags;
     }
 
     private String mPackageName;
@@ -94,46 +91,58 @@ public class UninstallerActivity extends Activity {
         // be stale, if e.g. the app was uninstalled while the activity was destroyed.
         super.onCreate(null);
 
-        try {
-            int callingUid = ActivityManager.getService().getLaunchedFromUid(getActivityToken());
+        if (usePiaV2() && !isTv()) {
+            Log.i(TAG, "Using Pia V2");
 
-            String callingPackage = getPackageNameForUid(callingUid);
-            if (callingPackage == null) {
-                Log.e(TAG, "Package not found for originating uid " + callingUid);
-                setResult(Activity.RESULT_FIRST_USER);
-                finish();
-                return;
-            } else {
-                AppOpsManager appOpsManager = (AppOpsManager) getSystemService(
-                        Context.APP_OPS_SERVICE);
-                if (appOpsManager.noteOpNoThrow(
-                        AppOpsManager.OPSTR_REQUEST_DELETE_PACKAGES, callingUid, callingPackage)
-                        != MODE_ALLOWED) {
-                    Log.e(TAG, "Install from uid " + callingUid + " disallowed by AppOps");
-                    setResult(Activity.RESULT_FIRST_USER);
-                    finish();
-                    return;
-                }
+            boolean returnResult = getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
+            Intent piaV2 = new Intent(getIntent());
+            piaV2.putExtra(UninstallLaunch.EXTRA_CALLING_PKG_UID, getLaunchedFromUid());
+            piaV2.putExtra(UninstallLaunch.EXTRA_CALLING_ACTIVITY_NAME, getCallingActivity());
+            if (returnResult) {
+                piaV2.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
             }
+            piaV2.setClass(this, UninstallLaunch.class);
+            startActivity(piaV2);
+            finish();
+            return;
+        }
 
-            if (getMaxTargetSdkVersionForUid(this, callingUid)
-                    >= Build.VERSION_CODES.P && AppGlobals.getPackageManager().checkUidPermission(
-                    Manifest.permission.REQUEST_DELETE_PACKAGES, callingUid)
-                    != PackageManager.PERMISSION_GRANTED
-                    && AppGlobals.getPackageManager().checkUidPermission(
-                            Manifest.permission.DELETE_PACKAGES, callingUid)
-                            != PackageManager.PERMISSION_GRANTED) {
-                Log.e(TAG, "Uid " + callingUid + " does not have "
-                        + Manifest.permission.REQUEST_DELETE_PACKAGES + " or "
-                        + Manifest.permission.DELETE_PACKAGES);
-
-                setResult(Activity.RESULT_FIRST_USER);
-                finish();
-                return;
-            }
-        } catch (RemoteException ex) {
+        int callingUid = getLaunchedFromUid();
+        if (callingUid == Process.INVALID_UID) {
             // Cannot reach Package/ActivityManager. Aborting uninstall.
             Log.e(TAG, "Could not determine the launching uid.");
+
+            setResult(Activity.RESULT_FIRST_USER);
+            finish();
+            return;
+        }
+
+        String callingPackage = getPackageNameForUid(callingUid);
+        if (callingPackage == null) {
+            Log.e(TAG, "Package not found for originating uid " + callingUid);
+            setResult(Activity.RESULT_FIRST_USER);
+            finish();
+            return;
+        } else {
+            AppOpsManager appOpsManager = getSystemService(AppOpsManager.class);
+            if (appOpsManager.noteOpNoThrow(
+                    AppOpsManager.OPSTR_REQUEST_DELETE_PACKAGES, callingUid, callingPackage)
+                    != MODE_ALLOWED) {
+                Log.e(TAG, "Install from uid " + callingUid + " disallowed by AppOps");
+                setResult(Activity.RESULT_FIRST_USER);
+                finish();
+                return;
+            }
+        }
+
+        if (getMaxTargetSdkVersionForUid(this, callingUid) >= Build.VERSION_CODES.P
+                && getBaseContext().checkPermission(Manifest.permission.REQUEST_DELETE_PACKAGES,
+                0 /* random value for pid */, callingUid) != PackageManager.PERMISSION_GRANTED
+                && getBaseContext().checkPermission(Manifest.permission.DELETE_PACKAGES,
+                0 /* random value for pid */, callingUid) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Uid " + callingUid + " does not have "
+                    + Manifest.permission.REQUEST_DELETE_PACKAGES + " or "
+                    + Manifest.permission.DELETE_PACKAGES);
 
             setResult(Activity.RESULT_FIRST_USER);
             finish();
@@ -157,37 +166,38 @@ public class UninstallerActivity extends Activity {
             return;
         }
 
-        final IPackageManager pm = IPackageManager.Stub.asInterface(
-                ServiceManager.getService("package"));
+        PackageManager pm = getPackageManager();
+        UserManager userManager = getBaseContext().getSystemService(UserManager.class);
 
         mDialogInfo = new DialogInfo();
 
         mDialogInfo.allUsers = intent.getBooleanExtra(Intent.EXTRA_UNINSTALL_ALL_USERS, false);
-        if (mDialogInfo.allUsers && !UserManager.get(this).isAdminUser()) {
+        if (mDialogInfo.allUsers && !userManager.isAdminUser()) {
             Log.e(TAG, "Only admin user can request uninstall for all users");
             showUserIsNotAllowed();
             return;
         }
         mDialogInfo.user = intent.getParcelableExtra(Intent.EXTRA_USER);
         if (mDialogInfo.user == null) {
-            mDialogInfo.user = android.os.Process.myUserHandle();
+            mDialogInfo.user = Process.myUserHandle();
         } else {
-            UserManager userManager = (UserManager) getSystemService(Context.USER_SERVICE);
             List<UserHandle> profiles = userManager.getUserProfiles();
             if (!profiles.contains(mDialogInfo.user)) {
-                Log.e(TAG, "User " + android.os.Process.myUserHandle() + " can't request uninstall "
+                Log.e(TAG, "User " + Process.myUserHandle() + " can't request uninstall "
                         + "for user " + mDialogInfo.user);
                 showUserIsNotAllowed();
                 return;
             }
         }
 
-        mDialogInfo.callback = intent.getIBinderExtra(PackageInstaller.EXTRA_CALLBACK);
+        mDialogInfo.callback = intent.getParcelableExtra(PackageInstaller.EXTRA_CALLBACK,
+                                            PackageManager.UninstallCompleteCallback.class);
 
         try {
             mDialogInfo.appInfo = pm.getApplicationInfo(mPackageName,
-                    PackageManager.MATCH_ANY_USER, mDialogInfo.user.getIdentifier());
-        } catch (RemoteException e) {
+                    PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_ANY_USER
+                            | PackageManager.MATCH_ARCHIVED_PACKAGES));
+        } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Unable to get packageName. Package manager is dead?");
         }
 
@@ -202,15 +212,31 @@ public class UninstallerActivity extends Activity {
         if (className != null) {
             try {
                 mDialogInfo.activityInfo = pm.getActivityInfo(
-                        new ComponentName(mPackageName, className), 0,
-                        mDialogInfo.user.getIdentifier());
-            } catch (RemoteException e) {
+                        new ComponentName(mPackageName, className),
+                        PackageManager.ComponentInfoFlags.of(0));
+            } catch (PackageManager.NameNotFoundException e) {
                 Log.e(TAG, "Unable to get className. Package manager is dead?");
                 // Continue as the ActivityInfo isn't critical.
             }
         }
+        parseDeleteFlags(intent);
 
         showConfirmationDialog();
+    }
+
+    /**
+     * Parses specific {@link android.content.pm.PackageManager.DeleteFlags} from {@link Intent}
+     * to archive an app if requested.
+     *
+     * Do not parse any flags because developers might pass here any flags which might cause
+     * unintended behaviour.
+     * For more context {@link com.android.server.pm.PackageArchiver#requestArchive}.
+     */
+    private void parseDeleteFlags(Intent intent) {
+        int deleteFlags = intent.getIntExtra(PackageInstaller.EXTRA_DELETE_FLAGS, 0);
+        int archive = deleteFlags & PackageManager.DELETE_ARCHIVE;
+        int keepData = deleteFlags & PackageManager.DELETE_KEEP_DATA;
+        mDialogInfo.deleteFlags = archive | keepData;
     }
 
     public DialogInfo getDialogInfo() {
@@ -288,6 +314,14 @@ public class UninstallerActivity extends Activity {
         fragment.show(ft, "dialog");
     }
 
+    /**
+     * Starts uninstall of app.
+     */
+    public void startUninstallProgress(boolean keepData, boolean isClonedApp) {
+        mIsClonedApp = isClonedApp;
+        startUninstallProgress(keepData);
+    }
+
     public void startUninstallProgress(boolean keepData) {
         boolean returnResult = getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
         CharSequence label = mDialogInfo.appInfo.loadSafeLabel(getPackageManager());
@@ -315,7 +349,6 @@ public class UninstallerActivity extends Activity {
             newIntent.putExtra(UninstallUninstalling.EXTRA_APP_LABEL, label);
             newIntent.putExtra(UninstallUninstalling.EXTRA_KEEP_DATA, keepData);
             newIntent.putExtra(PackageInstaller.EXTRA_CALLBACK, mDialogInfo.callback);
-
             if (returnResult) {
                 newIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
             }
@@ -323,7 +356,10 @@ public class UninstallerActivity extends Activity {
             if (returnResult || getCallingActivity() != null) {
                 newIntent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
             }
-
+            if (mDialogInfo.deleteFlags != 0) {
+                newIntent.putExtra(PackageInstaller.EXTRA_DELETE_FLAGS,
+                        mDialogInfo.deleteFlags);
+            }
             startActivity(newIntent);
         } else {
             int uninstallId;
@@ -341,6 +377,7 @@ public class UninstallerActivity extends Activity {
             broadcastIntent.putExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO, mDialogInfo.appInfo);
             broadcastIntent.putExtra(UninstallFinish.EXTRA_APP_LABEL, label);
             broadcastIntent.putExtra(UninstallFinish.EXTRA_UNINSTALL_ID, uninstallId);
+            broadcastIntent.putExtra(UninstallFinish.EXTRA_IS_CLONE_APP, mIsClonedApp);
 
             PendingIntent pendingIntent =
                     PendingIntent.getBroadcast(this, uninstallId, broadcastIntent,
@@ -355,7 +392,10 @@ public class UninstallerActivity extends Activity {
             Notification uninstallingNotification =
                     (new Notification.Builder(this, UNINSTALLING_CHANNEL))
                     .setSmallIcon(R.drawable.ic_remove).setProgress(0, 1, true)
-                    .setContentTitle(getString(R.string.uninstalling_app, label)).setOngoing(true)
+                    .setContentTitle(mIsClonedApp
+                            ? getString(R.string.uninstalling_cloned_app, label)
+                            : getString(R.string.uninstalling_app, label))
+                            .setOngoing(true)
                     .build();
 
             notificationManager.notify(uninstallId, uninstallingNotification);
@@ -365,12 +405,12 @@ public class UninstallerActivity extends Activity {
 
                 int flags = mDialogInfo.allUsers ? PackageManager.DELETE_ALL_USERS : 0;
                 flags |= keepData ? PackageManager.DELETE_KEEP_DATA : 0;
+                flags |= mDialogInfo.deleteFlags;
 
-                ActivityThread.getPackageManager().getPackageInstaller().uninstall(
-                        new VersionedPackage(mDialogInfo.appInfo.packageName,
-                                PackageManager.VERSION_CODE_HIGHEST),
-                        getPackageName(), flags, pendingIntent.getIntentSender(),
-                        mDialogInfo.user.getIdentifier());
+                createContextAsUser(mDialogInfo.user, 0).getPackageManager().getPackageInstaller()
+                        .uninstall(new VersionedPackage(mDialogInfo.appInfo.packageName,
+                                PackageManager.VERSION_CODE_HIGHEST), flags,
+                                pendingIntent.getIntentSender());
             } catch (Exception e) {
                 notificationManager.cancel(uninstallId);
 
@@ -382,13 +422,8 @@ public class UninstallerActivity extends Activity {
 
     public void dispatchAborted() {
         if (mDialogInfo != null && mDialogInfo.callback != null) {
-            final IPackageDeleteObserver2 observer = IPackageDeleteObserver2.Stub.asInterface(
-                    mDialogInfo.callback);
-            try {
-                observer.onPackageDeleted(mPackageName,
-                        PackageManager.DELETE_FAILED_ABORTED, "Cancelled by user");
-            } catch (RemoteException ignored) {
-            }
+            mDialogInfo.callback.onUninstallComplete(mPackageName,
+                    PackageManager.DELETE_FAILED_ABORTED, "Cancelled by user");
         }
     }
 

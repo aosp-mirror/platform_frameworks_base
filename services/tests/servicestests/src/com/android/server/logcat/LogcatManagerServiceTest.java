@@ -22,21 +22,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.content.ContextWrapper;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.ILogd;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.os.test.TestLooper;
-
-import androidx.test.core.app.ApplicationProvider;
 
 import com.android.server.LocalServices;
 import com.android.server.logcat.LogcatManagerService.Injector;
@@ -70,6 +67,8 @@ public class LogcatManagerServiceTest {
     private static final int FD2 = 11;
 
     @Mock
+    private Context mContextSpy;
+    @Mock
     private ActivityManagerInternal mActivityManagerInternalMock;
     @Mock
     private PackageManager mPackageManagerMock;
@@ -78,7 +77,6 @@ public class LogcatManagerServiceTest {
 
     private LogcatManagerService mService;
     private LogcatManagerService.LogAccessDialogCallback mDialogCallback;
-    private ContextWrapper mContextSpy;
     private OffsettableClock mClock;
     private TestLooper mTestLooper;
 
@@ -89,7 +87,6 @@ public class LogcatManagerServiceTest {
         when(mActivityManagerInternalMock.getInstrumentationSourceUid(anyInt()))
                 .thenReturn(INVALID_UID);
 
-        mContextSpy = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         mClock = new OffsettableClock.Stopped();
         mTestLooper = new TestLooper(mClock::now);
         when(mContextSpy.getPackageManager()).thenReturn(mPackageManagerMock);

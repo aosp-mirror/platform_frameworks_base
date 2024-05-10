@@ -36,6 +36,7 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -47,6 +48,7 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.vcn.Flags;
 import android.net.vcn.IVcnManagementService;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
@@ -68,6 +70,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -162,6 +165,8 @@ import java.util.concurrent.TimeUnit;
 // TODO(b/180451994): ensure all incoming + outgoing calls have a cleared calling identity
 public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull private static final String TAG = VcnManagementService.class.getSimpleName();
+    @NonNull private static final String CONTEXT_ATTRIBUTION_TAG = "VCN";
+
     private static final long DUMP_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(5);
     private static final int LOCAL_LOG_LINE_COUNT = 512;
 
@@ -223,7 +228,9 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     VcnManagementService(@NonNull Context context, @NonNull Dependencies deps) {
-        mContext = requireNonNull(context, "Missing context");
+        mContext =
+                requireNonNull(context, "Missing context")
+                        .createAttributionContext(CONTEXT_ATTRIBUTION_TAG);
         mDeps = requireNonNull(deps, "Missing dependencies");
 
         mLooper = mDeps.getLooper();
@@ -427,6 +434,8 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         mTelephonySubscriptionTracker.register();
     }
 
+    // The system server automatically has the required permissions for #getMainUser()
+    @SuppressLint("AndroidFrameworkRequiresPermission")
     private void enforcePrimaryUser() {
         final int uid = mDeps.getBinderCallingUid();
         if (uid == Process.SYSTEM_UID) {
@@ -434,7 +443,20 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                     "Calling identity was System Server. Was Binder calling identity cleared?");
         }
 
-        if (!UserHandle.getUserHandleForUid(uid).isSystem()) {
+        final UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
+
+        if (Flags.enforceMainUser()) {
+            final UserManager userManager = mContext.getSystemService(UserManager.class);
+
+            Binder.withCleanCallingIdentity(
+                    () -> {
+                        if (!Objects.equals(userManager.getMainUser(), userHandle)) {
+                            throw new SecurityException(
+                                    "VcnManagementService can only be used by callers running as"
+                                            + " the main user");
+                        }
+                    });
+        } else if (!userHandle.isSystem()) {
             throw new SecurityException(
                     "VcnManagementService can only be used by callers running as the primary user");
         }
@@ -452,7 +474,13 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         final List<SubscriptionInfo> subscriptionInfos = new ArrayList<>();
         Binder.withCleanCallingIdentity(
                 () -> {
-                    subscriptionInfos.addAll(subMgr.getSubscriptionsInGroup(subscriptionGroup));
+                    List<SubscriptionInfo> subsInGroup =
+                            subMgr.getSubscriptionsInGroup(subscriptionGroup);
+                    if (subsInGroup == null) {
+                        logWtf("Received null from getSubscriptionsInGroup");
+                        subsInGroup = Collections.emptyList();
+                    }
+                    subscriptionInfos.addAll(subsInGroup);
                 });
 
         for (SubscriptionInfo info : subscriptionInfos) {
@@ -1065,18 +1093,26 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             boolean isRestricted = false;
             synchronized (mLock) {
                 final Vcn vcn = mVcns.get(subGrp);
+                final VcnConfig vcnConfig = mConfigs.get(subGrp);
                 if (vcn != null) {
+                    if (vcnConfig == null) {
+                        // TODO: b/284381334 Investigate for the root cause of this issue
+                        // and handle it properly
+                        logWtf("Vcn instance exists but VcnConfig does not for " + subGrp);
+                    }
+
                     if (vcn.getStatus() == VCN_STATUS_CODE_ACTIVE) {
                         isVcnManagedNetwork = true;
                     }
 
                     final Set<Integer> restrictedTransports = mDeps.getRestrictedTransports(
-                            subGrp, mLastSnapshot, mConfigs.get(subGrp));
+                            subGrp, mLastSnapshot, vcnConfig);
                     for (int restrictedTransport : restrictedTransports) {
                         if (ncCopy.hasTransport(restrictedTransport)) {
-                            if (restrictedTransport == TRANSPORT_CELLULAR) {
-                                // Only make a cell network as restricted when the VCN is in
-                                // active mode.
+                            if (restrictedTransport == TRANSPORT_CELLULAR
+                                    || restrictedTransport == TRANSPORT_TEST) {
+                                // For cell or test network, only mark it as restricted when
+                                // the VCN is in active mode.
                                 isRestricted |= (vcn.getStatus() == VCN_STATUS_CODE_ACTIVE);
                             } else {
                                 isRestricted = true;
@@ -1104,7 +1140,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             final NetworkCapabilities result = ncBuilder.build();
             final VcnUnderlyingNetworkPolicy policy = new VcnUnderlyingNetworkPolicy(
                     mTrackingNetworkCallback
-                            .requiresRestartForImmutableCapabilityChanges(result),
+                            .requiresRestartForImmutableCapabilityChanges(result, linkProperties),
                     result);
 
             logVdbg("getUnderlyingNetworkPolicy() called for caps: " + networkCapabilities
@@ -1354,19 +1390,29 @@ public class VcnManagementService extends IVcnManagementService.Stub {
      * without requiring a Network restart.
      */
     private class TrackingNetworkCallback extends ConnectivityManager.NetworkCallback {
+        private final Object mLockObject = new Object();
         private final Map<Network, NetworkCapabilities> mCaps = new ArrayMap<>();
+        private final Map<Network, LinkProperties> mLinkProperties = new ArrayMap<>();
 
         @Override
         public void onCapabilitiesChanged(Network network, NetworkCapabilities caps) {
-            synchronized (mCaps) {
+            synchronized (mLockObject) {
                 mCaps.put(network, caps);
             }
         }
 
         @Override
+        public void onLinkPropertiesChanged(Network network, LinkProperties lp) {
+            synchronized (mLockObject) {
+                mLinkProperties.put(network, lp);
+            }
+        }
+
+        @Override
         public void onLost(Network network) {
-            synchronized (mCaps) {
+            synchronized (mLockObject) {
                 mCaps.remove(network);
+                mLinkProperties.remove(network);
             }
         }
 
@@ -1393,22 +1439,28 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             return true;
         }
 
-        private boolean requiresRestartForImmutableCapabilityChanges(NetworkCapabilities caps) {
+        private boolean requiresRestartForImmutableCapabilityChanges(
+                NetworkCapabilities caps, LinkProperties lp) {
             if (caps.getSubscriptionIds() == null) {
                 return false;
             }
 
-            synchronized (mCaps) {
-                for (NetworkCapabilities existing : mCaps.values()) {
-                    if (caps.getSubscriptionIds().equals(existing.getSubscriptionIds())
-                            && hasSameTransportsAndCapabilities(caps, existing)) {
-                        // Restart if any immutable capabilities have changed
-                        return existing.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)
+            synchronized (mLockObject) {
+                // Search for an existing network (using interfce names)
+                // TODO: Get network from NetworkFactory (if exists) for this match.
+                for (Entry<Network, LinkProperties> lpEntry : mLinkProperties.entrySet()) {
+                    if (lp.getInterfaceName() != null
+                            && !lp.getInterfaceName().isEmpty()
+                            && Objects.equals(
+                                    lp.getInterfaceName(), lpEntry.getValue().getInterfaceName())) {
+                        return mCaps.get(lpEntry.getKey())
+                                        .hasCapability(NET_CAPABILITY_NOT_RESTRICTED)
                                 != caps.hasCapability(NET_CAPABILITY_NOT_RESTRICTED);
                     }
                 }
             }
 
+            // If no network found, by definition does not need restart.
             return false;
         }
 

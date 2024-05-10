@@ -1,0 +1,5 @@
+package: com.example.bundletool.minimal
+permission: minimal.FIRST_PERMISSION
+uses-permission: name='android.permission.BIND_ACCESSIBILITY_SERVICE' maxSdkVersion='24'
+uses-permission-sdk-23: name='android.permission.RECEIVE_SMS'
+uses-permission: name='android.permission.WRITE_EXTERNAL_STORAGE'

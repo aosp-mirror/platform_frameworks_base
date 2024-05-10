@@ -16,10 +16,10 @@
 
 package com.android.server.am;
 
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPES_MAX_INDEX;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
-import static android.content.pm.ServiceInfo.NUM_OF_FOREGROUND_SERVICE_TYPES;
 import static android.content.pm.ServiceInfo.foregroundServiceTypeToLabel;
 import static android.os.PowerExemptionManager.REASON_DENIED;
 
@@ -645,7 +645,7 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
 
         PackageDurations(int uid, String packageName,
                 MaxTrackingDurationConfig maxTrackingDurationConfig, AppFGSTracker tracker) {
-            super(uid, packageName, NUM_OF_FOREGROUND_SERVICE_TYPES + 1, TAG,
+            super(uid, packageName, FOREGROUND_SERVICE_TYPES_MAX_INDEX + 1, TAG,
                     maxTrackingDurationConfig);
             mEvents[DEFAULT_INDEX] = new LinkedList<>();
             mTracker = tracker;

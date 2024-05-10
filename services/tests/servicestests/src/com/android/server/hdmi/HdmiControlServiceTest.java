@@ -21,7 +21,16 @@ import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
 
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
+import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
+import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
+import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_2;
+import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_3;
+import static com.android.server.hdmi.HdmiControlService.DEVICE_CLEANUP_TIMEOUT;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
+import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_HOTPLUG;
+import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_SCREEN_ON;
+import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_SOUNDBAR_MODE;
+import static com.android.server.hdmi.HdmiControlService.WAKE_UP_SCREEN_ON;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -29,9 +38,14 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -39,10 +53,12 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener;
 import android.hardware.hdmi.IHdmiControlStatusChangeListener;
 import android.hardware.hdmi.IHdmiVendorCommandListener;
+import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Binder;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -57,12 +73,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for {@link HdmiControlService} class.
@@ -79,20 +96,28 @@ public class HdmiControlServiceTest {
     private MockAudioSystemDevice mAudioSystemDeviceSpy;
     private MockPlaybackDevice mPlaybackDeviceSpy;
     private FakeNativeWrapper mNativeWrapper;
+    private HdmiEarcController mHdmiEarcController;
+    private FakeEarcNativeWrapper mEarcNativeWrapper;
     private FakePowerManagerWrapper mPowerManager;
+    private WakeLockWrapper mWakeLockSpy;
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private HdmiPortInfo[] mHdmiPortInfo;
+    private ArrayList<Integer> mLocalDeviceTypes = new ArrayList<>();
+    private static final int PORT_ID_EARC_SUPPORTED = 3;
 
     @Before
     public void setUp() throws Exception {
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
+        mLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_PLAYBACK);
 
-        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy, Collections.emptyList(),
-                new FakeAudioDeviceVolumeManagerWrapper()));
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
+        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy, mLocalDeviceTypes,
+                audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()));
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
 
@@ -105,31 +130,65 @@ public class HdmiControlServiceTest {
 
         mHdmiControlServiceSpy.setIoLooper(mMyLooper);
         mHdmiControlServiceSpy.setHdmiCecConfig(hdmiCecConfig);
+        mHdmiControlServiceSpy.setDeviceConfig(new FakeDeviceConfigWrapper());
         mHdmiControlServiceSpy.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
 
         mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlServiceSpy, mNativeWrapper, mHdmiControlServiceSpy.getAtomWriter());
         mHdmiControlServiceSpy.setCecController(mHdmiCecController);
+        mEarcNativeWrapper = new FakeEarcNativeWrapper();
+        mHdmiEarcController = HdmiEarcController.createWithNativeWrapper(
+                mHdmiControlServiceSpy, mEarcNativeWrapper);
+        mHdmiControlServiceSpy.setEarcController(mHdmiEarcController);
         mHdmiControlServiceSpy.setHdmiMhlController(HdmiMhlControllerStub.create(
                 mHdmiControlServiceSpy));
 
         mLocalDevices.add(mAudioSystemDeviceSpy);
         mLocalDevices.add(mPlaybackDeviceSpy);
-        mHdmiPortInfo = new HdmiPortInfo[4];
+        mHdmiPortInfo = new HdmiPortInfo[5];
         mHdmiPortInfo[0] =
-                new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, 0x2100, true, false, false);
+                new HdmiPortInfo.Builder(1, HdmiPortInfo.PORT_INPUT, 0x2100)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .setEarcSupported(false)
+                        .build();
         mHdmiPortInfo[1] =
-                new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2200, true, false, false);
+                new HdmiPortInfo.Builder(2, HdmiPortInfo.PORT_INPUT, 0x2200)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .setEarcSupported(false)
+                        .build();
         mHdmiPortInfo[2] =
-                new HdmiPortInfo(3, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, false);
+                new HdmiPortInfo.Builder(PORT_ID_EARC_SUPPORTED, HdmiPortInfo.PORT_INPUT, 0x2000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(true)
+                        .setEarcSupported(true)
+                        .build();
         mHdmiPortInfo[3] =
-                new HdmiPortInfo(4, HdmiPortInfo.PORT_INPUT, 0x3000, true, false, false);
+                new HdmiPortInfo.Builder(4, HdmiPortInfo.PORT_INPUT, 0x3000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .setEarcSupported(false)
+                        .build();
+        mHdmiPortInfo[4] =
+                new HdmiPortInfo.Builder(4, HdmiPortInfo.PORT_OUTPUT, 0x3000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .setEarcSupported(false)
+                        .build();
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiControlServiceSpy.initService();
-        mPowerManager = new FakePowerManagerWrapper(mContextSpy);
+        mWakeLockSpy = spy(new FakePowerManagerWrapper.FakeWakeLockWrapper());
+        mPowerManager = new FakePowerManagerWrapper(mContextSpy, mWakeLockSpy);
         mHdmiControlServiceSpy.setPowerManager(mPowerManager);
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mHdmiControlServiceSpy.setEarcSupported(true);
 
         mTestLooper.dispatchAll();
     }
@@ -152,10 +211,80 @@ public class HdmiControlServiceTest {
         doReturn(true).when(mHdmiControlServiceSpy).isStandbyMessageReceived();
 
         mHdmiControlServiceSpy.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+
         assertTrue(mPlaybackDeviceSpy.isStandby());
         assertTrue(mAudioSystemDeviceSpy.isStandby());
         assertTrue(mPlaybackDeviceSpy.isDisabled());
         assertTrue(mAudioSystemDeviceSpy.isDisabled());
+    }
+
+    @Test
+    public void playbackOnlyDevice_onStandbyCompleted_disableCecController() {
+        mLocalDevices.remove(mAudioSystemDeviceSpy);
+        mHdmiControlServiceSpy.clearCecLocalDevices();
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY);
+
+        assertTrue(mNativeWrapper.getIsCecControlEnabled());
+        mHdmiControlServiceSpy.disableCecLocalDevices(
+                new HdmiCecLocalDevice.PendingActionClearedCallback() {
+                    @Override
+                    public void onCleared(HdmiCecLocalDevice device) {
+                        assertTrue(mNativeWrapper.getIsCecControlEnabled());
+                        mHdmiControlServiceSpy.onPendingActionsCleared(
+                                HdmiControlService.STANDBY_SCREEN_OFF);
+                    }
+                });
+        mTestLooper.dispatchAll();
+
+        verify(mPlaybackDeviceSpy, times(1)).invokeStandbyCompletedCallback(any());
+        assertFalse(mNativeWrapper.getIsCecControlEnabled());
+    }
+
+
+    @Test
+    public void playbackAndAudioDevice_onStandbyCompleted_doNotDisableCecController() {
+        mLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY);
+
+        assertTrue(mNativeWrapper.getIsCecControlEnabled());
+        mHdmiControlServiceSpy.disableCecLocalDevices(
+                new HdmiCecLocalDevice.PendingActionClearedCallback() {
+                    @Override
+                    public void onCleared(HdmiCecLocalDevice device) {
+                        assertTrue(mNativeWrapper.getIsCecControlEnabled());
+                        mHdmiControlServiceSpy.onPendingActionsCleared(
+                                HdmiControlService.STANDBY_SCREEN_OFF);
+                    }
+                });
+        mTestLooper.dispatchAll();
+
+        verify(mPlaybackDeviceSpy, times(1)).invokeStandbyCompletedCallback(any());
+        verify(mAudioSystemDeviceSpy, times(1)).invokeStandbyCompletedCallback(any());
+        assertTrue(mNativeWrapper.getIsCecControlEnabled());
+    }
+
+    @Test
+    public void onStandby_acquireAndReleaseWakeLockSuccessfully() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
+                HdmiControlManager.POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM);
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+        doReturn(true).when(mHdmiControlServiceSpy).isStandbyMessageReceived();
+        mTestLooper.dispatchAll();
+
+        assertFalse(mPowerManager.wasWakeLockInstanceCreated());
+        mHdmiControlServiceSpy.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+
+        InOrder inOrder = inOrder(mHdmiControlServiceSpy, mWakeLockSpy);
+        inOrder.verify(mWakeLockSpy, times(1)).acquire(DEVICE_CLEANUP_TIMEOUT);
+        inOrder.verify(mHdmiControlServiceSpy, times(1)).disableCecLocalDevices(any());
+        inOrder.verify(mHdmiControlServiceSpy, times(1))
+                .onPendingActionsCleared(HdmiControlService.STANDBY_SCREEN_OFF);
+        inOrder.verify(mWakeLockSpy, times(1)).release();
+
+        assertTrue(mPowerManager.wasWakeLockInstanceCreated());
     }
 
     @Test
@@ -193,7 +322,7 @@ public class HdmiControlServiceTest {
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
 
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         mNativeWrapper.clearResultMessages();
 
         assertThat(mHdmiControlServiceSpy.getInitialPowerStatus()).isEqualTo(
@@ -226,10 +355,8 @@ public class HdmiControlServiceTest {
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
         mTestLooper.dispatchAll();
 
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         mNativeWrapper.clearResultMessages();
-
-        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
         assertThat(mHdmiControlServiceSpy.getInitialPowerStatus()).isEqualTo(
@@ -285,11 +412,11 @@ public class HdmiControlServiceTest {
         int volumeControlEnabled = HdmiControlManager.VOLUME_CONTROL_ENABLED;
         mHdmiControlServiceSpy.setHdmiCecVolumeControlEnabledInternal(volumeControlEnabled);
 
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
         assertThat(mHdmiControlServiceSpy.getHdmiCecVolumeControl()).isEqualTo(
                 HdmiControlManager.VOLUME_CONTROL_DISABLED);
 
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         assertThat(mHdmiControlServiceSpy.getHdmiCecVolumeControl())
                 .isEqualTo(volumeControlEnabled);
     }
@@ -300,12 +427,12 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE, volumeControlEnabled);
 
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
         assertThat(mHdmiControlServiceSpy.getHdmiCecConfig().getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE)).isEqualTo(
                 volumeControlEnabled);
 
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         assertThat(mHdmiControlServiceSpy.getHdmiCecConfig().getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE)).isEqualTo(
                 volumeControlEnabled);
@@ -320,13 +447,13 @@ public class HdmiControlServiceTest {
         VolumeControlFeatureCallback callback = new VolumeControlFeatureCallback();
         mHdmiControlServiceSpy.addHdmiCecVolumeControlFeatureListener(callback);
 
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
         assertThat(callback.mCallbackReceived).isTrue();
         assertThat(callback.mVolumeControlEnabled).isEqualTo(
                 HdmiControlManager.VOLUME_CONTROL_DISABLED);
 
 
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         assertThat(callback.mVolumeControlEnabled).isEqualTo(
                 HdmiControlManager.VOLUME_CONTROL_ENABLED);
     }
@@ -423,7 +550,7 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         assertThat(mHdmiControlServiceSpy.getCecVersion()).isEqualTo(
                 HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
     }
@@ -433,7 +560,7 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         assertThat(mHdmiControlServiceSpy.getCecVersion()).isEqualTo(
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
     }
@@ -443,14 +570,14 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         assertThat(mHdmiControlServiceSpy.getCecVersion()).isEqualTo(
                 HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
 
         mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         assertThat(mHdmiControlServiceSpy.getCecVersion()).isEqualTo(
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
     }
@@ -460,8 +587,7 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
-        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         mTestLooper.dispatchAll();
 
         mNativeWrapper.onCecMessage(HdmiCecMessageBuilder.buildGiveFeatures(Constants.ADDR_TV,
@@ -479,7 +605,7 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
@@ -501,7 +627,7 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
@@ -518,7 +644,7 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
@@ -625,11 +751,11 @@ public class HdmiControlServiceTest {
     @Test
     public void initCec_statusListener_CecEnabled_CecAvailable_TvOn() {
         HdmiControlStatusCallback hdmiControlStatusCallback = new HdmiControlStatusCallback();
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
         mTestLooper.dispatchAll();
 
         mHdmiControlServiceSpy.addHdmiControlStatusChangeListener(hdmiControlStatusCallback);
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
@@ -648,11 +774,11 @@ public class HdmiControlServiceTest {
     @Test
     public void initCec_statusListener_CecEnabled_CecAvailable_TvStandby() {
         HdmiControlStatusCallback hdmiControlStatusCallback = new HdmiControlStatusCallback();
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
         mTestLooper.dispatchAll();
 
         mHdmiControlServiceSpy.addHdmiControlStatusChangeListener(hdmiControlStatusCallback);
-        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
@@ -669,11 +795,64 @@ public class HdmiControlServiceTest {
     }
 
     @Test
+    public void initCec_statusListener_CecEnabled_CecAvailable_TvTransientToOn() {
+        HdmiControlStatusCallback hdmiControlStatusCallback = new HdmiControlStatusCallback();
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.addHdmiControlStatusChangeListener(hdmiControlStatusCallback);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportPowerStatus =
+                HdmiCecMessageBuilder.buildReportPowerStatus(
+                        Constants.ADDR_TV,
+                        mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress(),
+                        HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON);
+        mNativeWrapper.onCecMessage(reportPowerStatus);
+        mTestLooper.dispatchAll();
+
+        assertThat(hdmiControlStatusCallback.mCecEnabled).isTrue();
+        assertThat(hdmiControlStatusCallback.mCecAvailable).isTrue();
+    }
+
+    @Test
+    public void initCec_statusListener_CecEnabled_CecAvailable_TvTransientToStandby() {
+        HdmiControlStatusCallback hdmiControlStatusCallback = new HdmiControlStatusCallback();
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.addHdmiControlStatusChangeListener(hdmiControlStatusCallback);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportPowerStatus =
+                HdmiCecMessageBuilder.buildReportPowerStatus(
+                        Constants.ADDR_TV,
+                        mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress(),
+                        HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY);
+        mNativeWrapper.onCecMessage(reportPowerStatus);
+        mTestLooper.dispatchAll();
+
+        assertThat(hdmiControlStatusCallback.mCecEnabled).isTrue();
+        assertThat(hdmiControlStatusCallback.mCecAvailable).isTrue();
+    }
+
+    @Test
     public void handleCecCommand_errorParameter_returnsAbortInvalidOperand() {
         // Validity ERROR_PARAMETER. Taken from HdmiCecMessageValidatorTest#isValid_menuStatus
         HdmiCecMessage message = HdmiUtils.buildMessage("80:8D:03");
 
         assertThat(mHdmiControlServiceSpy.handleCecCommand(message))
+                .isEqualTo(Constants.ABORT_INVALID_OPERAND);
+
+        // Validating ERROR_PARAMETER_LONG will generate ABORT_INVALID_OPERAND.
+        // Taken from HdmiCecMessageValidatorTest#isValid_systemAudioModeStatus
+        HdmiCecMessage systemAudioModeStatus = HdmiUtils.buildMessage("40:7E:01:1F:28");
+
+        assertThat(mHdmiControlServiceSpy.handleCecCommand(systemAudioModeStatus))
                 .isEqualTo(Constants.ABORT_INVALID_OPERAND);
     }
 
@@ -813,6 +992,33 @@ public class HdmiControlServiceTest {
         mNativeWrapper.onCecMessage(vendorCommandWithDiffId);
         mTestLooper.dispatchAll();
         assertThat(vendorCmdListener.mVendorCommandCallbackReceived).isFalse();
+    }
+
+    @Test
+    public void multipleVendorCommandListeners_receiveCallback() {
+        int destAddress = mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress();
+        int sourceAddress = Constants.ADDR_TV;
+        byte[] params = {0x00, 0x01, 0x02, 0x03};
+        int vendorId = 0x123456;
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+
+        VendorCommandListener vendorCmdListener =
+                new VendorCommandListener(sourceAddress, destAddress, params, vendorId);
+        VendorCommandListener secondVendorCmdListener =
+                new VendorCommandListener(sourceAddress, destAddress, params, vendorId);
+        mHdmiControlServiceSpy.addVendorCommandListener(vendorCmdListener, vendorId);
+        mHdmiControlServiceSpy.addVendorCommandListener(secondVendorCmdListener, vendorId);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage vendorCommandNoId =
+                HdmiCecMessageBuilder.buildVendorCommand(sourceAddress, destAddress, params);
+        mNativeWrapper.onCecMessage(vendorCommandNoId);
+        mTestLooper.dispatchAll();
+        assertThat(vendorCmdListener.mVendorCommandCallbackReceived).isTrue();
+        assertThat(vendorCmdListener.mParamsCorrect).isTrue();
+
+        assertThat(secondVendorCmdListener.mVendorCommandCallbackReceived).isTrue();
+        assertThat(secondVendorCmdListener.mParamsCorrect).isTrue();
     }
 
     private static class VendorCommandListener extends IHdmiVendorCommandListener.Stub {
@@ -981,6 +1187,525 @@ public class HdmiControlServiceTest {
                 .containsExactly(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM);
     }
 
+    @Test
+    public void setSoundbarMode_enabled_addAudioSystemLocalDevice() {
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+        // Initialize the local devices excluding the audio system.
+        mHdmiControlServiceSpy.clearCecLocalDevices();
+        mLocalDevices.remove(mAudioSystemDeviceSpy);
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNull();
+
+        // Enable the setting and check if the audio system local device is found in the network.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_ENABLED);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNotNull();
+    }
+
+    @Test
+    public void setSoundbarMode_disabled_removeAudioSystemLocalDevice() {
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+        // Initialize the local devices excluding the audio system.
+        mHdmiControlServiceSpy.clearCecLocalDevices();
+        mLocalDevices.remove(mAudioSystemDeviceSpy);
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNull();
+
+        // Enable the setting and check if the audio system local device is found in the network.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_ENABLED);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNotNull();
+
+        // Disable the setting and check if the audio system local device is removed from the
+        // network.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_DISABLED);
+        mTestLooper.dispatchAll();
+
+        // Wait for ArcTerminationActionFromAvr timeout for the logical address allocation to start.
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNull();
+    }
+
+    @Test
+    public void disableEarc_clearEarcLocalDevice() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        mHdmiControlServiceSpy.addEarcLocalDevice(
+                new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy));
+        assertThat(mHdmiControlServiceSpy.getEarcLocalDevice()).isNotNull();
+
+        mHdmiControlServiceSpy.setEarcEnabled(HdmiControlManager.EARC_FEATURE_DISABLED);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.getEarcLocalDevice()).isNull();
+    }
+
+    @Test
+    public void disableEarc_noEarcLocalDevice_enableArc() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        mHdmiControlServiceSpy.addEarcLocalDevice(
+                new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy));
+        mHdmiControlServiceSpy.setEarcEnabled(HdmiControlManager.EARC_FEATURE_DISABLED);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.getEarcLocalDevice()).isNull();
+
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.handleEarcStateChange(Constants.HDMI_EARC_STATUS_ARC_PENDING,
+                PORT_ID_EARC_SUPPORTED);
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyEarcStatusToAudioService(eq(false), eq(new ArrayList<>()));
+        verify(mHdmiControlServiceSpy, times(1)).startArcAction(eq(true), any());
+    }
+
+    @Test
+    public void disableCec_doNotClearEarcLocalDevice() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        mHdmiControlServiceSpy.addEarcLocalDevice(
+                new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy));
+        assertThat(mHdmiControlServiceSpy.getEarcLocalDevice()).isNotNull();
+
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.getEarcLocalDevice()).isNotNull();
+    }
+
+    @Test
+    public void enableCec_initializeCecLocalDevices() {
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1)).initializeCecLocalDevices(anyInt());
+        verify(mHdmiControlServiceSpy, times(0)).initializeEarcLocalDevice(anyInt());
+    }
+
+    @Test
+    public void enableEarc_initializeEarcLocalDevices() {
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.setEarcEnabled(HdmiControlManager.EARC_FEATURE_DISABLED);
+        mTestLooper.dispatchAll();
+        mHdmiControlServiceSpy.setEarcEnabled(HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(0)).initializeCecLocalDevices(anyInt());
+        verify(mHdmiControlServiceSpy, times(1)).initializeEarcLocalDevice(anyInt());
+    }
+
+    @Test
+    public void disableCec_DoNotInformHalAboutEarc() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void disableEarc_informHalAboutEarc() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_DISABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1)).setEarcEnabledInHal(false, false);
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(eq(true), anyBoolean());
+    }
+
+    @Test
+    public void enableCec_DoNotInformHalAboutEarc() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void enableEarc_informHalAboutEarc() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_DISABLED);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1)).setEarcEnabledInHal(true, true);
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(eq(false), anyBoolean());
+    }
+
+    @Test
+    public void bootWithEarcEnabled_informHalAboutEarc() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_ENABLED);
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.initService();
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1)).setEarcEnabledInHal(true, false);
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(eq(false), anyBoolean());
+    }
+
+    @Test
+    public void bootWithEarcDisabled_informHalAboutEarc() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_DISABLED);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.initService();
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1)).setEarcEnabledInHal(false, false);
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(eq(true), anyBoolean());
+    }
+
+    @Test
+    public void wakeUpWithEarcEnabled_informHalAboutEarc() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1)).setEarcEnabledInHal(true, false);
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(eq(false), anyBoolean());
+    }
+
+    @Test
+    public void wakeUpWithEarcDisabled_informHalAboutEarc() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_DISABLED);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1)).setEarcEnabledInHal(false, false);
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(eq(true), anyBoolean());
+    }
+
+    @Test
+    public void triggerMultipleAddressAllocations_uniqueLocalDevicePerDeviceType() {
+        long allocationDelay = TimeUnit.SECONDS.toMillis(60);
+        mHdmiCecController.setLogicalAddressAllocationDelay(allocationDelay);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        // Wake up process that will trigger the address allocation to start.
+        mHdmiControlServiceSpy.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_SCREEN_ON));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mTestLooper.dispatchAll();
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // Hotplug In will trigger the address allocation to start.
+        mHdmiControlServiceSpy.onHotplug(4, true);
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_HOTPLUG));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The first allocation finished. The second allocation is still in progress.
+        HdmiCecLocalDevicePlayback firstAllocatedPlayback = mHdmiControlServiceSpy.playback();
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_SCREEN_ON));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The second allocation finished.
+        HdmiCecLocalDevicePlayback secondAllocatedPlayback = mHdmiControlServiceSpy.playback();
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_HOTPLUG));
+        // Local devices have the same identity.
+        assertTrue(firstAllocatedPlayback == secondAllocatedPlayback);
+    }
+
+    @Test
+    public void triggerMultipleAddressAllocations_keepLastAllocatedAddress() {
+        // First logical address for playback is free.
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.NACK);
+        mTestLooper.dispatchAll();
+
+        long allocationDelay = TimeUnit.SECONDS.toMillis(60);
+        mHdmiCecController.setLogicalAddressAllocationDelay(allocationDelay);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        // Wake up process that will trigger the address allocation to start.
+        mHdmiControlServiceSpy.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_SCREEN_ON));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mTestLooper.dispatchAll();
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+
+        // First logical address for playback is busy.
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_SCREEN_ON));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mTestLooper.dispatchAll();
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The first allocation finished. The second allocation is still in progress.
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_SCREEN_ON));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The second allocation finished. Second logical address for playback is used.
+        HdmiCecLocalDevicePlayback allocatedPlayback = mHdmiControlServiceSpy.playback();
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_SCREEN_ON));
+        assertThat(allocatedPlayback.getDeviceInfo().getLogicalAddress())
+                .isEqualTo(ADDR_PLAYBACK_2);
+    }
+
+    @Test
+    public void triggerMultipleAddressAllocations_toggleSoundbarMode_addThenRemoveAudioSystem() {
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+        long allocationDelay = TimeUnit.SECONDS.toMillis(60);
+        mHdmiCecController.setLogicalAddressAllocationDelay(allocationDelay);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        // Enabling Dynamic soundbar mode will trigger address allocation.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_ENABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // Disabling Dynamic soundbar mode will trigger another address allocation.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_DISABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The first allocation finished. The second allocation is still in progress.
+        // The audio system is present in the network.
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNotNull();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The second allocation finished. The audio system is not present in the network.
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNull();
+    }
+
+    @Test
+    public void triggerMultipleAddressAllocations_toggleSoundbarMode_removeThenAddAudioSystem() {
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+        // Enable the setting and check if the audio system local device is found in the network.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_ENABLED);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNotNull();
+
+        long allocationDelay = TimeUnit.SECONDS.toMillis(60);
+        mHdmiCecController.setLogicalAddressAllocationDelay(allocationDelay);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        // Disabling Dynamic soundbar mode will trigger address allocation.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_DISABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // Enabling Dynamic soundbar mode will trigger another address allocation.
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                HdmiControlManager.SOUNDBAR_MODE_ENABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The first allocation finished. The second allocation is still in progress.
+        // The audio system is not present in the network.
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNull();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+
+        mTestLooper.moveTimeForward(allocationDelay / 2);
+        mTestLooper.dispatchAll();
+        // The second allocation finished. The audio system is present in the network.
+        verify(mHdmiControlServiceSpy, times(1))
+                .notifyAddressAllocated(any(), eq(INITIATED_BY_SOUNDBAR_MODE));
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNotNull();
+    }
+
+    @Test
+    public void failedAddressAllocation_noLocalDevice() {
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_2, SendMessageResult.SUCCESS);
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_3, SendMessageResult.SUCCESS);
+        mNativeWrapper.setPollAddressResponse(ADDR_AUDIO_SYSTEM, SendMessageResult.SUCCESS);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.clearCecLocalDevices();
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiControlServiceSpy.playback()).isNull();
+        assertThat(mHdmiControlServiceSpy.audioSystem()).isNull();
+    }
+
+    @Test
+    public void earcIdle_blocksArcConnection() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_IDLE);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        assertThat(mHdmiControlServiceSpy.earcBlocksArcConnection()).isTrue();
+    }
+
+    @Test
+    public void earcPending_blocksArcConnection() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_EARC_PENDING);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        assertThat(mHdmiControlServiceSpy.earcBlocksArcConnection()).isTrue();
+    }
+
+    @Test
+    public void earcEnabled_blocksArcConnection() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_EARC_CONNECTED);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        assertThat(mHdmiControlServiceSpy.earcBlocksArcConnection()).isTrue();
+    }
+
+    @Test
+    public void arcPending_doesNotBlockArcConnection() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_ARC_PENDING);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        assertThat(mHdmiControlServiceSpy.earcBlocksArcConnection()).isFalse();
+    }
+
+    @Test
+    public void earcStatusBecomesIdle_terminateArc() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_IDLE);
+        verify(mHdmiControlServiceSpy, times(1)).startArcAction(eq(false), any());
+    }
+
+    @Test
+    public void earcStatusBecomesEnabled_doNothing() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_EARC_CONNECTED);
+        verify(mHdmiControlServiceSpy, times(0)).startArcAction(anyBoolean(), any());
+    }
+
+    @Test
+    public void earcStatusBecomesPending_doNothing() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_EARC_PENDING);
+        verify(mHdmiControlServiceSpy, times(0)).startArcAction(anyBoolean(), any());
+    }
+
+    @Test
+    public void earcStatusBecomesNotEnabled_initiateArc() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_ARC_PENDING);
+        verify(mHdmiControlServiceSpy, times(1)).startArcAction(eq(true), any());
+    }
+
+    @Test
+    public void earcStateWasArcPending_becomesEarcPending_terminateArc() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_ARC_PENDING);
+        mTestLooper.dispatchAll();
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_EARC_PENDING);
+        verify(mHdmiControlServiceSpy, times(1)).startArcAction(eq(false), any());
+    }
+
+    @Test
+    public void earcStateWasArcPending_becomesEarcEnabled_terminateArc() {
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        HdmiEarcLocalDeviceTx localDeviceTx = new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.addEarcLocalDevice(localDeviceTx);
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_ARC_PENDING);
+        mTestLooper.dispatchAll();
+        localDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_EARC_CONNECTED);
+        verify(mHdmiControlServiceSpy, times(1)).startArcAction(eq(false), any());
+    }
+
     protected static class MockPlaybackDevice extends HdmiCecLocalDevicePlayback {
 
         private boolean mCanGoToStandby;
@@ -1017,8 +1742,10 @@ public class HdmiControlServiceTest {
         }
 
         @Override
-        protected void onStandby(boolean initiatedByCec, int standbyAction) {
+        protected void onStandby(boolean initiatedByCec, int standbyAction,
+                StandbyCompletedCallback callback) {
             mIsStandby = true;
+            invokeStandbyCompletedCallback(callback);
         }
 
         protected boolean isStandby() {
@@ -1070,8 +1797,10 @@ public class HdmiControlServiceTest {
         }
 
         @Override
-        protected void onStandby(boolean initiatedByCec, int standbyAction) {
+        protected void onStandby(boolean initiatedByCec, int standbyAction,
+                StandbyCompletedCallback callback) {
             mIsStandby = true;
+            invokeStandbyCompletedCallback(callback);
         }
 
         protected boolean isStandby() {

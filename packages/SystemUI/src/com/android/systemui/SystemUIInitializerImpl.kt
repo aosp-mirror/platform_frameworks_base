@@ -17,7 +17,7 @@
 package com.android.systemui
 
 import android.content.Context
-import com.android.systemui.dagger.DaggerGlobalRootComponent
+import com.android.systemui.dagger.DaggerReferenceGlobalRootComponent
 import com.android.systemui.dagger.GlobalRootComponent
 
 /**
@@ -25,6 +25,6 @@ import com.android.systemui.dagger.GlobalRootComponent
  */
 class SystemUIInitializerImpl(context: Context) : SystemUIInitializer(context) {
     override fun getGlobalRootComponentBuilder(): GlobalRootComponent.Builder {
-        return DaggerGlobalRootComponent.builder()
+        return DaggerReferenceGlobalRootComponent.builder()
     }
 }

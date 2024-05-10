@@ -40,6 +40,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -61,9 +62,8 @@ import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.IResultReceiver;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.internal.util.function.pooled.PooledConsumer;
-import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -148,8 +148,6 @@ public class RecentsAnimationController implements DeathRecipient {
 
     @VisibleForTesting
     boolean mIsAddingTaskToTargets;
-    @VisibleForTesting
-    boolean mShouldAttachNavBarToAppDuringTransition;
     private boolean mNavigationBarAttachedToApp;
     private ActivityRecord mNavBarAttachedApp;
 
@@ -161,15 +159,14 @@ public class RecentsAnimationController implements DeathRecipient {
      */
     final AppTransitionListener mAppTransitionListener = new AppTransitionListener() {
         @Override
-        public int onAppTransitionStartingLocked(boolean keyguardGoingAway,
-                boolean keyguardOccluding, long duration, long statusBarAnimationStartTime,
+        public int onAppTransitionStartingLocked(long statusBarAnimationStartTime,
                 long statusBarAnimationDuration) {
             continueDeferredCancel();
             return 0;
         }
 
         @Override
-        public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {
+        public void onAppTransitionCancelledLocked(boolean keyguardGoingAwayCancelled) {
             continueDeferredCancel();
         }
 
@@ -248,7 +245,8 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         @Override
-        public void finish(boolean moveHomeToTop, boolean sendUserLeaveHint) {
+        public void finish(boolean moveHomeToTop, boolean sendUserLeaveHint,
+                IResultReceiver finishCb) {
             ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                     "finish(%b): mCanceled=%b", moveHomeToTop, mCanceled);
             final long token = Binder.clearCallingIdentity();
@@ -260,6 +258,13 @@ public class RecentsAnimationController implements DeathRecipient {
                         : REORDER_MOVE_TO_ORIGINAL_POSITION, sendUserLeaveHint);
             } finally {
                 Binder.restoreCallingIdentity(token);
+            }
+            if (finishCb != null) {
+                try {
+                    finishCb.send(0, new Bundle());
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to report animation finished", e);
+                }
             }
         }
 
@@ -382,8 +387,6 @@ public class RecentsAnimationController implements DeathRecipient {
         mDisplayId = displayId;
         mStatusBar = LocalServices.getService(StatusBarManagerInternal.class);
         mDisplayContent = service.mRoot.getDisplayContent(displayId);
-        mShouldAttachNavBarToAppDuringTransition =
-                mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition();
     }
 
     /**
@@ -404,11 +407,11 @@ public class RecentsAnimationController implements DeathRecipient {
         final Task targetRootTask = mDisplayContent.getDefaultTaskDisplayArea()
                 .getRootTask(WINDOWING_MODE_UNDEFINED, targetActivityType);
         if (targetRootTask != null) {
-            final PooledConsumer c = PooledLambda.obtainConsumer((t, outList) ->
-	            { if (!outList.contains(t)) outList.add(t); }, PooledLambda.__(Task.class),
-                    visibleTasks);
-            targetRootTask.forAllLeafTasks(c, true /* traverseTopToBottom */);
-            c.recycle();
+            targetRootTask.forAllLeafTasks(t -> {
+                if (!visibleTasks.contains(t)) {
+                    visibleTasks.add(t);
+                }
+            }, true /* traverseTopToBottom */);
         }
 
         final int taskCount = visibleTasks.size();
@@ -553,7 +556,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 contentInsets = mTmpRect;
             }
             mRunner.onAnimationStart(mController, appTargets, wallpaperTargets, contentInsets,
-                    null);
+                    null, new Bundle());
             ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                     "startAnimation(): Notify animation start: %s",
                     mPendingAnimations.stream()
@@ -580,7 +583,7 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     private void attachNavigationBarToApp() {
-        if (!mShouldAttachNavBarToAppDuringTransition
+        if (!mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
                 // Skip the case where the nav bar is controlled by fade rotation.
                 || mDisplayContent.getAsyncRotationController() != null) {
             return;
@@ -655,7 +658,7 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     void animateNavigationBarForAppLaunch(long duration) {
-        if (!mShouldAttachNavBarToAppDuringTransition
+        if (!mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
                 // Skip the case where the nav bar is controlled by fade rotation.
                 || mDisplayContent.getAsyncRotationController() != null
                 || mNavigationBarAttachedToApp
@@ -907,7 +910,8 @@ public class RecentsAnimationController implements DeathRecipient {
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
             final Task task = adapter.mTask;
-            snapshotController.recordTaskSnapshot(task, false /* allowSnapshotHome */);
+            if (task.isActivityTypeHome()) continue;
+            snapshotController.recordSnapshot(task);
             final TaskSnapshot snapshot = snapshotController.getSnapshot(task.mTaskId, task.mUserId,
                     false /* restoreFromDisk */, false /* isLowResolution */);
             if (snapshot != null) {
@@ -963,7 +967,8 @@ public class RecentsAnimationController implements DeathRecipient {
         // Restore IME icon only when moving the original app task to front from recents, in case
         // IME icon may missing if the moving task has already been the current focused task.
         if (reorderMode == REORDER_MOVE_TO_ORIGINAL_POSITION && !mIsAddingTaskToTargets) {
-            InputMethodManagerInternal.get().updateImeWindowStatus(false /* disableImeIcon */);
+            InputMethodManagerInternal.get().updateImeWindowStatus(
+                    false /* disableImeIcon */, mDisplayId);
         }
 
         // Update the input windows after the animation is complete
@@ -1017,7 +1022,11 @@ public class RecentsAnimationController implements DeathRecipient {
         synchronized (mService.getWindowManagerLock()) {
             // Clear associated input consumers on runner death
             final InputMonitor inputMonitor = mDisplayContent.getInputMonitor();
-            inputMonitor.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
+            final InputConsumerImpl consumer = inputMonitor.getInputConsumer(
+                    INPUT_CONSUMER_RECENTS_ANIMATION);
+            if (consumer != null) {
+                inputMonitor.destroyInputConsumer(consumer.mToken);
+            }
         }
     }
 

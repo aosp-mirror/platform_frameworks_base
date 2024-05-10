@@ -2,4 +2,7 @@
 <resources>
     <!-- name of the app [CHAR LIMIT=25]-->
     <string name="app_name">Audio Policy APIs Tests</string>
+    <string name="capture_duration_key">captureDurationMs</string>
+    <string name="callback_key">callback</string>
+    <string name="status_key">result</string>
 </resources>

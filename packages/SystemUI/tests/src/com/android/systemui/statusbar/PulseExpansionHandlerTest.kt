@@ -21,17 +21,17 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableView
-import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.mockito.mock
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,33 +51,33 @@ class PulseExpansionHandlerTest : SysuiTestCase() {
     private val collapsedHeight = 300
     private val wakeUpCoordinator: NotificationWakeUpCoordinator = mock()
     private val bypassController: KeyguardBypassController = mock()
-    private val headsUpManager: HeadsUpManagerPhone = mock()
-    private val roundnessManager: NotificationRoundnessManager = mock()
+    private val headsUpManager: HeadsUpManager = mock()
     private val configurationController: ConfigurationController = mock()
     private val statusBarStateController: StatusBarStateController = mock()
     private val falsingManager: FalsingManager = mock()
+    private val shadeInteractor: ShadeInteractor = mock()
     private val lockscreenShadeTransitionController: LockscreenShadeTransitionController = mock()
-    private val falsingCollector: FalsingCollector = mock()
     private val dumpManager: DumpManager = mock()
     private val expandableView: ExpandableView = mock()
 
     @Before
     fun setUp() {
         whenever(expandableView.collapsedHeight).thenReturn(collapsedHeight)
+        whenever(shadeInteractor.isQsExpanded).thenReturn(MutableStateFlow(false))
 
-        pulseExpansionHandler = PulseExpansionHandler(
+        pulseExpansionHandler =
+            PulseExpansionHandler(
                 mContext,
                 wakeUpCoordinator,
                 bypassController,
                 headsUpManager,
-                roundnessManager,
                 configurationController,
                 statusBarStateController,
                 falsingManager,
+                shadeInteractor,
                 lockscreenShadeTransitionController,
-                falsingCollector,
                 dumpManager
-        )
+            )
     }
 
     @Test

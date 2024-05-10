@@ -17,7 +17,6 @@
 package com.android.systemui.accessibility;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
-import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
@@ -45,19 +44,22 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.util.SparseIntArray;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
@@ -72,8 +74,8 @@ import android.widget.ImageView;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 
 import org.junit.After;
 import org.junit.Before;
@@ -100,7 +102,8 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     private AccessibilityManager mAccessibilityManager;
     @Mock
     private SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
-    private SwitchListenerStub mSwitchListener;
+    @Mock
+    private MagnificationModeSwitch.ClickListener mClickListener;
     private TestableWindowManager mWindowManager;
     private ViewPropertyAnimator mViewPropertyAnimator;
     private MagnificationModeSwitch mMagnificationModeSwitch;
@@ -113,7 +116,6 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mContext = Mockito.spy(getContext());
         final WindowManager wm = mContext.getSystemService(WindowManager.class);
-        mSwitchListener = new SwitchListenerStub();
         mWindowManager = spy(new TestableWindowManager(wm));
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
         mContext.addMockSystemService(Context.ACCESSIBILITY_SERVICE, mAccessibilityManager);
@@ -132,7 +134,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         }).when(mSfVsyncFrameProvider).postFrameCallback(
                 any(Choreographer.FrameCallback.class));
         mMagnificationModeSwitch = new MagnificationModeSwitch(mContext, mSpyImageView,
-                mSfVsyncFrameProvider, mSwitchListener);
+                mSfVsyncFrameProvider, mClickListener);
         assertNotNull(mTouchListener);
     }
 
@@ -145,7 +147,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
 
     @Test
     public void removeButton_buttonIsShowing_removeViewAndUnregisterComponentCallbacks() {
-        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
 
         mMagnificationModeSwitch.removeButton();
 
@@ -167,7 +169,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
 
     @Test
     public void showButton_excludeSystemGestureArea() {
-        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
 
         verify(mSpyImageView).setSystemGestureExclusionRects(any(List.class));
     }
@@ -178,7 +180,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         when(mAccessibilityManager.getRecommendedTimeoutMillis(anyInt(), anyInt())).thenReturn(
                 a11yTimeout);
 
-        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
 
         verify(mAccessibilityManager).getRecommendedTimeoutMillis(
                 DEFAULT_FADE_OUT_ANIMATION_DELAY_MS, AccessibilityManager.FLAG_CONTENT_ICONS
@@ -187,8 +189,89 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     }
 
     @Test
+    public void showMagnificationButton_noA11yServicesRunning_postDelayedAnimationsWithTimeout() {
+        final int a11yTimeout = 12345;
+        when(mAccessibilityManager.getRecommendedTimeoutMillis(anyInt(), anyInt())).thenReturn(
+                a11yTimeout);
+        when(mAccessibilityManager.getEnabledAccessibilityServiceList(anyInt()))
+                .thenReturn(List.of());
+
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        verify(mAccessibilityManager).getRecommendedTimeoutMillis(
+                DEFAULT_FADE_OUT_ANIMATION_DELAY_MS, AccessibilityManager.FLAG_CONTENT_ICONS
+                        | AccessibilityManager.FLAG_CONTENT_CONTROLS);
+        verify(mSpyImageView).postOnAnimationDelayed(any(Runnable.class), eq((long) a11yTimeout));
+    }
+
+    @Test
+    public void showMagnificationButton_voiceAccessRunning_noTimeout() {
+        var serviceInfo = createServiceInfoWithName(
+                "com.google.android.apps.accessibility.voiceaccess.JustSpeakService");
+        when(mAccessibilityManager.getEnabledAccessibilityServiceList(anyInt()))
+                .thenReturn(List.of(serviceInfo));
+
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        verify(mSpyImageView, never()).postOnAnimationDelayed(any(Runnable.class), anyLong());
+    }
+
+    @Test
+    public void showMagnificationButton_switchAccessRunning_noTimeout() {
+        var serviceInfo = createServiceInfoWithName(
+                "com.android.switchaccess.SwitchAccessService");
+        when(mAccessibilityManager.getEnabledAccessibilityServiceList(anyInt()))
+                .thenReturn(List.of(serviceInfo));
+
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        verify(mSpyImageView, never()).postOnAnimationDelayed(any(Runnable.class), anyLong());
+    }
+
+    @Test
+    public void showMagnificationButton_switchAccessAndVoiceAccessBothRunning_noTimeout() {
+        var switchAccessServiceInfo = createServiceInfoWithName(
+                "com.android.switchaccess.SwitchAccessService");
+        var voiceAccessServiceInfo = createServiceInfoWithName(
+                "com.google.android.apps.accessibility.voiceaccess.JustSpeakService");
+        when(mAccessibilityManager.getEnabledAccessibilityServiceList(anyInt()))
+                .thenReturn(List.of(switchAccessServiceInfo, voiceAccessServiceInfo));
+
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        verify(mSpyImageView, never()).postOnAnimationDelayed(any(Runnable.class), anyLong());
+    }
+
+    @Test
+    public void showMagnificationButton_someOtherServiceRunning_postDelayedAnimationsWithTimeout() {
+        final int a11yTimeout = 12345;
+        when(mAccessibilityManager.getRecommendedTimeoutMillis(anyInt(), anyInt())).thenReturn(
+                a11yTimeout);
+        var serviceInfo1 = createServiceInfoWithName("com.test.someService1");
+        var serviceInfo2 = createServiceInfoWithName("com.test.someService2");
+        when(mAccessibilityManager.getEnabledAccessibilityServiceList(anyInt()))
+                .thenReturn(List.of(serviceInfo1, serviceInfo2));
+
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        verify(mAccessibilityManager).getRecommendedTimeoutMillis(
+                DEFAULT_FADE_OUT_ANIMATION_DELAY_MS, AccessibilityManager.FLAG_CONTENT_ICONS
+                        | AccessibilityManager.FLAG_CONTENT_CONTROLS);
+        verify(mSpyImageView).postOnAnimationDelayed(any(Runnable.class), eq((long) a11yTimeout));
+    }
+
+    private AccessibilityServiceInfo createServiceInfoWithName(String name) {
+        var resolveInfo = new ResolveInfo();
+        resolveInfo.serviceInfo = new ServiceInfo();
+        resolveInfo.serviceInfo.name = name;
+        var serviceInfo = new AccessibilityServiceInfo();
+        serviceInfo.setResolveInfo(resolveInfo);
+        return serviceInfo;
+    }
+
+    @Test
     public void showMagnificationButton_windowModeAndFadingOut_verifyAnimationEndAction() {
-        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
         executeFadeOutAnimation();
 
         // Verify the end action after fade-out.
@@ -286,7 +369,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     }
 
     @Test
-    public void performSingleTap_fullscreenMode_removeViewAndChangeSettingsValue() {
+    public void performSingleTap_fullscreenMode_callbackTriggered() {
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
         resetAndStubMockImageViewAndAnimator();
 
@@ -298,7 +381,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         mTouchListener.onTouch(mSpyImageView,
                 obtainMotionEvent(downTime, downTime, ACTION_UP, 100, 100));
 
-        verifyTapAction(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        verify(mClickListener).onClick(eq(mContext.getDisplayId()));
     }
 
     @Test
@@ -347,7 +430,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         mTouchListener.onTouch(mSpyImageView, obtainMotionEvent(
                 downTime, downTime, ACTION_UP, 100 + offset, 100));
 
-        assertModeUnchanged();
+        verify(mClickListener, never()).onClick(anyInt());
         assertShowFadingAnimation(FADE_OUT_ALPHA);
     }
 
@@ -363,7 +446,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         mTouchListener.onTouch(mSpyImageView, obtainMotionEvent(
                 downTime, downTime, ACTION_CANCEL, 100, 100));
 
-        assertModeUnchanged();
+        verify(mClickListener, never()).onClick(anyInt());
         assertShowFadingAnimation(FADE_OUT_ALPHA);
     }
 
@@ -383,25 +466,25 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         mTouchListener.onTouch(mSpyImageView, obtainMotionEvent(
                 downTime, downTime, ACTION_CANCEL, 100 + offset, 100));
 
-        assertModeUnchanged();
+        verify(mClickListener, never()).onClick(anyInt());
         assertShowFadingAnimation(FADE_OUT_ALPHA);
     }
 
     @Test
     public void initializeA11yNode_showWindowModeButton_expectedValues() {
-        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
         final AccessibilityNodeInfo nodeInfo = new AccessibilityNodeInfo();
 
         mSpyImageView.onInitializeAccessibilityNodeInfo(nodeInfo);
 
         assertEquals(mContext.getString(R.string.magnification_mode_switch_description),
                 nodeInfo.getContentDescription());
-        assertEquals(mContext.getString(R.string.magnification_mode_switch_state_window),
-                nodeInfo.getStateDescription());
+        assertEquals(mContext.getString(R.string.magnification_mode_switch_state_full_screen),
+                nodeInfo.getStateDescription().toString());
         assertThat(nodeInfo.getActionList(),
                 hasItems(new AccessibilityNodeInfo.AccessibilityAction(
                         ACTION_CLICK.getId(), mContext.getResources().getString(
-                        R.string.magnification_mode_switch_click_label))));
+                        R.string.magnification_open_settings_click_label))));
         assertThat(nodeInfo.getActionList(),
                 hasItems(new AccessibilityNodeInfo.AccessibilityAction(
                         R.id.accessibility_action_move_up, mContext.getResources().getString(
@@ -421,19 +504,19 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     }
 
     @Test
-    public void performClickA11yActions_showWindowModeButton_verifyTapAction() {
-        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+    public void performClickA11yActions_showWindowModeButton_callbackTriggered() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
         resetAndStubMockImageViewAndAnimator();
 
         mSpyImageView.performAccessibilityAction(
                 ACTION_CLICK.getId(), null);
 
-        verifyTapAction(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        verify(mClickListener).onClick(mContext.getDisplayId());
     }
 
     @Test
     public void performMoveLeftA11yAction_showButtonAtRightEdge_moveToLeftEdge() {
-        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
 
         mSpyImageView.performAccessibilityAction(
                 R.id.accessibility_action_move_left, null);
@@ -456,7 +539,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
 
     @Test
     public void showButton_hasAccessibilityWindowTitle() {
-        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
 
         final WindowManager.LayoutParams layoutPrams =
                 mWindowManager.getLayoutParamsFromAttachedView();
@@ -468,7 +551,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
 
     @Test
     public void showButton_registerComponentCallbacks() {
-        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
 
         verify(mContext).registerComponentCallbacks(mMagnificationModeSwitch);
     }
@@ -534,11 +617,6 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         assertEquals(expectedY, mWindowManager.getLayoutParamsFromAttachedView().y);
     }
 
-    private void assertModeUnchanged() {
-        assertEquals(SwitchListenerStub.MODE_INVALID,
-                mSwitchListener.getChangedMode(mContext.getDisplayId()));
-    }
-
     private void assertShowFadingAnimation(float alpha) {
         final ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
         if (alpha == FADE_IN_ALPHA) { // Fade-in
@@ -588,20 +666,6 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         doNothing().when(mViewPropertyAnimator).start();
     }
 
-    /**
-     * Verifies the tap behaviour including the image of the button and the magnification mode.
-     *
-     * @param expectedMode the expected mode after tapping
-     */
-    private void verifyTapAction(int expectedMode) {
-        verify(mViewPropertyAnimator).cancel();
-        verify(mSpyImageView).setImageResource(
-                getIconResId(expectedMode));
-        verify(mWindowManager).removeView(mSpyImageView);
-        final int changedMode = mSwitchListener.getChangedMode(mContext.getDisplayId());
-        assertEquals(expectedMode, changedMode);
-    }
-
     private MotionEvent obtainMotionEvent(long downTime, long eventTime, int action, float x,
             float y) {
         return mMotionEventHelper.obtainMotionEvent(downTime, eventTime, action, x, y);
@@ -623,21 +687,5 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         assertNotNull(layoutParams);
         assertEquals(expectedX, layoutParams.x);
         assertEquals(expectedY, layoutParams.y);
-    }
-
-    private static class SwitchListenerStub implements MagnificationModeSwitch.SwitchListener {
-
-        private static final int MODE_INVALID = -1;
-
-        private final SparseIntArray mModes = new SparseIntArray();
-
-        @Override
-        public void onSwitch(int displayId, int magnificationMode) {
-            mModes.put(displayId, magnificationMode);
-        }
-
-        int getChangedMode(int displayId) {
-            return mModes.get(displayId, MODE_INVALID);
-        }
     }
 }

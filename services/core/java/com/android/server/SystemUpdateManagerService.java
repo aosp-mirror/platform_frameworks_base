@@ -38,12 +38,12 @@ import android.os.SystemUpdateManager;
 import android.provider.Settings;
 import android.util.AtomicFile;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -86,9 +86,10 @@ public class SystemUpdateManagerService extends ISystemUpdateManager.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.RECOVERY)
     @Override
     public void updateSystemUpdateInfo(PersistableBundle infoBundle) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.RECOVERY, TAG);
+        updateSystemUpdateInfo_enforcePermission();
 
         int status = infoBundle.getInt(KEY_STATUS, STATUS_UNKNOWN);
         if (status == STATUS_UNKNOWN) {

@@ -31,22 +31,20 @@ import android.os.Process;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.util.ArrayMap;
-import android.util.Dumpable;
-import android.util.DumpableContainer;
 import android.util.Log;
 import android.util.TimingsTraceLog;
 import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
+import android.view.View;
 
+import com.android.systemui.res.R;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.NotificationChannels;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -57,25 +55,19 @@ import javax.inject.Provider;
  * Application class for SystemUI.
  */
 public class SystemUIApplication extends Application implements
-        SystemUIAppComponentFactory.ContextInitializer, DumpableContainer {
+        SystemUIAppComponentFactoryBase.ContextInitializer {
 
     public static final String TAG = "SystemUIService";
     private static final boolean DEBUG = false;
 
     private BootCompleteCacheImpl mBootCompleteCache;
-    private DumpManager mDumpManager;
-
-    /**
-     * Map of dumpables added externally.
-     */
-    private final ArrayMap<String, Dumpable> mDumpables = new ArrayMap<>();
 
     /**
      * Hold a reference on the stuff we start.
      */
     private CoreStartable[] mServices;
     private boolean mServicesStarted;
-    private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
+    private SystemUIAppComponentFactoryBase.ContextAvailableCallback mContextAvailableCallback;
     private SysUIComponent mSysUIComponent;
     private SystemUIInitializer mInitializer;
 
@@ -113,8 +105,18 @@ public class SystemUIApplication extends Application implements
         // the theme set there.
         setTheme(R.style.Theme_SystemUI);
 
+        View.setTraceLayoutSteps(
+                SystemProperties.getBoolean("persist.debug.trace_layouts", false));
+        View.setTracedRequestLayoutClassClass(
+                SystemProperties.get("persist.debug.trace_request_layout_class", null));
+
+        if (Flags.enableLayoutTracing()) {
+            View.setTraceLayoutSteps(true);
+        }
+
         if (Process.myUserHandle().equals(UserHandle.SYSTEM)) {
-            IntentFilter bootCompletedFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+            IntentFilter bootCompletedFilter = new
+                    IntentFilter(Intent.ACTION_LOCKED_BOOT_COMPLETED);
             bootCompletedFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 
             // If SF GPU context priority is set to realtime, then SysUI should run at high.
@@ -139,7 +141,7 @@ public class SystemUIApplication extends Application implements
                     if (mServicesStarted) {
                         final int N = mServices.length;
                         for (int i = 0; i < N; i++) {
-                            mServices[i].onBootCompleted();
+                            notifyBootCompleted(mServices[i]);
                         }
                     }
                 }
@@ -227,7 +229,7 @@ public class SystemUIApplication extends Application implements
             }
         }
 
-        mDumpManager = mSysUIComponent.createDumpManager();
+        DumpManager dumpManager = mSysUIComponent.createDumpManager();
 
         Log.v(TAG, "Starting SystemUI services for user " +
                 Process.myUserHandle().getIdentifier() + ".");
@@ -257,11 +259,16 @@ public class SystemUIApplication extends Application implements
         }
 
         for (i = 0; i < mServices.length; i++) {
+            final CoreStartable service = mServices[i];
             if (mBootCompleteCache.isBootComplete()) {
-                mServices[i].onBootCompleted();
+                notifyBootCompleted(service);
             }
 
-            mDumpManager.registerDumpable(mServices[i].getClass().getName(), mServices[i]);
+            if (service.isDumpCritical()) {
+                dumpManager.registerCriticalDumpable(service);
+            } else {
+                dumpManager.registerNormalDumpable(service);
+            }
         }
         mSysUIComponent.getInitController().executePostInitTasks();
         log.traceEnd();
@@ -269,7 +276,17 @@ public class SystemUIApplication extends Application implements
         mServicesStarted = true;
     }
 
-    private void timeInitialization(String clsName, Runnable init, TimingsTraceLog log,
+    private static void notifyBootCompleted(CoreStartable coreStartable) {
+        if (Trace.isEnabled()) {
+            Trace.traceBegin(
+                    Trace.TRACE_TAG_APP,
+                    coreStartable.getClass().getSimpleName() + ".onBootCompleted()");
+        }
+        coreStartable.onBootCompleted();
+        Trace.endSection();
+    }
+
+    private static void timeInitialization(String clsName, Runnable init, TimingsTraceLog log,
             String metricsPrefix) {
         long ti = System.currentTimeMillis();
         log.traceBegin(metricsPrefix + " " + clsName);
@@ -283,74 +300,71 @@ public class SystemUIApplication extends Application implements
         }
     }
 
-    private CoreStartable startAdditionalStartable(String clsName) {
+    private static CoreStartable startAdditionalStartable(String clsName) {
         CoreStartable startable;
         if (DEBUG) Log.d(TAG, "loading: " + clsName);
+        if (Trace.isEnabled()) {
+            Trace.traceBegin(
+                    Trace.TRACE_TAG_APP, clsName + ".newInstance()");
+        }
         try {
-            Constructor<?> constructor = Class.forName(clsName).getConstructor(
-                    Context.class);
-            startable = (CoreStartable) constructor.newInstance(this);
+            startable = (CoreStartable) Class.forName(clsName).newInstance();
         } catch (ClassNotFoundException
-                | NoSuchMethodException
                 | IllegalAccessException
-                | InstantiationException
-                | InvocationTargetException ex) {
+                | InstantiationException ex) {
             throw new RuntimeException(ex);
+        } finally {
+            Trace.endSection();
         }
 
         return startStartable(startable);
     }
 
-    private CoreStartable startStartable(String clsName, Provider<CoreStartable> provider) {
+    private static CoreStartable startStartable(String clsName, Provider<CoreStartable> provider) {
         if (DEBUG) Log.d(TAG, "loading: " + clsName);
-        return startStartable(provider.get());
+        if (Trace.isEnabled()) {
+            Trace.traceBegin(
+                    Trace.TRACE_TAG_APP, "Provider<" + clsName + ">.get()");
+        }
+        CoreStartable startable = provider.get();
+        Trace.endSection();
+        return startStartable(startable);
     }
 
-    private CoreStartable startStartable(CoreStartable startable) {
+    private static CoreStartable startStartable(CoreStartable startable) {
         if (DEBUG) Log.d(TAG, "running: " + startable);
+        if (Trace.isEnabled()) {
+            Trace.traceBegin(
+                    Trace.TRACE_TAG_APP, startable.getClass().getSimpleName() + ".start()");
+        }
         startable.start();
+        Trace.endSection();
 
         return startable;
-    }
-
-    // TODO(b/217567642): add unit tests? There doesn't seem to be a SystemUiApplicationTest...
-    @Override
-    public boolean addDumpable(Dumpable dumpable) {
-        String name = dumpable.getDumpableName();
-        if (mDumpables.containsKey(name)) {
-            // This is normal because SystemUIApplication is an application context that is shared
-            // among multiple components
-            if (DEBUG) {
-                Log.d(TAG, "addDumpable(): ignoring " + dumpable + " as there is already a dumpable"
-                        + " with that name (" + name + "): " + mDumpables.get(name));
-            }
-            return false;
-        }
-        if (DEBUG) Log.d(TAG, "addDumpable(): adding '" + name + "' = " + dumpable);
-        mDumpables.put(name, dumpable);
-
-        // TODO(b/217567642): replace com.android.systemui.dump.Dumpable by
-        // com.android.util.Dumpable and get rid of the intermediate lambda
-        mDumpManager.registerDumpable(dumpable.getDumpableName(), dumpable::dump);
-        return true;
-    }
-
-    // TODO(b/217567642): implement
-    @Override
-    public boolean removeDumpable(Dumpable dumpable) {
-        Log.w(TAG, "removeDumpable(" + dumpable + "): not implemented");
-
-        return false;
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (mServicesStarted) {
-            mSysUIComponent.getConfigurationController().onConfigurationChanged(newConfig);
+            ConfigurationController configController = mSysUIComponent.getConfigurationController();
+            if (Trace.isEnabled()) {
+                Trace.traceBegin(
+                        Trace.TRACE_TAG_APP,
+                        configController.getClass().getSimpleName() + ".onConfigurationChanged()");
+            }
+            configController.onConfigurationChanged(newConfig);
+            Trace.endSection();
             int len = mServices.length;
             for (int i = 0; i < len; i++) {
                 if (mServices[i] != null) {
+                    if (Trace.isEnabled()) {
+                        Trace.traceBegin(
+                                Trace.TRACE_TAG_APP,
+                                mServices[i].getClass().getSimpleName()
+                                        + ".onConfigurationChanged()");
+                    }
                     mServices[i].onConfigurationChanged(newConfig);
+                    Trace.endSection();
                 }
             }
         }
@@ -362,7 +376,7 @@ public class SystemUIApplication extends Application implements
 
     @Override
     public void setContextAvailableCallback(
-            SystemUIAppComponentFactory.ContextAvailableCallback callback) {
+            SystemUIAppComponentFactoryBase.ContextAvailableCallback callback) {
         mContextAvailableCallback = callback;
     }
 

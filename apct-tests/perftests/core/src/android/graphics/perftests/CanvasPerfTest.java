@@ -16,19 +16,28 @@
 
 package android.graphics.perftests;
 
+import static org.junit.Assert.assertTrue;
+
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Color;
+import android.graphics.ImageDecoder;
 import android.graphics.Paint;
 import android.graphics.RecordingCanvas;
 import android.graphics.RenderNode;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
+
+import com.android.perftests.core.R;
 
 import org.junit.Rule;
 import org.junit.Test;
+
+import java.io.IOException;
 
 @LargeTest
 public class CanvasPerfTest {
@@ -91,6 +100,40 @@ public class CanvasPerfTest {
                 canvas.restore();
             }
             node.end(canvas);
+        }
+    }
+
+    @Test
+    public void testCreateScaledBitmap() throws IOException {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final Context context = InstrumentationRegistry.getContext();
+        Bitmap source = ImageDecoder.decodeBitmap(
+                ImageDecoder.createSource(context.getResources(), R.drawable.fountain_night),
+                (decoder, info, source1) -> {
+                    decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
+                });
+        source.setGainmap(null);
+
+        while (state.keepRunning()) {
+            Bitmap.createScaledBitmap(source, source.getWidth() / 2, source.getHeight() / 2, true)
+                    .recycle();
+        }
+    }
+
+    @Test
+    public void testCreateScaledBitmapWithGainmap() throws IOException {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final Context context = InstrumentationRegistry.getContext();
+        Bitmap source = ImageDecoder.decodeBitmap(
+                ImageDecoder.createSource(context.getResources(), R.drawable.fountain_night),
+                (decoder, info, source1) -> {
+                    decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
+                });
+        assertTrue(source.hasGainmap());
+
+        while (state.keepRunning()) {
+            Bitmap.createScaledBitmap(source, source.getWidth() / 2, source.getHeight() / 2, true)
+                    .recycle();
         }
     }
 }

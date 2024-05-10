@@ -77,4 +77,9 @@ public class UnderlineSpan extends CharacterStyle
     public void updateDrawState(@NonNull TextPaint ds) {
         ds.setUnderlineText(true);
     }
+
+    @Override
+    public String toString() {
+        return "UnderlineSpan{}";
+    }
 }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+   <item android:state_selected="true"
+         android:color="@color/language_picker_item_text_color_selected" />
+   <item android:color="@color/language_picker_item_text_color" />
+</selector>

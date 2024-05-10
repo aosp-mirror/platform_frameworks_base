@@ -17,7 +17,8 @@
 #ifndef SkiaInterpolator_DEFINED
 #define SkiaInterpolator_DEFINED
 
-#include "include/private/SkTo.h"
+#include <cstddef>
+#include <cstdint>
 
 class SkiaInterpolatorBase {
 public:
@@ -46,7 +47,9 @@ public:
         @param mirror If true, the odd repeats interpolate from the last key
                       frame and the first.
     */
-    void setMirror(bool mirror) { fFlags = SkToU8((fFlags & ~kMirror) | (int)mirror); }
+    void setMirror(bool mirror) {
+        fFlags = static_cast<uint8_t>((fFlags & ~kMirror) | (int)mirror);
+    }
 
     /** Set the repeat count. The repeat count may be fractional.
         @param repeatCount Multiplies the total time by this scalar.
@@ -57,7 +60,7 @@ public:
         @param reset If true, the odd repeats interpolate from the last key
                      frame and the first.
     */
-    void setReset(bool reset) { fFlags = SkToU8((fFlags & ~kReset) | (int)reset); }
+    void setReset(bool reset) { fFlags = static_cast<uint8_t>((fFlags & ~kReset) | (int)reset); }
 
     Result timeToT(uint32_t time, float* T, int* index, bool* exact) const;
 
@@ -65,19 +68,18 @@ protected:
     enum Flags { kMirror = 1, kReset = 2, kHasBlend = 4 };
     static float ComputeRelativeT(uint32_t time, uint32_t prevTime, uint32_t nextTime,
                                   const float blend[4] = nullptr);
-    int16_t fFrameCount;
-    uint8_t fElemCount;
-    uint8_t fFlags;
-    float fRepeat;
     struct SkTimeCode {
         uint32_t fTime;
         float fBlend[4];
     };
+    static int binarySearch(const SkTimeCode* arr, int count, uint32_t target);
+
+    int16_t fFrameCount;
+    uint8_t fElemCount;
+    uint8_t fFlags;
+    float fRepeat;
     SkTimeCode* fTimes;  // pointer into fStorage
     void* fStorage;
-#ifdef SK_DEBUG
-    SkTimeCode (*fTimesArray)[10];
-#endif
 };
 
 class SkiaInterpolator : public SkiaInterpolatorBase {

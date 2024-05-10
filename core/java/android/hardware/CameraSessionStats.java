@@ -54,6 +54,7 @@ public class CameraSessionStats implements Parcelable {
     private int mApiLevel;
     private boolean mIsNdk;
     private int mLatencyMs;
+    private long mLogId;
     private int mSessionType;
     private int mInternalReconfigure;
     private long mRequestCount;
@@ -63,6 +64,10 @@ public class CameraSessionStats implements Parcelable {
     private ArrayList<CameraStreamStats> mStreamStats;
     private String mUserTag;
     private int mVideoStabilizationMode;
+    private boolean mUsedUltraWide;
+    private boolean mUsedZoomOverride;
+    private int mSessionIndex;
+    private CameraExtensionSessionStats mCameraExtensionSessionStats;
 
     public CameraSessionStats() {
         mFacing = -1;
@@ -70,6 +75,7 @@ public class CameraSessionStats implements Parcelable {
         mApiLevel = -1;
         mIsNdk = false;
         mLatencyMs = -1;
+        mLogId = 0;
         mMaxPreviewFps = 0;
         mSessionType = -1;
         mInternalReconfigure = -1;
@@ -78,11 +84,16 @@ public class CameraSessionStats implements Parcelable {
         mDeviceError = false;
         mStreamStats = new ArrayList<CameraStreamStats>();
         mVideoStabilizationMode = -1;
+        mUsedUltraWide = false;
+        mUsedZoomOverride = false;
+        mSessionIndex = 0;
+        mCameraExtensionSessionStats = new CameraExtensionSessionStats();
     }
 
     public CameraSessionStats(String cameraId, int facing, int newCameraState,
             String clientName, int apiLevel, boolean isNdk, int creationDuration,
-            float maxPreviewFps, int sessionType, int internalReconfigure) {
+            float maxPreviewFps, int sessionType, int internalReconfigure, long logId,
+            int sessionIdx) {
         mCameraId = cameraId;
         mFacing = facing;
         mNewCameraState = newCameraState;
@@ -90,10 +101,16 @@ public class CameraSessionStats implements Parcelable {
         mApiLevel = apiLevel;
         mIsNdk = isNdk;
         mLatencyMs = creationDuration;
+        mLogId = logId;
         mMaxPreviewFps = maxPreviewFps;
         mSessionType = sessionType;
         mInternalReconfigure = internalReconfigure;
         mStreamStats = new ArrayList<CameraStreamStats>();
+        mVideoStabilizationMode = -1;
+        mUsedUltraWide = false;
+        mUsedZoomOverride = false;
+        mSessionIndex = sessionIdx;
+        mCameraExtensionSessionStats = new CameraExtensionSessionStats();
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<CameraSessionStats> CREATOR =
@@ -127,6 +144,7 @@ public class CameraSessionStats implements Parcelable {
         dest.writeInt(mApiLevel);
         dest.writeBoolean(mIsNdk);
         dest.writeInt(mLatencyMs);
+        dest.writeLong(mLogId);
         dest.writeFloat(mMaxPreviewFps);
         dest.writeInt(mSessionType);
         dest.writeInt(mInternalReconfigure);
@@ -136,6 +154,10 @@ public class CameraSessionStats implements Parcelable {
         dest.writeTypedList(mStreamStats);
         dest.writeString(mUserTag);
         dest.writeInt(mVideoStabilizationMode);
+        dest.writeBoolean(mUsedUltraWide);
+        dest.writeBoolean(mUsedZoomOverride);
+        dest.writeInt(mSessionIndex);
+        mCameraExtensionSessionStats.writeToParcel(dest, 0);
     }
 
     public void readFromParcel(Parcel in) {
@@ -146,6 +168,7 @@ public class CameraSessionStats implements Parcelable {
         mApiLevel = in.readInt();
         mIsNdk = in.readBoolean();
         mLatencyMs = in.readInt();
+        mLogId = in.readLong();
         mMaxPreviewFps = in.readFloat();
         mSessionType = in.readInt();
         mInternalReconfigure = in.readInt();
@@ -159,6 +182,12 @@ public class CameraSessionStats implements Parcelable {
 
         mUserTag = in.readString();
         mVideoStabilizationMode = in.readInt();
+
+        mUsedUltraWide = in.readBoolean();
+        mUsedZoomOverride = in.readBoolean();
+
+        mSessionIndex = in.readInt();
+        mCameraExtensionSessionStats = CameraExtensionSessionStats.CREATOR.createFromParcel(in);
     }
 
     public String getCameraId() {
@@ -187,6 +216,10 @@ public class CameraSessionStats implements Parcelable {
 
     public int getLatencyMs() {
         return mLatencyMs;
+    }
+
+    public long getLogId() {
+        return mLogId;
     }
 
     public float getMaxPreviewFps() {
@@ -223,5 +256,21 @@ public class CameraSessionStats implements Parcelable {
 
     public int getVideoStabilizationMode() {
         return mVideoStabilizationMode;
+    }
+
+    public boolean getUsedUltraWide() {
+        return mUsedUltraWide;
+    }
+
+    public boolean getUsedZoomOverride() {
+        return mUsedZoomOverride;
+    }
+
+    public int getSessionIndex() {
+        return mSessionIndex;
+    }
+
+    public CameraExtensionSessionStats getExtensionSessionStats() {
+        return mCameraExtensionSessionStats;
     }
 }

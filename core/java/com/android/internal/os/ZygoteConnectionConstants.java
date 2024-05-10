@@ -41,5 +41,5 @@ public class ZygoteConnectionConstants {
      * WARNING: This may trigger the watchdog in debug mode. However, to support
      *          wrapping on lower-end devices we do not have much choice.
      */
-    public static final int WRAPPED_PID_TIMEOUT_MILLIS = 30000;
+    public static final int WRAPPED_PID_TIMEOUT_MILLIS = 20000;
 }

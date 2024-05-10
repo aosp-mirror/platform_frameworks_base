@@ -27,6 +27,8 @@ import android.os.SystemClock;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.Annotation;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -52,6 +54,7 @@ public final class ThrottleStatus implements Parcelable {
             ThrottleStatus.THROTTLE_TYPE_NONE,
             ThrottleStatus.THROTTLE_TYPE_ELAPSED_TIME,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface ThrottleType {
     }
 
@@ -76,6 +79,7 @@ public final class ThrottleStatus implements Parcelable {
             ThrottleStatus.RETRY_TYPE_NEW_CONNECTION,
             ThrottleStatus.RETRY_TYPE_HANDOVER,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface RetryType {
     }
 

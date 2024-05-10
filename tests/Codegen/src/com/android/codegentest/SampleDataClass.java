@@ -237,6 +237,12 @@ public final class SampleDataClass implements Parcelable {
      */
     private transient LinkAddress[] mLinkAddresses6;
     /**
+     * For hidden lists, getters, setters and adders will be hidden.
+     * @hide
+     */
+    private @NonNull List<LinkAddress> mLinkAddresses7 = new ArrayList<>();
+
+    /**
      * When using transient fields for caching it's often also a good idea to initialize them
      * lazily.
      *
@@ -486,6 +492,8 @@ public final class SampleDataClass implements Parcelable {
      *   Making a field public will suppress getter generation in favor of accessing it directly.
      * @param linkAddresses5
      *   Final fields suppress generating a setter (when setters are requested).
+     * @param linkAddresses7
+     *   For hidden lists, getters, setters and adders will be hidden.
      * @param stringRes
      *   Fields with certain annotations are automatically validated in constructor
      *
@@ -529,9 +537,10 @@ public final class SampleDataClass implements Parcelable {
             @State int state,
             @NonNull CharSequence charSeq,
             @Nullable LinkAddress[] linkAddresses5,
+            @NonNull List<LinkAddress> linkAddresses7,
             @StringRes int stringRes,
             @android.annotation.IntRange(from = 0, to = 6) int dayOfWeek,
-            @Size(2) @NonNull @FloatRange(from = 0f) float[] coords,
+            @Size(2) @NonNull @Each @FloatRange(from = 0f) float[] coords,
             @NonNull IBinder token,
             @Nullable ICompanionDeviceManager iPCInterface) {
         this.mNum = num;
@@ -595,6 +604,9 @@ public final class SampleDataClass implements Parcelable {
         AnnotationValidations.validate(
                 NonNull.class, null, charSeq);
         this.mLinkAddresses5 = linkAddresses5;
+        this.mLinkAddresses7 = linkAddresses7;
+        AnnotationValidations.validate(
+                NonNull.class, null, mLinkAddresses7);
         this.mStringRes = stringRes;
         AnnotationValidations.validate(
                 StringRes.class, null, mStringRes);
@@ -609,13 +621,11 @@ public final class SampleDataClass implements Parcelable {
                 "value", 2);
         AnnotationValidations.validate(
                 NonNull.class, null, mCoords);
-        int coordsSize = mCoords.length;
-        for (int i = 0; i < coordsSize; i++) {
-            AnnotationValidations.validate(
-                    FloatRange.class, null, mCoords[i],
-                    "from", 0f);
-        }
-
+        AnnotationValidations.validate(
+                Each.class, null, mCoords);
+        AnnotationValidations.validate(
+                FloatRange.class, null, mCoords,
+                "from", 0f);
         this.mToken = token;
         AnnotationValidations.validate(
                 NonNull.class, null, mToken);
@@ -777,6 +787,16 @@ public final class SampleDataClass implements Parcelable {
     }
 
     /**
+     * For hidden lists, getters, setters and adders will be hidden.
+     *
+     * @hide
+     */
+    @DataClass.Generated.Member
+    public @NonNull List<LinkAddress> getLinkAddresses7() {
+        return mLinkAddresses7;
+    }
+
+    /**
      * Fields with certain annotations are automatically validated in constructor
      *
      * You can see overloads in {@link AnnotationValidations} for a list of currently
@@ -815,7 +835,7 @@ public final class SampleDataClass implements Parcelable {
      * @see AnnotationValidations#validate(Class, Size, int, String, int)
      */
     @DataClass.Generated.Member
-    public @Size(2) @NonNull @FloatRange(from = 0f) float[] getCoords() {
+    public @Size(2) @NonNull @Each @FloatRange(from = 0f) float[] getCoords() {
         return mCoords;
     }
 
@@ -1065,6 +1085,19 @@ public final class SampleDataClass implements Parcelable {
     }
 
     /**
+     * For hidden lists, getters, setters and adders will be hidden.
+     *
+     * @hide
+     */
+    @DataClass.Generated.Member
+    public @NonNull SampleDataClass setLinkAddresses7(@NonNull List<LinkAddress> value) {
+        mLinkAddresses7 = value;
+        AnnotationValidations.validate(
+                NonNull.class, null, mLinkAddresses7);
+        return this;
+    }
+
+    /**
      * Fields with certain annotations are automatically validated in constructor
      *
      * You can see overloads in {@link AnnotationValidations} for a list of currently
@@ -1111,20 +1144,18 @@ public final class SampleDataClass implements Parcelable {
      * @see AnnotationValidations#validate(Class, Size, int, String, int)
      */
     @DataClass.Generated.Member
-    public @NonNull SampleDataClass setCoords(@Size(2) @NonNull @FloatRange(from = 0f) float... value) {
+    public @NonNull SampleDataClass setCoords(@Size(2) @NonNull @Each @FloatRange(from = 0f) float... value) {
         mCoords = value;
         AnnotationValidations.validate(
                 Size.class, null, mCoords.length,
                 "value", 2);
         AnnotationValidations.validate(
                 NonNull.class, null, mCoords);
-        int coordsSize = mCoords.length;
-        for (int i = 0; i < coordsSize; i++) {
-            AnnotationValidations.validate(
-                    FloatRange.class, null, mCoords[i],
-                    "from", 0f);
-        }
-
+        AnnotationValidations.validate(
+                Each.class, null, mCoords);
+        AnnotationValidations.validate(
+                FloatRange.class, null, mCoords,
+                "from", 0f);
         return this;
     }
 
@@ -1172,6 +1203,7 @@ public final class SampleDataClass implements Parcelable {
                 "state = " + stateToString(mState) + ", " +
                 "charSeq = " + charSeq + ", " +
                 "linkAddresses5 = " + java.util.Arrays.toString(mLinkAddresses5) + ", " +
+                "linkAddresses7 = " + mLinkAddresses7 + ", " +
                 "stringRes = " + mStringRes + ", " +
                 "dayOfWeek = " + mDayOfWeek + ", " +
                 "coords = " + java.util.Arrays.toString(mCoords) + ", " +
@@ -1210,6 +1242,7 @@ public final class SampleDataClass implements Parcelable {
                 && mState == that.mState
                 && Objects.equals(charSeq, that.charSeq)
                 && java.util.Arrays.equals(mLinkAddresses5, that.mLinkAddresses5)
+                && Objects.equals(mLinkAddresses7, that.mLinkAddresses7)
                 && mStringRes == that.mStringRes
                 && mDayOfWeek == that.mDayOfWeek
                 && java.util.Arrays.equals(mCoords, that.mCoords)
@@ -1241,6 +1274,7 @@ public final class SampleDataClass implements Parcelable {
         _hash = 31 * _hash + mState;
         _hash = 31 * _hash + Objects.hashCode(charSeq);
         _hash = 31 * _hash + java.util.Arrays.hashCode(mLinkAddresses5);
+        _hash = 31 * _hash + Objects.hashCode(mLinkAddresses7);
         _hash = 31 * _hash + mStringRes;
         _hash = 31 * _hash + mDayOfWeek;
         _hash = 31 * _hash + java.util.Arrays.hashCode(mCoords);
@@ -1270,6 +1304,7 @@ public final class SampleDataClass implements Parcelable {
         actionInt.acceptInt(this, "state", mState);
         actionObject.acceptObject(this, "charSeq", charSeq);
         actionObject.acceptObject(this, "linkAddresses5", mLinkAddresses5);
+        actionObject.acceptObject(this, "linkAddresses7", mLinkAddresses7);
         actionInt.acceptInt(this, "stringRes", mStringRes);
         actionInt.acceptInt(this, "dayOfWeek", mDayOfWeek);
         actionObject.acceptObject(this, "coords", mCoords);
@@ -1298,6 +1333,7 @@ public final class SampleDataClass implements Parcelable {
         action.acceptObject(this, "state", mState);
         action.acceptObject(this, "charSeq", charSeq);
         action.acceptObject(this, "linkAddresses5", mLinkAddresses5);
+        action.acceptObject(this, "linkAddresses7", mLinkAddresses7);
         action.acceptObject(this, "stringRes", mStringRes);
         action.acceptObject(this, "dayOfWeek", mDayOfWeek);
         action.acceptObject(this, "coords", mCoords);
@@ -1338,7 +1374,7 @@ public final class SampleDataClass implements Parcelable {
         if (mOtherParcelable != null) flg |= 0x40;
         if (mLinkAddresses4 != null) flg |= 0x800;
         if (mLinkAddresses5 != null) flg |= 0x10000;
-        if (mIPCInterface != null) flg |= 0x200000;
+        if (mIPCInterface != null) flg |= 0x400000;
         dest.writeLong(flg);
         dest.writeInt(mNum);
         dest.writeInt(mNum2);
@@ -1357,6 +1393,7 @@ public final class SampleDataClass implements Parcelable {
         dest.writeInt(mState);
         dest.writeCharSequence(charSeq);
         if (mLinkAddresses5 != null) dest.writeTypedArray(mLinkAddresses5, flags);
+        dest.writeParcelableList(mLinkAddresses7, flags);
         dest.writeInt(mStringRes);
         dest.writeInt(mDayOfWeek);
         dest.writeFloatArray(mCoords);
@@ -1395,11 +1432,13 @@ public final class SampleDataClass implements Parcelable {
         int state = in.readInt();
         CharSequence _charSeq = (CharSequence) in.readCharSequence();
         LinkAddress[] linkAddresses5 = (flg & 0x10000) == 0 ? null : (LinkAddress[]) in.createTypedArray(LinkAddress.CREATOR);
+        List<LinkAddress> linkAddresses7 = new ArrayList<>();
+        in.readParcelableList(linkAddresses7, LinkAddress.class.getClassLoader());
         int stringRes = in.readInt();
         int dayOfWeek = in.readInt();
         float[] coords = in.createFloatArray();
         IBinder token = (IBinder) in.readStrongBinder();
-        ICompanionDeviceManager iPCInterface = (flg & 0x200000) == 0 ? null : ICompanionDeviceManager.Stub.asInterface(in.readStrongBinder());
+        ICompanionDeviceManager iPCInterface = (flg & 0x400000) == 0 ? null : ICompanionDeviceManager.Stub.asInterface(in.readStrongBinder());
 
         this.mNum = num;
         this.mNum2 = num2;
@@ -1462,6 +1501,9 @@ public final class SampleDataClass implements Parcelable {
         AnnotationValidations.validate(
                 NonNull.class, null, charSeq);
         this.mLinkAddresses5 = linkAddresses5;
+        this.mLinkAddresses7 = linkAddresses7;
+        AnnotationValidations.validate(
+                NonNull.class, null, mLinkAddresses7);
         this.mStringRes = stringRes;
         AnnotationValidations.validate(
                 StringRes.class, null, mStringRes);
@@ -1476,13 +1518,11 @@ public final class SampleDataClass implements Parcelable {
                 "value", 2);
         AnnotationValidations.validate(
                 NonNull.class, null, mCoords);
-        int coordsSize = mCoords.length;
-        for (int i = 0; i < coordsSize; i++) {
-            AnnotationValidations.validate(
-                    FloatRange.class, null, mCoords[i],
-                    "from", 0f);
-        }
-
+        AnnotationValidations.validate(
+                Each.class, null, mCoords);
+        AnnotationValidations.validate(
+                FloatRange.class, null, mCoords,
+                "from", 0f);
         this.mToken = token;
         AnnotationValidations.validate(
                 NonNull.class, null, mToken);
@@ -1529,9 +1569,10 @@ public final class SampleDataClass implements Parcelable {
         private @State int mState;
         private @NonNull CharSequence charSeq;
         private @Nullable LinkAddress[] mLinkAddresses5;
+        private @NonNull List<LinkAddress> mLinkAddresses7;
         private @StringRes int mStringRes;
         private @android.annotation.IntRange(from = 0, to = 6) int mDayOfWeek;
-        private @Size(2) @NonNull @FloatRange(from = 0f) float[] mCoords;
+        private @Size(2) @NonNull @Each @FloatRange(from = 0f) float[] mCoords;
         private @NonNull IBinder mToken;
         private @Nullable ICompanionDeviceManager mIPCInterface;
 
@@ -1823,6 +1864,30 @@ public final class SampleDataClass implements Parcelable {
         }
 
         /**
+         * For hidden lists, getters, setters and adders will be hidden.
+         *
+         * @hide
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setLinkAddresses7(@NonNull List<LinkAddress> value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x20000;
+            mLinkAddresses7 = value;
+            return this;
+        }
+
+        /** @see #setLinkAddresses7 @hide */
+        @DataClass.Generated.Member
+        public @NonNull Builder addLinkAddresses7(@NonNull LinkAddress value) {
+            // You can refine this method's name by providing item's singular name, e.g.:
+            // @DataClass.PluralOf("item")) mItems = ...
+
+            if (mLinkAddresses7 == null) setLinkAddresses7(new ArrayList<>());
+            mLinkAddresses7.add(value);
+            return this;
+        }
+
+        /**
          * Fields with certain annotations are automatically validated in constructor
          *
          * You can see overloads in {@link AnnotationValidations} for a list of currently
@@ -1837,7 +1902,7 @@ public final class SampleDataClass implements Parcelable {
         @DataClass.Generated.Member
         public @NonNull Builder setStringRes(@StringRes int value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x20000;
+            mBuilderFieldsSet |= 0x40000;
             mStringRes = value;
             return this;
         }
@@ -1852,7 +1917,7 @@ public final class SampleDataClass implements Parcelable {
         @DataClass.Generated.Member
         public @NonNull Builder setDayOfWeek(@android.annotation.IntRange(from = 0, to = 6) int value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x40000;
+            mBuilderFieldsSet |= 0x80000;
             mDayOfWeek = value;
             return this;
         }
@@ -1867,9 +1932,9 @@ public final class SampleDataClass implements Parcelable {
          * @see AnnotationValidations#validate(Class, Size, int, String, int)
          */
         @DataClass.Generated.Member
-        public @NonNull Builder setCoords(@Size(2) @NonNull @FloatRange(from = 0f) float... value) {
+        public @NonNull Builder setCoords(@Size(2) @NonNull @Each @FloatRange(from = 0f) float... value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x80000;
+            mBuilderFieldsSet |= 0x100000;
             mCoords = value;
             return this;
         }
@@ -1880,7 +1945,7 @@ public final class SampleDataClass implements Parcelable {
         @DataClass.Generated.Member
         public @NonNull Builder setToken(@NonNull IBinder value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x100000;
+            mBuilderFieldsSet |= 0x200000;
             mToken = value;
             return this;
         }
@@ -1891,7 +1956,7 @@ public final class SampleDataClass implements Parcelable {
         @DataClass.Generated.Member
         public @NonNull Builder setIPCInterface(@NonNull ICompanionDeviceManager value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x200000;
+            mBuilderFieldsSet |= 0x400000;
             mIPCInterface = value;
             return this;
         }
@@ -1899,7 +1964,7 @@ public final class SampleDataClass implements Parcelable {
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull SampleDataClass build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x400000; // Mark builder used
+            mBuilderFieldsSet |= 0x800000; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x10) == 0) {
                 mName2 = "Bob";
@@ -1935,18 +2000,21 @@ public final class SampleDataClass implements Parcelable {
                 charSeq = "";
             }
             if ((mBuilderFieldsSet & 0x20000) == 0) {
-                mStringRes = 0;
+                mLinkAddresses7 = new ArrayList<>();
             }
             if ((mBuilderFieldsSet & 0x40000) == 0) {
-                mDayOfWeek = 3;
+                mStringRes = 0;
             }
             if ((mBuilderFieldsSet & 0x80000) == 0) {
-                mCoords = new float[] { 0f, 0f };
+                mDayOfWeek = 3;
             }
             if ((mBuilderFieldsSet & 0x100000) == 0) {
-                mToken = new Binder();
+                mCoords = new float[] { 0f, 0f };
             }
             if ((mBuilderFieldsSet & 0x200000) == 0) {
+                mToken = new Binder();
+            }
+            if ((mBuilderFieldsSet & 0x400000) == 0) {
                 mIPCInterface = null;
             }
             SampleDataClass o = new SampleDataClass(
@@ -1967,6 +2035,7 @@ public final class SampleDataClass implements Parcelable {
                     mState,
                     charSeq,
                     mLinkAddresses5,
+                    mLinkAddresses7,
                     mStringRes,
                     mDayOfWeek,
                     mCoords,
@@ -1976,7 +2045,7 @@ public final class SampleDataClass implements Parcelable {
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x400000) != 0) {
+            if ((mBuilderFieldsSet & 0x800000) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }
@@ -1984,10 +2053,10 @@ public final class SampleDataClass implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1616541539978L,
+            time = 1697693846352L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/tests/Codegen/src/com/android/codegentest/SampleDataClass.java",
-            inputSignatures = "public static final  java.lang.String STATE_NAME_UNDEFINED\npublic static final  java.lang.String STATE_NAME_ON\npublic static final  java.lang.String STATE_NAME_OFF\npublic static final  int STATE_ON\npublic static final  int STATE_OFF\npublic static final  int STATE_UNDEFINED\npublic static final @com.android.codegentest.SampleDataClass.RequestFlags int FLAG_MANUAL_REQUEST\npublic static final @com.android.codegentest.SampleDataClass.RequestFlags int FLAG_COMPATIBILITY_MODE_REQUEST\npublic static final @com.android.codegentest.SampleDataClass.RequestFlags int FLAG_AUGMENTED_REQUEST\nprivate  int mNum\nprivate  int mNum2\nprivate  int mNum4\nprivate @android.annotation.Nullable java.lang.String mName\nprivate @android.annotation.NonNull java.lang.String mName2\nprivate @android.annotation.NonNull java.lang.String mName4\nprivate @android.annotation.Nullable android.view.accessibility.AccessibilityNodeInfo mOtherParcelable\nprivate @com.android.internal.util.DataClass.ParcelWith(com.android.codegentest.MyDateParcelling.class) @android.annotation.NonNull java.util.Date mDate\nprivate @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForPattern.class) @android.annotation.NonNull java.util.regex.Pattern mPattern\nprivate @android.annotation.NonNull java.util.List<android.net.LinkAddress> mLinkAddresses2\nprivate @com.android.internal.util.DataClass.PluralOf(\"linkAddress\") @android.annotation.NonNull java.util.ArrayList<android.net.LinkAddress> mLinkAddresses\nprivate @android.annotation.Nullable android.net.LinkAddress[] mLinkAddresses4\nprivate @com.android.codegentest.SampleDataClass.StateName @android.annotation.NonNull java.lang.String mStateName\nprivate @com.android.codegentest.SampleDataClass.RequestFlags int mFlags\nprivate @com.android.codegentest.SampleDataClass.State int mState\npublic @android.annotation.NonNull java.lang.CharSequence charSeq\nprivate final @android.annotation.Nullable android.net.LinkAddress[] mLinkAddresses5\nprivate transient  android.net.LinkAddress[] mLinkAddresses6\ntransient  int[] mTmpStorage\nprivate @android.annotation.StringRes int mStringRes\nprivate @android.annotation.IntRange int mDayOfWeek\nprivate @android.annotation.Size @android.annotation.NonNull @com.android.internal.util.DataClass.Each @android.annotation.FloatRange float[] mCoords\nprivate @android.annotation.NonNull android.os.IBinder mToken\nprivate @android.annotation.Nullable android.companion.ICompanionDeviceManager mIPCInterface\nprivate static  java.lang.String defaultName4()\nprivate  int[] lazyInitTmpStorage()\npublic  android.net.LinkAddress[] getLinkAddresses4()\nprivate  boolean patternEquals(java.util.regex.Pattern)\nprivate  int patternHashCode()\nprivate  void onConstructed()\npublic  void dump(java.io.PrintWriter)\nclass SampleDataClass extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genBuilder=true, genConstructor=true, genEqualsHashCode=true, genToString=true, genForEachField=true, genSetters=true)")
+            inputSignatures = "public static final  java.lang.String STATE_NAME_UNDEFINED\npublic static final  java.lang.String STATE_NAME_ON\npublic static final  java.lang.String STATE_NAME_OFF\npublic static final  int STATE_ON\npublic static final  int STATE_OFF\npublic static final  int STATE_UNDEFINED\npublic static final @com.android.codegentest.SampleDataClass.RequestFlags int FLAG_MANUAL_REQUEST\npublic static final @com.android.codegentest.SampleDataClass.RequestFlags int FLAG_COMPATIBILITY_MODE_REQUEST\npublic static final @com.android.codegentest.SampleDataClass.RequestFlags int FLAG_AUGMENTED_REQUEST\nprivate  int mNum\nprivate  int mNum2\nprivate  int mNum4\nprivate @android.annotation.Nullable java.lang.String mName\nprivate @android.annotation.NonNull java.lang.String mName2\nprivate @android.annotation.NonNull java.lang.String mName4\nprivate @android.annotation.Nullable android.view.accessibility.AccessibilityNodeInfo mOtherParcelable\nprivate @com.android.internal.util.DataClass.ParcelWith(com.android.codegentest.MyDateParcelling.class) @android.annotation.NonNull java.util.Date mDate\nprivate @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForPattern.class) @android.annotation.NonNull java.util.regex.Pattern mPattern\nprivate @android.annotation.NonNull java.util.List<android.net.LinkAddress> mLinkAddresses2\nprivate @com.android.internal.util.DataClass.PluralOf(\"linkAddress\") @android.annotation.NonNull java.util.ArrayList<android.net.LinkAddress> mLinkAddresses\nprivate @android.annotation.Nullable android.net.LinkAddress[] mLinkAddresses4\nprivate @com.android.codegentest.SampleDataClass.StateName @android.annotation.NonNull java.lang.String mStateName\nprivate @com.android.codegentest.SampleDataClass.RequestFlags int mFlags\nprivate @com.android.codegentest.SampleDataClass.State int mState\npublic @android.annotation.NonNull java.lang.CharSequence charSeq\nprivate final @android.annotation.Nullable android.net.LinkAddress[] mLinkAddresses5\nprivate transient  android.net.LinkAddress[] mLinkAddresses6\nprivate @android.annotation.NonNull java.util.List<android.net.LinkAddress> mLinkAddresses7\ntransient  int[] mTmpStorage\nprivate @android.annotation.StringRes int mStringRes\nprivate @android.annotation.IntRange int mDayOfWeek\nprivate @android.annotation.Size @android.annotation.NonNull @com.android.internal.util.DataClass.Each @android.annotation.FloatRange float[] mCoords\nprivate @android.annotation.NonNull android.os.IBinder mToken\nprivate @android.annotation.Nullable android.companion.ICompanionDeviceManager mIPCInterface\nprivate static  java.lang.String defaultName4()\nprivate  int[] lazyInitTmpStorage()\npublic  android.net.LinkAddress[] getLinkAddresses4()\nprivate  boolean patternEquals(java.util.regex.Pattern)\nprivate  int patternHashCode()\nprivate  void onConstructed()\npublic  void dump(java.io.PrintWriter)\nclass SampleDataClass extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genBuilder=true, genConstructor=true, genEqualsHashCode=true, genToString=true, genForEachField=true, genSetters=true)")
     @Deprecated
     private void __metadata() {}
 

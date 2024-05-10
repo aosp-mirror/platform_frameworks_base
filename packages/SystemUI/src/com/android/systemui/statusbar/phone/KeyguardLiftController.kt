@@ -22,14 +22,15 @@ import android.hardware.Sensor
 import android.hardware.TriggerEvent
 import android.hardware.TriggerEventListener
 import com.android.keyguard.ActiveUnlockConfig
-import com.android.keyguard.FaceAuthApiRequestReason
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.CoreStartable
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.Assert
 import com.android.systemui.util.sensors.AsyncSensorManager
 import java.io.PrintWriter
@@ -46,8 +47,10 @@ class KeyguardLiftController @Inject constructor(
     private val statusBarStateController: StatusBarStateController,
     private val asyncSensorManager: AsyncSensorManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    private val dumpManager: DumpManager
-) : Dumpable, CoreStartable(context) {
+    private val keyguardFaceAuthInteractor: KeyguardFaceAuthInteractor,
+    private val dumpManager: DumpManager,
+    private val selectedUserInteractor: SelectedUserInteractor,
+) : Dumpable, CoreStartable {
 
     private val pickupSensor = asyncSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE)
     private var isListening = false
@@ -60,7 +63,7 @@ class KeyguardLiftController @Inject constructor(
     }
 
     private fun init() {
-        dumpManager.registerDumpable(javaClass.name, this)
+        dumpManager.registerDumpable(this)
         statusBarStateController.addCallback(statusBarStateListener)
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
         updateListeningState()
@@ -72,12 +75,9 @@ class KeyguardLiftController @Inject constructor(
             // Not listening anymore since trigger events unregister themselves
             isListening = false
             updateListeningState()
-            keyguardUpdateMonitor.requestFaceAuth(
-                true,
-                FaceAuthApiRequestReason.PICK_UP_GESTURE_TRIGGERED
-            )
+            keyguardFaceAuthInteractor.onDeviceLifted()
             keyguardUpdateMonitor.requestActiveUnlock(
-                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.WAKE,
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE,
                 "KeyguardLiftController")
         }
     }
@@ -88,7 +88,7 @@ class KeyguardLiftController @Inject constructor(
             updateListeningState()
         }
 
-        override fun onKeyguardVisibilityChanged(showing: Boolean) {
+        override fun onKeyguardVisibilityChanged(visible: Boolean) {
             updateListeningState()
         }
     }
@@ -113,8 +113,7 @@ class KeyguardLiftController @Inject constructor(
         val onKeyguard = keyguardUpdateMonitor.isKeyguardVisible &&
                 !statusBarStateController.isDozing
 
-        val userId = KeyguardUpdateMonitor.getCurrentUser()
-        val isFaceEnabled = keyguardUpdateMonitor.isFaceAuthEnabledForUser(userId)
+        val isFaceEnabled = keyguardFaceAuthInteractor.isFaceAuthEnabledAndEnrolled()
         val shouldListen = (onKeyguard || bouncerVisible) && isFaceEnabled
         if (shouldListen != isListening) {
             isListening = shouldListen

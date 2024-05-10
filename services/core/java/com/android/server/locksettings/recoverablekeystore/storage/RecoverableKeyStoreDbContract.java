@@ -98,6 +98,11 @@ class RecoverableKeyStoreDbContract {
          * Serial number for the user which can not be reused. Default value is {@code -1}.
          */
         static final String COLUMN_NAME_USER_SERIAL_NUMBER = "user_serial_number";
+
+        /**
+         * Number of invalid lockscreen credentials guess from a remote device.
+         */
+        static final String COLUMN_NAME_BAD_REMOTE_GUESS_COUNTER = "bad_remote_guess_counter";
     }
 
     /**

@@ -266,4 +266,13 @@ public class ImageSpan extends DynamicDrawableSpan {
     public String getSource() {
         return mSource;
     }
+
+    @Override
+    public String toString() {
+        return "ImageSpan{"
+                + "drawable=" + getDrawable()
+                + ", source='" + getSource() + '\''
+                + ", verticalAlignment=" + getVerticalAlignment()
+                + '}';
+    }
 }

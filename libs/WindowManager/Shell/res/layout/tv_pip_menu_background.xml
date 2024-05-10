@@ -19,10 +19,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <View
+        android:id="@+id/background_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="@dimen/pip_menu_outer_space_frame"
         android:background="@drawable/tv_pip_menu_background"
-        android:elevation="@dimen/pip_menu_elevation"/>
+        android:elevation="@dimen/pip_menu_elevation_no_menu"/>
 </FrameLayout>
 

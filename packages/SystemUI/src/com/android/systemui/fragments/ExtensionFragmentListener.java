@@ -37,9 +37,14 @@ public class ExtensionFragmentListener<T extends FragmentBase> implements Consum
     private final int mId;
     private String mOldClass;
 
-    private ExtensionFragmentListener(View view, String tag, int id, Extension<T> extension) {
+    private ExtensionFragmentListener(
+            FragmentService fragmentService,
+            View view,
+            String tag,
+            int id,
+            Extension<T> extension) {
         mTag = tag;
-        mFragmentHostManager = FragmentHostManager.get(view);
+        mFragmentHostManager = fragmentService.getFragmentHostManager(view);
         mExtension = extension;
         mId = id;
         mFragmentHostManager.getFragmentManager().beginTransaction()
@@ -60,8 +65,13 @@ public class ExtensionFragmentListener<T extends FragmentBase> implements Consum
         mExtension.clearItem(true);
     }
 
-    public static <T> void attachExtensonToFragment(View view, String tag, int id,
+    public static <T> void attachExtensonToFragment(
+            FragmentService fragmentService,
+            View view,
+            String tag,
+            int id,
             Extension<T> extension) {
-        extension.addCallback(new ExtensionFragmentListener(view, tag, id, extension));
+        extension.addCallback(
+                new ExtensionFragmentListener(fragmentService, view, tag, id, extension));
     }
 }

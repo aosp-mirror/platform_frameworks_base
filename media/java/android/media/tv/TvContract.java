@@ -2534,6 +2534,67 @@ public final class TvContract {
          */
         public static final String COLUMN_BROADCAST_GENRE = Programs.COLUMN_BROADCAST_GENRE;
 
+        /**
+         * The broadcast visibility type of this TV channel.
+         *
+         * <p>This is used to indicate the broadcast visibility type defined in the underlying
+         * broadcast standard or country/operator profile, if applicable. For example,
+         * {@code visible_service_flag} and {@code numeric_selection_flag} of
+         * {@code service_attribute_descriptor} in D-Book, {@code visible_service_flag} and
+         * {@code selectable_service_flag} of {@code ciplus_service_descriptor} in CI Plus 1.3
+         * specification.
+         *
+         * <p>The value should match one of the following:
+         * {@link #BROADCAST_VISIBILITY_TYPE_VISIBLE},
+         * {@link #BROADCAST_VISIBILITY_TYPE_NUMERIC_SELECTABLE_ONLY}, and
+         * {@link #BROADCAST_VISIBILITY_TYPE_INVISIBLE}.
+         *
+         * <p>If not specified, this value is set to {@link #BROADCAST_VISIBILITY_TYPE_VISIBLE}
+         * by default.
+         *
+         * <p>Type: INTEGER
+         * @hide
+         */
+        public static final String COLUMN_BROADCAST_VISIBILITY_TYPE = "broadcast_visibility_type";
+
+        /** @hide */
+        @IntDef(prefix = { "BROADCAST_VISIBILITY_TYPE_" }, value = {
+                BROADCAST_VISIBILITY_TYPE_VISIBLE,
+                BROADCAST_VISIBILITY_TYPE_NUMERIC_SELECTABLE_ONLY,
+                BROADCAST_VISIBILITY_TYPE_INVISIBLE,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface BroadcastVisibilityType {}
+
+        /**
+         * The broadcast visibility type for visible services. Use this type when the service is
+         * visible from users and selectable by users via normal service navigation mechanisms.
+         *
+         * @see #COLUMN_BROADCAST_VISIBILITY_TYPE
+         * @hide
+         */
+        public static final int BROADCAST_VISIBILITY_TYPE_VISIBLE = 0;
+
+        /**
+         * The broadcast visibility type for numeric selectable only services. Use this type when
+         * the service is invisible from users but selectable by users only via direct entry of
+         * the logical channel number.
+         *
+         * @see #COLUMN_BROADCAST_VISIBILITY_TYPE
+         * @hide
+         */
+        public static final int BROADCAST_VISIBILITY_TYPE_NUMERIC_SELECTABLE_ONLY = 1;
+
+        /**
+         * The broadcast visibility type for invisible services. Use this type when the service
+         * is invisible from users and unselectable by users via any of normal service navigation
+         * mechanisms.
+         *
+         * @see #COLUMN_BROADCAST_VISIBILITY_TYPE
+         * @hide
+         */
+        public static final int BROADCAST_VISIBILITY_TYPE_INVISIBLE = 2;
+
         private Channels() {}
 
         /**

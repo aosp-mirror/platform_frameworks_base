@@ -91,10 +91,6 @@
     <string name="wifi_disabled_generic">Disabled</string>
     <!-- Status for networked disabled from a DNS or DHCP failure -->
     <string name="wifi_disabled_network_failure">IP Configuration Failure</string>
-    <!-- Status for networks disabled by the network recommendation provider -->
-    <string name="wifi_disabled_by_recommendation_provider">Not connected due to low quality network</string>
-    <!-- Status for networked disabled from a wifi association failure -->
-    <string name="wifi_disabled_wifi_failure">WiFi Connection Failure</string>
     <!-- Status for networks disabled from authentication failure (wrong password
          or certificate). -->
     <string name="wifi_disabled_password_failure">Authentication problem</string>
@@ -114,20 +110,14 @@
     <string name="wifi_no_internet">No internet access</string>
     <!-- Summary for saved networks -->
     <string name="saved_network">Saved by <xliff:g id="name">%1$s</xliff:g></string>
-    <!-- Summary for connect to metered access point [CHAR LIMIT=NONE] -->
-    <string name="connected_to_metered_access_point">Connected to metered network</string>
 
 
     <!-- Status message of Wi-Fi when it is automatically connected by a network recommendation provider. [CHAR LIMIT=NONE] -->
     <string name="connected_via_network_scorer">Automatically connected via %1$s</string>
     <!-- Status message of Wi-Fi when it is automatically connected by a default network recommendation provider. [CHAR LIMIT=NONE] -->
     <string name="connected_via_network_scorer_default">Automatically connected via network rating provider</string>
-    <!-- Status message of Wi-Fi when it is connected by Passpoint configuration. [CHAR LIMIT=NONE] -->
-    <string name="connected_via_passpoint">Connected via %1$s</string>
     <!-- Status message of Wi-Fi when it is connected by a app (via suggestion or network request). [CHAR LIMIT=NONE] -->
     <string name="connected_via_app">Connected via <xliff:g id="name" example="Wifi App">%1$s</xliff:g></string>
-    <!-- Status message of Wi-Fi when network has matching passpoint credentials. [CHAR LIMIT=NONE] -->
-    <string name="available_via_passpoint">Available via %1$s</string>
     <!-- Status message of OSU Provider network when not connected. [CHAR LIMIT=NONE] -->
     <string name="tap_to_sign_up">Tap to sign up</string>
     <!-- Package name for Settings app-->
@@ -153,11 +143,6 @@
     <!-- Summary for networks failing to connect due to association rejection status 17, AP full -->
     <string name="wifi_ap_unable_to_handle_new_sta">Access point temporarily full</string>
 
-    <!-- Status message of Wi-Fi when it is connected to a Carrier Network. [CHAR LIMIT=NONE] -->
-    <string name="connected_via_carrier">Connected via %1$s</string>
-    <!-- Status message of Wi-Fi when an available network is a carrier network. [CHAR LIMIT=NONE] -->
-    <string name="available_via_carrier">Available via %1$s</string>
-
     <!-- Status message of OSU Provider upon initiating provisioning flow [CHAR LIMIT=NONE] -->
     <string name="osu_opening_provider">Opening <xliff:g id="passpointProvider" example="Passpoint Provider">%1$s</xliff:g></string>
     <!-- Status message of OSU Provider when connection fails [CHAR LIMIT=NONE] -->
@@ -169,14 +154,10 @@
     <!-- Status message of OSU Provider on completing provisioning. [CHAR LIMIT=NONE] -->
     <string name="osu_sign_up_complete">Sign-up complete. Connecting\u2026</string>
 
-    <!-- Speed label for very slow network speed -->
-    <string name="speed_label_very_slow">Very Slow</string>
     <!-- Speed label for slow network speed -->
     <string name="speed_label_slow">Slow</string>
     <!-- Speed label for okay network speed -->
     <string name="speed_label_okay">OK</string>
-    <!-- Speed label for medium network speed -->
-    <string name="speed_label_medium">Medium</string>
     <!-- Speed label for fast network speed -->
     <string name="speed_label_fast">Fast</string>
     <!-- Speed label for very fast network speed -->
@@ -203,8 +184,6 @@
     <string name="bluetooth_connected_no_headset">Connected (no phone)<xliff:g id="active_device">%1$s</xliff:g></string>
     <!-- Bluetooth settings.  Message when connected to a device, except for media audio. [CHAR LIMIT=40] -->
     <string name="bluetooth_connected_no_a2dp">Connected (no media)<xliff:g id="active_device">%1$s</xliff:g></string>
-    <!-- Bluetooth settings.  Message when connected to a device, except for map. [CHAR LIMIT=40] -->
-    <string name="bluetooth_connected_no_map">Connected (no message access)<xliff:g id="active_device">%1$s</xliff:g></string>
     <!-- Bluetooth settings.  Message when connected to a device, except for phone/media audio. [CHAR LIMIT=40] -->
     <string name="bluetooth_connected_no_headset_no_a2dp">Connected (no phone or media)<xliff:g id="active_device">%1$s</xliff:g></string>
 
@@ -223,10 +202,18 @@
     <string name="bluetooth_active_battery_level_untethered">Active, L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery</string>
     <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_battery_level"><xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message on TV when Bluetooth is connected but not in use, showing remote device battery level. [CHAR LIMIT=NONE] -->
+    <string name="tv_bluetooth_battery_level">Battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g></string>
     <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for untethered headset. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_battery_level_untethered">L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for the left part of the untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_untethered_left">Left <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for the right part of the untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_untethered_right">Right <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
     <!-- Connected devices settings. Message when Bluetooth is connected and active but no battery information, showing remote device status. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_active_no_battery_level">Active</string>
+    <!-- Connected devices settings. Message shown when bluetooth device is disconnected but is a known, previously connected device [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_saved_device">Saved</string>
 
     <!-- Connected device settings. Message when the left-side hearing aid device is active. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_hearing_aid_left_active">Active, left only</string>
@@ -246,9 +233,9 @@
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PAN profile (accessing Internet through remote device). [CHAR LIMIT=40] -->
     <string name="bluetooth_profile_pan">Internet access</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PBAP profile. [CHAR LIMIT=40] -->
-    <string name="bluetooth_profile_pbap">Contacts and call history sharing</string>
+    <string name="bluetooth_profile_pbap">Allow access to contacts and call history</string>
     <!-- Bluetooth settings. The user-visible summary string that is used whenever referring to the PBAP profile (sharing contacts). [CHAR LIMIT=60] -->
-    <string name="bluetooth_profile_pbap_summary">Use for contacts and call history sharing</string>
+    <string name="bluetooth_profile_pbap_summary">Info will be used for call announcements and more</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PAN profile (sharing this device's Internet connection). [CHAR LIMIT=40] -->
     <string name="bluetooth_profile_pan_nap">Internet connection sharing</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the map profile. -->
@@ -262,12 +249,12 @@
     <!-- Bluetooth settings. Similar to bluetooth_profile_a2dp_high_quality, but used when the device supports high quality audio but we don't know which codec that will be used. -->
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec">HD audio</string>
 
-    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the Hearing Aid profile. -->
-    <string name="bluetooth_profile_hearing_aid">Hearing Aids</string>
+    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the Hearing aid profile. -->
+    <string name="bluetooth_profile_hearing_aid">Hearing aids</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the LE audio profile. -->
-    <string name="bluetooth_profile_le_audio">LE audio</string>
-    <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference when Hearing Aid is connected. -->
-    <string name="bluetooth_hearing_aid_profile_summary_connected">Connected to Hearing Aids</string>
+    <string name="bluetooth_profile_le_audio">LE Audio</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing aid checkbox preference when hearing aid is connected. -->
+    <string name="bluetooth_hearing_aid_profile_summary_connected">Connected to hearing aids</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the LE audio checkbox preference when LE audio is connected. -->
     <string name="bluetooth_le_audio_profile_summary_connected">Connected to LE audio</string>
 
@@ -308,8 +295,8 @@
          for the HID checkbox preference that describes how checking it
          will set the HID profile as preferred. -->
     <string name="bluetooth_hid_profile_summary_use_for">Use for input</string>
-    <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference that describes how checking it will set the Hearing Aid profile as preferred. -->
-    <string name="bluetooth_hearing_aid_profile_summary_use_for">Use for Hearing Aids</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing aid checkbox preference that describes how checking it will set the hearing aid related profile as preferred. -->
+    <string name="bluetooth_hearing_aid_profile_summary_use_for">Use for hearing aids</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the LE_AUDIO checkbox preference that describes how checking it will set the LE_AUDIO profile as preferred. -->
     <string name="bluetooth_le_audio_profile_summary_use_for">Use for LE_AUDIO</string>
 
@@ -366,6 +353,8 @@
     <string name="accessibility_wifi_three_bars">Wifi three bars.</string>
     <!-- Content description of the WIFI signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_signal_full">Wifi signal full.</string>
+    <!-- Content description of the WIFI signal when the WIFI is connected using the signal from a different device owned by the user. For accessibility (not shown on the screen) [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wifi_other_device">Connected to your device.</string>
 
     <!-- Content description of the Wi-Fi security type. This message indicates this is an open Wi-Fi (no password needed) [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_security_type_none">Open network</string>
@@ -488,15 +477,15 @@
 
     <!-- Default speech rate choices -->
     <string-array name="tts_rate_entries">
-        <item>Very slow</item>
-        <item>Slow</item>
-        <item>Normal</item>
-        <item>Fast</item>
-        <item>Faster</item>
-        <item>Very fast</item>
-        <item>Rapid</item>
-        <item>Very rapid</item>
-        <item>Fastest</item>
+        <item>60%</item>
+        <item>80%</item>
+        <item>100%</item>
+        <item>150%</item>
+        <item>200%</item>
+        <item>250%</item>
+        <item>300%</item>
+        <item>350%</item>
+        <item>400%</item>
     </string-array>
     <!-- Do not translate. -->
     <string-array name="tts_rate_values">
@@ -537,6 +526,11 @@
     <string name="category_personal">Personal</string>
     <!-- Header for items under the work user [CHAR LIMIT=30] -->
     <string name="category_work">Work</string>
+    <!-- Header for items under the private profile user [CHAR LIMIT=30] -->
+    <string name="category_private">Private</string>
+    <!-- Header for items under the clone user [CHAR LIMIT=30] -->
+    <string name="category_clone">Clone</string>
+
 
     <!-- Full package name of OEM preferred device feedback reporter. Leave this blank, overlaid in Settings/TvSettings [DO NOT TRANSLATE] -->
     <string name="oem_preferred_feedback_reporter" translatable="false" />
@@ -845,6 +839,11 @@
     <!-- UI debug setting: show touches location summary [CHAR LIMIT=50] -->
     <string name="show_touches_summary">Show visual feedback for taps</string>
 
+    <!-- UI debug setting: show key presses? [CHAR LIMIT=50] -->
+    <string name="show_key_presses">Show key presses</string>
+    <!-- UI debug setting: show physical key presses summary [CHAR LIMIT=150] -->
+    <string name="show_key_presses_summary">Show visual feedback for physical key presses</string>
+
     <!-- UI debug setting: show where surface updates happen? [CHAR LIMIT=25] -->
     <string name="show_screen_updates">Show surface updates</string>
     <!-- UI debug setting: show surface updates summary [CHAR LIMIT=50] -->
@@ -888,6 +887,11 @@
     <string name="force_rtl_layout_all_locales">Force RTL layout direction</string>
     <!-- UI debug setting: force right to left layout summary [CHAR LIMIT=100] -->
     <string name="force_rtl_layout_all_locales_summary">Force screen layout direction to RTL for all locales</string>
+
+    <!-- UI debug setting: make navigation bar background color transparent by default [CHAR LIMIT=50] -->
+    <string name="transparent_navigation_bar">Transparent navigation bar</string>
+    <!-- UI debug setting: make navigation bar background color transparent by default summary [CHAR LIMIT=100] -->
+    <string name="transparent_navigation_bar_summary">Make navigation bar background color transparent by default</string>
 
     <!-- UI debug setting: enable or disable window blurs [CHAR LIMIT=50] -->
     <string name="window_blurs">Allow window-level blurs</string>
@@ -942,7 +946,7 @@
     <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=100] -->
     <string name="show_all_anrs_summary">Display App Not Responding dialog for background apps</string>
 
-    <!-- UI debug setting: show missing channel toasts? [CHAR LIMIT=25] -->
+    <!-- UI debug setting: show missing channel toasts? [CHAR LIMIT=30] -->
     <string name="show_notification_channel_warnings">Show notification channel warnings</string>
     <!-- UI debug setting: show missing channel toasts summary [CHAR LIMIT=50] -->
     <string name="show_notification_channel_warnings_summary">Displays on-screen warning when an app posts a notification without a valid channel</string>
@@ -961,9 +965,6 @@
     <string name="enable_freeform_support">Enable freeform windows</string>
     <!-- UI debug setting: enable freeform window support summary [CHAR LIMIT=150] -->
     <string name="enable_freeform_support_summary">Enable support for experimental freeform windows.</string>
-
-    <!-- UI debug setting: enable desktop mode [CHAR LIMIT=25] -->
-    <string name="desktop_mode">Desktop mode</string>
 
     <!-- Local (desktop) backup password menu title [CHAR LIMIT=25] -->
     <string name="local_backup_password_title">Desktop backup password</string>
@@ -1025,6 +1026,13 @@
 
     <!-- Settings item title to select whether to disable cache for transcoding. [CHAR LIMIT=85] -->
     <string name="transcode_disable_cache">Disable transcoding cache</string>
+
+    <!-- Developer settings title: widevine settings screen. [CHAR LIMIT=50] -->
+    <string name="widevine_settings_title">Widevine settings</string>
+     <!-- Developer settings title: select whether to enable Force L3 fallback. [CHAR LIMIT=50] -->
+    <string name="force_l3_fallback_title">Force L3 fallback</string>
+     <!-- Developer settings summary: select whether to enable Force L3 fallback.[CHAR LIMIT=NONE] -->
+    <string name="force_l3_fallback_summary">Select to force L3 fallback</string>
 
     <!-- Services settings screen, setting option name for the user to go to the screen to view running services -->
     <string name="runningservices_settings_title">Running services</string>
@@ -1105,19 +1113,6 @@
     <!-- Used to let users know that they have more than some amount of battery life remaining. ex: more than 1 day remaining [CHAR LIMIT = 40] -->
     <string name="power_remaining_only_more_than_subtext">More than <xliff:g id="time_remaining">%1$s</xliff:g> left</string>
 
-    <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default">Phone may shut down soon</string>
-    <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet">Tablet may shut down soon</string>
-    <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device">Device may shut down soon</string>
-    <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
-    <string name="power_remaining_duration_shutdown_imminent" product="default">Phone may shut down soon (<xliff:g id="level">%1$s</xliff:g>)</string>
-    <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet">Tablet may shut down soon (<xliff:g id="level">%1$s</xliff:g>)</string>
-    <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
-    <string name="power_remaining_duration_shutdown_imminent" product="device">Device may shut down soon (<xliff:g id="level">%1$s</xliff:g>)</string>
-
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging -->
     <string name="power_charging"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="state">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging -->
@@ -1125,7 +1120,9 @@
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="time">%2$s</xliff:g> left until full</string>
     <!-- [CHAR_LIMIT=80] Label for battery level chart when charge been limited -->
-    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Charging is paused</string>
+    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Charging optimized</string>
+    <!-- [CHAR_LIMIT=80] Label for battery charging future pause -->
+    <string name="power_charging_future_paused"><xliff:g id="level">%1$s</xliff:g> - Charging optimized</string>
 
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_unknown">Unknown</string>
@@ -1263,7 +1260,6 @@
     <!-- Summary to show how many devices are connected in wifi hotspot [CHAR LIMIT=NONE] -->
     <string name="wifi_tether_connected_summary">
         {count, plural,
-            =0    {0 device connected}
             =1    {1 device connected}
             other {# devices connected}
         }
@@ -1276,6 +1272,12 @@
 
     <!-- Button label for generic cancel action [CHAR LIMIT=20] -->
     <string name="cancel">Cancel</string>
+    <!-- Button label for generic next action [CHAR LIMIT=20] -->
+    <string name="next">Next</string>
+    <!-- Button label for generic back action [CHAR LIMIT=20] -->
+    <string name="back">Back</string>
+    <!-- Button label for generic save action [CHAR LIMIT=20] -->
+    <string name="save">Save</string>
     <!-- Button label for generic OK action [CHAR LIMIT=20] -->
     <string name="okay">OK</string>
     <!-- Button label for generic Done action, to be pressed when an action has been completed [CHAR LIMIT=20] -->
@@ -1332,8 +1334,50 @@
     <string name="media_transfer_this_device_name" product="default">This phone</string>
     <!-- Name of the tablet device. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name" product="tablet">This tablet</string>
+    <!-- Name of the default media output of the TV. [CHAR LIMIT=30] -->
+    <string name="media_transfer_this_device_name" product="tv">@string/tv_media_transfer_default</string>
+    <!-- Name of the dock device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_dock_speaker_device_name">Dock speaker</string>
+    <!-- Default name of the external device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_external_device_name">External Device</string>
+    <!-- Default name of the connected device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_default_device_name">Connected device</string>
     <!-- Name of the phone device with an active remote session. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_phone">This phone</string>
+    <!-- Sub status indicates device is not available due to an unknown error. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_unknown_error">Can\’t play on this device</string>
+    <!-- Sub status indicates device need premium account. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_require_premium">Upgrade account to switch</string>
+    <!-- Sub status indicates device not support download content. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_not_support_downloads">Can\’t play downloads here</string>
+    <!-- Sub status indicates device need to wait after ad. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_try_after_ad">Try again after the ad</string>
+    <!-- Sub status indicates device is in low-power mode. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_device_in_low_power_mode">Wake up device to play here</string>
+    <!-- Sub status indicates the device does not authorize the user. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_unauthorized">Device not approved to play</string>
+    <!-- Sub status indicates the device does not support the current media track. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_track_unsupported">Can\’t play this media here</string>
+
+    <!-- Media output switcher. Default subtitle for any output option that is connected if no more information is known [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_connected">Connected</string>
+
+    <!-- TV media output switcher. Title for devices connected through HDMI ARC if no device name is available. [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_arc_fallback_title">HDMI ARC</string>
+    <!-- TV media output switcher. Title for devices connected through HDMI EARC if no device name is available. [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_earc_fallback_title">HDMI eARC</string>
+
+    <!-- TV media output switcher. Subtitle for devices connected through HDMI ARC if a device name is available. [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_arc_subtitle">Connected via ARC</string>
+    <!-- Media output switcher. Subtitle for devices connected through HDMI EARC if a device name is available. [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_earc_subtitle">Connected via eARC</string>
+
+    <!-- TV media output switcher. Title for the default audio output of the device [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_default">TV default</string>
+    <!-- TV media output switcher. Subtitle for default audio output which is HDMI, e.g. TV dongle [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_hdmi">HDMI output</string>
+    <!-- TV media output switcher. Subtitle for default audio output which is internal speaker, i.e. panel VTs [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_internal_speakers">Internal speakers</string>
 
     <!-- Warning message to tell user is have problem during profile connect, it need to turn off device and back on. [CHAR_LIMIT=NONE] -->
     <string name="profile_connect_timeout_subtext">Problem connecting. Turn device off &amp; back on</string>
@@ -1387,6 +1431,12 @@
     <string name="user_add_user_message_long">You can share this device with other people by creating additional users. Each user has their own space, which they can customize with apps, wallpaper, and so on. Users can also adjust device settings like Wi\u2011Fi that affect everyone.\n\nWhen you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. Accessibility settings and services may not transfer to the new user.</string>
     <!-- Message for add user confirmation dialog - short version. [CHAR LIMIT=none] -->
     <string name="user_add_user_message_short">When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. </string>
+    <!-- Title for grant user admin privileges dialog [CHAR LIMIT=65] -->
+    <string name="user_grant_admin_title">Make this user an admin?</string>
+    <!-- Message for grant admin privileges dialog. [CHAR LIMIT=none] -->
+    <string name="user_grant_admin_message">Admins have special privileges that other users don\’t. An admin can manage all users, update or reset this device, modify settings, see all installed apps, and grant or revoke admin privileges for others.</string>
+    <!-- Confirmation button for grant user admin privileges dialog [CHAR LIMIT=65] -->
+    <string name="user_grant_admin_button">Make admin</string>
     <!-- Title of dialog to setup a new user [CHAR LIMIT=30] -->
     <string name="user_setup_dialog_title">Set up user now?</string>
     <!-- Message in dialog to setup a new user after creation [CHAR LIMIT=none] -->
@@ -1453,6 +1503,10 @@
     <!-- Dialog message on action exit guest (ephemeral guest) [CHAR LIMIT=80] -->
     <string name="guest_exit_dialog_message">This will delete
         apps and data from the current guest session</string>
+    <!-- Dialog message on action grant admin privileges [CHAR LIMIT=60] -->
+    <string name="grant_admin">Yes, make them an admin</string>
+    <!-- Dialog message on action not grant admin privileges [CHAR LIMIT=60] -->
+    <string name="not_grant_admin">No, don\’t make them an admin</string>
     <!-- Dialog button on action exit guest (ephemeral guest) [CHAR LIMIT=80] -->
     <string name="guest_exit_dialog_button">Exit</string>
     <!-- Dialog title on action exit guest (non-ephemeral guest) [CHAR LIMIT=32] -->
@@ -1637,4 +1691,16 @@
     <string name="back_navigation_animation_summary">Enable system animations for predictive back.</string>
     <!-- Developer setting: enable animations when a back gesture is executed, full explanation[CHAR LIMIT=NONE] -->
     <string name="back_navigation_animation_dialog">This setting enables system animations for predictive gesture animation. It requires setting per-app "enableOnBackInvokedCallback" to true in the manifest file.</string>
+
+    <!-- Formatting states for the scale of font size, in percent. Double "%" is required to represent the symbol "%". [CHAR LIMIT=20] -->
+    <string name="font_scale_percentage"> <xliff:g id="percentage">%1$d</xliff:g> %%</string>
+
+    <!-- List entry in developer settings to set the grammatical gender to Not specified [CHAR LIMIT=30]-->
+    <string name="not_specified">Not specified</string>
+    <!-- List entry in developer settings to set the grammatical gender to Neuter [CHAR LIMIT=30]-->
+    <string name="neuter">Neuter</string>
+    <!-- List entry in developer settings to set the grammatical gender to Feminine [CHAR LIMIT=30]-->
+    <string name="feminine">Feminine</string>
+    <!-- List entry in developer settings to set the grammatical gender to Masculine [CHAR LIMIT=30]-->
+    <string name="masculine">Masculine</string>
 </resources>

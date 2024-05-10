@@ -119,6 +119,7 @@ instead of:
     }
 </pre>
 */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class UriMatcher
 {
     public static final int NO_MATCH = -1;

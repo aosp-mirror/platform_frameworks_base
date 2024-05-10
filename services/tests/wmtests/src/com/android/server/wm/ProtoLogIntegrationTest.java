@@ -50,17 +50,17 @@ public class ProtoLogIntegrationTest {
         ProtoLogImpl mockedProtoLog = mock(ProtoLogImpl.class);
         runWith(mockedProtoLog, this::testProtoLog);
         verify(mockedProtoLog).log(eq(ProtoLogImpl.LogLevel.ERROR), eq(ProtoLogGroup.TEST_GROUP),
-                anyInt(), eq(0b0010101001010111),
+                anyInt(), eq(0b0010010111),
                 eq(com.android.internal.protolog.ProtoLogGroup.TEST_GROUP.isLogToLogcat()
-                        ? "Test completed successfully: %b %d %o %x %e %g %f %% %s"
+                        ? "Test completed successfully: %b %d %x %f %% %s"
                         : null),
-                eq(new Object[]{true, 1L, 2L, 3L, 0.4, 0.5, 0.6, "ok"}));
+                eq(new Object[]{true, 1L, 2L, 0.3, "ok"}));
     }
 
     private void testProtoLog() {
         ProtoLog.e(ProtoLogGroup.TEST_GROUP,
-                "Test completed successfully: %b %d %o %x %e %g %f %% %s.",
-                true, 1, 2, 3, 0.4, 0.5, 0.6, "ok");
+                "Test completed successfully: %b %d %x %f %% %s",
+                true, 1, 2, 0.3, "ok");
     }
 
     /**

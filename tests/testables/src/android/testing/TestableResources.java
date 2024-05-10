@@ -15,9 +15,11 @@
 package android.testing;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.Log;
 import android.util.SparseArray;
@@ -54,12 +56,23 @@ public class TestableResources {
     }
 
     /**
+     * Sets a configuration for {@link #getResources()} to return to allow custom configs to
+     * be set and tested.
+     *
+     * @param configuration the configuration to return from resources.
+     */
+    public void overrideConfiguration(Configuration configuration) {
+        when(mResources.getConfiguration()).thenReturn(configuration);
+    }
+
+    /**
      * Sets the return value for the specified resource id.
      * <p>
      * Since resource ids are unique there is a single addOverride that will override the value
      * whenever it is gotten regardless of which method is used (i.e. getColor or getDrawable).
      * </p>
-     * @param id The resource id to be overridden
+     *
+     * @param id    The resource id to be overridden
      * @param value The value of the resource, null to cause a {@link Resources.NotFoundException}
      *              when gotten.
      */
@@ -74,28 +87,33 @@ public class TestableResources {
      * cause a {@link Resources.NotFoundException} whereas removing the override will actually
      * switch back to returning the default/real value of the resource.
      * </p>
-     * @param id
      */
     public void removeOverride(int id) {
         mOverrides.remove(id);
     }
 
     private Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-        try {
-            int id = invocationOnMock.getArgument(0);
-            int index = mOverrides.indexOfKey(id);
-            if (index >= 0) {
-                Object value = mOverrides.valueAt(index);
-                if (value == null) throw new Resources.NotFoundException();
-                return value;
+        // Only try to override methods with an integer first argument
+        if (invocationOnMock.getArguments().length > 0) {
+            Object argument = invocationOnMock.getArgument(0);
+            if (argument instanceof Integer) {
+                try {
+                    int id = (Integer)argument;
+                    int index = mOverrides.indexOfKey(id);
+                    if (index >= 0) {
+                        Object value = mOverrides.valueAt(index);
+                        if (value == null) throw new Resources.NotFoundException();
+                        return value;
+                    }
+                } catch (Resources.NotFoundException e) {
+                    // Let through NotFoundException.
+                    throw e;
+                } catch (Throwable t) {
+                    // Generic catching for the many things that can go wrong, fall back to
+                    // the real implementation.
+                    Log.i(TAG, "Falling back to default resources call " + t);
+                }
             }
-        } catch (Resources.NotFoundException e) {
-            // Let through NotFoundException.
-            throw e;
-        } catch (Throwable t) {
-            // Generic catching for the many things that can go wrong, fall back to
-            // the real implementation.
-            Log.i(TAG, "Falling back to default resources call " + t);
         }
         return invocationOnMock.callRealMethod();
     }

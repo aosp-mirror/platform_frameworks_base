@@ -19,6 +19,8 @@
 #include <SkCanvas.h>
 #include <gtest/gtest.h>
 
+class SkRRect;
+
 namespace {
 
 class TestCanvasBase : public SkCanvas {

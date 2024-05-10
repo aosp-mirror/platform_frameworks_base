@@ -17,19 +17,19 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 import android.app.ActivityManager;
 import android.app.Notification;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
@@ -37,15 +37,18 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
+import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.settings.FakeGlobalSettings;
+import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.util.time.SystemClock;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,29 +66,32 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
 
-    protected static final int TEST_MINIMUM_DISPLAY_TIME = 200;
-    protected static final int TEST_AUTO_DISMISS_TIME = 500;
+    protected static final int TEST_MINIMUM_DISPLAY_TIME = 400;
+    protected static final int TEST_AUTO_DISMISS_TIME = 600;
+    protected static final int TEST_STICKY_AUTO_DISMISS_TIME = 800;
     // Number of notifications to use in tests requiring multiple notifications
     private static final int TEST_NUM_NOTIFICATIONS = 4;
-    protected static final int TEST_TIMEOUT_TIME = 15000;
-    protected final Runnable TEST_TIMEOUT_RUNNABLE = () -> mTimedOut = true;
 
-    private AlertingNotificationManager mAlertingNotificationManager;
-
-    protected NotificationEntry mEntry;
-    protected Handler mTestHandler;
-    private StatusBarNotification mSbn;
-    protected boolean mTimedOut = false;
+    protected final FakeGlobalSettings mGlobalSettings = new FakeGlobalSettings();
+    protected final FakeSystemClock mSystemClock = new FakeSystemClock();
+    protected final FakeExecutor mExecutor = new FakeExecutor(mSystemClock);
 
     @Mock protected ExpandableNotificationRow mRow;
 
-    private final class TestableAlertingNotificationManager extends AlertingNotificationManager {
+    static {
+        assertThat(TEST_MINIMUM_DISPLAY_TIME).isLessThan(TEST_AUTO_DISMISS_TIME);
+        assertThat(TEST_AUTO_DISMISS_TIME).isLessThan(TEST_STICKY_AUTO_DISMISS_TIME);
+    }
+
+    private static class TestableAlertingNotificationManager extends AlertingNotificationManager {
         private AlertEntry mLastCreatedEntry;
 
-        private TestableAlertingNotificationManager(Handler handler) {
-            super(mock(HeadsUpManagerLogger.class), handler);
+        private TestableAlertingNotificationManager(SystemClock systemClock,
+                DelayableExecutor executor) {
+            super(new HeadsUpManagerLogger(logcatLogBuffer()), systemClock, executor);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
-            mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
+            mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
+            mStickyForSomeTimeAutoDismissTime = TEST_STICKY_AUTO_DISMISS_TIME;
         }
 
         @Override
@@ -106,11 +112,11 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
         }
     }
 
-    protected AlertingNotificationManager createAlertingNotificationManager(Handler handler) {
-        return new TestableAlertingNotificationManager(handler);
+    protected AlertingNotificationManager createAlertingNotificationManager() {
+        return new TestableAlertingNotificationManager(mSystemClock, mExecutor);
     }
 
-    protected StatusBarNotification createNewSbn(int id, Notification.Builder n) {
+    protected StatusBarNotification createSbn(int id, Notification n) {
         return new StatusBarNotification(
                 TEST_PACKAGE_NAME /* pkg */,
                 TEST_PACKAGE_NAME,
@@ -118,101 +124,104 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
                 null /* tag */,
                 TEST_UID,
                 0 /* initialPid */,
-                n.build(),
+                n,
                 new UserHandle(ActivityManager.getCurrentUser()),
                 null /* overrideGroupKey */,
                 0 /* postTime */);
     }
 
-    protected StatusBarNotification createNewNotification(int id) {
-        Notification.Builder n = new Notification.Builder(mContext, "")
+    protected StatusBarNotification createSbn(int id, Notification.Builder n) {
+        return createSbn(id, n.build());
+    }
+
+    protected StatusBarNotification createSbn(int id) {
+        final Notification.Builder b = new Notification.Builder(mContext, "")
                 .setSmallIcon(R.drawable.ic_person)
                 .setContentTitle("Title")
                 .setContentText("Text");
-        return createNewSbn(id, n);
+        return createSbn(id, b);
     }
 
-    @Before
-    public void setUp() {
-        mTestHandler = Handler.createAsync(Looper.myLooper());
-        mSbn = createNewNotification(0 /* id */);
-        mEntry = new NotificationEntryBuilder()
-                .setSbn(mSbn)
-                .build();
-        mEntry.setRow(mRow);
-
-        mAlertingNotificationManager = createAlertingNotificationManager(mTestHandler);
+    protected NotificationEntry createEntry(int id, Notification n) {
+        return new NotificationEntryBuilder().setSbn(createSbn(id, n)).build();
     }
 
-    @After
-    public void tearDown() {
-        mTestHandler.removeCallbacksAndMessages(null);
+    protected NotificationEntry createEntry(int id) {
+        return new NotificationEntryBuilder().setSbn(createSbn(id)).build();
     }
+
 
     @Test
     public void testShowNotification_addsEntry() {
-        mAlertingNotificationManager.showNotification(mEntry);
+        final AlertingNotificationManager alm = createAlertingNotificationManager();
+        final NotificationEntry entry = createEntry(/* id = */ 0);
 
-        assertTrue(mAlertingNotificationManager.isAlerting(mEntry.getKey()));
-        assertTrue(mAlertingNotificationManager.hasNotifications());
-        assertEquals(mEntry, mAlertingNotificationManager.getEntry(mEntry.getKey()));
+        alm.showNotification(entry);
+
+        assertTrue(alm.isAlerting(entry.getKey()));
+        assertTrue(alm.hasNotifications());
+        assertEquals(entry, alm.getEntry(entry.getKey()));
     }
 
     @Test
     public void testShowNotification_autoDismisses() {
-        mAlertingNotificationManager.showNotification(mEntry);
-        mTestHandler.postDelayed(TEST_TIMEOUT_RUNNABLE, TEST_TIMEOUT_TIME);
+        final AlertingNotificationManager alm = createAlertingNotificationManager();
+        final NotificationEntry entry = createEntry(/* id = */ 0);
 
-        // Wait for remove runnable and then process it immediately
-        TestableLooper.get(this).processMessages(1);
+        alm.showNotification(entry);
+        mSystemClock.advanceTime(TEST_AUTO_DISMISS_TIME * 3 / 2);
 
-        assertFalse("Test timed out", mTimedOut);
-        assertFalse(mAlertingNotificationManager.isAlerting(mEntry.getKey()));
+        assertFalse(alm.isAlerting(entry.getKey()));
     }
 
     @Test
     public void testRemoveNotification_removeDeferred() {
-        mAlertingNotificationManager.showNotification(mEntry);
+        final AlertingNotificationManager alm = createAlertingNotificationManager();
+        final NotificationEntry entry = createEntry(/* id = */ 0);
 
-        // Try to remove but defer, since the notification has not been shown long enough.
-        mAlertingNotificationManager.removeNotification(
-                mEntry.getKey(), false /* releaseImmediately */);
+        alm.showNotification(entry);
 
-        assertTrue(mAlertingNotificationManager.isAlerting(mEntry.getKey()));
+        final boolean removedImmediately = alm.removeNotification(
+                entry.getKey(), /* releaseImmediately = */ false);
+        assertFalse(removedImmediately);
+        assertTrue(alm.isAlerting(entry.getKey()));
     }
 
     @Test
     public void testRemoveNotification_forceRemove() {
-        mAlertingNotificationManager.showNotification(mEntry);
+        final AlertingNotificationManager alm = createAlertingNotificationManager();
+        final NotificationEntry entry = createEntry(/* id = */ 0);
 
-        // Remove forcibly with releaseImmediately = true.
-        mAlertingNotificationManager.removeNotification(
-                mEntry.getKey(), true /* releaseImmediately */);
+        alm.showNotification(entry);
 
-        assertFalse(mAlertingNotificationManager.isAlerting(mEntry.getKey()));
+        final boolean removedImmediately = alm.removeNotification(
+                entry.getKey(), /* releaseImmediately = */ true);
+        assertTrue(removedImmediately);
+        assertFalse(alm.isAlerting(entry.getKey()));
     }
 
     @Test
     public void testReleaseAllImmediately() {
+        final AlertingNotificationManager alm = createAlertingNotificationManager();
         for (int i = 0; i < TEST_NUM_NOTIFICATIONS; i++) {
-            StatusBarNotification sbn = createNewNotification(i);
-            NotificationEntry entry = new NotificationEntryBuilder()
-                    .setSbn(sbn)
-                    .build();
+            final NotificationEntry entry = createEntry(i);
             entry.setRow(mRow);
-            mAlertingNotificationManager.showNotification(entry);
+            alm.showNotification(entry);
         }
 
-        mAlertingNotificationManager.releaseAllImmediately();
+        alm.releaseAllImmediately();
 
-        assertEquals(0, mAlertingNotificationManager.getAllEntries().count());
+        assertEquals(0, alm.getAllEntries().count());
     }
 
     @Test
     public void testCanRemoveImmediately_notShownLongEnough() {
-        mAlertingNotificationManager.showNotification(mEntry);
+        final AlertingNotificationManager alm = createAlertingNotificationManager();
+        final NotificationEntry entry = createEntry(/* id = */ 0);
+
+        alm.showNotification(entry);
 
         // The entry has just been added so we should not remove immediately.
-        assertFalse(mAlertingNotificationManager.canRemoveImmediately(mEntry.getKey()));
+        assertFalse(alm.canRemoveImmediately(entry.getKey()));
     }
 }

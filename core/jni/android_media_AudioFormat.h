@@ -49,6 +49,7 @@
 #define ENCODING_DRA 28
 #define ENCODING_DTS_HD_MA 29
 #define ENCODING_DTS_UHD_P2 30
+#define ENCODING_DSD 31
 
 #define ENCODING_INVALID    0
 #define ENCODING_DEFAULT    1
@@ -122,6 +123,8 @@ static inline audio_format_t audioFormatToNative(int audioFormat)
         return AUDIO_FORMAT_DTS_HD_MA;
     case ENCODING_DTS_UHD_P2:
         return AUDIO_FORMAT_DTS_UHD_P2;
+    case ENCODING_DSD:
+        return AUDIO_FORMAT_DSD;
     default:
         return AUDIO_FORMAT_INVALID;
     }
@@ -201,6 +204,8 @@ static inline int audioFormatFromNative(audio_format_t nativeFormat)
         return ENCODING_DTS_UHD_P2;
     case AUDIO_FORMAT_DEFAULT:
         return ENCODING_DEFAULT;
+    case AUDIO_FORMAT_DSD:
+        return ENCODING_DSD;
     default:
         return ENCODING_INVALID;
     }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <!-- Example with special characters and CDATA -->
+    <data><![CDATA[Some <encoded> data & other "special" characters]]></data>
+    <message>Hello &amp; Welcome!</message>
+</root>

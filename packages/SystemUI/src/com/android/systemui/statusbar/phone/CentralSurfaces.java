@@ -20,18 +20,14 @@ import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIO
 
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.RemoteAnimationAdapter;
 import android.view.View;
-import android.view.ViewGroup;
+import android.window.RemoteTransition;
 import android.window.SplashScreen;
 
 import androidx.annotation.NonNull;
@@ -39,27 +35,21 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.keyguard.AuthKeyguardMessageArea;
-import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.animation.RemoteTransitionAdapter;
+import com.android.systemui.display.data.repository.DisplayMetricsRepository;
 import com.android.systemui.navigationbar.NavigationBarView;
-import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.qs.QSPanelController;
-import com.android.systemui.shade.NotificationPanelViewController;
-import com.android.systemui.shade.NotificationShadeWindowView;
-import com.android.systemui.shade.NotificationShadeWindowViewController;
-import com.android.systemui.statusbar.GestureRecorder;
-import com.android.systemui.statusbar.LightRevealScrim;
-import com.android.systemui.statusbar.NotificationPresenter;
-import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.shared.system.RemoteAnimationRunnerCompat;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.util.Compile;
 
 import java.io.PrintWriter;
 
-public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwner {
+/** */
+public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     boolean MULTIUSER_DEBUG = false;
     // Should match the values in PhoneWindowManager
     String SYSTEM_DIALOG_REASON_KEY = "reason";
@@ -69,13 +59,11 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     String TAG = "CentralSurfaces";
     boolean DEBUG = false;
     boolean SPEW = false;
-    boolean DUMPTRUCK = true; // extra dumpsys info
     boolean DEBUG_GESTURES = false;
     boolean DEBUG_MEDIA_FAKE_ARTWORK = false;
     boolean DEBUG_CAMERA_LIFT = false;
     boolean DEBUG_WINDOW_STATE = false;
-    // additional instrumentation for testing purposes; intended to be left on during development
-    boolean CHATTY = DEBUG;
+    boolean DEBUG_WAKEUP_DELAY = Compile.IS_DEBUG;
     boolean SHOW_LOCKSCREEN_MEDIA_ARTWORK = true;
     String ACTION_FAKE_ARTWORK = "fake_artwork";
     int FADE_KEYGUARD_START_DELAY = 100;
@@ -124,6 +112,7 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
         ActivityOptions options = getDefaultActivityOptions(animationAdapter);
         options.setLaunchDisplayId(displayId);
         options.setCallerDisplayId(displayId);
+        options.setPendingIntentBackgroundActivityLaunchAllowed(true);
         return options.toBundle();
     }
 
@@ -147,6 +136,7 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
                 : ActivityOptions.SourceInfo.TYPE_NOTIFICATION, eventTime);
         options.setLaunchDisplayId(displayId);
         options.setCallerDisplayId(displayId);
+        options.setPendingIntentBackgroundActivityLaunchAllowed(true);
         return options.toBundle();
     }
 
@@ -156,7 +146,9 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
         if (animationAdapter != null) {
             if (ENABLE_SHELL_TRANSITIONS) {
                 options = ActivityOptions.makeRemoteTransition(
-                        RemoteTransitionAdapter.adaptRemoteAnimation(animationAdapter));
+                        new RemoteTransition(
+                                RemoteAnimationRunnerCompat.wrap(animationAdapter.getRunner()),
+                                animationAdapter.getCallingApplication(), "SysUILaunch"));
             } else {
                 options = ActivityOptions.makeRemoteAnimation(animationAdapter);
             }
@@ -189,20 +181,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
         return contextForUser.getPackageManager();
     }
 
-    void animateExpandNotificationsPanel();
-
-    void animateExpandSettingsPanel(@Nullable String subpanel);
-
-    void animateCollapsePanels(int flags, boolean force);
-
-    void collapsePanelOnMainThread();
-
-    void collapsePanelWithDuration(int duration);
-
-    void togglePanel();
-
-    void start();
-
     boolean updateIsKeyguard();
 
     boolean updateIsKeyguard(boolean forceStateChange);
@@ -211,177 +189,31 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     @Override
     Lifecycle getLifecycle();
 
-    void wakeUpIfDozing(long time, View where, String why);
-
-    NotificationShadeWindowView getNotificationShadeWindowView();
-
-    NotificationShadeWindowViewController getNotificationShadeWindowViewController();
-
-    NotificationPanelViewController getNotificationPanelViewController();
-
-    ViewGroup getBouncerContainer();
-
     /** Get the Keyguard Message Area that displays auth messages. */
     AuthKeyguardMessageArea getKeyguardMessageArea();
 
-    int getStatusBarHeight();
-
-    void updateQsExpansionEnabled();
-
-    boolean isShadeDisabled();
-
-    /**
-     * Request face auth to initiated
-     * @param userInitiatedRequest Whether this was a user initiated request
-     * @param reason Reason why face auth was triggered.
-     */
-    void requestFaceAuth(boolean userInitiatedRequest, @FaceAuthApiRequestReason String reason);
-
-    @Override
-    void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade,
-            int flags);
-
-    @Override
-    void startActivity(Intent intent, boolean dismissShade);
-
-    @Override
-    void startActivity(Intent intent, boolean dismissShade,
-            @Nullable ActivityLaunchAnimator.Controller animationController,
-            boolean showOverLockscreenWhenLocked);
-
-    @Override
-    void startActivity(Intent intent, boolean dismissShade,
-            @Nullable ActivityLaunchAnimator.Controller animationController,
-            boolean showOverLockscreenWhenLocked, UserHandle userHandle);
-
     boolean isLaunchingActivityOverLockscreen();
-
-    @Override
-    void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade);
-
-    @Override
-    void startActivity(Intent intent, boolean dismissShade, Callback callback);
-
-    void setQsExpanded(boolean expanded);
-
-    boolean isWakeUpComingFromTouch();
-
-    boolean isFalsingThresholdNeeded();
 
     void onKeyguardViewManagerStatesUpdated();
 
-    void setPanelExpanded(boolean isExpanded);
-
-    ViewGroup getNotificationScrollLayout();
-
-    boolean isPulsing();
-
-    boolean isOccluded();
-
-    //TODO: These can / should probably be moved to NotificationPresenter or ShadeController
-    void onLaunchAnimationCancelled(boolean isLaunchForActivity);
-
-    void onLaunchAnimationEnd(boolean launchIsFullScreen);
-
-    boolean shouldAnimateLaunch(boolean isActivityIntent, boolean showOverLockscreen);
-
-    boolean shouldAnimateLaunch(boolean isActivityIntent);
-
-    boolean isDeviceInVrMode();
-
-    NotificationPresenter getPresenter();
-
-    void postAnimateCollapsePanels();
-
-    void postAnimateForceCollapsePanels();
-
-    void postAnimateOpenPanels();
-
-    boolean isExpandedVisible();
-
-    boolean isPanelExpanded();
-
-    void onInputFocusTransfer(boolean start, boolean cancel, float velocity);
-
-    void animateCollapseQuickSettings();
-
-    void onTouchEvent(MotionEvent event);
-
-    GestureRecorder getGestureRecorder();
-
-    BiometricUnlockController getBiometricUnlockController();
+    /** */
+    boolean getCommandQueuePanelsEnabled();
 
     void showWirelessChargingAnimation(int batteryLevel);
 
     void checkBarModes();
 
-    // Called by NavigationBarFragment
-    void setQsScrimEnabled(boolean scrimEnabled);
-
     void updateBubblesVisibility();
 
     void setInteracting(int barWindow, boolean interacting);
 
-    @Override
-    void dump(PrintWriter pwOriginal, String[] args);
-
-    void createAndAddWindows(@Nullable RegisterStatusBarResult result);
-
+    /** @deprecated Use {@link DisplayMetricsRepository} instead. */
+    @Deprecated
     float getDisplayWidth();
 
+    /** @deprecated Use {@link DisplayMetricsRepository} instead. */
+    @Deprecated
     float getDisplayHeight();
-
-    void startActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned,
-            boolean dismissShade, int flags);
-
-    void startActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned,
-            boolean dismissShade);
-
-    void startActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned,
-            boolean dismissShade, boolean disallowEnterPictureInPictureWhileLaunching,
-            Callback callback, int flags,
-            @Nullable ActivityLaunchAnimator.Controller animationController,
-            UserHandle userHandle);
-
-    void readyForKeyguardDone();
-
-    void executeRunnableDismissingKeyguard(Runnable runnable,
-            Runnable cancelAction,
-            boolean dismissShade,
-            boolean afterKeyguardGone,
-            boolean deferred);
-
-    void executeRunnableDismissingKeyguard(Runnable runnable,
-            Runnable cancelAction,
-            boolean dismissShade,
-            boolean afterKeyguardGone,
-            boolean deferred,
-            boolean willAnimateOnKeyguard);
-
-    void resetUserExpandedStates();
-
-    @Override
-    void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancelAction,
-            boolean afterKeyguardGone);
-
-    void setLockscreenUser(int newUserId);
-
-    @Override
-    void postQSRunnableDismissingKeyguard(Runnable runnable);
-
-    @Override
-    void postStartActivityDismissingKeyguard(PendingIntent intent);
-
-    @Override
-    void postStartActivityDismissingKeyguard(PendingIntent intent,
-            @Nullable ActivityLaunchAnimator.Controller animationController);
-
-    @Override
-    void postStartActivityDismissingKeyguard(Intent intent, int delay);
-
-    @Override
-    void postStartActivityDismissingKeyguard(Intent intent, int delay,
-            @Nullable ActivityLaunchAnimator.Controller animationController);
 
     void showKeyguard();
 
@@ -389,12 +221,8 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void showKeyguardImpl();
 
-    boolean isInLaunchTransition();
-
     void fadeKeyguardAfterLaunchTransition(Runnable beforeFading,
             Runnable endRunnable, Runnable cancelRunnable);
-
-    void animateKeyguardUnoccluding();
 
     void startLaunchTransitionTimeout();
 
@@ -408,55 +236,20 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void userActivity();
 
-    boolean interceptMediaKey(KeyEvent event);
-
-    boolean dispatchKeyEventPreIme(KeyEvent event);
-
-    boolean onMenuPressed();
-
     void endAffordanceLaunch();
 
-    boolean onBackPressed();
-
-    boolean onSpacePressed();
+    /** Should the keyguard be hidden immediately in response to a back press/gesture. */
+    boolean shouldKeyguardHideImmediately();
 
     void showBouncerWithDimissAndCancelIfKeyguard(OnDismissAction performAction,
             Runnable cancelAction);
 
-    LightRevealScrim getLightRevealScrim();
-
-    void onTrackingStarted();
-
-    void onClosingFinished();
-
-    void onUnlockHintStarted();
-
-    void onHintFinished();
-
-    void onTrackingStopped(boolean expand);
-
     // TODO: Figure out way to remove these.
     NavigationBarView getNavigationBarView();
 
-    boolean isOverviewEnabled();
-
-    void showPinningEnterExitToast(boolean entering);
-
-    void showPinningEscapeToast();
-
-    KeyguardBottomAreaView getKeyguardBottomAreaView();
-
     void setBouncerShowing(boolean bouncerShowing);
 
-  void setBouncerShowingOverDream(boolean bouncerShowingOverDream);
-
-    void collapseShade();
-
-    int getWakefulnessState();
-
     boolean isScreenFullyOff();
-
-    void showScreenPinningRequest(int taskId, boolean allowCancel);
 
     @Nullable
     Intent getEmergencyActionIntent();
@@ -469,92 +262,37 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void setTransitionToFullShadeProgress(float transitionToFullShadeProgress);
 
-    void setBouncerHiddenFraction(float expansion);
+    /**
+     * Sets the amount of progress to the bouncer being fully hidden/visible. 1 means the bouncer
+     * is fully hidden, while 0 means the bouncer is visible.
+     */
+    void setPrimaryBouncerHiddenFraction(float expansion);
 
     @VisibleForTesting
     void updateScrimController();
-
-    boolean isKeyguardShowing();
 
     boolean shouldIgnoreTouch();
 
     boolean isDeviceInteractive();
 
-    void setNotificationSnoozed(StatusBarNotification sbn,
-            NotificationSwipeActionHelper.SnoozeOption snoozeOption);
-
     void awakenDreams();
-
-    @Override
-    void startPendingIntentDismissingKeyguard(PendingIntent intent);
-
-    @Override
-    void startPendingIntentDismissingKeyguard(
-            PendingIntent intent, @Nullable Runnable intentSentUiThreadCallback);
-
-    @Override
-    void startPendingIntentDismissingKeyguard(PendingIntent intent,
-            Runnable intentSentUiThreadCallback, View associatedView);
-
-    @Override
-    void startPendingIntentDismissingKeyguard(
-            PendingIntent intent, @Nullable Runnable intentSentUiThreadCallback,
-            @Nullable ActivityLaunchAnimator.Controller animationController);
-
-    void clearNotificationEffects();
 
     boolean isBouncerShowing();
 
     boolean isBouncerShowingScrimmed();
 
-    boolean isBouncerShowingOverDream();
-
-    void onBouncerPreHideAnimation();
-
-    boolean isKeyguardSecure();
-
-    NotificationPanelViewController getPanelController();
-
-    NotificationGutsManager getGutsManager();
-
     void updateNotificationPanelTouchState();
-
-    void makeExpandedVisible(boolean force);
-
-    void instantCollapseNotificationPanel();
-
-    void visibilityChanged(boolean visible);
-
-    int getDisplayId();
 
     int getRotation();
 
     @VisibleForTesting
     void setBarStateForTest(int state);
 
-    void wakeUpForFullScreenIntent();
-
-    void showTransientUnchecked();
-
-    void clearTransient();
-
     void acquireGestureWakeLock(long time);
-
-    boolean setAppearance(int appearance);
-
-    int getBarMode();
 
     void resendMessage(int msg);
 
     void resendMessage(Object msg);
-
-    int getDisabled1();
-
-    void setDisabled1(int disabled);
-
-    int getDisabled2();
-
-    void setDisabled2(int disabled);
 
     void setLastCameraLaunchSource(int source);
 
@@ -568,11 +306,9 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     QSPanelController getQSPanelController();
 
-    boolean areNotificationAlertsDisabled();
-
+    /** @deprecated Use {@link DisplayMetricsRepository} instead. */
+    @Deprecated
     float getDisplayDensity();
-
-    void extendDozePulse();
 
     public static class KeyboardShortcutsMessage {
         final int mDeviceId;
@@ -581,4 +317,15 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
             mDeviceId = deviceId;
         }
     }
+
+    /**
+     * Sets launching activity over LS state in central surfaces.
+     */
+    void setIsLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen);
+
+    /**
+     * Gets an animation controller from a notification row.
+     */
+    ActivityLaunchAnimator.Controller getAnimatorControllerFromNotification(
+            ExpandableNotificationRow associatedView);
 }

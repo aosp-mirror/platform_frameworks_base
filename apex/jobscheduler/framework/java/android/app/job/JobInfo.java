@@ -23,16 +23,21 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.util.TimeUtils.formatDuration;
 
 import android.annotation.BytesLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.app.Notification;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.ComponentName;
@@ -45,13 +50,19 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+import android.os.Process;
+import android.os.Trace;
+import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Container of data passed to the {@link android.app.job.JobScheduler} fully encapsulating the
@@ -96,6 +107,25 @@ public class JobInfo implements Parcelable {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public static final long THROW_ON_INVALID_PRIORITY_VALUE = 140852299L;
+
+    /**
+     * Require that estimated network bytes are nonnegative.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long REJECT_NEGATIVE_NETWORK_ESTIMATES = 253665015L;
+
+    /**
+     * Enforce a minimum time window between job latencies and deadlines.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @Overridable // Aid in testing
+    public static final long ENFORCE_MINIMUM_TIME_WINDOWS = 311402873L;
 
     /** @hide */
     @IntDef(prefix = { "NETWORK_TYPE_" }, value = {
@@ -360,7 +390,7 @@ public class JobInfo implements Parcelable {
 
     /**
      * Allows this job to run despite doze restrictions as long as the app is in the foreground
-     * or on the temporary whitelist
+     * or on the temporary allowlist
      * @hide
      */
     public static final int FLAG_IMPORTANT_WHILE_FOREGROUND = 1 << 1;
@@ -386,6 +416,13 @@ public class JobInfo implements Parcelable {
     public static final int FLAG_EXPEDITED = 1 << 4;
 
     /**
+     * Whether it's a user initiated job or not.
+     *
+     * @hide
+     */
+    public static final int FLAG_USER_INITIATED = 1 << 5;
+
+    /**
      * @hide
      */
     public static final int CONSTRAINT_FLAG_CHARGING = 1 << 0;
@@ -404,6 +441,15 @@ public class JobInfo implements Parcelable {
      * @hide
      */
     public static final int CONSTRAINT_FLAG_STORAGE_NOT_LOW = 1 << 3;
+
+    /** @hide */
+    public static final int MAX_NUM_DEBUG_TAGS = 32;
+
+    /** @hide */
+    public static final int MAX_DEBUG_TAG_LENGTH = 127;
+
+    /** @hide */
+    public static final int MAX_TRACE_TAG_LENGTH = Trace.MAX_SECTION_NAME_LEN;
 
     @UnsupportedAppUsage
     private final int jobId;
@@ -436,6 +482,9 @@ public class JobInfo implements Parcelable {
     private final int mPriority;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int flags;
+    private final ArraySet<String> mDebugTags;
+    @Nullable
+    private final String mTraceTag;
 
     /**
      * Unique job id associated with this application (uid).  This is the same job ID
@@ -706,10 +755,44 @@ public class JobInfo implements Parcelable {
     }
 
     /**
+     * @see JobInfo.Builder#addDebugTag(String)
+     */
+    @FlaggedApi(Flags.FLAG_JOB_DEBUG_INFO_APIS)
+    @NonNull
+    public Set<String> getDebugTags() {
+        return Collections.unmodifiableSet(mDebugTags);
+    }
+
+    /**
+     * @see JobInfo.Builder#addDebugTag(String)
+     * @hide
+     */
+    @NonNull
+    public ArraySet<String> getDebugTagsArraySet() {
+        return mDebugTags;
+    }
+
+    /**
+     * @see JobInfo.Builder#setTraceTag(String)
+     */
+    @FlaggedApi(Flags.FLAG_JOB_DEBUG_INFO_APIS)
+    @Nullable
+    public String getTraceTag() {
+        return mTraceTag;
+    }
+
+    /**
      * @see JobInfo.Builder#setExpedited(boolean)
      */
     public boolean isExpedited() {
         return (flags & FLAG_EXPEDITED) != 0;
+    }
+
+    /**
+     * @see JobInfo.Builder#setUserInitiated(boolean)
+     */
+    public boolean isUserInitiated() {
+        return (flags & FLAG_USER_INITIATED) != 0;
     }
 
     /**
@@ -835,6 +918,12 @@ public class JobInfo implements Parcelable {
         if (flags != j.flags) {
             return false;
         }
+        if (!mDebugTags.equals(j.mDebugTags)) {
+            return false;
+        }
+        if (!Objects.equals(mTraceTag, j.mTraceTag)) {
+            return false;
+        }
         return true;
     }
 
@@ -879,13 +968,20 @@ public class JobInfo implements Parcelable {
         hashCode = 31 * hashCode + mBias;
         hashCode = 31 * hashCode + mPriority;
         hashCode = 31 * hashCode + flags;
+        if (mDebugTags.size() > 0) {
+            hashCode = 31 * hashCode + mDebugTags.hashCode();
+        }
+        if (mTraceTag != null) {
+            hashCode = 31 * hashCode + mTraceTag.hashCode();
+        }
         return hashCode;
     }
 
     @SuppressWarnings("UnsafeParcelApi")
     private JobInfo(Parcel in) {
         jobId = in.readInt();
-        extras = in.readPersistableBundle();
+        final PersistableBundle persistableExtras = in.readPersistableBundle();
+        extras = persistableExtras != null ? persistableExtras : PersistableBundle.EMPTY;
         transientExtras = in.readBundle();
         if (in.readInt() != 0) {
             clipData = ClipData.CREATOR.createFromParcel(in);
@@ -920,6 +1016,17 @@ public class JobInfo implements Parcelable {
         mBias = in.readInt();
         mPriority = in.readInt();
         flags = in.readInt();
+        final int numDebugTags = in.readInt();
+        mDebugTags = new ArraySet<>();
+        for (int i = 0; i < numDebugTags; ++i) {
+            final String tag = in.readString();
+            if (tag == null) {
+                throw new IllegalStateException("malformed parcel");
+            }
+            mDebugTags.add(tag.intern());
+        }
+        final String traceTag = in.readString();
+        mTraceTag = traceTag == null ? null : traceTag.intern();
     }
 
     private JobInfo(JobInfo.Builder b) {
@@ -952,6 +1059,8 @@ public class JobInfo implements Parcelable {
         mBias = b.mBias;
         mPriority = b.mPriority;
         flags = b.mFlags;
+        mDebugTags = b.mDebugTags;
+        mTraceTag = b.mTraceTag;
     }
 
     @Override
@@ -998,6 +1107,14 @@ public class JobInfo implements Parcelable {
         out.writeInt(mBias);
         out.writeInt(mPriority);
         out.writeInt(this.flags);
+        // Explicitly write out values here to avoid double looping to intern the strings
+        // when unparcelling.
+        final int numDebugTags = mDebugTags.size();
+        out.writeInt(numDebugTags);
+        for (int i = 0; i < numDebugTags; ++i) {
+            out.writeString(mDebugTags.valueAt(i));
+        }
+        out.writeString(mTraceTag);
     }
 
     public static final @android.annotation.NonNull Creator<JobInfo> CREATOR = new Creator<JobInfo>() {
@@ -1142,6 +1259,8 @@ public class JobInfo implements Parcelable {
         private int mBackoffPolicy = DEFAULT_BACKOFF_POLICY;
         /** Easy way to track whether the client has tried to set a back-off policy. */
         private boolean mBackoffPolicySet = false;
+        private final ArraySet<String> mDebugTags = new ArraySet<>();
+        private String mTraceTag;
 
         /**
          * Initialize a new Builder to construct a {@link JobInfo}.
@@ -1196,8 +1315,54 @@ public class JobInfo implements Parcelable {
             mPriority = job.getPriority();
         }
 
+        /**
+         * Add a debug tag to help track what this job is for. The tags may show in debug dumps
+         * or app metrics. Do not put personally identifiable information (PII) in the tag.
+         * <p>
+         * Tags have the following requirements:
+         * <ul>
+         *   <li>Tags cannot be more than 127 characters.</li>
+         *   <li>
+         *       Since leading and trailing whitespace can lead to hard-to-debug issues,
+         *       tags should not include leading or trailing whitespace.
+         *       All tags will be {@link String#trim() trimmed}.
+         *   </li>
+         *   <li>An empty String (after trimming) is not allowed.</li>
+         *   <li>Should not have personally identifiable information (PII).</li>
+         *   <li>A job cannot have more than 32 tags.</li>
+         * </ul>
+         *
+         * @param tag A debug tag that helps describe what the job is for.
+         * @return This object for method chaining
+         */
+        @FlaggedApi(Flags.FLAG_JOB_DEBUG_INFO_APIS)
+        @NonNull
+        public Builder addDebugTag(@NonNull String tag) {
+            mDebugTags.add(validateDebugTag(tag));
+            return this;
+        }
+
         /** @hide */
         @NonNull
+        public void addDebugTags(@NonNull Set<String> tags) {
+            mDebugTags.addAll(tags);
+        }
+
+        /**
+         * Remove a tag set via {@link #addDebugTag(String)}.
+         * @param tag The tag to remove
+         * @return This object for method chaining
+         */
+        @FlaggedApi(Flags.FLAG_JOB_DEBUG_INFO_APIS)
+        @NonNull
+        public Builder removeDebugTag(@NonNull String tag) {
+            mDebugTags.remove(tag);
+            return this;
+        }
+
+        /** @hide */
+        @NonNull
+        @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
         public Builder setBias(int bias) {
             mBias = bias;
             return this;
@@ -1211,6 +1376,9 @@ public class JobInfo implements Parcelable {
          * to run before other jobs. Giving the same priority to all of your jobs will result
          * in them all being treated the same. The priorities each have slightly different
          * behaviors, as noted in their relevant javadoc.
+         *
+         * Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+         * the priority will only affect sorting order within the job's namespace.
          *
          * <b>NOTE:</b> Setting all of your jobs to high priority will not be
          * beneficial to your app and in fact may hurt its performance in the
@@ -1312,6 +1480,16 @@ public class JobInfo implements Parcelable {
          * Calling this method will override any requirements previously defined
          * by {@link #setRequiredNetwork(NetworkRequest)}; you typically only
          * want to call one of these methods.
+         *
+         * Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+         * an app must hold the
+         * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} permission to
+         * schedule a job that requires a network.
+         *
+         * <p> Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+         * {@link JobScheduler} may try to shift the execution of jobs requiring
+         * {@link #NETWORK_TYPE_ANY} to when there is access to an un-metered network.
+         *
          * <p class="note">
          * When your job executes in
          * {@link JobService#onStartJob(JobParameters)}, be sure to use the
@@ -1367,6 +1545,11 @@ public class JobInfo implements Parcelable {
          * specific network returned by {@link JobParameters#getNetwork()},
          * otherwise you'll use the default network which may not meet this
          * constraint.
+         *
+         * Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+         * an app must hold the
+         * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} permission to
+         * schedule a job that requires a network.
          *
          * @param networkRequest The detailed description of the kind of network
          *            this job requires, or {@code null} if no specific kind of
@@ -1431,6 +1614,7 @@ public class JobInfo implements Parcelable {
          * @see JobInfo#getEstimatedNetworkUploadBytes()
          * @see JobWorkItem#JobWorkItem(android.content.Intent, long, long)
          */
+        // TODO(b/255371817): update documentation to reflect how this data will be used
         public Builder setEstimatedNetworkBytes(@BytesLong long downloadBytes,
                 @BytesLong long uploadBytes) {
             mNetworkDownloadBytes = downloadBytes;
@@ -1474,7 +1658,8 @@ public class JobInfo implements Parcelable {
         /**
          * Specify that to run this job, the device must be charging (or be a
          * non-battery-powered device connected to permanent power, such as Android TV
-         * devices). This defaults to {@code false}.
+         * devices). This defaults to {@code false}. Setting this to {@code false} <b>DOES NOT</b>
+         * mean the job will only run when the device is not charging.
          *
          * <p class="note">For purposes of running jobs, a battery-powered device
          * "charging" is not quite the same as simply being connected to power.  If the
@@ -1497,7 +1682,9 @@ public class JobInfo implements Parcelable {
          * Specify that to run this job, the device's battery level must not be low.
          * This defaults to false.  If true, the job will only run when the battery level
          * is not low, which is generally the point where the user is given a "low battery"
-         * warning.
+         * warning. Setting this to {@code false} <b>DOES NOT</b> mean the job will only run
+         * when the battery is low.
+         *
          * @param batteryNotLow Whether or not the device's battery level must not be low.
          * @see JobInfo#isRequireBatteryNotLow()
          */
@@ -1510,7 +1697,8 @@ public class JobInfo implements Parcelable {
         /**
          * When set {@code true}, ensure that this job will not run if the device is in active use.
          * The default state is {@code false}: that is, the for the job to be runnable even when
-         * someone is interacting with the device.
+         * someone is interacting with the device. Setting this to {@code false} <b>DOES NOT</b>
+         * mean the job will only run when the device is not idle.
          *
          * <p>This state is a loose definition provided by the system. In general, it means that
          * the device is not currently being used interactively, and has not been in use for some
@@ -1637,6 +1825,8 @@ public class JobInfo implements Parcelable {
         /**
          * Specify that this job should recur with the provided interval and flex. The job can
          * execute at any time in a window of flex length at the end of the period.
+         * If the constraints are not satisfied within the window,
+         * the job will wait until the constraints are satisfied.
          * @param intervalMillis Millisecond interval for which this job will repeat. A minimum
          *                       value of {@link #getMinPeriodMillis()} is enforced.
          * @param flexMillis Millisecond flex for this job. Flex is clamped to be at least
@@ -1690,10 +1880,40 @@ public class JobInfo implements Parcelable {
          * Set deadline which is the maximum scheduling latency. The job will be run by this
          * deadline even if other requirements (including a delay set through
          * {@link #setMinimumLatency(long)}) are not met.
+         * {@link JobParameters#isOverrideDeadlineExpired()} will return {@code true} if the job's
+         * deadline has passed.
+         *
          * <p>
          * Because it doesn't make sense setting this property on a periodic job, doing so will
          * throw an {@link java.lang.IllegalArgumentException} when
          * {@link android.app.job.JobInfo.Builder#build()} is called.
+         *
+         * <p class="note">
+         * Since a job will run once the deadline has passed regardless of the status of other
+         * constraints, setting a deadline of 0 with other constraints makes those constraints
+         * meaningless when it comes to execution decisions. Avoid doing this.
+         * </p>
+         *
+         * <p>
+         * Short deadlines hinder the system's ability to optimize scheduling behavior and may
+         * result in running jobs at inopportune times. Therefore, starting in Android version
+         * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}, minimum time windows will be
+         * enforced to help make it easier to better optimize job execution. Time windows are
+         * defined as the time between a job's {@link #setMinimumLatency(long) minimum latency}
+         * and its deadline. If the minimum latency is not set, it is assumed to be 0.
+         * The following minimums will be enforced:
+         * <ul>
+         *     <li>
+         *         Jobs with {@link #PRIORITY_DEFAULT} or higher priorities have a minimum time
+         *         window of one hour.
+         *     </li>
+         *     <li>Jobs with {@link #PRIORITY_LOW} have a minimum time window of 6 hours.</li>
+         *     <li>Jobs with {@link #PRIORITY_MIN} have a minimum time window of 12 hours.</li>
+         * </ul>
+         *
+         * Work that must happen immediately should use {@link #setExpedited(boolean)} or
+         * {@link #setUserInitiated(boolean)} in the appropriate manner.
+         *
          * @see JobInfo#getMaxExecutionDelayMillis()
          */
         public Builder setOverrideDeadline(long maxExecutionDelayMillis) {
@@ -1739,9 +1959,13 @@ public class JobInfo implements Parcelable {
          * <ol>
          *     <li>Run as soon as possible</li>
          *     <li>Be less restricted during Doze and battery saver</li>
-         *     <li>Bypass Doze, app standby, and battery saver network restrictions</li>
+         *     <li>
+         *         Bypass Doze, app standby, and battery saver network restrictions (if the job
+         *         has a {@link #setRequiredNetwork(NetworkRequest) connectivity constraint})
+         *     </li>
          *     <li>Be less likely to be killed than regular jobs</li>
          *     <li>Be subject to background location throttling</li>
+         *     <li>Be exempt from delay to optimize job execution</li>
          * </ol>
          *
          * <p>
@@ -1802,14 +2026,72 @@ public class JobInfo implements Parcelable {
         }
 
         /**
+         * Indicates that this job is being scheduled to fulfill an explicit user request.
+         * As such, user-initiated jobs can only be scheduled when the app is in the foreground
+         * or in a state where launching an activity is allowed, as defined
+         * <a href=
+         * "https://developer.android.com/guide/components/activities/background-starts#exceptions">
+         * here</a>. Attempting to schedule one outside of these conditions will throw a
+         * {@link SecurityException}.
+         *
+         * <p>
+         * This should <b>NOT</b> be used for automatic features.
+         *
+         * <p>
+         * All user-initiated jobs must have an associated notification, set via
+         * {@link JobService#setNotification(JobParameters, int, Notification, int)}, and will be
+         * shown in the Task Manager when running. These jobs cannot be rescheduled by the app
+         * if the user stops the job via system provided affordance (such as the Task Manager).
+         * Thus, it is best practice and recommended to provide action buttons in the
+         * associated notification to allow the user to stop the job gracefully
+         * and allow for rescheduling.
+         *
+         * <p>
+         * If the app doesn't hold the {@link android.Manifest.permission#RUN_USER_INITIATED_JOBS}
+         * permission when scheduling a user-initiated job, JobScheduler will throw a
+         * {@link SecurityException}.
+         *
+         * <p>
+         * In {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, user-initiated jobs can only
+         * be used for network data transfers. As such, they must specify a required network via
+         * {@link #setRequiredNetwork(NetworkRequest)} or {@link #setRequiredNetworkType(int)}.
+         *
+         * <p>
+         * These jobs will not be subject to quotas and will be started immediately once scheduled
+         * if all constraints are met and the device system health allows for additional tasks.
+         *
+         * @see JobInfo#isUserInitiated()
+         */
+        @RequiresPermission(android.Manifest.permission.RUN_USER_INITIATED_JOBS)
+        @NonNull
+        public Builder setUserInitiated(boolean userInitiated) {
+            if (userInitiated) {
+                mFlags |= FLAG_USER_INITIATED;
+                if (mPriority == PRIORITY_DEFAULT) {
+                    // The default priority for UIJs is MAX, but only change this if .setPriority()
+                    // hasn't been called yet.
+                    mPriority = PRIORITY_MAX;
+                }
+            } else {
+                if (mPriority == PRIORITY_MAX && (mFlags & FLAG_USER_INITIATED) != 0) {
+                    // Reset the priority for the job, but only change this if .setPriority()
+                    // hasn't been called yet.
+                    mPriority = PRIORITY_DEFAULT;
+                }
+                mFlags &= (~FLAG_USER_INITIATED);
+            }
+            return this;
+        }
+
+        /**
          * Setting this to true indicates that this job is important while the scheduling app
-         * is in the foreground or on the temporary whitelist for background restrictions.
+         * is in the foreground or on the temporary allowlist for background restrictions.
          * This means that the system will relax doze restrictions on this job during this time.
          *
          * Apps should use this flag only for short jobs that are essential for the app to function
          * properly in the foreground.
          *
-         * Note that once the scheduling app is no longer whitelisted from background restrictions
+         * Note that once the scheduling app is no longer allowlisted from background restrictions
          * and in the background, or the job failed due to unsatisfied constraints,
          * this job should be expected to behave like other jobs without this flag.
          *
@@ -1883,14 +2165,36 @@ public class JobInfo implements Parcelable {
         }
 
         /**
+         * Set a tag that will be used in {@link android.os.Trace traces}.
+         * Since this is a trace tag, it must follow the rules set in
+         * {@link android.os.Trace#beginSection(String)}, such as it cannot be more
+         * than 127 Unicode code units.
+         * Additionally, since leading and trailing whitespace can lead to hard-to-debug issues,
+         * they will be {@link String#trim() trimmed}.
+         * An empty String (after trimming) is not allowed.
+         * @param traceTag The tag to use in traces.
+         * @return This object for method chaining
+         */
+        @FlaggedApi(Flags.FLAG_JOB_DEBUG_INFO_APIS)
+        @NonNull
+        public Builder setTraceTag(@Nullable String traceTag) {
+            mTraceTag = validateTraceTag(traceTag);
+            return this;
+        }
+
+        /**
          * @return The job object to hand to the JobScheduler. This object is immutable.
          */
         public JobInfo build() {
-            return build(Compatibility.isChangeEnabled(DISALLOW_DEADLINES_FOR_PREFETCH_JOBS));
+            return build(Compatibility.isChangeEnabled(DISALLOW_DEADLINES_FOR_PREFETCH_JOBS),
+                    Compatibility.isChangeEnabled(REJECT_NEGATIVE_NETWORK_ESTIMATES),
+                    Compatibility.isChangeEnabled(ENFORCE_MINIMUM_TIME_WINDOWS));
         }
 
         /** @hide */
-        public JobInfo build(boolean disallowPrefetchDeadlines) {
+        public JobInfo build(boolean disallowPrefetchDeadlines,
+                boolean rejectNegativeNetworkEstimates,
+                boolean enforceMinimumTimeWindows) {
             // This check doesn't need to be inside enforceValidity. It's an unnecessary legacy
             // check that would ideally be phased out instead.
             if (mBackoffPolicySet && (mConstraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
@@ -1899,7 +2203,8 @@ public class JobInfo implements Parcelable {
                         " setRequiresDeviceIdle is an error.");
             }
             JobInfo jobInfo = new JobInfo(this);
-            jobInfo.enforceValidity(disallowPrefetchDeadlines);
+            jobInfo.enforceValidity(disallowPrefetchDeadlines, rejectNegativeNetworkEstimates,
+                    enforceMinimumTimeWindows);
             return jobInfo;
         }
 
@@ -1917,12 +2222,24 @@ public class JobInfo implements Parcelable {
     /**
      * @hide
      */
-    public final void enforceValidity(boolean disallowPrefetchDeadlines) {
+    public final void enforceValidity(boolean disallowPrefetchDeadlines,
+            boolean rejectNegativeNetworkEstimates,
+            boolean enforceMinimumTimeWindows) {
         // Check that network estimates require network type and are reasonable values.
         if ((networkDownloadBytes > 0 || networkUploadBytes > 0 || minimumNetworkChunkBytes > 0)
                 && networkRequest == null) {
             throw new IllegalArgumentException(
                     "Can't provide estimated network usage without requiring a network");
+        }
+        if (networkRequest != null && rejectNegativeNetworkEstimates) {
+            if (networkUploadBytes != NETWORK_BYTES_UNKNOWN && networkUploadBytes < 0) {
+                throw new IllegalArgumentException(
+                        "Invalid network upload bytes: " + networkUploadBytes);
+            }
+            if (networkDownloadBytes != NETWORK_BYTES_UNKNOWN && networkDownloadBytes < 0) {
+                throw new IllegalArgumentException(
+                        "Invalid network download bytes: " + networkDownloadBytes);
+            }
         }
         final long estimatedTransfer;
         if (networkUploadBytes == NETWORK_BYTES_UNKNOWN) {
@@ -1998,10 +2315,12 @@ public class JobInfo implements Parcelable {
         }
 
         final boolean isExpedited = (flags & FLAG_EXPEDITED) != 0;
+        final boolean isUserInitiated = (flags & FLAG_USER_INITIATED) != 0;
         switch (mPriority) {
             case PRIORITY_MAX:
-                if (!isExpedited) {
-                    throw new IllegalArgumentException("Only expedited jobs can have max priority");
+                if (!(isExpedited || isUserInitiated)) {
+                    throw new IllegalArgumentException(
+                            "Only expedited or user-initiated jobs can have max priority");
                 }
                 break;
             case PRIORITY_HIGH:
@@ -2020,6 +2339,39 @@ public class JobInfo implements Parcelable {
                 throw new IllegalArgumentException("Invalid priority level provided: " + mPriority);
         }
 
+        if (enforceMinimumTimeWindows
+                && Flags.enforceMinimumTimeWindows()
+                // TODO(312197030): remove exemption for the system
+                && !UserHandle.isCore(Process.myUid())
+                && hasLateConstraint && !isPeriodic) {
+            final long windowStart = hasEarlyConstraint ? minLatencyMillis : 0;
+            if (mPriority >= PRIORITY_DEFAULT) {
+                if (maxExecutionDelayMillis - windowStart < HOUR_IN_MILLIS) {
+                    throw new IllegalArgumentException(
+                            getPriorityString(mPriority)
+                                    + " cannot have a time window less than 1 hour."
+                                    + " Delay=" + windowStart
+                                    + ", deadline=" + maxExecutionDelayMillis);
+                }
+            } else if (mPriority >= PRIORITY_LOW) {
+                if (maxExecutionDelayMillis - windowStart < 6 * HOUR_IN_MILLIS) {
+                    throw new IllegalArgumentException(
+                            getPriorityString(mPriority)
+                                    + " cannot have a time window less than 6 hours."
+                                    + " Delay=" + windowStart
+                                    + ", deadline=" + maxExecutionDelayMillis);
+                }
+            } else {
+                if (maxExecutionDelayMillis - windowStart < 12 * HOUR_IN_MILLIS) {
+                    throw new IllegalArgumentException(
+                            getPriorityString(mPriority)
+                                    + " cannot have a time window less than 12 hours."
+                                    + " Delay=" + windowStart
+                                    + ", deadline=" + maxExecutionDelayMillis);
+                }
+            }
+        }
+
         if (isExpedited) {
             if (hasEarlyConstraint) {
                 throw new IllegalArgumentException("An expedited job cannot have a time delay");
@@ -2029,6 +2381,9 @@ public class JobInfo implements Parcelable {
             }
             if (isPeriodic) {
                 throw new IllegalArgumentException("An expedited job cannot be periodic");
+            }
+            if (isUserInitiated) {
+                throw new IllegalArgumentException("An expedited job cannot be user-initiated");
             }
             if (mPriority != PRIORITY_MAX && mPriority != PRIORITY_HIGH) {
                 throw new IllegalArgumentException(
@@ -2045,6 +2400,94 @@ public class JobInfo implements Parcelable {
                         "Can't call addTriggerContentUri() on an expedited job");
             }
         }
+
+        if (isUserInitiated) {
+            if (hasEarlyConstraint) {
+                throw new IllegalArgumentException("A user-initiated job cannot have a time delay");
+            }
+            if (hasLateConstraint) {
+                throw new IllegalArgumentException("A user-initiated job cannot have a deadline");
+            }
+            if (isPeriodic) {
+                throw new IllegalArgumentException("A user-initiated job cannot be periodic");
+            }
+            if ((flags & FLAG_PREFETCH) != 0) {
+                throw new IllegalArgumentException(
+                        "A user-initiated job cannot also be a prefetch job");
+            }
+            if (mPriority != PRIORITY_MAX) {
+                throw new IllegalArgumentException("A user-initiated job must be max priority.");
+            }
+            if ((constraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
+                throw new IllegalArgumentException(
+                        "A user-initiated job cannot have a device-idle constraint");
+            }
+            if (triggerContentUris != null && triggerContentUris.length > 0) {
+                throw new IllegalArgumentException(
+                        "Can't call addTriggerContentUri() on a user-initiated job");
+            }
+            // UIDTs
+            if (networkRequest == null) {
+                throw new IllegalArgumentException(
+                        "A user-initiated data transfer job must specify a valid network type");
+            }
+        }
+
+        if (mDebugTags.size() > MAX_NUM_DEBUG_TAGS) {
+            throw new IllegalArgumentException(
+                    "Can't have more than " + MAX_NUM_DEBUG_TAGS + " tags");
+        }
+        final ArraySet<String> validatedDebugTags = new ArraySet<>();
+        for (int i = 0; i < mDebugTags.size(); ++i) {
+            validatedDebugTags.add(validateDebugTag(mDebugTags.valueAt(i)));
+        }
+        mDebugTags.clear();
+        mDebugTags.addAll(validatedDebugTags);
+
+        validateTraceTag(mTraceTag);
+    }
+
+    /**
+     * Returns a sanitized debug tag if valid, or throws an exception if not.
+     * @hide
+     */
+    @NonNull
+    public static String validateDebugTag(@Nullable String debugTag) {
+        if (debugTag == null) {
+            throw new NullPointerException("debug tag cannot be null");
+        }
+        debugTag = debugTag.trim();
+        if (debugTag.isEmpty()) {
+            throw new IllegalArgumentException("debug tag cannot be empty");
+        }
+        if (debugTag.length() > MAX_DEBUG_TAG_LENGTH) {
+            throw new IllegalArgumentException(
+                    "debug tag cannot be more than " + MAX_DEBUG_TAG_LENGTH + " characters");
+        }
+        return debugTag.intern();
+    }
+
+    /**
+     * Returns a sanitized trace tag if valid, or throws an exception if not.
+     * @hide
+     */
+    @Nullable
+    public static String validateTraceTag(@Nullable String traceTag) {
+        if (traceTag == null) {
+            return null;
+        }
+        traceTag = traceTag.trim();
+        if (traceTag.isEmpty()) {
+            throw new IllegalArgumentException("trace tag cannot be empty");
+        }
+        if (traceTag.length() > MAX_TRACE_TAG_LENGTH) {
+            throw new IllegalArgumentException(
+                    "traceTag tag cannot be more than " + MAX_TRACE_TAG_LENGTH + " characters");
+        }
+        if (traceTag.contains("|") || traceTag.contains("\n") || traceTag.contains("\0")) {
+            throw new IllegalArgumentException("Trace tag cannot contain |, \\n, or \\0");
+        }
+        return traceTag.intern();
     }
 
     /**

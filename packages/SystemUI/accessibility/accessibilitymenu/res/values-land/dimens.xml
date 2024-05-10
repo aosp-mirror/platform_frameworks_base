@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <dimen name="table_margin_top">0dp</dimen>
+  <dimen name="row_width">388dp</dimen>
+  <dimen name="image_button_height">45dp</dimen>
+  <dimen name="image_button_width">45dp</dimen>
+  <dimen name="image_button_marginBottom">1dp</dimen>
+
+  <!-- dimens for gridview layout. -->
+  <dimen name="grid_item_padding">4dp</dimen>
+
+</resources>

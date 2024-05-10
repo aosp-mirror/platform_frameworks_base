@@ -16,6 +16,8 @@
 
 package com.android.systemui.wallet.ui;
 
+import static com.android.systemui.wallet.util.WalletCardUtilsKt.getPaymentCards;
+
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -41,16 +43,16 @@ import androidx.annotation.NonNull;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /** Controller for the wallet card carousel screen. */
 public class WalletScreenController implements
@@ -77,8 +79,11 @@ public class WalletScreenController implements
     private final FalsingManager mFalsingManager;
     private final UiEventLogger mUiEventLogger;
 
-    @VisibleForTesting String mSelectedCardId;
-    @VisibleForTesting boolean mIsDismissed;
+
+    @VisibleForTesting
+    String mSelectedCardId;
+    @VisibleForTesting
+    boolean mIsDismissed;
 
     public WalletScreenController(
             Context context,
@@ -123,29 +128,29 @@ public class WalletScreenController implements
             return;
         }
         Log.i(TAG, "Successfully retrieved wallet cards.");
-        List<WalletCard> walletCards = response.getWalletCards();
-        List<WalletCardViewInfo> data = new ArrayList<>(walletCards.size());
-        for (WalletCard card : walletCards) {
-            data.add(new QAWalletCardViewInfo(mContext, card));
-        }
+        List<WalletCard> walletCards = getPaymentCards(response.getWalletCards());
+
+        List<WalletCardViewInfo> paymentCardData = walletCards.stream().map(
+                card -> new QAWalletCardViewInfo(mContext, card)
+        ).collect(Collectors.toList());
 
         // Get on main thread for UI updates.
         mHandler.post(() -> {
             if (mIsDismissed) {
                 return;
             }
-            if (data.isEmpty()) {
+            if (paymentCardData.isEmpty()) {
                 showEmptyStateView();
             } else {
                 int selectedIndex = response.getSelectedIndex();
-                if (selectedIndex >= data.size()) {
+                if (selectedIndex >= paymentCardData.size()) {
                     Log.w(TAG, "Invalid selected card index, showing empty state.");
                     showEmptyStateView();
                 } else {
                     boolean isUdfpsEnabled = mKeyguardUpdateMonitor.isUdfpsEnrolled()
                             && mKeyguardUpdateMonitor.isFingerprintDetectionRunning();
                     mWalletView.showCardCarousel(
-                            data,
+                            paymentCardData,
                             selectedIndex,
                             !mKeyguardStateController.isUnlocked(),
                             isUdfpsEnabled);
@@ -211,7 +216,6 @@ public class WalletScreenController implements
         // even if the user keeps it open for a long time.
         mHandler.postDelayed(mSelectionRunnable, SELECTION_DELAY_MILLIS);
     }
-
 
 
     @Override
@@ -325,7 +329,12 @@ public class WalletScreenController implements
          */
         QAWalletCardViewInfo(Context context, WalletCard walletCard) {
             mWalletCard = walletCard;
-            mCardDrawable = mWalletCard.getCardImage().loadDrawable(context);
+            Icon cardImageIcon = mWalletCard.getCardImage();
+            if (cardImageIcon.getType() == Icon.TYPE_URI) {
+                mCardDrawable = null;
+            } else {
+                mCardDrawable = mWalletCard.getCardImage().loadDrawable(context);
+            }
             Icon icon = mWalletCard.getCardIcon();
             mIconDrawable = icon == null ? null : icon.loadDrawable(context);
         }

@@ -29,6 +29,7 @@ import android.os.Build;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class GrowingArrayUtils {
 
     /**

@@ -131,7 +131,8 @@ public interface QS extends FragmentBase {
     /**
      * A rounded corner clipping that makes QS feel as if it were behind everything.
      */
-    void setFancyClipping(int top, int bottom, int cornerRadius, boolean visible);
+    void setFancyClipping(int leftInset, int top, int rightInset, int bottom, int cornerRadius,
+            boolean visible, boolean fullWidth);
 
     /**
      * @return if quick settings is fully collapsed currently

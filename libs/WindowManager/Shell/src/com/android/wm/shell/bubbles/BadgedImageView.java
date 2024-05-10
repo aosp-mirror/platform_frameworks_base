@@ -318,7 +318,7 @@ public class BadgedImageView extends ConstraintLayout {
     /**
      * Animates the dot to the given scale, running the optional callback when the animation ends.
      */
-    private void animateDotScale(float toScale, @Nullable Runnable after) {
+    public void animateDotScale(float toScale, @Nullable Runnable after) {
         mDotIsAnimating = true;
 
         // Don't restart the animation if we're already animating to the given value.

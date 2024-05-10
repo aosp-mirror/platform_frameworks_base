@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.annotation.ColorInt
+import android.content.Context
 import android.graphics.Rect
 import android.view.InsetsFlags
 import android.view.ViewDebug
@@ -26,23 +27,20 @@ import android.view.WindowInsetsController.Appearance
 import com.android.internal.statusbar.LetterboxDetails
 import com.android.internal.util.ContrastColorUtil
 import com.android.internal.view.AppearanceRegion
+import com.android.systemui.Dumpable
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewInitializedListener
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
 import java.io.PrintWriter
-import java.util.Arrays
 import javax.inject.Inject
 
-class LetterboxAppearance(
+data class LetterboxAppearance(
     @Appearance val appearance: Int,
-    val appearanceRegions: Array<AppearanceRegion>
+    val appearanceRegions: List<AppearanceRegion>,
 ) {
     override fun toString(): String {
         val appearanceString =
                 ViewDebug.flagsToString(InsetsFlags::class.java, "appearance", appearance)
-        return "LetterboxAppearance{$appearanceString, ${appearanceRegions.contentToString()}}"
+        return "LetterboxAppearance{$appearanceString, $appearanceRegions}"
     }
 }
 
@@ -50,77 +48,85 @@ class LetterboxAppearance(
  * Responsible for calculating the [Appearance] and [AppearanceRegion] for the status bar when apps
  * are letterboxed.
  */
-@CentralSurfacesScope
+@SysUISingleton
 class LetterboxAppearanceCalculator
 @Inject
 constructor(
-    private val lightBarController: LightBarController,
-    private val dumpManager: DumpManager,
+    context: Context,
+    dumpManager: DumpManager,
     private val letterboxBackgroundProvider: LetterboxBackgroundProvider,
-) : OnStatusBarViewInitializedListener, CentralSurfacesComponent.Startable {
+) : Dumpable {
 
-    private var statusBarBoundsProvider: StatusBarBoundsProvider? = null
+    private val darkAppearanceIconColor = context.getColor(
+        // For a dark background status bar, use a *light* icon color.
+        com.android.settingslib.R.color.light_mode_icon_color_single_tone
+    )
+    private val lightAppearanceIconColor = context.getColor(
+        // For a light background status bar, use a *dark* icon color.
+        com.android.settingslib.R.color.dark_mode_icon_color_single_tone
+    )
 
-    override fun start() {
-        dumpManager.registerDumpable(javaClass.simpleName) { printWriter, _ -> dump(printWriter) }
-    }
-
-    override fun stop() {
-        dumpManager.unregisterDumpable(javaClass.simpleName)
+    init {
+        dumpManager.registerCriticalDumpable(this)
     }
 
     private var lastAppearance: Int? = null
-    private var lastAppearanceRegions: Array<AppearanceRegion>? = null
-    private var lastLetterboxes: Array<LetterboxDetails>? = null
+    private var lastAppearanceRegions: List<AppearanceRegion>? = null
+    private var lastLetterboxes: List<LetterboxDetails>? = null
     private var lastLetterboxAppearance: LetterboxAppearance? = null
 
     fun getLetterboxAppearance(
         @Appearance originalAppearance: Int,
-        originalAppearanceRegions: Array<AppearanceRegion>,
-        letterboxes: Array<LetterboxDetails>
+        originalAppearanceRegions: List<AppearanceRegion>,
+        letterboxes: List<LetterboxDetails>,
+        statusBarBounds: BoundsPair,
     ): LetterboxAppearance {
         lastAppearance = originalAppearance
         lastAppearanceRegions = originalAppearanceRegions
         lastLetterboxes = letterboxes
         return getLetterboxAppearanceInternal(
-                letterboxes, originalAppearance, originalAppearanceRegions)
+                letterboxes, originalAppearance, originalAppearanceRegions, statusBarBounds)
             .also { lastLetterboxAppearance = it }
     }
 
     private fun getLetterboxAppearanceInternal(
-        letterboxes: Array<LetterboxDetails>,
+        letterboxes: List<LetterboxDetails>,
         originalAppearance: Int,
-        originalAppearanceRegions: Array<AppearanceRegion>
+        originalAppearanceRegions: List<AppearanceRegion>,
+        statusBarBounds: BoundsPair,
     ): LetterboxAppearance {
-        if (isScrimNeeded(letterboxes)) {
+        if (isScrimNeeded(letterboxes, statusBarBounds)) {
             return originalAppearanceWithScrim(originalAppearance, originalAppearanceRegions)
         }
         val appearance = appearanceWithoutScrim(originalAppearance)
         val appearanceRegions = getAppearanceRegions(originalAppearanceRegions, letterboxes)
-        return LetterboxAppearance(appearance, appearanceRegions.toTypedArray())
+        return LetterboxAppearance(appearance, appearanceRegions)
     }
 
-    private fun isScrimNeeded(letterboxes: Array<LetterboxDetails>): Boolean {
+    private fun isScrimNeeded(
+        letterboxes: List<LetterboxDetails>,
+        statusBarBounds: BoundsPair,
+    ): Boolean {
         if (isOuterLetterboxMultiColored()) {
             return true
         }
         return letterboxes.any { letterbox ->
-            letterbox.letterboxInnerBounds.overlapsWith(getStartSideIconBounds()) ||
-                letterbox.letterboxInnerBounds.overlapsWith(getEndSideIconsBounds())
+            letterbox.letterboxInnerBounds.overlapsWith(statusBarBounds.start) ||
+                letterbox.letterboxInnerBounds.overlapsWith(statusBarBounds.end)
         }
     }
 
     private fun getAppearanceRegions(
-        originalAppearanceRegions: Array<AppearanceRegion>,
-        letterboxes: Array<LetterboxDetails>
+        originalAppearanceRegions: List<AppearanceRegion>,
+        letterboxes: List<LetterboxDetails>
     ): List<AppearanceRegion> {
         return sanitizeAppearanceRegions(originalAppearanceRegions, letterboxes) +
             getAllOuterAppearanceRegions(letterboxes)
     }
 
     private fun sanitizeAppearanceRegions(
-        originalAppearanceRegions: Array<AppearanceRegion>,
-        letterboxes: Array<LetterboxDetails>
+        originalAppearanceRegions: List<AppearanceRegion>,
+        letterboxes: List<LetterboxDetails>
     ): List<AppearanceRegion> =
         originalAppearanceRegions.map { appearanceRegion ->
             val matchingLetterbox =
@@ -138,7 +144,7 @@ constructor(
 
     private fun originalAppearanceWithScrim(
         @Appearance originalAppearance: Int,
-        originalAppearanceRegions: Array<AppearanceRegion>
+        originalAppearanceRegions: List<AppearanceRegion>
     ): LetterboxAppearance {
         return LetterboxAppearance(
             originalAppearance or APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS,
@@ -150,7 +156,7 @@ constructor(
         originalAppearance and APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS.inv()
 
     private fun getAllOuterAppearanceRegions(
-        letterboxes: Array<LetterboxDetails>
+        letterboxes: List<LetterboxDetails>
     ): List<AppearanceRegion> = letterboxes.map(this::getOuterAppearanceRegions).flatten()
 
     private fun getOuterAppearanceRegions(
@@ -176,11 +182,9 @@ constructor(
     private fun getOuterAppearance(): Int {
         val backgroundColor = outerLetterboxBackgroundColor()
         val darkAppearanceContrast =
-            ContrastColorUtil.calculateContrast(
-                lightBarController.darkAppearanceIconColor, backgroundColor)
+            ContrastColorUtil.calculateContrast(darkAppearanceIconColor, backgroundColor)
         val lightAppearanceContrast =
-            ContrastColorUtil.calculateContrast(
-                lightBarController.lightAppearanceIconColor, backgroundColor)
+            ContrastColorUtil.calculateContrast(lightAppearanceIconColor, backgroundColor)
         return if (lightAppearanceContrast > darkAppearanceContrast) {
             WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
         } else {
@@ -197,31 +201,19 @@ constructor(
         return letterboxBackgroundProvider.isLetterboxBackgroundMultiColored
     }
 
-    private fun getEndSideIconsBounds(): Rect {
-        return statusBarBoundsProvider?.visibleEndSideBounds ?: Rect()
-    }
-
-    private fun getStartSideIconBounds(): Rect {
-        return statusBarBoundsProvider?.visibleStartSideBounds ?: Rect()
-    }
-
-    override fun onStatusBarViewInitialized(component: StatusBarFragmentComponent) {
-        statusBarBoundsProvider = component.boundsProvider
-    }
-
     private fun Rect.overlapsWith(other: Rect): Boolean {
         if (this.contains(other) || other.contains(this)) {
             return false
         }
-        return this.intersect(other)
+        return this.intersects(other.left, other.top, other.right, other.bottom)
     }
 
-    private fun dump(printWriter: PrintWriter) {
-        printWriter.println(
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.println(
             """
            lastAppearance: ${lastAppearance?.toAppearanceString()}
-           lastAppearanceRegion: ${Arrays.toString(lastAppearanceRegions)},
-           lastLetterboxes: ${Arrays.toString(lastLetterboxes)},
+           lastAppearanceRegion: $lastAppearanceRegions,
+           lastLetterboxes: $lastLetterboxes,
            lastLetterboxAppearance: $lastLetterboxAppearance
        """.trimIndent())
     }

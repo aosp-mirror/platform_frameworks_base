@@ -16,25 +16,31 @@
 
 package com.android.server.pm;
 
+import static com.android.server.pm.DexOptHelper.useArtService;
+
 import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.PackageStats;
+import android.os.Binder;
 import android.os.Build;
 import android.os.CreateAppDataArgs;
 import android.os.CreateAppDataResult;
 import android.os.IBinder;
 import android.os.IInstalld;
+import android.os.ParcelFileDescriptor;
 import android.os.ReconcileSdkDataArgs;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.storage.CrateMetadata;
 import android.text.format.DateUtils;
+import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.os.BackgroundThread;
+import com.android.server.EventLogTags;
 import com.android.server.SystemService;
 
 import dalvik.system.BlockGuard;
@@ -134,9 +140,7 @@ public class Installer extends SystemService {
     }
 
     /**
-     * @param isolated indicates if this object should <em>not</em> connect to
-     *            the real {@code installd}. All remote calls will be ignored
-     *            unless you extend this class and intercept them.
+     * @param isolated Make the installer isolated. See {@link isIsolated}.
      */
     public Installer(Context context, boolean isolated) {
         super(context);
@@ -149,6 +153,15 @@ public class Installer extends SystemService {
      */
     public void setWarnIfHeld(Object warnIfHeld) {
         mWarnIfHeld = warnIfHeld;
+    }
+
+    /**
+     * Returns true if the installer is isolated, i.e. if this object should <em>not</em> connect to
+     * the real {@code installd}. All remote calls will be ignored unless you extend this class and
+     * intercept them.
+     */
+    public boolean isIsolated() {
+        return mIsolated;
     }
 
     @Override
@@ -247,6 +260,7 @@ public class Installer extends SystemService {
     private static CreateAppDataResult buildPlaceholderCreateAppDataResult() {
         final CreateAppDataResult result = new CreateAppDataResult();
         result.ceDataInode = -1;
+        result.deDataInode = -1;
         result.exceptionCode = 0;
         result.exceptionMessage = null;
         return result;
@@ -351,7 +365,7 @@ public class Installer extends SystemService {
         private boolean mExecuted;
 
         private final List<CreateAppDataArgs> mArgs = new ArrayList<>();
-        private final List<CompletableFuture<Long>> mFutures = new ArrayList<>();
+        private final List<CompletableFuture<CreateAppDataResult>> mFutures = new ArrayList<>();
 
         /**
          * Enqueue the given {@code installd} operation to be executed in the
@@ -361,11 +375,12 @@ public class Installer extends SystemService {
          * {@link Installer} object.
          */
         @NonNull
-        public synchronized CompletableFuture<Long> createAppData(CreateAppDataArgs args) {
+        public synchronized CompletableFuture<CreateAppDataResult> createAppData(
+                CreateAppDataArgs args) {
             if (mExecuted) {
                 throw new IllegalStateException();
             }
-            final CompletableFuture<Long> future = new CompletableFuture<>();
+            final CompletableFuture<CreateAppDataResult> future = new CompletableFuture<>();
             mArgs.add(args);
             mFutures.add(future);
             return future;
@@ -390,11 +405,11 @@ public class Installer extends SystemService {
                     args[j] = mArgs.get(i + j);
                 }
                 final CreateAppDataResult[] results = installer.createAppDataBatched(args);
-                for (int j = 0; j < args.length; j++) {
+                for (int j = 0; j < results.length; j++) {
                     final CreateAppDataResult result = results[j];
-                    final CompletableFuture<Long> future = mFutures.get(i + j);
+                    final CompletableFuture<CreateAppDataResult> future = mFutures.get(i + j);
                     if (result.exceptionCode == 0) {
-                        future.complete(result.ceDataInode);
+                        future.complete(result);
                     } else {
                         future.completeExceptionally(
                                 new InstallerException(result.exceptionMessage));
@@ -429,6 +444,26 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.clearAppData(uuid, packageName, userId, flags, ceDataInode);
+
+            final StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+            String className;
+            String methodName;
+            String fileName;
+            int lineNumber;
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            EventLog.writeEvent(EventLogTags.INSTALLER_CLEAR_APP_DATA_CALLER, pid, uid, packageName,
+                    flags);
+            // Skip the first two elements since they are always the same, ie
+            // Thread#getStackTrace() and VMStack#getThreadStackTrace()
+            for (int i = 2; i < elements.length; i++) {
+                className = elements[i].getClassName();
+                methodName = elements[i].getMethodName();
+                fileName = elements[i].getFileName();
+                lineNumber = elements[i].getLineNumber();
+                EventLog.writeEvent(EventLogTags.INSTALLER_CLEAR_APP_DATA_CALL_STACK, methodName,
+                        className, fileName, lineNumber);
+            }
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -609,11 +644,13 @@ public class Installer extends SystemService {
      * @throws InstallerException if {@code dexopt} fails.
      */
     public boolean dexopt(String apkPath, int uid, String pkgName, String instructionSet,
-            int dexoptNeeded, @Nullable String outputPath, int dexFlags,
-            String compilerFilter, @Nullable String volumeUuid, @Nullable String classLoaderContext,
+            int dexoptNeeded, @Nullable String outputPath, int dexFlags, String compilerFilter,
+            @Nullable String volumeUuid, @Nullable String classLoaderContext,
             @Nullable String seInfo, boolean downgrade, int targetSdkVersion,
             @Nullable String profileName, @Nullable String dexMetadataPath,
-            @Nullable String compilationReason) throws InstallerException {
+            @Nullable String compilationReason)
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         assertValidInstructionSet(instructionSet);
         BlockGuard.getVmPolicy().onPathAccess(apkPath);
         BlockGuard.getVmPolicy().onPathAccess(outputPath);
@@ -637,7 +674,8 @@ public class Installer extends SystemService {
      *
      * @param block set to true to enable blocking / false to disable blocking.
      */
-    public void controlDexOptBlocking(boolean block) {
+    public void controlDexOptBlocking(boolean block) throws LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         try {
             mInstalld.controlDexOptBlocking(block);
         } catch (Exception e) {
@@ -655,7 +693,8 @@ public class Installer extends SystemService {
      *         {@link #PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES}
      */
     public int mergeProfiles(int uid, String packageName, String profileName)
-            throws InstallerException {
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
         try {
             return mInstalld.mergeProfiles(uid, packageName, profileName);
@@ -668,8 +707,9 @@ public class Installer extends SystemService {
      * Dumps profiles associated with a package in a human readable format.
      */
     public boolean dumpProfiles(int uid, String packageName, String profileName, String codePath,
-                                boolean dumpClassesAndMethods)
-            throws InstallerException {
+            boolean dumpClassesAndMethods)
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return false;
         BlockGuard.getVmPolicy().onPathAccess(codePath);
         try {
@@ -681,7 +721,8 @@ public class Installer extends SystemService {
     }
 
     public boolean copySystemProfile(String systemProfile, int uid, String packageName,
-                String profileName) throws InstallerException {
+            String profileName) throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return false;
         try {
             return mInstalld.copySystemProfile(systemProfile, uid, packageName, profileName);
@@ -690,7 +731,9 @@ public class Installer extends SystemService {
         }
     }
 
-    public void rmdex(String codePath, String instructionSet) throws InstallerException {
+    public void rmdex(String codePath, String instructionSet)
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         assertValidInstructionSet(instructionSet);
         if (!checkBeforeRemote()) return;
         BlockGuard.getVmPolicy().onPathAccess(codePath);
@@ -714,7 +757,9 @@ public class Installer extends SystemService {
         }
     }
 
-    public void clearAppProfiles(String packageName, String profileName) throws InstallerException {
+    public void clearAppProfiles(String packageName, String profileName)
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.clearAppProfiles(packageName, profileName);
@@ -723,7 +768,9 @@ public class Installer extends SystemService {
         }
     }
 
-    public void destroyAppProfiles(String packageName) throws InstallerException {
+    public void destroyAppProfiles(String packageName)
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.destroyAppProfiles(packageName);
@@ -737,7 +784,8 @@ public class Installer extends SystemService {
      * @throws InstallerException if the deletion fails.
      */
     public void deleteReferenceProfile(String packageName, String profileName)
-            throws InstallerException {
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.deleteReferenceProfile(packageName, profileName);
@@ -800,6 +848,9 @@ public class Installer extends SystemService {
      */
     public void createOatDir(String packageName, String oatDir, String dexInstructionSet)
             throws InstallerException {
+        // This method should be allowed even if ART Service is enabled, because it's used for
+        // creating oat dirs before creating hard links for partial installation.
+        // TODO(b/274658735): Add an ART Service API to support hard linking.
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.createOatDir(packageName, oatDir, dexInstructionSet);
@@ -843,7 +894,8 @@ public class Installer extends SystemService {
      * of freed bytes.
      */
     public long deleteOdex(String packageName, String apkPath, String instructionSet,
-            String outputPath) throws InstallerException {
+            String outputPath) throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return -1;
         BlockGuard.getVmPolicy().onPathAccess(apkPath);
         BlockGuard.getVmPolicy().onPathAccess(outputPath);
@@ -855,7 +907,9 @@ public class Installer extends SystemService {
     }
 
     public boolean reconcileSecondaryDexFile(String apkPath, String packageName, int uid,
-            String[] isas, @Nullable String volumeUuid, int flags) throws InstallerException {
+            String[] isas, @Nullable String volumeUuid, int flags)
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         for (int i = 0; i < isas.length; i++) {
             assertValidInstructionSet(isas[i]);
         }
@@ -881,7 +935,8 @@ public class Installer extends SystemService {
     }
 
     public boolean createProfileSnapshot(int appId, String packageName, String profileName,
-            String classpath) throws InstallerException {
+            String classpath) throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return false;
         try {
             return mInstalld.createProfileSnapshot(appId, packageName, profileName, classpath);
@@ -891,7 +946,8 @@ public class Installer extends SystemService {
     }
 
     public void destroyProfileSnapshot(String packageName, String profileName)
-            throws InstallerException {
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.destroyProfileSnapshot(packageName, profileName);
@@ -952,7 +1008,9 @@ public class Installer extends SystemService {
      * </ul>
      */
     public boolean prepareAppProfile(String pkg, @UserIdInt int userId, @AppIdInt int appId,
-            String profileName, String codePath, String dexMetadataPath) throws InstallerException {
+            String profileName, String codePath, String dexMetadataPath)
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return false;
         BlockGuard.getVmPolicy().onPathAccess(codePath);
         BlockGuard.getVmPolicy().onPathAccess(dexMetadataPath);
@@ -1093,14 +1151,6 @@ public class Installer extends SystemService {
         throw new InstallerException("Invalid instruction set: " + instructionSet);
     }
 
-    public boolean compileLayouts(String apkPath, String packageName, String outDexFile, int uid) {
-        try {
-            return mInstalld.compileLayouts(apkPath, packageName, outDexFile, uid);
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
     /**
      * Returns the visibility of the optimized artifacts.
      *
@@ -1117,12 +1167,60 @@ public class Installer extends SystemService {
      * @throws InstallerException if failed to get the visibility of the optimized artifacts.
      */
     public int getOdexVisibility(String packageName, String apkPath, String instructionSet,
-            String outputPath) throws InstallerException {
+            String outputPath) throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return -1;
         BlockGuard.getVmPolicy().onPathAccess(apkPath);
         BlockGuard.getVmPolicy().onPathAccess(outputPath);
         try {
             return mInstalld.getOdexVisibility(packageName, apkPath, instructionSet, outputPath);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Returns an auth token for the provided writable FD.
+     *
+     * @param authFd a file descriptor to proof that the caller can write to the file.
+     * @param uid uid of the calling app.
+     *
+     * @return authToken, or null if a remote call shouldn't be continued. See {@link
+     * #checkBeforeRemote}.
+     *
+     * @throws InstallerException if the remote call failed.
+     */
+    public IInstalld.IFsveritySetupAuthToken createFsveritySetupAuthToken(
+            ParcelFileDescriptor authFd, int uid) throws InstallerException {
+        if (!checkBeforeRemote()) {
+            return null;
+        }
+        try {
+            return mInstalld.createFsveritySetupAuthToken(authFd, uid);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Enables fs-verity to the given app file.
+     *
+     * @param authToken a token previously returned from {@link #createFsveritySetupAuthToken}.
+     * @param filePath file path of the package to enable fs-verity.
+     * @param packageName name of the package.
+     *
+     * @return 0 if the operation was successful, otherwise {@code errno}.
+     *
+     * @throws InstallerException if the remote call failed (e.g. see {@link #checkBeforeRemote}).
+     */
+    public int enableFsverity(IInstalld.IFsveritySetupAuthToken authToken, String filePath,
+            String packageName) throws InstallerException {
+        if (!checkBeforeRemote()) {
+            throw new InstallerException("fs-verity wasn't enabled with an isolated installer");
+        }
+        BlockGuard.getVmPolicy().onPathAccess(filePath);
+        try {
+            return mInstalld.enableFsverity(authToken, filePath, packageName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -1135,6 +1233,28 @@ public class Installer extends SystemService {
 
         public static InstallerException from(Exception e) throws InstallerException {
             throw new InstallerException(e.toString());
+        }
+    }
+
+    /**
+     * A checked exception that is thrown in legacy dexopt code paths when ART Service should be
+     * used instead.
+     */
+    public static class LegacyDexoptDisabledException extends Exception {
+        // TODO(b/260124949): Remove the legacy dexopt code paths, i.e. this exception and all code
+        // that may throw it.
+        public LegacyDexoptDisabledException() {
+            super("Invalid call to legacy dexopt method while ART Service is in use.");
+        }
+    }
+
+    /**
+     * Throws LegacyDexoptDisabledException if ART Service should be used instead of the
+     * {@link android.os.IInstalld} method that follows this method call.
+     */
+    public static void checkLegacyDexoptDisabled() throws LegacyDexoptDisabledException {
+        if (useArtService()) {
+            throw new LegacyDexoptDisabledException();
         }
     }
 }

@@ -16,6 +16,8 @@
 
 package com.android.server.inputmethod;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 
 import android.os.LocaleList;
@@ -355,6 +357,29 @@ public class LocaleUtilsTest {
             assertEquals(1, dest.size());
             assertEquals(availableLocales.get(0), dest.get(0));  // "sr-Latn-RS"
         }
+        // Locale with deprecated subtag, e.g. CS for Serbia and Montenegro, should not win
+        // even if the other available locale doesn't have explicit script / country.
+        // On Android, users don't normally use deprecated subtags unless the application requests.
+        {
+            final LocaleList preferredLocales = LocaleList.forLanguageTags("sr-RS");
+            final ArrayList<Locale> availableLocales = new ArrayList<>();
+            availableLocales.add(Locale.forLanguageTag("sr-Cyrl-CS"));
+            availableLocales.add(Locale.forLanguageTag("sr-RS"));
+            final ArrayList<Locale> dest = new ArrayList<>();
+            LocaleUtils.filterByLanguage(availableLocales, sIdentityMapper, preferredLocales, dest);
+            assertEquals(1, dest.size());
+            assertEquals(availableLocales.get(1), dest.get(0));  // "sr-RS"
+        }
+        {
+            final LocaleList preferredLocales = LocaleList.forLanguageTags("sr-RS");
+            final ArrayList<Locale> availableLocales = new ArrayList<>();
+            availableLocales.add(Locale.forLanguageTag("sr-Cyrl-CS"));
+            availableLocales.add(Locale.forLanguageTag("sr"));
+            final ArrayList<Locale> dest = new ArrayList<>();
+            LocaleUtils.filterByLanguage(availableLocales, sIdentityMapper, preferredLocales, dest);
+            assertEquals(1, dest.size());
+            assertEquals(availableLocales.get(1), dest.get(0));  // "sr"
+        }
     }
 
     @Test
@@ -385,5 +410,11 @@ public class LocaleUtilsTest {
             // Should be zh-Hans since it supports zh-Hani. Also zh-Hant, zh-Hanb supports zh-Hani.
             assertEquals(availableLocales.get(3), dest.get(0));
         }
+    }
+
+    @Test
+    public void testGetLanguageFromLocaleString() {
+        assertThat(LocaleUtils.getLanguageFromLocaleString("en")).isEqualTo("en");
+        assertThat(LocaleUtils.getLanguageFromLocaleString("en-US")).isEqualTo("en");
     }
 }

@@ -16,7 +16,7 @@
 package com.android.server.pm.parsing.library;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 
 /**
  * Updates a package to remove dependency on android.net.ipsec.ike library.
@@ -29,7 +29,8 @@ public class AndroidNetIpSecIkeUpdater extends PackageSharedLibraryUpdater {
     private static final String LIBRARY_NAME = "android.net.ipsec.ike";
 
     @Override
-    public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
+    public void updatePackage(ParsedPackage parsedPackage, boolean isSystemApp,
+            boolean isUpdatedSystemApp) {
         removeLibrary(parsedPackage, LIBRARY_NAME);
     }
 }

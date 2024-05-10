@@ -16,13 +16,11 @@
 
 package com.android.server.location.injector;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.location.settings.LocationSettings;
 
 /**
  * Injects various location dependencies so that they may be controlled by tests.
  */
-@VisibleForTesting
 public interface Injector {
 
     /** Returns a UserInfoHelper. */
@@ -63,4 +61,7 @@ public interface Injector {
 
     /** Returns a LocationUsageLogger. */
     LocationUsageLogger getLocationUsageLogger();
+
+    /** Returns a PackageResetHelper. */
+    PackageResetHelper getPackageResetHelper();
 }

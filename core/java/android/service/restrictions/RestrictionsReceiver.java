@@ -77,7 +77,7 @@ public abstract class RestrictionsReceiver extends BroadcastReceiver {
             String requestType = intent.getStringExtra(RestrictionsManager.EXTRA_REQUEST_TYPE);
             String requestId = intent.getStringExtra(RestrictionsManager.EXTRA_REQUEST_ID);
             PersistableBundle request = (PersistableBundle)
-                    intent.getParcelableExtra(RestrictionsManager.EXTRA_REQUEST_BUNDLE);
+                    intent.getParcelableExtra(RestrictionsManager.EXTRA_REQUEST_BUNDLE, android.os.PersistableBundle.class);
             onRequestPermission(context, packageName, requestType, requestId, request);
         }
     }

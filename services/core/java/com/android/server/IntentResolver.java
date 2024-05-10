@@ -35,7 +35,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.FastPrintWriter;
 import com.android.server.pm.Computer;
-import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
 
 import java.io.PrintWriter;
@@ -78,85 +77,11 @@ public abstract class IntentResolver<F, R extends Object> {
         }
     }
 
-    public static boolean filterEquals(IntentFilter f1, IntentFilter f2) {
-        int s1 = f1.countActions();
-        int s2 = f2.countActions();
-        if (s1 != s2) {
-            return false;
-        }
-        for (int i=0; i<s1; i++) {
-            if (!f2.hasAction(f1.getAction(i))) {
-                return false;
-            }
-        }
-        s1 = f1.countCategories();
-        s2 = f2.countCategories();
-        if (s1 != s2) {
-            return false;
-        }
-        for (int i=0; i<s1; i++) {
-            if (!f2.hasCategory(f1.getCategory(i))) {
-                return false;
-            }
-        }
-        s1 = f1.countDataTypes();
-        s2 = f2.countDataTypes();
-        if (s1 != s2) {
-            return false;
-        }
-        for (int i=0; i<s1; i++) {
-            if (!f2.hasExactDataType(f1.getDataType(i))) {
-                return false;
-            }
-        }
-        s1 = f1.countDataSchemes();
-        s2 = f2.countDataSchemes();
-        if (s1 != s2) {
-            return false;
-        }
-        for (int i=0; i<s1; i++) {
-            if (!f2.hasDataScheme(f1.getDataScheme(i))) {
-                return false;
-            }
-        }
-        s1 = f1.countDataAuthorities();
-        s2 = f2.countDataAuthorities();
-        if (s1 != s2) {
-            return false;
-        }
-        for (int i=0; i<s1; i++) {
-            if (!f2.hasDataAuthority(f1.getDataAuthority(i))) {
-                return false;
-            }
-        }
-        s1 = f1.countDataPaths();
-        s2 = f2.countDataPaths();
-        if (s1 != s2) {
-            return false;
-        }
-        for (int i=0; i<s1; i++) {
-            if (!f2.hasDataPath(f1.getDataPath(i))) {
-                return false;
-            }
-        }
-        s1 = f1.countDataSchemeSpecificParts();
-        s2 = f2.countDataSchemeSpecificParts();
-        if (s1 != s2) {
-            return false;
-        }
-        for (int i=0; i<s1; i++) {
-            if (!f2.hasDataSchemeSpecificPart(f1.getDataSchemeSpecificPart(i))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     /**
      * Returns whether an intent matches the IntentFilter with a pre-resolved type.
      */
     public static boolean intentMatchesFilter(
-            IntentFilter filter, Intent intent, String resolvedType) {
+            IntentFilter filter, Intent intent, String resolvedType, boolean defaultOnly) {
         final boolean debug = localLOGV
                 || ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
 
@@ -169,8 +94,12 @@ public abstract class IntentResolver<F, R extends Object> {
             filter.dump(logPrinter, "  ");
         }
 
-        final int match = filter.match(intent.getAction(), resolvedType, intent.getScheme(),
+        int match = filter.match(intent.getAction(), resolvedType, intent.getScheme(),
                 intent.getData(), intent.getCategories(), TAG);
+
+        if (match >= 0 && defaultOnly && !filter.hasCategory(Intent.CATEGORY_DEFAULT)) {
+            match = IntentFilter.NO_MATCH_CATEGORY;
+        }
 
         if (match >= 0) {
             if (debug) {
@@ -201,7 +130,7 @@ public abstract class IntentResolver<F, R extends Object> {
                 if (cur == null) {
                     break;
                 }
-                if (filterEquals(getIntentFilter(cur), matching)) {
+                if (IntentFilter.filterEquals(getIntentFilter(cur), matching)) {
                     if (res == null) {
                         res = new ArrayList<>();
                     }
@@ -226,7 +155,7 @@ public abstract class IntentResolver<F, R extends Object> {
         } else {
             ArrayList<F> res = null;
             for (F cur : mFilters) {
-                if (filterEquals(getIntentFilter(cur), matching)) {
+                if (IntentFilter.filterEquals(getIntentFilter(cur), matching)) {
                     if (res == null) {
                         res = new ArrayList<>();
                     }
@@ -566,7 +495,7 @@ public abstract class IntentResolver<F, R extends Object> {
      * "stopped", that is whether it should not be included in the result
      * if the intent requests to excluded stopped objects.
      */
-    protected boolean isFilterStopped(PackageStateInternal packageState, @UserIdInt int userId) {
+    protected boolean isFilterStopped(@NonNull Computer computer, F filter, @UserIdInt int userId) {
         return false;
     }
 
@@ -805,8 +734,7 @@ public abstract class IntentResolver<F, R extends Object> {
             int match;
             if (debug) Slog.v(TAG, "Matching against filter " + filter);
 
-            if (excludingStopped && isFilterStopped(computer.getPackageStateInternal(packageName),
-                    userId)) {
+            if (excludingStopped && isFilterStopped(computer, filter, userId)) {
                 if (debug) {
                     Slog.v(TAG, "  Filter's target is stopped; skipping");
                 }

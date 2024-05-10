@@ -640,15 +640,15 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
         // value and having the IME up makes no sense.
         InputMethodManager inputMethodManager = mContext.getSystemService(InputMethodManager.class);
         if (inputMethodManager != null) {
-            if (inputMethodManager.isActive(mYearSpinnerInput)) {
+            if (mYearSpinnerInput.hasFocus()) {
+                inputMethodManager.hideSoftInputFromView(mYearSpinnerInput, 0);
                 mYearSpinnerInput.clearFocus();
-                inputMethodManager.hideSoftInputFromWindow(mDelegator.getWindowToken(), 0);
-            } else if (inputMethodManager.isActive(mMonthSpinnerInput)) {
+            } else if (mMonthSpinnerInput.hasFocus()) {
+                inputMethodManager.hideSoftInputFromView(mMonthSpinnerInput, 0);
                 mMonthSpinnerInput.clearFocus();
-                inputMethodManager.hideSoftInputFromWindow(mDelegator.getWindowToken(), 0);
-            } else if (inputMethodManager.isActive(mDaySpinnerInput)) {
+            } else if (mDaySpinnerInput.hasFocus()) {
+                inputMethodManager.hideSoftInputFromView(mDaySpinnerInput, 0);
                 mDaySpinnerInput.clearFocus();
-                inputMethodManager.hideSoftInputFromWindow(mDelegator.getWindowToken(), 0);
             }
         }
     }

@@ -18,10 +18,12 @@ package android.hardware.display;
 
 import android.content.pm.ParceledListSlice;
 import android.graphics.Point;
+import android.hardware.OverlayProperties;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.Curve;
 import android.hardware.graphics.common.DisplayDecorationSupport;
+import android.hardware.display.HdrConversionMode;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
@@ -36,7 +38,7 @@ import android.view.Surface;
 interface IDisplayManager {
     @UnsupportedAppUsage
     DisplayInfo getDisplayInfo(int displayId);
-    int[] getDisplayIds();
+    int[] getDisplayIds(boolean includeDisabled);
 
     boolean isUidPresentOnDisplay(int uid, int displayId);
 
@@ -45,9 +47,11 @@ interface IDisplayManager {
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
     // The process must have previously registered a callback.
+    @EnforcePermission("CONFIGURE_WIFI_DISPLAY")
     void startWifiDisplayScan();
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
+    @EnforcePermission("CONFIGURE_WIFI_DISPLAY")
     void stopWifiDisplayScan();
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
@@ -63,18 +67,22 @@ interface IDisplayManager {
     void forgetWifiDisplay(String address);
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
+    @EnforcePermission("CONFIGURE_WIFI_DISPLAY")
     void pauseWifiDisplay();
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
+    @EnforcePermission("CONFIGURE_WIFI_DISPLAY")
     void resumeWifiDisplay();
 
     // No permissions required.
     WifiDisplayStatus getWifiDisplayStatus();
 
     // Requires WRITE_SECURE_SETTINGS permission.
+    @EnforcePermission("WRITE_SECURE_SETTINGS")
     void setUserDisabledHdrTypes(in int[] userDisabledTypes);
 
     // Requires WRITE_SECURE_SETTINGS permission.
+    @EnforcePermission("WRITE_SECURE_SETTINGS")
     void setAreUserDisabledHdrTypesAllowed(boolean areUserDisabledHdrTypesAllowed);
 
     // No permissions required.
@@ -83,7 +91,11 @@ interface IDisplayManager {
     // No permissions required.
     int[] getUserDisabledHdrTypes();
 
+    // Requires ACCESS_SURFACE_FLINGER permission.
+    void overrideHdrTypes(int displayId, in int[] modes);
+
     // Requires CONFIGURE_DISPLAY_COLOR_MODE
+    @EnforcePermission("CONFIGURE_DISPLAY_COLOR_MODE")
     void requestColorMode(int displayId, int colorMode);
 
     // Requires CAPTURE_VIDEO_OUTPUT, CAPTURE_SECURE_VIDEO_OUTPUT, or an appropriate
@@ -109,24 +121,29 @@ interface IDisplayManager {
     Point getStableDisplaySize();
 
     // Requires BRIGHTNESS_SLIDER_USAGE permission.
+    @EnforcePermission("BRIGHTNESS_SLIDER_USAGE")
     ParceledListSlice getBrightnessEvents(String callingPackage);
 
     // Requires ACCESS_AMBIENT_LIGHT_STATS permission.
+    @EnforcePermission("ACCESS_AMBIENT_LIGHT_STATS")
     ParceledListSlice getAmbientBrightnessStats();
 
     // Sets the global brightness configuration for a given user. Requires
     // CONFIGURE_DISPLAY_BRIGHTNESS, and INTERACT_ACROSS_USER if the user being configured is not
     // the same as the calling user.
+    @EnforcePermission("CONFIGURE_DISPLAY_BRIGHTNESS")
     void setBrightnessConfigurationForUser(in BrightnessConfiguration c, int userId,
             String packageName);
 
     // Sets the global brightness configuration for a given display. Requires
     // CONFIGURE_DISPLAY_BRIGHTNESS.
+    @EnforcePermission("CONFIGURE_DISPLAY_BRIGHTNESS")
     void setBrightnessConfigurationForDisplay(in BrightnessConfiguration c, String uniqueDisplayId,
             int userId, String packageName);
 
     // Gets the brightness configuration for a given display. Requires
     // CONFIGURE_DISPLAY_BRIGHTNESS.
+    @EnforcePermission("CONFIGURE_DISPLAY_BRIGHTNESS")
     BrightnessConfiguration getBrightnessConfigurationForDisplay(String uniqueDisplayId,
             int userId);
 
@@ -136,27 +153,32 @@ interface IDisplayManager {
     BrightnessConfiguration getBrightnessConfigurationForUser(int userId);
 
     // Gets the default brightness configuration if configured.
+    @EnforcePermission("CONFIGURE_DISPLAY_BRIGHTNESS")
     BrightnessConfiguration getDefaultBrightnessConfiguration();
 
     // Gets the last requested minimal post processing settings for display with displayId.
     boolean isMinimalPostProcessingRequested(int displayId);
 
     // Temporarily sets the display brightness.
+    @EnforcePermission("CONTROL_DISPLAY_BRIGHTNESS")
     void setTemporaryBrightness(int displayId, float brightness);
 
     // Saves the display brightness.
+    @EnforcePermission("CONTROL_DISPLAY_BRIGHTNESS")
     void setBrightness(int displayId, float brightness);
 
     // Retrieves the display brightness.
     float getBrightness(int displayId);
 
     // Temporarily sets the auto brightness adjustment factor.
+    @EnforcePermission("CONTROL_DISPLAY_BRIGHTNESS")
     void setTemporaryAutoBrightnessAdjustment(float adjustment);
 
     // Get the minimum brightness curve.
     Curve getMinimumBrightnessCurve();
 
     // Get Brightness Information for the specified display.
+    @EnforcePermission("CONTROL_DISPLAY_BRIGHTNESS")
     BrightnessInfo getBrightnessInfo(int displayId);
 
     // Gets the id of the preferred wide gamut color space for all displays.
@@ -166,17 +188,30 @@ interface IDisplayManager {
 
     // Sets the user preferred display mode.
     // Requires MODIFY_USER_PREFERRED_DISPLAY_MODE permission.
+    @EnforcePermission("MODIFY_USER_PREFERRED_DISPLAY_MODE")
     void setUserPreferredDisplayMode(int displayId, in Mode mode);
     Mode getUserPreferredDisplayMode(int displayId);
     Mode getSystemPreferredDisplayMode(int displayId);
 
+    // Sets the HDR conversion mode for a device.
+    // Requires MODIFY_HDR_CONVERSION_MODE permission.
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+                + ".permission.MODIFY_HDR_CONVERSION_MODE)")
+    void setHdrConversionMode(in HdrConversionMode hdrConversionMode);
+    HdrConversionMode getHdrConversionModeSetting();
+    HdrConversionMode getHdrConversionMode();
+    int[] getSupportedHdrOutputTypes();
+
     // When enabled the app requested display resolution and refresh rate is always selected
     // in DisplayModeDirector regardless of user settings and policies for low brightness, low
     // battery etc.
+    @EnforcePermission("OVERRIDE_DISPLAY_MODE_REQUESTS")
     void setShouldAlwaysRespectAppRequestedMode(boolean enabled);
+    @EnforcePermission("OVERRIDE_DISPLAY_MODE_REQUESTS")
     boolean shouldAlwaysRespectAppRequestedMode();
 
     // Sets the refresh rate switching type.
+    @EnforcePermission("MODIFY_REFRESH_RATE_SWITCHING_TYPE")
     void setRefreshRateSwitchingType(int newValue);
 
     // Returns the refresh rate switching type.
@@ -184,4 +219,20 @@ interface IDisplayManager {
 
     // Query for DISPLAY_DECORATION support.
     DisplayDecorationSupport getDisplayDecorationSupport(int displayId);
+
+    // This method is to support behavior that was calling hidden APIs. The caller was requesting
+    // to set the layerStack after the display was created, which is not something we support in
+    // DMS. This should be deleted in V release.
+    void setDisplayIdToMirror(in IBinder token, int displayId);
+
+    // Query overlay properties of the device
+    OverlayProperties getOverlaySupport();
+
+    // Enable a connected display that is disabled.
+    @EnforcePermission("MANAGE_DISPLAYS")
+    void enableConnectedDisplay(int displayId);
+
+    // Disable a connected display that is enabled.
+    @EnforcePermission("MANAGE_DISPLAYS")
+    void disableConnectedDisplay(int displayId);
 }

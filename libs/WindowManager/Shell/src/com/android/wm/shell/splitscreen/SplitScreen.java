@@ -18,6 +18,7 @@ package com.android.wm.shell.splitscreen;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.ActivityManager;
 import android.graphics.Rect;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
@@ -63,6 +64,14 @@ public interface SplitScreen {
         default void onSplitVisibilityChanged(boolean visible) {}
     }
 
+    /** Callback interface for listening to requests to enter split select */
+    interface SplitSelectListener {
+        default boolean onRequestEnterSplitSelect(ActivityManager.RunningTaskInfo taskInfo,
+                int splitPosition, Rect taskBounds) {
+            return false;
+        }
+    }
+
     /** Registers listener that gets split screen callback. */
     void registerSplitScreenListener(@NonNull SplitScreenListener listener,
             @NonNull Executor executor);
@@ -70,15 +79,11 @@ public interface SplitScreen {
     /** Unregisters listener that gets split screen callback. */
     void unregisterSplitScreenListener(@NonNull SplitScreenListener listener);
 
-    /**
-     * Returns a binder that can be passed to an external process to manipulate SplitScreen.
-     */
-    default ISplitScreen createExternalInterface() {
-        return null;
-    }
-
     /** Called when device waking up finished. */
     void onFinishedWakingUp();
+
+    /** Called when requested to go to fullscreen from the current active split app. */
+    void goToFullscreenFromSplit();
 
     /** Get a string representation of a stage type */
     static String stageTypeToString(@StageType int stage) {

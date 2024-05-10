@@ -36,10 +36,10 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
 import java.io.IOException;
@@ -251,6 +251,11 @@ public class ConditionProviders extends ManagedServices {
     }
 
     @Override
+    protected boolean allowRebindForParentUser() {
+        return true;
+    }
+
+    @Override
     protected String getRequiredPermission() {
         return null;
     }
@@ -261,11 +266,15 @@ public class ConditionProviders extends ManagedServices {
         }
     }
 
-    private Condition[] removeDuplicateConditions(String pkg, Condition[] conditions) {
+    private Condition[] getValidConditions(String pkg, Condition[] conditions) {
         if (conditions == null || conditions.length == 0) return null;
         final int N = conditions.length;
         final ArrayMap<Uri, Condition> valid = new ArrayMap<Uri, Condition>(N);
         for (int i = 0; i < N; i++) {
+            if (conditions[i] == null) {
+                Slog.w(TAG, "Ignoring null condition from " + pkg);
+                continue;
+            }
             final Uri id = conditions[i].id;
             if (valid.containsKey(id)) {
                 Slog.w(TAG, "Ignoring condition from " + pkg + " for duplicate id: " + id);
@@ -303,7 +312,7 @@ public class ConditionProviders extends ManagedServices {
         synchronized(mMutex) {
             if (DEBUG) Slog.d(TAG, "notifyConditions pkg=" + pkg + " info=" + info + " conditions="
                     + (conditions == null ? null : Arrays.asList(conditions)));
-            conditions = removeDuplicateConditions(pkg, conditions);
+            conditions = getValidConditions(pkg, conditions);
             if (conditions == null || conditions.length == 0) return;
             final int N = conditions.length;
             for (int i = 0; i < N; i++) {
@@ -430,6 +439,58 @@ public class ConditionProviders extends ManagedServices {
 
     private static IConditionProvider provider(ManagedServiceInfo info) {
         return info == null ? null : (IConditionProvider) info.service;
+    }
+
+    void resetDefaultFromConfig() {
+        synchronized (mDefaultsLock) {
+            mDefaultComponents.clear();
+            mDefaultPackages.clear();
+        }
+        loadDefaultsFromConfig();
+    }
+
+    boolean removeDefaultFromConfig(int userId) {
+        boolean removed = false;
+        String defaultDndDenied = mContext.getResources().getString(
+                R.string.config_defaultDndDeniedPackages);
+        if (defaultDndDenied != null) {
+            String[] dnds = defaultDndDenied.split(ManagedServices.ENABLED_SERVICES_SEPARATOR);
+            for (int i = 0; i < dnds.length; i++) {
+                if (TextUtils.isEmpty(dnds[i])) {
+                    continue;
+                }
+                removed |= removePackageFromApprovedLists(userId, dnds[i], "remove from config");
+            }
+        }
+        return removed;
+    }
+
+    private boolean removePackageFromApprovedLists(int userId, String pkg, String reason) {
+        boolean removed = false;
+        synchronized (mApproved) {
+            final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(
+                    userId);
+            if (approvedByType != null) {
+                int approvedByTypeSize = approvedByType.size();
+                for (int i = 0; i < approvedByTypeSize; i++) {
+                    final ArraySet<String> approved = approvedByType.valueAt(i);
+                    int approvedSize = approved.size();
+                    for (int j = approvedSize - 1; j >= 0; j--) {
+                        final String packageOrComponent = approved.valueAt(j);
+                        final String packageName = getPackageName(packageOrComponent);
+                        if (TextUtils.equals(pkg, packageName)) {
+                            approved.removeAt(j);
+                            removed = true;
+                            if (DEBUG) {
+                                Slog.v(TAG, "Removing " + packageOrComponent
+                                        + " from approved list; " + reason);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return removed;
     }
 
     private static class ConditionRecord {

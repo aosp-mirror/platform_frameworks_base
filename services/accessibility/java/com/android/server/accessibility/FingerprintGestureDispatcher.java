@@ -33,6 +33,7 @@ import java.util.List;
 /**
  * Encapsulate fingerprint gesture logic
  */
+@SuppressWarnings("MissingPermissionAnnotation")
 public class FingerprintGestureDispatcher extends IFingerprintClientActiveCallback.Stub
         implements Handler.Callback{
     private static final int MSG_REGISTER = 1;

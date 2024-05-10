@@ -27,6 +27,8 @@ import android.view.ViewTreeObserver
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import com.android.systemui.animation.LaunchableView
+import com.android.systemui.animation.LaunchableViewDelegate
 import com.android.systemui.statusbar.CrossFadeHelper
 
 /**
@@ -38,7 +40,7 @@ class TransitionLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr) {
+) : ConstraintLayout(context, attrs, defStyleAttr), LaunchableView {
 
     private val boundsRect = Rect()
     private val originalGoneChildrenSet: MutableSet<Int> = mutableSetOf()
@@ -50,7 +52,11 @@ class TransitionLayout @JvmOverloads constructor(
 
     private var desiredMeasureWidth = 0
     private var desiredMeasureHeight = 0
-    private var transitionVisibility = View.VISIBLE
+    private val delegate =
+        LaunchableViewDelegate(
+            this,
+            superSetVisibility = { super.setVisibility(it) },
+        )
 
     /**
      * The measured state of this view which is the one we will lay ourselves out with. This
@@ -59,8 +65,8 @@ class TransitionLayout @JvmOverloads constructor(
      */
     var measureState: TransitionViewState = TransitionViewState()
         set(value) {
-            val newWidth = value.width
-            val newHeight = value.height
+            val newWidth = value.measureWidth
+            val newHeight = value.measureHeight
             if (newWidth != desiredMeasureWidth || newHeight != desiredMeasureHeight) {
                 desiredMeasureWidth = newWidth
                 desiredMeasureHeight = newHeight
@@ -83,11 +89,12 @@ class TransitionLayout @JvmOverloads constructor(
         }
     }
 
-    override fun setTransitionVisibility(visibility: Int) {
-        // We store the last transition visibility assigned to this view to restore it later if
-        // necessary.
-        super.setTransitionVisibility(visibility)
-        transitionVisibility = visibility
+    override fun setShouldBlockVisibilityChanges(block: Boolean) {
+        delegate.setShouldBlockVisibilityChanges(block)
+    }
+
+    override fun setVisibility(visibility: Int) {
+        delegate.setVisibility(visibility)
     }
 
     override fun onFinishInflate() {
@@ -173,14 +180,6 @@ class TransitionLayout @JvmOverloads constructor(
         translationY = currentState.translation.y
 
         CrossFadeHelper.fadeIn(this, currentState.alpha)
-
-        // CrossFadeHelper#fadeIn will change this view visibility, which overrides the transition
-        // visibility. We set the transition visibility again to make sure that this view plays well
-        // with GhostView, which sets the transition visibility and is used for activity launch
-        // animations.
-        if (transitionVisibility != View.VISIBLE) {
-            setTransitionVisibility(transitionVisibility)
-        }
     }
 
     private fun applyCurrentStateOnPredraw() {
@@ -224,11 +223,11 @@ class TransitionLayout @JvmOverloads constructor(
         }
     }
 
-    override fun dispatchDraw(canvas: Canvas?) {
-        canvas?.save()
-        canvas?.clipRect(boundsRect)
+    override fun dispatchDraw(canvas: Canvas) {
+        canvas.save()
+        canvas.clipRect(boundsRect)
         super.dispatchDraw(canvas)
-        canvas?.restore()
+        canvas.restore()
     }
 
     private fun updateBounds() {
@@ -318,8 +317,28 @@ class TransitionLayout @JvmOverloads constructor(
 
 class TransitionViewState {
     var widgetStates: MutableMap<Int, WidgetState> = mutableMapOf()
+
+    /**
+     * The visible width of this ViewState. This may differ from the measuredWidth when e.g.
+     * squishing the view
+     */
     var width: Int = 0
+
+    /**
+     * The visible height of this ViewState. This may differ from the measuredHeight when e.g.
+     * squishing the view
+     */
     var height: Int = 0
+
+    /**
+     * The height that determines the measured dimensions of the view
+     */
+    var measureHeight: Int = 0
+
+    /**
+     * The width that determines the measured dimensions of the view
+     */
+    var measureWidth: Int = 0
     var alpha: Float = 1.0f
     val translation = PointF()
     val contentTranslation = PointF()
@@ -328,6 +347,8 @@ class TransitionViewState {
         val copy = reusedState ?: TransitionViewState()
         copy.width = width
         copy.height = height
+        copy.measureHeight = measureHeight
+        copy.measureWidth = measureWidth
         copy.alpha = alpha
         copy.translation.set(translation.x, translation.y)
         copy.contentTranslation.set(contentTranslation.x, contentTranslation.y)
@@ -348,6 +369,8 @@ class TransitionViewState {
         }
         width = transitionLayout.measuredWidth
         height = transitionLayout.measuredHeight
+        measureWidth = width
+        measureHeight = height
         translation.set(0.0f, 0.0f)
         contentTranslation.set(0.0f, 0.0f)
         alpha = 1.0f

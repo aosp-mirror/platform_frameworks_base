@@ -32,6 +32,7 @@ package android.util;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class DayOfMonthCursor extends MonthDisplayHelper {
 
     private int mRow;

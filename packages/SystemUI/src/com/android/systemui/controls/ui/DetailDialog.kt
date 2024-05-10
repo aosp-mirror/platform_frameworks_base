@@ -16,27 +16,28 @@
 
 package com.android.systemui.controls.ui
 
+import android.app.Activity
 import android.app.ActivityOptions
-import android.app.ActivityTaskManager
-import android.app.ActivityTaskManager.INVALID_TASK_ID
+import android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
 import android.app.Dialog
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowInsets.Type
 import android.view.WindowManager
 import android.widget.ImageView
+import androidx.annotation.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.wm.shell.TaskView
+import com.android.systemui.util.boundsOnScreen
+import com.android.wm.shell.taskview.TaskView
 
 /**
  * A dialog that provides an {@link TaskView}, allowing the application to provide
@@ -44,13 +45,13 @@ import com.android.wm.shell.TaskView
  * The activity being launched is specified by {@link android.service.controls.Control#getAppIntent}.
  */
 class DetailDialog(
-    val activityContext: Context,
-    val broadcastSender: BroadcastSender,
-    val taskView: TaskView,
-    val pendingIntent: PendingIntent,
-    val cvh: ControlViewHolder,
-    val keyguardStateController: KeyguardStateController,
-    val activityStarter: ActivityStarter
+        val activityContext: Context,
+        val broadcastSender: BroadcastSender,
+        val taskView: TaskView,
+        val pendingIntent: PendingIntent,
+        val cvh: ControlViewHolder,
+        val keyguardStateController: KeyguardStateController,
+        val activityStarter: ActivityStarter
 ) : Dialog(
     activityContext,
     R.style.Theme_SystemUI_Dialog_Control_DetailPanel
@@ -63,8 +64,8 @@ class DetailDialog(
         private const val EXTRA_USE_PANEL = "controls.DISPLAY_IN_PANEL"
     }
 
-    var detailTaskId = INVALID_TASK_ID
     private lateinit var taskViewContainer: View
+    private lateinit var controlDetailRoot: View
     private val taskWidthPercentWidth = activityContext.resources.getFloat(
         R.dimen.controls_task_view_width_percentage
     )
@@ -77,12 +78,7 @@ class DetailDialog(
         addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
     }
 
-    fun removeDetailTask() {
-        if (detailTaskId == INVALID_TASK_ID) return
-        ActivityTaskManager.getInstance().removeTask(detailTaskId)
-        detailTaskId = INVALID_TASK_ID
-    }
-
+    @VisibleForTesting
     val stateCallback = object : TaskView.Listener {
         override fun onInitialized() {
             taskViewContainer.apply {
@@ -96,31 +92,29 @@ class DetailDialog(
                 activityContext,
                 0 /* enterResId */,
                 0 /* exitResId */
-            )
+            ).apply {
+                pendingIntentBackgroundActivityStartMode = MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                isPendingIntentBackgroundActivityLaunchAllowedByPermission = true
+                taskAlwaysOnTop = true
+            }
+
             taskView.startActivity(
                 pendingIntent,
                 fillInIntent,
                 options,
-                getTaskViewBounds()
+                taskView.boundsOnScreen,
             )
         }
 
         override fun onTaskRemovalStarted(taskId: Int) {
-            detailTaskId = INVALID_TASK_ID
-            dismiss()
+            taskView.release()
         }
 
         override fun onTaskCreated(taskId: Int, name: ComponentName?) {
-            detailTaskId = taskId
             requireViewById<ViewGroup>(R.id.controls_activity_view).apply {
                 setAlpha(1f)
             }
         }
-
-        override fun onReleased() {
-            removeDetailTask()
-        }
-
         override fun onBackPressedOnTaskRoot(taskId: Int) {
             dismiss()
         }
@@ -128,12 +122,15 @@ class DetailDialog(
 
     init {
         // To pass touches to the task inside TaskView.
-        window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
-        window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
+        window?.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
+        window?.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
 
         setContentView(R.layout.controls_detail_dialog)
 
         taskViewContainer = requireViewById<ViewGroup>(R.id.control_task_view_container)
+        controlDetailRoot = requireViewById<View>(R.id.control_detail_root).apply {
+            setOnClickListener { _: View -> dismiss() }
+        }
 
         requireViewById<ViewGroup>(R.id.controls_activity_view).apply {
             addView(taskView)
@@ -143,20 +140,22 @@ class DetailDialog(
         requireViewById<ImageView>(R.id.control_detail_close).apply {
             setOnClickListener { _: View -> dismiss() }
         }
-        requireViewById<View>(R.id.control_detail_root).apply {
-            setOnClickListener { _: View -> dismiss() }
-        }
 
         requireViewById<ImageView>(R.id.control_detail_open_in_app).apply {
             setOnClickListener { v: View ->
-                removeDetailTask()
                 dismiss()
 
                 val action = ActivityStarter.OnDismissAction {
                     // Remove the task explicitly, since onRelease() callback will be executed after
                     // startActivity() below is called.
                     broadcastSender.closeSystemDialogs()
-                    pendingIntent.send()
+                    // not sent as interactive, lest the higher-importance activity launch
+                    // be impacted
+                    val options = ActivityOptions.makeBasic()
+                            .setPendingIntentBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                            .toBundle()
+                    pendingIntent.send(options)
                     false
                 }
                 if (keyguardStateController.isUnlocked()) {
@@ -172,7 +171,7 @@ class DetailDialog(
         }
 
         // consume all insets to achieve slide under effect
-        window.getDecorView().setOnApplyWindowInsetsListener {
+        checkNotNull(window).decorView.setOnApplyWindowInsetsListener {
             v: View, insets: WindowInsets ->
                 val l = v.getPaddingLeft()
                 val r = v.getPaddingRight()
@@ -191,27 +190,16 @@ class DetailDialog(
         taskView.setListener(cvh.uiExecutor, stateCallback)
     }
 
-    fun getTaskViewBounds(): Rect {
-        val wm = context.getSystemService(WindowManager::class.java)
-        val windowMetrics = wm.getCurrentWindowMetrics()
-        val rect = windowMetrics.bounds
-        val metricInsets = windowMetrics.windowInsets
-        val insets = metricInsets.getInsetsIgnoringVisibility(Type.systemBars()
-                or Type.displayCutout())
-        val headerHeight = context.resources.getDimensionPixelSize(
-                R.dimen.controls_detail_dialog_header_height)
-
-        val finalRect = Rect(rect.left - insets.left /* left */,
-                rect.top + insets.top + headerHeight /* top */,
-                rect.right - insets.right /* right */,
-                rect.bottom - insets.bottom /* bottom */)
-        return finalRect
-    }
-
     override fun dismiss() {
         if (!isShowing()) return
-        taskView.release()
+        taskView.removeTask()
 
+        val isActivityFinishing =
+            (activityContext as? Activity)?.let { it.isFinishing || it.isDestroyed }
+        if (isActivityFinishing == true) {
+            // Don't dismiss the dialog if the activity is finishing, it will get removed
+            return
+        }
         super.dismiss()
     }
 }

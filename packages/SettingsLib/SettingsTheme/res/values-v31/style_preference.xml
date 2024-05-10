@@ -17,6 +17,7 @@
 <resources>
     <style name="PreferenceTheme.SettingsLib" parent="@style/PreferenceThemeOverlay">
         <item name="preferenceCategoryTitleTextAppearance">@style/TextAppearance.CategoryTitle.SettingsLib</item>
+        <item name="preferenceScreenStyle">@style/SettingsPreferenceScreen.SettingsLib</item>
         <item name="preferenceCategoryStyle">@style/SettingsCategoryPreference.SettingsLib</item>
         <item name="preferenceStyle">@style/SettingsPreference.SettingsLib</item>
         <item name="checkBoxPreferenceStyle">@style/SettingsCheckBoxPreference.SettingsLib</item>
@@ -24,8 +25,14 @@
         <item name="editTextPreferenceStyle">@style/SettingsEditTextPreference.SettingsLib</item>
         <item name="dropdownPreferenceStyle">@style/SettingsDropdownPreference.SettingsLib</item>
         <item name="switchPreferenceStyle">@style/SettingsSwitchPreference.SettingsLib</item>
+        <item name="switchPreferenceCompatStyle">@style/SettingsSwitchPreferenceCompat.SettingsLib</item>
         <item name="seekBarPreferenceStyle">@style/SettingsSeekbarPreference.SettingsLib</item>
         <item name="footerPreferenceStyle">@style/Preference.Material</item>
+    </style>
+
+    <style name="SettingsPreferenceScreen.SettingsLib" parent="@style/Preference.PreferenceScreen.Material">
+        <item name="layout">@layout/settingslib_preference</item>
+        <item name="iconSpaceReserved">@bool/settingslib_config_icon_space_reserved</item>
     </style>
 
     <style name="SettingsCategoryPreference.SettingsLib" parent="@style/Preference.Category.Material">
@@ -58,6 +65,12 @@
 
     <style name="SettingsSwitchPreference.SettingsLib" parent="@style/Preference.SwitchPreference.Material">
         <item name="layout">@layout/settingslib_preference</item>
+        <item name="iconSpaceReserved">@bool/settingslib_config_icon_space_reserved</item>
+    </style>
+
+    <style name="SettingsSwitchPreferenceCompat.SettingsLib" parent="@style/Preference.SwitchPreferenceCompat.Material">
+        <item name="layout">@layout/settingslib_preference</item>
+        <item name="singleLineTitle">false</item>
         <item name="iconSpaceReserved">@bool/settingslib_config_icon_space_reserved</item>
     </style>
 

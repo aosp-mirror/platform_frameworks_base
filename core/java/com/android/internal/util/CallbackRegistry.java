@@ -39,6 +39,7 @@ import java.util.List;
  * @param <T> The notification sender type. Typically this is the containing class.
  * @param <A> Opaque argument used to pass additional data beyond an int.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class CallbackRegistry<C, T, A> implements Cloneable {
     private static final String TAG = "CallbackRegistry";
 

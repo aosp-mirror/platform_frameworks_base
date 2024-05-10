@@ -18,21 +18,21 @@ LIBJNIGRAPHICS {
     AImageDecoder_getRepeatCount; # introduced=31
     AImageDecoder_advanceFrame; # introduced=31
     AImageDecoder_rewind; # introduced=31
-    AImageDecoder_getFrameInfo; # introduced = 31
-    AImageDecoder_setInternallyHandleDisposePrevious; # introduced = 31
+    AImageDecoder_getFrameInfo; # introduced=31
+    AImageDecoder_setInternallyHandleDisposePrevious; # introduced=31
     AImageDecoderHeaderInfo_getWidth; # introduced=30
     AImageDecoderHeaderInfo_getHeight; # introduced=30
     AImageDecoderHeaderInfo_getMimeType; # introduced=30
     AImageDecoderHeaderInfo_getAlphaFlags; # introduced=30
     AImageDecoderHeaderInfo_getAndroidBitmapFormat; # introduced=30
     AImageDecoderHeaderInfo_getDataSpace; # introduced=30
-    AImageDecoderFrameInfo_create; # introduced = 31
-    AImageDecoderFrameInfo_delete; # introduced = 31
-    AImageDecoderFrameInfo_getDuration; # introduced = 31
-    AImageDecoderFrameInfo_getFrameRect; # introduced = 31
-    AImageDecoderFrameInfo_hasAlphaWithinBounds; # introduced = 31
-    AImageDecoderFrameInfo_getDisposeOp; # introduced = 31
-    AImageDecoderFrameInfo_getBlendOp; # introduced = 31
+    AImageDecoderFrameInfo_create; # introduced=31
+    AImageDecoderFrameInfo_delete; # introduced=31
+    AImageDecoderFrameInfo_getDuration; # introduced=31
+    AImageDecoderFrameInfo_getFrameRect; # introduced=31
+    AImageDecoderFrameInfo_hasAlphaWithinBounds; # introduced=31
+    AImageDecoderFrameInfo_getDisposeOp; # introduced=31
+    AImageDecoderFrameInfo_getBlendOp; # introduced=31
     AndroidBitmap_getInfo;
     AndroidBitmap_getDataSpace;
     AndroidBitmap_lockPixels;

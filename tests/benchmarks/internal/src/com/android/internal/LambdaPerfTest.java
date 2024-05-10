@@ -29,7 +29,6 @@ import android.util.Log;
 
 import androidx.test.filters.LargeTest;
 
-import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
 
@@ -46,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -94,27 +92,27 @@ public class LambdaPerfTest {
     };
 
     @Test
-    public void test1ParamConsumer() {
-        evaluate(LAMBDA_FORM_REGULAR, () -> forAllTask(t -> t.doSomething(mTask)));
+    public void test1ParamPredicate() {
+        evaluate(LAMBDA_FORM_REGULAR, () -> handleTask(t -> t.doSomething(mTaskId, mTime)));
         evaluate(LAMBDA_FORM_POOLED, () -> {
-            final PooledConsumer c = PooledLambda.obtainConsumer(Task::doSomething,
-                    PooledLambda.__(Task.class), mTask);
-            forAllTask(c);
+            final PooledPredicate c = PooledLambda.obtainPredicate(Task::doSomething,
+                    PooledLambda.__(Task.class), mTaskId, mTime);
+            handleTask(c);
             c.recycle();
         });
     }
 
     @Test
-    public void test2PrimitiveParamsConsumer() {
-        // Not in Integer#IntegerCache (-128~127) for autoboxing, that will create new object.
+    public void test2PrimitiveParamsPredicate() {
+        // Not in Integer#IntegerCache (-128~127) for autoboxing, that may create new object.
         mTaskId = 12345;
         mTime = 54321;
 
-        evaluate(LAMBDA_FORM_REGULAR, () -> forAllTask(t -> t.doSomething(mTaskId, mTime)));
+        evaluate(LAMBDA_FORM_REGULAR, () -> handleTask(t -> t.doSomething(mTaskId, mTime)));
         evaluate(LAMBDA_FORM_POOLED, () -> {
-            final PooledConsumer c = PooledLambda.obtainConsumer(Task::doSomething,
+            final PooledPredicate c = PooledLambda.obtainPredicate(Task::doSomething,
                     PooledLambda.__(Task.class), mTaskId, mTime);
-            forAllTask(c);
+            handleTask(c);
             c.recycle();
         });
     }
@@ -164,26 +162,20 @@ public class LambdaPerfTest {
     public void testMultiThread() {
         final int numThread = 3;
 
-        final Runnable regularAction = () -> forAllTask(t -> t.doSomething(mTask));
+        final Runnable regularAction = () -> handleTask(t -> t.doSomething(mTaskId, mTime));
         final Runnable[] regularActions = new Runnable[numThread];
         Arrays.fill(regularActions, regularAction);
         evaluateMultiThread(LAMBDA_FORM_REGULAR, regularActions);
 
         final Runnable pooledAction = () -> {
-            final PooledConsumer c = PooledLambda.obtainConsumer(Task::doSomething,
-                    PooledLambda.__(Task.class), mTask);
-            forAllTask(c);
+            final PooledPredicate c = PooledLambda.obtainPredicate(Task::doSomething,
+                    PooledLambda.__(Task.class), mTaskId, mTime);
+            handleTask(c);
             c.recycle();
         };
         final Runnable[] pooledActions = new Runnable[numThread];
         Arrays.fill(pooledActions, pooledAction);
         evaluateMultiThread(LAMBDA_FORM_POOLED, pooledActions);
-    }
-
-    private void forAllTask(Consumer<Task> callback) {
-        for (int i = mTasks.size() - 1; i >= 0; i--) {
-            callback.accept(mTasks.get(i));
-        }
     }
 
     private void handleTask(Predicate<Task> callback) {
@@ -239,6 +231,7 @@ public class LambdaPerfTest {
         SystemClock.sleep(DELAY_AFTER_BENCH_MS);
         final GcStatus endStatus = getGcStatus();
         final GcInfo info = startStatus.calculateGcTime(endStatus, title, mTestResults);
+        mTestResults.putFloat("[" + title + "-execution-time]", elapsed);
         Log.i(TAG, mMethodName + "_" + title + " execution time: "
                 + elapsed + "ms (avg=" + String.format("%.5f", elapsed / TEST_ITERATIONS) + "ms)"
                 + " GC time: " + String.format("%.3f", info.mTotalGcTime) + "ms"
@@ -284,6 +277,9 @@ public class LambdaPerfTest {
             final int pos = log.indexOf(pattern);
             if (pos > 0) {
                 dump = log.substring(pattern.length() + pos);
+                if (!dump.startsWith("/data/anr/")) {
+                    dump = "/data/anr/" + dump;
+                }
                 break;
             }
         }
@@ -314,10 +310,8 @@ public class LambdaPerfTest {
         void doSomething() {
         }
 
-        void doSomething(Task t) {
-        }
-
-        void doSomething(int taskId, long time) {
+        boolean doSomething(int taskId, long time) {
+            return false;
         }
 
         boolean doSomething(Rect bounds, boolean top, int taskId) {

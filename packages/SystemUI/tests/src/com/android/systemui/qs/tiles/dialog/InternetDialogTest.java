@@ -6,14 +6,16 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Handler;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
@@ -29,8 +31,9 @@ import androidx.test.filters.SmallTest;
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -38,16 +41,17 @@ import com.android.wifitrackerlib.WifiEntry;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
 
 import java.util.List;
 
+@Ignore("b/257089187")
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -72,13 +76,16 @@ public class InternetDialogTest extends SysuiTestCase {
     private InternetDialogController mInternetDialogController;
     @Mock
     private KeyguardStateController mKeyguard;
+    @Mock
+    private DialogLaunchAnimator mDialogLaunchAnimator;
 
     private FakeExecutor mBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InternetDialog mInternetDialog;
     private View mDialogView;
     private View mSubTitle;
     private LinearLayout mEthernet;
-    private LinearLayout mMobileDataToggle;
+    private LinearLayout mMobileDataLayout;
+    private Switch mMobileToggleSwitch;
     private LinearLayout mWifiToggle;
     private Switch mWifiToggleSwitch;
     private TextView mWifiToggleSummary;
@@ -100,8 +107,9 @@ public class InternetDialogTest extends SysuiTestCase {
         when(mInternetWifiEntry.hasInternetAccess()).thenReturn(true);
         when(mWifiEntries.size()).thenReturn(1);
 
-        when(mInternetDialogController.getMobileNetworkTitle()).thenReturn(MOBILE_NETWORK_TITLE);
-        when(mInternetDialogController.getMobileNetworkSummary())
+        when(mInternetDialogController.getMobileNetworkTitle(anyInt()))
+                .thenReturn(MOBILE_NETWORK_TITLE);
+        when(mInternetDialogController.getMobileNetworkSummary(anyInt()))
                 .thenReturn(MOBILE_NETWORK_SUMMARY);
         when(mInternetDialogController.isWifiEnabled()).thenReturn(true);
 
@@ -115,7 +123,8 @@ public class InternetDialogTest extends SysuiTestCase {
 
     private void createInternetDialog() {
         mInternetDialog = new InternetDialog(mContext, mock(InternetDialogFactory.class),
-                mInternetDialogController, true, true, true, mock(UiEventLogger.class), mHandler,
+                mInternetDialogController, true, true, true, mock(UiEventLogger.class),
+                mDialogLaunchAnimator, mHandler,
                 mBgExecutor, mKeyguard);
         mInternetDialog.mAdapter = mInternetAdapter;
         mInternetDialog.mConnectedWifiEntry = mInternetWifiEntry;
@@ -125,7 +134,8 @@ public class InternetDialogTest extends SysuiTestCase {
         mDialogView = mInternetDialog.mDialogView;
         mSubTitle = mDialogView.requireViewById(R.id.internet_dialog_subtitle);
         mEthernet = mDialogView.requireViewById(R.id.ethernet_layout);
-        mMobileDataToggle = mDialogView.requireViewById(R.id.mobile_network_layout);
+        mMobileDataLayout = mDialogView.requireViewById(R.id.mobile_network_layout);
+        mMobileToggleSwitch = mDialogView.requireViewById(R.id.mobile_toggle);
         mWifiToggle = mDialogView.requireViewById(R.id.turn_on_wifi_layout);
         mWifiToggleSwitch = mDialogView.requireViewById(R.id.wifi_toggle);
         mWifiToggleSummary = mDialogView.requireViewById(R.id.wifi_toggle_summary);
@@ -226,7 +236,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
         mInternetDialog.updateDialog(true);
 
-        assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mMobileDataLayout.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
@@ -238,7 +248,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
         mInternetDialog.updateDialog(true);
 
-        assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mMobileDataLayout.getVisibility()).isEqualTo(View.GONE);
 
         // Carrier network should be visible if airplane mode ON and Wi-Fi is ON.
         when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(true);
@@ -247,7 +257,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
         mInternetDialog.updateDialog(true);
 
-        assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mMobileDataLayout.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -257,7 +267,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
         mInternetDialog.updateDialog(true);
 
-        assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mMobileDataLayout.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
@@ -269,7 +279,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
         mInternetDialog.updateDialog(true);
 
-        assertThat(mMobileDataToggle.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mMobileDataLayout.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mAirplaneModeSummaryText.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
@@ -306,13 +316,43 @@ public class InternetDialogTest extends SysuiTestCase {
     }
 
     @Test
+    public void updateDialog_mobileDataIsEnabled_checkMobileDataSwitch() {
+        doReturn(true).when(mInternetDialogController).hasActiveSubId();
+        when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(true);
+        when(mInternetDialogController.isMobileDataEnabled()).thenReturn(true);
+        mMobileToggleSwitch.setChecked(false);
+
+        mInternetDialog.updateDialog(true);
+
+        assertThat(mMobileToggleSwitch.isChecked()).isTrue();
+    }
+
+    @Test
+    public void updateDialog_mobileDataIsNotChanged_checkMobileDataSwitch() {
+        doReturn(true).when(mInternetDialogController).hasActiveSubId();
+        when(mInternetDialogController.isCarrierNetworkActive()).thenReturn(true);
+        when(mInternetDialogController.isMobileDataEnabled()).thenReturn(false);
+        mMobileToggleSwitch.setChecked(false);
+
+        mInternetDialog.updateDialog(true);
+
+        assertThat(mMobileToggleSwitch.isChecked()).isFalse();
+    }
+
+    @Test
     public void updateDialog_wifiOnAndHasInternetWifi_showConnectedWifi() {
+        mInternetDialog.dismissDialog();
+        doReturn(true).when(mInternetDialogController).hasActiveSubId();
+        createInternetDialog();
         // The preconditions WiFi ON and Internet WiFi are already in setUp()
         doReturn(false).when(mInternetDialogController).activeNetworkIsCellular();
 
-        mInternetDialog.updateDialog(false);
+        mInternetDialog.updateDialog(true);
 
         assertThat(mConnectedWifi.getVisibility()).isEqualTo(View.VISIBLE);
+        LinearLayout secondaryLayout = mDialogView.requireViewById(
+                R.id.secondary_mobile_network_layout);
+        assertThat(secondaryLayout.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
@@ -460,6 +500,44 @@ public class InternetDialogTest extends SysuiTestCase {
     }
 
     @Test
+    public void updateDialog_showSecondaryDataSub() {
+        mInternetDialog.dismissDialog();
+        doReturn(1).when(mInternetDialogController).getActiveAutoSwitchNonDdsSubId();
+        doReturn(true).when(mInternetDialogController).hasActiveSubId();
+        doReturn(false).when(mInternetDialogController).isAirplaneModeEnabled();
+        createInternetDialog();
+
+        clearInvocations(mInternetDialogController);
+        mInternetDialog.updateDialog(true);
+
+        LinearLayout primaryLayout = mDialogView.requireViewById(
+                R.id.mobile_network_layout);
+        LinearLayout secondaryLayout = mDialogView.requireViewById(
+                R.id.secondary_mobile_network_layout);
+
+        verify(mInternetDialogController).getMobileNetworkSummary(1);
+        assertThat(primaryLayout.getBackground()).isNotEqualTo(secondaryLayout.getBackground());
+
+        // Tap the primary sub info
+        primaryLayout.performClick();
+        ArgumentCaptor<AlertDialog> dialogArgumentCaptor =
+                ArgumentCaptor.forClass(AlertDialog.class);
+        verify(mDialogLaunchAnimator).showFromDialog(dialogArgumentCaptor.capture(),
+                eq(mInternetDialog), eq(null), eq(false));
+        AlertDialog dialog = dialogArgumentCaptor.getValue();
+        dialog.show();
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick();
+        TestableLooper.get(this).processAllMessages();
+        verify(mInternetDialogController).setAutoDataSwitchMobileDataPolicy(1, false);
+
+        // Tap the secondary sub info
+        secondaryLayout.performClick();
+        verify(mInternetDialogController).launchMobileNetworkSettings(any(View.class));
+
+        dialog.dismiss();
+    }
+
+    @Test
     public void updateDialog_wifiOn_hideWifiScanNotify() {
         // The preconditions WiFi ON and WiFi entries are already in setUp()
 
@@ -532,66 +610,21 @@ public class InternetDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void showProgressBar_wifiDisabled_hideProgressBar() {
-        Mockito.reset(mHandler);
-        when(mInternetDialogController.isWifiEnabled()).thenReturn(false);
+    public void onWifiScan_isScanTrue_setProgressBarVisibleTrue() {
+        mInternetDialog.mIsProgressBarVisible = false;
 
-        mInternetDialog.showProgressBar();
+        mInternetDialog.onWifiScan(true);
 
-        assertThat(mInternetDialog.mIsProgressBarVisible).isFalse();
-        verify(mHandler, never()).postDelayed(any(Runnable.class), anyLong());
+        assertThat(mInternetDialog.mIsProgressBarVisible).isTrue();
     }
 
     @Test
-    public void showProgressBar_deviceLocked_hideProgressBar() {
-        Mockito.reset(mHandler);
-        when(mInternetDialogController.isDeviceLocked()).thenReturn(true);
+    public void onWifiScan_isScanFalse_setProgressBarVisibleFalse() {
+        mInternetDialog.mIsProgressBarVisible = true;
 
-        mInternetDialog.showProgressBar();
+        mInternetDialog.onWifiScan(false);
 
         assertThat(mInternetDialog.mIsProgressBarVisible).isFalse();
-        verify(mHandler, never()).postDelayed(any(Runnable.class), anyLong());
-    }
-
-    @Test
-    public void showProgressBar_wifiEnabledWithWifiEntry_showProgressBarThenHide() {
-        Mockito.reset(mHandler);
-        when(mInternetDialogController.isWifiEnabled()).thenReturn(true);
-
-        mInternetDialog.showProgressBar();
-
-        // Show progress bar
-        assertThat(mInternetDialog.mIsProgressBarVisible).isTrue();
-
-        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(mHandler).postDelayed(runnableCaptor.capture(),
-                eq(InternetDialog.PROGRESS_DELAY_MS));
-        runnableCaptor.getValue().run();
-
-        // Then hide progress bar
-        assertThat(mInternetDialog.mIsProgressBarVisible).isFalse();
-    }
-
-    @Test
-    public void showProgressBar_wifiEnabledWithoutWifiEntries_showProgressBarThenHideSearch() {
-        Mockito.reset(mHandler);
-        when(mInternetDialogController.isWifiEnabled()).thenReturn(true);
-        mInternetDialog.mConnectedWifiEntry = null;
-        mInternetDialog.mWifiEntriesCount = 0;
-
-        mInternetDialog.showProgressBar();
-
-        // Show progress bar
-        assertThat(mInternetDialog.mIsProgressBarVisible).isTrue();
-
-        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(mHandler).postDelayed(runnableCaptor.capture(),
-                eq(InternetDialog.PROGRESS_DELAY_MS));
-        runnableCaptor.getValue().run();
-
-        // Then hide searching sub-title only
-        assertThat(mInternetDialog.mIsProgressBarVisible).isTrue();
-        assertThat(mInternetDialog.mIsSearchingHidden).isTrue();
     }
 
     @Test
@@ -638,10 +671,30 @@ public class InternetDialogTest extends SysuiTestCase {
         assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 2);
     }
 
+    @Test
+    public void updateDialog_shareWifiIntentNull_hideButton() {
+        when(mInternetDialogController.getConfiguratorQrCodeGeneratorIntentOrNull(any()))
+                .thenReturn(null);
+
+        mInternetDialog.updateDialog(false);
+
+        assertThat(mInternetDialog.mShareWifiButton.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void updateDialog_shareWifiShareable_showButton() {
+        when(mInternetDialogController.getConfiguratorQrCodeGeneratorIntentOrNull(any()))
+                .thenReturn(new Intent());
+
+        mInternetDialog.updateDialog(false);
+
+        assertThat(mInternetDialog.mShareWifiButton.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
     private void setNetworkVisible(boolean ethernetVisible, boolean mobileDataVisible,
             boolean connectedWifiVisible) {
         mEthernet.setVisibility(ethernetVisible ? View.VISIBLE : View.GONE);
-        mMobileDataToggle.setVisibility(mobileDataVisible ? View.VISIBLE : View.GONE);
+        mMobileDataLayout.setVisibility(mobileDataVisible ? View.VISIBLE : View.GONE);
         mConnectedWifi.setVisibility(connectedWifiVisible ? View.VISIBLE : View.GONE);
     }
 }

@@ -45,6 +45,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -65,8 +66,8 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.pip.PipUiEventLogger;
-import com.android.wm.shell.pip.PipUtils;
+import com.android.wm.shell.common.pip.PipUiEventLogger;
+import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
@@ -106,7 +107,7 @@ public class PipMenuView extends FrameLayout {
     private static final int POST_INTERACTION_DISMISS_DELAY = 2000;
     private static final long MENU_SHOW_ON_EXPAND_START_DELAY = 30;
 
-    private static final float MENU_BACKGROUND_ALPHA = 0.3f;
+    private static final float MENU_BACKGROUND_ALPHA = 0.54f;
     private static final float DISABLED_ACTION_ALPHA = 0.54f;
 
     private int mMenuState;
@@ -282,7 +283,8 @@ public class PipMenuView extends FrameLayout {
 
     public void onFocusTaskChanged(ActivityManager.RunningTaskInfo taskInfo) {
         final boolean isSplitScreen = mSplitScreenControllerOptional.isPresent()
-                && mSplitScreenControllerOptional.get().isTaskInSplitScreen(taskInfo.taskId);
+                && mSplitScreenControllerOptional.get().isTaskInSplitScreenForeground(
+                taskInfo.taskId);
         mFocusedTaskAllowSplitScreen = isSplitScreen
                 || (taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
                 && taskInfo.supportsMultiWindow
@@ -512,13 +514,19 @@ public class PipMenuView extends FrameLayout {
                     final boolean isCloseAction = mCloseAction != null && Objects.equals(
                             mCloseAction.getActionIntent(), action.getActionIntent());
 
-                    // TODO: Check if the action drawable has changed before we reload it
-                    action.getIcon().loadDrawableAsync(mContext, d -> {
-                        if (d != null) {
-                            d.setTint(Color.WHITE);
-                            actionView.setImageDrawable(d);
-                        }
-                    }, mMainHandler);
+                    final int iconType = action.getIcon().getType();
+                    if (iconType == Icon.TYPE_URI || iconType == Icon.TYPE_URI_ADAPTIVE_BITMAP) {
+                        // Disallow loading icon from content URI
+                        actionView.setImageDrawable(null);
+                    } else {
+                        // TODO: Check if the action drawable has changed before we reload it
+                        action.getIcon().loadDrawableAsync(mContext, d -> {
+                            if (d != null) {
+                                d.setTint(Color.WHITE);
+                                actionView.setImageDrawable(d);
+                            }
+                        }, mMainHandler);
+                    }
                     actionView.setCustomCloseBackgroundVisibility(
                             isCloseAction ? View.VISIBLE : View.GONE);
                     actionView.setContentDescription(action.getContentDescription());

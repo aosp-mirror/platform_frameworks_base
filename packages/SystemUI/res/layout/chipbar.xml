@@ -1,0 +1,103 @@
+<!--
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<!-- Wrap in a frame layout so that we can update the margins on the inner layout. (Since this view
+     is the root view of a window, we cannot change the root view's margins.) -->
+<!-- Alphas start as 0 because the view will be animated in. -->
+<com.android.systemui.temporarydisplay.chipbar.ChipbarRootView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:id="@+id/chipbar_root_view"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <!-- Extra marginBottom to give room for the drop shadow. -->
+    <LinearLayout
+        android:id="@+id/chipbar_inner"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/chipbar_outer_padding"
+        android:background="@drawable/chipbar_background"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="@dimen/notification_side_paddings"
+        android:layout_marginEnd="@dimen/notification_side_paddings"
+        android:translationZ="4dp"
+        android:layout_marginBottom="8dp"
+        android:clipToPadding="false"
+        android:gravity="center_vertical"
+        android:alpha="0.0"
+        >
+
+        <com.android.internal.widget.CachingIconView
+            android:id="@+id/start_icon"
+            android:layout_width="@dimen/chipbar_start_icon_size"
+            android:layout_height="@dimen/chipbar_start_icon_size"
+            android:layout_marginEnd="12dp"
+            android:alpha="0.0"
+            />
+
+        <!-- LINT.IfChange textColor -->
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            style="@style/Chipbar.Text"
+            android:textColor="?androidprv:attr/materialColorOnSecondaryFixed"
+            android:alpha="0.0"
+            />
+        <!-- LINT.ThenChange(systemui.temporarydisplay.chipbar.ChipbarInfo.kt) -->
+
+        <!-- At most one of [loading, failure_icon, undo] will be visible at a time. -->
+        <ImageView
+            android:id="@+id/loading"
+            android:layout_width="@dimen/chipbar_end_icon_size"
+            android:layout_height="@dimen/chipbar_end_icon_size"
+            android:layout_marginStart="@dimen/chipbar_end_item_start_margin"
+            android:src="@drawable/ic_progress_activity"
+            android:tint="?androidprv:attr/materialColorOnSecondaryFixedVariant"
+            android:alpha="0.0"
+            />
+
+        <ImageView
+            android:id="@+id/error"
+            android:layout_width="@dimen/chipbar_end_icon_size"
+            android:layout_height="@dimen/chipbar_end_icon_size"
+            android:layout_marginStart="@dimen/chipbar_end_item_start_margin"
+            android:src="@drawable/ic_warning"
+            android:tint="@color/GM2_red_600"
+            android:alpha="0.0"
+            />
+
+        <TextView
+            android:id="@+id/end_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/chipbar_end_item_start_margin"
+            style="@style/Chipbar.Text"
+            android:textColor="?androidprv:attr/materialColorOnPrimaryFixed"
+            android:paddingStart="@dimen/chipbar_outer_padding"
+            android:paddingEnd="@dimen/chipbar_outer_padding"
+            android:paddingTop="@dimen/chipbar_end_button_vertical_padding"
+            android:paddingBottom="@dimen/chipbar_end_button_vertical_padding"
+            android:layout_marginTop="@dimen/chipbar_end_button_vertical_negative_margin"
+            android:layout_marginBottom="@dimen/chipbar_end_button_vertical_negative_margin"
+            android:background="@drawable/chipbar_end_button_background"
+            android:alpha="0.0"
+            />
+
+    </LinearLayout>
+</com.android.systemui.temporarydisplay.chipbar.ChipbarRootView>

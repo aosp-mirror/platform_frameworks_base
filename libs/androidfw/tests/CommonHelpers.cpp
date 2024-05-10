@@ -60,7 +60,7 @@ const std::string& GetTestDataPath() {
 std::string GetStringFromPool(const ResStringPool* pool, uint32_t idx) {
   auto str = pool->string8ObjectAt(idx);
   CHECK(str.has_value()) << "failed to find string entry";
-  return std::string(str->string(), str->length());
+  return std::string(str->c_str(), str->length());
 }
 
 }  // namespace android

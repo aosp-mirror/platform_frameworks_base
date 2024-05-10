@@ -1,0 +1,74 @@
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+android_library {
+    name: "SpaRoboRNGTestsAssetsLib",
+    asset_dirs: ["assets"],
+    sdk_version: "current",
+    platform_apis: true,
+    manifest: "AndroidManifest.xml",
+    optimize: {
+        enabled: false,
+    },
+    use_resource_processor: true,
+    resource_dirs: ["res"],
+}
+
+android_app {
+    name: "SpaRoboApp",
+    srcs: [],
+    static_libs: [
+        "androidx.test.espresso.core",
+        "androidx.appcompat_appcompat",
+        "flag-junit",
+        "guava",
+        "SpaLib",
+        "SpaLibTestUtils",
+        "SpaRoboRNGTestsAssetsLib",
+        "platform-screenshot-diff-core",
+        "PlatformComposeSceneTransitionLayoutTestsUtils",
+    ],
+    manifest: "robo-manifest.xml",
+    aaptflags: [
+        "--extra-packages",
+        "com.android.settingslib.spa.screenshot",
+    ],
+    dont_merge_manifests: true,
+    platform_apis: true,
+    system_ext_specific: true,
+    certificate: "platform",
+    privileged: true,
+    resource_dirs: [],
+    kotlincflags: ["-Xjvm-default=all"],
+
+    plugins: ["dagger2-compiler"],
+    use_resource_processor: true,
+}
+
+android_robolectric_test {
+    name: "SpaRoboRNGTests",
+    srcs: [
+        ":SpaScreenshotTestRNGFiles",
+        ":flag-junit",
+        ":platform-test-screenshot-rules",
+    ],
+    // Do not add any new libraries here, they should be added to SpaRoboApp above.
+    static_libs: [
+        "androidx.compose.runtime_runtime",
+        "androidx.test.uiautomator_uiautomator",
+        "androidx.test.ext.junit",
+        "inline-mockito-robolectric-prebuilt",
+        "platform-parametric-runner-lib",
+        "uiautomator-helpers",
+    ],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+        "truth",
+    ],
+    upstream: true,
+    java_resource_dirs: ["config"],
+    instrumentation_for: "SpaRoboApp",
+}

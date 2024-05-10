@@ -25,12 +25,12 @@ import android.perftests.utils.ManualBenchmarkState;
 import android.perftests.utils.PerfManualStatusReporter;
 import android.perftests.utils.TraceMarkParser;
 import android.perftests.utils.TraceMarkParser.TraceMarkSlice;
-import android.support.test.uiautomator.UiDevice;
 import android.util.DataUnit;
 
 import androidx.benchmark.macro.MacrobenchmarkScope;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.UiDevice;
 
 import com.android.utils.blob.FakeBlobData;
 

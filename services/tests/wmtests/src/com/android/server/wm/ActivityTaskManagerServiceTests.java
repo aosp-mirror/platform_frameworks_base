@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
@@ -23,10 +24,10 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.ActivityInterceptorCallback.FIRST_ORDERED_ID;
-import static com.android.server.wm.ActivityInterceptorCallback.LAST_ORDERED_ID;
+import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_FIRST_ORDERED_ID;
+import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_FIRST_ORDERED_ID;
+import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_LAST_ORDERED_ID;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -38,32 +39,34 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
-import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.EnterPipRequestedItem;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.LocaleList;
+import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.IDisplayWindowListener;
+import android.view.WindowManager;
 
 import androidx.test.filters.MediumTest;
 
@@ -72,7 +75,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,9 +90,6 @@ import java.util.function.Consumer;
 @MediumTest
 @RunWith(WindowTestRunner.class)
 public class ActivityTaskManagerServiceTests extends WindowTestsBase {
-
-    private final ArgumentCaptor<ClientTransaction> mClientTransactionCaptor =
-            ArgumentCaptor.forClass(ClientTransaction.class);
 
     private static final String DEFAULT_PACKAGE_NAME = "my.application.package";
     private static final int DEFAULT_USER_ID = 100;
@@ -122,53 +121,42 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         final ClientLifecycleManager mockLifecycleManager = mock(ClientLifecycleManager.class);
         doReturn(mockLifecycleManager).when(mAtm).getLifecycleManager();
         doReturn(true).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+        clearInvocations(mClientLifecycleManager);
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        verify(mockLifecycleManager).scheduleTransaction(mClientTransactionCaptor.capture());
-        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
+        final ArgumentCaptor<ClientTransactionItem> clientTransactionItemCaptor =
+                ArgumentCaptor.forClass(ClientTransactionItem.class);
+        verify(mockLifecycleManager).scheduleTransactionItem(any(),
+                clientTransactionItemCaptor.capture());
+        final ClientTransactionItem transactionItem = clientTransactionItemCaptor.getValue();
         // Check that only an enter pip request item callback was scheduled.
-        assertEquals(1, transaction.getCallbacks().size());
-        assertTrue(transaction.getCallbacks().get(0) instanceof EnterPipRequestedItem);
-        // Check the activity lifecycle state remains unchanged.
-        assertNull(transaction.getLifecycleStateRequest());
+        assertTrue(transactionItem instanceof EnterPipRequestedItem);
     }
 
     @Test
     public void testOnPictureInPictureRequested_cannotEnterPip() throws RemoteException {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
-        ClientLifecycleManager lifecycleManager = mAtm.getLifecycleManager();
         doReturn(false).when(activity).inPinnedWindowingMode();
         doReturn(false).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+        clearInvocations(mClientLifecycleManager);
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        verify(lifecycleManager, atLeast(0))
-                .scheduleTransaction(mClientTransactionCaptor.capture());
-        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
-        // Check that none are enter pip request items.
-        transaction.getCallbacks().forEach(clientTransactionItem -> {
-            assertFalse(clientTransactionItem instanceof EnterPipRequestedItem);
-        });
+        verify(mClientLifecycleManager, never()).scheduleTransactionItem(any(), any());
     }
 
     @Test
     public void testOnPictureInPictureRequested_alreadyInPIPMode() throws RemoteException {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
-        ClientLifecycleManager lifecycleManager = mAtm.getLifecycleManager();
         doReturn(true).when(activity).inPinnedWindowingMode();
+        clearInvocations(mClientLifecycleManager);
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        verify(lifecycleManager, atLeast(0))
-                .scheduleTransaction(mClientTransactionCaptor.capture());
-        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
-        // Check that none are enter pip request items.
-        transaction.getCallbacks().forEach(clientTransactionItem -> {
-            assertFalse(clientTransactionItem instanceof EnterPipRequestedItem);
-        });
+        verify(mClientLifecycleManager, never()).scheduleTransactionItem(any(), any());
     }
 
     @Test
@@ -238,26 +226,27 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.type = Display.TYPE_VIRTUAL;
         DisplayContent virtualDisplay = createNewDisplay(displayInfo);
+        final KeyguardController keyguardController = mSupervisor.getKeyguardController();
 
         // Make sure we're starting out with 2 unlocked displays
         assertEquals(2, mRootWindowContainer.getChildCount());
         mRootWindowContainer.forAllDisplays(displayContent -> {
             assertFalse(displayContent.isKeyguardLocked());
-            assertFalse(displayContent.isAodShowing());
+            assertFalse(keyguardController.isAodShowing(displayContent.mDisplayId));
         });
 
         // Check that setLockScreenShown locks both displays
         mAtm.setLockScreenShown(true, true);
         mRootWindowContainer.forAllDisplays(displayContent -> {
             assertTrue(displayContent.isKeyguardLocked());
-            assertTrue(displayContent.isAodShowing());
+            assertTrue(keyguardController.isAodShowing(displayContent.mDisplayId));
         });
 
         // Check setLockScreenShown unlocking both displays
         mAtm.setLockScreenShown(false, false);
         mRootWindowContainer.forAllDisplays(displayContent -> {
             assertFalse(displayContent.isKeyguardLocked());
-            assertFalse(displayContent.isAodShowing());
+            assertFalse(keyguardController.isAodShowing(displayContent.mDisplayId));
         });
     }
 
@@ -271,25 +260,26 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         displayInfo.displayGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
         displayInfo.flags = Display.FLAG_OWN_DISPLAY_GROUP | Display.FLAG_ALWAYS_UNLOCKED;
         DisplayContent newDisplay = createNewDisplay(displayInfo);
+        final KeyguardController keyguardController = mSupervisor.getKeyguardController();
 
         // Make sure we're starting out with 2 unlocked displays
         assertEquals(2, mRootWindowContainer.getChildCount());
         mRootWindowContainer.forAllDisplays(displayContent -> {
             assertFalse(displayContent.isKeyguardLocked());
-            assertFalse(displayContent.isAodShowing());
+            assertFalse(keyguardController.isAodShowing(displayContent.mDisplayId));
         });
 
         // setLockScreenShown should only lock the default display, not the virtual one
         mAtm.setLockScreenShown(true, true);
 
         assertTrue(mDefaultDisplay.isKeyguardLocked());
-        assertTrue(mDefaultDisplay.isAodShowing());
+        assertTrue(keyguardController.isAodShowing(mDefaultDisplay.mDisplayId));
 
         DisplayContent virtualDisplay = mRootWindowContainer.getDisplayContent(
                 newDisplay.getDisplayId());
         assertNotEquals(Display.DEFAULT_DISPLAY, virtualDisplay.getDisplayId());
         assertFalse(virtualDisplay.isKeyguardLocked());
-        assertFalse(virtualDisplay.isAodShowing());
+        assertFalse(keyguardController.isAodShowing(virtualDisplay.mDisplayId));
     }
 
     /*
@@ -300,18 +290,11 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
      */
     @Test
     public void testEnterPipModeWhenRecordParentChangesToNull() {
-        MockitoSession mockSession = mockitoSession()
-                .initMocks(this)
-                .mockStatic(ActivityRecord.class)
-                .startMocking();
-
-        ActivityRecord record = mock(ActivityRecord.class);
-        IBinder token = mock(IBinder.class);
+        final ActivityRecord record = new ActivityBuilder(mAtm).setCreateTask(true).build();
         PictureInPictureParams params = mock(PictureInPictureParams.class);
         record.pictureInPictureArgs = params;
 
         //mock operations in private method ensureValidPictureInPictureActivityParamsLocked()
-        when(ActivityRecord.forTokenLocked(token)).thenReturn(record);
         doReturn(true).when(record).supportsPictureInPicture();
         doReturn(false).when(params).hasSetAspectRatio();
 
@@ -319,15 +302,13 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         doReturn(true).when(record)
                 .checkEnterPictureInPictureState("enterPictureInPictureMode", false);
         doReturn(false).when(record).inPinnedWindowingMode();
-        doReturn(false).when(mAtm).isKeyguardLocked(anyInt());
+        doReturn(false).when(record).isKeyguardLocked();
 
         //to simulate NPE
         doReturn(null).when(record).getParent();
 
-        mAtm.mActivityClientController.enterPictureInPictureMode(token, params);
+        mAtm.mActivityClientController.enterPictureInPictureMode(record.token, params);
         //if record's null parent is not handled gracefully, test will fail with NPE
-
-        mockSession.finishMocking();
     }
 
     @Test
@@ -344,7 +325,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
         // Assume the activity is finishing and hidden because it was crashed.
         activity.finishing = true;
-        activity.mVisibleRequested = false;
+        activity.setVisibleRequested(false);
         activity.setVisible(false);
         activity.getTask().setPausingActivity(activity);
         homeActivity.setState(PAUSED, "test");
@@ -388,12 +369,12 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // The top app should not change while sleeping.
         assertEquals(topActivity.app, mAtm.mInternal.getTopApp());
 
-        mAtm.startLaunchPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY
+        mAtm.startPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY
                 | ActivityTaskManagerService.POWER_MODE_REASON_UNKNOWN_VISIBILITY);
         assertEquals(ActivityManager.PROCESS_STATE_TOP, mAtm.mInternal.getTopProcessState());
         // Because there is no unknown visibility record, the state will be restored if other
         // reasons are all done.
-        mAtm.endLaunchPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+        mAtm.endPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
         assertEquals(ActivityManager.PROCESS_STATE_TOP_SLEEPING,
                 mAtm.mInternal.getTopProcessState());
 
@@ -415,6 +396,37 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         mAtm.updateSleepIfNeededLocked();
 
         assertTopNonSleeping.accept(homeActivity);
+    }
+
+    @Test
+    public void testSetPowerMode() {
+        // Depends on the mocked power manager set in SystemServicesTestRule#setUpLocalServices.
+        mAtm.onInitPowerManagement();
+
+        // Apply different power modes according to the reasons.
+        mAtm.startPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+        verify(mWm.mPowerManagerInternal).setPowerMode(
+                PowerManagerInternal.MODE_LAUNCH, true);
+        mAtm.startPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY);
+        verify(mWm.mPowerManagerInternal).setPowerMode(
+                PowerManagerInternal.MODE_DISPLAY_CHANGE, true);
+
+        // If there is unknown visibility launching app, the launch power mode won't be canceled
+        // even if REASON_START_ACTIVITY is cleared.
+        mAtm.startPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_UNKNOWN_VISIBILITY);
+        mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(mock(ActivityRecord.class));
+        mAtm.endPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+        verify(mWm.mPowerManagerInternal, never()).setPowerMode(
+                PowerManagerInternal.MODE_LAUNCH, false);
+
+        mDisplayContent.mUnknownAppVisibilityController.clear();
+        mAtm.endPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+        verify(mWm.mPowerManagerInternal).setPowerMode(
+                PowerManagerInternal.MODE_LAUNCH, false);
+
+        mAtm.endPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY);
+        verify(mWm.mPowerManagerInternal).setPowerMode(
+                PowerManagerInternal.MODE_DISPLAY_CHANGE, false);
     }
 
     @Test
@@ -454,13 +466,15 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         mAtm.mSupportsNonResizableMultiWindow = 0;
 
         // Supports on large screen.
-        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp;
+        tda.getConfiguration().smallestScreenWidthDp =
+                WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
 
         assertTrue(activity.supportsMultiWindow());
         assertTrue(task.supportsMultiWindow());
 
         // Not supports on small screen.
-        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+        tda.getConfiguration().smallestScreenWidthDp =
+                WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP - 1;
 
         assertFalse(activity.supportsMultiWindow());
         assertFalse(task.supportsMultiWindow());
@@ -473,8 +487,10 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 new ActivityInfo.WindowLayout(0, 0, 0, 0, 0,
                         // This is larger than the min dimensions device support in multi window,
                         // the activity will not be supported in multi window if the device respects
-                        /* minWidth= */(int) (mAtm.mLargeScreenSmallestScreenWidthDp * density),
-                        /* minHeight= */(int) (mAtm.mLargeScreenSmallestScreenWidthDp * density));
+                        /* minWidth= */
+                        (int) (WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP * density),
+                        /* minHeight= */
+                        (int) (WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP * density));
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
                 .setWindowLayout(windowLayout)
@@ -482,6 +498,11 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 .build();
         final Task task = activity.getTask();
         final TaskDisplayArea tda = task.getDisplayArea();
+        // Ensure the display is not a large screen
+        if (tda.getConfiguration().smallestScreenWidthDp
+                >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP) {
+            resizeDisplay(activity.mDisplayContent, 500, 800);
+        }
 
         // Ignore the activity min width/height for determine multi window eligibility.
         mAtm.mRespectsActivityMinWidthHeightMultiWindow = -1;
@@ -499,13 +520,15 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         mAtm.mRespectsActivityMinWidthHeightMultiWindow = 0;
 
         // Ignore on large screen.
-        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp;
+        tda.getConfiguration().smallestScreenWidthDp =
+                WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
 
         assertTrue(activity.supportsMultiWindow());
         assertTrue(task.supportsMultiWindow());
 
         // Check on small screen.
-        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+        tda.getConfiguration().smallestScreenWidthDp =
+                WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP - 1;
 
         assertFalse(activity.supportsMultiWindow());
         assertFalse(task.supportsMultiWindow());
@@ -516,7 +539,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // This is smaller than the min dimensions device support in multi window,
         // the activity will be supported in multi window
         final float density = mContext.getResources().getDisplayMetrics().density;
-        final int supportedWidth = (int) (mAtm.mLargeScreenSmallestScreenWidthDp
+        final int supportedWidth = (int) (WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP
                 * mAtm.mMinPercentageMultiWindowSupportWidth * density);
         final ActivityInfo.WindowLayout windowLayout =
                 new ActivityInfo.WindowLayout(0, 0, 0, 0, 0,
@@ -529,15 +552,17 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 .build();
         final Task task = activity.getTask();
         final TaskDisplayArea tda = task.getDisplayArea();
-        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
-        tda.getConfiguration().screenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+        tda.getConfiguration().smallestScreenWidthDp =
+                WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP - 1;
+        tda.getConfiguration().screenWidthDp =
+                WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP - 1;
         tda.getConfiguration().orientation = ORIENTATION_LANDSCAPE;
 
         assertFalse(activity.supportsMultiWindow());
         assertFalse(task.supportsMultiWindow());
 
         tda.getConfiguration().screenWidthDp = (int) Math.ceil(
-                mAtm.mLargeScreenSmallestScreenWidthDp
+                WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP
                         / mAtm.mMinPercentageMultiWindowSupportWidth);
 
         assertTrue(activity.supportsMultiWindow());
@@ -549,7 +574,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // This is smaller than the min dimensions device support in multi window,
         // the activity will be supported in multi window
         final float density = mContext.getResources().getDisplayMetrics().density;
-        final int supportedHeight = (int) (mAtm.mLargeScreenSmallestScreenWidthDp
+        final int supportedHeight = (int) (WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP
                 * mAtm.mMinPercentageMultiWindowSupportHeight * density);
         final ActivityInfo.WindowLayout windowLayout =
                 new ActivityInfo.WindowLayout(0, 0, 0, 0, 0,
@@ -562,15 +587,17 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 .build();
         final Task task = activity.getTask();
         final TaskDisplayArea tda = task.getDisplayArea();
-        tda.getConfiguration().smallestScreenWidthDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
-        tda.getConfiguration().screenHeightDp = mAtm.mLargeScreenSmallestScreenWidthDp - 1;
+        tda.getConfiguration().smallestScreenWidthDp =
+                WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP - 1;
+        tda.getConfiguration().screenHeightDp =
+                WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP - 1;
         tda.getConfiguration().orientation = ORIENTATION_PORTRAIT;
 
         assertFalse(activity.supportsMultiWindow());
         assertFalse(task.supportsMultiWindow());
 
         tda.getConfiguration().screenHeightDp = (int) Math.ceil(
-                mAtm.mLargeScreenSmallestScreenWidthDp
+                WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP
                         / mAtm.mMinPercentageMultiWindowSupportHeight);
 
         assertTrue(activity.supportsMultiWindow());
@@ -957,11 +984,12 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
     @Test(expected = IllegalArgumentException.class)
     public void testRegisterActivityStartInterceptor_IndexTooSmall() {
-        mAtm.mInternal.registerActivityStartInterceptor(FIRST_ORDERED_ID - 1,
+        mAtm.mInternal.registerActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID - 1,
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult onInterceptActivityLaunch(
+                            @NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -969,11 +997,12 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
     @Test(expected = IllegalArgumentException.class)
     public void testRegisterActivityStartInterceptor_IndexTooLarge() {
-        mAtm.mInternal.registerActivityStartInterceptor(LAST_ORDERED_ID + 1,
+        mAtm.mInternal.registerActivityStartInterceptor(SYSTEM_LAST_ORDERED_ID + 1,
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult onInterceptActivityLaunch(
+                            @NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -981,19 +1010,21 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
     @Test(expected = IllegalArgumentException.class)
     public void testRegisterActivityStartInterceptor_DuplicateId() {
-        mAtm.mInternal.registerActivityStartInterceptor(FIRST_ORDERED_ID,
+        mAtm.mInternal.registerActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID,
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult onInterceptActivityLaunch(
+                            @NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
-        mAtm.mInternal.registerActivityStartInterceptor(FIRST_ORDERED_ID,
+        mAtm.mInternal.registerActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID,
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult onInterceptActivityLaunch(
+                            @NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -1003,16 +1034,57 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
     public void testRegisterActivityStartInterceptor() {
         assertEquals(0, mAtm.getActivityInterceptorCallbacks().size());
 
-        mAtm.mInternal.registerActivityStartInterceptor(FIRST_ORDERED_ID,
+        mAtm.mInternal.registerActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID,
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult onInterceptActivityLaunch(
+                            @NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
 
         assertEquals(1, mAtm.getActivityInterceptorCallbacks().size());
-        assertTrue(mAtm.getActivityInterceptorCallbacks().contains(FIRST_ORDERED_ID));
+        assertTrue(mAtm.getActivityInterceptorCallbacks().contains(SYSTEM_FIRST_ORDERED_ID));
+    }
+
+    @Test
+    public void testSystemAndMainlineOrderIdsNotOverlapping() {
+        assertTrue(MAINLINE_FIRST_ORDERED_ID - SYSTEM_LAST_ORDERED_ID > 1);
+    }
+
+    @Test
+    public void testUnregisterActivityStartInterceptor() {
+        int size = mAtm.getActivityInterceptorCallbacks().size();
+        int orderId = SYSTEM_FIRST_ORDERED_ID;
+
+        mAtm.mInternal.registerActivityStartInterceptor(orderId,
+                (ActivityInterceptorCallback) info -> null);
+        assertEquals(size + 1, mAtm.getActivityInterceptorCallbacks().size());
+        assertTrue(mAtm.getActivityInterceptorCallbacks().contains(orderId));
+
+        mAtm.mInternal.unregisterActivityStartInterceptor(orderId);
+        assertEquals(size, mAtm.getActivityInterceptorCallbacks().size());
+        assertFalse(mAtm.getActivityInterceptorCallbacks().contains(orderId));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnregisterActivityStartInterceptor_IdNotExist() {
+        assertEquals(0, mAtm.getActivityInterceptorCallbacks().size());
+        mAtm.mInternal.unregisterActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID);
+    }
+
+    @Test
+    public void testFocusTopTask() {
+        final ActivityRecord homeActivity = new ActivityBuilder(mAtm)
+                .setTask(mRootWindowContainer.getDefaultTaskDisplayArea().getOrCreateRootHomeTask())
+                .build();
+        final Task pinnedTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
+                .setWindowingMode(WINDOWING_MODE_PINNED)
+                .build();
+        mAtm.focusTopTask(mDisplayContent.mDisplayId);
+
+        assertTrue(homeActivity.getTask().isFocused());
+        assertFalse(pinnedTask.isFocused());
     }
 }

@@ -25,7 +25,7 @@ import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.widget.LinearLayout;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.AlphaOptimizedFrameLayout;
 
 /**

@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import static android.os.VibrationAttributes.CATEGORY_KEYBOARD;
 import static android.os.VibrationAttributes.USAGE_ACCESSIBILITY;
 import static android.os.VibrationAttributes.USAGE_ALARM;
 import static android.os.VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
@@ -27,9 +28,10 @@ import static android.os.VibrationAttributes.USAGE_RINGTONE;
 import static android.os.VibrationAttributes.USAGE_TOUCH;
 import static android.os.VibrationAttributes.USAGE_UNKNOWN;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.IUidObserver;
+import android.app.UidObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +41,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
@@ -50,19 +53,21 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.Vibrator.VibrationIntensity;
+import android.os.vibrator.Flags;
 import android.os.vibrator.VibrationConfig;
 import android.provider.Settings;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
-import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -123,6 +128,7 @@ final class VibrationSettings {
     private static final Set<Integer> SYSTEM_VIBRATION_SCREEN_OFF_USAGE_ALLOWLIST = new HashSet<>(
             Arrays.asList(
                     USAGE_TOUCH,
+                    USAGE_ACCESSIBILITY,
                     USAGE_PHYSICAL_EMULATION,
                     USAGE_HARDWARE_FEEDBACK));
 
@@ -156,10 +162,9 @@ final class VibrationSettings {
     @VisibleForTesting
     final SettingsContentObserver mSettingObserver;
     @VisibleForTesting
-    final UidObserver mUidObserver;
+    final MyUidObserver mUidObserver;
     @VisibleForTesting
     final SettingsBroadcastReceiver mSettingChangeReceiver;
-    final VirtualDeviceListener mVirtualDeviceListener;
 
     @GuardedBy("mLock")
     private final List<OnVibratorSettingsChanged> mListeners = new ArrayList<>();
@@ -173,6 +178,8 @@ final class VibrationSettings {
     @GuardedBy("mLock")
     @Nullable
     private PowerManagerInternal mPowerManagerInternal;
+    @Nullable
+    private VirtualDeviceManagerInternal mVirtualDeviceManagerInternal;
 
     @GuardedBy("mLock")
     private boolean mVibrateInputDevices;
@@ -183,7 +190,11 @@ final class VibrationSettings {
     @GuardedBy("mLock")
     private boolean mVibrateOn;
     @GuardedBy("mLock")
+    private boolean mKeyboardVibrationOn;
+    @GuardedBy("mLock")
     private int mRingerMode;
+    @GuardedBy("mLock")
+    private boolean mOnWirelessCharger;
 
     VibrationSettings(Context context, Handler handler) {
         this(context, handler, new VibrationConfig(context.getResources()));
@@ -194,10 +205,8 @@ final class VibrationSettings {
         mContext = context;
         mVibrationConfig = config;
         mSettingObserver = new SettingsContentObserver(handler);
-        mUidObserver = new UidObserver();
+        mUidObserver = new MyUidObserver();
         mSettingChangeReceiver = new SettingsBroadcastReceiver();
-        mVirtualDeviceListener = new VirtualDeviceListener();
-
         mSystemUiPackage = LocalServices.getService(PackageManagerInternal.class)
                 .getSystemUiServiceComponent().getPackageName();
 
@@ -261,13 +270,6 @@ final class VibrationSettings {
                     }
                 });
 
-        VirtualDeviceManagerInternal vdm = LocalServices.getService(
-                VirtualDeviceManagerInternal.class);
-        if (vdm != null) {
-            vdm.registerVirtualDisplayListener(mVirtualDeviceListener);
-            vdm.registerAppsOnVirtualDeviceListener(mVirtualDeviceListener);
-        }
-
         registerSettingsChangeReceiver(USER_SWITCHED_INTENT_FILTER);
         registerSettingsChangeReceiver(INTERNAL_RINGER_MODE_CHANGED_INTENT_FILTER);
 
@@ -288,6 +290,27 @@ final class VibrationSettings {
                 Settings.System.getUriFor(Settings.System.NOTIFICATION_VIBRATION_INTENSITY));
         registerSettingsObserver(
                 Settings.System.getUriFor(Settings.System.RING_VIBRATION_INTENSITY));
+        registerSettingsObserver(
+                Settings.System.getUriFor(Settings.System.KEYBOARD_VIBRATION_ENABLED));
+
+        if (mVibrationConfig.ignoreVibrationsOnWirelessCharger()) {
+            Intent batteryStatus = mContext.registerReceiver(
+                    new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            updateBatteryInfo(intent);
+                        }
+                    },
+                    new IntentFilter(Intent.ACTION_BATTERY_CHANGED),
+                    Context.RECEIVER_NOT_EXPORTED);
+            // After registering the receiver for battery status, process the sticky broadcast that
+            // may have been returned upon registration of the receiver. This helps to capture the
+            // current charging state, and subsequent charging states can be listened to via the
+            // receiver registered.
+            if (batteryStatus != null) {
+                updateBatteryInfo(batteryStatus);
+            }
+        }
 
         // Update with newly loaded services.
         update();
@@ -375,15 +398,21 @@ final class VibrationSettings {
      * null otherwise.
      */
     @Nullable
-    public Vibration.Status shouldIgnoreVibration(int uid, int displayId,
-            VibrationAttributes attrs) {
-        final int usage = attrs.getUsage();
+    public Vibration.Status shouldIgnoreVibration(@NonNull Vibration.CallerInfo callerInfo) {
+        final int usage = callerInfo.attrs.getUsage();
         synchronized (mLock) {
-            if (!mUidObserver.isUidForeground(uid)
+            if (!mUidObserver.isUidForeground(callerInfo.uid)
                     && !BACKGROUND_PROCESS_USAGE_ALLOWLIST.contains(usage)) {
                 return Vibration.Status.IGNORED_BACKGROUND;
             }
-            if (mVirtualDeviceListener.isAppOrDisplayOnAnyVirtualDevice(uid, displayId)) {
+
+            if (callerInfo.deviceId != Context.DEVICE_ID_DEFAULT
+                    && callerInfo.deviceId != Context.DEVICE_ID_INVALID) {
+                return Vibration.Status.IGNORED_FROM_VIRTUAL_DEVICE;
+            }
+
+            if (callerInfo.deviceId == Context.DEVICE_ID_INVALID
+                    && isAppRunningOnAnyVirtualDevice(callerInfo.uid)) {
                 return Vibration.Status.IGNORED_FROM_VIRTUAL_DEVICE;
             }
 
@@ -391,20 +420,20 @@ final class VibrationSettings {
                 return Vibration.Status.IGNORED_FOR_POWER;
             }
 
-            if (!attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)) {
-                if (!mVibrateOn && (VIBRATE_ON_DISABLED_USAGE_ALLOWED != usage)) {
-                    return Vibration.Status.IGNORED_FOR_SETTINGS;
-                }
-
-                if (getCurrentIntensity(usage) == Vibrator.VIBRATION_INTENSITY_OFF) {
-                    return Vibration.Status.IGNORED_FOR_SETTINGS;
-                }
+            if (!callerInfo.attrs.isFlagSet(
+                    VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
+                    && !shouldVibrateForUserSetting(callerInfo)) {
+                return Vibration.Status.IGNORED_FOR_SETTINGS;
             }
 
-            if (!attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY)) {
+            if (!callerInfo.attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY)) {
                 if (!shouldVibrateForRingerModeLocked(usage)) {
                     return Vibration.Status.IGNORED_FOR_RINGER_MODE;
                 }
+            }
+
+            if (mVibrationConfig.ignoreVibrationsOnWirelessCharger() && mOnWirelessCharger) {
+                return Vibration.Status.IGNORED_ON_WIRELESS_CHARGER;
             }
         }
         return null;
@@ -420,8 +449,8 @@ final class VibrationSettings {
      *
      * @return true if the vibration should be cancelled when the screen goes off, false otherwise.
      */
-    public boolean shouldCancelVibrationOnScreenOff(int uid, String opPkg,
-            @VibrationAttributes.Usage int usage, long vibrationStartUptimeMillis) {
+    public boolean shouldCancelVibrationOnScreenOff(@NonNull Vibration.CallerInfo callerInfo,
+            long vibrationStartUptimeMillis) {
         PowerManagerInternal pm;
         synchronized (mLock) {
             pm = mPowerManagerInternal;
@@ -442,12 +471,13 @@ final class VibrationSettings {
                 return false;
             }
         }
-        if (!SYSTEM_VIBRATION_SCREEN_OFF_USAGE_ALLOWLIST.contains(usage)) {
+        if (!SYSTEM_VIBRATION_SCREEN_OFF_USAGE_ALLOWLIST.contains(callerInfo.attrs.getUsage())) {
             // Usages not allowed even for system vibrations should always be cancelled.
             return true;
         }
         // Only allow vibrations from System packages to continue vibrating when the screen goes off
-        return uid != Process.SYSTEM_UID && uid != 0 && !mSystemUiPackage.equals(opPkg);
+        return callerInfo.uid != Process.SYSTEM_UID && callerInfo.uid != 0
+                && !mSystemUiPackage.equals(callerInfo.opPkg);
     }
 
     /**
@@ -465,6 +495,30 @@ final class VibrationSettings {
         return mRingerMode != AudioManager.RINGER_MODE_SILENT;
     }
 
+    /**
+     * Return {@code true} if the device should vibrate for user setting, and
+     * {@code false} to ignore the vibration.
+     */
+    @GuardedBy("mLock")
+    private boolean shouldVibrateForUserSetting(Vibration.CallerInfo callerInfo) {
+        final int usage = callerInfo.attrs.getUsage();
+        if (!mVibrateOn && (VIBRATE_ON_DISABLED_USAGE_ALLOWED != usage)) {
+            // Main setting disabled.
+            return false;
+        }
+
+        if (Flags.keyboardCategoryEnabled()) {
+            int category = callerInfo.attrs.getCategory();
+            if (usage == USAGE_TOUCH && category == CATEGORY_KEYBOARD) {
+                // Keyboard touch has a different user setting.
+                return mKeyboardVibrationOn;
+            }
+        }
+
+        // Apply individual user setting based on usage.
+        return getCurrentIntensity(usage) != Vibrator.VIBRATION_INTENSITY_OFF;
+    }
+
     /** Update all cached settings and triggers registered listeners. */
     void update() {
         updateSettings();
@@ -476,6 +530,8 @@ final class VibrationSettings {
         synchronized (mLock) {
             mVibrateInputDevices = loadSystemSetting(Settings.System.VIBRATE_INPUT_DEVICES, 0) > 0;
             mVibrateOn = loadSystemSetting(Settings.System.VIBRATE_ON, 1) > 0;
+            mKeyboardVibrationOn = loadSystemSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED,
+                    mVibrationConfig.isDefaultKeyboardVibrationEnabled() ? 1 : 0) > 0;
 
             int alarmIntensity = toIntensity(
                     loadSystemSetting(Settings.System.ALARM_VIBRATION_INTENSITY, -1),
@@ -540,6 +596,13 @@ final class VibrationSettings {
         }
     }
 
+    private void updateBatteryInfo(Intent intent) {
+        int pluggedInfo = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
+        synchronized (mLock) {
+            mOnWirelessCharger = pluggedInfo == BatteryManager.BATTERY_PLUGGED_WIRELESS;
+        }
+    }
+
     @Override
     public String toString() {
         synchronized (mLock) {
@@ -564,8 +627,32 @@ final class VibrationSettings {
         }
     }
 
+    /** Write current settings into given {@link PrintWriter}. */
+    void dump(IndentingPrintWriter pw) {
+        pw.println("VibrationSettings:");
+        pw.increaseIndent();
+        pw.println("vibrateOn = " + mVibrateOn);
+        pw.println("vibrateInputDevices = " + mVibrateInputDevices);
+        pw.println("batterySaverMode = " + mBatterySaverMode);
+        pw.println("VibrationIntensities:");
+
+        pw.increaseIndent();
+        for (int i = 0; i < mCurrentVibrationIntensities.size(); i++) {
+            int usage = mCurrentVibrationIntensities.keyAt(i);
+            int intensity = mCurrentVibrationIntensities.valueAt(i);
+            pw.println(VibrationAttributes.usageToString(usage) + " = "
+                    + intensityToString(intensity)
+                    + ", default: " + intensityToString(getDefaultIntensity(usage)));
+        }
+        pw.decreaseIndent();
+
+        mVibrationConfig.dumpWithoutDefaultSettings(pw);
+        pw.println("processStateCache = " + mUidObserver.mProcStatesCache);
+        pw.decreaseIndent();
+    }
+
     /** Write current settings into given {@link ProtoOutputStream}. */
-    public void dumpProto(ProtoOutputStream proto) {
+    void dump(ProtoOutputStream proto) {
         synchronized (mLock) {
             proto.write(VibratorManagerServiceDumpProto.VIBRATE_ON, mVibrateOn);
             proto.write(VibratorManagerServiceDumpProto.LOW_POWER_MODE, mBatterySaverMode);
@@ -655,12 +742,29 @@ final class VibrationSettings {
     }
 
     private void registerSettingsChangeReceiver(IntentFilter intentFilter) {
-        mContext.registerReceiver(mSettingChangeReceiver, intentFilter);
+        mContext.registerReceiver(mSettingChangeReceiver, intentFilter,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
     }
 
     @Nullable
     private VibrationEffect createEffectFromResource(int resId) {
-        long[] timings = getLongIntArray(mContext.getResources(), resId);
+        return createEffectFromResource(mContext.getResources(), resId);
+    }
+
+    /**
+     * Provides a {@link VibrationEffect} from a timings-array provided as an int-array resource..
+     *
+     * <p>If the timings array is {@code null} or empty, it returns {@code null}.
+     *
+     * <p>If the timings array has a size of one, it returns a one-shot vibration with duration that
+     * is equal to the single value in the array.
+     *
+     * <p>If the timings array has more than one values, it returns a non-repeating wave-form
+     * vibration with off-on timings as per the provided timings array.
+     */
+    @Nullable
+    static VibrationEffect createEffectFromResource(Resources res, int resId) {
+        long[] timings = getLongIntArray(res, resId);
         return createEffectFromTimings(timings);
     }
 
@@ -685,6 +789,15 @@ final class VibrationSettings {
             out[i] = ar[i];
         }
         return out;
+    }
+
+    private boolean isAppRunningOnAnyVirtualDevice(int uid) {
+        if (mVirtualDeviceManagerInternal == null) {
+            mVirtualDeviceManagerInternal =
+                    LocalServices.getService(VirtualDeviceManagerInternal.class);
+        }
+        return mVirtualDeviceManagerInternal != null
+                && mVirtualDeviceManagerInternal.isAppRunningOnAnyVirtualDevice(uid);
     }
 
     /** Implementation of {@link ContentObserver} to be registered to a setting {@link Uri}. */
@@ -722,107 +835,28 @@ final class VibrationSettings {
 
     /** Implementation of {@link ContentObserver} to be registered to a setting {@link Uri}. */
     @VisibleForTesting
-    final class UidObserver extends IUidObserver.Stub {
+    final class MyUidObserver extends UidObserver {
         private final SparseArray<Integer> mProcStatesCache = new SparseArray<>();
 
         public boolean isUidForeground(int uid) {
-            return mProcStatesCache.get(uid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)
-                    <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            synchronized (this) {
+                return mProcStatesCache.get(uid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)
+                        <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            }
         }
 
         @Override
         public void onUidGone(int uid, boolean disabled) {
-            mProcStatesCache.delete(uid);
-        }
-
-        @Override
-        public void onUidActive(int uid) {
-        }
-
-        @Override
-        public void onUidIdle(int uid, boolean disabled) {
+            synchronized (this) {
+                mProcStatesCache.delete(uid);
+            }
         }
 
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
-            mProcStatesCache.put(uid, procState);
-        }
-
-        @Override
-        public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override
-        public void onUidProcAdjChanged(int uid) {
-        }
-    }
-
-    /**
-     * Implementation of Virtual Device listeners for the changes of virtual displays and of apps
-     * running on any virtual device.
-     */
-    final class VirtualDeviceListener implements
-            VirtualDeviceManagerInternal.VirtualDisplayListener,
-            VirtualDeviceManagerInternal.AppsOnVirtualDeviceListener {
-        @GuardedBy("mLock")
-        private final Set<Integer> mVirtualDisplays = new HashSet<>();
-        @GuardedBy("mLock")
-        private final Set<Integer> mAppsOnVirtualDevice = new HashSet<>();
-
-
-        @Override
-        public void onVirtualDisplayCreated(int displayId) {
-            synchronized (mLock) {
-                mVirtualDisplays.add(displayId);
+            synchronized (this) {
+                mProcStatesCache.put(uid, procState);
             }
         }
-
-        @Override
-        public void onVirtualDisplayRemoved(int displayId) {
-            synchronized (mLock) {
-                mVirtualDisplays.remove(displayId);
-            }
-        }
-
-
-        @Override
-        public void onAppsOnAnyVirtualDeviceChanged(Set<Integer> allRunningUids) {
-            synchronized (mLock) {
-                mAppsOnVirtualDevice.clear();
-                mAppsOnVirtualDevice.addAll(allRunningUids);
-            }
-        }
-
-        /**
-         * @param uid:       uid of the calling app.
-         * @param displayId: the id of a Display.
-         * @return Returns true if:
-         * <ul>
-         *   <li> the displayId is valid, and it's owned by a virtual device.</li>
-         *   <li> the displayId is invalid, and the calling app (uid) is running on a virtual
-         *        device.</li>
-         * </ul>
-         */
-        public boolean isAppOrDisplayOnAnyVirtualDevice(int uid, int displayId) {
-            if (displayId == Display.DEFAULT_DISPLAY) {
-                // The default display is the primary physical display on the phone.
-                return false;
-            }
-
-            synchronized (mLock) {
-                if (displayId == Display.INVALID_DISPLAY) {
-                    // There is no Display object associated with the Context of calling
-                    // {@link SystemVibratorManager}, checking the calling UID instead.
-                    return mAppsOnVirtualDevice.contains(uid);
-                } else {
-                    // Other valid display IDs representing valid logical displays will be
-                    // checked
-                    // against the active virtual displays set built with the registered
-                    // {@link VirtualDisplayListener}.
-                    return mVirtualDisplays.contains(displayId);
-                }
-            }
-        }
-
     }
 }

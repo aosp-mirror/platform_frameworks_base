@@ -44,8 +44,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.EventLogTags;
 import com.android.server.power.BatterySaverStateMachineProto;
+import com.android.server.power.PowerManagerService;
 
 import java.io.PrintWriter;
+import java.time.Duration;
 
 /**
  * Decides when to enable / disable battery saver.
@@ -105,6 +107,8 @@ public class BatterySaverStateMachine {
 
     /** Turn off adaptive battery saver if the device has charged above this level. */
     private static final int ADAPTIVE_AUTO_DISABLE_BATTERY_LEVEL = 80;
+
+    private static final long STICKY_DISABLED_NOTIFY_TIMEOUT_MS = Duration.ofHours(12).toMillis();
 
     private static final int STATE_OFF = BatterySaverStateMachineProto.STATE_OFF;
 
@@ -248,6 +252,24 @@ public class BatterySaverStateMachine {
                 com.android.internal.R.bool.config_batterySaverStickyBehaviourDisabled);
         mDynamicPowerSavingsDefaultDisableThreshold = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_dynamicPowerSavingsDefaultDisableThreshold);
+    }
+
+    /**
+     * Called by {@link PowerManagerService} on system ready, *with no lock held*.
+     */
+    public void systemReady() {
+        mBatterySaverController.systemReady();
+        getBatterySaverPolicy().systemReady();
+    }
+
+    /** @return Battery saver controller. */
+    public BatterySaverController getBatterySaverController() {
+        return mBatterySaverController;
+    }
+
+    /** @return Battery saver policy. */
+    public BatterySaverPolicy getBatterySaverPolicy() {
+        return mBatterySaverController.getBatterySaverPolicy();
     }
 
     /** @return true if the automatic percentage based mode should be used */
@@ -802,7 +824,8 @@ public class BatterySaverStateMachine {
         mBatterySaverController.enableBatterySaver(enable, intReason);
 
         // Handle triggering the notification to show/hide when appropriate
-        if (intReason == BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON) {
+        if (intReason == BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON
+                || intReason == BatterySaverController.REASON_PERCENTAGE_AUTOMATIC_ON) {
             triggerDynamicModeNotification();
         } else if (!enable) {
             hideDynamicModeNotification();
@@ -828,7 +851,7 @@ public class BatterySaverStateMachine {
                     buildNotification(DYNAMIC_MODE_NOTIF_CHANNEL_ID,
                             R.string.dynamic_mode_notification_title,
                             R.string.dynamic_mode_notification_summary,
-                            Intent.ACTION_POWER_USAGE_SUMMARY),
+                            Settings.ACTION_BATTERY_SAVER_SETTINGS, 0L),
                     UserHandle.ALL);
         });
     }
@@ -846,7 +869,8 @@ public class BatterySaverStateMachine {
                     buildNotification(BATTERY_SAVER_NOTIF_CHANNEL_ID,
                             R.string.battery_saver_off_notification_title,
                             R.string.battery_saver_charged_notification_summary,
-                            Settings.ACTION_BATTERY_SAVER_SETTINGS),
+                            Settings.ACTION_BATTERY_SAVER_SETTINGS,
+                            STICKY_DISABLED_NOTIFY_TIMEOUT_MS),
                     UserHandle.ALL);
         });
     }
@@ -861,7 +885,7 @@ public class BatterySaverStateMachine {
     }
 
     private Notification buildNotification(@NonNull String channelId, @StringRes int titleId,
-            @StringRes int summaryId, @NonNull String intentAction) {
+            @StringRes int summaryId, @NonNull String intentAction, long timeoutMs) {
         Resources res = mContext.getResources();
         Intent intent = new Intent(intentAction);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -879,6 +903,7 @@ public class BatterySaverStateMachine {
                 .setStyle(new Notification.BigTextStyle().bigText(summary))
                 .setOnlyAlertOnce(true)
                 .setAutoCancel(true)
+                .setTimeoutAfter(timeoutMs)
                 .build();
     }
 
@@ -931,8 +956,7 @@ public class BatterySaverStateMachine {
             ipw.print(mBatterySaverController.isAdaptiveEnabled());
             if (mBatterySaverController.isAdaptiveEnabled()) {
                 ipw.print(" (advertise=");
-                ipw.print(
-                        mBatterySaverController.getBatterySaverPolicy().shouldAdvertiseIsEnabled());
+                ipw.print(getBatterySaverPolicy().shouldAdvertiseIsEnabled());
                 ipw.print(")");
             }
             ipw.decreaseIndent();
@@ -999,7 +1023,7 @@ public class BatterySaverStateMachine {
             proto.write(BatterySaverStateMachineProto.IS_ADAPTIVE_ENABLED,
                     mBatterySaverController.isAdaptiveEnabled());
             proto.write(BatterySaverStateMachineProto.SHOULD_ADVERTISE_IS_ENABLED,
-                    mBatterySaverController.getBatterySaverPolicy().shouldAdvertiseIsEnabled());
+                    getBatterySaverPolicy().shouldAdvertiseIsEnabled());
 
             proto.write(BatterySaverStateMachineProto.BOOT_COMPLETED, mBootCompleted);
             proto.write(BatterySaverStateMachineProto.SETTINGS_LOADED, mSettingsLoaded);

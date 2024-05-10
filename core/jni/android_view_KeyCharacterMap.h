@@ -25,7 +25,7 @@ namespace android {
 
 /* Creates a KeyCharacterMap object from the given information. */
 extern jobject android_view_KeyCharacterMap_create(JNIEnv* env, int32_t deviceId,
-                                                   const std::shared_ptr<KeyCharacterMap> kcm);
+                                                   std::unique_ptr<KeyCharacterMap> kcm);
 
 } // namespace android
 

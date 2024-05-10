@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Fake {@link NativeWrapper} useful for testing. */
+/** Fake {@link NativeWrapper} for the HDMI CEC HAL, useful for testing. */
 final class FakeNativeWrapper implements NativeWrapper {
     private static final String TAG = "FakeNativeWrapper";
 
@@ -61,6 +61,7 @@ final class FakeNativeWrapper implements NativeWrapper {
     private HdmiPortInfo[] mHdmiPortInfo = null;
     private HdmiCecController.HdmiCecCallback mCallback = null;
     private int mCecVersion = HdmiControlManager.HDMI_CEC_VERSION_2_0;
+    private boolean mIsCecControlEnabled = true;
 
     @Override
     public String nativeInit() {
@@ -112,7 +113,11 @@ final class FakeNativeWrapper implements NativeWrapper {
     public HdmiPortInfo[] nativeGetPortInfos() {
         if (mHdmiPortInfo == null) {
             mHdmiPortInfo = new HdmiPortInfo[1];
-            mHdmiPortInfo[0] = new HdmiPortInfo(1, 1, 0x1000, true, true, true);
+            mHdmiPortInfo[0] = new HdmiPortInfo.Builder(1, 1, 0x1000)
+                    .setCecSupported(true)
+                    .setMhlSupported(true)
+                    .setArcSupported(true)
+                    .build();
         }
         return mHdmiPortInfo;
     }
@@ -124,7 +129,9 @@ final class FakeNativeWrapper implements NativeWrapper {
     public void enableCec(boolean enabled) {}
 
     @Override
-    public void enableSystemCecControl(boolean enabled) {}
+    public void enableSystemCecControl(boolean enabled) {
+        mIsCecControlEnabled = enabled;
+    }
 
     @Override
     public void nativeSetLanguage(String language) {}
@@ -138,8 +145,20 @@ final class FakeNativeWrapper implements NativeWrapper {
         return isConnected == null ? false : isConnected;
     }
 
+    @Override
+    public void nativeSetHpdSignalType(int signal, int portId) {}
+
+    @Override
+    public int nativeGetHpdSignalType(int portId) {
+        return Constants.HDMI_HPD_TYPE_PHYSICAL;
+    }
+
     public void setPortConnectionStatus(int port, boolean connected) {
         mPortConnectionStatus.put(port, connected);
+    }
+
+    public boolean getIsCecControlEnabled() {
+        return mIsCecControlEnabled;
     }
 
     public void setCecVersion(@HdmiControlManager.HdmiCecVersion int cecVersion) {

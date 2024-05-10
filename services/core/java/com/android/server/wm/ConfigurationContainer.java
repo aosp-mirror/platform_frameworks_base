@@ -23,7 +23,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
 import static android.app.WindowConfigurationProto.WINDOWING_MODE;
@@ -223,9 +225,9 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     /**
-     * Update merged override configuration based on corresponding parent's config and notify all
-     * its children. If there is no parent, merged override configuration will set equal to current
-     * override config.
+     * Update merged override configuration based on corresponding parent's config. If there is no
+     * parent, merged override configuration will set equal to current override config. This
+     * doesn't cascade on its own since it's called by {@link #onConfigurationChanged}.
      * @see #mMergedOverrideConfiguration
      */
     void onMergedOverrideConfigurationChanged() {
@@ -239,10 +241,6 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
             mMergedOverrideConfiguration.updateFrom(mResolvedOverrideConfiguration);
         } else {
             mMergedOverrideConfiguration.setTo(mResolvedOverrideConfiguration);
-        }
-        for (int i = getChildCount() - 1; i >= 0; --i) {
-            final ConfigurationContainer child = getChildAt(i);
-            child.onMergedOverrideConfigurationChanged();
         }
     }
 
@@ -536,16 +534,19 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * Applies app-specific nightMode and {@link LocaleList} on requested configuration.
      * @return true if any of the requested configuration has been updated.
      */
-    public boolean applyAppSpecificConfig(Integer nightMode, LocaleList locales) {
+    public boolean applyAppSpecificConfig(Integer nightMode, LocaleList locales,
+            @Configuration.GrammaticalGender Integer gender) {
         mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
         boolean newNightModeSet = (nightMode != null) && setOverrideNightMode(mRequestsTmpConfig,
                 nightMode);
         boolean newLocalesSet = (locales != null) && setOverrideLocales(mRequestsTmpConfig,
                 locales);
-        if (newNightModeSet || newLocalesSet) {
+        boolean newGenderSet = (gender != null) && setOverrideGender(mRequestsTmpConfig,
+                gender);
+        if (newNightModeSet || newLocalesSet || newGenderSet) {
             onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
         }
-        return newNightModeSet || newLocalesSet;
+        return newNightModeSet || newLocalesSet || newGenderSet;
     }
 
     /**
@@ -576,6 +577,21 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         requestsTmpConfig.setLocales(overrideLocales);
         requestsTmpConfig.userSetLocale = true;
         return true;
+    }
+
+    /**
+     * Overrides the gender to this ConfigurationContainer.
+     *
+     * @return true if the grammatical gender has been changed.
+     */
+    private boolean setOverrideGender(Configuration requestsTmpConfig,
+            @Configuration.GrammaticalGender int gender) {
+        if (mRequestedOverrideConfiguration.getGrammaticalGender() == gender) {
+            return false;
+        } else {
+            requestsTmpConfig.setGrammaticalGender(gender);
+            return true;
+        }
     }
 
     public boolean isActivityTypeDream() {
@@ -670,8 +686,6 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         if (newParent != null) {
             // Update full configuration of this container and all its children.
             onConfigurationChanged(newParent.mFullConfiguration);
-            // Update merged override configuration of this container and all its children.
-            onMergedOverrideConfigurationChanged();
         }
     }
 
@@ -727,17 +741,43 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * level with the input prefix.
      */
     public void dumpChildrenNames(PrintWriter pw, String prefix) {
-        final String childPrefix = prefix + " ";
+        dumpChildrenNames(pw, prefix, true /* isLastChild */);
+    }
+
+    /**
+     * Dumps the names of this container children in the input print writer indenting each
+     * level with the input prefix.
+     */
+    public void dumpChildrenNames(PrintWriter pw, String prefix, boolean isLastChild) {
+        int curWinMode = getWindowingMode();
+        String winMode = windowingModeToString(curWinMode);
+        if (curWinMode != WINDOWING_MODE_UNDEFINED &&
+                curWinMode != WINDOWING_MODE_FULLSCREEN) {
+            winMode = winMode.toUpperCase();
+        }
+        int requestedWinMode = getRequestedOverrideWindowingMode();
+        String overrideWinMode = windowingModeToString(requestedWinMode);
+        if (requestedWinMode != WINDOWING_MODE_UNDEFINED &&
+                requestedWinMode != WINDOWING_MODE_FULLSCREEN) {
+            overrideWinMode = overrideWinMode.toUpperCase();
+        }
+        String actType = activityTypeToString(getActivityType());
+        if (getActivityType() != ACTIVITY_TYPE_UNDEFINED
+                && getActivityType() != ACTIVITY_TYPE_STANDARD) {
+            actType = actType.toUpperCase();
+        }
+        pw.print(prefix + (isLastChild ? "└─ " : "├─ "));
         pw.println(getName()
-                + " type=" + activityTypeToString(getActivityType())
-                + " mode=" + windowingModeToString(getWindowingMode())
-                + " override-mode=" + windowingModeToString(getRequestedOverrideWindowingMode())
+                + " type=" + actType
+                + " mode=" + winMode
+                + " override-mode=" + overrideWinMode
                 + " requested-bounds=" + getRequestedOverrideBounds().toShortString()
                 + " bounds=" + getBounds().toShortString());
+
+        String childPrefix = prefix + (isLastChild ? "   " : "│  ");
         for (int i = getChildCount() - 1; i >= 0; --i) {
             final E cc = getChildAt(i);
-            pw.print(childPrefix + "#" + i + " ");
-            cc.dumpChildrenNames(pw, childPrefix);
+            cc.dumpChildrenNames(pw, childPrefix, i == 0 /* isLastChild */);
         }
     }
 

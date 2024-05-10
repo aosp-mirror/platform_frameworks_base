@@ -21,9 +21,9 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.util.Log
 import androidx.test.ext.junit.rules.ActivityScenarioRule
-import com.android.server.wm.flicker.monitor.LayersTraceMonitor
-import com.android.server.wm.flicker.monitor.withSFTracing
-import com.android.server.wm.traces.common.layers.LayersTrace
+import android.tools.common.traces.surfaceflinger.LayersTrace
+import android.tools.device.traces.monitors.withSFTracing
+import android.tools.device.traces.monitors.PerfettoTraceMonitor
 import junit.framework.Assert
 import org.junit.After
 import org.junit.Before
@@ -31,6 +31,7 @@ import org.junit.Rule
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
+import perfetto.protos.PerfettoConfig.SurfaceFlingerLayersConfig
 
 open class SurfaceTracingTestBase(useBlastAdapter: Boolean) :
         SurfaceViewBufferTestBase(useBlastAdapter) {
@@ -41,7 +42,7 @@ open class SurfaceTracingTestBase(useBlastAdapter: Boolean) :
     @Before
     override fun setup() {
         super.setup()
-        stopLayerTrace()
+        PerfettoTraceMonitor.stopAllSessions()
         addSurfaceView()
     }
 
@@ -52,8 +53,7 @@ open class SurfaceTracingTestBase(useBlastAdapter: Boolean) :
     }
 
     fun withTrace(predicate: (it: MainActivity) -> Unit): LayersTrace {
-        return withSFTracing(TRACE_FLAGS,
-                outputDir = instrumentation.targetContext.dataDir.toPath()) {
+        return withSFTracing(TRACE_FLAGS) {
             scenarioRule.getScenario().onActivity {
                 predicate(it)
             }
@@ -61,8 +61,7 @@ open class SurfaceTracingTestBase(useBlastAdapter: Boolean) :
     }
 
     fun withTrace(predicate: () -> Unit): LayersTrace {
-        return withSFTracing(TRACE_FLAGS,
-                outputDir = instrumentation.targetContext.dataDir.toPath()) {
+        return withSFTracing(TRACE_FLAGS) {
                 predicate()
         }
     }
@@ -81,11 +80,6 @@ open class SurfaceTracingTestBase(useBlastAdapter: Boolean) :
         surfaceReadyLatch.await()
         // sleep to finish animations
         instrumentation.waitForIdleSync()
-    }
-
-    private fun stopLayerTrace() {
-        val tmpDir = instrumentation.targetContext.dataDir.toPath()
-        LayersTraceMonitor(tmpDir).stop()
     }
 
     fun checkPixels(bounds: Rect, @ColorInt color: Int) {
@@ -107,14 +101,19 @@ open class SurfaceTracingTestBase(useBlastAdapter: Boolean) :
                         Log.e("SurfaceViewBufferTests", "Error writing bitmap to file", e)
                     }
                 }
-                Assert.assertEquals("Checking $bounds found mismatch $i,$j",
-                        Color.valueOf(color), Color.valueOf(actualColor))
+                Assert.assertEquals(
+                    "Checking $bounds found mismatch $i,$j",
+                    Color.valueOf(color),
+                    Color.valueOf(actualColor)
+                )
             }
         }
     }
 
     private companion object {
-        private const val TRACE_FLAGS =
-                (1 shl 0) or (1 shl 5) or (1 shl 6) // TRACE_CRITICAL | TRACE_BUFFERS | TRACE_SYNC
+        private val TRACE_FLAGS = listOf(
+            SurfaceFlingerLayersConfig.TraceFlag.TRACE_FLAG_BUFFERS,
+            SurfaceFlingerLayersConfig.TraceFlag.TRACE_FLAG_VIRTUAL_DISPLAYS,
+        )
     }
 }

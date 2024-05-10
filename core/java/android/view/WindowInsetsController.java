@@ -23,7 +23,6 @@ import android.graphics.Insets;
 import android.inputmethodservice.InputMethodService;
 import android.os.Build;
 import android.os.CancellationSignal;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.animation.Interpolator;
@@ -251,6 +250,16 @@ public interface WindowInsetsController {
     void setCaptionInsetsHeight(int height);
 
     /**
+     * Sets the insets height for the IME caption bar, which corresponds to the
+     * "fake" IME navigation bar.
+     *
+     * @param height the insets height of the IME caption bar.
+     * @hide
+     */
+    default void setImeCaptionBarInsetsHeight(int height) {
+    }
+
+    /**
      * Controls the behavior of system bars.
      *
      * @param behavior Determines how the bars behave when being hidden by the application.
@@ -279,11 +288,10 @@ public interface WindowInsetsController {
     InsetsState getState();
 
     /**
-     * @return Whether the specified insets source is currently requested to be visible by the
-     *         application.
+     * @return Insets types that have been requested to be visible.
      * @hide
      */
-    boolean isRequestedVisible(@InternalInsetsType int type);
+    @InsetsType int getRequestedVisibleTypes();
 
     /**
      * Adds a {@link OnControllableInsetsChangedListener} to the window insets controller.

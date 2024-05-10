@@ -42,6 +42,7 @@ import com.android.server.backup.OperationStorage.OpType;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.remote.RemoteCall;
 import com.android.server.backup.utils.BackupEligibilityRules;
+import com.android.server.backup.utils.BackupManagerMonitorEventSender;
 import com.android.server.backup.utils.FullBackupUtils;
 
 import java.io.File;
@@ -60,12 +61,13 @@ public class FullBackupEngine {
     private BackupRestoreTask mTimeoutMonitor;
     private IBackupAgent mAgent;
     private boolean mIncludeApks;
-    private PackageInfo mPkg;
+    private final PackageInfo mPkg;
     private final long mQuota;
     private final int mOpToken;
     private final int mTransportFlags;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final BackupEligibilityRules mBackupEligibilityRules;
+    private final BackupManagerMonitorEventSender mBackupManagerMonitorEventSender;
 
     class FullBackupRunner implements Runnable {
         private final @UserIdInt int mUserId;
@@ -193,7 +195,8 @@ public class FullBackupEngine {
             long quota,
             int opToken,
             int transportFlags,
-            BackupEligibilityRules backupEligibilityRules) {
+            BackupEligibilityRules backupEligibilityRules,
+            BackupManagerMonitorEventSender backupManagerMonitorEventSender) {
         this.backupManagerService = backupManagerService;
         mOutput = output;
         mPreflightHook = preflightHook;
@@ -208,6 +211,7 @@ public class FullBackupEngine {
                         backupManagerService.getAgentTimeoutParameters(),
                         "Timeout parameters cannot be null");
         mBackupEligibilityRules = backupEligibilityRules;
+        mBackupManagerMonitorEventSender = backupManagerMonitorEventSender;
     }
 
     public int preflightCheck() throws RemoteException {
@@ -222,6 +226,9 @@ public class FullBackupEngine {
             if (MORE_DEBUG) {
                 Slog.v(TAG, "preflight returned " + result);
             }
+
+            // Clear any logs generated during preflight
+            mAgent.clearBackupRestoreEventLogger();
             return result;
         } else {
             Slog.w(TAG, "Unable to bind to full agent for " + mPkg.packageName);
@@ -260,6 +267,8 @@ public class FullBackupEngine {
                     }
                     result = BackupTransport.TRANSPORT_OK;
                 }
+
+                mBackupManagerMonitorEventSender.monitorAgentLoggingResults(mPkg, mAgent);
             } catch (IOException e) {
                 Slog.e(TAG, "Error backing up " + mPkg.packageName + ": " + e.getMessage());
                 result = BackupTransport.AGENT_ERROR;
@@ -307,7 +316,7 @@ public class FullBackupEngine {
             mAgent =
                     backupManagerService.bindToAgentSynchronous(
                             mPkg.applicationInfo, ApplicationThreadConstants.BACKUP_MODE_FULL,
-                            mBackupEligibilityRules.getOperationType());
+                            mBackupEligibilityRules.getBackupDestination());
         }
         return mAgent != null;
     }

@@ -41,11 +41,21 @@ public class AudioDescriptor implements Parcelable {
      * The Extended Display Identification Data (EDID) standard for a short audio descriptor.
      */
     public static final int STANDARD_EDID = 1;
+    /**
+     * The standard for a Speaker Allocation Data Block (SADB).
+     */
+    public static final int STANDARD_SADB = 2;
+    /**
+     * The standard for a Vendor-Specific Audio Data Block (VSADB).
+     */
+    public static final int STANDARD_VSADB = 3;
 
     /** @hide */
     @IntDef({
             STANDARD_NONE,
             STANDARD_EDID,
+            STANDARD_SADB,
+            STANDARD_VSADB,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioDescriptorStandard {}
@@ -89,7 +99,7 @@ public class AudioDescriptor implements Parcelable {
      * When encapsulation is required, only playback with {@link android.media.AudioTrack} API is
      * supported. But playback with {@link android.media.MediaPlayer} is not.
      * When an encapsulation type is required, the {@link AudioFormat} encoding selected when
-     * creating the {@link AudioTrack} must match the encapsulation type, e.g
+     * creating the {@link AudioTrack} must match the encapsulation type, e.g.
      * AudioFormat#ENCODING_IEC61937 for AudioProfile.AUDIO_ENCAPSULATION_TYPE_IEC61937.
      *
      * @return an integer representing the encapsulation type

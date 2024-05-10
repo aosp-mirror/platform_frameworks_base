@@ -299,7 +299,7 @@ static void android_media_MediaCrypto_setMediaDrmSession(
             std::string strerr(StrCryptoError(err));
             msg.appendFormat(": general failure (%s)", strerr.c_str());
         }
-        jniThrowException(env, "android/media/MediaCryptoException", msg.string());
+        jniThrowException(env, "android/media/MediaCryptoException", msg.c_str());
     }
 }
 

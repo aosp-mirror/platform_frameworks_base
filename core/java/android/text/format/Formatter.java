@@ -56,11 +56,18 @@ public final class Formatter {
     public static class BytesResult {
         public final String value;
         public final String units;
+        /**
+         * Content description of the {@link #units}.
+         * See {@link View#setContentDescription(CharSequence)}
+         */
+        public final String unitsContentDescription;
         public final long roundedBytes;
 
-        public BytesResult(String value, String units, long roundedBytes) {
+        public BytesResult(String value, String units, String unitsContentDescription,
+                long roundedBytes) {
             this.value = value;
             this.units = units;
+            this.unitsContentDescription = unitsContentDescription;
             this.roundedBytes = roundedBytes;
         }
     }
@@ -271,20 +278,20 @@ public final class Formatter {
         final Locale locale = res.getConfiguration().getLocales().get(0);
         final NumberFormat numberFormatter = getNumberFormatter(locale, rounded.fractionDigits);
         final String formattedNumber = numberFormatter.format(rounded.value);
-        final String units;
+        // Since ICU does not give us access to the pattern, we need to extract the unit string
+        // from ICU, which we do by taking out the formatted number out of the formatted string
+        // and trimming the result of spaces and controls.
+        final String formattedMeasure = formatMeasureShort(
+                locale, numberFormatter, rounded.value, rounded.units);
+        final String numberRemoved = deleteFirstFromString(formattedMeasure, formattedNumber);
+        String units = SPACES_AND_CONTROLS.trim(numberRemoved).toString();
+        String unitsContentDescription = units;
         if (rounded.units == MeasureUnit.BYTE) {
             // ICU spells out "byte" instead of "B".
             units = getByteSuffixOverride(res);
-        } else {
-            // Since ICU does not give us access to the pattern, we need to extract the unit string
-            // from ICU, which we do by taking out the formatted number out of the formatted string
-            // and trimming the result of spaces and controls.
-            final String formattedMeasure = formatMeasureShort(
-                    locale, numberFormatter, rounded.value, rounded.units);
-            final String numberRemoved = deleteFirstFromString(formattedMeasure, formattedNumber);
-            units = SPACES_AND_CONTROLS.trim(numberRemoved).toString();
         }
-        return new BytesResult(formattedNumber, units, rounded.roundedBytes);
+        return new BytesResult(formattedNumber, units, unitsContentDescription,
+                rounded.roundedBytes);
     }
 
     /**

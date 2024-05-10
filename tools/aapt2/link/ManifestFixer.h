@@ -18,11 +18,10 @@
 #define AAPT_LINK_MANIFESTFIXER_H
 
 #include <string>
+#include <vector>
 
 #include "android-base/macros.h"
-
 #include "process/IResourceTableConsumer.h"
-
 #include "xml/XmlActionExecutor.h"
 #include "xml/XmlDom.h"
 
@@ -68,12 +67,16 @@ struct ManifestFixerOptions {
   std::optional<std::string> revision_code_default;
 
   // The version of the framework being compiled against to set for 'android:compileSdkVersion' in
-  // the <manifest> tag.
+  // the <manifest> tag. Not used if no_compile_sdk_metadata is set.
   std::optional<std::string> compile_sdk_version;
 
   // The version codename of the framework being compiled against to set for
-  // 'android:compileSdkVersionCodename' in the <manifest> tag.
+  // 'android:compileSdkVersionCodename' in the <manifest> tag. Not used if no_compile_sdk_metadata
+  // is set.
   std::optional<std::string> compile_sdk_version_codename;
+
+  // The fingerprint prefixes to be added to the <install-constraints> tag.
+  std::vector<std::string> fingerprint_prefixes;
 
   // Whether validation errors should be treated only as warnings. If this is 'true', then an
   // incorrect node will not result in an error, but only as a warning, and the parsing will
@@ -85,6 +88,14 @@ struct ManifestFixerOptions {
 
   // Whether to replace the manifest version with the the command line version
   bool replace_version = false;
+
+  // Whether to suppress `android:compileSdkVersion*` and `platformBuildVersion*` attributes.
+  bool no_compile_sdk_metadata = false;
+
+  // Whether to mark the app as a non-updatable system app. This adds `updatableSystem="false"` to
+  // the <manifest> tag. Not used if a version code is set either explicitly in the manifest or
+  // through version_code_default.
+  bool non_updatable_system = false;
 };
 
 // Verifies that the manifest is correctly formed and inserts defaults where specified with
@@ -99,7 +110,7 @@ class ManifestFixer : public IXmlResourceConsumer {
  private:
   DISALLOW_COPY_AND_ASSIGN(ManifestFixer);
 
-  bool BuildRules(xml::XmlActionExecutor* executor, IDiagnostics* diag);
+  bool BuildRules(xml::XmlActionExecutor* executor, android::IDiagnostics* diag);
 
   ManifestFixerOptions options_;
 };

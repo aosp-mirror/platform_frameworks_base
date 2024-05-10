@@ -24,7 +24,7 @@
     <string name="pip_move" msgid="158770205886688553">"გადაადგილება"</string>
     <string name="pip_expand" msgid="1051966011679297308">"გაშლა"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"ჩაკეცვა"</string>
-    <string name="pip_edu_text" msgid="3672999496647508701">" მართვის საშუალებებზე წვდომისთვის ორმაგად დააჭირეთ "<annotation icon="home_icon">" მთავარ ღილაკს "</annotation></string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"სახლის მართვის საშუალებებზე წვდომისთვის ორმაგად დააჭირეთ "<annotation icon="home_icon">" მთავარ ღილაკს "</annotation></string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"მენიუ „ეკრანი ეკრანში“."</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"მარცხნივ გადატანა"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"მარჯვნივ გადატანა"</string>

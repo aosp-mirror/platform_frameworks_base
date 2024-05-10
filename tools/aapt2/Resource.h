@@ -25,8 +25,8 @@
 #include <tuple>
 #include <vector>
 
-#include "Source.h"
 #include "androidfw/ConfigDescription.h"
+#include "androidfw/Source.h"
 #include "androidfw/StringPiece.h"
 #include "utils/JenkinsHash.h"
 
@@ -74,7 +74,7 @@ android::StringPiece to_string(ResourceType type);
 /**
  * Returns a pointer to a valid ResourceType, or nullptr if the string was invalid.
  */
-const ResourceType* ParseResourceType(const android::StringPiece& str);
+const ResourceType* ParseResourceType(android::StringPiece str);
 
 /**
  * Pair of type name as in ResourceTable and actual resource type.
@@ -87,7 +87,7 @@ struct ResourceNamedType {
   ResourceType type = ResourceType::kRaw;
 
   ResourceNamedType() = default;
-  ResourceNamedType(const android::StringPiece& n, ResourceType t);
+  ResourceNamedType(android::StringPiece n, ResourceType t);
 
   int compare(const ResourceNamedType& other) const;
 
@@ -108,19 +108,19 @@ struct ResourceNamedTypeRef {
   ResourceNamedTypeRef(const ResourceNamedTypeRef&) = default;
   ResourceNamedTypeRef(ResourceNamedTypeRef&&) = default;
   ResourceNamedTypeRef(const ResourceNamedType& rhs);  // NOLINT(google-explicit-constructor)
-  ResourceNamedTypeRef(const android::StringPiece& n, ResourceType t);
+  ResourceNamedTypeRef(android::StringPiece n, ResourceType t);
   ResourceNamedTypeRef& operator=(const ResourceNamedTypeRef& rhs) = default;
   ResourceNamedTypeRef& operator=(ResourceNamedTypeRef&& rhs) = default;
   ResourceNamedTypeRef& operator=(const ResourceNamedType& rhs);
 
   ResourceNamedType ToResourceNamedType() const;
 
-  std::string to_string() const;
+  std::string_view to_string() const;
 };
 
 ResourceNamedTypeRef ResourceNamedTypeWithDefaultName(ResourceType t);
 
-std::optional<ResourceNamedTypeRef> ParseResourceNamedType(const android::StringPiece& s);
+std::optional<ResourceNamedTypeRef> ParseResourceNamedType(android::StringPiece s);
 
 /**
  * A resource's name. This can uniquely identify
@@ -132,9 +132,8 @@ struct ResourceName {
   std::string entry;
 
   ResourceName() = default;
-  ResourceName(const android::StringPiece& p, const ResourceNamedTypeRef& t,
-               const android::StringPiece& e);
-  ResourceName(const android::StringPiece& p, ResourceType t, const android::StringPiece& e);
+  ResourceName(android::StringPiece p, const ResourceNamedTypeRef& t, android::StringPiece e);
+  ResourceName(android::StringPiece p, ResourceType t, android::StringPiece e);
 
   int compare(const ResourceName& other) const;
 
@@ -157,9 +156,8 @@ struct ResourceNameRef {
   ResourceNameRef(const ResourceNameRef&) = default;
   ResourceNameRef(ResourceNameRef&&) = default;
   ResourceNameRef(const ResourceName& rhs);  // NOLINT(google-explicit-constructor)
-  ResourceNameRef(const android::StringPiece& p, const ResourceNamedTypeRef& t,
-                  const android::StringPiece& e);
-  ResourceNameRef(const android::StringPiece& p, ResourceType t, const android::StringPiece& e);
+  ResourceNameRef(android::StringPiece p, const ResourceNamedTypeRef& t, android::StringPiece e);
+  ResourceNameRef(android::StringPiece p, ResourceType t, android::StringPiece e);
   ResourceNameRef& operator=(const ResourceNameRef& rhs) = default;
   ResourceNameRef& operator=(ResourceNameRef&& rhs) = default;
   ResourceNameRef& operator=(const ResourceName& rhs);
@@ -228,7 +226,7 @@ struct ResourceFile {
   Type type;
 
   // Source
-  Source source;
+  android::Source source;
 
   // Exported symbols
   std::vector<SourcedResourceName> exported_symbols;
@@ -346,8 +344,8 @@ inline ::std::ostream& operator<<(::std::ostream& out, const ResourceType& val) 
 //
 // ResourceNamedType implementation.
 //
-inline ResourceNamedType::ResourceNamedType(const android::StringPiece& n, ResourceType t)
-    : name(n.to_string()), type(t) {
+inline ResourceNamedType::ResourceNamedType(android::StringPiece n, ResourceType t)
+    : name(n), type(t) {
 }
 
 inline int ResourceNamedType::compare(const ResourceNamedType& other) const {
@@ -380,7 +378,7 @@ inline ::std::ostream& operator<<(::std::ostream& out, const ResourceNamedType& 
 //
 // ResourceNamedTypeRef implementation.
 //
-inline ResourceNamedTypeRef::ResourceNamedTypeRef(const android::StringPiece& n, ResourceType t)
+inline ResourceNamedTypeRef::ResourceNamedTypeRef(android::StringPiece n, ResourceType t)
     : name(n), type(t) {
 }
 
@@ -398,8 +396,8 @@ inline ResourceNamedType ResourceNamedTypeRef::ToResourceNamedType() const {
   return ResourceNamedType(name, type);
 }
 
-inline std::string ResourceNamedTypeRef::to_string() const {
-  return name.to_string();
+inline std::string_view ResourceNamedTypeRef::to_string() const {
+  return name;
 }
 
 inline bool operator<(const ResourceNamedTypeRef& lhs, const ResourceNamedTypeRef& rhs) {
@@ -422,13 +420,12 @@ inline ::std::ostream& operator<<(::std::ostream& out, const ResourceNamedTypeRe
 // ResourceName implementation.
 //
 
-inline ResourceName::ResourceName(const android::StringPiece& p, const ResourceNamedTypeRef& t,
-                                  const android::StringPiece& e)
-    : package(p.to_string()), type(t.ToResourceNamedType()), entry(e.to_string()) {
+inline ResourceName::ResourceName(android::StringPiece p, const ResourceNamedTypeRef& t,
+                                  android::StringPiece e)
+    : package(p), type(t.ToResourceNamedType()), entry(e) {
 }
 
-inline ResourceName::ResourceName(const android::StringPiece& p, ResourceType t,
-                                  const android::StringPiece& e)
+inline ResourceName::ResourceName(android::StringPiece p, ResourceType t, android::StringPiece e)
     : ResourceName(p, ResourceNamedTypeWithDefaultName(t), e) {
 }
 
@@ -471,14 +468,13 @@ inline ::std::ostream& operator<<(::std::ostream& out, const ResourceName& name)
 inline ResourceNameRef::ResourceNameRef(const ResourceName& rhs)
     : package(rhs.package), type(rhs.type), entry(rhs.entry) {}
 
-inline ResourceNameRef::ResourceNameRef(const android::StringPiece& p,
-                                        const ResourceNamedTypeRef& t,
-                                        const android::StringPiece& e)
+inline ResourceNameRef::ResourceNameRef(android::StringPiece p, const ResourceNamedTypeRef& t,
+                                        android::StringPiece e)
     : package(p), type(t), entry(e) {
 }
 
-inline ResourceNameRef::ResourceNameRef(const android::StringPiece& p, ResourceType t,
-                                        const android::StringPiece& e)
+inline ResourceNameRef::ResourceNameRef(android::StringPiece p, ResourceType t,
+                                        android::StringPiece e)
     : ResourceNameRef(p, ResourceNamedTypeWithDefaultName(t), e) {
 }
 

@@ -24,6 +24,9 @@ public class FakeKeyguardStateController implements KeyguardStateController {
 
     private final BaseLeakChecker<Callback> mCallbackController;
 
+    private boolean mIsShowing = false;
+    private boolean mIsOccluded = false;
+
     public FakeKeyguardStateController(LeakCheck test) {
         mCallbackController = new BaseLeakChecker<Callback>(test, "keyguard");
     }
@@ -45,11 +48,15 @@ public class FakeKeyguardStateController implements KeyguardStateController {
 
     @Override
     public boolean isShowing() {
-        return false;
+        return mIsShowing;
+    }
+
+    public void setShowing(boolean showing) {
+        mIsShowing = showing;
     }
 
     @Override
-    public boolean isBouncerShowing() {
+    public boolean isPrimaryBouncerShowing() {
         return false;
     }
 
@@ -60,7 +67,11 @@ public class FakeKeyguardStateController implements KeyguardStateController {
 
     @Override
     public boolean isOccluded() {
-        return false;
+        return mIsOccluded;
+    }
+
+    public void setOccluded(boolean occluded) {
+        mIsOccluded = occluded;
     }
 
     @Override

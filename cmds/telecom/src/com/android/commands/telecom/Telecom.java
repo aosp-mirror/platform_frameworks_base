@@ -54,7 +54,7 @@ public final class Telecom extends BaseCommand {
 
       (new Telecom()).run(args);
     }
-
+    private static final String CALLING_PACKAGE = Telecom.class.getPackageName();
     private static final String COMMAND_SET_PHONE_ACCOUNT_ENABLED = "set-phone-account-enabled";
     private static final String COMMAND_SET_PHONE_ACCOUNT_DISABLED = "set-phone-account-disabled";
     private static final String COMMAND_REGISTER_PHONE_ACCOUNT = "register-phone-account";
@@ -76,6 +76,8 @@ public final class Telecom extends BaseCommand {
     private static final String COMMAND_CLEANUP_ORPHAN_PHONE_ACCOUNTS =
             "cleanup-orphan-phone-accounts";
     private static final String COMMAND_RESET_CAR_MODE = "reset-car-mode";
+    private static final String COMMAND_IS_NON_IN_CALL_SERVICE_BOUND =
+            "is-non-ui-in-call-service-bound";
 
     /**
      * Change the system dialer package name if a package name was specified,
@@ -169,6 +171,8 @@ public final class Telecom extends BaseCommand {
                         + " over Telephony.\n"
                 + "telecom log-mark <MESSAGE>: emits a message into the telecom logs.  Useful for "
                         + "testers to indicate where in the logs various test steps take place.\n"
+                + "telecom is-non-ui-in-call-service-bound <PACKAGE>: queries a particular "
+                + "non-ui-InCallService in InCallController to determine if it is bound \n"
         );
     }
 
@@ -270,6 +274,9 @@ public final class Telecom extends BaseCommand {
             case COMMAND_GET_MAX_PHONES:
                 runGetMaxPhones();
                 break;
+            case COMMAND_IS_NON_IN_CALL_SERVICE_BOUND:
+                runIsNonUiInCallServiceBound();
+                break;
             case COMMAND_SET_TEST_EMERGENCY_PHONE_ACCOUNT_PACKAGE_FILTER:
                 runSetEmergencyPhoneAccountPackageFilter();
                 break;
@@ -297,7 +304,7 @@ public final class Telecom extends BaseCommand {
         final String label = nextArgRequired();
         PhoneAccount account = PhoneAccount.builder(handle, label)
                 .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER).build();
-        mTelecomService.registerPhoneAccount(account);
+        mTelecomService.registerPhoneAccount(account, CALLING_PACKAGE);
         System.out.println("Success - " + handle + " registered.");
     }
 
@@ -327,7 +334,7 @@ public final class Telecom extends BaseCommand {
                 .addSupportedUriScheme(PhoneAccount.SCHEME_TEL)
                 .addSupportedUriScheme(PhoneAccount.SCHEME_VOICEMAIL)
                 .build();
-        mTelecomService.registerPhoneAccount(account);
+        mTelecomService.registerPhoneAccount(account, CALLING_PACKAGE);
         System.out.println("Success - " + handle + " registered.");
     }
 
@@ -369,7 +376,7 @@ public final class Telecom extends BaseCommand {
 
     private void runUnregisterPhoneAccount() throws RemoteException {
         final PhoneAccountHandle handle = getPhoneAccountHandleFromArgs();
-        mTelecomService.unregisterPhoneAccount(handle);
+        mTelecomService.unregisterPhoneAccount(handle, CALLING_PACKAGE);
         System.out.println("Success - " + handle + " unregistered.");
     }
 
@@ -406,11 +413,11 @@ public final class Telecom extends BaseCommand {
     }
 
     private void runGetDefaultDialer() throws RemoteException {
-        System.out.println(mTelecomService.getDefaultDialerPackage());
+        System.out.println(mTelecomService.getDefaultDialerPackage(CALLING_PACKAGE));
     }
 
     private void runGetSystemDialer() throws RemoteException {
-        System.out.println(mTelecomService.getSystemDialerPackage());
+        System.out.println(mTelecomService.getSystemDialerPackage(CALLING_PACKAGE));
     }
 
     private void runWaitOnHandler() throws RemoteException {
@@ -425,6 +432,18 @@ public final class Telecom extends BaseCommand {
         int numSims = Integer.parseInt(nextArgRequired());
         System.out.println("Setting sim count to " + numSims + ". Device may reboot");
         mTelephonyManager.switchMultiSimConfig(numSims);
+    }
+
+    /**
+     * prints out whether a particular non-ui InCallServices is bound in a call
+     */
+    public void runIsNonUiInCallServiceBound() throws RemoteException {
+        if (TextUtils.isEmpty(mArgs.peekNextArg())) {
+            System.out.println("No Argument passed. Please pass a <PACKAGE_NAME> to lookup.");
+        } else {
+            System.out.println(
+                    String.valueOf(mTelecomService.isNonUiInCallServiceBound(nextArg())));
+        }
     }
 
     /**

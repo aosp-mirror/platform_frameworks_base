@@ -18,6 +18,7 @@ package com.android.server.location.gnss;
 
 import static android.location.LocationManager.GPS_PROVIDER;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
@@ -33,10 +34,12 @@ import android.os.Process;
 import android.util.ArraySet;
 
 import com.android.internal.util.Preconditions;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.location.injector.AppForegroundHelper;
 import com.android.server.location.injector.Injector;
 import com.android.server.location.injector.LocationPermissionsHelper;
+import com.android.server.location.injector.PackageResetHelper;
 import com.android.server.location.injector.SettingsHelper;
 import com.android.server.location.injector.UserInfoHelper;
 import com.android.server.location.injector.UserInfoHelper.UserListener;
@@ -67,21 +70,44 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
      * Registration object for GNSS listeners.
      */
     protected class GnssListenerRegistration extends
-            BinderListenerRegistration<TRequest, TListener> {
+            BinderListenerRegistration<IBinder, TListener> {
+
+        private final TRequest mRequest;
+        private final CallerIdentity mIdentity;
 
         // we store these values because we don't trust the listeners not to give us dupes, not to
         // spam us, and because checking the values may be more expensive
         private boolean mForeground;
         private boolean mPermitted;
 
-        protected GnssListenerRegistration(@Nullable TRequest request,
-                CallerIdentity callerIdentity, TListener listener) {
-            super(request, callerIdentity, listener);
+        protected GnssListenerRegistration(TRequest request, CallerIdentity identity,
+                TListener listener) {
+            super(identity.isMyProcess() ? FgThread.getExecutor() : DIRECT_EXECUTOR, listener);
+            mRequest = request;
+            mIdentity = identity;
+        }
+
+        public final TRequest getRequest() {
+            return mRequest;
+        }
+
+        public final CallerIdentity getIdentity() {
+            return mIdentity;
+        }
+
+        @Override
+        public String getTag() {
+            return TAG;
         }
 
         @Override
         protected GnssListenerMultiplexer<TRequest, TListener, TMergedRegistration> getOwner() {
             return GnssListenerMultiplexer.this;
+        }
+
+        @Override
+        protected IBinder getBinderFromKey(IBinder key) {
+            return key;
         }
 
         /**
@@ -96,31 +122,16 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
 
         @Override
-        protected final void onBinderListenerRegister() {
+        protected void onRegister() {
+            super.onRegister();
+
             mPermitted = mLocationPermissionsHelper.hasLocationPermissions(PERMISSION_FINE,
-                    getIdentity());
-            mForeground = mAppForegroundHelper.isAppForeground(getIdentity().getUid());
-
-            onGnssListenerRegister();
+                    mIdentity);
+            mForeground = mAppForegroundHelper.isAppForeground(mIdentity.getUid());
         }
-
-        @Override
-        protected final void onBinderListenerUnregister() {
-            onGnssListenerUnregister();
-        }
-
-        /**
-         * May be overridden in place of {@link #onBinderListenerRegister()}.
-         */
-        protected void onGnssListenerRegister() {}
-
-        /**
-         * May be overridden in place of {@link #onBinderListenerUnregister()}.
-         */
-        protected void onGnssListenerUnregister() {}
 
         boolean onLocationPermissionsChanged(@Nullable String packageName) {
-            if (packageName == null || getIdentity().getPackageName().equals(packageName)) {
+            if (packageName == null || mIdentity.getPackageName().equals(packageName)) {
                 return onLocationPermissionsChanged();
             }
 
@@ -128,7 +139,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
 
         boolean onLocationPermissionsChanged(int uid) {
-            if (getIdentity().getUid() == uid) {
+            if (mIdentity.getUid() == uid) {
                 return onLocationPermissionsChanged();
             }
 
@@ -137,7 +148,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
 
         private boolean onLocationPermissionsChanged() {
             boolean permitted = mLocationPermissionsHelper.hasLocationPermissions(PERMISSION_FINE,
-                    getIdentity());
+                    mIdentity);
             if (permitted != mPermitted) {
                 mPermitted = permitted;
                 return true;
@@ -147,7 +158,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
 
         boolean onForegroundChanged(int uid, boolean foreground) {
-            if (getIdentity().getUid() == uid && foreground != mForeground) {
+            if (mIdentity.getUid() == uid && foreground != mForeground) {
                 mForeground = foreground;
                 return true;
             }
@@ -158,7 +169,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append(getIdentity());
+            builder.append(mIdentity);
 
             ArraySet<String> flags = new ArraySet<>(2);
             if (!mForeground) {
@@ -171,8 +182,8 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
                 builder.append(" ").append(flags);
             }
 
-            if (getRequest() != null) {
-                builder.append(" ").append(getRequest());
+            if (mRequest != null) {
+                builder.append(" ").append(mRequest);
             }
             return builder.toString();
         }
@@ -183,16 +194,17 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
     protected final LocationPermissionsHelper mLocationPermissionsHelper;
     protected final AppForegroundHelper mAppForegroundHelper;
     protected final LocationManagerInternal mLocationManagerInternal;
+    private final PackageResetHelper mPackageResetHelper;
 
     private final UserListener mUserChangedListener = this::onUserChanged;
     private final ProviderEnabledListener mProviderEnabledChangedListener =
             this::onProviderEnabledChanged;
     private final SettingsHelper.GlobalSettingChangedListener
             mBackgroundThrottlePackageWhitelistChangedListener =
-            this::onBackgroundThrottlePackageWhitelistChanged;
+            this::onBackgroundThrottlePackageAllowlistChanged;
     private final SettingsHelper.UserSettingChangedListener
             mLocationPackageBlacklistChangedListener =
-            this::onLocationPackageBlacklistChanged;
+            this::onLocationPackageDenylistChanged;
     private final LocationPermissionsHelper.LocationPermissionsListener
             mLocationPermissionsListener =
             new LocationPermissionsHelper.LocationPermissionsListener() {
@@ -208,19 +220,27 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
             };
     private final AppForegroundHelper.AppForegroundListener mAppForegroundChangedListener =
             this::onAppForegroundChanged;
+    private final PackageResetHelper.Responder mPackageResetResponder =
+            new PackageResetHelper.Responder() {
+                @Override
+                public void onPackageReset(String packageName) {
+                    GnssListenerMultiplexer.this.onPackageReset(packageName);
+                }
+
+                @Override
+                public boolean isResetableForPackage(String packageName) {
+                    return GnssListenerMultiplexer.this.isResetableForPackage(packageName);
+                }
+            };
 
     protected GnssListenerMultiplexer(Injector injector) {
         mUserInfoHelper = injector.getUserInfoHelper();
         mSettingsHelper = injector.getSettingsHelper();
         mLocationPermissionsHelper = injector.getLocationPermissionsHelper();
         mAppForegroundHelper = injector.getAppForegroundHelper();
+        mPackageResetHelper = injector.getPackageResetHelper();
         mLocationManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(LocationManagerInternal.class));
-    }
-
-    @Override
-    public String getTag() {
-        return TAG;
     }
 
     /**
@@ -297,7 +317,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
                     identity.getUserId())) {
                 return false;
             }
-            if (!mUserInfoHelper.isCurrentUserId(identity.getUserId())) {
+            if (!mUserInfoHelper.isVisibleUserId(identity.getUserId())) {
                 return false;
             }
             if (mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
@@ -352,6 +372,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
                 mLocationPackageBlacklistChangedListener);
         mLocationPermissionsHelper.addListener(mLocationPermissionsListener);
         mAppForegroundHelper.addListener(mAppForegroundChangedListener);
+        mPackageResetHelper.register(mPackageResetResponder);
     }
 
     @Override
@@ -369,10 +390,14 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
                 mLocationPackageBlacklistChangedListener);
         mLocationPermissionsHelper.removeListener(mLocationPermissionsListener);
         mAppForegroundHelper.removeListener(mAppForegroundChangedListener);
+        mPackageResetHelper.unregister(mPackageResetResponder);
     }
 
     private void onUserChanged(int userId, int change) {
-        if (change == UserListener.CURRENT_USER_CHANGED) {
+        // current user changes affect whether system server location requests are allowed to access
+        // location, and visibility changes affect whether any given user may access location.
+        if (change == UserListener.CURRENT_USER_CHANGED
+                || change == UserListener.USER_VISIBILITY_CHANGED) {
             updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
         }
     }
@@ -382,11 +407,11 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
-    private void onBackgroundThrottlePackageWhitelistChanged() {
+    private void onBackgroundThrottlePackageAllowlistChanged() {
         updateRegistrations(registration -> true);
     }
 
-    private void onLocationPackageBlacklistChanged(int userId) {
+    private void onLocationPackageDenylistChanged(int userId) {
         updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
@@ -400,6 +425,24 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
 
     private void onAppForegroundChanged(int uid, boolean foreground) {
         updateRegistrations(registration -> registration.onForegroundChanged(uid, foreground));
+    }
+
+    private void onPackageReset(String packageName) {
+        updateRegistrations(
+                registration -> {
+                    if (registration.getIdentity().getPackageName().equals(
+                            packageName)) {
+                        registration.remove();
+                    }
+
+                    return false;
+                });
+    }
+
+    private boolean isResetableForPackage(String packageName) {
+        // invoked to find out if the given package has any state that can be "force quit"
+        return findRegistration(
+                registration -> registration.getIdentity().getPackageName().equals(packageName));
     }
 
     @Override

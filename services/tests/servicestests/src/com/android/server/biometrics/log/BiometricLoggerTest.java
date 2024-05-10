@@ -32,7 +32,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.common.OperationContext;
 import android.hardware.input.InputSensorInfo;
 import android.platform.test.annotations.Presubmit;
 import android.testing.TestableContext;
@@ -40,6 +39,7 @@ import android.testing.TestableContext;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.server.biometrics.AuthenticationStatsCollector;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 
 import org.junit.Before;
@@ -66,16 +66,18 @@ public class BiometricLoggerTest {
     @Mock
     private BiometricFrameworkStatsLogger mSink;
     @Mock
+    private AuthenticationStatsCollector mAuthenticationStatsCollector;
+    @Mock
     private SensorManager mSensorManager;
     @Mock
     private BaseClientMonitor mClient;
 
-    private OperationContext mOpContext;
+    private OperationContextExt mOpContext;
     private BiometricLogger mLogger;
 
     @Before
     public void setUp() {
-        mOpContext = new OperationContext();
+        mOpContext = new OperationContextExt(false);
         mContext.addMockSystemService(SensorManager.class, mSensorManager);
         when(mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)).thenReturn(
                 new Sensor(new InputSensorInfo("", "", 0, 0, Sensor.TYPE_LIGHT, 0, 0, 0, 0, 0, 0,
@@ -88,7 +90,8 @@ public class BiometricLoggerTest {
     }
 
     private BiometricLogger createLogger(int statsModality, int statsAction, int statsClient) {
-        return new BiometricLogger(statsModality, statsAction, statsClient, mSink, mSensorManager);
+        return new BiometricLogger(statsModality, statsAction, statsClient, mSink,
+                mAuthenticationStatsCollector, mSensorManager);
     }
 
     @Test
@@ -121,7 +124,9 @@ public class BiometricLoggerTest {
         verify(mSink).authenticate(eq(mOpContext),
                 eq(DEFAULT_MODALITY), eq(DEFAULT_ACTION), eq(DEFAULT_CLIENT), anyBoolean(),
                 anyLong(), anyInt(), eq(requireConfirmation),
-                eq(targetUserId), anyFloat());
+                eq(targetUserId), any());
+
+        verify(mAuthenticationStatsCollector).authenticate(eq(targetUserId), eq(authenticated));
     }
 
     @Test

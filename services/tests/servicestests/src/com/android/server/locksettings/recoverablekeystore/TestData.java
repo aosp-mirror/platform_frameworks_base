@@ -39,7 +39,6 @@ public final class TestData {
 
     private static final String KEY_ALGORITHM = "AES";
     private static final long DEFAULT_SERIAL = 10001;
-    private static final String CERT_PATH_ENCODING = "PkiPath";
 
     private static final String CERT_PATH_1_BASE64 = ""
             + "MIIIXTCCBRowggMCoAMCAQICEB35ZwzVpI9ssXg9SAehnU0wDQYJKoZIhvcNAQEL"

@@ -17,7 +17,9 @@
 package android.media.tv;
 
 import android.graphics.Rect;
+import android.media.AudioPresentation;
 import android.media.PlaybackParams;
+import android.media.tv.AdBuffer;
 import android.media.tv.AdRequest;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.TvTrackInfo;
@@ -40,6 +42,7 @@ oneway interface ITvInputSession {
     void setVolume(float volume);
     void tune(in Uri channelUri, in Bundle params);
     void setCaptionEnabled(boolean enabled);
+    void selectAudioPresentation(int presentationId, int programId);
     void selectTrack(int type, in String trackId);
 
     void setInteractiveAppNotificationEnabled(boolean enable);
@@ -57,7 +60,11 @@ oneway interface ITvInputSession {
     void timeShiftResume();
     void timeShiftSeekTo(long timeMs);
     void timeShiftSetPlaybackParams(in PlaybackParams params);
+    void timeShiftSetMode(int mode);
     void timeShiftEnablePositionTracking(boolean enable);
+
+    void startPlayback();
+    void stopPlayback(int mode);
 
     // For the recording session
     void startRecording(in Uri programUri, in Bundle params);
@@ -71,4 +78,9 @@ oneway interface ITvInputSession {
 
     // For ad request
     void requestAd(in AdRequest request);
+    void notifyAdBufferReady(in AdBuffer buffer);
+
+    // For TV messages
+    void notifyTvMessage(int type, in Bundle data);
+    void setTvMessageEnabled(int type, boolean enabled);
 }

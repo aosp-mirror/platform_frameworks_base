@@ -54,6 +54,9 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState;
+import com.android.systemui.statusbar.notification.collection.listbuilder.SemiStableSort;
+import com.android.systemui.statusbar.notification.collection.listbuilder.SemiStableSort.StableOrder;
+import com.android.systemui.statusbar.notification.collection.listbuilder.ShadeListBuilderHelper;
 import com.android.systemui.statusbar.notification.collection.listbuilder.ShadeListBuilderLogger;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.DefaultNotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator;
@@ -66,6 +69,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
 import com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.NamedListenerSet;
 import com.android.systemui.util.time.SystemClock;
 
 import java.io.PrintWriter;
@@ -96,14 +100,19 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
     // used exclusivly by ShadeListBuilder#notifySectionEntriesUpdated
     // TODO replace temp with collection pool for readability
     private final ArrayList<ListEntry> mTempSectionMembers = new ArrayList<>();
+    private NotifPipelineFlags mFlags;
     private final boolean mAlwaysLogList;
 
     private List<ListEntry> mNotifList = new ArrayList<>();
     private List<ListEntry> mNewNotifList = new ArrayList<>();
 
+    private final SemiStableSort mSemiStableSort = new SemiStableSort();
+    private final StableOrder<ListEntry> mStableOrder = this::getStableOrderRank;
     private final PipelineState mPipelineState = new PipelineState();
     private final Map<String, GroupEntry> mGroups = new ArrayMap<>();
     private Collection<NotificationEntry> mAllEntries = Collections.emptyList();
+    @Nullable
+    private Collection<NotificationEntry> mPendingEntries = null;
     private int mIterationCount = 0;
 
     private final List<NotifFilter> mNotifPreGroupFilters = new ArrayList<>();
@@ -113,14 +122,14 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
     private final List<NotifSection> mNotifSections = new ArrayList<>();
     private NotifStabilityManager mNotifStabilityManager;
 
-    private final List<OnBeforeTransformGroupsListener> mOnBeforeTransformGroupsListeners =
-            new ArrayList<>();
-    private final List<OnBeforeSortListener> mOnBeforeSortListeners =
-            new ArrayList<>();
-    private final List<OnBeforeFinalizeFilterListener> mOnBeforeFinalizeFilterListeners =
-            new ArrayList<>();
-    private final List<OnBeforeRenderListListener> mOnBeforeRenderListListeners =
-            new ArrayList<>();
+    private final NamedListenerSet<OnBeforeTransformGroupsListener>
+            mOnBeforeTransformGroupsListeners = new NamedListenerSet<>();
+    private final NamedListenerSet<OnBeforeSortListener>
+            mOnBeforeSortListeners = new NamedListenerSet<>();
+    private final NamedListenerSet<OnBeforeFinalizeFilterListener>
+            mOnBeforeFinalizeFilterListeners = new NamedListenerSet<>();
+    private final NamedListenerSet<OnBeforeRenderListListener>
+            mOnBeforeRenderListListeners = new NamedListenerSet<>();
     @Nullable private OnRenderListListener mOnRenderListListener;
 
     private List<ListEntry> mReadOnlyNotifList = Collections.unmodifiableList(mNotifList);
@@ -141,6 +150,7 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
     ) {
         mSystemClock = systemClock;
         mLogger = logger;
+        mFlags = flags;
         mAlwaysLogList = flags.isDevLoggingEnabled();
         mInteractionTracker = interactionTracker;
         mChoreographer = pipelineChoreographer;
@@ -175,28 +185,28 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
         Assert.isMainThread();
 
         mPipelineState.requireState(STATE_IDLE);
-        mOnBeforeTransformGroupsListeners.add(listener);
+        mOnBeforeTransformGroupsListeners.addIfAbsent(listener);
     }
 
     void addOnBeforeSortListener(OnBeforeSortListener listener) {
         Assert.isMainThread();
 
         mPipelineState.requireState(STATE_IDLE);
-        mOnBeforeSortListeners.add(listener);
+        mOnBeforeSortListeners.addIfAbsent(listener);
     }
 
     void addOnBeforeFinalizeFilterListener(OnBeforeFinalizeFilterListener listener) {
         Assert.isMainThread();
 
         mPipelineState.requireState(STATE_IDLE);
-        mOnBeforeFinalizeFilterListeners.add(listener);
+        mOnBeforeFinalizeFilterListeners.addIfAbsent(listener);
     }
 
     void addOnBeforeRenderListListener(OnBeforeRenderListListener listener) {
         Assert.isMainThread();
 
         mPipelineState.requireState(STATE_IDLE);
-        mOnBeforeRenderListListeners.add(listener);
+        mOnBeforeRenderListListeners.addIfAbsent(listener);
     }
 
     void addPreRenderInvalidator(Invalidator invalidator) {
@@ -310,11 +320,9 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
                 @Override
                 public void onBuildList(Collection<NotificationEntry> entries, String reason) {
                     Assert.isMainThread();
-                    mPipelineState.requireIsBefore(STATE_BUILD_STARTED);
-
+                    mPendingEntries = new ArrayList<>(entries);
                     mLogger.logOnBuildList(reason);
-                    mAllEntries = entries;
-                    scheduleRebuild(/* reentrant = */ false);
+                    rebuildListIfBefore(STATE_BUILD_STARTED);
                 }
             };
 
@@ -390,6 +398,11 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
     private void buildList() {
         Trace.beginSection("ShadeListBuilder.buildList");
         mPipelineState.requireIsBefore(STATE_BUILD_STARTED);
+
+        if (mPendingEntries != null) {
+            mAllEntries = mPendingEntries;
+            mPendingEntries = null;
+        }
 
         if (!mNotifStabilityManager.isPipelineRunAllowed()) {
             mLogger.logPipelineRunSuppressed();
@@ -484,7 +497,9 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
                     mTempSectionMembers.add(entry);
                 }
             }
+            Trace.beginSection(section.getLabel());
             section.getSectioner().onEntriesUpdated(mTempSectionMembers);
+            Trace.endSection();
             mTempSectionMembers.clear();
         }
         Trace.endSection();
@@ -527,7 +542,7 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
             List<NotifFilter> filters) {
         Trace.beginSection("ShadeListBuilder.filterNotifs");
         final long now = mSystemClock.uptimeMillis();
-        for (ListEntry entry : entries)  {
+        for (ListEntry entry : entries) {
             if (entry instanceof GroupEntry) {
                 final GroupEntry groupEntry = (GroupEntry) entry;
 
@@ -978,40 +993,45 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
 
     private void sortListAndGroups() {
         Trace.beginSection("ShadeListBuilder.sortListAndGroups");
-        // Assign sections to top-level elements and sort their children
-        for (ListEntry entry : mNotifList) {
-            if (entry instanceof GroupEntry) {
-                GroupEntry parent = (GroupEntry) entry;
-                parent.sortChildren(mGroupChildrenComparator);
-            }
-        }
-        mNotifList.sort(mTopLevelComparator);
-        assignIndexes(mNotifList);
-
-        // Check for suppressed order changes
-        if (!getStabilityManager().isEveryChangeAllowed()) {
-            mForceReorderable = true;
-            boolean isSorted = isShadeSorted();
-            mForceReorderable = false;
-            if (!isSorted) {
-                getStabilityManager().onEntryReorderSuppressed();
-            }
-        }
+        sortWithSemiStableSort();
         Trace.endSection();
     }
 
-    private boolean isShadeSorted() {
-        if (!isSorted(mNotifList, mTopLevelComparator)) {
-            return false;
-        }
+    private void sortWithSemiStableSort() {
+        // Sort each group's children
+        boolean allSorted = true;
         for (ListEntry entry : mNotifList) {
             if (entry instanceof GroupEntry) {
-                if (!isSorted(((GroupEntry) entry).getChildren(), mGroupChildrenComparator)) {
-                    return false;
-                }
+                GroupEntry parent = (GroupEntry) entry;
+                allSorted &= sortGroupChildren(parent.getRawChildren());
             }
         }
-        return true;
+        // Sort each section within the top level list
+        mNotifList.sort(mTopLevelComparator);
+        if (!getStabilityManager().isEveryChangeAllowed()) {
+            for (List<ListEntry> subList : getSectionSubLists(mNotifList)) {
+                allSorted &= mSemiStableSort.stabilizeTo(subList, mStableOrder, mNewNotifList);
+            }
+            applyNewNotifList();
+        }
+        assignIndexes(mNotifList);
+        if (!allSorted) {
+            // Report suppressed order changes
+            getStabilityManager().onEntryReorderSuppressed();
+        }
+    }
+
+    private Iterable<List<ListEntry>> getSectionSubLists(List<ListEntry> entries) {
+        return ShadeListBuilderHelper.INSTANCE.getSectionSubLists(entries);
+    }
+
+    private boolean sortGroupChildren(List<NotificationEntry> entries) {
+        if (getStabilityManager().isEveryChangeAllowed()) {
+            entries.sort(mGroupChildrenComparator);
+            return true;
+        } else {
+            return mSemiStableSort.sort(entries, mStableOrder, mGroupChildrenComparator);
+        }
     }
 
     /** Determine whether the items in the list are sorted according to the comparator */
@@ -1036,27 +1056,28 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
     /**
      * Assign the index of each notification relative to the total order
      */
-    private static void assignIndexes(List<ListEntry> notifList) {
+    private void assignIndexes(List<ListEntry> notifList) {
         if (notifList.size() == 0) return;
         NotifSection currentSection = requireNonNull(notifList.get(0).getSection());
         int sectionMemberIndex = 0;
         for (int i = 0; i < notifList.size(); i++) {
-            ListEntry entry = notifList.get(i);
+            final ListEntry entry = notifList.get(i);
             NotifSection section = requireNonNull(entry.getSection());
             if (section.getIndex() != currentSection.getIndex()) {
                 sectionMemberIndex = 0;
                 currentSection = section;
             }
-            entry.getAttachState().setStableIndex(sectionMemberIndex);
+            entry.getAttachState().setStableIndex(sectionMemberIndex++);
             if (entry instanceof GroupEntry) {
-                GroupEntry parent = (GroupEntry) entry;
-                for (int j = 0; j < parent.getChildren().size(); j++) {
-                    entry = parent.getChildren().get(j);
-                    entry.getAttachState().setStableIndex(sectionMemberIndex);
-                    sectionMemberIndex++;
+                final GroupEntry parent = (GroupEntry) entry;
+                final NotificationEntry summary = parent.getSummary();
+                if (summary != null) {
+                    summary.getAttachState().setStableIndex(sectionMemberIndex++);
+                }
+                for (NotificationEntry child : parent.getChildren()) {
+                    child.getAttachState().setStableIndex(sectionMemberIndex++);
                 }
             }
-            sectionMemberIndex++;
         }
     }
 
@@ -1093,11 +1114,20 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
                 mLogger.logParentChanged(mIterationCount, prev.getParent(), curr.getParent());
             }
 
-            if (curr.getSuppressedChanges().getParent() != null) {
-                mLogger.logParentChangeSuppressed(
+            GroupEntry currSuppressedParent = curr.getSuppressedChanges().getParent();
+            GroupEntry prevSuppressedParent = prev.getSuppressedChanges().getParent();
+            if (currSuppressedParent != null && (prevSuppressedParent == null
+                    || !prevSuppressedParent.getKey().equals(currSuppressedParent.getKey()))) {
+                mLogger.logParentChangeSuppressedStarted(
                         mIterationCount,
-                        curr.getSuppressedChanges().getParent(),
+                        currSuppressedParent,
                         curr.getParent());
+            }
+            if (prevSuppressedParent != null && currSuppressedParent == null) {
+                mLogger.logParentChangeSuppressedStopped(
+                        mIterationCount,
+                        prevSuppressedParent,
+                        prev.getParent());
             }
 
             if (curr.getSuppressedChanges().getSection() != null) {
@@ -1196,11 +1226,6 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
                 o2.getSectionIndex());
         if (cmp != 0) return cmp;
 
-        cmp = Integer.compare(
-                getStableOrderIndex(o1),
-                getStableOrderIndex(o2));
-        if (cmp != 0) return cmp;
-
         NotifComparator sectionComparator = getSectionComparator(o1, o2);
         if (sectionComparator != null) {
             cmp = sectionComparator.compare(o1, o2);
@@ -1226,11 +1251,6 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
 
     private final Comparator<NotificationEntry> mGroupChildrenComparator = (o1, o2) -> {
         int cmp = Integer.compare(
-                getStableOrderIndex(o1),
-                getStableOrderIndex(o2));
-        if (cmp != 0) return cmp;
-
-        cmp = Integer.compare(
                 o1.getRepresentativeEntry().getRanking().getRank(),
                 o2.getRepresentativeEntry().getRanking().getRank());
         if (cmp != 0) return cmp;
@@ -1241,22 +1261,19 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
         return cmp;
     };
 
-    /**
-     * A flag that is set to true when we want to run the comparators as if all reordering is
-     * allowed.  This is used to check if the list is "out of order" after the sort is complete.
-     */
-    private boolean mForceReorderable = false;
-
-    private int getStableOrderIndex(ListEntry entry) {
-        if (mForceReorderable) {
-            // this is used to determine if the list is correctly sorted
-            return -1;
-        }
+    @Nullable
+    private Integer getStableOrderRank(ListEntry entry) {
         if (getStabilityManager().isEntryReorderingAllowed(entry)) {
             // let the stability manager constrain or allow reordering
-            return -1;
+            return null;
         }
-        return entry.getPreviousAttachState().getStableIndex();
+        if (entry.getAttachState().getSectionIndex()
+                != entry.getPreviousAttachState().getSectionIndex()) {
+            // stable index is only valid within the same section; otherwise we allow reordering
+            return null;
+        }
+        final int stableIndex = entry.getPreviousAttachState().getStableIndex();
+        return stableIndex == -1 ? null : stableIndex;
     }
 
     private boolean applyFilters(NotificationEntry entry, long now, List<NotifFilter> filters) {
@@ -1398,7 +1415,7 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
             throw exception;
         }
 
-        Log.e(TAG, "Allowing " + mConsecutiveReentrantRebuilds
+        Log.wtf(TAG, "Allowing " + mConsecutiveReentrantRebuilds
                 + " consecutive reentrant notification pipeline rebuild(s).", exception);
         mChoreographer.schedule();
     }
@@ -1416,33 +1433,33 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
 
     private void dispatchOnBeforeTransformGroups(List<ListEntry> entries) {
         Trace.beginSection("ShadeListBuilder.dispatchOnBeforeTransformGroups");
-        for (int i = 0; i < mOnBeforeTransformGroupsListeners.size(); i++) {
-            mOnBeforeTransformGroupsListeners.get(i).onBeforeTransformGroups(entries);
-        }
+        mOnBeforeTransformGroupsListeners.forEachTraced(listener -> {
+            listener.onBeforeTransformGroups(entries);
+        });
         Trace.endSection();
     }
 
     private void dispatchOnBeforeSort(List<ListEntry> entries) {
         Trace.beginSection("ShadeListBuilder.dispatchOnBeforeSort");
-        for (int i = 0; i < mOnBeforeSortListeners.size(); i++) {
-            mOnBeforeSortListeners.get(i).onBeforeSort(entries);
-        }
+        mOnBeforeSortListeners.forEachTraced(listener -> {
+            listener.onBeforeSort(entries);
+        });
         Trace.endSection();
     }
 
     private void dispatchOnBeforeFinalizeFilter(List<ListEntry> entries) {
         Trace.beginSection("ShadeListBuilder.dispatchOnBeforeFinalizeFilter");
-        for (int i = 0; i < mOnBeforeFinalizeFilterListeners.size(); i++) {
-            mOnBeforeFinalizeFilterListeners.get(i).onBeforeFinalizeFilter(entries);
-        }
+        mOnBeforeFinalizeFilterListeners.forEachTraced(listener -> {
+            listener.onBeforeFinalizeFilter(entries);
+        });
         Trace.endSection();
     }
 
     private void dispatchOnBeforeRenderList(List<ListEntry> entries) {
         Trace.beginSection("ShadeListBuilder.dispatchOnBeforeRenderList");
-        for (int i = 0; i < mOnBeforeRenderListListeners.size(); i++) {
-            mOnBeforeRenderListListeners.get(i).onBeforeRenderList(entries);
-        }
+        mOnBeforeRenderListListeners.forEachTraced(listener -> {
+            listener.onBeforeRenderList(entries);
+        });
         Trace.endSection();
     }
 

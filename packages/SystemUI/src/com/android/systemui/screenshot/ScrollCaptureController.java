@@ -78,6 +78,7 @@ public class ScrollCaptureController {
     static class LongScreenshot {
         private final ImageTileSet mImageTileSet;
         private final Session mSession;
+        // TODO: Add UserHandle so LongScreenshots can adhere to work profile screenshot policy
 
         LongScreenshot(Session session, ImageTileSet imageTileSet) {
             mSession = session;
@@ -129,8 +130,14 @@ public class ScrollCaptureController {
 
         @Override
         public String toString() {
-            return "LongScreenshot{w=" + mImageTileSet.getWidth()
-                    + ", h=" + mImageTileSet.getHeight() + "}";
+            return "LongScreenshot{"
+                    + "l=" + mImageTileSet.getLeft() + ", "
+                    + "t=" + mImageTileSet.getTop() + ", "
+                    + "r=" + mImageTileSet.getRight() + ", "
+                    + "b=" + mImageTileSet.getBottom() + ", "
+                    + "w=" + mImageTileSet.getWidth() + ", "
+                    + "h=" + mImageTileSet.getHeight()
+                    + "}";
         }
 
         public Drawable getDrawable() {

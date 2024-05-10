@@ -9,6 +9,7 @@ package {
 
 android_library {
     name: "SettingsLibHelpUtils",
+    use_resource_processor: true,
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
@@ -22,5 +23,6 @@ android_library {
     apex_available: [
         "//apex_available:platform",
         "com.android.permission",
+        "com.android.healthfitness",
     ],
 }

@@ -127,7 +127,7 @@ public final class EditorBoundsInfo implements Parcelable {
     };
 
     /**
-     * Builder for {@link CursorAnchorInfo}.
+     * Builder for {@link EditorBoundsInfo}.
      */
     public static final class Builder {
         private RectF mEditorBounds = null;

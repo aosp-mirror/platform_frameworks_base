@@ -16,7 +16,10 @@
 
 package android.content;
 
+import static android.permission.flags.Flags.FLAG_SHOULD_REGISTER_ATTRIBUTION_SOURCE;
+
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -50,17 +53,20 @@ public final class ContextParams {
     private final @Nullable String mAttributionTag;
     private final @Nullable AttributionSource mNext;
     private final @NonNull Set<String> mRenouncedPermissions;
+    private final boolean mShouldRegisterAttributionSource;
 
     /** {@hide} */
     public static final ContextParams EMPTY = new ContextParams.Builder().build();
 
     private ContextParams(@Nullable String attributionTag,
             @Nullable AttributionSource next,
-            @Nullable Set<String> renouncedPermissions) {
+            @Nullable Set<String> renouncedPermissions,
+            boolean shouldRegister) {
         mAttributionTag = attributionTag;
         mNext = next;
         mRenouncedPermissions = (renouncedPermissions != null)
                 ? renouncedPermissions : Collections.emptySet();
+        mShouldRegisterAttributionSource = shouldRegister;
     }
 
     /**
@@ -95,12 +101,23 @@ public final class ContextParams {
     }
 
     /**
+     * @return Whether the attribution source associated with the Context being created should be
+     * registered.
+     */
+    @NonNull
+    @FlaggedApi(FLAG_SHOULD_REGISTER_ATTRIBUTION_SOURCE)
+    public boolean shouldRegisterAttributionSource() {
+        return mShouldRegisterAttributionSource;
+    }
+
+    /**
      * Builder for creating a {@link ContextParams}.
      */
     public static final class Builder {
         private @Nullable String mAttributionTag;
         private @NonNull Set<String> mRenouncedPermissions = Collections.emptySet();
         private @Nullable AttributionSource mNext;
+        private boolean mShouldRegisterAttributionSource;
 
         /**
          * Create a new builder.
@@ -159,6 +176,20 @@ public final class ContextParams {
         }
 
         /**
+         * Sets whether the attribution source associated with the context created from these params
+         * should be registered.
+         *
+         * @param shouldRegister Whether the attribution source associated with the Context being
+         *                       created should be registered.
+         */
+        @NonNull
+        @FlaggedApi(FLAG_SHOULD_REGISTER_ATTRIBUTION_SOURCE)
+        public Builder setShouldRegisterAttributionSource(boolean shouldRegister) {
+            mShouldRegisterAttributionSource = shouldRegister;
+            return this;
+        }
+
+        /**
          * Sets permissions which have been voluntarily "renounced" by the
          * calling app.
          * <p>
@@ -205,7 +236,7 @@ public final class ContextParams {
         @NonNull
         public ContextParams build() {
             return new ContextParams(mAttributionTag, mNext,
-                    mRenouncedPermissions);
+                    mRenouncedPermissions, mShouldRegisterAttributionSource);
         }
     }
 }

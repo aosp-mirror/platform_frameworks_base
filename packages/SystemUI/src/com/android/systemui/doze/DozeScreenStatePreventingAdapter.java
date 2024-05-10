@@ -22,14 +22,16 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.statusbar.phone.DozeParameters;
 
+import java.util.concurrent.Executor;
+
 /**
  * Prevents usage of doze screen states on devices that don't support them.
  */
 public class DozeScreenStatePreventingAdapter extends DozeMachine.Service.Delegate {
 
     @VisibleForTesting
-    DozeScreenStatePreventingAdapter(DozeMachine.Service inner) {
-        super(inner);
+    DozeScreenStatePreventingAdapter(DozeMachine.Service inner, Executor bgExecutor) {
+        super(inner, bgExecutor);
     }
 
     @Override
@@ -47,8 +49,8 @@ public class DozeScreenStatePreventingAdapter extends DozeMachine.Service.Delega
      * return a new instance of {@link DozeScreenStatePreventingAdapter} wrapping {@code inner}.
      */
     public static DozeMachine.Service wrapIfNeeded(DozeMachine.Service inner,
-            DozeParameters params) {
-        return isNeeded(params) ? new DozeScreenStatePreventingAdapter(inner) : inner;
+            DozeParameters params, Executor bgExecutor) {
+        return isNeeded(params) ? new DozeScreenStatePreventingAdapter(inner, bgExecutor) : inner;
     }
 
     private static boolean isNeeded(DozeParameters params) {

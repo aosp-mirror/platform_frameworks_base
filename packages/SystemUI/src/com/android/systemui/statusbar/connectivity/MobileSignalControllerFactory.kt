@@ -22,6 +22,7 @@ import android.telephony.TelephonyManager
 import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.MobileStatusTracker
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
 import javax.inject.Inject
 
@@ -33,6 +34,7 @@ internal class MobileSignalControllerFactory @Inject constructor(
     val context: Context,
     val callbackHandler: CallbackHandler,
     val carrierConfigTracker: CarrierConfigTracker,
+    val mobileMappings: MobileMappingsProxy,
 ) {
     fun createMobileSignalController(
         config: MobileMappings.Config,
@@ -56,6 +58,7 @@ internal class MobileSignalControllerFactory @Inject constructor(
             phone,
             callbackHandler,
             networkController,
+            mobileMappings,
             subscriptionInfo,
             subscriptionDefaults,
             receiverLooper,

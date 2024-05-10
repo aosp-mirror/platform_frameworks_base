@@ -22,6 +22,7 @@ import static com.android.server.location.eventlog.LocationEventLog.EVENT_LOG;
 import static com.android.server.location.injector.UserInfoHelper.UserListener.CURRENT_USER_CHANGED;
 import static com.android.server.location.injector.UserInfoHelper.UserListener.USER_STARTED;
 import static com.android.server.location.injector.UserInfoHelper.UserListener.USER_STOPPED;
+import static com.android.server.location.injector.UserInfoHelper.UserListener.USER_VISIBILITY_CHANGED;
 
 import android.annotation.IntDef;
 import android.annotation.UserIdInt;
@@ -47,8 +48,9 @@ public abstract class UserInfoHelper {
         int CURRENT_USER_CHANGED = 1;
         int USER_STARTED = 2;
         int USER_STOPPED = 3;
+        int USER_VISIBILITY_CHANGED = 4;
 
-        @IntDef({CURRENT_USER_CHANGED, USER_STARTED, USER_STOPPED})
+        @IntDef({CURRENT_USER_CHANGED, USER_STARTED, USER_STOPPED, USER_VISIBILITY_CHANGED})
         @Retention(RetentionPolicy.SOURCE)
         @interface UserChange {}
 
@@ -121,6 +123,18 @@ public abstract class UserInfoHelper {
         }
     }
 
+    protected final void dispatchOnVisibleUserChanged(@UserIdInt int userId, boolean visible) {
+        if (D) {
+            Log.d(TAG, "visibility of u" + userId + " changed to "
+                    + (visible ? "visible" : "invisible"));
+        }
+        EVENT_LOG.logUserVisibilityChanged(userId, visible);
+
+        for (UserListener listener : mListeners) {
+            listener.onUserChanged(userId, USER_VISIBILITY_CHANGED);
+        }
+    }
+
     /**
      * Returns an array of running user ids. This will include all running users, and will also
      * include any profiles of the running users. The caller must never mutate the returned
@@ -129,8 +143,8 @@ public abstract class UserInfoHelper {
     public abstract int[] getRunningUserIds();
 
     /**
-     * Returns true if the given user id is either the current user or a profile of the current
-     * user.
+     * Returns {@code true} if the given user id is either the current user or a profile of the
+     * current user.
      */
     public abstract boolean isCurrentUserId(@UserIdInt int userId);
 
@@ -139,6 +153,13 @@ public abstract class UserInfoHelper {
      * instead, as that method has more flexibility.
      */
     public abstract @UserIdInt int getCurrentUserId();
+
+    /**
+     * Returns {@code true} if the user is visible.
+     *
+     * <p>The visibility of a user is defined by {@link android.os.UserManager#isUserVisible()}.
+     */
+    public abstract boolean isVisibleUserId(@UserIdInt int userId);
 
     protected abstract int[] getProfileIds(@UserIdInt int userId);
 

@@ -17,36 +17,41 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.os.RemoteException;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 /**
  * A helper class to handle touches on the heads-up views.
  */
 public class HeadsUpTouchHelper implements Gefingerpoken {
 
-    private HeadsUpManagerPhone mHeadsUpManager;
-    private Callback mCallback;
+    private final HeadsUpManager mHeadsUpManager;
+    private final IStatusBarService mStatusBarService;
+    private final Callback mCallback;
     private int mTrackingPointer;
-    private float mTouchSlop;
+    private final float mTouchSlop;
     private float mInitialTouchX;
     private float mInitialTouchY;
     private boolean mTouchingHeadsUpView;
     private boolean mTrackingHeadsUp;
     private boolean mCollapseSnoozes;
-    private NotificationPanelViewController mPanel;
+    private final HeadsUpNotificationViewController mPanel;
     private ExpandableNotificationRow mPickedChild;
 
-    public HeadsUpTouchHelper(HeadsUpManagerPhone headsUpManager,
+    public HeadsUpTouchHelper(HeadsUpManager headsUpManager,
+            IStatusBarService statusBarService,
             Callback callback,
-            NotificationPanelViewController notificationPanelView) {
+            HeadsUpNotificationViewController notificationPanelView) {
         mHeadsUpManager = headsUpManager;
+        mStatusBarService = statusBarService;
         mCallback = callback;
         mPanel = notificationPanelView;
         Context context = mCallback.getContext();
@@ -116,11 +121,11 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                     int startHeight = (int) (mPickedChild.getActualHeight()
                                                 + mPickedChild.getTranslationY());
                     mPanel.setHeadsUpDraggingStartingHeight(startHeight);
-                    mPanel.startExpandMotion(x, y, true /* startTracking */, startHeight);
+                    mPanel.startExpand(x, y, true /* startTracking */, startHeight);
                     // This call needs to be after the expansion start otherwise we will get a
                     // flicker of one frame as it's not expanded yet.
                     mHeadsUpManager.unpinAll(true);
-                    mPanel.clearNotificationEffects();
+                    clearNotificationEffects();
                     endMotion();
                     return true;
                 }
@@ -176,9 +181,29 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
         mTouchingHeadsUpView = false;
     }
 
+    private void clearNotificationEffects() {
+        try {
+            mStatusBarService.clearNotificationEffects();
+        } catch (RemoteException e) {
+            // Won't fail unless the world has ended.
+        }
+    }
+
     public interface Callback {
         ExpandableView getChildAtRawPosition(float touchX, float touchY);
         boolean isExpanded();
         Context getContext();
+    }
+
+    /** The controller for a view that houses heads up notifications. */
+    public interface HeadsUpNotificationViewController {
+        /** Called when a HUN is dragged to indicate the starting height for shade motion. */
+        void setHeadsUpDraggingStartingHeight(int startHeight);
+
+        /** Sets notification that is being expanded. */
+        void setTrackedHeadsUp(ExpandableNotificationRow expandableNotificationRow);
+
+        /** Called when a MotionEvent is about to trigger expansion. */
+        void startExpand(float newX, float newY, boolean startTracking, float expandedHeight);
     }
 }

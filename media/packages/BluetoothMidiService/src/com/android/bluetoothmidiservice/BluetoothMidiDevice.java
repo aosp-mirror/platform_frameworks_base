@@ -100,16 +100,12 @@ public final class BluetoothMidiDevice {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status,
                 int newState) {
+            Log.d(TAG, "onConnectionStateChange() status: " + status + ", newState: " + newState);
             String intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.d(TAG, "Connected to GATT server.");
                 Log.d(TAG, "Attempting to start service discovery:" +
                         mBluetoothGatt.discoverServices());
-                if (!mBluetoothGatt.requestMtu(MAX_PACKET_SIZE)) {
-                    Log.e(TAG, "request mtu failed");
-                    mPacketEncoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
-                    mPacketDecoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
-                }
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.i(TAG, "Disconnected from GATT server.");
                 close();
@@ -118,6 +114,7 @@ public final class BluetoothMidiDevice {
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+            Log.d(TAG, "onServicesDiscovered() status: " +  status);
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 BluetoothGattService service = gatt.getService(MIDI_SERVICE);
                 if (service != null) {
@@ -137,9 +134,14 @@ public final class BluetoothMidiDevice {
                         // Specification says to read the characteristic first and then
                         // switch to receiving notifications
                         mBluetoothGatt.readCharacteristic(characteristic);
-                    }
 
-                    openBluetoothDevice(mBluetoothDevice);
+                        // Request higher MTU size
+                        if (!gatt.requestMtu(MAX_PACKET_SIZE)) {
+                            Log.e(TAG, "request mtu failed");
+                            mPacketEncoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
+                            mPacketDecoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
+                        }
+                    }
                 }
             } else {
                 Log.e(TAG, "onServicesDiscovered received: " + status);
@@ -235,13 +237,13 @@ public final class BluetoothMidiDevice {
             System.arraycopy(buffer, 0, mCachedBuffer, 0, count);
 
             if (DEBUG) {
-                logByteArray("Sent ", mCharacteristic.getValue(), 0,
-                       mCharacteristic.getValue().length);
+                logByteArray("Sent ", mCachedBuffer, 0, mCachedBuffer.length);
             }
 
-            if (mBluetoothGatt.writeCharacteristic(mCharacteristic, mCachedBuffer,
-                    mCharacteristic.getWriteType()) != BluetoothGatt.GATT_SUCCESS) {
-                Log.w(TAG, "could not write characteristic to Bluetooth GATT");
+            int result = mBluetoothGatt.writeCharacteristic(mCharacteristic, mCachedBuffer,
+                    mCharacteristic.getWriteType());
+            if (result != BluetoothGatt.GATT_SUCCESS) {
+                Log.w(TAG, "could not write characteristic to Bluetooth GATT. result: " + result);
                 return false;
             }
 
@@ -253,6 +255,10 @@ public final class BluetoothMidiDevice {
             BluetoothMidiService service) {
         mBluetoothDevice = device;
         mService = service;
+
+        // Set a small default packet size in case there is an issue with configuring MTUs.
+        mPacketEncoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
+        mPacketDecoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
 
         mBluetoothGatt = mBluetoothDevice.connectGatt(context, false, mGattCallback);
 

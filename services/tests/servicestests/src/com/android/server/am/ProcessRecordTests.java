@@ -34,6 +34,7 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.FlakyTest;
 
+import com.android.internal.os.TimeoutRecord;
 import com.android.server.LocalServices;
 import com.android.server.wm.ActivityTaskManagerService;
 
@@ -44,6 +45,7 @@ import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Build/Install/Run:
@@ -57,6 +59,7 @@ public class ProcessRecordTests {
 
     private ProcessRecord mProcessRecord;
     private ProcessErrorStateRecord mProcessErrorState;
+    private ExecutorService mExecutorService;
 
     @BeforeClass
     public static void setUpOnce() throws Exception {
@@ -108,6 +111,7 @@ public class ProcessRecordTests {
         runWithDexmakerShareClassLoader(() -> {
             mProcessRecord = new ProcessRecord(sService, sContext.getApplicationInfo(),
                     "name", 12345);
+            mExecutorService = mock(ExecutorService.class);
             mProcessErrorState = spy(mProcessRecord.mErrorState);
             doNothing().when(mProcessErrorState).startAppProblemLSP();
             doReturn(false).when(mProcessErrorState).isSilentAnr();
@@ -193,10 +197,12 @@ public class ProcessRecordTests {
         assertTrue(mProcessRecord.isKilled());
     }
 
-    private static void appNotResponding(ProcessErrorStateRecord processErrorState,
+    private void appNotResponding(ProcessErrorStateRecord processErrorState,
             String annotation) {
+        TimeoutRecord timeoutRecord = TimeoutRecord.forInputDispatchNoFocusedWindow(annotation);
         processErrorState.appNotResponding(null /* activityShortComponentName */, null /* aInfo */,
                 null /* parentShortComponentName */, null /* parentProcess */,
-                false /* aboveSystem */, annotation, false /* onlyDumpSelf */);
+                false /* aboveSystem */, timeoutRecord, mExecutorService, false /* onlyDumpSelf */,
+                false /*isContinuousAnr*/, null);
     }
 }

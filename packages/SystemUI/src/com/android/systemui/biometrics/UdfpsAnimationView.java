@@ -118,6 +118,24 @@ public abstract class UdfpsAnimationView extends FrameLayout {
     }
 
     /**
+     * Converts coordinates of RectF relative to the screen to coordinates relative to this view.
+     *
+     * @param bounds RectF based off screen coordinates in current orientation
+     */
+    RectF getBoundsRelativeToView(RectF bounds) {
+        int[] pos = getLocationOnScreen();
+
+        RectF output = new RectF(
+                bounds.left - pos[0],
+                bounds.top - pos[1],
+                bounds.right - pos[0],
+                bounds.bottom - pos[1]
+        );
+
+        return output;
+    }
+
+    /**
      * Set the suggested alpha based on whether a dialog was recently shown or hidden.
      * @param dialogSuggestedAlpha value from 0f to 1f.
      */

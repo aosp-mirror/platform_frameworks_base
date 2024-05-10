@@ -66,6 +66,7 @@ public class PersistentDataBlockManager {
      */
     public static final int FLASH_LOCK_LOCKED = 1;
 
+    /** @removed mistakenly exposed previously */
     @IntDef(prefix = { "FLASH_LOCK_" }, value = {
             FLASH_LOCK_UNKNOWN,
             FLASH_LOCK_LOCKED,

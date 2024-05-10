@@ -278,14 +278,4 @@ public abstract class InputEventReceiver {
         writer.println(prefix + " mSeqMap: " + mSeqMap);
         writer.println(prefix + " mReceiverPtr:\n" + nativeDump(mReceiverPtr, prefix + "  "));
     }
-
-    /**
-     * Factory for InputEventReceiver
-     */
-    public interface Factory {
-        /**
-         * Create a new InputReceiver for a given inputChannel
-         */
-        InputEventReceiver createInputEventReceiver(InputChannel inputChannel, Looper looper);
-    }
 }

@@ -27,7 +27,7 @@ import android.util.AttributeSet;
 import android.widget.LinearLayout;
 import android.widget.TextClock;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Container for a clock which has two separate views for the clock itself and AM/PM indicator. This

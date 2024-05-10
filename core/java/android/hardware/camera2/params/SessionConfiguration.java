@@ -23,16 +23,21 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.graphics.ColorSpace;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.HashCodeHelpers;
+import android.media.ImageReader;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
+
+import com.android.internal.camera.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -52,7 +57,7 @@ public final class SessionConfiguration implements Parcelable {
      * at regular non high speed FPS ranges and optionally {@link InputConfiguration} for
      * reprocessable sessions.
      *
-     * @see CameraDevice#createCaptureSession
+     * @see CameraDevice#createCaptureSession(SessionConfiguration)
      * @see CameraDevice#createReprocessableCaptureSession
      */
     public static final int SESSION_REGULAR = CameraDevice.SESSION_OPERATION_MODE_NORMAL;
@@ -94,6 +99,7 @@ public final class SessionConfiguration implements Parcelable {
     private Executor mExecutor = null;
     private InputConfiguration mInputConfig = null;
     private CaptureRequest mSessionParameters = null;
+    private int mColorSpace;
 
     /**
      * Create a new {@link SessionConfiguration}.
@@ -106,10 +112,7 @@ public final class SessionConfiguration implements Parcelable {
      *
      * @see #SESSION_REGULAR
      * @see #SESSION_HIGH_SPEED
-     * @see CameraDevice#createCaptureSession(List, CameraCaptureSession.StateCallback, Handler)
-     * @see CameraDevice#createCaptureSessionByOutputConfigurations
-     * @see CameraDevice#createReprocessableCaptureSession
-     * @see CameraDevice#createConstrainedHighSpeedCaptureSession
+     * @see CameraDevice#createCaptureSession(SessionConfiguration)
      */
     public SessionConfiguration(@SessionMode int sessionType,
             @NonNull List<OutputConfiguration> outputs,
@@ -123,7 +126,7 @@ public final class SessionConfiguration implements Parcelable {
 
     /**
      * Create a SessionConfiguration from Parcel.
-     * No support for parcelable 'mStateCallback', 'mExecutor' and 'mSessionParameters' yet.
+     * No support for parcelable 'mStateCallback' and 'mExecutor' yet.
      */
     private SessionConfiguration(@NonNull Parcel source) {
         int sessionType = source.readInt();
@@ -133,6 +136,15 @@ public final class SessionConfiguration implements Parcelable {
         boolean isInputMultiResolution = source.readBoolean();
         ArrayList<OutputConfiguration> outConfigs = new ArrayList<OutputConfiguration>();
         source.readTypedList(outConfigs, OutputConfiguration.CREATOR);
+        // Ignore the values for hasSessionParameters and settings because we cannot reconstruct
+        // the CaptureRequest object.
+        if (Flags.featureCombinationQuery()) {
+            boolean hasSessionParameters = source.readBoolean();
+            if (hasSessionParameters) {
+                CameraMetadataNative settings = new CameraMetadataNative();
+                settings.readFromParcel(source);
+            }
+        }
 
         if ((inputWidth > 0) && (inputHeight > 0) && (inputFormat != -1)) {
             mInputConfig = new InputConfiguration(inputWidth, inputHeight,
@@ -173,6 +185,15 @@ public final class SessionConfiguration implements Parcelable {
             dest.writeBoolean(/*isMultiResolution*/ false);
         }
         dest.writeTypedList(mOutputConfigurations);
+        if (Flags.featureCombinationQuery()) {
+            if (mSessionParameters != null) {
+                dest.writeBoolean(/*hasSessionParameters*/true);
+                CameraMetadataNative metadata = mSessionParameters.getNativeCopy();
+                metadata.writeToParcel(dest, /*flags*/0);
+            } else {
+                dest.writeBoolean(/*hasSessionParameters*/false);
+            }
+        }
     }
 
     @Override
@@ -313,5 +334,46 @@ public final class SessionConfiguration implements Parcelable {
      */
     public CaptureRequest getSessionParameters() {
         return mSessionParameters;
+    }
+
+    /**
+     * Set a specific device-supported color space.
+     *
+     * <p>Clients can choose from any profile advertised as supported in
+     * {@link CameraCharacteristics#REQUEST_AVAILABLE_COLOR_SPACE_PROFILES}
+     * queried using {@link ColorSpaceProfiles#getSupportedColorSpaces}.
+     * When set, the colorSpace will override the default color spaces of the output targets,
+     * or the color space implied by the dataSpace passed into an {@link ImageReader}'s
+     * constructor.</p>
+     */
+    public void setColorSpace(@NonNull ColorSpace.Named colorSpace) {
+        mColorSpace = colorSpace.ordinal();
+        for (OutputConfiguration outputConfiguration : mOutputConfigurations) {
+            outputConfiguration.setColorSpace(colorSpace);
+        }
+    }
+
+    /**
+     * Clear the color space, such that the default color space will be used.
+     */
+    public void clearColorSpace() {
+        mColorSpace = ColorSpaceProfiles.UNSPECIFIED;
+        for (OutputConfiguration outputConfiguration : mOutputConfigurations) {
+            outputConfiguration.clearColorSpace();
+        }
+    }
+
+    /**
+     * Return the current color space.
+     *
+     * @return the currently set color space
+     */
+    @SuppressLint("MethodNameUnits")
+    public @Nullable ColorSpace getColorSpace() {
+        if (mColorSpace != ColorSpaceProfiles.UNSPECIFIED) {
+            return ColorSpace.get(ColorSpace.Named.values()[mColorSpace]);
+        } else {
+            return null;
+        }
     }
 }

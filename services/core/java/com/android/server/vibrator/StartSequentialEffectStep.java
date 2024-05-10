@@ -22,7 +22,6 @@ import android.os.CombinedVibration;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.VibrationEffect;
-import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.StepSegment;
@@ -93,8 +92,8 @@ final class StartSequentialEffectStep extends Step {
             }
 
             mVibratorsOnMaxDuration = startVibrating(effectMapping, nextSteps);
-            conductor.vibratorManagerHooks.noteVibratorOn(conductor.getVibration().uid,
-                    mVibratorsOnMaxDuration);
+            conductor.vibratorManagerHooks.noteVibratorOn(
+                    conductor.getVibration().callerInfo.uid, mVibratorsOnMaxDuration);
         } finally {
             if (mVibratorsOnMaxDuration >= 0) {
                 // It least one vibrator was started then add a finish step to wait for all
@@ -162,8 +161,7 @@ final class StartSequentialEffectStep extends Step {
      * waveforms return {@link Long#MAX_VALUE}. Zero or negative values indicate the vibrators
      * have ignored all effects.
      */
-    private long startVibrating(
-            DeviceEffectMap effectMapping, List<Step> nextSteps) {
+    private long startVibrating(DeviceEffectMap effectMapping, List<Step> nextSteps) {
         int vibratorCount = effectMapping.size();
         if (vibratorCount == 0) {
             // No effect was mapped to any available vibrator.
@@ -192,41 +190,45 @@ final class StartSequentialEffectStep extends Step {
         // delivered asynchronously but enqueued until the step processing is finished.
         boolean hasPrepared = false;
         boolean hasTriggered = false;
+        boolean hasFailed = false;
         long maxDuration = 0;
-        try {
-            hasPrepared = conductor.vibratorManagerHooks.prepareSyncedVibration(
-                    effectMapping.getRequiredSyncCapabilities(),
-                    effectMapping.getVibratorIds());
+        hasPrepared = conductor.vibratorManagerHooks.prepareSyncedVibration(
+                effectMapping.getRequiredSyncCapabilities(),
+                effectMapping.getVibratorIds());
 
-            for (AbstractVibratorStep step : steps) {
-                long duration = startVibrating(step, nextSteps);
-                if (duration < 0) {
-                    // One vibrator has failed, fail this entire sync attempt.
-                    return maxDuration = -1;
-                }
-                maxDuration = Math.max(maxDuration, duration);
+        for (AbstractVibratorStep step : steps) {
+            long duration = startVibrating(step, nextSteps);
+            if (duration < 0) {
+                // One vibrator has failed, fail this entire sync attempt.
+                hasFailed = true;
+                break;
             }
+            maxDuration = Math.max(maxDuration, duration);
+        }
 
-            // Check if sync was prepared and if any step was accepted by a vibrator,
-            // otherwise there is nothing to trigger here.
-            if (hasPrepared && maxDuration > 0) {
-                hasTriggered = conductor.vibratorManagerHooks.triggerSyncedVibration(
-                        getVibration().id);
-            }
-            return maxDuration;
-        } finally {
-            if (hasPrepared && !hasTriggered) {
-                // Trigger has failed or all steps were ignored by the vibrators.
-                conductor.vibratorManagerHooks.cancelSyncedVibration();
-                nextSteps.clear();
-            } else if (maxDuration < 0) {
-                // Some vibrator failed without being prepared so other vibrators might be
-                // active. Cancel and remove every pending step from output list.
-                for (int i = nextSteps.size() - 1; i >= 0; i--) {
-                    nextSteps.remove(i).cancelImmediately();
-                }
+        // Check if sync was prepared and if any step was accepted by a vibrator,
+        // otherwise there is nothing to trigger here.
+        if (hasPrepared && !hasFailed && maxDuration > 0) {
+            hasTriggered = conductor.vibratorManagerHooks.triggerSyncedVibration(
+                    getVibration().id);
+            hasFailed &= hasTriggered;
+        }
+
+        if (hasFailed) {
+            // Something failed, possibly after other vibrators were activated.
+            // Cancel and remove every pending step from output list.
+            for (int i = nextSteps.size() - 1; i >= 0; i--) {
+                nextSteps.remove(i).cancelImmediately();
             }
         }
+
+        // Cancel the preparation if trigger failed or all
+        if (hasPrepared && !hasTriggered) {
+            // Trigger has failed or was skipped, so abort the synced vibration.
+            conductor.vibratorManagerHooks.cancelSyncedVibration();
+        }
+
+        return hasFailed ? -1 : maxDuration;
     }
 
     private long startVibrating(AbstractVibratorStep step, List<Step> nextSteps) {
@@ -253,17 +255,22 @@ final class StartSequentialEffectStep extends Step {
 
         DeviceEffectMap(CombinedVibration.Mono mono) {
             SparseArray<VibratorController> vibrators = conductor.getVibrators();
-            mVibratorEffects = new SparseArray<>(vibrators.size());
-            mVibratorIds = new int[vibrators.size()];
-            for (int i = 0; i < vibrators.size(); i++) {
-                int vibratorId = vibrators.keyAt(i);
-                VibratorInfo vibratorInfo = vibrators.valueAt(i).getVibratorInfo();
-                VibrationEffect effect = conductor.deviceEffectAdapter.apply(
-                        mono.getEffect(), vibratorInfo);
-                if (effect instanceof VibrationEffect.Composed) {
-                    mVibratorEffects.put(vibratorId, (VibrationEffect.Composed) effect);
+            VibrationEffect effect = mono.getEffect();
+            if (effect instanceof VibrationEffect.Composed) {
+                mVibratorEffects = new SparseArray<>(vibrators.size());
+                mVibratorIds = new int[vibrators.size()];
+
+                VibrationEffect.Composed composedEffect = (VibrationEffect.Composed) effect;
+                for (int i = 0; i < vibrators.size(); i++) {
+                    int vibratorId = vibrators.keyAt(i);
+                    mVibratorEffects.put(vibratorId, composedEffect);
                     mVibratorIds[i] = vibratorId;
                 }
+            } else {
+                Slog.wtf(VibrationThread.TAG,
+                        "Unable to map device vibrators to unexpected effect: " + effect);
+                mVibratorEffects = new SparseArray<>();
+                mVibratorIds = new int[0];
             }
             mRequiredSyncCapabilities = calculateRequiredSyncCapabilities(mVibratorEffects);
         }
@@ -275,11 +282,12 @@ final class StartSequentialEffectStep extends Step {
             for (int i = 0; i < stereoEffects.size(); i++) {
                 int vibratorId = stereoEffects.keyAt(i);
                 if (vibrators.contains(vibratorId)) {
-                    VibratorInfo vibratorInfo = vibrators.valueAt(i).getVibratorInfo();
-                    VibrationEffect effect = conductor.deviceEffectAdapter.apply(
-                            stereoEffects.valueAt(i), vibratorInfo);
+                    VibrationEffect effect = stereoEffects.valueAt(i);
                     if (effect instanceof VibrationEffect.Composed) {
                         mVibratorEffects.put(vibratorId, (VibrationEffect.Composed) effect);
+                    } else {
+                        Slog.wtf(VibrationThread.TAG,
+                                "Unable to map device vibrators to unexpected effect: " + effect);
                     }
                 }
             }

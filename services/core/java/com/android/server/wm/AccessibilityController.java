@@ -19,17 +19,19 @@ package com.android.server.wm;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CALLBACK;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK;
 import static android.os.Build.IS_USER;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 
+import static com.android.internal.util.DumpUtils.dumpSparseArray;
+import static com.android.internal.util.DumpUtils.dumpSparseArrayValues;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.ENTRY;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER_H;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER_L;
+import static com.android.server.accessibility.AccessibilityTraceFileProto.REAL_TO_ELAPSED_TIME_OFFSET_NANOS;
 import static com.android.server.accessibility.AccessibilityTraceProto.ACCESSIBILITY_SERVICE;
 import static com.android.server.accessibility.AccessibilityTraceProto.CALENDAR_TIME;
 import static com.android.server.accessibility.AccessibilityTraceProto.CALLING_PARAMS;
@@ -57,6 +59,7 @@ import android.content.pm.PackageManagerInternal;
 import android.graphics.BLASTBufferQueue;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -83,7 +86,6 @@ import android.util.SparseBooleanArray;
 import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
-import android.view.InsetsSource;
 import android.view.MagnificationSpec;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
@@ -105,6 +107,7 @@ import com.android.server.wm.AccessibilityWindowsPopulator.AccessibilityWindow;
 import com.android.server.wm.WindowManagerInternal.AccessibilityControllerInternal;
 import com.android.server.wm.WindowManagerInternal.MagnificationCallbacks;
 import com.android.server.wm.WindowManagerInternal.WindowsForAccessibilityCallback;
+import com.android.window.flags.Flags;
 
 import java.io.File;
 import java.io.IOException;
@@ -116,6 +119,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class contains the accessibility related logic of the window manager.
@@ -138,7 +142,7 @@ final class AccessibilityController {
     private final SparseArray<WindowsForAccessibilityObserver> mWindowsForAccessibilityObserver =
             new SparseArray<>();
     private SparseArray<IBinder> mFocusedWindow = new SparseArray<>();
-    private int mFocusedDisplay = -1;
+    private int mFocusedDisplay = Display.INVALID_DISPLAY;
     private final SparseBooleanArray mIsImeVisibleArray = new SparseBooleanArray();
     // Set to true if initializing window population complete.
     private boolean mAllObserversInitialized = true;
@@ -339,6 +343,18 @@ final class AccessibilityController {
         // Not relevant for the window observer.
     }
 
+    void onWMTransition(int displayId, @WindowManager.TransitionType int type) {
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".onAppWindowTransition",
+                    FLAGS_MAGNIFICATION_CALLBACK, "displayId=" + displayId + "; type=" + type);
+        }
+        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
+        if (displayMagnifier != null) {
+            displayMagnifier.onWMTransition(displayId, type);
+        }
+        // Not relevant for the window observer.
+    }
+
     void onWindowTransition(WindowState windowState, int transition) {
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK
                 | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
@@ -529,15 +545,12 @@ final class AccessibilityController {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        for (int i = 0; i < mDisplayMagnifiers.size(); i++) {
-            final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.valueAt(i);
-            if (displayMagnifier != null) {
-                displayMagnifier.dump(pw, prefix
-                        + "Magnification display# " + mDisplayMagnifiers.keyAt(i));
-            }
-        }
-        pw.println(prefix
-                + "mWindowsForAccessibilityObserver=" + mWindowsForAccessibilityObserver);
+        dumpSparseArray(pw, prefix, mDisplayMagnifiers, "magnification display",
+                (index, key) -> pw.printf("%sDisplay #%d:", prefix + "  ", key),
+                dm -> dm.dump(pw, ""));
+        dumpSparseArrayValues(pw, prefix, mWindowsForAccessibilityObserver,
+                "windows for accessibility observer");
+        mAccessibilityWindowsPopulator.dump(pw, prefix);
     }
 
     void onFocusChanged(InputTarget lastTarget, InputTarget newTarget) {
@@ -546,7 +559,7 @@ final class AccessibilityController {
         }
         if (newTarget != null) {
             int displayId = newTarget.getDisplayId();
-            IBinder clientBinder = newTarget.getIWindow().asBinder();
+            IBinder clientBinder = newTarget.getWindowToken();
             mFocusedWindow.put(displayId, clientBinder);
         }
     }
@@ -689,8 +702,8 @@ final class AccessibilityController {
                         + AppTransition.appTransitionOldToString(transition)
                         + " displayId: " + displayId);
             }
-            final boolean magnifying = mMagnifedViewport.isMagnifying();
-            if (magnifying) {
+            final boolean isMagnifierActivated = isForceShowingMagnifiableBounds();
+            if (isMagnifierActivated) {
                 switch (transition) {
                     case WindowManager.TRANSIT_OLD_ACTIVITY_OPEN:
                     case WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN:
@@ -701,6 +714,28 @@ final class AccessibilityController {
                     case WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN: {
                         mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_USER_CONTEXT_CHANGED);
                     }
+                }
+            }
+        }
+
+        void onWMTransition(int displayId, @WindowManager.TransitionType int type) {
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".onWMTransition",
+                        FLAGS_MAGNIFICATION_CALLBACK, "displayId=" + displayId + "; type=" + type);
+            }
+            if (DEBUG_WINDOW_TRANSITIONS) {
+                Slog.i(LOG_TAG, "Window transition: " + WindowManager.transitTypeToString(type)
+                        + " displayId: " + displayId);
+            }
+            final boolean isMagnifierActivated = isForceShowingMagnifiableBounds();
+            if (isMagnifierActivated) {
+                // All opening/closing situations.
+                switch (type) {
+                    case WindowManager.TRANSIT_OPEN:
+                    case WindowManager.TRANSIT_TO_FRONT:
+                    case WindowManager.TRANSIT_CLOSE:
+                    case WindowManager.TRANSIT_TO_BACK:
+                        mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_USER_CONTEXT_CHANGED);
                 }
             }
         }
@@ -716,13 +751,18 @@ final class AccessibilityController {
                         + AppTransition.appTransitionOldToString(transition)
                         + " displayId: " + windowState.getDisplayId());
             }
-            final boolean magnifying = mMagnifedViewport.isMagnifying();
+            final boolean isMagnifierActivated = isForceShowingMagnifiableBounds();
             final int type = windowState.mAttrs.type;
             switch (transition) {
                 case WindowManagerPolicy.TRANSIT_ENTER:
                 case WindowManagerPolicy.TRANSIT_SHOW: {
-                    if (!magnifying) {
+                    if (!isMagnifierActivated) {
                         break;
+                    }
+                    if (Flags.doNotCheckIntersectionWhenNonMagnifiableWindowTransitions()) {
+                        if (!windowState.shouldMagnify()) {
+                            break;
+                        }
                     }
                     switch (type) {
                         case WindowManager.LayoutParams.TYPE_APPLICATION:
@@ -888,8 +928,7 @@ final class AccessibilityController {
                 // to show the border. We will do so when the pending message is handled.
                 if (!mHandler.hasMessages(
                         MyHandler.MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED)) {
-                    setMagnifiedRegionBorderShown(
-                            isMagnifying() || isForceShowingMagnifiableBounds(), true);
+                    setMagnifiedRegionBorderShown(isForceShowingMagnifiableBounds(), true);
                 }
             }
 
@@ -958,7 +997,7 @@ final class AccessibilityController {
                     // navigation bar insets into nonMagnifiedBounds. It happens when
                     // navigation mode is gestural.
                     if (isUntouchableNavigationBar(windowState, mTempRegion3)) {
-                        final Rect navBarInsets = getNavBarInsets(mDisplayContent);
+                        final Rect navBarInsets = getSystemBarInsetsFrame(windowState);
                         nonMagnifiedBounds.op(navBarInsets, Region.Op.UNION);
                         availableBounds.op(navBarInsets, Region.Op.DIFFERENCE);
                     }
@@ -1019,6 +1058,27 @@ final class AccessibilityController {
                 }
             }
 
+            private Region getLetterboxBounds(WindowState windowState) {
+                final ActivityRecord appToken = windowState.mActivityRecord;
+                if (appToken == null) {
+                    return new Region();
+                }
+
+                final Rect boundsWithoutLetterbox = windowState.getBounds();
+                final Rect letterboxInsets = appToken.getLetterboxInsets();
+
+                final Rect boundsIncludingLetterbox = Rect.copyOrNull(boundsWithoutLetterbox);
+                // Letterbox insets from mActivityRecord are positive, so we negate them to grow the
+                // bounds to include the letterbox.
+                boundsIncludingLetterbox.inset(
+                        Insets.subtract(Insets.NONE, Insets.of(letterboxInsets)));
+
+                final Region letterboxBounds = new Region();
+                letterboxBounds.set(boundsIncludingLetterbox);
+                letterboxBounds.op(boundsWithoutLetterbox, Region.Op.DIFFERENCE);
+                return letterboxBounds;
+            }
+
             private boolean isExcludedWindowType(int windowType) {
                 return windowType == TYPE_MAGNIFICATION_OVERLAY
                         // Omit the touch region of window magnification to avoid the cut out of the
@@ -1033,7 +1093,7 @@ final class AccessibilityController {
                 // rotation or folding/unfolding the device. In the rotation case, the screenshot
                 // used for rotation already has the border. After the rotation is complete
                 // we will show the border.
-                if (isMagnifying() || isForceShowingMagnifiableBounds()) {
+                if (isForceShowingMagnifiableBounds()) {
                     setMagnifiedRegionBorderShown(false, false);
                     final long delay = (long) (mLongAnimationDuration
                             * mService.getWindowAnimationScaleLocked());
@@ -1226,44 +1286,52 @@ final class AccessibilityController {
                 }
 
                 void drawIfNeeded(SurfaceControl.Transaction t) {
+                    // Drawing variables (alpha, dirty rect, and bounds) access is synchronized
+                    // using WindowManagerGlobalLock. Grab copies of these values before
+                    // drawing on the canvas so that drawing can be performed outside of the lock.
+                    int alpha;
+                    Rect drawingRect = null;
+                    Region drawingBounds = null;
                     synchronized (mService.mGlobalLock) {
                         if (!mInvalidated) {
                             return;
                         }
                         mInvalidated = false;
-                        if (mAlpha > 0) {
-                            Canvas canvas = null;
-                            try {
-                                // Empty dirty rectangle means unspecified.
-                                if (mDirtyRect.isEmpty()) {
-                                    mBounds.getBounds(mDirtyRect);
-                                }
-                                mDirtyRect.inset(-mHalfBorderWidth, -mHalfBorderWidth);
-                                canvas = mSurface.lockCanvas(mDirtyRect);
-                                if (DEBUG_VIEWPORT_WINDOW) {
-                                    Slog.i(LOG_TAG, "Dirty rect: " + mDirtyRect);
-                                }
-                            } catch (IllegalArgumentException iae) {
-                                /* ignore */
-                            } catch (Surface.OutOfResourcesException oore) {
-                                /* ignore */
-                            }
-                            if (canvas == null) {
-                                return;
-                            }
-                            if (DEBUG_VIEWPORT_WINDOW) {
-                                Slog.i(LOG_TAG, "Bounds: " + mBounds);
-                            }
-                            canvas.drawColor(Color.TRANSPARENT, Mode.CLEAR);
-                            mPaint.setAlpha(mAlpha);
-                            Path path = mBounds.getBoundaryPath();
-                            canvas.drawPath(path, mPaint);
 
-                            mSurface.unlockCanvasAndPost(canvas);
-                            t.show(mSurfaceControl);
-                        } else {
-                            t.hide(mSurfaceControl);
+                        alpha = mAlpha;
+                        if (alpha > 0) {
+                            drawingBounds = new Region(mBounds);
+                            // Empty dirty rectangle means unspecified.
+                            if (mDirtyRect.isEmpty()) {
+                                mBounds.getBounds(mDirtyRect);
+                            }
+                            mDirtyRect.inset(-mHalfBorderWidth, -mHalfBorderWidth);
+                            drawingRect = new Rect(mDirtyRect);
+                            if (DEBUG_VIEWPORT_WINDOW) {
+                                Slog.i(LOG_TAG, "ViewportWindow bounds: " + mBounds);
+                                Slog.i(LOG_TAG, "ViewportWindow dirty rect: " + mDirtyRect);
+                            }
                         }
+                    }
+
+                    // Draw without holding WindowManagerGlobalLock.
+                    if (alpha > 0) {
+                        Canvas canvas = null;
+                        try {
+                            canvas = mSurface.lockCanvas(drawingRect);
+                        } catch (IllegalArgumentException | OutOfResourcesException e) {
+                            /* ignore */
+                        }
+                        if (canvas == null) {
+                            return;
+                        }
+                        canvas.drawColor(Color.TRANSPARENT, Mode.CLEAR);
+                        mPaint.setAlpha(alpha);
+                        canvas.drawPath(drawingBounds.getBoundaryPath(), mPaint);
+                        mSurface.unlockCanvasAndPost(canvas);
+                        t.show(mSurfaceControl);
+                    } else {
+                        t.hide(mSurfaceControl);
                     }
                 }
 
@@ -1374,8 +1442,7 @@ final class AccessibilityController {
 
                     case MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED : {
                         synchronized (mService.mGlobalLock) {
-                            if (mMagnifedViewport.isMagnifying()
-                                    || isForceShowingMagnifiableBounds()) {
+                            if (isForceShowingMagnifiableBounds()) {
                                 mMagnifedViewport.setMagnifiedRegionBorderShown(true, true);
                                 mService.scheduleAnimationLocked();
                             }
@@ -1403,24 +1470,12 @@ final class AccessibilityController {
         return touchableRegion.isEmpty();
     }
 
-    static Rect getNavBarInsets(DisplayContent displayContent) {
-        final InsetsSource source = displayContent.getInsetsStateController().getRawInsetsState()
-                .peekSource(ITYPE_NAVIGATION_BAR);
-        return source != null ? source.getFrame() : EMPTY_RECT;
-    }
-
-    static Region getLetterboxBounds(WindowState windowState) {
-        final ActivityRecord appToken = windowState.mActivityRecord;
-        if (appToken == null) {
-            return new Region();
+    static Rect getSystemBarInsetsFrame(WindowState win) {
+        if (win == null) {
+            return EMPTY_RECT;
         }
-        final Rect letterboxInsets = appToken.getLetterboxInsets();
-        final Rect nonLetterboxRect = windowState.getBounds();
-        nonLetterboxRect.inset(letterboxInsets);
-        final Region letterboxBounds = new Region();
-        letterboxBounds.set(windowState.getBounds());
-        letterboxBounds.op(nonLetterboxRect, Region.Op.DIFFERENCE);
-        return letterboxBounds;
+        final InsetsSourceProvider provider = win.getControllableInsetProvider();
+        return provider != null ? provider.getSource().getFrame() : EMPTY_RECT;
     }
 
     /**
@@ -1573,7 +1628,10 @@ final class AccessibilityController {
                         // region of navigation bar inset because all touch events from this region
                         // would be received by launcher, i.e. this region is a un-touchable one
                         // for the application.
-                        unaccountedSpace.op(getNavBarInsets(dc), unaccountedSpace,
+                        unaccountedSpace.op(
+                                getSystemBarInsetsFrame(
+                                        mService.mWindowMap.get(a11yWindow.getWindowInfo().token)),
+                                unaccountedSpace,
                                 Region.Op.REVERSE_DIFFERENCE);
                     }
 
@@ -1676,18 +1734,17 @@ final class AccessibilityController {
                 a11yWindow.getTouchableRegionInScreen(touchableRegion);
                 unaccountedSpace.op(touchableRegion, unaccountedSpace,
                         Region.Op.REVERSE_DIFFERENCE);
-                // Account for the space of letterbox.
-                final Region letterboxBounds = mTempRegion1;
-                if (a11yWindow.setLetterBoxBoundsIfNeeded(letterboxBounds)) {
-                    unaccountedSpace.op(letterboxBounds,
-                            unaccountedSpace, Region.Op.REVERSE_DIFFERENCE);
-                }
             }
         }
 
         private static void addPopulatedWindowInfo(AccessibilityWindow a11yWindow,
                 Region regionInScreen, List<WindowInfo> out, Set<IBinder> tokenOut) {
             final WindowInfo window = a11yWindow.getWindowInfo();
+            if (window.token == null) {
+                // The window was used in calculating visible windows but does not have an
+                // associated IWindow token, so exclude it from the list returned to accessibility.
+                return;
+            }
             window.regionInScreen.set(regionInScreen);
             window.layer = tokenOut.size();
             out.add(window);
@@ -2215,6 +2272,10 @@ final class AccessibilityController {
             try {
                 ProtoOutputStream proto = new ProtoOutputStream();
                 proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
+                long timeOffsetNs =
+                        TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis())
+                        - SystemClock.elapsedRealtimeNanos();
+                proto.write(REAL_TO_ELAPSED_TIME_OFFSET_NANOS, timeOffsetNs);
                 mBuffer.writeTraceToFile(mTraceFile, proto);
             } catch (IOException e) {
                 Slog.e(TAG, "Unable to write buffer to file", e);

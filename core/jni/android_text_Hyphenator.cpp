@@ -126,6 +126,7 @@ static void init() {
     addHyphenator("nn", 2, 2);  // Norwegian Nynorsk
     addHyphenator("or", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Oriya
     addHyphenator("pa", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Punjabi
+    addHyphenator("pl", 2, 2);  // Polish
     addHyphenator("pt", 2, 3);  // Portuguese
     addHyphenator("ru", 2, 2);  // Russian
     addHyphenator("sk", 2, 2);  // Slovak
@@ -141,7 +142,6 @@ static void init() {
     // Following two hyphenators do not have pattern files but there is some special logic based on
     // language.
     addHyphenatorWithoutPatternFile("ca", 2, 2);  // Catalan
-    addHyphenatorWithoutPatternFile("pl", 2, 2);  // Polish
 
     // English locales that fall back to en-US. The data is from CLDR. It's all English locales,
     // minus the locales whose parent is en-001 (from supplementalData.xml, under <parentLocales>).

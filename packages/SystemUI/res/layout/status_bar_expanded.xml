@@ -26,46 +26,18 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent">
 
+    <com.android.systemui.common.ui.view.LongPressHandlingView
+        android:id="@+id/keyguard_long_press"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <ViewStub
         android:id="@+id/keyguard_qs_user_switch_stub"
         android:layout="@layout/keyguard_qs_user_switch"
         android:layout_height="match_parent"
         android:layout_width="match_parent" />
 
-    <include
-        layout="@layout/keyguard_bottom_area"
-        android:visibility="gone" />
-
-    <ViewStub
-        android:id="@+id/keyguard_user_switcher_stub"
-        android:layout="@layout/keyguard_user_switcher"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent" />
-
     <include layout="@layout/status_bar_expanded_plugin_frame"/>
-
-    <include layout="@layout/dock_info_bottom_area_overlay" />
-
-    <com.android.keyguard.LockIconView
-        android:id="@+id/lock_icon_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <!-- Background protection -->
-        <ImageView
-            android:id="@+id/lock_icon_bg"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/fingerprint_bg"
-            android:visibility="invisible"/>
-
-        <ImageView
-            android:id="@+id/lock_icon"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:scaleType="centerCrop"/>
-
-    </com.android.keyguard.LockIconView>
 
     <com.android.systemui.shade.NotificationsQuickSettingsContainer
         android:layout_width="match_parent"
@@ -74,12 +46,6 @@
         android:id="@+id/notification_container_parent"
         android:clipToPadding="false"
         android:clipChildren="false">
-
-        <ViewStub
-            android:id="@+id/qs_header_stub"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-        />
 
         <include
             layout="@layout/keyguard_status_view"
@@ -100,6 +66,15 @@
             systemui:layout_constraintEnd_toEndOf="parent"
             systemui:layout_constraintTop_toTopOf="parent"
             systemui:layout_constraintBottom_toBottomOf="parent"
+        />
+
+        <!-- This view should be after qs_frame so touches are dispatched first to it. That gives
+             it a chance to capture clicks before the NonInterceptingScrollView disallows all
+             intercepts -->
+        <ViewStub
+            android:id="@+id/qs_header_stub"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
         />
 
         <androidx.constraintlayout.widget.Guideline
@@ -145,9 +120,21 @@
         />
     </com.android.systemui.shade.NotificationsQuickSettingsContainer>
 
-    <FrameLayout
-        android:id="@+id/preview_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </FrameLayout>
+    <ViewStub
+        android:id="@+id/keyguard_user_switcher_stub"
+        android:layout="@layout/keyguard_user_switcher"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent" />
+
+    <include layout="@layout/dock_info_bottom_area_overlay" />
+
+    <com.android.keyguard.LockIconView
+        android:id="@+id/lock_icon_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    </com.android.keyguard.LockIconView>
+
+    <include
+        layout="@layout/keyguard_bottom_area"
+        android:visibility="gone" />
 </com.android.systemui.shade.NotificationPanelView>

@@ -67,8 +67,9 @@ public abstract class DpmTestBase {
 
     @Before
     public void setFixtures() throws Exception {
-        mServices = new MockSystemServices(mRealTestContext, "test-data");
-        mMockContext = new DpmMockContext(mServices, mRealTestContext);
+        var mockBinder = new DpmMockContext.MockBinder();
+        mServices = new MockSystemServices(mRealTestContext, "test-data", mockBinder);
+        mMockContext = new DpmMockContext(mServices, mRealTestContext, mockBinder);
 
         admin1 = new ComponentName(mRealTestContext, DummyDeviceAdmins.Admin1.class);
         admin2 = new ComponentName(mRealTestContext, DummyDeviceAdmins.Admin2.class);
@@ -150,7 +151,7 @@ public abstract class DpmTestBase {
 
         doReturn(pi).when(mServices.ipackageManager).getPackageInfo(packageName, 0, userId);
 
-        doReturn(ai.uid).when(mServices.packageManager).getPackageUidAsUser(packageName, userId);
+        mServices.addTestPackageUid(packageName, ai.uid);
     }
 
     protected void markDelegatedCertInstallerAsInstalled() throws Exception {

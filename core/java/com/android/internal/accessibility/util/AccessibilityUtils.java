@@ -19,19 +19,29 @@ package com.android.internal.accessibility.util;
 import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import static com.android.internal.accessibility.common.ShortcutConstants.SERVICES_SEPARATOR;
 
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.telecom.TelecomManager;
+import android.telephony.Annotation;
+import android.telephony.TelephonyManager;
 import android.text.ParcelableSpan;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.view.accessibility.AccessibilityManager;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import libcore.util.EmptyArray;
 
@@ -40,6 +50,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -65,6 +76,19 @@ public final class AccessibilityUtils {
     public static final int TEXT = 1;
     /** Specifies some parcelable spans has been changed. */
     public static final int PARCELABLE_SPAN = 2;
+
+    @VisibleForTesting
+    public static final String MENU_SERVICE_RELATIVE_CLASS_NAME = ".AccessibilityMenuService";
+
+    /**
+     * {@link ComponentName} for the Accessibility Menu {@link AccessibilityService} as provided
+     * inside the system build, used for automatic migration to this version of the service.
+     * @hide
+     */
+    public static final ComponentName ACCESSIBILITY_MENU_IN_SYSTEM =
+            new ComponentName("com.android.systemui.accessibility.accessibilitymenu",
+                    "com.android.systemui.accessibility.accessibilitymenu"
+                            + MENU_SERVICE_RELATIVE_CLASS_NAME);
 
     /**
      * Returns the set of enabled accessibility services for userId. If there are no
@@ -183,6 +207,32 @@ public final class AccessibilityUtils {
     }
 
     /**
+     * Intercepts the {@link AccessibilityService#GLOBAL_ACTION_KEYCODE_HEADSETHOOK} action
+     * by directly interacting with TelecomManager if a call is incoming or in progress.
+     *
+     * <p>
+     * Provided here in shared utils to be used by both the legacy and modern (SysUI)
+     * system action implementations.
+     * </p>
+     *
+     * @return True if the action was propagated to TelecomManager, otherwise false.
+     */
+    public static boolean interceptHeadsetHookForActiveCall(Context context) {
+        final TelecomManager telecomManager = context.getSystemService(TelecomManager.class);
+        @Annotation.CallState final int callState =
+                telecomManager != null ? telecomManager.getCallState()
+                        : TelephonyManager.CALL_STATE_IDLE;
+        if (callState == TelephonyManager.CALL_STATE_RINGING) {
+            telecomManager.acceptRingingCall();
+            return true;
+        } else if (callState == TelephonyManager.CALL_STATE_OFFHOOK) {
+            telecomManager.endCall();
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Indicates whether the current user has completed setup via the setup wizard.
      * {@link android.provider.Settings.Secure#USER_SETUP_COMPLETE}
      *
@@ -243,5 +293,55 @@ public final class AccessibilityUtils {
             }
         }
         return true;
+    }
+
+    /**
+     * Finds the {@link ComponentName} of the AccessibilityMenu accessibility service that the
+     * device should be migrated off. Devices using this service should be migrated to
+     * {@link #ACCESSIBILITY_MENU_IN_SYSTEM}.
+     *
+     * <p>
+     * Requirements:
+     * <li>There are exactly two installed accessibility service components with class name
+     * {@link #MENU_SERVICE_RELATIVE_CLASS_NAME}.</li>
+     * <li>Exactly one of these components is equal to {@link #ACCESSIBILITY_MENU_IN_SYSTEM}.</li>
+     * </p>
+     *
+     * @return The {@link ComponentName} of the service that is not {@link
+     * #ACCESSIBILITY_MENU_IN_SYSTEM},
+     * or <code>null</code> if the above requirements are not met.
+     */
+    @Nullable
+    public static ComponentName getAccessibilityMenuComponentToMigrate(
+            PackageManager packageManager, int userId) {
+        final Set<ComponentName> menuComponentNames = findA11yMenuComponentNames(packageManager,
+                userId);
+        Optional<ComponentName> menuOutsideSystem = menuComponentNames.stream().filter(
+                name -> !name.equals(ACCESSIBILITY_MENU_IN_SYSTEM)).findFirst();
+        final boolean shouldMigrateToMenuInSystem = menuComponentNames.size() == 2
+                && menuComponentNames.contains(ACCESSIBILITY_MENU_IN_SYSTEM)
+                && menuOutsideSystem.isPresent();
+        return shouldMigrateToMenuInSystem ? menuOutsideSystem.get() : null;
+    }
+
+    /**
+     * Returns all {@link ComponentName}s whose class name ends in {@link
+     * #MENU_SERVICE_RELATIVE_CLASS_NAME}.
+     **/
+    private static Set<ComponentName> findA11yMenuComponentNames(
+            PackageManager packageManager, int userId) {
+        Set<ComponentName> result = new ArraySet<>();
+        final PackageManager.ResolveInfoFlags flags = PackageManager.ResolveInfoFlags.of(
+                PackageManager.MATCH_DISABLED_COMPONENTS
+                        | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+        for (ResolveInfo resolveInfo : packageManager.queryIntentServicesAsUser(
+                new Intent(AccessibilityService.SERVICE_INTERFACE), flags, userId)) {
+            final ComponentName componentName = resolveInfo.serviceInfo.getComponentName();
+            if (componentName.getClassName().endsWith(MENU_SERVICE_RELATIVE_CLASS_NAME)) {
+                result.add(componentName);
+            }
+        }
+        return result;
     }
 }

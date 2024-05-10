@@ -23,6 +23,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
@@ -30,6 +32,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.os.KernelSingleUidTimeReader.Injector;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -43,7 +46,11 @@ import java.util.Collection;
 
 @SmallTest
 @RunWith(Parameterized.class)
+@IgnoreUnderRavenwood(reason = "Needs kernel support")
 public class KernelSingleUidTimeReaderTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private final static int TEST_UID = 2222;
     private final static int TEST_FREQ_COUNT = 5;
 

@@ -96,6 +96,16 @@ oneway interface IRecognitionListener {
     void onEndOfSegmentedSession();
 
     /**
+     * Called when the language detection (and switching) results are available.
+     *
+     * @param results a Bundle containing the identifiers of the most confidently detected language,
+     * the confidence level of the detection,
+     * the alternative locales for the most confidently detected language,
+     * and the results of the language switching.
+     */
+    void onLanguageDetection(in Bundle results);
+
+    /**
      * Reserved for adding future events.
      *
      * @param eventType the type of the occurred event

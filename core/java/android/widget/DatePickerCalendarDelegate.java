@@ -302,7 +302,11 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
 
         // Update the date formatter.
         mMonthDayFormat = DateFormat.getInstanceForSkeleton("EMMMd", locale);
-        mMonthDayFormat.setContext(DisplayContext.CAPITALIZATION_FOR_STANDALONE);
+        // The use of CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE instead of
+        // CAPITALIZATION_FOR_STANDALONE is to address
+        // https://unicode-org.atlassian.net/browse/ICU-21631
+        // TODO(b/229287642): Switch back to CAPITALIZATION_FOR_STANDALONE
+        mMonthDayFormat.setContext(DisplayContext.CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE);
         mYearFormat = DateFormat.getInstanceForSkeleton("y", locale);
 
         // Update the header text.

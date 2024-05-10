@@ -33,11 +33,12 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.bubbles.DismissView;
-import com.android.wm.shell.common.DismissCircleView;
+import com.android.wm.shell.bubbles.DismissViewUtils;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.bubbles.DismissCircleView;
+import com.android.wm.shell.common.bubbles.DismissView;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
-import com.android.wm.shell.pip.PipUiEventLogger;
+import com.android.wm.shell.common.pip.PipUiEventLogger;
 
 import kotlin.Unit;
 
@@ -106,6 +107,7 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
         }
 
         mTargetViewContainer = new DismissView(mContext);
+        DismissViewUtils.setup(mTargetViewContainer);
         mTargetView = mTargetViewContainer.getCircle();
         mTargetViewContainer.setOnApplyWindowInsetsListener((view, windowInsets) -> {
             if (!windowInsets.equals(mWindowInsets)) {
@@ -235,21 +237,14 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
 
     /** Adds the magnetic target view to the WindowManager so it's ready to be animated in. */
     public void createOrUpdateDismissTarget() {
-        if (!mTargetViewContainer.isAttachedToWindow()) {
+        if (mTargetViewContainer.getParent() == null) {
             mTargetViewContainer.cancelAnimators();
 
             mTargetViewContainer.setVisibility(View.INVISIBLE);
             mTargetViewContainer.getViewTreeObserver().removeOnPreDrawListener(this);
             mHasDismissTargetSurface = false;
 
-            try {
-                mWindowManager.addView(mTargetViewContainer, getDismissTargetLayoutParams());
-            } catch (IllegalStateException e) {
-                // This shouldn't happen, but if the target is already added, just update its layout
-                // params.
-                mWindowManager.updateViewLayout(
-                        mTargetViewContainer, getDismissTargetLayoutParams());
-            }
+            mWindowManager.addView(mTargetViewContainer, getDismissTargetLayoutParams());
         } else {
             mWindowManager.updateViewLayout(mTargetViewContainer, getDismissTargetLayoutParams());
         }
@@ -306,7 +301,7 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
      * Removes the dismiss target and cancels any pending callbacks to show it.
      */
     public void cleanUpDismissTarget() {
-        if (mTargetViewContainer.isAttachedToWindow()) {
+        if (mTargetViewContainer.getParent() != null) {
             mWindowManager.removeViewImmediate(mTargetViewContainer);
         }
     }

@@ -377,8 +377,7 @@ public abstract class SQLiteOpenHelper implements AutoCloseable {
                     if (writable) {
                         throw ex;
                     }
-                    Log.e(TAG, "Couldn't open " + mName
-                            + " for writing (will try read-only):", ex);
+                    Log.e(TAG, "Couldn't open database for writing (will try read-only):", ex);
                     params = params.toBuilder().addOpenFlags(SQLiteDatabase.OPEN_READONLY).build();
                     db = SQLiteDatabase.openDatabase(filePath, params);
                 }
@@ -425,11 +424,6 @@ public abstract class SQLiteOpenHelper implements AutoCloseable {
             }
 
             onOpen(db);
-
-            if (db.isReadOnly()) {
-                Log.w(TAG, "Opened " + mName + " in read-only mode");
-            }
-
             mDatabase = db;
             return db;
         } finally {
@@ -513,6 +507,19 @@ public abstract class SQLiteOpenHelper implements AutoCloseable {
      * This method executes within a transaction.  If an exception is thrown, all changes
      * will automatically be rolled back.
      * </p>
+     * <p>
+     * <em>Important:</em> You should NOT modify an existing migration step from version X to X+1
+     * once a build has been released containing that migration step.  If a migration step has an
+     * error and it runs on a device, the step will NOT re-run itself in the future if a fix is made
+     * to the migration step.</p>
+     * <p>For example, suppose a migration step renames a database column from {@code foo} to
+     * {@code bar} when the name should have been {@code baz}.  If that migration step is released
+     * in a build and runs on a user's device, the column will be renamed to {@code bar}.  If the
+     * developer subsequently edits this same migration step to change the name to {@code baz} as
+     * intended, the user devices which have already run this step will still have the name
+     * {@code bar}.  Instead, a NEW migration step should be created to correct the error and rename
+     * {@code bar} to {@code baz}, ensuring the error is corrected on devices which have already run
+     * the migration step with the error.</p>
      *
      * @param db The database.
      * @param oldVersion The old database version.

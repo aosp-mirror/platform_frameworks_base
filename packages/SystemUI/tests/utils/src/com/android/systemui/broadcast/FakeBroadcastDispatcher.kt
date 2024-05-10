@@ -17,30 +17,51 @@
 package com.android.systemui.broadcast
 
 import android.content.BroadcastReceiver
+import android.content.BroadcastReceiver.PendingResult
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
 import android.os.UserHandle
-import android.util.ArraySet
 import android.util.Log
 import com.android.systemui.SysuiTestableContext
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserTracker
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 
+/**
+ * A fake instance of [BroadcastDispatcher] for tests.
+ *
+ * Important: The *real* broadcast dispatcher will only send intents to receivers if the intent
+ * matches the [IntentFilter] that the [BroadcastReceiver] was registered with. This fake class
+ * exposes [sendIntentToMatchingReceiversOnly] to get the same matching behavior as the real
+ * broadcast dispatcher.
+ */
 class FakeBroadcastDispatcher(
     context: SysuiTestableContext,
-    looper: Looper,
-    executor: Executor,
+    mainExecutor: Executor,
+    broadcastRunningLooper: Looper,
+    broadcastRunningExecutor: Executor,
     dumpManager: DumpManager,
     logger: BroadcastDispatcherLogger,
-    userTracker: UserTracker
-) : BroadcastDispatcher(
-    context, looper, executor, dumpManager, logger, userTracker, PendingRemovalStore(logger)) {
+    userTracker: UserTracker,
+    private val shouldFailOnLeakedReceiver: Boolean
+) :
+    BroadcastDispatcher(
+        context,
+        mainExecutor,
+        broadcastRunningLooper,
+        broadcastRunningExecutor,
+        dumpManager,
+        logger,
+        userTracker,
+        PendingRemovalStore(logger)
+    ) {
 
-    private val registeredReceivers = ArraySet<BroadcastReceiver>()
+    private val receivers: MutableSet<InternalReceiver> = ConcurrentHashMap.newKeySet()
 
     override fun registerReceiverWithHandler(
         receiver: BroadcastReceiver,
@@ -50,7 +71,7 @@ class FakeBroadcastDispatcher(
         @Context.RegisterReceiverFlags flags: Int,
         permission: String?
     ) {
-        registeredReceivers.add(receiver)
+        receivers.add(InternalReceiver(receiver, filter))
     }
 
     override fun registerReceiver(
@@ -61,21 +82,76 @@ class FakeBroadcastDispatcher(
         @Context.RegisterReceiverFlags flags: Int,
         permission: String?
     ) {
-        registeredReceivers.add(receiver)
+        receivers.add(InternalReceiver(receiver, filter))
     }
 
     override fun unregisterReceiver(receiver: BroadcastReceiver) {
-        registeredReceivers.remove(receiver)
+        receivers.removeIf { it.receiver == receiver }
     }
 
     override fun unregisterReceiverForUser(receiver: BroadcastReceiver, user: UserHandle) {
-        registeredReceivers.remove(receiver)
+        receivers.removeIf { it.receiver == receiver }
     }
 
-    fun cleanUpReceivers(testName: String) {
-        registeredReceivers.forEach {
-            Log.i(testName, "Receiver not unregistered from dispatcher: $it")
+    /**
+     * Sends the given [intent] to *only* the receivers that were registered with an [IntentFilter]
+     * that matches the intent.
+     *
+     * A non-null [pendingResult] can be used to pass the sending user.
+     */
+    fun sendIntentToMatchingReceiversOnly(
+        context: Context,
+        intent: Intent,
+        pendingResult: PendingResult? = null
+    ) {
+        receivers.forEach {
+            if (
+                it.filter.match(
+                    context.contentResolver,
+                    intent,
+                    /* resolve= */ false,
+                    /* logTag= */ "FakeBroadcastDispatcher",
+                ) > 0
+            ) {
+                if (pendingResult != null) {
+                    it.receiver.pendingResult = pendingResult
+                }
+                it.receiver.onReceive(context, intent)
+            }
         }
-        registeredReceivers.clear()
+    }
+
+    val numReceiversRegistered: Int
+        get() = receivers.size
+
+    fun cleanUpReceivers(testName: String) {
+        receivers.forEach {
+            val receiver = it.receiver
+            Log.i(testName, "Receiver not unregistered from dispatcher: $receiver")
+            if (shouldFailOnLeakedReceiver) {
+                throw IllegalStateException("Receiver not unregistered from dispatcher: $receiver")
+            }
+        }
+        receivers.clear()
+    }
+
+    private data class InternalReceiver(
+        val receiver: BroadcastReceiver,
+        val filter: IntentFilter,
+    )
+
+    companion object {
+        fun fakePendingResultForUser(userId: Int) =
+            PendingResult(
+                /* resultCode = */ 0,
+                /* resultData = */ "",
+                /* resultExtras = */ null,
+                /* type = */ PendingResult.TYPE_REGISTERED,
+                /* ordered = */ false,
+                /* sticky = */ false,
+                /* token = */ null,
+                userId,
+                /* flags = */ 0,
+            )
     }
 }

@@ -24,6 +24,7 @@ import static com.android.systemui.statusbar.notification.row.NotificationRowCon
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -42,6 +43,7 @@ import android.os.Looper;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RemoteViews;
@@ -51,7 +53,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.media.MediaFeatureFlag;
+import com.android.systemui.media.controls.util.MediaFeatureFlag;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -90,6 +92,8 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     @Mock private ConversationNotificationProcessor mConversationNotificationProcessor;
     @Mock private InflatedSmartReplyState mInflatedSmartReplyState;
     @Mock private InflatedSmartReplyViewHolder mInflatedSmartReplies;
+    @Mock private NotifLayoutInflaterFactory.Provider mNotifLayoutInflaterFactoryProvider;
+    @Mock private NotifLayoutInflaterFactory mNotifLayoutInflaterFactory;
 
     private final SmartReplyStateInflater mSmartReplyStateInflater =
             new SmartReplyStateInflater() {
@@ -111,7 +115,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mBuilder = new Notification.Builder(mContext).setSmallIcon(
-                R.drawable.ic_person)
+                com.android.systemui.res.R.drawable.ic_person)
                 .setContentTitle("Title")
                 .setContentText("Text")
                 .setStyle(new Notification.BigTextStyle().bigText("big text"));
@@ -121,6 +125,8 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 TestableLooper.get(this));
         ExpandableNotificationRow row = helper.createRow(mBuilder.build());
         mRow = spy(row);
+        when(mNotifLayoutInflaterFactoryProvider.provide(any(), any()))
+                .thenReturn(mNotifLayoutInflaterFactory);
 
         mNotificationInflater = new NotificationContentInflater(
                 mCache,
@@ -128,7 +134,9 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 mConversationNotificationProcessor,
                 mock(MediaFeatureFlag.class),
                 mock(Executor.class),
-                mSmartReplyStateInflater);
+                mSmartReplyStateInflater,
+                mNotifLayoutInflaterFactoryProvider,
+                mock(NotificationContentInflaterLogger.class));
     }
 
     @Test
@@ -183,7 +191,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     public void testInflationThrowsErrorDoesntCallUpdated() throws Exception {
         mRow.getPrivateLayout().removeAllViews();
         mRow.getEntry().getSbn().getNotification().contentView
-                = new RemoteViews(mContext.getPackageName(), R.layout.status_bar);
+                = new RemoteViews(mContext.getPackageName(), com.android.systemui.res.R.layout.status_bar);
         inflateAndWait(true /* expectingException */, mNotificationInflater, FLAG_CONTENT_VIEW_ALL,
                 mRow);
         assertTrue(mRow.getPrivateLayout().getChildCount() == 0);
@@ -251,7 +259,8 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                         return new AsyncFailRemoteView(mContext.getPackageName(),
                                 R.layout.custom_view_dark);
                     }
-                });
+                },
+                mock(NotificationContentInflaterLogger.class));
         assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS));
     }
 
@@ -330,6 +339,38 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
         verify(mCache).removeCachedView(
                 eq(mRow.getEntry()),
                 eq(FLAG_CONTENT_VIEW_HEADS_UP));
+    }
+
+    @Test
+    public void testNotificationViewHeightTooSmallFailsValidation() {
+        View view = mock(View.class);
+        when(view.getHeight())
+                .thenReturn((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 10,
+                        mContext.getResources().getDisplayMetrics()));
+        String result = NotificationContentInflater.isValidView(view, mRow.getEntry(),
+                mContext.getResources());
+        assertNotNull(result);
+    }
+
+    @Test
+    public void testNotificationViewPassesValidation() {
+        View view = mock(View.class);
+        when(view.getHeight())
+                .thenReturn((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 17,
+                        mContext.getResources().getDisplayMetrics()));
+        String result = NotificationContentInflater.isValidView(view, mRow.getEntry(),
+                mContext.getResources());
+        assertNull(result);
+    }
+
+    @Test
+    public void testInvalidNotificationDoesNotInvokeCallback() throws Exception {
+        mRow.getPrivateLayout().removeAllViews();
+        mRow.getEntry().getSbn().getNotification().contentView =
+                new RemoteViews(mContext.getPackageName(), R.layout.invalid_notification_height);
+        inflateAndWait(true, mNotificationInflater, FLAG_CONTENT_VIEW_ALL, mRow);
+        assertEquals(0, mRow.getPrivateLayout().getChildCount());
+        verify(mRow, times(0)).onNotificationUpdated();
     }
 
     private static void inflateAndWait(NotificationContentInflater inflater,

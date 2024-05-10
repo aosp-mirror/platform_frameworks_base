@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.taptotransfer.receiver
 
+import com.android.internal.logging.InstanceId
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.SysUISingleton
@@ -25,8 +26,8 @@ import javax.inject.Inject
 @SysUISingleton
 class MediaTttReceiverUiEventLogger @Inject constructor(private val logger: UiEventLogger) {
     /** Logs that the receiver chip has changed states. */
-    fun logReceiverStateChange(chipState: ChipStateReceiver) {
-        logger.log(chipState.uiEvent)
+    fun logReceiverStateChange(chipState: ChipStateReceiver, instanceId: InstanceId) {
+        logger.log(chipState.uiEvent, instanceId)
     }
 }
 
@@ -34,7 +35,11 @@ enum class MediaTttReceiverUiEvents(val metricId: Int) : UiEventLogger.UiEventEn
     @UiEvent(doc = "See android.app.StatusBarManager.MEDIA_TRANSFER_RECEIVER_* docs")
     MEDIA_TTT_RECEIVER_CLOSE_TO_SENDER(982),
     @UiEvent(doc = "See android.app.StatusBarManager.MEDIA_TRANSFER_RECEIVER_* docs")
-    MEDIA_TTT_RECEIVER_FAR_FROM_SENDER(983);
+    MEDIA_TTT_RECEIVER_FAR_FROM_SENDER(983),
+    @UiEvent(doc = "See android.app.StatusBarManager.MEDIA_TRANSFER_RECEIVER_* docs")
+    MEDIA_TTT_RECEIVER_TRANSFER_TO_RECEIVER_SUCCEEDED(1263),
+    @UiEvent(doc = "See android.app.StatusBarManager.MEDIA_TRANSFER_RECEIVER_* docs")
+    MEDIA_TTT_RECEIVER_TRANSFER_TO_RECEIVER_FAILED(1264);
 
     override fun getId() = metricId
 }

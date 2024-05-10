@@ -25,9 +25,9 @@
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"የሳንካ ሪፖርቱ ከትንሽ ጊዜ በኋላ በስልኩ ላይ ይመጣል"</string>
     <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"የሳንካ ሪፖርትዎን ለማጋራት ይምረጡ"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"የሳንካ ሪፖርትዎን ለማጋራት መታ ያድርጉ"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"የእርስዎን የሳንካ ሪፖርት ያለ ቅጽበታዊ ማያ ገጽ ለማጋራት ይምረጡ ወይም ቅጽበታዊ ማያ ገጹ እስኪጨርስ ይጠብቁ"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"የእርስዎን የሳንካ ሪፖርት ያለ ቅጽበታዊ ማያ ገጽ ለማጋራት መታ ያድርጉ ወይም ቅጽበታዊ ማያ ገጹ እስኪጨርስ ይጠብቁ"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"የእርስዎን የሳንካ ሪፖርት ያለ ቅጽበታዊ ማያ ገጽ ለማጋራት መታ ያድርጉ ወይም ቅጽበታዊ ማያ ገጹ እስኪጨርስ ይጠብቁ"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"የእርስዎን የሳንካ ሪፖርት ያለ ቅጽበታዊ ማያ ገፅ ለማጋራት ይምረጡ ወይም ቅጽበታዊ ማያ ገጹ እስኪጨርስ ይጠብቁ"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"የእርስዎን የሳንካ ሪፖርት ያለ ቅጽበታዊ ማያ ገፅ ለማጋራት መታ ያድርጉ ወይም ቅጽበታዊ ማያ ገጹ እስኪጨርስ ይጠብቁ"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"የእርስዎን የሳንካ ሪፖርት ያለ ቅጽበታዊ ማያ ገፅ ለማጋራት መታ ያድርጉ ወይም ቅጽበታዊ ማያ ገጹ እስኪጨርስ ይጠብቁ"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"የሳንካ ሪፖርቶች ከተለያዩ የስርዓቱ የምዝግብ ማስታወሻ ፋይሎች የመጣ ውሂብ ይዘዋል፣ እነዚህም እርስዎ ሚስጥራዊነት ያለው ብለው የሚቆጥሯቸው (እንደ የመተግበሪያ አጠቃቀም እና የአካባቢ ውሂብ ያለ) ሊያካትቱ ይችላሉ። የሳንካ ሪፖርቶች ለሚያምኗቸው ሰዎች እና መተግበሪያዎች ብቻ ያጋሩ።"</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"ዳግም አታሳይ"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"የሳንካ ሪፖርቶች"</string>
@@ -35,9 +35,9 @@
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"የሳንካ ሪፖርት ዝርዝሮችን ወደ ዚፕ ፋይል ማከል አልተቻለም"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ያልተሰየመ"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"ዝርዝሮች"</string>
-    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ቅጽበታዊ ገጽ እይታ"</string>
-    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"ቅጽበታዊ ገጽ እይታ በተሳካ ሁኔታ ተነስቷል"</string>
-    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ቅጽበታዊ ገጽ እይታ ሊነሳ አይችልም"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ቅጽበታዊ ገፅ ዕይታ"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"ቅጽበታዊ ገፅ ዕይታ በተሳካ ሁኔታ ተነስቷል"</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ቅጽበታዊ ገፅ ዕይታ ሊነሳ አይችልም"</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"የሳንካ ሪፖርት <xliff:g id="ID">#%d</xliff:g> ዝርዝሮች"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"የፋይል ስም"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"የሳንካ ርዕስ"</string>

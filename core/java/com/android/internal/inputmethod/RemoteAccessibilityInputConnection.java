@@ -26,7 +26,6 @@ import android.view.inputmethod.SurroundingText;
 import android.view.inputmethod.TextAttribute;
 
 import com.android.internal.infra.AndroidFuture;
-import com.android.internal.view.IInputMethod;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -48,7 +47,7 @@ public final class RemoteAccessibilityInputConnection {
      * Signaled when the system decided to take away IME focus from the target app.
      *
      * <p>This is expected to be signaled immediately when the IME process receives
-     * {@link IInputMethod#unbindInput()}.</p>
+     * {@link com.android.internal.inputmethod.IInputMethod#unbindInput()}.</p>
      */
     @NonNull
     private final CancellationGroup mCancellationGroup;

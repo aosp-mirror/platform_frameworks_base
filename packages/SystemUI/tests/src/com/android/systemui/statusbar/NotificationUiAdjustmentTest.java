@@ -39,11 +39,10 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
 
     @Test
     public void needReinflate_differentLength() {
-        // TODO(b/174258598) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         PendingIntent pendingIntent =
-                PendingIntent.getActivity(mContext, 0, new Intent(),
-                        PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.getActivity(mContext, 0,
+                        new Intent().setPackage(mContext.getPackageName()),
+                        PendingIntent.FLAG_MUTABLE);
         Notification.Action action =
                 createActionBuilder("first", R.drawable.ic_corp_icon, pendingIntent).build();
         assertThat(NotificationUiAdjustment.needReinflate(
@@ -54,11 +53,10 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
 
     @Test
     public void needReinflate_differentLabels() {
-        // TODO(b/174258598) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         PendingIntent pendingIntent =
-                PendingIntent.getActivity(mContext, 0, new Intent(),
-                        PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.getActivity(mContext, 0,
+                        new Intent().setPackage(mContext.getPackageName()),
+                        PendingIntent.FLAG_MUTABLE);
         Notification.Action firstAction =
                 createActionBuilder("first", R.drawable.ic_corp_icon, pendingIntent).build();
         Notification.Action secondAction =
@@ -72,11 +70,10 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
 
     @Test
     public void needReinflate_differentIcons() {
-        // TODO(b/174258598) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         PendingIntent pendingIntent =
-                PendingIntent.getActivity(mContext, 0, new Intent(),
-                        PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.getActivity(mContext, 0,
+                        new Intent().setPackage(mContext.getPackageName()),
+                        PendingIntent.FLAG_MUTABLE);
         Notification.Action firstAction =
                 createActionBuilder("same", R.drawable.ic_corp_icon, pendingIntent).build();
         Notification.Action secondAction =
@@ -91,14 +88,15 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
 
     @Test
     public void needReinflate_differentPendingIntent() {
-        // TODO(b/174258598) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         PendingIntent firstPendingIntent =
-                PendingIntent.getActivity(mContext, 0, new Intent(Intent.ACTION_VIEW),
-                        PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.getActivity(mContext, 0,
+                        new Intent(Intent.ACTION_VIEW).setPackage(mContext.getPackageName()),
+                        PendingIntent.FLAG_MUTABLE);
         PendingIntent secondPendingIntent =
-                PendingIntent.getActivity(mContext, 0, new Intent(Intent.ACTION_PROCESS_TEXT),
-                        PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.getActivity(mContext, 0,
+                        new Intent(Intent.ACTION_PROCESS_TEXT)
+                                .setPackage(mContext.getPackageName()),
+                        PendingIntent.FLAG_MUTABLE);
         Notification.Action firstAction =
                 createActionBuilder("same", R.drawable.ic_corp_icon, firstPendingIntent)
                         .build();
@@ -114,11 +112,10 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
 
     @Test
     public void needReinflate_differentChoices() {
-        // TODO(b/174258598) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         PendingIntent pendingIntent =
-                PendingIntent.getActivity(mContext, 0, new Intent(),
-                        PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.getActivity(mContext, 0,
+                        new Intent().setPackage(mContext.getPackageName()),
+                        PendingIntent.FLAG_MUTABLE);
 
         RemoteInput firstRemoteInput =
                 createRemoteInput("same", "same", new CharSequence[] {"first"});
@@ -142,11 +139,10 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
 
     @Test
     public void needReinflate_differentRemoteInputLabel() {
-        // TODO(b/174258598) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         PendingIntent pendingIntent =
-                PendingIntent.getActivity(mContext, 0, new Intent(),
-                        PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.getActivity(mContext, 0,
+                        new Intent().setPackage(mContext.getPackageName()),
+                        PendingIntent.FLAG_MUTABLE);
 
         RemoteInput firstRemoteInput =
                 createRemoteInput("same", "first", new CharSequence[] {"same"});
@@ -170,11 +166,10 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
 
     @Test
     public void needReinflate_negative() {
-        // TODO(b/174258598) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         PendingIntent pendingIntent =
-                PendingIntent.getActivity(mContext, 0, new Intent(),
-                        PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.getActivity(mContext, 0,
+                        new Intent().setPackage(mContext.getPackageName()),
+                        PendingIntent.FLAG_MUTABLE);
         RemoteInput firstRemoteInput =
                 createRemoteInput("same", "same", new CharSequence[] {"same"});
         RemoteInput secondRemoteInput =

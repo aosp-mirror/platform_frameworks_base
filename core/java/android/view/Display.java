@@ -18,14 +18,17 @@ package android.view;
 
 import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
+import static android.hardware.flags.Flags.FLAG_OVERLAYPROPERTIES_CLASS_API;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.app.KeyguardManager;
 import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -36,6 +39,7 @@ import android.graphics.ColorSpace;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.OverlayProperties;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayManager;
@@ -55,6 +59,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Provides information about the size and density of a logical display.
@@ -109,6 +115,8 @@ public final class Display {
     private long mLastCachedAppSizeUpdate;
     private int mCachedAppWidthCompat;
     private int mCachedAppHeightCompat;
+
+    private ArrayList<HdrSdrRatioListenerWrapper> mHdrSdrRatioListeners = new ArrayList<>();
 
     /**
      * The default Display id, which is the id of the primary display assuming there is one.
@@ -268,15 +276,14 @@ public final class Display {
     /**
      * Display flag: Indicates that the display should show system decorations.
      * <p>
-     * This flag identifies secondary displays that should show system decorations, such as status
-     * bar, navigation bar, home activity or IME.
+     * This flag identifies secondary displays that should show system decorations, such as
+     * navigation bar, home activity or wallpaper.
      * </p>
      * <p>Note that this flag doesn't work without {@link #FLAG_TRUSTED}</p>
      *
      * @see #getFlags()
      * @hide
      */
-    // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
     public static final int FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 6;
 
     /**
@@ -316,6 +323,66 @@ public final class Display {
      * @see #getFlags()
      */
     public static final int FLAG_TOUCH_FEEDBACK_DISABLED = 1 << 10;
+
+    /**
+     * Flag: Indicates that the display maintains its own focus and touch mode.
+     *
+     * This flag is similar to {@link com.android.internal.R.bool.config_perDisplayFocusEnabled} in
+     * behavior, but only applies to the specific display instead of system-wide to all displays.
+     *
+     * Note: The display must be trusted in order to have its own focus.
+     *
+     * @see #FLAG_TRUSTED
+     * @hide
+     */
+    public static final int FLAG_OWN_FOCUS = 1 << 11;
+
+    /**
+     * Flag: Indicates that the display should not become the top focused display by stealing the
+     * top focus from another display.
+     *
+     * <p>The result is that only targeted input events (displayId of input event matches the
+     * displayId of the display) can reach this display. A display with this flag set can still
+     * become the top focused display, if the system consists of only one display or if all
+     * displays have this flag set. In both cases the default display becomes the top focused
+     * display.
+     *
+     * <p>Note:  A display only has a focused window if either
+     * - the display is the top focused display or
+     * - the display manages its own focus (via {@link #FLAG_OWN_FOCUS})
+     * - or all the displays manage their own focus (via {@code config_perDisplayFocusEnabled} flag)
+     * If a display has no focused window, no input event is dispatched to it. Therefore this
+     * flag is only useful together with {@link #FLAG_OWN_FOCUS} and will be
+     * ignored if it is not set.
+     *
+     * <p>Note: The framework only supports IME on the top focused display (b/262520411). Therefore,
+     * Enabling this flag on a display implicitly disables showing any IME. This is not intended
+     * behavior but cannot be fixed until b/262520411 is implemented. If you need IME on display do
+     * not set this flag.
+     *
+     * @hide
+     * @see #getFlags()
+     */
+    public static final int FLAG_STEAL_TOP_FOCUS_DISABLED = 1 << 12;
+
+    /**
+     * Display flag: Indicates that the display is a rear display.
+     * <p>
+     * This flag identifies complementary displays that are facing away from the user.
+     * </p>
+     *
+     * @hide
+     * @see #getFlags()
+     */
+    public static final int FLAG_REAR = 1 << 13;
+
+    /**
+     * Display flag: Indicates that the orientation of this display is not fixed and is coupled to
+     * the orientation of its content.
+     *
+     * @hide
+     */
+    public static final int FLAG_ROTATES_WITH_CONTENT = 1 << 14;
 
     /**
      * Display flag: Indicates that the contents of the display should not be scaled
@@ -574,7 +641,8 @@ public final class Display {
      * @see com.android.service.display.DisplayDevice#hasStableUniqueId().
      * @hide
      */
-    public String getUniqueId() {
+    @TestApi
+    public @Nullable String getUniqueId() {
         return mDisplayInfo.uniqueId;
     }
 
@@ -994,6 +1062,28 @@ public final class Display {
     }
 
     /**
+     * Returns the {@link DisplayShape} which is based on display coordinates.
+     *
+     * To get the {@link DisplayShape} based on the window frame, use
+     * {@link WindowInsets#getDisplayShape()} instead.
+     *
+     * @see DisplayShape
+     */
+    @SuppressLint("VisiblySynchronized")
+    @NonNull
+    public DisplayShape getShape() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            final DisplayShape displayShape = mDisplayInfo.displayShape;
+            final @Surface.Rotation int rotation = getLocalRotation();
+            if (displayShape != null && rotation != mDisplayInfo.rotation) {
+                return displayShape.setRotation(rotation);
+            }
+            return displayShape;
+        }
+    }
+
+    /**
      * Gets the pixel format of the display.
      * @return One of the constants defined in {@link android.graphics.PixelFormat}.
      *
@@ -1138,63 +1228,64 @@ public final class Display {
     }
 
     /**
-     * Returns the display's HDR capabilities.
+     * Returns the current display mode's HDR capabilities.
      *
      * @see #isHdr()
      */
     public HdrCapabilities getHdrCapabilities() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            if (mDisplayInfo.userDisabledHdrTypes.length == 0) {
-                return mDisplayInfo.hdrCapabilities;
-            }
-
             if (mDisplayInfo.hdrCapabilities == null) {
                 return null;
             }
-
-            ArraySet<Integer> enabledTypesSet = new ArraySet<>();
-            for (int supportedType : mDisplayInfo.hdrCapabilities.getSupportedHdrTypes()) {
-                boolean typeDisabled = false;
-                for (int userDisabledType : mDisplayInfo.userDisabledHdrTypes) {
-                    if (supportedType == userDisabledType) {
-                        typeDisabled = true;
-                        break;
+            int[] supportedHdrTypes;
+            if (mDisplayInfo.userDisabledHdrTypes.length == 0) {
+                int[] modeSupportedHdrTypes = getMode().getSupportedHdrTypes();
+                supportedHdrTypes = Arrays.copyOf(modeSupportedHdrTypes,
+                        modeSupportedHdrTypes.length);
+            } else {
+                ArraySet<Integer> enabledTypesSet = new ArraySet<>();
+                for (int supportedType : getMode().getSupportedHdrTypes()) {
+                    if (!contains(mDisplayInfo.userDisabledHdrTypes, supportedType)) {
+                        enabledTypesSet.add(supportedType);
                     }
                 }
-                if (!typeDisabled) {
-                    enabledTypesSet.add(supportedType);
+
+                supportedHdrTypes = new int[enabledTypesSet.size()];
+                int index = 0;
+                for (int enabledType : enabledTypesSet) {
+                    supportedHdrTypes[index++] = enabledType;
                 }
             }
-
-            int[] enabledTypes = new int[enabledTypesSet.size()];
-            int index = 0;
-            for (int enabledType : enabledTypesSet) {
-                enabledTypes[index++] = enabledType;
-            }
-            return new HdrCapabilities(enabledTypes,
+            return new HdrCapabilities(supportedHdrTypes,
                     mDisplayInfo.hdrCapabilities.mMaxLuminance,
                     mDisplayInfo.hdrCapabilities.mMaxAverageLuminance,
                     mDisplayInfo.hdrCapabilities.mMinLuminance);
         }
     }
 
+    private boolean contains(int[] disabledHdrTypes, int hdrType) {
+        for (Integer disabledHdrFormat : disabledHdrTypes) {
+            if (disabledHdrFormat == hdrType) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @hide
-     * Returns the display's HDR supported types.
+     * Returns the current mode's supported HDR types.
      *
      * @see #isHdr()
-     * @see HdrCapabilities#getSupportedHdrTypes()
+     * @see Mode#getSupportedHdrTypes()
      */
     @TestApi
     @NonNull
     public int[] getReportedHdrTypes() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            if (mDisplayInfo.hdrCapabilities == null) {
-                return new int[0];
-            }
-            return mDisplayInfo.hdrCapabilities.getSupportedHdrTypes();
+            return mDisplayInfo.getMode().getSupportedHdrTypes();
         }
     }
 
@@ -1212,6 +1303,94 @@ public final class Display {
                 return false;
             }
             return !(hdrCapabilities.getSupportedHdrTypes().length == 0);
+        }
+    }
+
+    /**
+     * @return Whether the display supports reporting an hdr/sdr ratio. If this is false,
+     *         {@link #getHdrSdrRatio()} will always be 1.0f
+     */
+    public boolean isHdrSdrRatioAvailable() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return !Float.isNaN(mDisplayInfo.hdrSdrRatio);
+        }
+    }
+
+    /**
+     * @return The current hdr/sdr ratio expressed as the ratio of targetHdrPeakBrightnessInNits /
+     *         targetSdrWhitePointInNits. If {@link #isHdrSdrRatioAvailable()} is false, this
+     *         always returns 1.0f.
+     */
+    public float getHdrSdrRatio() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return Float.isNaN(mDisplayInfo.hdrSdrRatio)
+                    ? 1.0f : mDisplayInfo.hdrSdrRatio;
+        }
+    }
+
+    private int findHdrSdrRatioListenerLocked(Consumer<Display> listener) {
+        for (int i = 0; i < mHdrSdrRatioListeners.size(); i++) {
+            final HdrSdrRatioListenerWrapper wrapper = mHdrSdrRatioListeners.get(i);
+            if (wrapper.mListener == listener) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Registers a listener that will be invoked whenever the display's hdr/sdr ratio has changed.
+     * After receiving the callback on the specified Executor, call {@link #getHdrSdrRatio()} to
+     * get the updated value.
+     * If {@link #isHdrSdrRatioAvailable()} is false, then an IllegalStateException will be thrown
+     *
+     * @see #unregisterHdrSdrRatioChangedListener(Consumer)
+     * @param executor The executor to invoke the listener on
+     * @param listener The listener to invoke when the HDR/SDR ratio changes
+     * @throws IllegalStateException if {@link #isHdrSdrRatioAvailable()} is false
+     */
+    public void registerHdrSdrRatioChangedListener(@NonNull Executor executor,
+            @NonNull Consumer<Display> listener) {
+        if (!isHdrSdrRatioAvailable()) {
+            throw new IllegalStateException("HDR/SDR ratio changed not available");
+        }
+        HdrSdrRatioListenerWrapper toRegister = null;
+        synchronized (mLock) {
+            if (findHdrSdrRatioListenerLocked(listener) == -1) {
+                toRegister = new HdrSdrRatioListenerWrapper(listener);
+                mHdrSdrRatioListeners.add(toRegister);
+            } // else already listening, don't do anything
+        }
+        if (toRegister != null) {
+            // Although we only care about the HDR/SDR ratio changing, that can also come in the
+            // form of the larger DISPLAY_CHANGED event
+            mGlobal.registerDisplayListener(toRegister, executor,
+                    DisplayManager.EVENT_FLAG_HDR_SDR_RATIO_CHANGED
+                            | DisplayManagerGlobal.EVENT_DISPLAY_CHANGED,
+                    ActivityThread.currentPackageName());
+        }
+
+    }
+
+    /**
+     * @param listener  The previously
+     *                  {@link #registerHdrSdrRatioChangedListener(Executor, Consumer) registered}
+     *                  hdr/sdr ratio listener to remove.
+     *
+     * @see #registerHdrSdrRatioChangedListener(Executor, Consumer)
+     */
+    public void unregisterHdrSdrRatioChangedListener(@NonNull Consumer<Display> listener) {
+        HdrSdrRatioListenerWrapper toRemove = null;
+        synchronized (mLock) {
+            int index = findHdrSdrRatioListenerLocked(listener);
+            if (index != -1) {
+                toRemove = mHdrSdrRatioListeners.remove(index);
+            }
+        }
+        if (toRemove != null) {
+            mGlobal.unregisterDisplayListener(toRemove);
         }
     }
 
@@ -1286,6 +1465,22 @@ public final class Display {
                 return mGlobal.getPreferredWideGamutColorSpace();
             }
             return null;
+        }
+    }
+
+    /**
+     * Returns the {@link OverlayProperties} of the display.
+     */
+    @FlaggedApi(FLAG_OVERLAYPROPERTIES_CLASS_API)
+    @NonNull
+    public OverlayProperties getOverlaySupport() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            if (mDisplayInfo.type == TYPE_INTERNAL
+                    || mDisplayInfo.type == TYPE_EXTERNAL) {
+                return mGlobal.getOverlaySupport();
+            }
+            return OverlayProperties.getDefault();
         }
     }
 
@@ -1417,7 +1612,8 @@ public final class Display {
      * @param outMetrics A {@link DisplayMetrics} object which receives the display metrics.
      *
      * @deprecated Use {@link WindowMetrics#getBounds()} to get the dimensions of the application
-     *     window. Use {@link Configuration#densityDpi} to get the display density.
+     *     window. Use {@link WindowMetrics#getDensity()} to get the density of the application
+     *     window.
      */
     @Deprecated
     public void getMetrics(DisplayMetrics outMetrics) {
@@ -1454,7 +1650,7 @@ public final class Display {
      * bounds of the window.
      * <p></p>
      * Handling multi-window mode correctly is necessary since applications are not always
-     * fullscreen. A user on a large screen device, such as a tablet or Chrome OS devices, is more
+     * fullscreen. A user on a large screen device, such as a tablet or ChromeOS devices, is more
      * likely to use multi-window modes.
      * <p></p>
      * For example, consider a device with a display partitioned into two halves. The user may have
@@ -1524,7 +1720,7 @@ public final class Display {
      * bounds of the window.
      * <p></p>
      * Handling multi-window mode correctly is necessary since applications are not always
-     * fullscreen. A user on a large screen device, such as a tablet or Chrome OS devices, is more
+     * fullscreen. A user on a large screen device, such as a tablet or ChromeOS devices, is more
      * likely to use multi-window modes.
      * <p></p>
      * For example, consider a device with a display partitioned into two halves. The user may have
@@ -1600,6 +1796,21 @@ public final class Display {
     }
 
     /**
+     * Returns the committed state of the display.
+     *
+     * @return The latest committed display state, such as {@link #STATE_ON}. The display state
+     * {@link Display#getState()} is set as committed only after power state changes finish.
+     *
+     * @hide
+     */
+    public int getCommittedState() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return mIsValid ? mDisplayInfo.committedState : STATE_UNKNOWN;
+        }
+    }
+
+    /**
      * Returns true if the specified UID has access to this display.
      * @hide
      */
@@ -1635,6 +1846,16 @@ public final class Display {
      */
     public boolean isTrusted() {
         return (mFlags & FLAG_TRUSTED) == FLAG_TRUSTED;
+    }
+
+    /**
+     * @return {@code true} if the display can steal the top focus from another display.
+     *
+     * @see #FLAG_STEAL_TOP_FOCUS_DISABLED
+     * @hide
+     */
+    public boolean canStealTopFocus() {
+        return (mFlags & FLAG_STEAL_TOP_FOCUS_DISABLED) == 0;
     }
 
     private void updateDisplayInfoLocked() {
@@ -1872,16 +2093,28 @@ public final class Display {
         private final int mModeId;
         private final int mWidth;
         private final int mHeight;
-        private final float mRefreshRate;
+        private final float mPeakRefreshRate;
+        private final float mVsyncRate;
         @NonNull
         private final float[] mAlternativeRefreshRates;
+        @NonNull
+        @HdrCapabilities.HdrType
+        private final int[] mSupportedHdrTypes;
 
         /**
          * @hide
          */
         @TestApi
         public Mode(int width, int height, float refreshRate) {
-            this(INVALID_MODE_ID, width, height, refreshRate, new float[0]);
+            this(INVALID_MODE_ID, width, height, refreshRate, refreshRate, new float[0],
+                    new int[0]);
+        }
+
+        /**
+         * @hide
+         */
+        public Mode(int width, int height, float refreshRate, float vsyncRate) {
+            this(INVALID_MODE_ID, width, height, refreshRate, vsyncRate, new float[0], new int[0]);
         }
 
         /**
@@ -1889,21 +2122,34 @@ public final class Display {
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Mode(int modeId, int width, int height, float refreshRate) {
-            this(modeId, width, height, refreshRate, new float[0]);
+            this(modeId, width, height, refreshRate, refreshRate, new float[0], new int[0]);
         }
 
         /**
          * @hide
          */
         public Mode(int modeId, int width, int height, float refreshRate,
-                float[] alternativeRefreshRates) {
+                    float[] alternativeRefreshRates,
+                    @HdrCapabilities.HdrType int[] supportedHdrTypes) {
+            this(modeId, width, height, refreshRate, refreshRate, alternativeRefreshRates,
+                    supportedHdrTypes);
+        }
+
+        /**
+         * @hide
+         */
+        public Mode(int modeId, int width, int height, float refreshRate, float vsyncRate,
+                float[] alternativeRefreshRates, @HdrCapabilities.HdrType int[] supportedHdrTypes) {
             mModeId = modeId;
             mWidth = width;
             mHeight = height;
-            mRefreshRate = refreshRate;
+            mPeakRefreshRate = refreshRate;
+            mVsyncRate = vsyncRate;
             mAlternativeRefreshRates =
                     Arrays.copyOf(alternativeRefreshRates, alternativeRefreshRates.length);
             Arrays.sort(mAlternativeRefreshRates);
+            mSupportedHdrTypes = Arrays.copyOf(supportedHdrTypes, supportedHdrTypes.length);
+            Arrays.sort(mSupportedHdrTypes);
         }
 
         /**
@@ -1949,7 +2195,17 @@ public final class Display {
          * Returns the refresh rate in frames per second.
          */
         public float getRefreshRate() {
-            return mRefreshRate;
+            return mPeakRefreshRate;
+        }
+
+        /**
+         * Returns the vsync rate in frames per second.
+         * The physical vsync rate may be higher than the refresh rate, as the refresh rate may be
+         * constrained by the system.
+         * @hide
+         */
+        public float getVsyncRate() {
+            return mVsyncRate;
         }
 
         /**
@@ -1974,7 +2230,16 @@ public final class Display {
          */
         @NonNull
         public float[] getAlternativeRefreshRates() {
-            return mAlternativeRefreshRates;
+            return Arrays.copyOf(mAlternativeRefreshRates, mAlternativeRefreshRates.length);
+        }
+
+        /**
+         * Returns the supported {@link HdrCapabilities} HDR_TYPE_* for this specific mode
+         */
+        @NonNull
+        @HdrCapabilities.HdrType
+        public int[] getSupportedHdrTypes() {
+            return Arrays.copyOf(mSupportedHdrTypes, mSupportedHdrTypes.length);
         }
 
         /**
@@ -1986,7 +2251,7 @@ public final class Display {
         public boolean matches(int width, int height, float refreshRate) {
             return mWidth == width &&
                     mHeight == height &&
-                    Float.floatToIntBits(mRefreshRate) == Float.floatToIntBits(refreshRate);
+                    Float.floatToIntBits(mPeakRefreshRate) == Float.floatToIntBits(refreshRate);
         }
 
         /**
@@ -1999,9 +2264,9 @@ public final class Display {
          *
          * @hide
          */
-        public boolean matchesIfValid(int width, int height, float refreshRate) {
+        public boolean matchesIfValid(int width, int height, float peakRefreshRate) {
             if (!isWidthValid(width) && !isHeightValid(height)
-                    && !isRefreshRateValid(refreshRate)) {
+                    && !isRefreshRateValid(peakRefreshRate)) {
                 return false;
             }
             if (isWidthValid(width) != isHeightValid(height)) {
@@ -2009,8 +2274,9 @@ public final class Display {
             }
             return (!isWidthValid(width) || mWidth == width)
                     && (!isHeightValid(height) || mHeight == height)
-                    && (!isRefreshRateValid(refreshRate)
-                    || Float.floatToIntBits(mRefreshRate) == Float.floatToIntBits(refreshRate));
+                    && (!isRefreshRateValid(peakRefreshRate)
+                    || Float.floatToIntBits(mPeakRefreshRate)
+                            == Float.floatToIntBits(peakRefreshRate));
         }
 
         /**
@@ -2029,7 +2295,7 @@ public final class Display {
          * @hide
          */
         public boolean isRefreshRateSet() {
-            return mRefreshRate != INVALID_DISPLAY_REFRESH_RATE;
+            return mPeakRefreshRate != INVALID_DISPLAY_REFRESH_RATE;
         }
 
         /**
@@ -2050,8 +2316,10 @@ public final class Display {
                 return false;
             }
             Mode that = (Mode) other;
-            return mModeId == that.mModeId && matches(that.mWidth, that.mHeight, that.mRefreshRate)
-                    && Arrays.equals(mAlternativeRefreshRates, that.mAlternativeRefreshRates);
+            return mModeId == that.mModeId
+                    && matches(that.mWidth, that.mHeight, that.mPeakRefreshRate)
+                    && Arrays.equals(mAlternativeRefreshRates, that.mAlternativeRefreshRates)
+                    && Arrays.equals(mSupportedHdrTypes, that.mSupportedHdrTypes);
         }
 
         @Override
@@ -2060,8 +2328,10 @@ public final class Display {
             hash = hash * 17 + mModeId;
             hash = hash * 17 + mWidth;
             hash = hash * 17 + mHeight;
-            hash = hash * 17 + Float.floatToIntBits(mRefreshRate);
+            hash = hash * 17 + Float.floatToIntBits(mPeakRefreshRate);
+            hash = hash * 17 + Float.floatToIntBits(mVsyncRate);
             hash = hash * 17 + Arrays.hashCode(mAlternativeRefreshRates);
+            hash = hash * 17 + Arrays.hashCode(mSupportedHdrTypes);
             return hash;
         }
 
@@ -2071,9 +2341,12 @@ public final class Display {
                     .append("id=").append(mModeId)
                     .append(", width=").append(mWidth)
                     .append(", height=").append(mHeight)
-                    .append(", fps=").append(mRefreshRate)
+                    .append(", fps=").append(mPeakRefreshRate)
+                    .append(", vsync=").append(mVsyncRate)
                     .append(", alternativeRefreshRates=")
                     .append(Arrays.toString(mAlternativeRefreshRates))
+                    .append(", supportedHdrTypes=")
+                    .append(Arrays.toString(mSupportedHdrTypes))
                     .append("}")
                     .toString();
         }
@@ -2084,7 +2357,8 @@ public final class Display {
         }
 
         private Mode(Parcel in) {
-            this(in.readInt(), in.readInt(), in.readInt(), in.readFloat(), in.createFloatArray());
+            this(in.readInt(), in.readInt(), in.readInt(), in.readFloat(), in.readFloat(),
+                    in.createFloatArray(), in.createIntArray());
         }
 
         @Override
@@ -2092,8 +2366,10 @@ public final class Display {
             out.writeInt(mModeId);
             out.writeInt(mWidth);
             out.writeInt(mHeight);
-            out.writeFloat(mRefreshRate);
+            out.writeFloat(mPeakRefreshRate);
+            out.writeFloat(mVsyncRate);
             out.writeFloatArray(mAlternativeRefreshRates);
+            out.writeIntArray(mSupportedHdrTypes);
         }
 
         @SuppressWarnings("hiding")
@@ -2197,6 +2473,10 @@ public final class Display {
          */
         public static final float INVALID_LUMINANCE = -1;
         /**
+         * Invalid HDR type value.
+         */
+        public static final int HDR_TYPE_INVALID = -1;
+        /**
          * Dolby Vision high dynamic range (HDR) display.
          */
         public static final int HDR_TYPE_DOLBY_VISION = 1;
@@ -2224,6 +2504,7 @@ public final class Display {
 
         /** @hide */
         @IntDef(prefix = { "HDR_TYPE_" }, value = {
+                HDR_TYPE_INVALID,
                 HDR_TYPE_DOLBY_VISION,
                 HDR_TYPE_HDR10,
                 HDR_TYPE_HLG,
@@ -2259,9 +2540,14 @@ public final class Display {
         /**
          * Gets the supported HDR types of this display.
          * Returns empty array if HDR is not supported by the display.
+         *
+         * @deprecated use {@link Display#getMode()}
+         * and {@link Mode#getSupportedHdrTypes()} instead
          */
-        public @HdrType int[] getSupportedHdrTypes() {
-            return mSupportedHdrTypes;
+        @Deprecated
+        @HdrType
+        public int[] getSupportedHdrTypes() {
+            return Arrays.copyOf(mSupportedHdrTypes, mSupportedHdrTypes.length);
         }
         /**
          * Returns the desired content max luminance data in cd/m2 for this display.
@@ -2362,6 +2648,55 @@ public final class Display {
                     + ", mMaxLuminance=" + mMaxLuminance
                     + ", mMaxAverageLuminance=" + mMaxAverageLuminance
                     + ", mMinLuminance=" + mMinLuminance + '}';
+        }
+
+        /**
+         * @hide
+         */
+        @NonNull
+        public static String hdrTypeToString(int hdrType) {
+            switch (hdrType) {
+                case HDR_TYPE_DOLBY_VISION:
+                    return "HDR_TYPE_DOLBY_VISION";
+                case HDR_TYPE_HDR10:
+                    return "HDR_TYPE_HDR10";
+                case HDR_TYPE_HLG:
+                    return "HDR_TYPE_HLG";
+                case HDR_TYPE_HDR10_PLUS:
+                    return "HDR_TYPE_HDR10_PLUS";
+                default:
+                    return "HDR_TYPE_INVALID";
+            }
+        }
+    }
+
+    private class HdrSdrRatioListenerWrapper implements DisplayManager.DisplayListener {
+        Consumer<Display> mListener;
+        float mLastReportedRatio = 1.f;
+
+        private HdrSdrRatioListenerWrapper(Consumer<Display> listener) {
+            mListener = listener;
+        }
+
+        @Override
+        public void onDisplayAdded(int displayId) {
+            // don't care
+        }
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+            // don't care
+        }
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+            if (displayId == getDisplayId()) {
+                float newRatio = getHdrSdrRatio();
+                if (newRatio != mLastReportedRatio) {
+                    mLastReportedRatio = newRatio;
+                    mListener.accept(Display.this);
+                }
+            }
         }
     }
 }

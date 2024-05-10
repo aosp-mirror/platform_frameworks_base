@@ -16,6 +16,7 @@
 package com.android.server.net;
 
 import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_BACKGROUND;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
@@ -24,6 +25,7 @@ import static android.net.ConnectivityManager.FIREWALL_CHAIN_STANDBY;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.INetd.FIREWALL_RULE_DENY;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_NONE;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_BACKGROUND;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_POWERSAVE;
@@ -338,8 +340,8 @@ public class NetworkPolicyLogger {
         return "App idle state of uid " + uid + ": " + idle;
     }
 
-    private static String getAppIdleWlChangedLog(int uid, boolean isWhitelisted) {
-        return "App idle whitelist state of uid " + uid + ": " + isWhitelisted;
+    private static String getAppIdleWlChangedLog(int uid, boolean isAllowlisted) {
+        return "App idle whitelist state of uid " + uid + ": " + isAllowlisted;
     }
 
     private static String getParoleStateChanged(boolean paroleOn) {
@@ -389,6 +391,8 @@ public class NetworkPolicyLogger {
                 return FIREWALL_CHAIN_NAME_RESTRICTED;
             case FIREWALL_CHAIN_LOW_POWER_STANDBY:
                 return FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY;
+            case FIREWALL_CHAIN_BACKGROUND:
+                return FIREWALL_CHAIN_NAME_BACKGROUND;
             default:
                 return String.valueOf(chain);
         }
@@ -413,7 +417,7 @@ public class NetworkPolicyLogger {
         private static final Date sDate = new Date();
 
         public LogBuffer(int capacity) {
-            super(Data.class, capacity);
+            super(Data::new, Data[]::new, capacity);
         }
 
         public void uidStateChanged(int uid, int procState, long procStateSeq,
@@ -519,14 +523,14 @@ public class NetworkPolicyLogger {
             data.timeStamp = System.currentTimeMillis();
         }
 
-        public void appIdleWlChanged(int uid, boolean isWhitelisted) {
+        public void appIdleWlChanged(int uid, boolean isAllowlisted) {
             final Data data = getNextSlot();
             if (data == null) return;
 
             data.reset();
             data.type = EVENT_APP_IDLE_WL_CHANGED;
             data.ifield1 = uid;
-            data.bfield1 = isWhitelisted;
+            data.bfield1 = isAllowlisted;
             data.timeStamp = System.currentTimeMillis();
         }
 
@@ -689,11 +693,8 @@ public class NetworkPolicyLogger {
 
     /**
      * Container class for all networkpolicy events data.
-     *
-     * Note: This class needs to be public for RingBuffer class to be able to create
-     * new instances of this.
      */
-    public static final class Data {
+    private static final class Data {
         public int type;
         public long timeStamp;
 

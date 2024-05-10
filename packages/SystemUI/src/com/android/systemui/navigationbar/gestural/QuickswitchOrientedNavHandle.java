@@ -21,7 +21,7 @@ import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.view.Surface;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /** Temporarily shown view when using QuickSwitch to switch between apps of different rotations */
 public class QuickswitchOrientedNavHandle extends NavigationHandle {

@@ -20,6 +20,8 @@ import static android.view.DisplayCutout.BOUNDS_POSITION_BOTTOM;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_RIGHT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
+import static android.view.MotionEvent.AXIS_GESTURE_SWIPE_FINGER_COUNT;
+import static android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -59,6 +61,12 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
     private static final int SWIPE_FROM_RIGHT = 3;
     private static final int SWIPE_FROM_LEFT = 4;
 
+    private static final int TRACKPAD_SWIPE_NONE = 0;
+    private static final int TRACKPAD_SWIPE_FROM_TOP = 1;
+    private static final int TRACKPAD_SWIPE_FROM_BOTTOM = 2;
+    private static final int TRACKPAD_SWIPE_FROM_RIGHT = 3;
+    private static final int TRACKPAD_SWIPE_FROM_LEFT = 4;
+
     private final Context mContext;
     private final Handler mHandler;
     private int mDisplayCutoutTouchableRegionSize;
@@ -78,7 +86,10 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
     private int mDownPointers;
     private boolean mSwipeFireable;
     private boolean mDebugFireable;
-    private boolean mMouseHoveringAtEdge;
+    private boolean mMouseHoveringAtLeft;
+    private boolean mMouseHoveringAtTop;
+    private boolean mMouseHoveringAtRight;
+    private boolean mMouseHoveringAtBottom;
     private long mLastFlingTime;
 
     SystemGesturesPointerEventListener(Context context, Handler handler, Callbacks callbacks) {
@@ -174,9 +185,21 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
                 mDebugFireable = true;
                 mDownPointers = 0;
                 captureDown(event, 0);
-                if (mMouseHoveringAtEdge) {
-                    mMouseHoveringAtEdge = false;
-                    mCallbacks.onMouseLeaveFromEdge();
+                if (mMouseHoveringAtLeft) {
+                    mMouseHoveringAtLeft = false;
+                    mCallbacks.onMouseLeaveFromLeft();
+                }
+                if (mMouseHoveringAtTop) {
+                    mMouseHoveringAtTop = false;
+                    mCallbacks.onMouseLeaveFromTop();
+                }
+                if (mMouseHoveringAtRight) {
+                    mMouseHoveringAtRight = false;
+                    mCallbacks.onMouseLeaveFromRight();
+                }
+                if (mMouseHoveringAtBottom) {
+                    mMouseHoveringAtBottom = false;
+                    mCallbacks.onMouseLeaveFromBottom();
                 }
                 mCallbacks.onDown();
                 break;
@@ -192,6 +215,25 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (mSwipeFireable) {
+                    int trackpadSwipe = detectTrackpadThreeFingerSwipe(event);
+                    mSwipeFireable = trackpadSwipe == TRACKPAD_SWIPE_NONE;
+                    if (!mSwipeFireable) {
+                        if (trackpadSwipe == TRACKPAD_SWIPE_FROM_TOP) {
+                            if (DEBUG) Slog.d(TAG, "Firing onSwipeFromTop from trackpad");
+                            mCallbacks.onSwipeFromTop();
+                        } else if (trackpadSwipe == TRACKPAD_SWIPE_FROM_BOTTOM) {
+                            if (DEBUG) Slog.d(TAG, "Firing onSwipeFromBottom from trackpad");
+                            mCallbacks.onSwipeFromBottom();
+                        } else if (trackpadSwipe == TRACKPAD_SWIPE_FROM_RIGHT) {
+                            if (DEBUG) Slog.d(TAG, "Firing onSwipeFromRight from trackpad");
+                            mCallbacks.onSwipeFromRight();
+                        } else if (trackpadSwipe == TRACKPAD_SWIPE_FROM_LEFT) {
+                            if (DEBUG) Slog.d(TAG, "Firing onSwipeFromLeft from trackpad");
+                            mCallbacks.onSwipeFromLeft();
+                        }
+                        break;
+                    }
+
                     final int swipe = detectSwipe(event);
                     mSwipeFireable = swipe == SWIPE_NONE;
                     if (swipe == SWIPE_FROM_TOP) {
@@ -211,16 +253,35 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
                 break;
             case MotionEvent.ACTION_HOVER_MOVE:
                 if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
-                    if (!mMouseHoveringAtEdge && event.getY() == 0) {
+                    final float eventX = event.getX();
+                    final float eventY = event.getY();
+                    if (!mMouseHoveringAtLeft && eventX == 0) {
+                        mCallbacks.onMouseHoverAtLeft();
+                        mMouseHoveringAtLeft = true;
+                    } else if (mMouseHoveringAtLeft && eventX > 0) {
+                        mCallbacks.onMouseLeaveFromLeft();
+                        mMouseHoveringAtLeft = false;
+                    }
+                    if (!mMouseHoveringAtTop && eventY == 0) {
                         mCallbacks.onMouseHoverAtTop();
-                        mMouseHoveringAtEdge = true;
-                    } else if (!mMouseHoveringAtEdge && event.getY() >= screenHeight - 1) {
+                        mMouseHoveringAtTop = true;
+                    } else if (mMouseHoveringAtTop && eventY > 0) {
+                        mCallbacks.onMouseLeaveFromTop();
+                        mMouseHoveringAtTop = false;
+                    }
+                    if (!mMouseHoveringAtRight && eventX >= screenWidth - 1) {
+                        mCallbacks.onMouseHoverAtRight();
+                        mMouseHoveringAtRight = true;
+                    } else if (mMouseHoveringAtRight && eventX < screenWidth - 1) {
+                        mCallbacks.onMouseLeaveFromRight();
+                        mMouseHoveringAtRight = false;
+                    }
+                    if (!mMouseHoveringAtBottom && eventY >= screenHeight - 1) {
                         mCallbacks.onMouseHoverAtBottom();
-                        mMouseHoveringAtEdge = true;
-                    } else if (mMouseHoveringAtEdge
-                            && (event.getY() > 0 && event.getY() < screenHeight - 1)) {
-                        mCallbacks.onMouseLeaveFromEdge();
-                        mMouseHoveringAtEdge = false;
+                        mMouseHoveringAtBottom = true;
+                    } else if (mMouseHoveringAtBottom && eventY < screenHeight - 1) {
+                        mCallbacks.onMouseLeaveFromBottom();
+                        mMouseHoveringAtBottom = false;
                     }
                 }
                 break;
@@ -264,6 +325,31 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
         }
         mDownPointerId[mDownPointers++] = pointerId;
         return mDownPointers - 1;
+    }
+
+    private int detectTrackpadThreeFingerSwipe(MotionEvent move) {
+        if (!isTrackpadThreeFingerSwipe(move)) {
+            return TRACKPAD_SWIPE_NONE;
+        }
+
+        float dx = move.getX() - mDownX[0];
+        float dy = move.getY() - mDownY[0];
+        if (Math.abs(dx) < Math.abs(dy)) {
+            if (Math.abs(dy) > mSwipeDistanceThreshold) {
+                return dy > 0 ? TRACKPAD_SWIPE_FROM_TOP : TRACKPAD_SWIPE_FROM_BOTTOM;
+            }
+        } else {
+            if (Math.abs(dx) > mSwipeDistanceThreshold) {
+                return dx > 0 ? TRACKPAD_SWIPE_FROM_LEFT : TRACKPAD_SWIPE_FROM_RIGHT;
+            }
+        }
+
+        return TRACKPAD_SWIPE_NONE;
+    }
+
+    private static boolean isTrackpadThreeFingerSwipe(MotionEvent event) {
+        return event.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE
+                && event.getAxisValue(AXIS_GESTURE_SWIPE_FINGER_COUNT) == 3;
     }
 
     private int detectSwipe(MotionEvent move) {
@@ -373,9 +459,14 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
         void onFling(int durationMs);
         void onDown();
         void onUpOrCancel();
+        void onMouseHoverAtLeft();
         void onMouseHoverAtTop();
+        void onMouseHoverAtRight();
         void onMouseHoverAtBottom();
-        void onMouseLeaveFromEdge();
+        void onMouseLeaveFromLeft();
+        void onMouseLeaveFromTop();
+        void onMouseLeaveFromRight();
+        void onMouseLeaveFromBottom();
         void onDebug();
     }
 }

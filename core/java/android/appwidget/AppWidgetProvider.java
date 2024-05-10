@@ -58,7 +58,12 @@ public class AppWidgetProvider extends BroadcastReceiver {
         // Protect against rogue update broadcasts (not really a security issue,
         // just filter bad broacasts out so subclasses are less likely to crash).
         String action = intent.getAction();
-        if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)) {
+        if (AppWidgetManager.ACTION_APPWIDGET_ENABLE_AND_UPDATE.equals(action)) {
+            this.onReceive(context, new Intent(intent)
+                    .setAction(AppWidgetManager.ACTION_APPWIDGET_ENABLED));
+            this.onReceive(context, new Intent(intent)
+                    .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
+        } else if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)) {
             Bundle extras = intent.getExtras();
             if (extras != null) {
                 int[] appWidgetIds = extras.getIntArray(AppWidgetManager.EXTRA_APPWIDGET_IDS);
@@ -122,7 +127,8 @@ public class AppWidgetProvider extends BroadcastReceiver {
 
     /**
      * Called in response to the {@link AppWidgetManager#ACTION_APPWIDGET_OPTIONS_CHANGED}
-     * broadcast when this widget has been layed out at a new size.
+     * broadcast when this widget has been layed out at a new size or its options changed via
+     * {@link AppWidgetManager#updateAppWidgetOptions}.
      *
      * {@more}
      *
@@ -131,7 +137,7 @@ public class AppWidgetProvider extends BroadcastReceiver {
      * @param appWidgetManager A {@link AppWidgetManager} object you can call {@link
      *                  AppWidgetManager#updateAppWidget} on.
      * @param appWidgetId The appWidgetId of the widget whose size changed.
-     * @param newOptions The appWidgetId of the widget whose size changed.
+     * @param newOptions The new options of the changed widget.
      *
      * @see AppWidgetManager#ACTION_APPWIDGET_OPTIONS_CHANGED
      */

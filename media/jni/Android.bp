@@ -18,7 +18,10 @@ license {
 cc_library_shared {
     name: "libmedia_jni",
 
-    defaults: ["libcodec2-internal-defaults"],
+    defaults: [
+        "aconfig_lib_cc_static_link.defaults",
+        "libcodec2-internal-defaults",
+    ],
     min_sdk_version: "",
 
     srcs: [
@@ -81,6 +84,7 @@ cc_library_shared {
         "libhidlallocatorutils",
         "libhidlbase",
         "libsonivox",
+        "server_configurable_flags",
         "android.hardware.cas@1.0",
         "android.hardware.cas.native@1.0",
         "android.hardware.drm@1.3",
@@ -88,6 +92,7 @@ cc_library_shared {
         "android.hidl.memory@1.0",
         "android.hidl.token@1.0-utils",
         "android.hardware.drm-V1-ndk",
+        "android.hardware.tv.tuner-V2-ndk",
     ],
 
     header_libs: [
@@ -98,6 +103,7 @@ cc_library_shared {
     static_libs: [
         "libgrallocusage",
         "libmedia_midiiowrapper",
+        "android.media.playback.flags-aconfig-cc",
     ],
 
     include_dirs: [
@@ -119,16 +125,12 @@ cc_library_shared {
         "-Wunused",
         "-Wunreachable-code",
     ],
-
-    // Workaround Clang LTO crash.
-    lto: {
-        never: true,
-    },
 }
 
 cc_library_shared {
     name: "libmedia_jni_utils",
     srcs: [
+        ":libgui_frame_event_aidl",
         "android_media_Utils.cpp",
     ],
 
@@ -159,7 +161,7 @@ cc_library_shared {
 
 cc_library_shared {
     name: "libmedia_tv_tuner",
-
+    min_sdk_version: "",
     srcs: [
         "android_media_tv_Tuner.cpp",
         "tuner/DemuxClient.cpp",
@@ -174,7 +176,7 @@ cc_library_shared {
 
     shared_libs: [
         "android.hardware.graphics.bufferqueue@2.0",
-        "android.hardware.tv.tuner-V1-ndk",
+        "android.hardware.tv.tuner-V2-ndk",
         "libbinder_ndk",
         "libandroid_runtime",
         "libcutils",

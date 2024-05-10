@@ -22,7 +22,9 @@ import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHT
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_DISTANCE_VELOCITY_TO_DISTANCE;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_DISTANCE_VERTICAL_FLING_THRESHOLD_IN;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_DISTANCE_VERTICAL_SWIPE_THRESHOLD_IN;
+import static com.android.systemui.classifier.Classifier.ALTERNATE_BOUNCER_SWIPE;
 import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
+import static com.android.systemui.classifier.Classifier.MEDIA_SEEKBAR;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QS_SWIPE_NESTED;
 import static com.android.systemui.classifier.Classifier.SHADE_DRAG;
@@ -153,12 +155,13 @@ class DistanceClassifier extends FalsingClassifier {
             @Classifier.InteractionType int interactionType,
             double historyBelief, double historyConfidence) {
         if (interactionType == BRIGHTNESS_SLIDER
+                || interactionType == MEDIA_SEEKBAR
                 || interactionType == SHADE_DRAG
                 || interactionType == QS_COLLAPSE
                 || interactionType == Classifier.UDFPS_AUTHENTICATION
-                || interactionType == Classifier.LOCK_ICON
                 || interactionType == Classifier.QS_SWIPE_SIDE
-                || interactionType == QS_SWIPE_NESTED) {
+                || interactionType == QS_SWIPE_NESTED
+                || interactionType == ALTERNATE_BOUNCER_SWIPE) {
             return Result.passed(0);
         }
 

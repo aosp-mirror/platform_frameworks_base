@@ -16,9 +16,11 @@
 
 package android.view;
 
+import static android.view.flags.Flags.FLAG_EXPECTED_PRESENTATION_TIME_API;
 import static android.view.DisplayEventReceiver.VSYNC_SOURCE_APP;
 import static android.view.DisplayEventReceiver.VSYNC_SOURCE_SURFACE_FLINGER;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -195,8 +197,9 @@ public final class Choreographer {
 
     private boolean mDebugPrintNextFrameTimeDelta;
     private int mFPSDivisor = 1;
-    private DisplayEventReceiver.VsyncEventData mLastVsyncEventData =
+    private final DisplayEventReceiver.VsyncEventData mLastVsyncEventData =
             new DisplayEventReceiver.VsyncEventData();
+    private final FrameData mFrameData = new FrameData();
 
     /**
      * Contains information about the current frame for jank-tracking,
@@ -270,10 +273,14 @@ public final class Choreographer {
     private static final int CALLBACK_LAST = CALLBACK_COMMIT;
 
     private Choreographer(Looper looper, int vsyncSource) {
+        this(looper, vsyncSource, /* layerHandle */ 0L);
+    }
+
+    private Choreographer(Looper looper, int vsyncSource, long layerHandle) {
         mLooper = looper;
         mHandler = new FrameHandler(looper);
         mDisplayEventReceiver = USE_VSYNC
-                ? new FrameDisplayEventReceiver(looper, vsyncSource)
+                ? new FrameDisplayEventReceiver(looper, vsyncSource, layerHandle)
                 : null;
         mLastFrameTimeNanos = Long.MIN_VALUE;
 
@@ -313,6 +320,26 @@ public final class Choreographer {
     }
 
     /**
+     * Gets the choreographer associated with the SurfaceControl.
+     *
+     * @param layerHandle to which the choreographer will be attached.
+     * @param looper      the choreographer is attached on this looper.
+     *
+     * @return The choreographer for the looper which is attached
+     * to the sourced SurfaceControl::mNativeHandle.
+     * @throws IllegalStateException if the looper sourced is null.
+     * @hide
+     */
+    @NonNull
+    static Choreographer getInstanceForSurfaceControl(long layerHandle,
+            @NonNull Looper looper) {
+        if (looper == null) {
+            throw new IllegalStateException("The current thread must have a looper!");
+        }
+        return new Choreographer(looper, VSYNC_SOURCE_APP, layerHandle);
+    }
+
+    /**
      * @return The Choreographer of the main thread, if it exists, or {@code null} otherwise.
      * @hide
      */
@@ -331,6 +358,23 @@ public final class Choreographer {
 
     private void dispose() {
         mDisplayEventReceiver.dispose();
+    }
+
+    /**
+     * Dispose the DisplayEventReceiver on the Choreographer.
+     * @hide
+     */
+    @UnsupportedAppUsage
+    void invalidate() {
+        dispose();
+    }
+
+    /**
+     * Check if the sourced looper and the current looper are same.
+     * @hide
+     */
+    boolean isTheLooperSame(Looper looper) {
+        return mLooper == looper;
     }
 
     /**
@@ -651,7 +695,9 @@ public final class Choreographer {
      * @throws IllegalStateException if no frame is in progress.
      * @hide
      */
+    @TestApi
     @UnsupportedAppUsage
+    @FlaggedApi(FLAG_EXPECTED_PRESENTATION_TIME_API)
     public long getFrameTimeNanos() {
         synchronized (mLock) {
             if (!mCallbacksRunning) {
@@ -672,6 +718,57 @@ public final class Choreographer {
         synchronized (mLock) {
             return USE_FRAME_TIME ? mLastFrameTimeNanos : System.nanoTime();
         }
+    }
+
+    /**
+     * Gets the time in {@link System#nanoTime()} timebase which the current frame
+     * is expected to be presented.
+     * <p>
+     * This time should be used to advance any animation clocks.
+     * Prefer using this method over {@link #getFrameTimeNanos()}.
+     * </p><p>
+     * This method should only be called from within a callback.
+     * </p>
+     *
+     * @return The frame start time, in the {@link System#nanoTime()} time base.
+     *
+     * @throws IllegalStateException if no frame is in progress.
+     * @hide
+     */
+    public long getExpectedPresentationTimeNanos() {
+        return mFrameData.getPreferredFrameTimeline().getExpectedPresentationTimeNanos();
+    }
+
+
+    /**
+     * Same as {@link #getExpectedPresentationTimeNanos()} but with millisecond precision.
+     *
+     * @return The frame start time, in the {@link SystemClock#uptimeMillis()} time base.
+     *
+     * @throws IllegalStateException if no frame is in progress.
+     * @hide
+     */
+    public long getExpectedPresentationTimeMillis() {
+        return getExpectedPresentationTimeNanos() / TimeUtils.NANOS_PER_MS;
+    }
+
+    /**
+     * Same as {@link #getExpectedPresentationTimeNanos()},
+     * Should always use {@link #getExpectedPresentationTimeNanos()} if it's possilbe.
+     * This method involves a binder call to SF,
+     * calling this method can potentially influence the performance.
+     *
+     * @return The frame start time, in the {@link System#nanoTime()} time base.
+     *
+     * @hide
+     */
+    public long getLatestExpectedPresentTimeNanos() {
+        if (mDisplayEventReceiver == null) {
+            return System.nanoTime();
+        }
+
+        return mDisplayEventReceiver.getLatestVsyncEventData()
+                .preferredFrameTimeline().expectedPresentationTime;
     }
 
     private void scheduleFrameLocked(long now) {
@@ -743,12 +840,13 @@ public final class Choreographer {
             DisplayEventReceiver.VsyncEventData vsyncEventData) {
         final long startNanos;
         final long frameIntervalNanos = vsyncEventData.frameInterval;
+        boolean resynced = false;
         try {
+            FrameTimeline timeline = mFrameData.update(frameTimeNanos, vsyncEventData);
             if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-                Trace.traceBegin(Trace.TRACE_TAG_VIEW,
-                        "Choreographer#doFrame " + vsyncEventData.preferredFrameTimeline().vsyncId);
+                Trace.traceBegin(
+                        Trace.TRACE_TAG_VIEW, "Choreographer#doFrame " + timeline.mVsyncId);
             }
-            FrameData frameData = new FrameData(frameTimeNanos, vsyncEventData);
             synchronized (mLock) {
                 if (!mFrameScheduled) {
                     traceMessage("Frame not scheduled");
@@ -765,11 +863,12 @@ public final class Choreographer {
                 startNanos = System.nanoTime();
                 final long jitterNanos = startNanos - frameTimeNanos;
                 if (jitterNanos >= frameIntervalNanos) {
-                    long lastFrameOffset = 0;
+                    frameTimeNanos = startNanos;
                     if (frameIntervalNanos == 0) {
                         Log.i(TAG, "Vsync data empty due to timeout");
                     } else {
-                        lastFrameOffset = jitterNanos % frameIntervalNanos;
+                        long lastFrameOffset = jitterNanos % frameIntervalNanos;
+                        frameTimeNanos = frameTimeNanos - lastFrameOffset;
                         final long skippedFrames = jitterNanos / frameIntervalNanos;
                         if (skippedFrames >= SKIPPED_FRAME_WARNING_LIMIT) {
                             Log.i(TAG, "Skipped " + skippedFrames + " frames!  "
@@ -785,8 +884,9 @@ public final class Choreographer {
                                     + " ms in the past.");
                         }
                     }
-                    frameTimeNanos = startNanos - lastFrameOffset;
-                    frameData.updateFrameData(frameTimeNanos);
+                    timeline = mFrameData.update(
+                            frameTimeNanos, mDisplayEventReceiver, jitterNanos);
+                    resynced = true;
                 }
 
                 if (frameTimeNanos < mLastFrameTimeNanos) {
@@ -815,25 +915,34 @@ public final class Choreographer {
                 mFrameScheduled = false;
                 mLastFrameTimeNanos = frameTimeNanos;
                 mLastFrameIntervalNanos = frameIntervalNanos;
-                mLastVsyncEventData = vsyncEventData;
+                mLastVsyncEventData.copyFrom(vsyncEventData);
             }
 
-            AnimationUtils.lockAnimationClock(frameTimeNanos / TimeUtils.NANOS_PER_MS);
+            if (resynced && Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                String message = String.format("Choreographer#doFrame - resynced to %d in %.1fms",
+                        timeline.mVsyncId, (timeline.mDeadlineNanos - startNanos) * 0.000001f);
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW, message);
+            }
+
+            AnimationUtils.lockAnimationClock(frameTimeNanos / TimeUtils.NANOS_PER_MS,
+                    timeline.mExpectedPresentationTimeNanos);
 
             mFrameInfo.markInputHandlingStart();
-            doCallbacks(Choreographer.CALLBACK_INPUT, frameData, frameIntervalNanos);
+            doCallbacks(Choreographer.CALLBACK_INPUT, frameIntervalNanos);
 
             mFrameInfo.markAnimationsStart();
-            doCallbacks(Choreographer.CALLBACK_ANIMATION, frameData, frameIntervalNanos);
-            doCallbacks(Choreographer.CALLBACK_INSETS_ANIMATION, frameData,
-                    frameIntervalNanos);
+            doCallbacks(Choreographer.CALLBACK_ANIMATION, frameIntervalNanos);
+            doCallbacks(Choreographer.CALLBACK_INSETS_ANIMATION, frameIntervalNanos);
 
             mFrameInfo.markPerformTraversalsStart();
-            doCallbacks(Choreographer.CALLBACK_TRAVERSAL, frameData, frameIntervalNanos);
+            doCallbacks(Choreographer.CALLBACK_TRAVERSAL, frameIntervalNanos);
 
-            doCallbacks(Choreographer.CALLBACK_COMMIT, frameData, frameIntervalNanos);
+            doCallbacks(Choreographer.CALLBACK_COMMIT, frameIntervalNanos);
         } finally {
             AnimationUtils.unlockAnimationClock();
+            if (resynced) {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
 
@@ -845,9 +954,9 @@ public final class Choreographer {
         }
     }
 
-    void doCallbacks(int callbackType, FrameData frameData, long frameIntervalNanos) {
+    void doCallbacks(int callbackType, long frameIntervalNanos) {
         CallbackRecord callbacks;
-        long frameTimeNanos = frameData.mFrameTimeNanos;
+        long frameTimeNanos = mFrameData.mFrameTimeNanos;
         synchronized (mLock) {
             // We use "now" to determine when callbacks become due because it's possible
             // for earlier processing phases in a frame to post callbacks that should run
@@ -871,7 +980,7 @@ public final class Choreographer {
             if (callbackType == Choreographer.CALLBACK_COMMIT) {
                 final long jitterNanos = now - frameTimeNanos;
                 Trace.traceCounter(Trace.TRACE_TAG_VIEW, "jitterNanos", (int) jitterNanos);
-                if (jitterNanos >= 2 * frameIntervalNanos) {
+                if (frameIntervalNanos > 0 && jitterNanos >= 2 * frameIntervalNanos) {
                     final long lastFrameOffset = jitterNanos % frameIntervalNanos
                             + frameIntervalNanos;
                     if (DEBUG_JANK) {
@@ -884,7 +993,7 @@ public final class Choreographer {
                     }
                     frameTimeNanos = now - lastFrameOffset;
                     mLastFrameTimeNanos = frameTimeNanos;
-                    frameData.updateFrameData(frameTimeNanos);
+                    mFrameData.update(frameTimeNanos, mDisplayEventReceiver, jitterNanos);
                 }
             }
         }
@@ -896,7 +1005,7 @@ public final class Choreographer {
                             + ", action=" + c.action + ", token=" + c.token
                             + ", latencyMillis=" + (SystemClock.uptimeMillis() - c.dueTime));
                 }
-                c.run(frameData);
+                c.run(mFrameData);
             }
         } finally {
             synchronized (mLock) {
@@ -998,30 +1107,39 @@ public final class Choreographer {
 
     /** Holds data that describes one possible VSync frame event to render at. */
     public static class FrameTimeline {
-        static final FrameTimeline INVALID_FRAME_TIMELINE = new FrameTimeline(
-                FrameInfo.INVALID_VSYNC_ID, Long.MAX_VALUE, Long.MAX_VALUE);
+        private long mVsyncId = FrameInfo.INVALID_VSYNC_ID;
+        private long mExpectedPresentationTimeNanos = -1;
+        private long mDeadlineNanos = -1;
+        private boolean mInCallback = false;
 
-        FrameTimeline(long vsyncId, long expectedPresentTimeNanos, long deadlineNanos) {
-            this.mVsyncId = vsyncId;
-            this.mExpectedPresentTimeNanos = expectedPresentTimeNanos;
-            this.mDeadlineNanos = deadlineNanos;
+        FrameTimeline() {
+            // Intentionally empty; defined so that it is not API/public by default.
         }
 
-        private long mVsyncId;
-        private long mExpectedPresentTimeNanos;
-        private long mDeadlineNanos;
+        void setInCallback(boolean inCallback) {
+            mInCallback = inCallback;
+        }
+
+        private void checkInCallback() {
+            if (!mInCallback) {
+                throw new IllegalStateException(
+                        "FrameTimeline is not valid outside of the vsync callback");
+            }
+        }
+
+        void update(long vsyncId, long expectedPresentationTimeNanos, long deadlineNanos) {
+            mVsyncId = vsyncId;
+            mExpectedPresentationTimeNanos = expectedPresentationTimeNanos;
+            mDeadlineNanos = deadlineNanos;
+        }
 
         /**
          * The id that corresponds to this frame timeline, used to correlate a frame
          * produced by HWUI with the timeline data stored in Surface Flinger.
          */
         public long getVsyncId() {
+            checkInCallback();
             return mVsyncId;
-        }
-
-        /** Reset the vsync ID to invalid. */
-        void resetVsyncId() {
-            mVsyncId = FrameInfo.INVALID_VSYNC_ID;
         }
 
         /**
@@ -1029,13 +1147,15 @@ public final class Choreographer {
          * presented.
          */
         public long getExpectedPresentationTimeNanos() {
-            return mExpectedPresentTimeNanos;
+            checkInCallback();
+            return mExpectedPresentationTimeNanos;
         }
 
         /**
          * The time in  {@link System#nanoTime()} timebase which this frame needs to be ready by.
          */
         public long getDeadlineNanos() {
+            checkInCallback();
             return mDeadlineNanos;
         }
     }
@@ -1046,43 +1166,18 @@ public final class Choreographer {
      * information including deadline and expected present time.
      */
     public static class FrameData {
-        static final FrameTimeline[] INVALID_FRAME_TIMELINES = new FrameTimeline[0];
-        FrameData() {
-            this.mFrameTimelines = INVALID_FRAME_TIMELINES;
-            this.mPreferredFrameTimeline = FrameTimeline.INVALID_FRAME_TIMELINE;
-        }
-
-        FrameData(long frameTimeNanos, DisplayEventReceiver.VsyncEventData vsyncEventData) {
-            FrameTimeline[] frameTimelines =
-                    new FrameTimeline[vsyncEventData.frameTimelines.length];
-            for (int i = 0; i <  vsyncEventData.frameTimelines.length; i++) {
-                DisplayEventReceiver.VsyncEventData.FrameTimeline frameTimeline =
-                        vsyncEventData.frameTimelines[i];
-                frameTimelines[i] = new FrameTimeline(frameTimeline.vsyncId,
-                        frameTimeline.expectedPresentTime, frameTimeline.deadline);
-            }
-            this.mFrameTimeNanos = frameTimeNanos;
-            this.mFrameTimelines = frameTimelines;
-            this.mPreferredFrameTimeline =
-                    frameTimelines[vsyncEventData.preferredFrameTimelineIndex];
-        }
-
         private long mFrameTimeNanos;
         private FrameTimeline[] mFrameTimelines;
-        private FrameTimeline mPreferredFrameTimeline;
+        private int mPreferredFrameTimelineIndex;
+        private boolean mInCallback = false;
 
-        void updateFrameData(long frameTimeNanos) {
-            mFrameTimeNanos = frameTimeNanos;
-            for (FrameTimeline ft : mFrameTimelines) {
-                // The ID is no longer valid because the frame time that was registered with the ID
-                // no longer matches.
-                // TODO(b/205721584): Ask SF for valid vsync information.
-                ft.resetVsyncId();
-            }
+        FrameData() {
+            allocateFrameTimelines(DisplayEventReceiver.VsyncEventData.FRAME_TIMELINES_CAPACITY);
         }
 
         /** The time in nanoseconds when the frame started being rendered. */
         public long getFrameTimeNanos() {
+            checkInCallback();
             return mFrameTimeNanos;
         }
 
@@ -1090,26 +1185,98 @@ public final class Choreographer {
         @NonNull
         @SuppressLint("ArrayReturn") // For API consistency and speed.
         public FrameTimeline[] getFrameTimelines() {
+            checkInCallback();
             return mFrameTimelines;
         }
 
         /** The platform-preferred frame timeline. */
         @NonNull
         public FrameTimeline getPreferredFrameTimeline() {
-            return mPreferredFrameTimeline;
+            checkInCallback();
+            return mFrameTimelines[mPreferredFrameTimelineIndex];
         }
 
-        private FrameTimeline[] convertFrameTimelines(
-                DisplayEventReceiver.VsyncEventData vsyncEventData) {
-            FrameTimeline[] frameTimelines =
-                    new FrameTimeline[vsyncEventData.frameTimelines.length];
-            for (int i = 0; i < vsyncEventData.frameTimelines.length; i++) {
+        void setInCallback(boolean inCallback) {
+            mInCallback = inCallback;
+            for (int i = 0; i < mFrameTimelines.length; i++) {
+                mFrameTimelines[i].setInCallback(inCallback);
+            }
+        }
+
+        private void checkInCallback() {
+            if (!mInCallback) {
+                throw new IllegalStateException(
+                        "FrameData is not valid outside of the vsync callback");
+            }
+        }
+
+        private void allocateFrameTimelines(int length) {
+            // Maintain one default frame timeline for API (such as getFrameTimelines and
+            // getPreferredFrameTimeline) consistency. It should have default data when accessed.
+            length = Math.max(1, length);
+
+            if (mFrameTimelines == null || mFrameTimelines.length != length) {
+                mFrameTimelines = new FrameTimeline[length];
+                for (int i = 0; i < mFrameTimelines.length; i++) {
+                    mFrameTimelines[i] = new FrameTimeline();
+                }
+            }
+        }
+
+        /**
+         * Update the frame data with a {@code DisplayEventReceiver.VsyncEventData} received from
+         * native.
+         */
+        FrameTimeline update(
+                long frameTimeNanos, DisplayEventReceiver.VsyncEventData vsyncEventData) {
+            allocateFrameTimelines(vsyncEventData.frameTimelinesLength);
+            mFrameTimeNanos = frameTimeNanos;
+            mPreferredFrameTimelineIndex = vsyncEventData.preferredFrameTimelineIndex;
+            for (int i = 0; i < mFrameTimelines.length; i++) {
                 DisplayEventReceiver.VsyncEventData.FrameTimeline frameTimeline =
                         vsyncEventData.frameTimelines[i];
-                frameTimelines[i] = new FrameTimeline(frameTimeline.vsyncId,
-                        frameTimeline.expectedPresentTime, frameTimeline.deadline);
+                mFrameTimelines[i].update(frameTimeline.vsyncId,
+                        frameTimeline.expectedPresentationTime, frameTimeline.deadline);
             }
-            return frameTimelines;
+            return mFrameTimelines[mPreferredFrameTimelineIndex];
+        }
+
+        /**
+         * Update the frame data when the frame is late.
+         *
+         * @param jitterNanos currentTime - frameTime
+         */
+        FrameTimeline update(
+                long frameTimeNanos, DisplayEventReceiver displayEventReceiver, long jitterNanos) {
+            int newPreferredIndex = 0;
+            final long minimumDeadline =
+                    mFrameTimelines[mPreferredFrameTimelineIndex].mDeadlineNanos + jitterNanos;
+            // Look for a non-past deadline timestamp in the existing frame data. Otherwise, binder
+            // query for new frame data. Note that binder is relatively slow, O(ms), so it is
+            // only called when the existing frame data does not hold a valid frame.
+            while (newPreferredIndex < mFrameTimelines.length - 1
+                    && mFrameTimelines[newPreferredIndex].mDeadlineNanos < minimumDeadline) {
+                newPreferredIndex++;
+            }
+
+            long newPreferredDeadline = mFrameTimelines[newPreferredIndex].mDeadlineNanos;
+            if (newPreferredDeadline < minimumDeadline) {
+                DisplayEventReceiver.VsyncEventData latestVsyncEventData =
+                        displayEventReceiver.getLatestVsyncEventData();
+                if (latestVsyncEventData == null) {
+                    Log.w(TAG, "Could not get latest VsyncEventData. Did SurfaceFlinger crash?");
+                } else {
+                    update(frameTimeNanos, latestVsyncEventData);
+                }
+            } else {
+                update(frameTimeNanos, newPreferredIndex);
+            }
+            return mFrameTimelines[mPreferredFrameTimelineIndex];
+        }
+
+        void update(long frameTimeNanos, int newPreferredFrameTimelineIndex) {
+            mFrameTimeNanos = frameTimeNanos;
+            mPreferredFrameTimelineIndex = newPreferredFrameTimelineIndex;
         }
     }
 
@@ -1127,7 +1294,8 @@ public final class Choreographer {
          *
          * @param data The payload which includes frame information. Divide nanosecond values by
          *             {@code 1000000} to convert it to the {@link SystemClock#uptimeMillis()}
-         *             time base.
+         *             time base. {@code data} is not valid outside of {@code onVsync} and should
+         *             not be accessed outside the callback.
          * @see FrameCallback#doFrame
          **/
         void onVsync(@NonNull FrameData data);
@@ -1159,10 +1327,10 @@ public final class Choreographer {
         private boolean mHavePendingVsync;
         private long mTimestampNanos;
         private int mFrame;
-        private VsyncEventData mLastVsyncEventData = new VsyncEventData();
+        private final VsyncEventData mLastVsyncEventData = new VsyncEventData();
 
-        public FrameDisplayEventReceiver(Looper looper, int vsyncSource) {
-            super(looper, vsyncSource, 0);
+        FrameDisplayEventReceiver(Looper looper, int vsyncSource, long layerHandle) {
+            super(looper, vsyncSource, /* eventRegistration */ 0, layerHandle);
         }
 
         // TODO(b/116025192): physicalDisplayId is ignored because SF only emits VSYNC events for
@@ -1199,7 +1367,7 @@ public final class Choreographer {
 
                 mTimestampNanos = timestampNanos;
                 mFrame = frame;
-                mLastVsyncEventData = vsyncEventData;
+                mLastVsyncEventData.copyFrom(vsyncEventData);
                 Message msg = Message.obtain(mHandler, this);
                 msg.setAsynchronous(true);
                 mHandler.sendMessageAtTime(msg, timestampNanos / TimeUtils.NANOS_PER_MS);
@@ -1233,11 +1401,13 @@ public final class Choreographer {
         }
 
         void run(FrameData frameData) {
+            frameData.setInCallback(true);
             if (token == VSYNC_CALLBACK_TOKEN) {
                 ((VsyncCallback) action).onVsync(frameData);
             } else {
                 run(frameData.getFrameTimeNanos());
             }
+            frameData.setInCallback(false);
         }
     }
 

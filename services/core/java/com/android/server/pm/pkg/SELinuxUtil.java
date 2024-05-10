@@ -16,6 +16,8 @@
 
 package com.android.server.pm.pkg;
 
+import com.android.internal.pm.pkg.SEInfoUtil;
+
 /**
  * Utility methods that need to be used in application space.
  * @hide
@@ -23,10 +25,10 @@ package com.android.server.pm.pkg;
 public final class SELinuxUtil {
 
     /** Append to existing seinfo label for instant apps @hide */
-    private static final String INSTANT_APP_STR = ":ephemeralapp";
+    private static final String INSTANT_APP_STR = SEInfoUtil.INSTANT_APP_STR;
 
     /** Append to existing seinfo when modifications are complete @hide */
-    public static final String COMPLETE_STR = ":complete";
+    public static final String COMPLETE_STR = SEInfoUtil.COMPLETE_STR;
 
     /** @hide */
     public static String getSeinfoUser(PackageUserState userState) {

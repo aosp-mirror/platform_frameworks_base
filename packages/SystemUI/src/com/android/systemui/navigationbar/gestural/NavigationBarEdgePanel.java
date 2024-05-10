@@ -16,8 +16,6 @@
 
 package com.android.systemui.navigationbar.gestural;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-
 import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE;
 import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE_TAG;
 
@@ -50,17 +48,20 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.util.LatencyTracker;
 import com.android.settingslib.Utils;
-import com.android.systemui.Dependency;
-import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
+import com.android.systemui.res.R;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.plugins.NavigationEdgeBackPlugin;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
 import com.android.systemui.statusbar.VibratorHelper;
 
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
+
+import javax.inject.Inject;
 
 public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPlugin {
 
@@ -282,11 +283,17 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
             };
     private BackCallback mBackCallback;
 
-    public NavigationBarEdgePanel(Context context, LatencyTracker latencyTracker) {
+    @Inject
+    public NavigationBarEdgePanel(
+            Context context,
+            LatencyTracker latencyTracker,
+            VibratorHelper vibratorHelper,
+            @Background Executor backgroundExecutor,
+            DisplayTracker displayTracker) {
         super(context);
 
         mWindowManager = context.getSystemService(WindowManager.class);
-        mVibratorHelper = Dependency.get(VibratorHelper.class);
+        mVibratorHelper = vibratorHelper;
 
         mDensity = context.getResources().getDisplayMetrics().density;
 
@@ -358,8 +365,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
 
         setVisibility(GONE);
 
-        Executor backgroundExecutor = Dependency.get(Dependency.BACKGROUND_EXECUTOR);
-        boolean isPrimaryDisplay = mContext.getDisplayId() == DEFAULT_DISPLAY;
+        boolean isPrimaryDisplay = mContext.getDisplayId() == displayTracker.getDefaultDisplayId();
         mRegionSamplingHelper = new RegionSamplingHelper(this,
                 new RegionSamplingHelper.SamplingCallback() {
                     @Override

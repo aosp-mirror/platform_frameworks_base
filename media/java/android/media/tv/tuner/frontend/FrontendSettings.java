@@ -38,7 +38,7 @@ public abstract class FrontendSettings {
     /** @hide */
     @IntDef(prefix = "TYPE_",
             value = {TYPE_UNDEFINED, TYPE_ANALOG, TYPE_ATSC, TYPE_ATSC3, TYPE_DVBC, TYPE_DVBS,
-                    TYPE_DVBT, TYPE_ISDBS, TYPE_ISDBS3, TYPE_ISDBT, TYPE_DTMB})
+                    TYPE_DVBT, TYPE_ISDBS, TYPE_ISDBS3, TYPE_ISDBT, TYPE_DTMB, TYPE_IPTV})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
 
@@ -86,7 +86,10 @@ public abstract class FrontendSettings {
      * Digital Terrestrial Multimedia Broadcast standard (DTMB) frontend type.
      */
     public static final int TYPE_DTMB = FrontendType.DTMB;
-
+    /**
+     * Internet Protocol (IPTV) frontend type.
+     */
+    public static final int TYPE_IPTV = FrontendType.IPTV;
 
     /** @hide */
     @LongDef(prefix = "FEC_",

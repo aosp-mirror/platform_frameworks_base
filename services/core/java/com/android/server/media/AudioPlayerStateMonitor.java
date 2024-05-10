@@ -154,6 +154,23 @@ class AudioPlayerStateMonitor {
     }
 
     /**
+     * Returns whether the given uid corresponds to the last process to audio or not.
+     *
+     * <p> This is useful for handling the cases where the foreground app is playing media without
+     * a media session. Then, volume events should affect the local music stream rather than other
+     * media sessions.
+     *
+     * @return {@code true} if the given uid corresponds to the last process to audio or
+     * {@code false} otherwise.
+     */
+    public boolean hasUidPlayedAudioLast(int uid) {
+        synchronized (mLock) {
+            return !mSortedAudioPlaybackClientUids.isEmpty()
+                    && uid == mSortedAudioPlaybackClientUids.get(0);
+        }
+    }
+
+    /**
      * Returns if the audio playback is active for the uid.
      */
     public boolean isPlaybackActive(int uid) {
@@ -234,7 +251,7 @@ class AudioPlayerStateMonitor {
                     }
                 }
 
-                // Update mSortedAuioPlaybackClientUids.
+                // Update mSortedAudioPlaybackClientUids.
                 for (int i = 0; i < activeAudioPlaybackConfigs.size(); ++i) {
                     AudioPlaybackConfiguration config = activeAudioPlaybackConfigs.valueAt(i);
                     final int uid = config.getClientUid();

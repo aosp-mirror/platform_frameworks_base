@@ -21,6 +21,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static androidx.window.extensions.embedding.SplitRule.FINISH_ALWAYS;
 import static androidx.window.extensions.embedding.SplitRule.FINISH_NEVER;
 
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -33,9 +34,11 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Pair;
+import android.view.WindowMetrics;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerToken;
 
+import androidx.window.extensions.core.util.function.Predicate;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType;
 import androidx.window.extensions.layout.DisplayFeature;
 import androidx.window.extensions.layout.FoldingFeature;
@@ -45,6 +48,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+// Suppress GuardedBy warning on unit tests
+@SuppressWarnings("GuardedBy")
 public class EmbeddingTestUtils {
     static final Rect TASK_BOUNDS = new Rect(0, 0, 600, 1200);
     static final int TASK_ID = 10;
@@ -104,7 +109,7 @@ public class EmbeddingTestUtils {
     static SplitRule createSplitRule(@NonNull Activity primaryActivity,
             @NonNull Intent secondaryIntent, boolean clearTop) {
         final Pair<Activity, Intent> targetPair = new Pair<>(primaryActivity, secondaryIntent);
-        return new SplitPairRule.Builder(
+        return createSplitPairRuleBuilder(
                 activityPair -> false,
                 targetPair::equals,
                 w -> true)
@@ -141,7 +146,7 @@ public class EmbeddingTestUtils {
             @NonNull Activity secondaryActivity, int finishPrimaryWithSecondary,
             int finishSecondaryWithPrimary, boolean clearTop) {
         final Pair<Activity, Activity> targetPair = new Pair<>(primaryActivity, secondaryActivity);
-        return new SplitPairRule.Builder(
+        return createSplitPairRuleBuilder(
                 targetPair::equals,
                 activityIntentPair -> false,
                 w -> true)
@@ -160,15 +165,23 @@ public class EmbeddingTestUtils {
     /** Creates a mock TaskFragmentInfo for the given TaskFragment. */
     static TaskFragmentInfo createMockTaskFragmentInfo(@NonNull TaskFragmentContainer container,
             @NonNull Activity activity) {
+        return createMockTaskFragmentInfo(container, activity, true /* isVisible */);
+    }
+
+    /** Creates a mock TaskFragmentInfo for the given TaskFragment. */
+    static TaskFragmentInfo createMockTaskFragmentInfo(@NonNull TaskFragmentContainer container,
+            @NonNull Activity activity, boolean isVisible) {
         return new TaskFragmentInfo(container.getTaskFragmentToken(),
                 mock(WindowContainerToken.class),
                 new Configuration(),
                 1,
-                true /* isVisible */,
+                isVisible,
                 Collections.singletonList(activity.getActivityToken()),
+                new ArrayList<>(),
                 new Point(),
                 false /* isTaskClearedForReuse */,
                 false /* isTaskFragmentClearedForPip */,
+                false /* isClearedForReorderActivityToFront */,
                 new Point());
     }
 
@@ -190,6 +203,15 @@ public class EmbeddingTestUtils {
         return new TaskContainer(TASK_ID, activity);
     }
 
+    static TaskContainer createTestTaskContainer(@NonNull SplitController controller) {
+        final TaskContainer taskContainer = createTestTaskContainer();
+        final int taskId = taskContainer.getTaskId();
+        // Should not call to create TaskContainer with the same task id twice.
+        assertFalse(controller.mTaskContainers.contains(taskId));
+        controller.mTaskContainers.put(taskId, taskContainer);
+        return taskContainer;
+    }
+
     static WindowLayoutInfo createWindowLayoutInfo() {
         final FoldingFeature foldingFeature = new FoldingFeature(
                 new Rect(
@@ -203,5 +225,27 @@ public class EmbeddingTestUtils {
         final List<DisplayFeature> displayFeatures = new ArrayList<>();
         displayFeatures.add(foldingFeature);
         return new WindowLayoutInfo(displayFeatures);
+    }
+
+    static ActivityRule.Builder createActivityBuilder(
+            @NonNull Predicate<Activity> activityPredicate,
+            @NonNull Predicate<Intent> intentPredicate) {
+        return new ActivityRule.Builder(activityPredicate, intentPredicate);
+    }
+
+    static SplitPairRule.Builder createSplitPairRuleBuilder(
+            @NonNull Predicate<Pair<Activity, Activity>> activitiesPairPredicate,
+            @NonNull Predicate<Pair<Activity, Intent>> activityIntentPairPredicate,
+            @NonNull Predicate<WindowMetrics> windowMetricsPredicate) {
+        return new SplitPairRule.Builder(activitiesPairPredicate, activityIntentPairPredicate,
+                windowMetricsPredicate);
+    }
+
+    static SplitPlaceholderRule.Builder createSplitPlaceholderRuleBuilder(
+            @NonNull Intent placeholderIntent, @NonNull Predicate<Activity> activityPredicate,
+            @NonNull Predicate<Intent> intentPredicate,
+            @NonNull Predicate<WindowMetrics> windowMetricsPredicate) {
+        return new SplitPlaceholderRule.Builder(placeholderIntent, activityPredicate,
+                intentPredicate, windowMetricsPredicate);
     }
 }

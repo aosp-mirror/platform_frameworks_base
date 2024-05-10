@@ -92,7 +92,7 @@ public class SoundTriggerTestService extends Service {
         super.onCreate();
         IntentFilter filter = new IntentFilter();
         filter.addAction(INTENT_ACTION);
-        registerReceiver(mBroadcastReceiver, filter);
+        registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
 
         // Make sure the data directory exists, and we're the owner of it.
         try {
@@ -469,7 +469,7 @@ public class SoundTriggerTestService extends Service {
             }
         }
 
-        // Create a few dummy models if we didn't load anything.
+        // Create a few placeholder models if we didn't load anything.
         if (!loadedModel) {
             Properties dummyModelProperties = new Properties();
             for (String name : new String[]{"1", "2", "3"}) {

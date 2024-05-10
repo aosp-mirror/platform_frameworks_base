@@ -22,6 +22,8 @@
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "tests/common/TestUtils.h"
 
+#include <SkBlendMode.h>
+
 using namespace android;
 using namespace android::uirenderer;
 using namespace android::uirenderer::skiapipeline;

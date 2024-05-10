@@ -24,6 +24,8 @@ import static org.junit.Assert.assertTrue;
 import android.content.Context;
 import android.os.FileUtils;
 import android.os.SystemClock;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -31,6 +33,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -57,7 +60,11 @@ import java.util.stream.IntStream;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(reason = "Needs kernel support")
 public class KernelCpuProcStringReaderTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private File mRoot;
     private File mTestDir;
     private File mTestFile;

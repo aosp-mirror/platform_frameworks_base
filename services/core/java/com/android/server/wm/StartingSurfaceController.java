@@ -20,6 +20,7 @@ import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_DRAWN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_APP_PREFERS_ICON;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
@@ -40,6 +41,7 @@ import android.compat.annotation.EnabledSince;
 import android.content.pm.ApplicationInfo;
 import android.os.UserHandle;
 import android.util.Slog;
+import android.window.ITaskOrganizer;
 import android.window.SplashScreenView;
 import android.window.TaskSnapshot;
 
@@ -79,12 +81,13 @@ public class StartingSurfaceController {
     }
 
     StartingSurface createSplashScreenStartingSurface(ActivityRecord activity, int theme) {
-
         synchronized (mService.mGlobalLock) {
             final Task task = activity.getTask();
-            if (task != null && mService.mAtmService.mTaskOrganizerController.addStartingWindow(
-                    task, activity, theme, null /* taskSnapshot */)) {
-                return new StartingSurface(task);
+            final TaskOrganizerController controller =
+                    mService.mAtmService.mTaskOrganizerController;
+            if (task != null && controller.addStartingWindow(task, activity, theme,
+                    null /* taskSnapshot */)) {
+                return new StartingSurface(task, controller.getTaskOrganizer());
             }
         }
         return null;
@@ -101,7 +104,7 @@ public class StartingSurfaceController {
     static int makeStartingWindowTypeParameter(boolean newTask, boolean taskSwitch,
             boolean processRunning, boolean allowTaskSnapshot, boolean activityCreated,
             boolean isSolidColor, boolean useLegacy, boolean activityDrawn, int startingWindowType,
-            String packageName, int userId) {
+            boolean appPrefersIcon, String packageName, int userId) {
         int parameter = 0;
         if (newTask) {
             parameter |= TYPE_PARAMETER_NEW_TASK;
@@ -131,6 +134,9 @@ public class StartingSurfaceController {
                 && CompatChanges.isChangeEnabled(ALLOW_COPY_SOLID_COLOR_VIEW, packageName,
                 UserHandle.of(userId))) {
             parameter |= TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN;
+        }
+        if (appPrefersIcon) {
+            parameter |= TYPE_PARAMETER_APP_PREFERS_ICON;
         }
         return parameter;
     }
@@ -166,9 +172,12 @@ public class StartingSurfaceController {
                 activity.mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(
                         activity, false /* checkOpening */);
             }
-                mService.mAtmService.mTaskOrganizerController.addStartingWindow(task,
-                        activity, 0 /* launchTheme */, taskSnapshot);
-            return new StartingSurface(task);
+            final TaskOrganizerController controller =
+                    mService.mAtmService.mTaskOrganizerController;
+            if (controller.addStartingWindow(task, activity, 0 /* launchTheme */, taskSnapshot)) {
+                return new StartingSurface(task, controller.getTaskOrganizer());
+            }
+            return null;
         }
     }
 
@@ -256,19 +265,25 @@ public class StartingSurfaceController {
 
     final class StartingSurface {
         private final Task mTask;
+        // The task organizer which hold the client side reference of this surface.
+        final ITaskOrganizer mTaskOrganizer;
 
-        StartingSurface(Task task) {
+        StartingSurface(Task task, ITaskOrganizer taskOrganizer) {
             mTask = task;
+            mTaskOrganizer = taskOrganizer;
         }
 
         /**
          * Removes the starting window surface. Do not hold the window manager lock when calling
          * this method!
+         *
          * @param animate Whether need to play the default exit animation for starting window.
+         * @param hasImeSurface Whether the starting window has IME surface.
          */
-        public void remove(boolean animate) {
+        public void remove(boolean animate, boolean hasImeSurface) {
             synchronized (mService.mGlobalLock) {
-                mService.mAtmService.mTaskOrganizerController.removeStartingWindow(mTask, animate);
+                mService.mAtmService.mTaskOrganizerController.removeStartingWindow(mTask,
+                        mTaskOrganizer, animate, hasImeSurface);
             }
         }
     }

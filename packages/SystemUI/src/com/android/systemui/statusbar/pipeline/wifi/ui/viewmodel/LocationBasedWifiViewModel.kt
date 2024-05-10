@@ -17,11 +17,8 @@
 package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
 import android.graphics.Color
-import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOf
+import com.android.systemui.statusbar.phone.StatusBarLocation
+import java.lang.IllegalArgumentException
 
 /**
  * A view model for a wifi icon in a specific location. This allows us to control parameters that
@@ -30,39 +27,51 @@ import kotlinx.coroutines.flow.flowOf
  * Must be subclassed for each distinct location.
  */
 abstract class LocationBasedWifiViewModel(
-    statusBarPipelineFlags: StatusBarPipelineFlags,
-    debugTint: Int,
-
-    /** The wifi icon that should be displayed. Null if we shouldn't display any icon. */
-    val wifiIcon: StateFlow<Icon.Resource?>,
-
-    /** True if the activity in view should be visible. */
-    val isActivityInViewVisible: Flow<Boolean>,
-
-    /** True if the activity out view should be visible. */
-    val isActivityOutViewVisible: Flow<Boolean>,
-
-    /** True if the activity container view should be visible. */
-    val isActivityContainerVisible: Flow<Boolean>,
-) {
-    /** The color that should be used to tint the icon. */
-    val tint: Flow<Int> =
-        flowOf(
-            if (statusBarPipelineFlags.useNewPipelineDebugColoring()) {
-                debugTint
-            } else {
-                DEFAULT_TINT
-            }
-        )
+    private val commonImpl: WifiViewModelCommon,
+) : WifiViewModelCommon by commonImpl {
+    val defaultColor: Int = Color.WHITE
 
     companion object {
         /**
-         * A default icon tint.
-         *
-         * TODO(b/238425913): The tint is actually controlled by
-         * [com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager]. We
-         * should use that logic instead of white as a default.
+         * Returns a new instance of [LocationBasedWifiViewModel] that's specific to the given
+         * [location].
          */
-        private const val DEFAULT_TINT = Color.WHITE
+        fun viewModelForLocation(
+            commonImpl: WifiViewModelCommon,
+            location: StatusBarLocation,
+        ): LocationBasedWifiViewModel =
+            when (location) {
+                StatusBarLocation.HOME -> HomeWifiViewModel(commonImpl)
+                StatusBarLocation.KEYGUARD -> KeyguardWifiViewModel(commonImpl)
+                StatusBarLocation.QS -> QsWifiViewModel(commonImpl)
+                StatusBarLocation.SHADE_CARRIER_GROUP ->
+                    throw IllegalArgumentException("invalid location for WifiViewModel: $location")
+            }
     }
 }
+
+/**
+ * A view model for the wifi icon shown on the "home" page (aka, when the device is unlocked and not
+ * showing the shade, so the user is on the home-screen, or in an app).
+ */
+class HomeWifiViewModel(
+    commonImpl: WifiViewModelCommon,
+) : WifiViewModelCommon, LocationBasedWifiViewModel(commonImpl)
+
+/** A view model for the wifi icon shown on keyguard (lockscreen). */
+class KeyguardWifiViewModel(
+    commonImpl: WifiViewModelCommon,
+) : WifiViewModelCommon, LocationBasedWifiViewModel(commonImpl)
+
+/** A view model for the wifi icon shown in quick settings (when the shade is pulled down). */
+class QsWifiViewModel(
+    commonImpl: WifiViewModelCommon,
+) : WifiViewModelCommon, LocationBasedWifiViewModel(commonImpl)
+
+/**
+ * A view model for the wifi icon in the shade carrier group (visible when quick settings is fully
+ * expanded, and in large screen shade). Currently unused.
+ */
+class ShadeCarrierGroupWifiViewModel(
+    commonImpl: WifiViewModelCommon,
+) : WifiViewModelCommon, LocationBasedWifiViewModel(commonImpl)

@@ -22,6 +22,7 @@ import android.annotation.NonNull;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class SparseSetArray<T> {
     private final SparseArray<ArraySet<T>> mData;
 
@@ -138,5 +139,10 @@ public class SparseSetArray<T> {
 
     public T valueAt(int intIndex, int valueIndex) {
         return mData.valueAt(intIndex).valueAt(valueIndex);
+    }
+
+    /** @return The set of values for key at position {@code intIndex}. */
+    public ArraySet<T> valuesAt(int intIndex) {
+        return mData.valueAt(intIndex);
     }
 }

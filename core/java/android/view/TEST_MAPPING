@@ -10,7 +10,7 @@
           "include-annotation": "android.platform.test.annotations.Presubmit"
         },
         {
-          "exclude-annotation": "android.platform.test.annotations.LargeTest"
+          "exclude-annotation": "androidx.test.filters.LargeTest"
         },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -41,6 +41,9 @@
     }
   ],
   "imports": [
+    {
+      "path": "cts/tests/surfacecontrol"
+    },
     {
       "path": "cts/tests/tests/uirendering"
     }

@@ -36,9 +36,11 @@ import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.ComponentInfoInternal;
+import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.IAuthService;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricService;
@@ -70,6 +72,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemService;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -173,10 +176,12 @@ public class AuthService extends SystemService {
     }
 
     private final class AuthServiceImpl extends IAuthService.Stub {
+        @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
         @Override
         public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
                 @NonNull String opPackageName) throws RemoteException {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+
+            super.createTestSession_enforcePermission();
 
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -187,10 +192,12 @@ public class AuthService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
         @Override
         public List<SensorPropertiesInternal> getSensorProperties(String opPackageName)
                 throws RemoteException {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+
+            super.getSensorProperties_enforcePermission();
 
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -202,9 +209,11 @@ public class AuthService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
         @Override
         public String getUiPackage() {
-            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+
+            super.getUiPackage_enforcePermission();
 
             return getContext().getResources()
                     .getString(R.string.config_biometric_prompt_ui_package);
@@ -256,6 +265,11 @@ public class AuthService extends SystemService {
 
             final long identity = Binder.clearCallingIdentity();
             try {
+                VirtualDeviceManagerInternal vdm = getLocalService(
+                        VirtualDeviceManagerInternal.class);
+                if (vdm != null) {
+                    vdm.onAuthenticationPrompt(callingUid);
+                }
                 return mBiometricService.authenticate(
                         token, sessionId, userId, receiver, opPackageName, promptInfo);
             } finally {
@@ -321,6 +335,33 @@ public class AuthService extends SystemService {
         }
 
         @Override
+        public long getLastAuthenticationTime(int userId,
+                @Authenticators.Types int authenticators) throws RemoteException {
+            // Only allow internal clients to call getLastAuthenticationTime with a different
+            // userId.
+            final int callingUserId = UserHandle.getCallingUserId();
+
+            if (userId != callingUserId) {
+                checkInternalPermission();
+            } else {
+                checkPermission();
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                // We can't do this above because we need the READ_DEVICE_CONFIG permission, which
+                // the calling user may not possess.
+                if (!Flags.lastAuthenticationTime()) {
+                    throw new UnsupportedOperationException();
+                }
+
+                return mBiometricService.getLastAuthenticationTime(userId, authenticators);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public boolean hasEnrolledBiometrics(int userId, String opPackageName)
                 throws RemoteException {
             checkInternalPermission();
@@ -336,12 +377,31 @@ public class AuthService extends SystemService {
         public void registerEnabledOnKeyguardCallback(
                 IBiometricEnabledOnKeyguardCallback callback) throws RemoteException {
             checkInternalPermission();
-            final int callingUserId = UserHandle.getCallingUserId();
             final long identity = Binder.clearCallingIdentity();
             try {
-                mBiometricService.registerEnabledOnKeyguardCallback(callback, callingUserId);
+                mBiometricService.registerEnabledOnKeyguardCallback(callback);
             } finally {
                 Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void registerAuthenticationStateListener(AuthenticationStateListener listener)
+                throws RemoteException {
+            checkInternalPermission();
+            final IFingerprintService fingerprintService = mInjector.getFingerprintService();
+            if (fingerprintService != null) {
+                fingerprintService.registerAuthenticationStateListener(listener);
+            }
+        }
+
+        @Override
+        public void unregisterAuthenticationStateListener(AuthenticationStateListener listener)
+                throws RemoteException {
+            checkInternalPermission();
+            final IFingerprintService fingerprintService = mInjector.getFingerprintService();
+            if (fingerprintService != null) {
+                fingerprintService.unregisterAuthenticationStateListener(listener);
             }
         }
 
@@ -398,6 +458,17 @@ public class AuthService extends SystemService {
             try {
                 mBiometricService.resetLockoutTimeBound(token, opPackageName, fromSensorId, userId,
                         hardwareAuthToken);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void resetLockout(int userId, byte[] hardwareAuthToken) throws RemoteException {
+            checkInternalPermission();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mBiometricService.resetLockout(userId, hardwareAuthToken);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

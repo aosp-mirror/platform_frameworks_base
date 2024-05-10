@@ -41,8 +41,10 @@ import android.app.prediction.AppPredictionSessionId;
 import android.app.prediction.AppTarget;
 import android.app.prediction.IPredictionCallback;
 import android.content.Context;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutServiceInternal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -56,6 +58,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.server.LocalServices;
+import com.android.server.notification.NotificationManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -87,6 +90,13 @@ public final class PeopleServiceTest {
     private AppPredictionContext mPredictionContext;
 
     @Mock
+    ShortcutServiceInternal mShortcutServiceInternal;
+    @Mock
+    PackageManagerInternal mPackageManagerInternal;
+    @Mock
+    NotificationManagerInternal mNotificationManagerInternal;
+
+    @Mock
     private Context mMockContext;
 
     @Rule
@@ -109,6 +119,10 @@ public final class PeopleServiceTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+
+        LocalServices.addService(ShortcutServiceInternal.class, mShortcutServiceInternal);
+        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
+        LocalServices.addService(NotificationManagerInternal.class, mNotificationManagerInternal);
 
         mPeopleService = new TestablePeopleService(mContext);
         mTestableLooper = TestableLooper.get(this);
@@ -137,6 +151,9 @@ public final class PeopleServiceTest {
     @After
     public void tearDown() {
         LocalServices.removeServiceForTest(PeopleServiceInternal.class);
+        LocalServices.removeServiceForTest(ShortcutServiceInternal.class);
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.removeServiceForTest(NotificationManagerInternal.class);
     }
 
     @Test
@@ -167,25 +184,29 @@ public final class PeopleServiceTest {
     @Test
     public void testRegisterConversationListener() throws Exception {
         assertEquals(0,
-                mPeopleService.mConversationListenerHelper.mListeners.getRegisteredCallbackCount());
+                mPeopleService.getConversationListenerHelper()
+                        .mListeners.getRegisteredCallbackCount());
 
         mIPeopleManager.registerConversationListener(TEST_PACKAGE_NAME, 0, CONVERSATION_ID_1,
                 new TestableConversationListener());
         mTestableLooper.processAllMessages();
         assertEquals(1,
-                mPeopleService.mConversationListenerHelper.mListeners.getRegisteredCallbackCount());
+                mPeopleService.getConversationListenerHelper()
+                        .mListeners.getRegisteredCallbackCount());
 
         mIPeopleManager.registerConversationListener(TEST_PACKAGE_NAME, 0, CONVERSATION_ID_1,
                 new TestableConversationListener());
         mTestableLooper.processAllMessages();
         assertEquals(2,
-                mPeopleService.mConversationListenerHelper.mListeners.getRegisteredCallbackCount());
+                mPeopleService.getConversationListenerHelper()
+                        .mListeners.getRegisteredCallbackCount());
 
         mIPeopleManager.registerConversationListener(TEST_PACKAGE_NAME, 0, CONVERSATION_ID_2,
                 new TestableConversationListener());
         mTestableLooper.processAllMessages();
         assertEquals(3,
-                mPeopleService.mConversationListenerHelper.mListeners.getRegisteredCallbackCount());
+                mPeopleService.getConversationListenerHelper()
+                        .mListeners.getRegisteredCallbackCount());
     }
 
     @Test
@@ -201,20 +222,24 @@ public final class PeopleServiceTest {
                 listener3);
         mTestableLooper.processAllMessages();
         assertEquals(3,
-                mPeopleService.mConversationListenerHelper.mListeners.getRegisteredCallbackCount());
+                mPeopleService.getConversationListenerHelper()
+                        .mListeners.getRegisteredCallbackCount());
 
         mIPeopleManager.unregisterConversationListener(
                 listener2);
         assertEquals(2,
-                mPeopleService.mConversationListenerHelper.mListeners.getRegisteredCallbackCount());
+                mPeopleService.getConversationListenerHelper()
+                        .mListeners.getRegisteredCallbackCount());
         mIPeopleManager.unregisterConversationListener(
                 listener1);
         assertEquals(1,
-                mPeopleService.mConversationListenerHelper.mListeners.getRegisteredCallbackCount());
+                mPeopleService.getConversationListenerHelper()
+                        .mListeners.getRegisteredCallbackCount());
         mIPeopleManager.unregisterConversationListener(
                 listener3);
         assertEquals(0,
-                mPeopleService.mConversationListenerHelper.mListeners.getRegisteredCallbackCount());
+                mPeopleService.getConversationListenerHelper()
+                        .mListeners.getRegisteredCallbackCount());
     }
 
     @Test
@@ -229,12 +254,13 @@ public final class PeopleServiceTest {
                 PeopleManager.ConversationListener.class);
         registerListener(CONVERSATION_ID_2, listenerForConversation2);
         assertEquals(3,
-                mPeopleService.mConversationListenerHelper.mListeners.getRegisteredCallbackCount());
+                mPeopleService.getConversationListenerHelper()
+                        .mListeners.getRegisteredCallbackCount());
 
         // Update conversation with two listeners.
         ConversationStatus status = new ConversationStatus.Builder(CONVERSATION_ID_1,
                 ACTIVITY_GAME).build();
-        mPeopleService.mConversationListenerHelper.onConversationsUpdate(
+        mPeopleService.getConversationListenerHelper().onConversationsUpdate(
                 Arrays.asList(getConversation(CONVERSATION_ID_1, status)));
         mTestLooper.dispatchAll();
 

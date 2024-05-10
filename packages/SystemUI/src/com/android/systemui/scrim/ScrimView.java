@@ -20,6 +20,7 @@ import static java.lang.Float.isNaN;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -29,6 +30,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -37,6 +39,8 @@ import androidx.core.graphics.ColorUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.systemui.shade.TouchLogger;
+import com.android.systemui.util.LargeScreenUtils;
 
 import java.util.concurrent.Executor;
 
@@ -57,6 +61,7 @@ public class ScrimView extends View {
     private float mViewAlpha = 1.0f;
     private Drawable mDrawable;
     private PorterDuffColorFilter mColorFilter;
+    private String mScrimName;
     private int mTintColor;
     private boolean mBlendWithMainColor = true;
     private Runnable mChangeRunnable;
@@ -81,6 +86,8 @@ public class ScrimView extends View {
     public ScrimView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
+        setFocusable(false);
+        setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         mDrawable = new ScrimDrawable();
         mDrawable.setCallback(this);
         mColors = new ColorExtractor.GradientColors();
@@ -102,6 +109,13 @@ public class ScrimView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         if (mDrawable.getAlpha() > 0) {
+            Resources res = getResources();
+            // Scrim behind notification shade has sharp (not rounded) corners on large screens
+            // which scrim itself cannot know, so we set it here.
+            if (mDrawable instanceof ScrimDrawable) {
+                ((ScrimDrawable) mDrawable).setShouldUseLargeScreenSize(
+                        LargeScreenUtils.shouldUseLargeScreenShadeHeader(res));
+            }
             mDrawable.draw(canvas);
         }
     }
@@ -168,6 +182,15 @@ public class ScrimView extends View {
             }
             updateColorWithTint(animated);
         });
+    }
+
+    /**
+     * Set corner radius of the bottom edge of the Notification scrim.
+     */
+    public void setBottomEdgeRadius(float radius) {
+        if (mDrawable instanceof ScrimDrawable) {
+            ((ScrimDrawable) mDrawable).setBottomEdgeRadius(radius);
+        }
     }
 
     @VisibleForTesting
@@ -316,6 +339,15 @@ public class ScrimView extends View {
         if (mDrawable instanceof ScrimDrawable) {
             ((ScrimDrawable) mDrawable).setBottomEdgeConcave(clipScrim);
         }
+    }
+
+    public void setScrimName(String scrimName) {
+        mScrimName = scrimName;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return TouchLogger.logDispatchTouch(mScrimName, ev, super.dispatchTouchEvent(ev));
     }
 
     /**

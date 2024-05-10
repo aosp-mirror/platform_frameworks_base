@@ -17,6 +17,7 @@
 package com.android.systemui.temporarydisplay
 
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBuffer
@@ -32,7 +33,7 @@ import org.mockito.Mockito
 @SmallTest
 class TemporaryViewLoggerTest : SysuiTestCase() {
     private lateinit var buffer: LogBuffer
-    private lateinit var logger: TemporaryViewLogger
+    private lateinit var logger: TemporaryViewLogger<TemporaryViewInfo>
 
     @Before
     fun setUp() {
@@ -43,20 +44,32 @@ class TemporaryViewLoggerTest : SysuiTestCase() {
     }
 
     @Test
-    fun logChipAddition_bufferHasLog() {
-        logger.logChipAddition()
+    fun logViewAddition_bufferHasLog() {
+        val info =
+            object : TemporaryViewInfo() {
+                override val id: String = "test id"
+                override val priority: ViewPriority = ViewPriority.CRITICAL
+                override val windowTitle: String = "Test Window Title"
+                override val wakeReason: String = "wake reason"
+                override val instanceId: InstanceId = InstanceId.fakeInstanceId(0)
+            }
+
+        logger.logViewAddition(info)
 
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
         val actualString = stringWriter.toString()
 
         assertThat(actualString).contains(TAG)
+        assertThat(actualString).contains("test id")
+        assertThat(actualString).contains("Test Window Title")
     }
 
     @Test
-    fun logChipRemoval_bufferHasTagAndReason() {
+    fun logViewRemoval_bufferHasTagAndReason() {
         val reason = "test reason"
-        logger.logChipRemoval(reason)
+        val deviceId = "test id"
+        logger.logViewRemoval(deviceId, reason)
 
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
@@ -64,6 +77,7 @@ class TemporaryViewLoggerTest : SysuiTestCase() {
 
         assertThat(actualString).contains(TAG)
         assertThat(actualString).contains(reason)
+        assertThat(actualString).contains(deviceId)
     }
 }
 

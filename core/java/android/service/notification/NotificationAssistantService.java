@@ -99,7 +99,6 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * Input: Nothing.
      * <p>
      * Output: Nothing.
-     * @hide
      */
     @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_ASSISTANT_DETAIL_SETTINGS =
@@ -294,7 +293,10 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * their notifications the assistant can modify.
      * <p> Query {@link NotificationManager#getAllowedAssistantAdjustments()} to see what
      * {@link Adjustment adjustments} you are currently allowed to make.</p>
+     *
+     * @deprecated changing allowed adjustments is no longer supported.
      */
+    @Deprecated
     public void onAllowedAdjustmentsChanged() {
     }
 

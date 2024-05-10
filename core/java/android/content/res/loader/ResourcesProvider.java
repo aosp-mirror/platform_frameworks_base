@@ -18,7 +18,10 @@ package android.content.res.loader;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.om.OverlayInfo;
+import android.content.om.OverlayManager;
 import android.content.pm.ApplicationInfo;
 import android.content.res.ApkAssets;
 import android.content.res.AssetFileDescriptor;
@@ -27,11 +30,17 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.content.om.OverlayManagerImpl;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.Preconditions;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * Provides methods to load resources data from APKs ({@code .apk}) and resources tables
@@ -60,6 +69,47 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
     public static ResourcesProvider empty(@NonNull AssetsProvider assetsProvider) {
         return new ResourcesProvider(ApkAssets.loadEmptyForLoader(ApkAssets.PROPERTY_LOADER,
                 assetsProvider));
+    }
+
+    /**
+     * Creates a ResourcesProvider instance from the specified overlay information.
+     *
+     * <p>In order to enable the registered overlays, an application can create a {@link
+     * ResourcesProvider} instance according to the specified {@link OverlayInfo} instance and put
+     * them into a {@link ResourcesLoader} instance. The application calls {@link
+     * android.content.res.Resources#addLoaders(ResourcesLoader...)} to load the overlays.
+     *
+     * @param overlayInfo is the information about the specified overlay
+     * @return the resources provider instance for the {@code overlayInfo}
+     * @throws IOException when the files can't be loaded.
+     * @see OverlayManager#getOverlayInfosForTarget(String) to get the list of overlay info.
+     */
+    @SuppressLint("WrongConstant") // TODO(b/238713267): ApkAssets blocks PROPERTY_LOADER
+    @NonNull
+    public static ResourcesProvider loadOverlay(@NonNull OverlayInfo overlayInfo)
+            throws IOException {
+        Objects.requireNonNull(overlayInfo);
+        Preconditions.checkArgument(overlayInfo.isFabricated(), "Not accepted overlay");
+        Preconditions.checkStringNotEmpty(
+                overlayInfo.getTargetOverlayableName(), "Without overlayable name");
+        final String overlayName =
+                OverlayManagerImpl.checkOverlayNameValid(overlayInfo.getOverlayName());
+        final String path =
+                Preconditions.checkStringNotEmpty(
+                        overlayInfo.getBaseCodePath(), "Invalid base path");
+
+        final Path frroPath = Path.of(path);
+        if (!Files.isRegularFile(frroPath)) {
+            throw new FileNotFoundException("The frro file not found");
+        }
+        final Path idmapPath = frroPath.getParent().resolve(overlayName + ".idmap");
+        if (!Files.isRegularFile(idmapPath)) {
+            throw new FileNotFoundException("The idmap file not found");
+        }
+
+        return new ResourcesProvider(
+                ApkAssets.loadOverlayFromPath(
+                        idmapPath.toString(), 0 /* flags: self targeting overlay */));
     }
 
     /**

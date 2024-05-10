@@ -89,6 +89,7 @@ public class MainActivity extends Activity {
             for (int i = 0; i < mIdsToRollback.size(); i++) {
                 Intent intent = new Intent(ACTION_NAME);
                 intent.putExtra(ROLLBACK_ID_EXTRA, mIdsToRollback.get(i));
+                intent.setPackage(getApplicationContext().getPackageName());
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(
                         getApplicationContext(), 0, intent, FLAG_MUTABLE);
                 mRollbackManager.commitRollback(mIdsToRollback.get(i),

@@ -4,6 +4,21 @@
 
     <application android:label="WallpaperBackup Tests">
         <uses-library android:name="android.test.runner" />
+        <service android:name="com.android.wallpaperbackup.utils.TestWallpaperService"
+                 android:enabled="true"
+                 android:directBootAware="true"
+                 android:label="Test wallpaper"
+                 android:permission="android.permission.BIND_WALLPAPER"
+                 android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService"/>
+            </intent-filter>
+
+            <!-- Link to XML that defines the wallpaper info. -->
+            <meta-data android:name="android.service.wallpaper"
+                       android:resource="@xml/livewallpaper"/>
+        </service>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

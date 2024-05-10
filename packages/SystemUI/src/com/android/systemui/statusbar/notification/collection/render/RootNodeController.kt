@@ -32,6 +32,9 @@ class RootNodeController(
     override val view: View
 ) : NodeController, PipelineDumpable {
     override val nodeLabel: String = "<root>"
+    override fun offerToKeepInParentForAnimation(): Boolean = false
+    override fun removeFromParentIfKeptForAnimation(): Boolean = false
+    override fun resetKeepInParentForAnimation() {}
 
     override fun getChildAt(index: Int): View? {
         return listContainer.getContainerChildAt(index)

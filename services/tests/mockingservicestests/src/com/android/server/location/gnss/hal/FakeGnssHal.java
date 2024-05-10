@@ -562,6 +562,26 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
     }
 
     @Override
+    protected boolean startSvStatusCollection() {
+        return true;
+    }
+
+    @Override
+    protected boolean stopSvStatusCollection() {
+        return true;
+    }
+
+    @Override
+    public boolean startNmeaMessageCollection() {
+        return true;
+    }
+
+    @Override
+    public boolean stopNmeaMessageCollection() {
+        return true;
+    }
+
+    @Override
     protected int getBatchSize() {
         return mBatchSize;
     }
@@ -664,9 +684,6 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
     protected boolean isGnssVisibilityControlSupported() {
         return mIsVisibilityControlSupported;
     }
-
-    @Override
-    protected void sendNiResponse(int notificationId, int userResponse) {}
 
     @Override
     protected void requestPowerStats() {

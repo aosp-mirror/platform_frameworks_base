@@ -154,7 +154,8 @@ public class Filter implements AutoCloseable {
 
     /** @hide */
     @IntDef(prefix = "STATUS_",
-            value = {STATUS_DATA_READY, STATUS_LOW_WATER, STATUS_HIGH_WATER, STATUS_OVERFLOW})
+            value = {STATUS_DATA_READY, STATUS_LOW_WATER, STATUS_HIGH_WATER, STATUS_OVERFLOW,
+                    STATUS_NO_DATA})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Status {}
 
@@ -183,6 +184,10 @@ public class Filter implements AutoCloseable {
      * discarded.
      */
     public static final int STATUS_OVERFLOW = DemuxFilterStatus.OVERFLOW;
+    /**
+     * The status of a filter that the filter buffer is empty and no filtered data is coming.
+     */
+    public static final int STATUS_NO_DATA = DemuxFilterStatus.NO_DATA;
 
     /** @hide */
     @IntDef(prefix = "SCRAMBLING_STATUS_",
@@ -264,10 +269,19 @@ public class Filter implements AutoCloseable {
         synchronized (mCallbackLock) {
             if (mCallback != null && mExecutor != null) {
                 mExecutor.execute(() -> {
+                    FilterCallback callback;
                     synchronized (mCallbackLock) {
-                        if (mCallback != null) {
-                            mCallback.onFilterStatusChanged(this, status);
+                        callback = mCallback;
+                    }
+                    if (callback != null) {
+                        try {
+                            callback.onFilterStatusChanged(this, status);
+                        } catch (NullPointerException e) {
+                            Log.d(TAG, "catch exception:" + e);
                         }
+                    }
+                    if (callback != null) {
+                        callback.onFilterStatusChanged(this, status);
                     }
                 });
             }
@@ -278,14 +292,20 @@ public class Filter implements AutoCloseable {
         synchronized (mCallbackLock) {
             if (mCallback != null && mExecutor != null) {
                 mExecutor.execute(() -> {
+                    FilterCallback callback;
                     synchronized (mCallbackLock) {
-                        if (mCallback != null) {
-                            mCallback.onFilterEvent(this, events);
-                        } else {
-                            for (FilterEvent event : events) {
-                                if (event instanceof MediaEvent) {
-                                    ((MediaEvent)event).release();
-                                }
+                        callback = mCallback;
+                    }
+                    if (callback != null) {
+                        try {
+                            callback.onFilterEvent(this, events);
+                        } catch (NullPointerException e) {
+                            Log.d(TAG, "catch exception:" + e);
+                        }
+                    } else {
+                        for (FilterEvent event : events) {
+                            if (event instanceof MediaEvent) {
+                                ((MediaEvent) event).release();
                             }
                         }
                     }
@@ -293,7 +313,7 @@ public class Filter implements AutoCloseable {
             } else {
                 for (FilterEvent event : events) {
                     if (event instanceof MediaEvent) {
-                        ((MediaEvent)event).release();
+                        ((MediaEvent) event).release();
                     }
                 }
             }
@@ -348,6 +368,15 @@ public class Filter implements AutoCloseable {
                 throw new IllegalArgumentException("Invalid filter config. filter main type="
                         + mMainType + ", filter subtype=" + mSubtype + ". config main type="
                         + config.getType() + ", config subtype=" + subType);
+            }
+            // Tuner only support VVC after tuner 3.0
+            if (s instanceof RecordSettings
+                    && ((RecordSettings) s).getScIndexType() == RecordSettings.INDEX_TYPE_SC_VVC
+                    && !TunerVersionChecker.isHigherOrEqualVersionTo(
+                            TunerVersionChecker.TUNER_VERSION_3_0)) {
+                Log.e(TAG, "Tuner version " + TunerVersionChecker.getTunerVersion()
+                        + " does not support VVC");
+                return Tuner.RESULT_UNAVAILABLE;
             }
             return nativeConfigureFilter(config.getType(), subType, config);
         }

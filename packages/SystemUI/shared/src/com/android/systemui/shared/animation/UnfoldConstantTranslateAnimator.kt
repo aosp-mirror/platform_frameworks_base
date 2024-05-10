@@ -16,6 +16,7 @@
 package com.android.systemui.shared.animation
 
 import android.view.View
+import android.view.View.LAYOUT_DIRECTION_RTL
 import android.view.ViewGroup
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.ViewIdToTranslate
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
@@ -58,39 +59,55 @@ class UnfoldConstantTranslateAnimator(
         // progress == 0 -> -translationMax
         // progress == 1 -> 0
         val xTrans = (progress - 1f) * translationMax
-        viewsToTranslate.forEach { (view, direction, shouldBeAnimated) ->
-            if (shouldBeAnimated()) {
-                view.get()?.translationX = xTrans * direction.multiplier
+        val rtlMultiplier =
+            if (rootView.getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
+                -1
+            } else {
+                1
             }
+        viewsToTranslate.forEach { (view, direction, func) ->
+            view.get()?.let { func(it, xTrans * direction.multiplier * rtlMultiplier) }
         }
     }
 
     /** Finds in [parent] all views specified by [ids] and register them for the animation. */
     private fun registerViewsForAnimation(parent: ViewGroup, ids: Set<ViewIdToTranslate>) {
         viewsToTranslate =
-            ids.mapNotNull { (id, dir, pred) ->
-                parent.findViewById<View>(id)?.let { view ->
-                    ViewToTranslate(WeakReference(view), dir, pred)
+            ids.asSequence()
+                .filter { it.shouldBeAnimated() }
+                .mapNotNull {
+                    parent.findViewById<View>(it.viewId)?.let { view ->
+                        ViewToTranslate(WeakReference(view), it.direction, it.translateFunc)
+                    }
                 }
-            }
+                .toList()
     }
 
-    /** Represents a view to animate. [rootView] should contain a view with [viewId] inside. */
+    /**
+     * Represents a view to animate. [rootView] should contain a view with [viewId] inside.
+     * [shouldBeAnimated] is only evaluated when the viewsToTranslate is registered in
+     * [registerViewsForAnimation].
+     */
     data class ViewIdToTranslate(
         val viewId: Int,
         val direction: Direction,
-        val shouldBeAnimated: () -> Boolean = { true }
+        val shouldBeAnimated: () -> Boolean = { true },
+        val translateFunc: (View, Float) -> Unit = { view, value -> view.translationX = value },
     )
 
+    /**
+     * Represents a view whose animation process is in-progress. It should be immutable because the
+     * started animation should be completed.
+     */
     private data class ViewToTranslate(
         val view: WeakReference<View>,
         val direction: Direction,
-        val shouldBeAnimated: () -> Boolean
+        val translateFunc: (View, Float) -> Unit,
     )
 
     /** Direction of the animation. */
     enum class Direction(val multiplier: Float) {
-        LEFT(-1f),
-        RIGHT(1f),
+        START(-1f),
+        END(1f),
     }
 }

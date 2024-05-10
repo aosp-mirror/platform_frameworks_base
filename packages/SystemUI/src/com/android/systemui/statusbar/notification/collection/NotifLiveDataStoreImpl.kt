@@ -21,8 +21,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.util.Assert
 import com.android.systemui.util.ListenerSet
-import com.android.systemui.util.isNotEmpty
-import com.android.systemui.util.traceSection
+import com.android.app.tracing.traceSection
 import java.util.Collections.unmodifiableList
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicReference
@@ -32,7 +31,7 @@ import javax.inject.Inject
 @SysUISingleton
 class NotifLiveDataStoreImpl @Inject constructor(
     @Main private val mainExecutor: Executor
-) : NotifLiveDataStore {
+) : NotifLiveDataStore, PipelineDumpable {
     private val hasActiveNotifsPrivate = NotifLiveDataImpl(
         name = "hasActiveNotifs",
         initialValue = false,
@@ -66,6 +65,12 @@ class NotifLiveDataStoreImpl @Inject constructor(
             ).forEach { dispatcher -> dispatcher.invoke() }
         }
     }
+
+    override fun dumpPipeline(d: PipelineDumper) {
+        d.dump("activeNotifListPrivate", activeNotifListPrivate)
+        d.dump("activeNotifCountPrivate", activeNotifCountPrivate)
+        d.dump("hasActiveNotifsPrivate", hasActiveNotifsPrivate)
+    }
 }
 
 /** Read-write implementation of [NotifLiveData] */
@@ -73,7 +78,7 @@ class NotifLiveDataImpl<T>(
     private val name: String,
     initialValue: T,
     @Main private val mainExecutor: Executor
-) : NotifLiveData<T> {
+) : NotifLiveData<T>, PipelineDumpable {
     private val syncObservers = ListenerSet<Observer<T>>()
     private val asyncObservers = ListenerSet<Observer<T>>()
     private val atomicValue = AtomicReference(initialValue)
@@ -133,5 +138,10 @@ class NotifLiveDataImpl<T>(
     override fun removeObserver(observer: Observer<T>) {
         syncObservers.remove(observer)
         asyncObservers.remove(observer)
+    }
+
+    override fun dumpPipeline(d: PipelineDumper) {
+        d.dump("syncObservers", syncObservers)
+        d.dump("asyncObservers", asyncObservers)
     }
 }

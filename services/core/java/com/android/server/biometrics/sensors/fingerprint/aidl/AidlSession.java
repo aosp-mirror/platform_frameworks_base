@@ -16,10 +16,13 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
-import static com.android.server.biometrics.sensors.fingerprint.aidl.Sensor.HalSessionCallback;
-
 import android.annotation.NonNull;
 import android.hardware.biometrics.fingerprint.ISession;
+import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
+
+import com.android.server.biometrics.sensors.fingerprint.hidl.AidlToHidlAdapter;
+
+import java.util.function.Supplier;
 
 /**
  * A holder for an AIDL {@link ISession} with additional metadata about the current user
@@ -30,14 +33,22 @@ public class AidlSession {
     private final int mHalInterfaceVersion;
     @NonNull private final ISession mSession;
     private final int mUserId;
-    @NonNull private final HalSessionCallback mHalSessionCallback;
+    @NonNull private final AidlResponseHandler mAidlResponseHandler;
 
     public AidlSession(int halInterfaceVersion, @NonNull ISession session, int userId,
-            HalSessionCallback halSessionCallback) {
+            AidlResponseHandler aidlResponseHandler) {
         mHalInterfaceVersion = halInterfaceVersion;
         mSession = session;
         mUserId = userId;
-        mHalSessionCallback = halSessionCallback;
+        mAidlResponseHandler = aidlResponseHandler;
+    }
+
+    public AidlSession(@NonNull Supplier<IBiometricsFingerprint> session,
+            int userId, AidlResponseHandler aidlResponseHandler) {
+        mSession = new AidlToHidlAdapter(session, userId, aidlResponseHandler);
+        mHalInterfaceVersion = 0;
+        mUserId = userId;
+        mAidlResponseHandler = aidlResponseHandler;
     }
 
     /** The underlying {@link ISession}. */
@@ -51,8 +62,8 @@ public class AidlSession {
     }
 
     /** The HAL callback, which should only be used in tests {@See BiometricTestSessionImpl}. */
-    HalSessionCallback getHalSessionCallback() {
-        return mHalSessionCallback;
+    AidlResponseHandler getHalSessionCallback() {
+        return mAidlResponseHandler;
     }
 
     /**

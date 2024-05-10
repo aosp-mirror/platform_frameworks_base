@@ -16,44 +16,41 @@
 
 package com.android.systemui.dagger;
 
-import android.content.Context;
 import android.os.HandlerThread;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.SystemUIInitializerFactory;
-import com.android.systemui.tv.TvWMComponent;
-import com.android.wm.shell.TaskViewFactory;
+import com.android.systemui.SystemUIInitializer;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.annotations.ShellMainThread;
-import com.android.wm.shell.dagger.TvWMShellModule;
 import com.android.wm.shell.dagger.WMShellModule;
 import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
-import com.android.wm.shell.floating.FloatingTasks;
+import com.android.wm.shell.keyguard.KeyguardTransitions;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.sysui.ShellInterface;
+import com.android.wm.shell.taskview.TaskViewFactory;
 import com.android.wm.shell.transition.ShellTransitions;
-
-import java.util.Optional;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
 
+import java.util.Optional;
+
 /**
  * Dagger Subcomponent for WindowManager.  This class explicitly describes the interfaces exported
  * from the WM component into the SysUI component (in
- * {@link SystemUIInitializerFactory#init(Context, boolean)}), and references the specific dependencies
+ * {@link SystemUIInitializer#init(boolean)}), and references the specific dependencies
  * provided by its particular device/form-factor SystemUI implementation.
  *
  * ie. {@link WMComponent} includes {@link WMShellModule}
- *     and {@link TvWMComponent} includes {@link TvWMShellModule}
+ * and {@code TvWMComponent} includes {@link com.android.wm.shell.dagger.TvWMShellModule}
  */
 @WMSingleton
 @Subcomponent(modules = {WMShellModule.class})
@@ -100,6 +97,9 @@ public interface WMComponent {
     ShellTransitions getTransitions();
 
     @WMSingleton
+    KeyguardTransitions getKeyguardTransitions();
+
+    @WMSingleton
     Optional<StartingSurface> getStartingSurface();
 
     @WMSingleton
@@ -110,9 +110,6 @@ public interface WMComponent {
 
     @WMSingleton
     Optional<BackAnimation> getBackAnimation();
-
-    @WMSingleton
-    Optional<FloatingTasks> getFloatingTasks();
 
     /**
      * Optional {@link DesktopMode} component for interacting with desktop mode.

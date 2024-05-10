@@ -1,0 +1,10 @@
+{
+  "imports": [
+    {
+      "path": "frameworks/base/services/tests/vibrator"
+    },
+    {
+      "path": "cts/tests/vibrator"
+    }
+  ]
+}

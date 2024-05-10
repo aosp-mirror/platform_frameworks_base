@@ -16,10 +16,13 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
+import static com.android.server.wm.BackgroundActivityStartController.BalVerdict;
 import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 
 import android.app.ActivityManager;
+import android.app.BackgroundStartPrivileges;
 import android.app.IAppTask;
 import android.app.IApplicationThread;
 import android.content.Intent;
@@ -30,6 +33,7 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.Slog;
 
 /**
  * An implementation of IAppTask, that allows an app to manage its own tasks via
@@ -72,15 +76,16 @@ class AppTaskImpl extends IAppTask.Stub {
         checkCallerOrSystemOrRoot();
 
         synchronized (mService.mGlobalLock) {
-            final long origId = Binder.clearCallingIdentity();
+            int origCallingUid = Binder.getCallingUid();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 // We remove the task from recents to preserve backwards
                 if (!mService.mTaskSupervisor.removeTaskById(mTaskId, false,
-                        REMOVE_FROM_RECENTS, "finish-and-remove-task")) {
+                        REMOVE_FROM_RECENTS, "finish-and-remove-task", origCallingUid)) {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                 }
             } finally {
-                Binder.restoreCallingIdentity(origId);
+                Binder.restoreCallingIdentity(callingIdentity);
             }
         }
     }
@@ -120,9 +125,8 @@ class AppTaskImpl extends IAppTask.Stub {
                     callerApp = mService.getProcessController(appThread);
                 }
                 final BackgroundActivityStartController balController =
-                        mService.getActivityStartController()
-                                .getBackgroundActivityLaunchController();
-                if (balController.shouldAbortBackgroundActivityStart(
+                        mService.mTaskSupervisor.getBackgroundActivityLaunchController();
+                BalVerdict balVerdict = balController.checkBackgroundActivityStart(
                         callingUid,
                         callingPid,
                         callingPackage,
@@ -130,12 +134,16 @@ class AppTaskImpl extends IAppTask.Stub {
                         -1,
                         callerApp,
                         null,
-                        false,
+                        BackgroundStartPrivileges.NONE,
                         null,
-                        null)) {
-                    if (!mService.isBackgroundActivityStartsEnabled()) {
-                        return;
-                    }
+                        null,
+                        null);
+                if (balVerdict.blocks() && !mService.isBackgroundActivityStartsEnabled()) {
+                    Slog.w(TAG, "moveTaskToFront blocked: : " + balVerdict);
+                    return;
+                }
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "moveTaskToFront allowed: " + balVerdict);
                 }
             }
             mService.mTaskSupervisor.startActivityFromRecents(callingPid, callingUid, mTaskId,

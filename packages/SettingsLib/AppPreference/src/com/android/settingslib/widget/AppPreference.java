@@ -24,6 +24,8 @@ import android.widget.ProgressBar;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.preference.app.R;
+
 /**
  * The Preference for the pages need to show apps icon.
  */

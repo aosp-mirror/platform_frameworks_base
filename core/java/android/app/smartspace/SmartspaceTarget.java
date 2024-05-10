@@ -16,10 +16,12 @@
 package android.app.smartspace;
 
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.smartspace.flags.Flags;
 import android.app.smartspace.uitemplatedata.BaseTemplateData;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
@@ -27,6 +29,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.widget.RemoteViews;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -41,7 +44,8 @@ import java.util.Objects;
  * {@link SmartspaceAction} as their type because they can have associated actions.
  *
  * <p><b>NOTE: </b>
- * If {@link mWidget} is set, it should be preferred over all other properties.
+ * If either {@link mRemoteViews} or {@link mWidget} is set, it should be preferred over all
+ * other properties. (An exception is thrown if both are set.)
  * Else, if {@link mSliceUri} is set, it should be preferred over all other data properties.
  * Otherwise, the instance should be treated as a data object.
  *
@@ -131,6 +135,9 @@ public final class SmartspaceTarget implements Parcelable {
     /** {@link AppWidgetProviderInfo} if this target is a widget. */
     @Nullable
     private final AppWidgetProviderInfo mWidget;
+
+    @Nullable
+    private final RemoteViews mRemoteViews;
 
     @Nullable
     private final BaseTemplateData mTemplateData;
@@ -245,6 +252,10 @@ public final class SmartspaceTarget implements Parcelable {
     public static final int UI_TEMPLATE_COMBINED_CARDS = 6;
     // Sub-card template whose data is represented by {@link SubCardTemplateData}
     public static final int UI_TEMPLATE_SUB_CARD = 7;
+    // Reserved: 8
+    // Template type used by non-UI template features for sending logging information in the
+    // base template data. This should not be used for UI template features.
+    // public static final int UI_TEMPLATE_LOGGING_ONLY = 8;
 
     /**
      * The types of the Smartspace ui templates.
@@ -284,6 +295,7 @@ public final class SmartspaceTarget implements Parcelable {
         this.mSliceUri = in.readTypedObject(Uri.CREATOR);
         this.mWidget = in.readTypedObject(AppWidgetProviderInfo.CREATOR);
         this.mTemplateData = in.readParcelable(/* loader= */null, BaseTemplateData.class);
+        this.mRemoteViews = in.readTypedObject(RemoteViews.CREATOR);
     }
 
     private SmartspaceTarget(String smartspaceTargetId,
@@ -294,7 +306,7 @@ public final class SmartspaceTarget implements Parcelable {
             boolean shouldShowExpanded, String sourceNotificationKey,
             ComponentName componentName, UserHandle userHandle,
             String associatedSmartspaceTargetId, Uri sliceUri,
-            AppWidgetProviderInfo widget, BaseTemplateData templateData) {
+            AppWidgetProviderInfo widget, BaseTemplateData templateData, RemoteViews remoteViews) {
         mSmartspaceTargetId = smartspaceTargetId;
         mHeaderAction = headerAction;
         mBaseAction = baseAction;
@@ -313,6 +325,7 @@ public final class SmartspaceTarget implements Parcelable {
         mSliceUri = sliceUri;
         mWidget = widget;
         mTemplateData = templateData;
+        mRemoteViews = remoteViews;
     }
 
     /**
@@ -457,6 +470,15 @@ public final class SmartspaceTarget implements Parcelable {
     }
 
     /**
+     * Returns the {@link RemoteViews} to show over the target.
+     */
+    @FlaggedApi(Flags.FLAG_REMOTE_VIEWS)
+    @Nullable
+    public RemoteViews getRemoteViews() {
+        return mRemoteViews;
+    }
+
+    /**
      * @see Parcelable.Creator
      */
     @NonNull
@@ -492,6 +514,7 @@ public final class SmartspaceTarget implements Parcelable {
         dest.writeTypedObject(this.mSliceUri, flags);
         dest.writeTypedObject(this.mWidget, flags);
         dest.writeParcelable(this.mTemplateData, flags);
+        dest.writeTypedObject(this.mRemoteViews, flags);
     }
 
     @Override
@@ -520,6 +543,7 @@ public final class SmartspaceTarget implements Parcelable {
                 + ", mSliceUri=" + mSliceUri
                 + ", mWidget=" + mWidget
                 + ", mTemplateData=" + mTemplateData
+                + ", mRemoteViews=" + mRemoteViews
                 + '}';
     }
 
@@ -546,7 +570,8 @@ public final class SmartspaceTarget implements Parcelable {
                 that.mAssociatedSmartspaceTargetId)
                 && Objects.equals(mSliceUri, that.mSliceUri)
                 && Objects.equals(mWidget, that.mWidget)
-                && Objects.equals(mTemplateData, that.mTemplateData);
+                && Objects.equals(mTemplateData, that.mTemplateData)
+                && Objects.equals(mRemoteViews, that.mRemoteViews);
     }
 
     @Override
@@ -554,7 +579,7 @@ public final class SmartspaceTarget implements Parcelable {
         return Objects.hash(mSmartspaceTargetId, mHeaderAction, mBaseAction, mCreationTimeMillis,
                 mExpiryTimeMillis, mScore, mActionChips, mIconGrid, mFeatureType, mSensitive,
                 mShouldShowExpanded, mSourceNotificationKey, mComponentName, mUserHandle,
-                mAssociatedSmartspaceTargetId, mSliceUri, mWidget, mTemplateData);
+                mAssociatedSmartspaceTargetId, mSliceUri, mWidget, mTemplateData, mRemoteViews);
     }
 
     /**
@@ -583,6 +608,8 @@ public final class SmartspaceTarget implements Parcelable {
         private Uri mSliceUri;
         private AppWidgetProviderInfo mWidget;
         private BaseTemplateData mTemplateData;
+
+        private RemoteViews mRemoteViews;
 
         /**
          * A builder for {@link SmartspaceTarget}.
@@ -723,9 +750,15 @@ public final class SmartspaceTarget implements Parcelable {
          *
          * <p><b>NOTE: </b> If {@link mWidget} is set, all other @Nullable params should be
          * ignored.
+         *
+         * @throws An {@link IllegalStateException} is thrown if {@link mRemoteViews} is set.
          */
         @NonNull
         public Builder setWidget(@NonNull AppWidgetProviderInfo widget) {
+            if (mRemoteViews != null) {
+                throw new IllegalStateException(
+                        "Widget providers and RemoteViews cannot be used at the same time.");
+            }
             this.mWidget = widget;
             return this;
         }
@@ -737,6 +770,25 @@ public final class SmartspaceTarget implements Parcelable {
         public Builder setTemplateData(
                 @Nullable BaseTemplateData templateData) {
             mTemplateData = templateData;
+            return this;
+        }
+
+        /**
+         * Sets the {@link RemoteViews}.
+         *
+         * <p><b>NOTE: </b> If {@link RemoteViews} is set, all other @Nullable params should be
+         * ignored.
+         *
+         * @throws An {@link IllegalStateException} is thrown if {@link mWidget} is set.
+         */
+        @FlaggedApi(Flags.FLAG_REMOTE_VIEWS)
+        @NonNull
+        public Builder setRemoteViews(@NonNull RemoteViews remoteViews) {
+            if (mWidget != null) {
+                throw new IllegalStateException(
+                        "Widget providers and RemoteViews cannot be used at the same time.");
+            }
+            mRemoteViews = remoteViews;
             return this;
         }
 
@@ -756,7 +808,7 @@ public final class SmartspaceTarget implements Parcelable {
                     mHeaderAction, mBaseAction, mCreationTimeMillis, mExpiryTimeMillis, mScore,
                     mActionChips, mIconGrid, mFeatureType, mSensitive, mShouldShowExpanded,
                     mSourceNotificationKey, mComponentName, mUserHandle,
-                    mAssociatedSmartspaceTargetId, mSliceUri, mWidget, mTemplateData);
+                    mAssociatedSmartspaceTargetId, mSliceUri, mWidget, mTemplateData, mRemoteViews);
         }
     }
 }

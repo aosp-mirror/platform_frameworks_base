@@ -24,7 +24,7 @@ import android.provider.Settings;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.wm.shell.pip.tv.TvPipNotificationController;
 
 import java.util.Arrays;
@@ -32,7 +32,8 @@ import java.util.Arrays;
 import javax.inject.Inject;
 
 // NOT Singleton. Started per-user.
-public class NotificationChannels extends CoreStartable {
+/** */
+public class NotificationChannels implements CoreStartable {
     public static String ALERTS      = "ALR";
     public static String SCREENSHOTS_HEADSUP = "SCN_HEADSUP";
     // Deprecated. Please use or create a more specific channel that users will better understand
@@ -45,9 +46,11 @@ public class NotificationChannels extends CoreStartable {
     public static String INSTANT     = "INS";
     public static String SETUP       = "STP";
 
+    private final Context mContext;
+
     @Inject
     public NotificationChannels(Context context) {
-        super(context);
+        mContext = context;
     }
 
     public static void createAll(Context context) {
@@ -109,7 +112,7 @@ public class NotificationChannels extends CoreStartable {
             // priority, so it can be shown in all times.
             nm.createNotificationChannel(new NotificationChannel(
                     TVPIP,
-                    context.getString(R.string.notification_channel_tv_pip),
+                    context.getString(com.android.wm.shell.R.string.notification_channel_tv_pip),
                     NotificationManager.IMPORTANCE_MAX));
         }
     }

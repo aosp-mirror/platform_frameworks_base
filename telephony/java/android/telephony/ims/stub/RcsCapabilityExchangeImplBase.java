@@ -24,8 +24,10 @@ import android.annotation.SystemApi;
 import android.net.Uri;
 import android.telephony.ims.ImsException;
 import android.telephony.ims.RcsUceAdapter;
+import android.telephony.ims.SipDetails;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.RcsFeature;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
@@ -155,7 +157,11 @@ public class RcsCapabilityExchangeImplBase {
          * is not {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received
          * the {@link ImsFeature#onFeatureReady()} callback. This may also happen in rare cases
          * when the Telephony stack has crashed.
+         *
+         * @deprecated Replaced sip information with the newly added
+         * {@link #onNetworkResponse(SipDetails)}.
          */
+        @Deprecated
         void onNetworkResponse(@IntRange(from = 100, to = 699) int sipCode,
                 @NonNull String reason) throws ImsException;
 
@@ -178,11 +184,35 @@ public class RcsCapabilityExchangeImplBase {
          * {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received
          * the {@link ImsFeature#onFeatureReady()} callback. This may also happen in
          * rare cases when the Telephony stack has crashed.
+         *
+         * @deprecated Replaced sip information with the newly added
+         * {@link #onNetworkResponse(SipDetails)}.
          */
+        @Deprecated
         void onNetworkResponse(@IntRange(from = 100, to = 699) int sipCode,
                 @NonNull String reasonPhrase,
                 @IntRange(from = 100, to = 699) int reasonHeaderCause,
                 @NonNull String reasonHeaderText) throws ImsException;
+
+        /**
+         * Provide the framework with a subsequent network response update to
+         * {@link #publishCapabilities(String, PublishResponseCallback)}.
+         *
+         * @param details The SIP information received in response to a publish operation.
+         * @throws ImsException If this {@link RcsCapabilityExchangeImplBase} instance is
+         * not currently connected to the framework. This can happen if the {@link RcsFeature}
+         * is not {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received
+         * the {@link ImsFeature#onFeatureReady()} callback. This may also happen in rare cases
+         * when the Telephony stack has crashed.
+         */
+        default void onNetworkResponse(@NonNull SipDetails details) throws ImsException {
+            if (TextUtils.isEmpty(details.getReasonHeaderText())) {
+                onNetworkResponse(details.getResponseCode(), details.getResponsePhrase());
+            } else {
+                onNetworkResponse(details.getResponseCode(), details.getResponsePhrase(),
+                        details.getReasonHeaderCause(), details.getReasonHeaderText());
+            }
+        }
     }
 
     /**
@@ -262,7 +292,11 @@ public class RcsCapabilityExchangeImplBase {
          * {@link RcsFeature} is not {@link ImsFeature#STATE_READY} and the
          * {@link RcsFeature} has not received the {@link ImsFeature#onFeatureReady()} callback.
          * This may also happen in rare cases when the Telephony stack has crashed.
+         *
+         * @deprecated Replaced sip information with the newly added
+         * {@link #onNetworkResponse(SipDetails)}.
          */
+        @Deprecated
         void onNetworkResponse(@IntRange(from = 100, to = 699) int sipCode,
                 @NonNull String reason) throws ImsException;
 
@@ -285,11 +319,40 @@ public class RcsCapabilityExchangeImplBase {
          * {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received
          * the {@link ImsFeature#onFeatureReady()} callback. This may also happen in
          * rare cases when the Telephony stack has crashed.
+         *
+         * @deprecated Replaced sip information with the newly added
+         * {@link #onNetworkResponse(SipDetails)}.
          */
+        @Deprecated
         void onNetworkResponse(@IntRange(from = 100, to = 699) int sipCode,
                 @NonNull String reasonPhrase,
                 @IntRange(from = 100, to = 699) int reasonHeaderCause,
                 @NonNull String reasonHeaderText) throws ImsException;
+
+        /**
+         * Notify the framework of the response to the SUBSCRIBE request from
+         * {@link #subscribeForCapabilities(Collection, SubscribeResponseCallback)}.
+         * <p>
+         * If the carrier network responds to the SUBSCRIBE request with a 2XX response, then the
+         * framework will expect the IMS stack to call {@link #onNotifyCapabilitiesUpdate},
+         * {@link #onResourceTerminated}, and {@link #onTerminated} as required for the
+         * subsequent NOTIFY responses to the subscription.
+         *
+         * @param details The SIP information related to this request.
+         * @throws ImsException If this {@link RcsCapabilityExchangeImplBase} instance is
+         * not currently connected to the framework. This can happen if the
+         * {@link RcsFeature} is not {@link ImsFeature#STATE_READY} and the
+         * {@link RcsFeature} has not received the {@link ImsFeature#onFeatureReady()} callback.
+         * This may also happen in rare cases when the Telephony stack has crashed.
+         */
+        default void onNetworkResponse(@NonNull SipDetails details) throws ImsException {
+            if (TextUtils.isEmpty(details.getReasonHeaderText())) {
+                onNetworkResponse(details.getResponseCode(), details.getResponsePhrase());
+            } else {
+                onNetworkResponse(details.getResponseCode(), details.getResponsePhrase(),
+                        details.getReasonHeaderCause(), details.getReasonHeaderText());
+            }
+        };
 
         /**
          * Notify the framework of the latest XML PIDF documents included in the network response

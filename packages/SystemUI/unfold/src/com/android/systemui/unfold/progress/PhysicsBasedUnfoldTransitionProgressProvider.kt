@@ -15,7 +15,16 @@
  */
 package com.android.systemui.unfold.progress
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
+import android.content.Context
+import android.os.Handler
+import android.os.Trace
+import android.util.FloatProperty
 import android.util.Log
+import android.view.animation.AnimationUtils.loadInterpolator
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
@@ -26,26 +35,48 @@ import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
-import com.android.systemui.unfold.updates.FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE
 import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
+import com.android.systemui.unfold.updates.name
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
-/** Maps fold updates to unfold transition progress using DynamicAnimation. */
-class PhysicsBasedUnfoldTransitionProgressProvider(
-    private val foldStateProvider: FoldStateProvider
+/**
+ * Maps fold updates to unfold transition progress using DynamicAnimation.
+ *
+ * Note that all variable accesses must be done in the [Handler] provided in the constructor, that
+ * might be different than [mainHandler]. When a custom handler is provided, the [SpringAnimation]
+ * uses a scheduler different than the default one.
+ */
+class PhysicsBasedUnfoldTransitionProgressProvider
+@AssistedInject
+constructor(
+    context: Context,
+    private val schedulerFactory: UnfoldFrameCallbackScheduler.Factory,
+    @Assisted private val foldStateProvider: FoldStateProvider,
+    @Assisted private val progressHandler: Handler,
 ) : UnfoldTransitionProgressProvider, FoldUpdatesListener, DynamicAnimation.OnAnimationEndListener {
 
+    private val emphasizedInterpolator =
+        loadInterpolator(context, android.R.interpolator.fast_out_extra_slow_in)
+
+    private var cannedAnimator: ValueAnimator? = null
+
     private val springAnimation =
-        SpringAnimation(this, AnimationProgressProperty).apply {
-            addEndListener(this@PhysicsBasedUnfoldTransitionProgressProvider)
-        }
+        SpringAnimation(
+                this,
+                FloatPropertyCompat.createFloatPropertyCompat(AnimationProgressProperty)
+            )
+            .apply { addEndListener(this@PhysicsBasedUnfoldTransitionProgressProvider) }
 
     private var isTransitionRunning = false
     private var isAnimatedCancelRunning = false
 
     private var transitionProgress: Float = 0.0f
         set(value) {
+            assertInProgressThread()
             if (isTransitionRunning) {
                 listeners.forEach { it.onTransitionProgress(value) }
             }
@@ -55,8 +86,14 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
     private val listeners: MutableList<TransitionProgressListener> = mutableListOf()
 
     init {
-        foldStateProvider.addCallback(this)
-        foldStateProvider.start()
+        progressHandler.post {
+            // The scheduler needs to be created in the progress handler in order to get the correct
+            // choreographer and frame callbacks. This is because the choreographer can be get only
+            // as a thread local.
+            springAnimation.scheduler = schedulerFactory.create()
+            foldStateProvider.addCallback(this)
+            foldStateProvider.start()
+        }
     }
 
     override fun destroy() {
@@ -64,6 +101,8 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
     }
 
     override fun onHingeAngleUpdate(angle: Float) {
+        assertInProgressThread()
+
         if (!isTransitionRunning || isAnimatedCancelRunning) return
         val progress = saturate(angle / FINAL_HINGE_ANGLE_POSITION)
         springAnimation.animateToFinalPosition(progress)
@@ -73,22 +112,14 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
         if (amount < low) low else if (amount > high) high else amount
 
     override fun onFoldUpdate(@FoldUpdate update: Int) {
+        assertInProgressThread()
         when (update) {
-            FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE -> {
-                startTransition(startValue = 0f)
-
-                // Stop the animation if the device has already opened by the time when
-                // the display is available as we won't receive the full open event anymore
-                if (foldStateProvider.isFinishedOpening) {
-                    cancelTransition(endValue = 1f, animate = true)
-                }
-            }
-            FOLD_UPDATE_FINISH_FULL_OPEN, FOLD_UPDATE_FINISH_HALF_OPEN -> {
+            FOLD_UPDATE_FINISH_FULL_OPEN,
+            FOLD_UPDATE_FINISH_HALF_OPEN -> {
                 // Do not cancel if we haven't started the transition yet.
                 // This could happen when we fully unfolded the device before the screen
                 // became available. In this case we start and immediately cancel the animation
-                // in FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE event handler, so we don't need to
-                // cancel it here.
+                // in onUnfoldedScreenAvailable event handler, so we don't need to cancel it here.
                 if (isTransitionRunning) {
                     cancelTransition(endValue = 1f, animate = true)
                 }
@@ -108,6 +139,14 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
                     // the transition continues running.
                     if (isAnimatedCancelRunning) {
                         isAnimatedCancelRunning = false
+
+                        // Switching to spring animation, start the animation if it
+                        // is not running already
+                        springAnimation.animateToFinalPosition(1.0f)
+
+                        cannedAnimator?.removeAllListeners()
+                        cannedAnimator?.cancel()
+                        cannedAnimator = null
                     }
                 } else {
                     startTransition(startValue = 1f)
@@ -116,19 +155,43 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
         }
 
         if (DEBUG) {
-            Log.d(TAG, "onFoldUpdate = $update")
+            Log.d(TAG, "onFoldUpdate = ${update.name()}")
+            Trace.setCounter("fold_update", update.toLong())
+        }
+    }
+
+    override fun onUnfoldedScreenAvailable() {
+        startTransition(startValue = 0f)
+
+        // Stop the animation if the device has already opened by the time when
+        // the display is available as we won't receive the full open event anymore
+        if (foldStateProvider.isFinishedOpening) {
+            cancelTransition(endValue = 1f, animate = true)
         }
     }
 
     private fun cancelTransition(endValue: Float, animate: Boolean) {
+        assertInProgressThread()
         if (isTransitionRunning && animate) {
+            if (endValue == 1.0f && !isAnimatedCancelRunning) {
+                listeners.forEach { it.onTransitionFinishing() }
+            }
+
             isAnimatedCancelRunning = true
-            springAnimation.animateToFinalPosition(endValue)
+
+            if (USE_CANNED_ANIMATION) {
+                startCannedCancelAnimation()
+            } else {
+                springAnimation.animateToFinalPosition(endValue)
+            }
         } else {
             transitionProgress = endValue
             isAnimatedCancelRunning = false
             isTransitionRunning = false
             springAnimation.cancel()
+            cannedAnimator?.removeAllListeners()
+            cannedAnimator?.cancel()
+            cannedAnimator = null
 
             listeners.forEach { it.onTransitionFinished() }
 
@@ -142,7 +205,7 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
         animation: DynamicAnimation<out DynamicAnimation<*>>,
         canceled: Boolean,
         value: Float,
-        velocity: Float
+        velocity: Float,
     ) {
         if (isAnimatedCancelRunning) {
             cancelTransition(value, animate = false)
@@ -150,7 +213,10 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
     }
 
     private fun onStartTransition() {
+        Trace.beginSection("$TAG#onStartTransition")
         listeners.forEach { it.onTransitionStarted() }
+        Trace.endSection()
+
         isTransitionRunning = true
 
         if (DEBUG) {
@@ -159,6 +225,7 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
     }
 
     private fun startTransition(startValue: Float) {
+        assertInProgressThread()
         if (!isTransitionRunning) onStartTransition()
 
         springAnimation.apply {
@@ -178,31 +245,85 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
     }
 
     override fun addCallback(listener: TransitionProgressListener) {
-        listeners.add(listener)
+        progressHandler.post { listeners.add(listener) }
     }
 
     override fun removeCallback(listener: TransitionProgressListener) {
-        listeners.remove(listener)
+        progressHandler.post { listeners.remove(listener) }
+    }
+
+    private fun startCannedCancelAnimation() {
+        assertInProgressThread()
+
+        cannedAnimator?.cancel()
+        cannedAnimator = null
+
+        // Temporary remove listener to cancel the spring animation without
+        // finishing the transition
+        springAnimation.removeEndListener(this)
+        springAnimation.cancel()
+        springAnimation.addEndListener(this)
+
+        cannedAnimator =
+            ObjectAnimator.ofFloat(this, AnimationProgressProperty, transitionProgress, 1f).apply {
+                addListener(CannedAnimationListener())
+                duration =
+                    (CANNED_ANIMATION_DURATION_MS.toFloat() * (1f - transitionProgress)).toLong()
+                interpolator = emphasizedInterpolator
+                start()
+            }
+    }
+
+    private inner class CannedAnimationListener : AnimatorListenerAdapter() {
+        override fun onAnimationStart(animator: Animator) {
+            Trace.beginAsyncSection("$TAG#cannedAnimatorRunning", 0)
+        }
+
+        override fun onAnimationEnd(animator: Animator) {
+            cancelTransition(1f, animate = false)
+            Trace.endAsyncSection("$TAG#cannedAnimatorRunning", 0)
+        }
     }
 
     private object AnimationProgressProperty :
-        FloatPropertyCompat<PhysicsBasedUnfoldTransitionProgressProvider>("animation_progress") {
+        FloatProperty<PhysicsBasedUnfoldTransitionProgressProvider>("animation_progress") {
 
         override fun setValue(
             provider: PhysicsBasedUnfoldTransitionProgressProvider,
-            value: Float
+            value: Float,
         ) {
             provider.transitionProgress = value
         }
 
-        override fun getValue(provider: PhysicsBasedUnfoldTransitionProgressProvider): Float =
+        override fun get(provider: PhysicsBasedUnfoldTransitionProgressProvider): Float =
             provider.transitionProgress
+    }
+
+    private fun assertInProgressThread() {
+        check(progressHandler.looper.isCurrentThread) {
+            val progressThread = progressHandler.looper.thread
+            val thisThread = Thread.currentThread()
+            """should be called from the progress thread.
+                progressThread=$progressThread tid=${progressThread.id}
+                Thread.currentThread()=$thisThread tid=${thisThread.id}"""
+                .trimMargin()
+        }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            foldStateProvider: FoldStateProvider,
+            handler: Handler,
+        ): PhysicsBasedUnfoldTransitionProgressProvider
     }
 }
 
 private const val TAG = "PhysicsBasedUnfoldTransitionProgressProvider"
 private const val DEBUG = true
 
-private const val SPRING_STIFFNESS = 200.0f
+private const val USE_CANNED_ANIMATION = true
+private const val CANNED_ANIMATION_DURATION_MS = 1000
+private const val SPRING_STIFFNESS = 600.0f
 private const val MINIMAL_VISIBLE_CHANGE = 0.001f
 private const val FINAL_HINGE_ANGLE_POSITION = 165f

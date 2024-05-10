@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
@@ -293,6 +294,8 @@ public class PowerProfile {
 
     private static final long SUBSYSTEM_FIELDS_MASK = 0xFFFF_FFFF;
 
+    public static final int POWER_BRACKETS_UNSPECIFIED = -1;
+
     /**
      * A map from Power Use Item to its power consumption.
      */
@@ -314,6 +317,8 @@ public class PowerProfile {
     private static final String TAG_MODEM = "modem";
 
     private static final Object sLock = new Object();
+
+    private int mCpuPowerBracketCount;
 
     @VisibleForTesting
     @UnsupportedAppUsage
@@ -346,7 +351,6 @@ public class PowerProfile {
             sModemPowerProfile.clear();
             initLocked(context, xmlId);
         }
-
     }
 
     @GuardedBy("sLock")
@@ -355,6 +359,8 @@ public class PowerProfile {
             readPowerValuesFromXml(context, xmlId);
         }
         initCpuClusters();
+        initCpuScalingPolicies();
+        initCpuPowerBrackets();
         initDisplays();
         initModem();
     }
@@ -450,6 +456,7 @@ public class PowerProfile {
     private static final String CPU_CLUSTER_POWER_COUNT = "cpu.cluster_power.cluster";
     private static final String CPU_CORE_SPEED_PREFIX = "cpu.core_speeds.cluster";
     private static final String CPU_CORE_POWER_PREFIX = "cpu.core_power.cluster";
+    private static final String CPU_POWER_BRACKETS_PREFIX = "cpu.power_brackets.policy";
 
     private void initCpuClusters() {
         if (sPowerArrayMap.containsKey(CPU_PER_CLUSTER_CORE_COUNT)) {
@@ -473,11 +480,179 @@ public class PowerProfile {
         }
     }
 
-    public static class CpuClusterKey {
-        private final String freqKey;
-        private final String clusterPowerKey;
-        private final String corePowerKey;
-        private final int numCpus;
+    private SparseArray<CpuScalingPolicyPower> mCpuScalingPolicies;
+    private static final String CPU_SCALING_POLICY_POWER_POLICY = "cpu.scaling_policy_power.policy";
+    private static final String CPU_SCALING_STEP_POWER_POLICY = "cpu.scaling_step_power.policy";
+
+    private void initCpuScalingPolicies() {
+        int policyCount = 0;
+        for (String key : sPowerItemMap.keySet()) {
+            if (key.startsWith(CPU_SCALING_POLICY_POWER_POLICY)) {
+                int policy =
+                        Integer.parseInt(key.substring(CPU_SCALING_POLICY_POWER_POLICY.length()));
+                policyCount = Math.max(policyCount, policy + 1);
+            }
+        }
+        for (String key : sPowerArrayMap.keySet()) {
+            if (key.startsWith(CPU_SCALING_STEP_POWER_POLICY)) {
+                int policy =
+                        Integer.parseInt(key.substring(CPU_SCALING_STEP_POWER_POLICY.length()));
+                policyCount = Math.max(policyCount, policy + 1);
+            }
+        }
+
+        if (policyCount > 0) {
+            mCpuScalingPolicies = new SparseArray<>(policyCount);
+            for (int policy = 0; policy < policyCount; policy++) {
+                Double policyPower = sPowerItemMap.get(CPU_SCALING_POLICY_POWER_POLICY + policy);
+                Double[] stepPower = sPowerArrayMap.get(CPU_SCALING_STEP_POWER_POLICY + policy);
+                if (policyPower != null || stepPower != null) {
+                    double[] primitiveStepPower;
+                    if (stepPower != null) {
+                        primitiveStepPower = new double[stepPower.length];
+                        for (int i = 0; i < stepPower.length; i++) {
+                            primitiveStepPower[i] = stepPower[i];
+                        }
+                    } else {
+                        primitiveStepPower = new double[0];
+                    }
+                    mCpuScalingPolicies.put(policy, new CpuScalingPolicyPower(
+                            policyPower != null ? policyPower : 0, primitiveStepPower));
+                }
+            }
+        } else {
+            // Legacy power_profile.xml
+            int cpuId = 0;
+            for (CpuClusterKey cpuCluster : mCpuClusters) {
+                policyCount = cpuId + 1;
+                cpuId += cpuCluster.numCpus;
+            }
+
+            if (policyCount > 0) {
+                mCpuScalingPolicies = new SparseArray<>(policyCount);
+                cpuId = 0;
+                for (CpuClusterKey cpuCluster : mCpuClusters) {
+                    double clusterPower = getAveragePower(cpuCluster.clusterPowerKey);
+                    double[] stepPower;
+                    int numSteps = getNumElements(cpuCluster.corePowerKey);
+                    if (numSteps != 0) {
+                        stepPower = new double[numSteps];
+                        for (int step = 0; step < numSteps; step++) {
+                            stepPower[step] = getAveragePower(cpuCluster.corePowerKey, step);
+                        }
+                    } else {
+                        stepPower = new double[1];
+                    }
+                    mCpuScalingPolicies.put(cpuId,
+                            new CpuScalingPolicyPower(clusterPower, stepPower));
+                    cpuId += cpuCluster.numCpus;
+                }
+            } else {
+                mCpuScalingPolicies = new SparseArray<>(1);
+                mCpuScalingPolicies.put(0,
+                        new CpuScalingPolicyPower(getAveragePower(POWER_CPU_ACTIVE),
+                                new double[]{0}));
+            }
+        }
+    }
+
+    /**
+     * Parses or computes CPU power brackets: groups of states with similar power requirements.
+     */
+    private void initCpuPowerBrackets() {
+        boolean anyBracketsSpecified = false;
+        boolean allBracketsSpecified = true;
+        for (int i = mCpuScalingPolicies.size() - 1; i >= 0; i--) {
+            int policy = mCpuScalingPolicies.keyAt(i);
+            CpuScalingPolicyPower cpuScalingPolicyPower = mCpuScalingPolicies.valueAt(i);
+            final int steps = cpuScalingPolicyPower.stepPower.length;
+            cpuScalingPolicyPower.powerBrackets = new int[steps];
+            if (sPowerArrayMap.get(CPU_POWER_BRACKETS_PREFIX + policy) != null) {
+                anyBracketsSpecified = true;
+            } else {
+                allBracketsSpecified = false;
+            }
+        }
+        if (anyBracketsSpecified && !allBracketsSpecified) {
+            throw new RuntimeException(
+                    "Power brackets should be specified for all scaling policies or none");
+        }
+
+        if (!allBracketsSpecified) {
+            mCpuPowerBracketCount = POWER_BRACKETS_UNSPECIFIED;
+            return;
+        }
+
+        mCpuPowerBracketCount = 0;
+        for (int i = mCpuScalingPolicies.size() - 1; i >= 0; i--) {
+            int policy = mCpuScalingPolicies.keyAt(i);
+            CpuScalingPolicyPower cpuScalingPolicyPower = mCpuScalingPolicies.valueAt(i);
+            final Double[] data = sPowerArrayMap.get(CPU_POWER_BRACKETS_PREFIX + policy);
+            if (data.length != cpuScalingPolicyPower.powerBrackets.length) {
+                throw new RuntimeException(
+                        "Wrong number of items in " + CPU_POWER_BRACKETS_PREFIX + policy
+                                + ", expected: "
+                                + cpuScalingPolicyPower.powerBrackets.length);
+            }
+
+            for (int j = 0; j < data.length; j++) {
+                final int bracket = (int) Math.round(data[j]);
+                cpuScalingPolicyPower.powerBrackets[j] = bracket;
+                if (bracket > mCpuPowerBracketCount) {
+                    mCpuPowerBracketCount = bracket;
+                }
+            }
+        }
+        mCpuPowerBracketCount++;
+    }
+
+    private static class CpuScalingPolicyPower {
+        public final double policyPower;
+        public final double[] stepPower;
+        public int[] powerBrackets;
+
+        private CpuScalingPolicyPower(double policyPower, double[] stepPower) {
+            this.policyPower = policyPower;
+            this.stepPower = stepPower;
+        }
+    }
+
+    /**
+     * Returns the average additional power in (mA) when the CPU scaling policy <code>policy</code>
+     * is used.
+     *
+     * @param policy Policy ID as per <code>ls /sys/devices/system/cpu/cpufreq</code>. Typically,
+     *               policy ID corresponds to the index of the first related CPU, e.g. for "policy6"
+     *               <code>/sys/devices/system/cpu/cpufreq/policy6/related_cpus</code> will
+     *               contain CPU IDs like <code>6, 7</code>
+     */
+    public double getAveragePowerForCpuScalingPolicy(int policy) {
+        CpuScalingPolicyPower cpuScalingPolicyPower = mCpuScalingPolicies.get(policy);
+        if (cpuScalingPolicyPower != null) {
+            return cpuScalingPolicyPower.policyPower;
+        }
+        return 0;
+    }
+
+    /**
+     * Returns the average additional power in (mA) when the CPU scaling policy <code>policy</code>
+     * is used at the <code>step</code> frequency step (this is not the frequency itself, but the
+     * integer index of the frequency step).
+     */
+    public double getAveragePowerForCpuScalingStep(int policy, int step) {
+        CpuScalingPolicyPower cpuScalingPolicyPower = mCpuScalingPolicies.get(policy);
+        if (cpuScalingPolicyPower != null
+                && step >= 0 && step < cpuScalingPolicyPower.stepPower.length) {
+            return cpuScalingPolicyPower.stepPower[step];
+        }
+        return 0;
+    }
+
+    private static class CpuClusterKey {
+        public final String freqKey;
+        public final String clusterPowerKey;
+        public final String corePowerKey;
+        public final int numCpus;
 
         private CpuClusterKey(String freqKey, String clusterPowerKey,
                 String corePowerKey, int numCpus) {
@@ -488,11 +663,19 @@ public class PowerProfile {
         }
     }
 
+    /**
+     * @deprecated Use CpuScalingPolicy instead
+     */
     @UnsupportedAppUsage
+    @Deprecated
     public int getNumCpuClusters() {
         return mCpuClusters.length;
     }
 
+    /**
+     * @deprecated Use CpuScalingPolicy instead
+     */
+    @Deprecated
     public int getNumCoresInCpuCluster(int cluster) {
         if (cluster < 0 || cluster >= mCpuClusters.length) {
             return 0; // index out of bound
@@ -500,7 +683,11 @@ public class PowerProfile {
         return mCpuClusters[cluster].numCpus;
     }
 
+    /**
+     * @deprecated Use CpuScalingPolicy instead
+     */
     @UnsupportedAppUsage
+    @Deprecated
     public int getNumSpeedStepsInCpuCluster(int cluster) {
         if (cluster < 0 || cluster >= mCpuClusters.length) {
             return 0; // index out of bound
@@ -511,6 +698,10 @@ public class PowerProfile {
         return 1; // Only one speed
     }
 
+    /**
+     * @deprecated Use getAveragePowerForCpuScalingPolicy
+     */
+    @Deprecated
     public double getAveragePowerForCpuCluster(int cluster) {
         if (cluster >= 0 && cluster < mCpuClusters.length) {
             return getAveragePower(mCpuClusters[cluster].clusterPowerKey);
@@ -518,9 +709,34 @@ public class PowerProfile {
         return 0;
     }
 
+    /**
+     * @deprecated Use getAveragePowerForCpuScalingStep
+     */
+    @Deprecated
     public double getAveragePowerForCpuCore(int cluster, int step) {
         if (cluster >= 0 && cluster < mCpuClusters.length) {
             return getAveragePower(mCpuClusters[cluster].corePowerKey, step);
+        }
+        return 0;
+    }
+
+    /**
+     * Returns the number of CPU power brackets: groups of states with similar power requirements.
+     * If power brackets are not specified, returns {@link #POWER_BRACKETS_UNSPECIFIED}
+     */
+    public int getCpuPowerBracketCount() {
+        return mCpuPowerBracketCount;
+    }
+
+    /**
+     * Returns the CPU power bracket corresponding to the specified scaling policy and frequency
+     * step
+     */
+    public int getCpuPowerBracketForScalingStep(int policy, int step) {
+        CpuScalingPolicyPower cpuScalingPolicyPower = mCpuScalingPolicies.get(policy);
+        if (cpuScalingPolicyPower != null
+                && step >= 0 && step < cpuScalingPolicyPower.powerBrackets.length) {
+            return cpuScalingPolicyPower.powerBrackets[step];
         }
         return 0;
     }

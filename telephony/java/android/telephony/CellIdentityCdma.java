@@ -23,6 +23,9 @@ import android.annotation.Nullable;
 import android.os.Parcel;
 import android.telephony.cdma.CdmaCellLocation;
 
+import com.android.internal.telephony.util.TelephonyUtils;
+import com.android.telephony.Rlog;
+
 import java.util.Objects;
 
 /**
@@ -242,8 +245,8 @@ public final class CellIdentityCdma extends CellIdentity {
         .append(":{ mNetworkId=").append(mNetworkId)
         .append(" mSystemId=").append(mSystemId)
         .append(" mBasestationId=").append(mBasestationId)
-        .append(" mLongitude=").append(mLongitude)
-        .append(" mLatitude=").append(mLatitude)
+        .append(" mLongitude=").append(Rlog.pii(TelephonyUtils.IS_DEBUGGABLE, mLongitude))
+        .append(" mLatitude=").append(Rlog.pii(TelephonyUtils.IS_DEBUGGABLE, mLatitude))
         .append(" mAlphaLong=").append(mAlphaLong)
         .append(" mAlphaShort=").append(mAlphaShort)
         .append("}").toString();

@@ -32,6 +32,8 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -57,6 +59,8 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     @Mock
     private SingleTapClassifier mSingleTapClassifier;
     @Mock
+    private LongTapClassifier mLongTapClassifier;
+    @Mock
     private DoubleTapClassifier mDoubleTapClassifier;
     @Mock
     private FalsingClassifier mClassifierA;
@@ -71,6 +75,7 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     private final FalsingClassifier.Result mPassedResult = FalsingClassifier.Result.passed(1);
     private final FalsingClassifier.Result mFalsedResult =
             FalsingClassifier.Result.falsed(1, getClass().getSimpleName(), "");
+    private final FakeFeatureFlags mFakeFeatureFlags = new FakeFeatureFlags();
 
     @Before
     public void setup() {
@@ -78,19 +83,29 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         when(mClassifierA.classifyGesture(anyInt(), anyDouble(), anyDouble()))
                 .thenReturn(mFalsedResult);
         when(mSingleTapClassifier.isTap(any(List.class), anyDouble())).thenReturn(mFalsedResult);
+        when(mLongTapClassifier.isTap(any(List.class), anyDouble())).thenReturn(mFalsedResult);
         when(mDoubleTapClassifier.classifyGesture(anyInt(), anyDouble(), anyDouble()))
                 .thenReturn(mFalsedResult);
         mClassifiers.add(mClassifierA);
         when(mFalsingDataProvider.getRecentMotionEvents()).thenReturn(mMotionEventList);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mFalsingDataProvider.isUnfolded()).thenReturn(false);
         mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider,
-                mMetricsLogger, mClassifiers, mSingleTapClassifier, mDoubleTapClassifier,
-                mHistoryTracker, mKeyguardStateController, mAccessibilityManager,
-                false);
+                mMetricsLogger, mClassifiers, mSingleTapClassifier, mLongTapClassifier,
+                mDoubleTapClassifier, mHistoryTracker, mKeyguardStateController,
+                mAccessibilityManager, false, mFakeFeatureFlags);
+        mFakeFeatureFlags.set(Flags.FALSING_OFF_FOR_UNFOLDED, true);
     }
 
     @Test
     public void testA11yDisablesGesture() {
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
+    }
+
+    @Test
+    public void testA11yDisablesTap() {
         assertThat(mBrightLineFalsingManager.isFalseTap(1)).isTrue();
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
         assertThat(mBrightLineFalsingManager.isFalseTap(1)).isFalse();
@@ -98,12 +113,11 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
 
 
     @Test
-    public void testA11yDisablesTap() {
-        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
+    public void testA11yDisablesLongTap() {
+        assertThat(mBrightLineFalsingManager.isFalseLongTap(1)).isTrue();
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
-        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
+        assertThat(mBrightLineFalsingManager.isFalseLongTap(1)).isFalse();
     }
-
 
     @Test
     public void testA11yDisablesDoubleTap() {
@@ -158,5 +172,26 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
             }
         });
         assertThat(mBrightLineFalsingManager.isProximityNear()).isFalse();
+    }
+
+    @Test
+    public void testA11yAction() {
+        assertThat(mBrightLineFalsingManager.isFalseTap(1)).isTrue();
+        when(mFalsingDataProvider.isA11yAction()).thenReturn(true);
+        assertThat(mBrightLineFalsingManager.isFalseTap(1)).isFalse();
+    }
+
+    @Test
+    public void testSkipUnfolded() {
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
+        when(mFalsingDataProvider.isUnfolded()).thenReturn(true);
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
+    }
+
+    @Test
+    public void testTrackpadGesture() {
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
+        when(mFalsingDataProvider.isFromTrackpad()).thenReturn(true);
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
     }
 }

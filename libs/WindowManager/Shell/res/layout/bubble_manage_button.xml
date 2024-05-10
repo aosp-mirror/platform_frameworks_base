@@ -16,6 +16,7 @@
   -->
 <com.android.wm.shell.common.AlphaOptimizedButton
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     style="@android:style/Widget.DeviceDefault.Button.Borderless"
     android:id="@+id/manage_button"
     android:layout_gravity="start"
@@ -27,6 +28,6 @@
     android:focusable="true"
     android:text="@string/manage_bubbles_text"
     android:textSize="@*android:dimen/text_size_body_2_material"
-    android:textColor="@*android:color/system_neutral1_50"
+    android:textColor="?androidprv:attr/materialColorOnSurface"
     android:background="@drawable/bubble_manage_btn_bg"
     />

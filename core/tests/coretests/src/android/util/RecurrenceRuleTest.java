@@ -16,9 +16,17 @@
 
 package android.util;
 
-import androidx.test.filters.SmallTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import junit.framework.TestCase;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -28,19 +36,18 @@ import java.time.ZonedDateTime;
 import java.util.Iterator;
 
 @SmallTest
-public class RecurrenceRuleTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class RecurrenceRuleTest {
 
     static Clock sOriginalClock;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         sOriginalClock = RecurrenceRule.sClock;
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
         RecurrenceRule.sClock = sOriginalClock;
     }
 
@@ -48,6 +55,7 @@ public class RecurrenceRuleTest extends TestCase {
         RecurrenceRule.sClock = Clock.fixed(instant, ZoneId.systemDefault());
     }
 
+    @Test
     public void testSimpleMonth() throws Exception {
         setClock(Instant.parse("2015-11-20T10:15:30.00Z"));
         final RecurrenceRule r = new RecurrenceRule(
@@ -68,6 +76,7 @@ public class RecurrenceRuleTest extends TestCase {
                 ZonedDateTime.parse("2015-11-14T00:00:00.00Z")), it.next());
     }
 
+    @Test
     public void testSimpleDays() throws Exception {
         setClock(Instant.parse("2015-01-01T10:15:30.00Z"));
         final RecurrenceRule r = new RecurrenceRule(
@@ -89,6 +98,7 @@ public class RecurrenceRuleTest extends TestCase {
         assertFalse(it.hasNext());
     }
 
+    @Test
     public void testNotRecurring() throws Exception {
         setClock(Instant.parse("2015-01-01T10:15:30.00Z"));
         final RecurrenceRule r = new RecurrenceRule(
@@ -106,6 +116,7 @@ public class RecurrenceRuleTest extends TestCase {
         assertFalse(it.hasNext());
     }
 
+    @Test
     public void testNever() throws Exception {
         setClock(Instant.parse("2015-01-01T10:15:30.00Z"));
         final RecurrenceRule r = RecurrenceRule.buildNever();
@@ -116,6 +127,7 @@ public class RecurrenceRuleTest extends TestCase {
         assertFalse(it.hasNext());
     }
 
+    @Test
     public void testSane() throws Exception {
         final RecurrenceRule r = new RecurrenceRule(
                 ZonedDateTime.parse("1980-01-31T00:00:00.000Z"),

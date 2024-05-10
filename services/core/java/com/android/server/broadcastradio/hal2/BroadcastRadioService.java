@@ -33,6 +33,9 @@ import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.broadcastradio.RadioServiceUserController;
+import com.android.server.utils.Slogf;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,13 +43,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class BroadcastRadioService {
+/**
+ * Broadcast radio service using BroadcastRadio HIDL 2.0 HAL
+ */
+public final class BroadcastRadioService {
     private static final String TAG = "BcRadio2Srv";
 
-    private final Object mLock;
+    private final Object mLock = new Object();
 
     @GuardedBy("mLock")
-    private int mNextModuleId = 0;
+    private int mNextModuleId;
 
     @GuardedBy("mLock")
     private final Map<String, Integer> mServiceNameToModuleIdMap = new HashMap<>();
@@ -69,7 +75,7 @@ public class BroadcastRadioService {
                     moduleId = mNextModuleId;
                 }
 
-                RadioModule module = RadioModule.tryLoadingModule(moduleId, serviceName, mLock);
+                RadioModule module = RadioModule.tryLoadingModule(moduleId, serviceName);
                 if (module == null) {
                     return;
                 }
@@ -117,9 +123,8 @@ public class BroadcastRadioService {
         }
     };
 
-    public BroadcastRadioService(int nextModuleId, Object lock) {
+    public BroadcastRadioService(int nextModuleId) {
         mNextModuleId = nextModuleId;
-        mLock = lock;
         try {
             IServiceManager manager = IServiceManager.getService();
             if (manager == null) {
@@ -132,10 +137,21 @@ public class BroadcastRadioService {
         }
     }
 
+    @VisibleForTesting
+    BroadcastRadioService(int nextModuleId, IServiceManager manager) {
+        mNextModuleId = nextModuleId;
+        Objects.requireNonNull(manager, "Service manager cannot be null");
+        try {
+            manager.registerForNotifications(IBroadcastRadio.kInterfaceName, "", mServiceListener);
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "Failed to register for service notifications: ", ex);
+        }
+    }
+
     public @NonNull Collection<RadioManager.ModuleProperties> listModules() {
         Slog.v(TAG, "List HIDL 2.0 modules");
         synchronized (mLock) {
-            return mModules.values().stream().map(module -> module.mProperties)
+            return mModules.values().stream().map(module -> module.getProperties())
                     .collect(Collectors.toList());
         }
     }
@@ -153,15 +169,19 @@ public class BroadcastRadioService {
     }
 
     public ITuner openSession(int moduleId, @Nullable RadioManager.BandConfig legacyConfig,
-        boolean withAudio, @NonNull ITunerCallback callback) throws RemoteException {
-        Slog.v(TAG, "Open HIDL 2.0 session");
+            boolean withAudio, @NonNull ITunerCallback callback) throws RemoteException {
+        Slog.v(TAG, "Open HIDL 2.0 session with module id " + moduleId);
+        if (!RadioServiceUserController.isCurrentOrSystemUser()) {
+            Slogf.e(TAG, "Cannot open tuner on HAL 2.0 client for non-current user");
+            throw new IllegalStateException("Cannot open session for non-current user");
+        }
         Objects.requireNonNull(callback);
 
         if (!withAudio) {
             throw new IllegalArgumentException("Non-audio sessions not supported with HAL 2.0");
         }
 
-        RadioModule module = null;
+        RadioModule module;
         synchronized (mLock) {
             module = mModules.get(moduleId);
             if (module == null) {

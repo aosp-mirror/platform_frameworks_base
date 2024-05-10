@@ -27,11 +27,10 @@
 #include <string>
 #include <vector>
 
-#include "android-base/macros.h"
-#include "androidfw/StringPiece.h"
-
 #include "Resource.h"
-#include "io/Io.h"
+#include "android-base/macros.h"
+#include "androidfw/Streams.h"
+#include "androidfw/StringPiece.h"
 #include "process/IResourceTableConsumer.h"
 #include "xml/XmlUtil.h"
 
@@ -66,7 +65,7 @@ class XmlPullParser : public IPackageDeclStack {
   static bool SkipCurrentElement(XmlPullParser* parser);
   static bool IsGoodEvent(Event event);
 
-  explicit XmlPullParser(io::InputStream* in);
+  explicit XmlPullParser(android::InputStream* in);
   ~XmlPullParser();
 
   /**
@@ -120,8 +119,7 @@ class XmlPullParser : public IPackageDeclStack {
    * If xmlns:app="http://schemas.android.com/apk/res-auto", then
    * 'package' will be set to 'defaultPackage'.
    */
-  std::optional<ExtractedPackage> TransformPackageAlias(
-      const android::StringPiece& alias) const override;
+  std::optional<ExtractedPackage> TransformPackageAlias(android::StringPiece alias) const override;
 
   struct PackageDecl {
     std::string prefix;
@@ -180,7 +178,7 @@ class XmlPullParser : public IPackageDeclStack {
     std::vector<Attribute> attributes;
   };
 
-  io::InputStream* in_;
+  android::InputStream* in_;
   XML_Parser parser_;
   std::queue<EventData> event_queue_;
   std::string error_;
@@ -194,7 +192,7 @@ class XmlPullParser : public IPackageDeclStack {
  * Finds the attribute in the current element within the global namespace.
  */
 std::optional<android::StringPiece> FindAttribute(const XmlPullParser* parser,
-                                                  const android::StringPiece& name);
+                                                  android::StringPiece name);
 
 /**
  * Finds the attribute in the current element within the global namespace. The
@@ -202,7 +200,7 @@ std::optional<android::StringPiece> FindAttribute(const XmlPullParser* parser,
  * must not be the empty string.
  */
 std::optional<android::StringPiece> FindNonEmptyAttribute(const XmlPullParser* parser,
-                                                          const android::StringPiece& name);
+                                                          android::StringPiece name);
 
 //
 // Implementation

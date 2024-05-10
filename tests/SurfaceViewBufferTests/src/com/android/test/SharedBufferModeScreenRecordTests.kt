@@ -18,7 +18,6 @@ package com.android.test
 import android.graphics.Color
 import android.graphics.Rect
 import android.os.SystemClock
-import android.view.cts.surfacevalidator.PixelColor
 import junit.framework.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -53,7 +52,7 @@ class SharedBufferModeScreenRecordTests(useBlastAdapter: Boolean) :
             SystemClock.sleep(4000)
         }
 
-        val result = withScreenRecording(svBounds, PixelColor.RED) {
+        val result = withScreenRecording(svBounds, Color.RED) {
             it.mSurfaceProxy.drawBuffer(0, Color.RED)
         }
         val failRatio = 1.0f * result.failFrames / (result.failFrames + result.passFrames)

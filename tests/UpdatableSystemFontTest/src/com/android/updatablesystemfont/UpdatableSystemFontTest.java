@@ -24,7 +24,6 @@ import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assume.assumeTrue;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -36,7 +35,6 @@ import android.graphics.fonts.FontManager;
 import android.graphics.fonts.FontStyle;
 import android.os.ParcelFileDescriptor;
 import android.platform.test.annotations.RootPermissionTest;
-import android.security.FileIntegrityManager;
 import android.text.FontConfig;
 import android.util.Log;
 import android.util.Pair;
@@ -69,6 +67,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Tests if fonts can be updated by {@link FontManager} API.
@@ -131,18 +130,13 @@ public class UpdatableSystemFontTest {
     private static final Pattern PATTERN_SYSTEM_FONT_FILES =
             Pattern.compile("^/(system|product)/fonts/");
 
-    private String mKeyId;
     private FontManager mFontManager;
     private UiDevice mUiDevice;
 
     @Before
     public void setUp() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        // Run tests only if updatable system font is enabled.
-        FileIntegrityManager fim = context.getSystemService(FileIntegrityManager.class);
-        assumeTrue(fim != null);
-        assumeTrue(fim.isApkVeritySupported());
-        mKeyId = insertCert(CERT_PATH);
+        insertCert(CERT_PATH);
         mFontManager = context.getSystemService(FontManager.class);
         expectCommandToSucceed("cmd font clear");
         mUiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
@@ -152,9 +146,6 @@ public class UpdatableSystemFontTest {
     public void tearDown() throws Exception {
         // Ignore errors because this may fail if updatable system font is not enabled.
         runShellCommand("cmd font clear", null);
-        if (mKeyId != null) {
-            expectCommandToSucceed("mini-keyctl unlink " + mKeyId + " .fs-verity");
-        }
     }
 
     @Test
@@ -246,7 +237,10 @@ public class UpdatableSystemFontTest {
     @Test
     public void updateFontFamily() throws Exception {
         assertThat(updateNotoSerifAs("serif")).isEqualTo(FontManager.RESULT_SUCCESS);
-        FontConfig.FontFamily family = findFontFamilyOrThrow("serif");
+        final FontConfig.NamedFamilyList namedFamilyList = findFontFamilyOrThrow("serif");
+        assertThat(namedFamilyList.getFamilies().size()).isEqualTo(1);
+        final FontConfig.FontFamily family = namedFamilyList.getFamilies().get(0);
+
         assertThat(family.getFontList()).hasSize(2);
         assertThat(family.getFontList().get(0).getPostScriptName())
                 .isEqualTo(NOTO_SERIF_REGULAR_POSTSCRIPT_NAME);
@@ -265,7 +259,10 @@ public class UpdatableSystemFontTest {
     public void updateFontFamily_asNewFont() throws Exception {
         assertThat(updateNotoSerifAs("UpdatableSystemFontTest-serif"))
                 .isEqualTo(FontManager.RESULT_SUCCESS);
-        FontConfig.FontFamily family = findFontFamilyOrThrow("UpdatableSystemFontTest-serif");
+        final FontConfig.NamedFamilyList namedFamilyList =
+                findFontFamilyOrThrow("UpdatableSystemFontTest-serif");
+        assertThat(namedFamilyList.getFamilies().size()).isEqualTo(1);
+        final FontConfig.FontFamily family = namedFamilyList.getFamilies().get(0);
         assertThat(family.getFontList()).hasSize(2);
         assertThat(family.getFontList().get(0).getPostScriptName())
                 .isEqualTo(NOTO_SERIF_REGULAR_POSTSCRIPT_NAME);
@@ -368,20 +365,11 @@ public class UpdatableSystemFontTest {
         assertThat(isFileOpenedBy(fontPath, EMOJI_RENDERING_TEST_APP_ID)).isFalse();
     }
 
-    private static String insertCert(String certPath) throws Exception {
-        Pair<String, String> result;
-        try (InputStream is = new FileInputStream(certPath)) {
-            result = runShellCommand("mini-keyctl padd asymmetric fsv_test .fs-verity", is);
-        }
+    private static void insertCert(String certPath) throws Exception {
         // /data/local/tmp is not readable by system server. Copy a cert file to /data/fonts
         final String copiedCert = "/data/fonts/debug_cert.der";
         runShellCommand("cp " + certPath + " " + copiedCert, null);
         runShellCommand("cmd font install-debug-cert " + copiedCert, null);
-        // Assert that there are no errors.
-        assertThat(result.second).isEmpty();
-        String keyId = result.first.trim();
-        assertThat(keyId).matches("^\\d+$");
-        return keyId;
     }
 
     private int updateFontFile(String fontPath, String signaturePath) throws IOException {
@@ -434,9 +422,15 @@ public class UpdatableSystemFontTest {
     private String getFontPath(String psName) {
         FontConfig fontConfig =
                 SystemUtil.runWithShellPermissionIdentity(mFontManager::getFontConfig);
-        return fontConfig.getFontFamilies().stream()
+        final List<FontConfig.FontFamily> namedFamilies = fontConfig.getNamedFamilyLists().stream()
+                .flatMap(namedFamily -> namedFamily.getFamilies().stream()).toList();
+
+        return Stream.concat(fontConfig.getFontFamilies().stream(), namedFamilies.stream())
                 .flatMap(family -> family.getFontList().stream())
-                .filter(font -> psName.equals(font.getPostScriptName()))
+                .filter(font -> {
+                    Log.e("Debug", "PsName = " + font.getPostScriptName());
+                    return psName.equals(font.getPostScriptName());
+                })
                 // Return the last match, because the latter family takes precedence if two families
                 // have the same name.
                 .reduce((first, second) -> second)
@@ -445,10 +439,10 @@ public class UpdatableSystemFontTest {
                 .getAbsolutePath();
     }
 
-    private FontConfig.FontFamily findFontFamilyOrThrow(String familyName) {
+    private FontConfig.NamedFamilyList findFontFamilyOrThrow(String familyName) {
         FontConfig fontConfig =
                 SystemUtil.runWithShellPermissionIdentity(mFontManager::getFontConfig);
-        return fontConfig.getFontFamilies().stream()
+        return fontConfig.getNamedFamilyLists().stream()
                 .filter(family -> familyName.equals(family.getName()))
                 // Return the last match, because the latter family takes precedence if two families
                 // have the same name.

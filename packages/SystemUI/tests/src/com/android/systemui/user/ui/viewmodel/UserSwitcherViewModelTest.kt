@@ -17,28 +17,47 @@
 
 package com.android.systemui.user.ui.viewmodel
 
-import android.graphics.drawable.Drawable
+import android.app.ActivityManager
+import android.app.admin.DevicePolicyManager
+import android.content.pm.UserInfo
+import android.os.UserManager
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.UiEventLogger
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.GuestResetOrExitSessionReceiver
+import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.power.data.repository.FakePowerRepository
-import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.statusbar.policy.UserSwitcherController
+import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
+import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
+import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.GuestUserInteractor
+import com.android.systemui.user.domain.interactor.HeadlessSystemUserMode
+import com.android.systemui.user.domain.interactor.RefreshUsersScheduler
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
 import com.android.systemui.user.shared.model.UserActionModel
-import com.android.systemui.user.shared.model.UserModel
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.yield
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,252 +65,437 @@ import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class UserSwitcherViewModelTest : SysuiTestCase() {
 
-    @Mock private lateinit var controller: UserSwitcherController
     @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var activityManager: ActivityManager
+    @Mock private lateinit var manager: UserManager
+    @Mock private lateinit var headlessSystemUserMode: HeadlessSystemUserMode
+    @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
+    @Mock private lateinit var devicePolicyManager: DevicePolicyManager
+    @Mock private lateinit var uiEventLogger: UiEventLogger
+    @Mock private lateinit var resumeSessionReceiver: GuestResumeSessionReceiver
+    @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
+    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
     private lateinit var underTest: UserSwitcherViewModel
 
     private lateinit var userRepository: FakeUserRepository
     private lateinit var keyguardRepository: FakeKeyguardRepository
-    private lateinit var powerRepository: FakePowerRepository
+
+    private lateinit var testDispatcher: TestDispatcher
+    private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(manager.canAddMoreUsers(any())).thenReturn(true)
+        whenever(manager.getUserSwitchability(any()))
+            .thenReturn(UserManager.SWITCHABILITY_STATUS_OK)
+        overrideResource(
+            com.android.internal.R.string.config_supervisedUserCreationPackage,
+            SUPERVISED_USER_CREATION_PACKAGE,
+        )
 
+        testDispatcher = UnconfinedTestDispatcher()
+        testScope = TestScope(testDispatcher)
         userRepository = FakeUserRepository()
-        keyguardRepository = FakeKeyguardRepository()
-        powerRepository = FakePowerRepository()
-        underTest =
-            UserSwitcherViewModel.Factory(
-                    userInteractor =
-                        UserInteractor(
-                            repository = userRepository,
-                            controller = controller,
-                            activityStarter = activityStarter,
-                            keyguardInteractor =
-                                KeyguardInteractor(
-                                    repository = keyguardRepository,
-                                )
-                        ),
-                    powerInteractor =
-                        PowerInteractor(
-                            repository = powerRepository,
-                        ),
+        runBlocking {
+            val userInfos =
+                listOf(
+                    UserInfo(
+                        /* id= */ 0,
+                        /* name= */ "zero",
+                        /* iconPath= */ "",
+                        /* flags= */ UserInfo.FLAG_PRIMARY or
+                            UserInfo.FLAG_ADMIN or
+                            UserInfo.FLAG_FULL,
+                        UserManager.USER_TYPE_FULL_SYSTEM,
+                    ),
                 )
-                .create(UserSwitcherViewModel::class.java)
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            userRepository.setSettings(
+                UserSwitcherSettingsModel(
+                    isUserSwitcherEnabled = true,
+                )
+            )
+        }
+
+        val refreshUsersScheduler =
+            RefreshUsersScheduler(
+                applicationScope = testScope.backgroundScope,
+                mainDispatcher = testDispatcher,
+                repository = userRepository,
+            )
+        val guestUserInteractor =
+            GuestUserInteractor(
+                applicationContext = context,
+                applicationScope = testScope.backgroundScope,
+                mainDispatcher = testDispatcher,
+                backgroundDispatcher = testDispatcher,
+                manager = manager,
+                repository = userRepository,
+                deviceProvisionedController = deviceProvisionedController,
+                devicePolicyManager = devicePolicyManager,
+                refreshUsersScheduler = refreshUsersScheduler,
+                uiEventLogger = uiEventLogger,
+                resumeSessionReceiver = resumeSessionReceiver,
+                resetOrExitSessionReceiver = resetOrExitSessionReceiver,
+            )
+
+        val featureFlags = FakeFeatureFlags().apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
+        val reply = KeyguardInteractorFactory.create(featureFlags = featureFlags)
+        keyguardRepository = reply.repository
+
+        underTest =
+            UserSwitcherViewModel(
+                userSwitcherInteractor =
+                    UserSwitcherInteractor(
+                        applicationContext = context,
+                        repository = userRepository,
+                        activityStarter = activityStarter,
+                        keyguardInteractor = reply.keyguardInteractor,
+                        featureFlags = featureFlags,
+                        manager = manager,
+                        headlessSystemUserMode = headlessSystemUserMode,
+                        applicationScope = testScope.backgroundScope,
+                        telephonyInteractor =
+                            TelephonyInteractor(
+                                repository = FakeTelephonyRepository(),
+                            ),
+                        broadcastDispatcher = fakeBroadcastDispatcher,
+                        keyguardUpdateMonitor = keyguardUpdateMonitor,
+                        backgroundDispatcher = testDispatcher,
+                        activityManager = activityManager,
+                        refreshUsersScheduler = refreshUsersScheduler,
+                        guestUserInteractor = guestUserInteractor,
+                        uiEventLogger = uiEventLogger,
+                        userRestrictionChecker = mock(),
+                    ),
+                guestUserInteractor = guestUserInteractor,
+            )
     }
 
     @Test
     fun users() =
-        runBlocking(IMMEDIATE) {
-            userRepository.setUsers(
+        testScope.runTest {
+            val userInfos =
                 listOf(
-                    UserModel(
-                        id = 0,
-                        name = Text.Loaded("zero"),
-                        image = USER_IMAGE,
-                        isSelected = true,
-                        isSelectable = true,
+                    UserInfo(
+                        /* id= */ 0,
+                        /* name= */ "zero",
+                        /* iconPath= */ "",
+                        /* flags= */ UserInfo.FLAG_PRIMARY or
+                            UserInfo.FLAG_ADMIN or
+                            UserInfo.FLAG_FULL,
+                        UserManager.USER_TYPE_FULL_SYSTEM,
                     ),
-                    UserModel(
-                        id = 1,
-                        name = Text.Loaded("one"),
-                        image = USER_IMAGE,
-                        isSelected = false,
-                        isSelectable = true,
+                    UserInfo(
+                        /* id= */ 1,
+                        /* name= */ "one",
+                        /* iconPath= */ "",
+                        /* flags= */ UserInfo.FLAG_FULL,
+                        UserManager.USER_TYPE_FULL_SYSTEM,
                     ),
-                    UserModel(
-                        id = 2,
-                        name = Text.Loaded("two"),
-                        image = USER_IMAGE,
-                        isSelected = false,
-                        isSelectable = false,
+                    UserInfo(
+                        /* id= */ 2,
+                        /* name= */ "two",
+                        /* iconPath= */ "",
+                        /* flags= */ UserInfo.FLAG_FULL,
+                        UserManager.USER_TYPE_FULL_SYSTEM,
                     ),
                 )
-            )
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
 
-            var userViewModels: List<UserViewModel>? = null
-            val job = underTest.users.onEach { userViewModels = it }.launchIn(this)
+            val userViewModels = mutableListOf<List<UserViewModel>>()
+            val job = launch(testDispatcher) { underTest.users.toList(userViewModels) }
 
-            assertThat(userViewModels).hasSize(3)
+            assertThat(userViewModels.last()).hasSize(3)
             assertUserViewModel(
-                viewModel = userViewModels?.get(0),
+                viewModel = userViewModels.last()[0],
                 viewKey = 0,
-                name = "zero",
+                name = Text.Loaded("zero"),
                 isSelectionMarkerVisible = true,
-                alpha = LegacyUserUiHelper.USER_SWITCHER_USER_VIEW_SELECTABLE_ALPHA,
-                isClickable = true,
             )
             assertUserViewModel(
-                viewModel = userViewModels?.get(1),
+                viewModel = userViewModels.last()[1],
                 viewKey = 1,
-                name = "one",
+                name = Text.Loaded("one"),
                 isSelectionMarkerVisible = false,
-                alpha = LegacyUserUiHelper.USER_SWITCHER_USER_VIEW_SELECTABLE_ALPHA,
-                isClickable = true,
             )
             assertUserViewModel(
-                viewModel = userViewModels?.get(2),
+                viewModel = userViewModels.last()[2],
                 viewKey = 2,
-                name = "two",
+                name = Text.Loaded("two"),
                 isSelectionMarkerVisible = false,
-                alpha = LegacyUserUiHelper.USER_SWITCHER_USER_VIEW_NOT_SELECTABLE_ALPHA,
-                isClickable = false,
             )
             job.cancel()
         }
 
     @Test
-    fun `maximumUserColumns - few users`() =
-        runBlocking(IMMEDIATE) {
+    fun maximumUserColumns_fewUsers() =
+        testScope.runTest {
             setUsers(count = 2)
-            var value: Int? = null
-            val job = underTest.maximumUserColumns.onEach { value = it }.launchIn(this)
+            val values = mutableListOf<Int>()
+            val job = launch(testDispatcher) { underTest.maximumUserColumns.toList(values) }
 
-            assertThat(value).isEqualTo(4)
+            assertThat(values.last()).isEqualTo(4)
+
             job.cancel()
         }
 
     @Test
-    fun `maximumUserColumns - many users`() =
-        runBlocking(IMMEDIATE) {
+    fun maximumUserColumns_manyUsers() =
+        testScope.runTest {
             setUsers(count = 5)
-            var value: Int? = null
-            val job = underTest.maximumUserColumns.onEach { value = it }.launchIn(this)
+            val values = mutableListOf<Int>()
+            val job = launch(testDispatcher) { underTest.maximumUserColumns.toList(values) }
 
-            assertThat(value).isEqualTo(3)
+            assertThat(values.last()).isEqualTo(3)
             job.cancel()
         }
 
     @Test
-    fun `isOpenMenuButtonVisible - has actions - true`() =
-        runBlocking(IMMEDIATE) {
-            userRepository.setActions(UserActionModel.values().toList())
+    fun isOpenMenuButtonVisible_hasActions_true() =
+        testScope.runTest {
+            setUsers(2)
 
-            var isVisible: Boolean? = null
-            val job = underTest.isOpenMenuButtonVisible.onEach { isVisible = it }.launchIn(this)
+            val isVisible = mutableListOf<Boolean>()
+            val job = launch(testDispatcher) { underTest.isOpenMenuButtonVisible.toList(isVisible) }
 
-            assertThat(isVisible).isTrue()
+            assertThat(isVisible.last()).isTrue()
             job.cancel()
         }
 
     @Test
-    fun `isOpenMenuButtonVisible - no actions - false`() =
-        runBlocking(IMMEDIATE) {
-            userRepository.setActions(emptyList())
+    fun isOpenMenuButtonVisible_noActions_false() =
+        testScope.runTest {
+            val userInfos = setUsers(2)
+            userRepository.setSelectedUserInfo(userInfos[1])
+            keyguardRepository.setKeyguardShowing(true)
+            whenever(manager.canAddMoreUsers(any())).thenReturn(false)
 
-            var isVisible: Boolean? = null
-            val job = underTest.isOpenMenuButtonVisible.onEach { isVisible = it }.launchIn(this)
+            val isVisible = mutableListOf<Boolean>()
+            val job = launch(testDispatcher) { underTest.isOpenMenuButtonVisible.toList(isVisible) }
 
-            assertThat(isVisible).isFalse()
+            assertThat(isVisible.last()).isFalse()
             job.cancel()
         }
 
     @Test
     fun menu() =
-        runBlocking(IMMEDIATE) {
-            userRepository.setActions(UserActionModel.values().toList())
-            var isMenuVisible: Boolean? = null
-            val job = underTest.isMenuVisible.onEach { isMenuVisible = it }.launchIn(this)
-            assertThat(isMenuVisible).isFalse()
+        testScope.runTest {
+            val isMenuVisible = mutableListOf<Boolean>()
+            val job = launch(testDispatcher) { underTest.isMenuVisible.toList(isMenuVisible) }
+            assertThat(isMenuVisible.last()).isFalse()
 
             underTest.onOpenMenuButtonClicked()
-            assertThat(isMenuVisible).isTrue()
+            assertThat(isMenuVisible.last()).isTrue()
 
             underTest.onMenuClosed()
-            assertThat(isMenuVisible).isFalse()
+            assertThat(isMenuVisible.last()).isFalse()
 
             job.cancel()
         }
 
     @Test
-    fun `isFinishRequested - finishes when user is switched`() =
-        runBlocking(IMMEDIATE) {
-            setUsers(count = 2)
-            var isFinishRequested: Boolean? = null
-            val job = underTest.isFinishRequested.onEach { isFinishRequested = it }.launchIn(this)
-            assertThat(isFinishRequested).isFalse()
+    fun menuActions() =
+        testScope.runTest {
+            setUsers(2)
+            val actions = mutableListOf<List<UserActionViewModel>>()
+            val job = launch(testDispatcher) { underTest.menu.toList(actions) }
 
-            userRepository.setSelectedUser(1)
-            yield()
-            assertThat(isFinishRequested).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
-    fun `isFinishRequested - finishes when the screen turns off`() =
-        runBlocking(IMMEDIATE) {
-            setUsers(count = 2)
-            powerRepository.setInteractive(true)
-            var isFinishRequested: Boolean? = null
-            val job = underTest.isFinishRequested.onEach { isFinishRequested = it }.launchIn(this)
-            assertThat(isFinishRequested).isFalse()
-
-            powerRepository.setInteractive(false)
-            yield()
-            assertThat(isFinishRequested).isTrue()
+            assertThat(actions.last().map { it.viewKey })
+                .isEqualTo(
+                    listOf(
+                        UserActionModel.ENTER_GUEST_MODE.ordinal.toLong(),
+                        UserActionModel.ADD_USER.ordinal.toLong(),
+                        UserActionModel.ADD_SUPERVISED_USER.ordinal.toLong(),
+                        UserActionModel.NAVIGATE_TO_USER_MANAGEMENT.ordinal.toLong(),
+                    )
+                )
 
             job.cancel()
         }
 
     @Test
-    fun `isFinishRequested - finishes when cancel button is clicked`() =
-        runBlocking(IMMEDIATE) {
+    fun isFinishRequested_finishesWhenCancelButtonIsClicked() =
+        testScope.runTest {
             setUsers(count = 2)
-            powerRepository.setInteractive(true)
-            var isFinishRequested: Boolean? = null
-            val job = underTest.isFinishRequested.onEach { isFinishRequested = it }.launchIn(this)
-            assertThat(isFinishRequested).isFalse()
+            val isFinishRequested = mutableListOf<Boolean>()
+            val job =
+                launch(testDispatcher) { underTest.isFinishRequested.toList(isFinishRequested) }
+            assertThat(isFinishRequested.last()).isFalse()
 
             underTest.onCancelButtonClicked()
-            yield()
-            assertThat(isFinishRequested).isTrue()
+
+            assertThat(isFinishRequested.last()).isTrue()
 
             underTest.onFinished()
-            yield()
-            assertThat(isFinishRequested).isFalse()
+
+            assertThat(isFinishRequested.last()).isFalse()
 
             job.cancel()
         }
 
-    private fun setUsers(count: Int) {
-        userRepository.setUsers(
+    @Test
+    fun isFinishRequested_finishesWhenUserButtonIsClicked() =
+        testScope.runTest {
+            setUsers(count = 2)
+            val isFinishRequested = mutableListOf<Boolean>()
+            val job =
+                launch(testDispatcher) { underTest.isFinishRequested.toList(isFinishRequested) }
+
+            val userViewModels = collectLastValue(underTest.users)
+            assertThat(isFinishRequested.last()).isFalse()
+
+            userViewModels.invoke()?.firstOrNull()?.onClicked?.invoke()
+
+            assertThat(isFinishRequested.last()).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun guestSelected_nameIsExitGuest() =
+        testScope.runTest {
+            val userInfos =
+                listOf(
+                    UserInfo(
+                        /* id= */ 0,
+                        /* name= */ "zero",
+                        /* iconPath= */ "",
+                        /* flags= */ UserInfo.FLAG_PRIMARY or
+                            UserInfo.FLAG_ADMIN or
+                            UserInfo.FLAG_FULL,
+                        UserManager.USER_TYPE_FULL_SYSTEM,
+                    ),
+                    UserInfo(
+                        /* id= */ 1,
+                        /* name= */ "one",
+                        /* iconPath= */ "",
+                        /* flags= */ UserInfo.FLAG_FULL,
+                        UserManager.USER_TYPE_FULL_GUEST,
+                    ),
+                )
+
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[1])
+
+            val userViewModels = mutableListOf<List<UserViewModel>>()
+            val job = launch(testDispatcher) { underTest.users.toList(userViewModels) }
+
+            assertThat(userViewModels.last()).hasSize(2)
+            assertUserViewModel(
+                viewModel = userViewModels.last()[0],
+                viewKey = 0,
+                name = Text.Loaded("zero"),
+                isSelectionMarkerVisible = false,
+            )
+            assertUserViewModel(
+                viewModel = userViewModels.last()[1],
+                viewKey = 1,
+                name =
+                    Text.Resource(
+                        com.android.settingslib.R.string.guest_exit_quick_settings_button
+                    ),
+                isSelectionMarkerVisible = true,
+            )
+            job.cancel()
+        }
+
+    @Test
+    fun guestNotSelected_nameIsGuest() =
+        testScope.runTest {
+            val userInfos =
+                listOf(
+                    UserInfo(
+                        /* id= */ 0,
+                        /* name= */ "zero",
+                        /* iconPath= */ "",
+                        /* flags= */ UserInfo.FLAG_PRIMARY or
+                            UserInfo.FLAG_ADMIN or
+                            UserInfo.FLAG_FULL,
+                        UserManager.USER_TYPE_FULL_SYSTEM,
+                    ),
+                    UserInfo(
+                        /* id= */ 1,
+                        /* name= */ "one",
+                        /* iconPath= */ "",
+                        /* flags= */ UserInfo.FLAG_FULL,
+                        UserManager.USER_TYPE_FULL_GUEST,
+                    ),
+                )
+
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            runCurrent()
+
+            val userViewModels = mutableListOf<List<UserViewModel>>()
+            val job = launch(testDispatcher) { underTest.users.toList(userViewModels) }
+
+            assertThat(userViewModels.last()).hasSize(2)
+            assertUserViewModel(
+                viewModel = userViewModels.last()[0],
+                viewKey = 0,
+                name = Text.Loaded("zero"),
+                isSelectionMarkerVisible = true,
+            )
+            assertUserViewModel(
+                viewModel = userViewModels.last()[1],
+                viewKey = 1,
+                name = Text.Loaded("one"),
+                isSelectionMarkerVisible = false,
+            )
+            job.cancel()
+        }
+
+    private suspend fun setUsers(count: Int): List<UserInfo> {
+        val userInfos =
             (0 until count).map { index ->
-                UserModel(
-                    id = index,
-                    name = Text.Loaded("$index"),
-                    image = USER_IMAGE,
-                    isSelected = index == 0,
-                    isSelectable = true,
+                UserInfo(
+                    /* id= */ index,
+                    /* name= */ "$index",
+                    /* iconPath= */ "",
+                    /* flags= */ if (index == 0) {
+                        // This is the primary user.
+                        UserInfo.FLAG_PRIMARY or UserInfo.FLAG_ADMIN or UserInfo.FLAG_FULL
+                    } else {
+                        // This isn't the primary user.
+                        UserInfo.FLAG_FULL
+                    },
+                    UserManager.USER_TYPE_FULL_SYSTEM,
                 )
             }
-        )
+        userRepository.setUserInfos(userInfos)
+
+        if (userInfos.isNotEmpty()) {
+            userRepository.setSelectedUserInfo(userInfos[0])
+        }
+        return userInfos
     }
 
     private fun assertUserViewModel(
         viewModel: UserViewModel?,
         viewKey: Int,
-        name: String,
+        name: Text,
         isSelectionMarkerVisible: Boolean,
-        alpha: Float,
-        isClickable: Boolean,
     ) {
         checkNotNull(viewModel)
         assertThat(viewModel.viewKey).isEqualTo(viewKey)
-        assertThat(viewModel.name).isEqualTo(Text.Loaded(name))
+        assertThat(viewModel.name).isEqualTo(name)
         assertThat(viewModel.isSelectionMarkerVisible).isEqualTo(isSelectionMarkerVisible)
-        assertThat(viewModel.alpha).isEqualTo(alpha)
-        assertThat(viewModel.onClicked != null).isEqualTo(isClickable)
+        assertThat(viewModel.alpha)
+            .isEqualTo(LegacyUserUiHelper.USER_SWITCHER_USER_VIEW_SELECTABLE_ALPHA)
+        assertThat(viewModel.onClicked).isNotNull()
     }
 
     companion object {
-        private val IMMEDIATE = Dispatchers.Main.immediate
-        private val USER_IMAGE = mock<Drawable>()
+        private const val SUPERVISED_USER_CREATION_PACKAGE = "com.some.package"
     }
 }

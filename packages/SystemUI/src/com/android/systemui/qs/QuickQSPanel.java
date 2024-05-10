@@ -24,10 +24,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
+import com.android.systemui.FontSizeUtils;
+import com.android.systemui.res.R;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.plugins.qs.QSTile.SignalState;
-import com.android.systemui.plugins.qs.QSTile.State;
 
 /**
  * Version of QSPanel that only shows N Quick Tiles in the QS Header.
@@ -88,19 +87,6 @@ public class QuickQSPanel extends QSPanel {
     @Override
     protected boolean shouldShowDetail() {
         return !mExpanded;
-    }
-
-    @Override
-    protected void drawTile(QSPanelControllerBase.TileRecord r, State state) {
-        if (state instanceof SignalState) {
-            SignalState copy = new SignalState();
-            state.copyTo(copy);
-            // No activity shown in the quick panel.
-            copy.activityIn = false;
-            copy.activityOut = false;
-            state = copy;
-        }
-        super.drawTile(r, state);
     }
 
     public void setMaxTiles(int maxTiles) {
@@ -198,10 +184,20 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         public boolean updateResources() {
-            mCellHeightResId = R.dimen.qs_quick_tile_size;
+            mResourceCellHeightResId = R.dimen.qs_quick_tile_size;
             boolean b = super.updateResources();
             mMaxAllowedRows = getResources().getInteger(R.integer.quick_qs_panel_max_rows);
             return b;
+        }
+
+        @Override
+        protected void estimateCellHeight() {
+            FontSizeUtils.updateFontSize(mTempTextView, R.dimen.qs_tile_text_size);
+            int unspecifiedSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+            mTempTextView.measure(unspecifiedSpec, unspecifiedSpec);
+            int padding = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_padding);
+            // the QQS only have 1 label
+            mEstimatedCellHeight = mTempTextView.getMeasuredHeight() + padding * 2;
         }
 
         @Override

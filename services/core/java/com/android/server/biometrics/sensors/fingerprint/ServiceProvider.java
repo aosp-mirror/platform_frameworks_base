@@ -21,21 +21,20 @@ import android.annotation.Nullable;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
+import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
-import android.util.proto.ProtoOutputStream;
 
+import com.android.server.biometrics.sensors.BiometricServiceProvider;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.LockoutTracker;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.util.List;
 
 /**
@@ -59,23 +58,8 @@ import java.util.List;
  * fail safely.
  */
 @SuppressWarnings("deprecation")
-public interface ServiceProvider {
-    /**
-     * Checks if the specified sensor is owned by this provider.
-     */
-    boolean containsSensor(int sensorId);
-
-    @NonNull
-    List<FingerprintSensorPropertiesInternal> getSensorProperties();
-
-    /**
-     * Returns the internal properties of the specified sensor, if owned by this provider.
-     *
-     * @param sensorId The ID of a fingerprint sensor, or -1 for any sensor.
-     * @return An object representing the internal properties of the specified sensor.
-     */
-    @Nullable
-    FingerprintSensorPropertiesInternal getSensorProperties(int sensorId);
+public interface ServiceProvider extends
+        BiometricServiceProvider<FingerprintSensorPropertiesInternal> {
 
     void scheduleResetLockout(int sensorId, int userId, @Nullable byte[] hardwareAuthToken);
 
@@ -94,19 +78,21 @@ public interface ServiceProvider {
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token, long requestId);
 
-    long scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
-            @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
+    long scheduleFingerDetect(@NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter callback,
+            @NonNull FingerprintAuthenticateOptions options,
             int statsClient);
 
-    void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
+    void scheduleAuthenticate(@NonNull IBinder token, long operationId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
-            @NonNull String opPackageName, long requestId, boolean restricted, int statsClient,
+            @NonNull FingerprintAuthenticateOptions options,
+            long requestId, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication);
 
-    long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
+    long scheduleAuthenticate(@NonNull IBinder token, long operationId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
-            @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication);
+            @NonNull FingerprintAuthenticateOptions options,
+            boolean restricted, int statsClient, boolean allowBackgroundAuthentication);
 
     void startPreparedClient(int sensorId, int cookie);
 
@@ -123,15 +109,13 @@ public interface ServiceProvider {
     void scheduleInternalCleanup(int sensorId, int userId,
             @Nullable ClientMonitorCallback callback);
 
-    boolean isHardwareDetected(int sensorId);
+    void scheduleInternalCleanup(int sensorId, int userId,
+            @Nullable ClientMonitorCallback callback, boolean favorHalEnrollments);
 
     void rename(int sensorId, int fingerId, int userId, @NonNull String name);
 
     @NonNull
     List<Fingerprint> getEnrolledFingerprints(int sensorId, int userId);
-
-    @LockoutTracker.LockoutMode
-    int getLockoutModeForUser(int sensorId, int userId);
 
     /**
      * Requests for the authenticatorId (whose source of truth is in the TEE or equivalent) to
@@ -140,32 +124,38 @@ public interface ServiceProvider {
     void scheduleInvalidateAuthenticatorId(int sensorId, int userId,
             @NonNull IInvalidationCallback callback);
 
-    long getAuthenticatorId(int sensorId, int userId);
 
-    void onPointerDown(long requestId, int sensorId, int x, int y, float minor, float major);
+    void onPointerDown(long requestId, int sensorId, PointerContext pc);
 
-    void onPointerUp(long requestId, int sensorId);
+    void onPointerUp(long requestId, int sensorId, PointerContext pc);
 
-    void onUiReady(long requestId, int sensorId);
+    void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event, long requestId, int sensorId);
 
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
 
     void onPowerPressed();
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     /**
      * Sets side-fps controller
      * @param controller side-fps controller
      */
     void setSidefpsController(@NonNull ISidefpsController controller);
 
-    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto,
-            boolean clearSchedulerBuffer);
-
-    void dumpProtoMetrics(int sensorId, @NonNull FileDescriptor fd);
-
-    void dumpInternal(int sensorId, @NonNull PrintWriter pw);
-
     @NonNull
     ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
             @NonNull String opPackageName);
+
+    /**
+     * Schedules watchdog for canceling hung operations
+     * @param sensorId sensor ID of the associated operation
+     */
+    default void scheduleWatchdog(int sensorId) {}
+
+    /**
+     * Simulate fingerprint down touch event for virtual HAL
+     * @param userId user ID
+     * @param sensorId sensor ID
+     */
+    default void simulateVhalFingerDown(int userId, int sensorId) {};
 }

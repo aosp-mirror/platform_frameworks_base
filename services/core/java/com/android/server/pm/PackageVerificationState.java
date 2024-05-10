@@ -26,11 +26,14 @@ import android.util.SparseBooleanArray;
  * sufficient verifiers, then package verification is considered complete.
  */
 class PackageVerificationState {
-    private final VerificationParams mParams;
+    private final VerifyingSession mVerifyingSession;
 
     private final SparseBooleanArray mSufficientVerifierUids;
 
-    private int mRequiredVerifierUid;
+    private final SparseBooleanArray mRequiredVerifierUids;
+    private final SparseBooleanArray mUnrespondedRequiredVerifierUids;
+
+    private final SparseBooleanArray mExtendedTimeoutUids;
 
     private boolean mSufficientVerificationComplete;
 
@@ -40,27 +43,35 @@ class PackageVerificationState {
 
     private boolean mRequiredVerificationPassed;
 
-    private boolean mExtendedTimeout;
-
     private boolean mIntegrityVerificationComplete;
 
     /**
      * Create a new package verification state where {@code requiredVerifierUid} is the user ID for
      * the package that must reply affirmative before things can continue.
      */
-    PackageVerificationState(VerificationParams params) {
-        mParams = params;
+    PackageVerificationState(VerifyingSession verifyingSession) {
+        mVerifyingSession = verifyingSession;
         mSufficientVerifierUids = new SparseBooleanArray();
-        mExtendedTimeout = false;
+        mRequiredVerifierUids = new SparseBooleanArray();
+        mUnrespondedRequiredVerifierUids = new SparseBooleanArray();
+        mExtendedTimeoutUids = new SparseBooleanArray();
+        mRequiredVerificationComplete = false;
+        mRequiredVerificationPassed = true;
     }
 
-    VerificationParams getVerificationParams() {
-        return mParams;
+    VerifyingSession getVerifyingSession() {
+        return mVerifyingSession;
     }
 
-    /** Sets the user ID of the required package verifier. */
-    void setRequiredVerifierUid(int uid) {
-        mRequiredVerifierUid = uid;
+    /** Add the user ID of the required package verifier. */
+    void addRequiredVerifierUid(int uid) {
+        mRequiredVerifierUids.put(uid, true);
+        mUnrespondedRequiredVerifierUids.put(uid, true);
+    }
+
+    /** Returns true if the uid a required verifier. */
+    boolean checkRequiredVerifierUid(int uid) {
+        return mRequiredVerifierUids.get(uid, false);
     }
 
     /**
@@ -72,44 +83,80 @@ class PackageVerificationState {
         mSufficientVerifierUids.put(uid, true);
     }
 
+    /** Returns true if the uid a sufficient verifier. */
+    boolean checkSufficientVerifierUid(int uid) {
+        return mSufficientVerifierUids.get(uid, false);
+    }
+
+    void setVerifierResponseOnTimeout(int uid, int code) {
+        if (!checkRequiredVerifierUid(uid)) {
+            return;
+        }
+
+        // Timeout, not waiting for the sufficient verifiers anymore.
+        mSufficientVerifierUids.clear();
+
+        // Only if unresponded.
+        if (mUnrespondedRequiredVerifierUids.get(uid, false)) {
+            setVerifierResponse(uid, code);
+        }
+    }
+
     /**
      * Should be called when a verification is received from an agent so the state of the package
      * verification can be tracked.
      *
      * @param uid user ID of the verifying agent
-     * @return {@code true} if the verifying agent actually exists in our list
      */
-    boolean setVerifierResponse(int uid, int code) {
-        if (uid == mRequiredVerifierUid) {
-            mRequiredVerificationComplete = true;
+    void setVerifierResponse(int uid, int code) {
+        if (mRequiredVerifierUids.get(uid)) {
             switch (code) {
                 case PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT:
                     mSufficientVerifierUids.clear();
                     // fall through
                 case PackageManager.VERIFICATION_ALLOW:
-                    mRequiredVerificationPassed = true;
+                    // Two possible options:
+                    // - verification result is true,
+                    // - another verifier set it to false.
+                    // In both cases we don't need to assign anything, just exit.
                     break;
                 default:
                     mRequiredVerificationPassed = false;
+                    // Required verifier rejected, no need to wait for the rest.
+                    mUnrespondedRequiredVerifierUids.clear();
+                    mSufficientVerifierUids.clear();
+                    mExtendedTimeoutUids.clear();
             }
-            return true;
-        } else {
-            if (mSufficientVerifierUids.get(uid)) {
-                if (code == PackageManager.VERIFICATION_ALLOW) {
-                    mSufficientVerificationComplete = true;
-                    mSufficientVerificationPassed = true;
-                }
 
-                mSufficientVerifierUids.delete(uid);
-                if (mSufficientVerifierUids.size() == 0) {
-                    mSufficientVerificationComplete = true;
-                }
+            // Responded, no need to extend timeout.
+            mExtendedTimeoutUids.delete(uid);
 
-                return true;
+            mUnrespondedRequiredVerifierUids.delete(uid);
+            if (mUnrespondedRequiredVerifierUids.size() == 0) {
+                mRequiredVerificationComplete = true;
+            }
+        } else if (mSufficientVerifierUids.get(uid)) {
+            if (code == PackageManager.VERIFICATION_ALLOW) {
+                mSufficientVerificationPassed = true;
+                mSufficientVerificationComplete = true;
+            }
+
+            mSufficientVerifierUids.delete(uid);
+            if (mSufficientVerifierUids.size() == 0) {
+                mSufficientVerificationComplete = true;
             }
         }
+    }
 
-        return false;
+    /**
+     * Mark the session as passed required verification.
+     */
+    void passRequiredVerification() {
+        if (mUnrespondedRequiredVerifierUids.size() > 0) {
+            throw new RuntimeException("Required verifiers still present.");
+        }
+        mRequiredVerificationPassed = true;
+        mRequiredVerificationComplete = true;
     }
 
     /**
@@ -137,7 +184,7 @@ class PackageVerificationState {
      * @return {@code true} if installation should be allowed
      */
     boolean isInstallAllowed() {
-        if (!mRequiredVerificationPassed) {
+        if (!mRequiredVerificationComplete || !mRequiredVerificationPassed) {
             return false;
         }
 
@@ -149,10 +196,12 @@ class PackageVerificationState {
     }
 
     /** Extend the timeout for this Package to be verified. */
-    void extendTimeout() {
-        if (!mExtendedTimeout) {
-            mExtendedTimeout = true;
+    boolean extendTimeout(int uid) {
+        if (!checkRequiredVerifierUid(uid) || timeoutExtended(uid)) {
+            return false;
         }
+        mExtendedTimeoutUids.append(uid, true);
+        return true;
     }
 
     /**
@@ -160,8 +209,8 @@ class PackageVerificationState {
      *
      * @return {@code true} if a timeout was already extended.
      */
-    boolean timeoutExtended() {
-        return mExtendedTimeout;
+    boolean timeoutExtended(int uid) {
+        return mExtendedTimeoutUids.get(uid, false);
     }
 
     void setIntegrityVerificationResult(int code) {

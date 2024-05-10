@@ -24,4 +24,12 @@ class BurnInHelperWrapper @Inject constructor() {
     fun burnInOffset(amplitude: Int, xAxis: Boolean): Int {
         return getBurnInOffset(amplitude, xAxis)
     }
+
+    fun burnInProgressOffset(): Float {
+        return getBurnInProgressOffset()
+    }
+
+    fun burnInScale(): Float {
+        return getBurnInScale()
+    }
 }

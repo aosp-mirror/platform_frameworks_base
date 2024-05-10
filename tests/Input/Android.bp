@@ -1,4 +1,5 @@
 package {
+    default_team: "trendy_team_input_framework",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_license"
@@ -9,19 +10,41 @@ package {
 
 android_test {
     name: "InputTests",
+    defaults: [
+        // For ExtendedMockito dependencies.
+        "modules-utils-testable-device-config-defaults",
+    ],
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
     ],
+    kotlincflags: [
+        "-Werror",
+    ],
     platform_apis: true,
     certificate: "platform",
     static_libs: [
+        "androidx.test.core",
         "androidx.test.ext.junit",
+        "androidx.test.ext.truth",
         "androidx.test.rules",
+        "androidx.test.runner",
+        "androidx.test.uiautomator_uiautomator",
+        "servicestests-utils",
+        "flag-junit",
+        "frameworks-base-testutils",
+        "hamcrest-library",
+        "kotlin-test",
+        "mockito-target-minus-junit4",
+        "platform-test-annotations",
         "services.core.unboosted",
         "testables",
-        "truth-prebuilt",
-        "ub-uiautomator",
+        "testng",
+        "truth",
+    ],
+    libs: [
+        "android.test.mock",
+        "android.test.base",
     ],
     test_suites: ["device-tests"],
 }

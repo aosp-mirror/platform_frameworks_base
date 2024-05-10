@@ -16,12 +16,17 @@
 
 package com.android.systemui.statusbar.notification.collection.render;
 
+import androidx.annotation.NonNull;
+
+import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.coordinator.Coordinator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 
 import java.io.PrintWriter;
@@ -36,34 +41,55 @@ import javax.inject.Inject;
  * expanded state.
  */
 @SysUISingleton
-public class GroupExpansionManagerImpl implements GroupExpansionManager, Coordinator {
+public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpable {
+    private final DumpManager mDumpManager;
     private final GroupMembershipManager mGroupMembershipManager;
     private final Set<OnGroupExpansionChangeListener> mOnGroupChangeListeners = new HashSet<>();
 
-    // Set of summary keys whose groups are expanded
+    /**
+     * Set of summary keys whose groups are expanded.
+     * NOTE: This should not be modified without notifying listeners, so prefer using
+     * {@code setGroupExpanded} when making changes.
+     */
     private final Set<NotificationEntry> mExpandedGroups = new HashSet<>();
 
+    private final FeatureFlags mFeatureFlags;
+
     @Inject
-    public GroupExpansionManagerImpl(GroupMembershipManager groupMembershipManager) {
+    public GroupExpansionManagerImpl(DumpManager dumpManager,
+            GroupMembershipManager groupMembershipManager, FeatureFlags featureFlags) {
+        mDumpManager = dumpManager;
         mGroupMembershipManager = groupMembershipManager;
+        mFeatureFlags = featureFlags;
     }
 
     /**
      * Cleanup entries from mExpandedGroups that no longer exist in the pipeline.
      */
     private final OnBeforeRenderListListener mNotifTracker = (entries) -> {
+        if (mExpandedGroups.isEmpty()) {
+            return; // nothing to do
+        }
+
         final Set<NotificationEntry> renderingSummaries = new HashSet<>();
         for (ListEntry entry : entries) {
             if (entry instanceof GroupEntry) {
                 renderingSummaries.add(entry.getRepresentativeEntry());
             }
         }
-        mExpandedGroups.removeIf(expandedGroup -> !renderingSummaries.contains(expandedGroup));
+
+        // If a group is in mExpandedGroups but not in the pipeline entries, collapse it.
+        final var groupsToRemove = setDifference(mExpandedGroups, renderingSummaries);
+        for (NotificationEntry entry : groupsToRemove) {
+            setGroupExpanded(entry, false);
+        }
     };
 
-    @Override
     public void attach(NotifPipeline pipeline) {
-        pipeline.addOnBeforeRenderListListener(mNotifTracker);
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE)) {
+            mDumpManager.registerDumpable(this);
+            pipeline.addOnBeforeRenderListListener(mNotifTracker);
+        }
     }
 
     @Override
@@ -78,14 +104,29 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Coordin
 
     @Override
     public void setGroupExpanded(NotificationEntry entry, boolean expanded) {
-        final NotificationEntry groupSummary = mGroupMembershipManager.getGroupSummary(entry);
-        if (expanded) {
-            mExpandedGroups.add(groupSummary);
-        } else {
-            mExpandedGroups.remove(groupSummary);
+        NotificationEntry groupSummary = mGroupMembershipManager.getGroupSummary(entry);
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE)
+                && entry.getParent() == null) {
+            if (expanded) {
+                throw new IllegalArgumentException("Cannot expand group that is not attached");
+            } else {
+                // The entry is no longer attached, but we still want to make sure we don't have
+                // a stale expansion state.
+                groupSummary = entry;
+            }
         }
 
-        sendOnGroupExpandedChange(entry, expanded);
+        boolean changed;
+        if (expanded) {
+            changed = mExpandedGroups.add(groupSummary);
+        } else {
+            changed = mExpandedGroups.remove(groupSummary);
+        }
+
+        // Only notify listeners if something changed.
+        if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE) || changed) {
+            sendOnGroupExpandedChange(entry, expanded);
+        }
     }
 
     @Override
@@ -102,11 +143,11 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Coordin
     }
 
     @Override
-    public void dump(PrintWriter pw, String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("NotificationEntryExpansion state:");
-        pw.println("  # expanded groups: " +  mExpandedGroups.size());
+        pw.println("  mExpandedGroups: " + mExpandedGroups.size());
         for (NotificationEntry entry : mExpandedGroups) {
-            pw.println("    summary key of expanded group: " + entry.getKey());
+            pw.println("  * " + entry.getKey());
         }
     }
 
@@ -114,5 +155,28 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Coordin
         for (OnGroupExpansionChangeListener listener : mOnGroupChangeListeners) {
             listener.onGroupExpansionChange(entry.getRow(), expanded);
         }
+    }
+
+    /**
+     * Utility method to compute the difference between two sets of NotificationEntry. Unfortunately
+     * {@code Sets.difference} from Guava is not available in this codebase.
+     */
+    @NonNull
+    private Set<NotificationEntry> setDifference(Set<NotificationEntry> set1,
+            Set<NotificationEntry> set2) {
+        if (set1 == null || set1.isEmpty()) {
+            return new HashSet<>();
+        }
+        if (set2 == null || set2.isEmpty()) {
+            return new HashSet<>(set1);
+        }
+
+        final Set<NotificationEntry> difference = new HashSet<>();
+        for (NotificationEntry e : set1) {
+            if (!set2.contains(e)) {
+                difference.add(e);
+            }
+        }
+        return difference;
     }
 }

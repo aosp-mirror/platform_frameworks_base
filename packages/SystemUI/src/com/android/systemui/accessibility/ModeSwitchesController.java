@@ -18,7 +18,7 @@ package com.android.systemui.accessibility;
 
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 
-import static com.android.systemui.accessibility.MagnificationModeSwitch.SwitchListener;
+import static com.android.systemui.accessibility.MagnificationModeSwitch.ClickListener;
 
 import android.annotation.MainThread;
 import android.content.Context;
@@ -37,19 +37,18 @@ import javax.inject.Inject;
  *   <li> Both full-screen and window magnification mode are capable.</li>
  *   <li> The magnification scale is changed by a user.</li>
  * <ol>
- * The switch action will be handled by {@link #mSwitchListenerDelegate} which informs the system
- * server about the changed mode.
+ * The click action will be handled by {@link #mClickListenerDelegate} which opens the
+ * {@link WindowMagnificationSettings} panel.
  */
 @SysUISingleton
-public class ModeSwitchesController implements SwitchListener {
+public class ModeSwitchesController implements ClickListener {
 
     private final DisplayIdIndexSupplier<MagnificationModeSwitch> mSwitchSupplier;
-    private SwitchListener mSwitchListenerDelegate;
+    private ClickListener mClickListenerDelegate;
 
     @Inject
-    public ModeSwitchesController(Context context) {
-        mSwitchSupplier = new SwitchSupplier(context,
-                context.getSystemService(DisplayManager.class), this::onSwitch);
+    public ModeSwitchesController(Context context, DisplayManager displayManager) {
+        mSwitchSupplier = new SwitchSupplier(context, displayManager, this::onClick);
     }
 
     @VisibleForTesting
@@ -102,40 +101,40 @@ public class ModeSwitchesController implements SwitchListener {
     }
 
     @Override
-    public void onSwitch(int displayId, int magnificationMode) {
-        if (mSwitchListenerDelegate != null) {
-            mSwitchListenerDelegate.onSwitch(displayId, magnificationMode);
+    public void onClick(int displayId) {
+        if (mClickListenerDelegate != null) {
+            mClickListenerDelegate.onClick(displayId);
         }
     }
 
-    public void setSwitchListenerDelegate(SwitchListener switchListenerDelegate) {
-        mSwitchListenerDelegate = switchListenerDelegate;
+    public void setClickListenerDelegate(ClickListener clickListenerDelegate) {
+        mClickListenerDelegate = clickListenerDelegate;
     }
 
     private static class SwitchSupplier extends DisplayIdIndexSupplier<MagnificationModeSwitch> {
 
         private final Context mContext;
-        private final SwitchListener mSwitchListener;
+        private final ClickListener mClickListener;
 
         /**
          * Supplies the switch for the given display.
          *
          * @param context        Context
          * @param displayManager DisplayManager
-         * @param switchListener The callback that will run when the switch is clicked
+         * @param clickListener The callback that will run when the switch is clicked
          */
         SwitchSupplier(Context context, DisplayManager displayManager,
-                SwitchListener switchListener) {
+                ClickListener clickListener) {
             super(displayManager);
             mContext = context;
-            mSwitchListener = switchListener;
+            mClickListener = clickListener;
         }
 
         @Override
         protected MagnificationModeSwitch createInstance(Display display) {
             final Context uiContext = mContext.createWindowContext(display,
                     TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, /* options */ null);
-            return new MagnificationModeSwitch(uiContext, mSwitchListener);
+            return new MagnificationModeSwitch(uiContext, mClickListener);
         }
     }
 }

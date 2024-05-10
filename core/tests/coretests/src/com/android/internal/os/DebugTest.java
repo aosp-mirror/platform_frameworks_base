@@ -16,14 +16,22 @@
 
 package com.android.internal.os;
 
+import static org.junit.Assert.assertTrue;
+
 import android.os.Debug;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 
-import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
 
 @SmallTest
-public class DebugTest extends TestCase {
+@IgnoreUnderRavenwood(reason = "Requires ART support")
+public class DebugTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private final static String EXPECTED_GET_CALLER =
             "com\\.android\\.internal\\.os\\.DebugTest\\.testGetCaller:\\d\\d";
@@ -39,6 +47,7 @@ public class DebugTest extends TestCase {
         return Debug.getCaller();
     }
 
+    @Test
     public void testGetCaller() {
         assertTrue(callDepth0().matches(EXPECTED_GET_CALLER));
     }
@@ -62,6 +71,7 @@ public class DebugTest extends TestCase {
         return callDepth2();
     }
 
+    @Test
     public void testGetCallers() {
         assertTrue(callDepth1().matches(EXPECTED_GET_CALLERS));
     }
@@ -69,6 +79,7 @@ public class DebugTest extends TestCase {
     /**
      * Regression test for b/31943543. Note: must be run under CheckJNI to detect the issue.
      */
+    @Test
     public void testGetMemoryInfo() {
         Debug.MemoryInfo info = new Debug.MemoryInfo();
         Debug.getMemoryInfo(-1, info);

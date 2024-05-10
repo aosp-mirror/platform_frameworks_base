@@ -143,6 +143,16 @@ class AppOpsPrivacyItemMonitorTest : SysuiTestCase() {
     }
 
     @Test
+    fun testVoiceActivationPrivacyItems() {
+        doReturn(listOf(AppOpItem(AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO, TEST_UID,
+                TEST_PACKAGE_NAME, 0)))
+                .`when`(appOpsController).getActiveAppOps(anyBoolean())
+        val privacyItems = appOpsPrivacyItemMonitor.getActivePrivacyItems()
+        assertEquals(1, privacyItems.size)
+        assertEquals(PrivacyType.TYPE_MICROPHONE, privacyItems[0].privacyType)
+    }
+
+    @Test
     fun testSimilarItemsDifferentTimeStamp() {
         doReturn(listOf(AppOpItem(AppOpsManager.OP_CAMERA, TEST_UID, TEST_PACKAGE_NAME, 0),
                 AppOpItem(AppOpsManager.OP_CAMERA, TEST_UID, TEST_PACKAGE_NAME, 1)))

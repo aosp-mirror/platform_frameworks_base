@@ -221,7 +221,7 @@ public final class SubscriptionPlan implements Parcelable {
     }
 
     /**
-     * Return an array containing all {@link NetworkType}s this SubscriptionPlan applies to.
+     * Return an array containing all network types this SubscriptionPlan applies to.
      * @see TelephonyManager for network types values
      */
     public @NonNull @NetworkType int[] getNetworkTypes() {
@@ -365,7 +365,7 @@ public final class SubscriptionPlan implements Parcelable {
          * Set the network types this SubscriptionPlan applies to. By default the plan will apply
          * to all network types. An empty array means this plan applies to no network types.
          *
-         * @param networkTypes an array of all {@link NetworkType}s that apply to this plan.
+         * @param networkTypes an array of all network types that apply to this plan.
          * @see TelephonyManager for network type values
          */
         public @NonNull Builder setNetworkTypes(@NonNull @NetworkType int[] networkTypes) {

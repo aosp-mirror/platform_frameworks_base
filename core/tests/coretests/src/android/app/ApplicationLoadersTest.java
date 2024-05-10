@@ -16,13 +16,16 @@
 
 package android.app;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import android.content.pm.SharedLibraryInfo;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.google.android.collect.Lists;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,7 +51,7 @@ public class ApplicationLoadersTest {
     @Test
     public void testGetNonExistantLib() {
         ApplicationLoaders loaders = new ApplicationLoaders();
-        assertEquals(null, loaders.getCachedNonBootclasspathSystemLib(
+        assertNull(loaders.getCachedNonBootclasspathSystemLib(
                 "/system/framework/nonexistantlib.jar", null, null, null));
     }
 
@@ -57,9 +60,9 @@ public class ApplicationLoadersTest {
         ApplicationLoaders loaders = new ApplicationLoaders();
         SharedLibraryInfo libA = createLib(LIB_A);
 
-        loaders.createAndCacheNonBootclasspathSystemClassLoaders(new SharedLibraryInfo[]{libA});
+        loaders.createAndCacheNonBootclasspathSystemClassLoaders(Lists.newArrayList(libA));
 
-        assertNotEquals(null, loaders.getCachedNonBootclasspathSystemLib(
+        assertNotNull(loaders.getCachedNonBootclasspathSystemLib(
                 LIB_A, null, null, null));
     }
 
@@ -71,9 +74,9 @@ public class ApplicationLoadersTest {
         ClassLoader parent = ClassLoader.getSystemClassLoader();
         assertNotEquals(null, parent);
 
-        loaders.createAndCacheNonBootclasspathSystemClassLoaders(new SharedLibraryInfo[]{libA});
+        loaders.createAndCacheNonBootclasspathSystemClassLoaders(Lists.newArrayList(libA));
 
-        assertEquals(null, loaders.getCachedNonBootclasspathSystemLib(
+        assertNull(loaders.getCachedNonBootclasspathSystemLib(
                 LIB_A, parent, null, null));
     }
 
@@ -82,9 +85,9 @@ public class ApplicationLoadersTest {
         ApplicationLoaders loaders = new ApplicationLoaders();
         SharedLibraryInfo libA = createLib(LIB_A);
 
-        loaders.createAndCacheNonBootclasspathSystemClassLoaders(new SharedLibraryInfo[]{libA});
+        loaders.createAndCacheNonBootclasspathSystemClassLoaders(Lists.newArrayList(libA));
 
-        assertEquals(null, loaders.getCachedNonBootclasspathSystemLib(
+        assertNull(loaders.getCachedNonBootclasspathSystemLib(
                 LIB_A, null, "other classloader", null));
     }
 
@@ -98,9 +101,9 @@ public class ApplicationLoadersTest {
         ArrayList<ClassLoader> sharedLibraries = new ArrayList<>();
         sharedLibraries.add(dep);
 
-        loaders.createAndCacheNonBootclasspathSystemClassLoaders(new SharedLibraryInfo[]{libA});
+        loaders.createAndCacheNonBootclasspathSystemClassLoaders(Lists.newArrayList(libA));
 
-        assertEquals(null, loaders.getCachedNonBootclasspathSystemLib(
+        assertNull(loaders.getCachedNonBootclasspathSystemLib(
                 LIB_A, null, null, sharedLibraries));
     }
 
@@ -112,7 +115,7 @@ public class ApplicationLoadersTest {
         libB.addDependency(libA);
 
         loaders.createAndCacheNonBootclasspathSystemClassLoaders(
-                new SharedLibraryInfo[]{libA, libB});
+                Lists.newArrayList(libA, libB));
 
         ClassLoader loadA = loaders.getCachedNonBootclasspathSystemLib(
                 LIB_A, null, null, null);
@@ -121,7 +124,7 @@ public class ApplicationLoadersTest {
         ArrayList<ClassLoader> sharedLibraries = new ArrayList<>();
         sharedLibraries.add(loadA);
 
-        assertNotEquals(null, loaders.getCachedNonBootclasspathSystemLib(
+        assertNotNull(loaders.getCachedNonBootclasspathSystemLib(
                 LIB_DEP_A, null, null, sharedLibraries));
     }
 
@@ -132,7 +135,6 @@ public class ApplicationLoadersTest {
         SharedLibraryInfo libB = createLib(LIB_DEP_A);
         libB.addDependency(libA);
 
-        loaders.createAndCacheNonBootclasspathSystemClassLoaders(
-                new SharedLibraryInfo[]{libB, libA});
+        loaders.createAndCacheNonBootclasspathSystemClassLoaders(Lists.newArrayList(libB, libA));
     }
 }

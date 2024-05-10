@@ -15,6 +15,7 @@
  */
 package com.android.server.location.injector;
 
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -31,6 +32,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
 import com.android.server.location.injector.UserInfoHelper.UserListener;
+import com.android.server.pm.UserManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -45,13 +47,14 @@ public class SystemUserInfoHelperTest {
 
     private static final int USER1_ID = 1;
     private static final int USER1_MANAGED_ID = 11;
-    private static final int[] USER1_PROFILES = new int[]{USER1_ID, USER1_MANAGED_ID};
+    private static final int[] USER1_PROFILES = new int[] {USER1_ID, USER1_MANAGED_ID};
     private static final int USER2_ID = 2;
     private static final int USER2_MANAGED_ID = 12;
-    private static final int[] USER2_PROFILES = new int[]{USER2_ID, USER2_MANAGED_ID};
+    private static final int[] USER2_PROFILES = new int[] {USER2_ID, USER2_MANAGED_ID};
 
     @Mock private Context mContext;
     @Mock private UserManager mUserManager;
+    @Mock private UserManagerInternal mUserManagerInternal;
 
     private SystemUserInfoHelper mHelper;
 
@@ -63,12 +66,15 @@ public class SystemUserInfoHelperTest {
         doReturn(USER1_PROFILES).when(mUserManager).getEnabledProfileIds(USER1_ID);
         doReturn(USER2_PROFILES).when(mUserManager).getEnabledProfileIds(USER2_ID);
 
+        LocalServices.addService(UserManagerInternal.class, mUserManagerInternal);
+
         mHelper = new SystemUserInfoHelper(mContext);
     }
 
     @After
     public void tearDown() {
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
     }
 
     @Test
@@ -77,11 +83,11 @@ public class SystemUserInfoHelperTest {
         mHelper.addListener(listener);
 
         mHelper.dispatchOnCurrentUserChanged(USER1_ID, USER2_ID);
-        verify(listener, times(1)).onUserChanged(USER1_ID, UserListener.CURRENT_USER_CHANGED);
-        verify(listener, times(1)).onUserChanged(USER1_MANAGED_ID,
+        verify(listener).onUserChanged(USER1_ID, UserListener.CURRENT_USER_CHANGED);
+        verify(listener).onUserChanged(USER1_MANAGED_ID,
                 UserListener.CURRENT_USER_CHANGED);
-        verify(listener, times(1)).onUserChanged(USER2_ID, UserListener.CURRENT_USER_CHANGED);
-        verify(listener, times(1)).onUserChanged(USER2_MANAGED_ID,
+        verify(listener).onUserChanged(USER2_ID, UserListener.CURRENT_USER_CHANGED);
+        verify(listener).onUserChanged(USER2_MANAGED_ID,
                 UserListener.CURRENT_USER_CHANGED);
 
         mHelper.dispatchOnCurrentUserChanged(USER2_ID, USER1_ID);
@@ -91,6 +97,25 @@ public class SystemUserInfoHelperTest {
         verify(listener, times(2)).onUserChanged(USER1_ID, UserListener.CURRENT_USER_CHANGED);
         verify(listener, times(2)).onUserChanged(USER1_MANAGED_ID,
                 UserListener.CURRENT_USER_CHANGED);
+    }
+
+    @Test
+    public void testListener_UserVisibilityChanged() {
+        mHelper.onSystemReady();
+        verify(mUserManagerInternal).addUserVisibilityListener(any());
+
+        UserListener listener = mock(UserListener.class);
+        mHelper.addListener(listener);
+
+        mHelper.dispatchOnVisibleUserChanged(USER1_ID, false);
+        mHelper.dispatchOnVisibleUserChanged(USER2_ID, true);
+        verify(listener).onUserChanged(USER1_ID, UserListener.USER_VISIBILITY_CHANGED);
+        verify(listener).onUserChanged(USER2_ID, UserListener.USER_VISIBILITY_CHANGED);
+
+        mHelper.dispatchOnVisibleUserChanged(USER2_ID, false);
+        mHelper.dispatchOnVisibleUserChanged(USER1_ID, true);
+        verify(listener, times(2)).onUserChanged(USER2_ID, UserListener.USER_VISIBILITY_CHANGED);
+        verify(listener, times(2)).onUserChanged(USER1_ID, UserListener.USER_VISIBILITY_CHANGED);
     }
 
     @Test

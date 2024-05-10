@@ -22,6 +22,7 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -231,6 +232,31 @@ public final class BrightnessChangeEvent implements Parcelable {
         dest.writeBoolean(isUserSetBrightness);
         dest.writeLongArray(colorValueBuckets);
         dest.writeLong(colorSampleDuration);
+    }
+
+    @Override
+    public String toString() {
+        return "BrightnessChangeEvent{"
+                + "brightness: " + brightness
+                + ", timeStamp: " + timeStamp
+                + ", packageName: " + packageName
+                + ", userId: " + userId
+                + ", uniqueDisplayId: " + uniqueDisplayId
+                + ", luxValues: " + Arrays.toString(luxValues)
+                + ", luxTimestamps: " + Arrays.toString(luxTimestamps)
+                + ", batteryLevel: " + batteryLevel
+                + ", powerBrightnessFactor: " + powerBrightnessFactor
+                + ", nightMode: " + nightMode
+                + ", colorTemperature: " + colorTemperature
+                + ", reduceBrightColors: " + reduceBrightColors
+                + ", reduceBrightColorsStrength: " + reduceBrightColorsStrength
+                + ", reduceBrightColorsOffset: " + reduceBrightColorsOffset
+                + ", lastBrightness: " + lastBrightness
+                + ", isDefaultBrightnessConfig: " + isDefaultBrightnessConfig
+                + ", isUserSetBrightness: " + isUserSetBrightness
+                + ", colorValueBuckets: " + Arrays.toString(colorValueBuckets)
+                + ", colorSampleDuration: " + colorSampleDuration
+                + "}";
     }
 
     /** @hide */

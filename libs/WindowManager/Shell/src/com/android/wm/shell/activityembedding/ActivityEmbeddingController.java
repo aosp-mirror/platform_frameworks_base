@@ -16,12 +16,17 @@
 
 package com.android.wm.shell.activityembedding;
 
+import static android.app.ActivityOptions.ANIM_CUSTOM;
+import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
+
+import static com.android.wm.shell.transition.DefaultTransitionHandler.isSupportedOverrideAnimation;
 
 import static java.util.Objects.requireNonNull;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.ArrayMap;
 import android.view.SurfaceControl;
@@ -35,6 +40,9 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.util.TransitionUtil;
+
+import java.util.List;
 
 /**
  * Responsible for handling ActivityEmbedding related transitions.
@@ -80,33 +88,105 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
         mTransitions.addHandler(this);
     }
 
-    @Override
-    public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction startTransaction,
-            @NonNull SurfaceControl.Transaction finishTransaction,
-            @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        boolean containsEmbeddingSplit = false;
+    /** Whether ActivityEmbeddingController should animate this transition. */
+    public boolean shouldAnimate(@NonNull TransitionInfo info) {
+        boolean containsEmbeddingChange = false;
         for (TransitionInfo.Change change : info.getChanges()) {
-            if (!change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)) {
-                // Only animate the transition if all changes are in a Task with ActivityEmbedding.
-                return false;
-            }
-            if (!containsEmbeddingSplit && !change.hasFlags(FLAG_FILLS_TASK)) {
+            if (!change.hasFlags(FLAG_FILLS_TASK) && change.hasFlags(
+                    FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)) {
                 // Whether the Task contains any ActivityEmbedding split before or after the
                 // transition.
-                containsEmbeddingSplit = true;
+                containsEmbeddingChange = true;
             }
         }
-        if (!containsEmbeddingSplit) {
+        if (!containsEmbeddingChange) {
             // Let the system to play the default animation if there is no ActivityEmbedding split
             // window. This allows to play the app customized animation when there is no embedding,
             // such as the device is in a folded state.
             return false;
         }
 
+        if (containsNonEmbeddedChange(info) && !handleNonEmbeddedChanges(info.getChanges())) {
+            return false;
+        }
+
+        final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
+        if (options != null) {
+            // Scene-transition should be handled by app side.
+            if (options.getType() == ANIM_SCENE_TRANSITION) {
+                return false;
+            }
+            // The case of ActivityOptions#makeCustomAnimation, Activity#overridePendingTransition,
+            // and Activity#overrideActivityTransition are supported.
+            if (options.getType() == ANIM_CUSTOM) {
+                return true;
+            }
+            // Use default transition handler to animate other override animation.
+            return !isSupportedOverrideAnimation(options);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+
+        if (!shouldAnimate(info)) return false;
+
         // Start ActivityEmbedding animation.
         mTransitionCallbacks.put(transition, finishCallback);
         mAnimationRunner.startAnimation(transition, info, startTransaction, finishTransaction);
+        return true;
+    }
+
+    @Override
+    public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        mAnimationRunner.cancelAnimationFromMerge();
+    }
+
+    /** Whether TransitionInfo contains non-ActivityEmbedding embedded window. */
+    private boolean containsNonEmbeddedChange(@NonNull TransitionInfo info) {
+        for (TransitionInfo.Change change : info.getChanges()) {
+            if (!change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean handleNonEmbeddedChanges(List<TransitionInfo.Change> changes) {
+        final Rect nonClosingEmbeddedArea = new Rect();
+        for (int i = changes.size() - 1; i >= 0; i--) {
+            final TransitionInfo.Change change = changes.get(i);
+            if (!TransitionUtil.isClosingType(change.getMode())) {
+                if (change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)) {
+                    nonClosingEmbeddedArea.union(change.getEndAbsBounds());
+                    continue;
+                }
+                // Not able to handle non-embedded container if it is not closing.
+                return false;
+            }
+        }
+        for (int i = changes.size() - 1; i >= 0; i--) {
+            final TransitionInfo.Change change = changes.get(i);
+            if (!change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)
+                    && !nonClosingEmbeddedArea.contains(change.getEndAbsBounds())) {
+                // Unknown to animate containers outside the area of embedded activities.
+                return false;
+            }
+        }
+        // Drop the non-embedded closing change because it is occluded by embedded activities.
+        for (int i = changes.size() - 1; i >= 0; i--) {
+            final TransitionInfo.Change change = changes.get(i);
+            if (!change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)) {
+                changes.remove(i);
+            }
+        }
         return true;
     }
 
@@ -129,6 +209,6 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
         if (callback == null) {
             throw new IllegalStateException("No finish callback found");
         }
-        callback.onTransitionFinished(null /* wct */, null /* wctCB */);
+        callback.onTransitionFinished(null /* wct */);
     }
 }

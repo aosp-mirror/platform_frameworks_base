@@ -64,14 +64,16 @@ public class KeyValueBackupJob extends JobService {
     @VisibleForTesting
     public static final int MAX_JOB_ID = 52418896;
 
-    public static void schedule(int userId, Context ctx, BackupManagerConstants constants) {
-        schedule(userId, ctx, 0, constants);
+    public static void schedule(int userId, Context ctx,
+            UserBackupManagerService userBackupManagerService) {
+        schedule(userId, ctx, 0, userBackupManagerService);
     }
 
     public static void schedule(int userId, Context ctx, long delay,
-            BackupManagerConstants constants) {
+            UserBackupManagerService userBackupManagerService) {
         synchronized (KeyValueBackupJob.class) {
-            if (sScheduledForUserId.get(userId)) {
+            if (sScheduledForUserId.get(userId)
+                    || !userBackupManagerService.isFrameworkSchedulingEnabled()) {
                 return;
             }
 
@@ -80,6 +82,7 @@ public class KeyValueBackupJob extends JobService {
             final int networkType;
             final boolean needsCharging;
 
+            final BackupManagerConstants constants = userBackupManagerService.getConstants();
             synchronized (constants) {
                 interval = constants.getKeyValueBackupIntervalMilliseconds();
                 fuzz = constants.getKeyValueBackupFuzzMilliseconds();
@@ -166,7 +169,8 @@ public class KeyValueBackupJob extends JobService {
         sNextScheduledForUserId.delete(userId);
     }
 
-    private static int getJobIdForUserId(int userId) {
+    @VisibleForTesting
+    static int getJobIdForUserId(int userId) {
         return JobIdManager.getJobIdForUserId(MIN_JOB_ID, MAX_JOB_ID, userId);
     }
 }

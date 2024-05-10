@@ -182,14 +182,14 @@ public class HelpUtilsTest {
         final Menu item = mock(Menu.class);
         when(item.findItem(MENU_HELP)).thenReturn(null);
         when(item.add(0, MENU_HELP, 0,
-                com.android.settingslib.widget.R.string.help_feedback_label)).thenReturn(
+                com.android.settingslib.widget.help.R.string.help_feedback_label)).thenReturn(
                 mock(MenuItem.class));
 
         HelpUtils.prepareHelpMenuItem(mActivity, item, TEST_HELP_URL, "backup_url");
         HelpUtils.prepareHelpMenuItem(mActivity, item, 0, "backup_url");
 
         verify(item, times(2)).add(0, MENU_HELP, 0,
-                com.android.settingslib.widget.R.string.help_feedback_label);
+                com.android.settingslib.widget.help.R.string.help_feedback_label);
     }
 
     @Test
@@ -197,13 +197,13 @@ public class HelpUtilsTest {
         final Menu item = mock(Menu.class);
         when(item.findItem(MENU_HELP)).thenReturn(mock(MenuItem.class));
         when(item.add(0, MENU_HELP, 0,
-                com.android.settingslib.widget.R.string.help_feedback_label)).thenReturn(
+                com.android.settingslib.widget.help.R.string.help_feedback_label)).thenReturn(
                 mock(MenuItem.class));
 
         HelpUtils.prepareHelpMenuItem(mActivity, item, TEST_HELP_URL, "backup_url");
         HelpUtils.prepareHelpMenuItem(mActivity, item, 0, "backup_url");
 
         verify(item, never()).add(0, MENU_HELP, 0,
-                com.android.settingslib.widget.R.string.help_feedback_label);
+                com.android.settingslib.widget.help.R.string.help_feedback_label);
     }
 }

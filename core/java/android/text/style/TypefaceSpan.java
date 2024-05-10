@@ -180,4 +180,12 @@ public class TypefaceSpan extends MetricAffectingSpan implements ParcelableSpan 
         }
         paint.setTypeface(styledTypeface);
     }
+
+    @Override
+    public String toString() {
+        return "TypefaceSpan{"
+                + "family='" + getFamily() + '\''
+                + ", typeface=" + getTypeface()
+                + '}';
+    }
 }

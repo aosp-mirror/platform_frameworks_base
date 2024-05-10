@@ -3,8 +3,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"ਇਨਪੁੱਟ ਡੀਵਾਈਸਾਂ"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android ਕੀ-ਬੋਰਡ"</string>
-    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"ਅੰਗ੍ਰੇਜ਼ੀ (ਯੂਕੇ)"</string>
-    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"ਅੰਗ੍ਰੇਜੀ (ਅਮ੍ਰੀਕਾ)"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"ਅੰਗਰੇਜ਼ੀ (ਯੂ.ਕੇ.)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"ਅੰਗਰੇਜ਼ੀ (ਯੂ.ਐੱਸ.)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"ਅੰਗ੍ਰੇਜ਼ੀ (ਅਮਰੀਕਾ), ਅੰਤਰਰਾਸ਼ਟਰੀ ਸਟਾਈਲ"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"ਅੰਗ੍ਰੇਜ਼ੀ (ਅਮਰੀਕਾ), ਕੋਲਮਾਰਕ ਸਟਾਈਲ"</string>
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"ਅੰਗ੍ਰੇਜ਼ੀ (ਅਮਰੀਕਾ), ਵੋਰਕ ਸਟਾਈਲ"</string>
@@ -28,7 +28,7 @@
     <string name="keyboard_layout_croatian" msgid="4172229471079281138">"ਕਰੋਆਟੀਆਈ"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"ਚੈਕ"</string>
     <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"ਚੈੱਕ QWERTY ਸਟਾਈਲ"</string>
-    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"ਇਸਟੋਨੀਅਨ"</string>
+    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"ਇਸਤੋਨੀਆਈ"</string>
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"ਹੰਗੇਰੀਅਨ"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"ਆਈਸਲੈਂਡੀ"</string>
     <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"ਬ੍ਰਾਜ਼ਿਲਿਆਈ"</string>
@@ -45,7 +45,7 @@
     <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"ਸਪੇਨੀ (ਲਾਤੀਨੀ)"</string>
     <string name="keyboard_layout_latvian" msgid="4405417142306250595">"ਲਾਤਵੀਅਨ"</string>
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"ਫ਼ਾਰਸੀ"</string>
-    <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"ਅਜ਼ੇਰਬੈਜਾਨੀ"</string>
+    <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"ਅਜ਼ਰਬਾਈਜਾਨੀ"</string>
     <string name="keyboard_layout_polish" msgid="1121588624094925325">"ਪੋਲਿਸ਼"</string>
     <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"ਬੇਲਾਰੂਸੀ"</string>
     <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"ਮੰਗੋਲੀਆਈ"</string>

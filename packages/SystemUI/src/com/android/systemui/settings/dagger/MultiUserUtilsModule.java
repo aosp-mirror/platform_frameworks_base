@@ -17,14 +17,20 @@
 package com.android.systemui.settings.dagger;
 
 import android.app.ActivityManager;
+import android.app.IActivityManager;
 import android.content.Context;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.UserManager;
 
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlagsClassic;
+import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.settings.DisplayTrackerImpl;
 import com.android.systemui.settings.UserContentResolverProvider;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserFileManager;
@@ -37,6 +43,11 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
+
+import javax.inject.Provider;
+
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.CoroutineScope;
 
 /**
  * Dagger Module for classes found within the com.android.systemui.settings package.
@@ -56,14 +67,28 @@ public abstract class MultiUserUtilsModule {
     @Provides
     static UserTracker provideUserTracker(
             Context context,
+            Provider<FeatureFlagsClassic> featureFlagsProvider,
             UserManager userManager,
+            IActivityManager iActivityManager,
             DumpManager dumpManager,
+            @Application CoroutineScope appScope,
+            @Background CoroutineDispatcher backgroundDispatcher,
             @Background Handler handler
     ) {
         int startingUser = ActivityManager.getCurrentUser();
-        UserTrackerImpl tracker = new UserTrackerImpl(context, userManager, dumpManager, handler);
+        UserTrackerImpl tracker = new UserTrackerImpl(context, featureFlagsProvider, userManager,
+                iActivityManager, dumpManager, appScope, backgroundDispatcher, handler);
         tracker.initialize(startingUser);
         return tracker;
+    }
+
+    @SysUISingleton
+    @Provides
+    static DisplayTracker provideDisplayTracker(
+            DisplayManager displayManager,
+            @Background Handler handler
+    ) {
+        return new DisplayTrackerImpl(displayManager, handler);
     }
 
     @Binds

@@ -31,18 +31,20 @@ import androidx.test.filters.SmallTest;
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -60,11 +62,13 @@ public class HotspotTileTest extends SysuiTestCase {
     @Rule
     public MockitoRule mRule = MockitoJUnit.rule();
     @Mock
-    private QSTileHost mHost;
+    private QSHost mHost;
     @Mock
     private HotspotController mHotspotController;
     @Mock
     private DataSaverController mDataSaverController;
+    @Mock
+    private QsEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private HotspotTile mTile;
@@ -79,6 +83,7 @@ public class HotspotTileTest extends SysuiTestCase {
 
         mTile = new HotspotTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),
@@ -94,6 +99,12 @@ public class HotspotTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
     }
 
+    @After
+    public void tearDown() {
+        mTile.destroy();
+        mTestableLooper.processAllMessages();
+    }
+
     @Test
     public void handleUpdateState_wifiTetheringIsAllowed_stateIsNotUnavailable() {
         MockitoSession mockitoSession = ExtendedMockito.mockitoSession()
@@ -105,7 +116,7 @@ public class HotspotTileTest extends SysuiTestCase {
 
         assertThat(mState.state).isNotEqualTo(Tile.STATE_UNAVAILABLE);
         assertThat(String.valueOf(mState.secondaryLabel))
-                .isNotEqualTo(mContext.getString(R.string.wifitrackerlib_admin_restricted_network));
+                .isNotEqualTo(mContext.getString(com.android.wifitrackerlib.R.string.wifitrackerlib_admin_restricted_network));
         mockitoSession.finishMocking();
     }
 
@@ -120,7 +131,7 @@ public class HotspotTileTest extends SysuiTestCase {
 
         assertThat(mState.state).isEqualTo(Tile.STATE_UNAVAILABLE);
         assertThat(String.valueOf(mState.secondaryLabel))
-                .isEqualTo(mContext.getString(R.string.wifitrackerlib_admin_restricted_network));
+                .isEqualTo(mContext.getString(com.android.wifitrackerlib.R.string.wifitrackerlib_admin_restricted_network));
         mockitoSession.finishMocking();
     }
 

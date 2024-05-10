@@ -109,6 +109,11 @@ public abstract class ViewController<T extends View> {
         }
     }
 
+    /** Destroy ViewController, removing any listeners. */
+    public void destroy() {
+        mView.removeOnAttachStateChangeListener(mOnAttachStateListener);
+    }
+
     /**
      * Called when the view is attached and a call to {@link #init()} has been made in either order.
      */

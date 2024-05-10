@@ -1,0 +1,3 @@
+per-file responsible_apis.aconfig = file:/BAL_OWNERS
+per-file large_screen_experiences_app_compat.aconfig = file:/LSE_APP_COMPAT_OWNERS
+per-file accessibility.aconfig = file:/core/java/android/view/accessibility/OWNERS

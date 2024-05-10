@@ -14,6 +14,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -24,10 +25,10 @@ import static org.mockito.Mockito.when;
 
 import android.app.NotificationManager;
 import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings;
 import android.service.notification.ZenModeConfig;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
@@ -35,14 +36,18 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.ZenModeController.Callback;
-import com.android.systemui.util.settings.FakeSettings;
+import com.android.systemui.util.settings.FakeGlobalSettings;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -58,8 +63,11 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
     BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     DumpManager mDumpManager;
-
+    @Mock
+    UserTracker mUserTracker;
     private ZenModeControllerImpl mController;
+
+    private final FakeGlobalSettings mGlobalSettings = new FakeGlobalSettings();
 
     @Before
     public void setUp() {
@@ -69,10 +77,11 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
 
         mController = new ZenModeControllerImpl(
                 mContext,
-                Handler.createAsync(Looper.myLooper()),
+                Handler.createAsync(TestableLooper.get(this).getLooper()),
                 mBroadcastDispatcher,
                 mDumpManager,
-                new FakeSettings());
+                mGlobalSettings,
+                mUserTracker);
     }
 
     @Test
@@ -123,8 +132,46 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAddNullCallback() {
-        mController.addCallback(null);
-        mController.fireConfigChanged(null);
+    public void testModeChange() {
+        List<Integer> states = List.of(
+                Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                Settings.Global.ZEN_MODE_NO_INTERRUPTIONS,
+                Settings.Global.ZEN_MODE_ALARMS,
+                Settings.Global.ZEN_MODE_ALARMS
+        );
+
+        for (Integer state : states) {
+            mGlobalSettings.putInt(Settings.Global.ZEN_MODE, state);
+            TestableLooper.get(this).processAllMessages();
+            assertEquals(state.intValue(), mController.getZen());
+        }
+    }
+
+    @Test
+    public void testModeChange_callbackNotified() {
+        final AtomicInteger currentState = new AtomicInteger(-1);
+
+        ZenModeController.Callback callback = new Callback() {
+            @Override
+            public void onZenChanged(int zen) {
+                currentState.set(zen);
+            }
+        };
+
+        mController.addCallback(callback);
+
+        List<Integer> states = List.of(
+                Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                Settings.Global.ZEN_MODE_NO_INTERRUPTIONS,
+                Settings.Global.ZEN_MODE_ALARMS,
+                Settings.Global.ZEN_MODE_ALARMS
+        );
+
+        for (Integer state : states) {
+            mGlobalSettings.putInt(Settings.Global.ZEN_MODE, state);
+            TestableLooper.get(this).processAllMessages();
+            assertEquals(state.intValue(), currentState.get());
+        }
+
     }
 }

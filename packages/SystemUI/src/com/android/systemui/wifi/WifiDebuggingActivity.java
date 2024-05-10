@@ -43,7 +43,7 @@ import android.widget.Toast;
 
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Alerts the user of an untrusted network when enabling wireless debugging.

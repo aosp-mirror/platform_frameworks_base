@@ -7,6 +7,7 @@
 
     <uses-sdk android:minSdkVersion="19"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
@@ -27,7 +28,8 @@
         </activity>
         <service android:name="com.android.onemedia.OnePlayerService"
              android:exported="true"
-             android:process="com.android.onemedia.service"/>
+             android:process="com.android.onemedia.service"
+             android:foregroundServiceType="mediaPlayback"/>
     </application>
 
 </manifest>

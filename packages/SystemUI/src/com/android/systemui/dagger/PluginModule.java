@@ -16,7 +16,6 @@
 
 package com.android.systemui.dagger;
 
-import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.classifier.FalsingManagerProxy;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.globalactions.GlobalActionsImpl;
@@ -24,16 +23,16 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.GlobalActions;
-import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
+import com.android.systemui.statusbar.phone.ActivityStarterImpl;
 import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;
+import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher;
 import com.android.systemui.volume.VolumeDialogControllerImpl;
 
 import dagger.Binds;
 import dagger.Module;
-import dagger.Provides;
 
 /**
  * Module for binding Plugin implementations.
@@ -44,16 +43,16 @@ import dagger.Provides;
 public abstract class PluginModule {
 
     /** */
-    @Provides
-    static ActivityStarter provideActivityStarter(ActivityStarterDelegate delegate,
-            PluginDependencyProvider dependencyProvider) {
-        dependencyProvider.allowPluginDependency(ActivityStarter.class, delegate);
-        return delegate;
-    }
+    @Binds
+    abstract ActivityStarter provideActivityStarter(ActivityStarterImpl activityStarterImpl);
 
     /** */
     @Binds
     abstract DarkIconDispatcher provideDarkIconDispatcher(DarkIconDispatcherImpl controllerImpl);
+
+    @Binds
+    abstract SysuiDarkIconDispatcher provideSysuiDarkIconDispatcher(
+            DarkIconDispatcherImpl controllerImpl);
 
     /** */
     @Binds

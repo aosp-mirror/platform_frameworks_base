@@ -1,0 +1,8 @@
+aconfig_declarations {
+    name: "fold_lock_setting_flags",
+    package: "com.android.internal.foldables.flags",
+    container: "system",
+    srcs: [
+        "fold_lock_setting_flags.aconfig",
+    ],
+}

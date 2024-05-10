@@ -47,6 +47,7 @@ public class SingleScanSettingsTest {
     private ChannelSettings mChannelSettings2;
     private HiddenNetwork mHiddenNetwork1;
     private HiddenNetwork mHiddenNetwork2;
+    private byte[] mVendorIes;
 
     @Before
     public void setUp() {
@@ -59,6 +60,9 @@ public class SingleScanSettingsTest {
         mHiddenNetwork1.ssid = TEST_SSID_1;
         mHiddenNetwork2 = new HiddenNetwork();
         mHiddenNetwork2.ssid = TEST_SSID_2;
+
+        mVendorIes = new byte[]{(byte) 0xdd, 0x7, 0x00, 0x50, (byte) 0xf2, 0x08, 0x11, 0x22, 0x33,
+                (byte) 0xdd, 0x7, 0x00, 0x50, (byte) 0xf2, 0x08, 0x44, 0x55, 0x66};
     }
 
     /**
@@ -69,12 +73,12 @@ public class SingleScanSettingsTest {
     public void canSerializeAndDeserialize() {
         SingleScanSettings scanSettings = new SingleScanSettings();
         scanSettings.scanType = IWifiScannerImpl.SCAN_TYPE_HIGH_ACCURACY;
-
         scanSettings.channelSettings =
                 new ArrayList<>(Arrays.asList(mChannelSettings1, mChannelSettings2));
         scanSettings.hiddenNetworks =
                 new ArrayList<>(Arrays.asList(mHiddenNetwork1, mHiddenNetwork2));
         scanSettings.enable6GhzRnr = true;
+        scanSettings.vendorIes = mVendorIes;
 
         Parcel parcel = Parcel.obtain();
         scanSettings.writeToParcel(parcel, 0);
@@ -98,6 +102,7 @@ public class SingleScanSettingsTest {
                 new ArrayList<>(Arrays.asList(mChannelSettings1, mChannelSettings2));
         scanSettings1.hiddenNetworks =
                 new ArrayList<>(Arrays.asList(mHiddenNetwork1, mHiddenNetwork2));
+        scanSettings1.vendorIes = mVendorIes;
 
         SingleScanSettings scanSettings2 = new SingleScanSettings();
         scanSettings2.scanType = IWifiScannerImpl.SCAN_TYPE_HIGH_ACCURACY;
@@ -105,6 +110,7 @@ public class SingleScanSettingsTest {
                 new ArrayList<>(Arrays.asList(mChannelSettings1, mChannelSettings2));
         scanSettings2.hiddenNetworks =
                 new ArrayList<>(Arrays.asList(mHiddenNetwork1, mHiddenNetwork2));
+        scanSettings2.vendorIes = mVendorIes;
 
         assertEquals(scanSettings1, scanSettings2);
         assertEquals(scanSettings1.hashCode(), scanSettings2.hashCode());

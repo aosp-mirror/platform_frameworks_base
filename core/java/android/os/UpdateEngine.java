@@ -25,6 +25,9 @@ import android.os.IUpdateEngine;
 import android.os.IUpdateEngineCallback;
 import android.os.RemoteException;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * UpdateEngine handles calls to the update engine which takes care of A/B OTA
  * updates. It wraps up the update engine Binder APIs and exposes them as
@@ -178,6 +181,7 @@ public class UpdateEngine {
             ErrorCodeConstants.NOT_ENOUGH_SPACE,
             ErrorCodeConstants.DEVICE_CORRUPTED,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface ErrorCode {}
 
     /**

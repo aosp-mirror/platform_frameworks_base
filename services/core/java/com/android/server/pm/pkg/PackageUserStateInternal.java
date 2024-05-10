@@ -19,6 +19,7 @@ package com.android.server.pm.pkg;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.content.pm.UserPackage;
 import android.content.pm.pkg.FrameworkPackageUserState;
 import android.util.Pair;
 
@@ -29,6 +30,8 @@ import com.android.server.utils.WatchedArraySet;
  * Internal variant of {@link PackageUserState} that includes data not exposed as API. This is
  * still read-only and should be used inside system server code when possible over the
  * implementation.
+ *
+ * @hide
  */
 public interface PackageUserStateInternal extends PackageUserState, FrameworkPackageUserState {
 
@@ -36,7 +39,7 @@ public interface PackageUserStateInternal extends PackageUserState, FrameworkPac
 
     // TODO: Make non-null with emptyMap()
     @Nullable
-    WatchedArrayMap<String, SuspendParams> getSuspendParams();
+    WatchedArrayMap<UserPackage, SuspendParams> getSuspendParams();
 
     @Nullable
     WatchedArraySet<String> getDisabledComponentsNoCopy();

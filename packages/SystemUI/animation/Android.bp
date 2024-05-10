@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_system_ui_please_use_a_more_specific_subteam_if_possible_",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_packages_SystemUI_license"
@@ -24,10 +25,15 @@ package {
 android_library {
 
     name: "SystemUIAnimationLib",
+    use_resource_processor: true,
 
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
+    ],
+    exclude_srcs: [
+        "src/com/android/systemui/surfaceeffects/**/*.java",
+        "src/com/android/systemui/surfaceeffects/**/*.kt",
     ],
 
     resource_dirs: [
@@ -35,9 +41,36 @@ android_library {
     ],
 
     static_libs: [
-        "PluginCoreLib",
+        "androidx.core_core-animation",
+        "androidx.core_core-ktx",
+        "androidx.annotation_annotation",
+        "SystemUIShaderLib",
+        "animationlib",
     ],
 
     manifest: "AndroidManifest.xml",
     kotlincflags: ["-Xjvm-default=all"],
+}
+
+android_library {
+    name: "SystemUIShaderLib",
+    use_resource_processor: true,
+
+    srcs: [
+        "src/com/android/systemui/surfaceeffects/**/*.java",
+        "src/com/android/systemui/surfaceeffects/**/*.kt",
+    ],
+
+    static_libs: [
+        "androidx.core_core-animation",
+        "androidx.core_core-ktx",
+        "androidx.annotation_annotation",
+    ],
+
+    manifest: "AndroidManifest.xml",
+    kotlincflags: ["-Xjvm-default=all"],
+
+    // sdk_version must be specified, otherwise it compiles against private APIs.
+    min_sdk_version: "33",
+    sdk_version: "current",
 }

@@ -194,6 +194,7 @@ public interface IBinder {
      * Limit that should be placed on IPC sizes, in bytes, to keep them safely under the transaction
      * buffer limit.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     static int getSuggestedMaxIpcSizeBytes() {
         return MAX_IPC_SIZE;
     }

@@ -327,7 +327,8 @@ private fun ClassPrinter.generateBuilderSetters(visibility: String) {
             +"return$maybeCast this;"
         }
 
-        val javadocSeeSetter = "/** @see #$setterName */"
+        val javadocSeeSetter =
+                if (isHidden()) "/** @see #$setterName @hide */" else "/** @see #$setterName */"
         val adderName = "add$SingularName"
 
         val singularNameCustomizationHint = if (SingularNameOrNull == null) {
@@ -393,7 +394,7 @@ private fun ClassPrinter.generateBuilderBuild() {
 fun ClassPrinter.generateParcelable() {
     val booleanFields = fields.filter { it.Type == "boolean" }
     val objectFields = fields.filter { it.Type !in PRIMITIVE_TYPES }
-    val nullableFields = objectFields.filter { it.mayBeNull }
+    val nullableFields = objectFields.filter { it.mayBeNull && it.Type !in PRIMITIVE_ARRAY_TYPES }
     val nonBooleanFields = fields - booleanFields
 
 
@@ -457,7 +458,7 @@ fun ClassPrinter.generateParcelable() {
                     hasAnnotation("@$DataClassEnum") ->
                         +"dest.writeInt($internalGetter == null ? -1 : $internalGetter.ordinal());"
                     else -> {
-                        if (mayBeNull) !"if ($internalGetter != null) "
+                        if (mayBeNull && Type !in PRIMITIVE_ARRAY_TYPES) !"if ($internalGetter != null) "
                         var args = internalGetter
                         if (ParcelMethodsSuffix.startsWith("Parcelable")
                                 || ParcelMethodsSuffix.startsWith("TypedObject")
@@ -529,7 +530,7 @@ fun ClassPrinter.generateParcelable() {
                     if (passContainer) {
                         methodArgs.add(_name)
                         !"$Type $_name = "
-                        if (mayBeNull) {
+                        if (mayBeNull && Type !in PRIMITIVE_ARRAY_TYPES) {
                             +"null;"
                             !"if ((flg & $fieldBit) != 0) {"
                             pushIndent()
@@ -539,7 +540,9 @@ fun ClassPrinter.generateParcelable() {
                         +"$containerInitExpr;"
                     } else {
                         !"$Type $_name = "
-                        if (mayBeNull) !"(flg & $fieldBit) == 0 ? null : "
+                        if (mayBeNull && Type !in PRIMITIVE_ARRAY_TYPES) {
+                            !"(flg & $fieldBit) == 0 ? null : "
+                        }
                         if (ParcelMethodsSuffix == "StrongInterface") {
                             !"$FieldClass.Stub.asInterface("
                         } else if (Type !in PRIMITIVE_TYPES + "String" + "Bundle" &&
@@ -578,7 +581,7 @@ fun ClassPrinter.generateParcelable() {
                     +";"
 
                     // Cleanup if passContainer
-                    if (passContainer && mayBeNull) {
+                    if (passContainer && mayBeNull && Type !in PRIMITIVE_ARRAY_TYPES) {
                         popIndent()
                         rmEmptyLine()
                         +"\n}"
@@ -746,6 +749,15 @@ fun ClassPrinter.generateGetters() {
             }
         }
     }
+}
+
+fun FieldInfo.isHidden(): Boolean {
+    if (javadocFull != null) {
+        (javadocFull ?: "/**\n */").lines().forEach {
+            if (it.contains("@hide")) return true
+        }
+    }
+    return false
 }
 
 fun FieldInfo.generateFieldJavadoc(forceHide: Boolean = false) = classPrinter {

@@ -114,24 +114,35 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void startedWakingUp(@WakeReason int wakeReason) {
+    public void startedWakingUpGlobal(@WakeReason int reason) {
     }
 
     @Override
-    public void finishedWakingUp(@WakeReason int wakeReason) {
+    public void finishedWakingUpGlobal(@WakeReason int reason) {
     }
 
     @Override
-    public void startedGoingToSleep(@GoToSleepReason int sleepReason) {
+    public void startedGoingToSleepGlobal(@GoToSleepReason int reason) {
     }
 
     @Override
-    public void finishedGoingToSleep(@GoToSleepReason int sleepReason) {
+    public void finishedGoingToSleepGlobal(@GoToSleepReason int reason) {
     }
 
     @Override
-    public void onPowerGroupWakefulnessChanged(int groupId, int wakefulness,
-            @GoToSleepReason int pmSleepReason, int globalWakefulness) {
+    public void startedWakingUp(int displayGroupId, @WakeReason int wakeReason) {
+    }
+
+    @Override
+    public void finishedWakingUp(int displayGroupId, @WakeReason int wakeReason) {
+    }
+
+    @Override
+    public void startedGoingToSleep(int displayGroupId, @GoToSleepReason int sleepReason) {
+    }
+
+    @Override
+    public void finishedGoingToSleep(int displayGroupId, @GoToSleepReason int sleepReason) {
     }
 
     @Override
@@ -147,7 +158,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void screenTurnedOff(int displayId) {
+    public void screenTurnedOff(int displayId, boolean isSwappingDisplay) {
     }
 
     @Override
@@ -310,11 +321,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
+    public void startKeyguardExitAnimation(long startTime) {
     }
 
     @Override
-    public int applyKeyguardOcclusionChange(boolean keyguardOccludingStarted) {
+    public int applyKeyguardOcclusionChange() {
         return 0;
     }
 
@@ -337,5 +348,10 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public boolean canDismissBootAnimation() {
         return true;
+    }
+
+    @Override
+    public boolean isGlobalKey(int keyCode) {
+        return false;
     }
 }

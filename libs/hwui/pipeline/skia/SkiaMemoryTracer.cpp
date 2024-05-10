@@ -32,13 +32,13 @@ SkiaMemoryTracer::SkiaMemoryTracer(const char* categoryKey, bool itemizeType)
         , mTotalSize("bytes", 0)
         , mPurgeableSize("bytes", 0) {}
 
-const char* SkiaMemoryTracer::mapName(const char* resourceName) {
+std::optional<std::string> SkiaMemoryTracer::mapName(const std::string& resourceName) {
     for (auto& resource : mResourceMap) {
-        if (SkStrContains(resourceName, resource.first)) {
+        if (resourceName.find(resource.first) != std::string::npos) {
             return resource.second;
         }
     }
-    return nullptr;
+    return std::nullopt;
 }
 
 void SkiaMemoryTracer::processElement() {
@@ -62,7 +62,7 @@ void SkiaMemoryTracer::processElement() {
         }
 
         // find the type if one exists
-        const char* type;
+        std::string type;
         auto typeResult = mCurrentValues.find("type");
         if (typeResult != mCurrentValues.end()) {
             type = typeResult->second.units;
@@ -71,14 +71,13 @@ void SkiaMemoryTracer::processElement() {
         }
 
         // compute the type if we are itemizing or use the default "size" if we are not
-        const char* key = (mItemizeType) ? type : sizeResult->first;
-        SkASSERT(key != nullptr);
+        std::string key = (mItemizeType) ? type : sizeResult->first;
 
         // compute the top level element name using either the map or category key
-        const char* resourceName = mapName(mCurrentElement.c_str());
-        if (mCategoryKey != nullptr) {
+        std::optional<std::string> resourceName = mapName(mCurrentElement);
+        if (mCategoryKey) {
             // find the category if one exists
-            auto categoryResult = mCurrentValues.find(mCategoryKey);
+            auto categoryResult = mCurrentValues.find(*mCategoryKey);
             if (categoryResult != mCurrentValues.end()) {
                 resourceName = categoryResult->second.units;
             } else if (mItemizeType) {
@@ -87,11 +86,11 @@ void SkiaMemoryTracer::processElement() {
         }
 
         // if we don't have a pretty name then use the dumpName
-        if (resourceName == nullptr) {
-            resourceName = mCurrentElement.c_str();
+        if (!resourceName) {
+            resourceName = mCurrentElement;
         }
 
-        auto result = mResults.find(resourceName);
+        auto result = mResults.find(*resourceName);
         if (result != mResults.end()) {
             auto& resourceValues = result->second;
             typeResult = resourceValues.find(key);
@@ -106,7 +105,7 @@ void SkiaMemoryTracer::processElement() {
             TraceValue sizeValue = sizeResult->second;
             mCurrentValues.clear();
             mCurrentValues.insert({key, sizeValue});
-            mResults.insert({resourceName, mCurrentValues});
+            mResults.insert({*resourceName, mCurrentValues});
         }
     }
 
@@ -139,8 +138,9 @@ void SkiaMemoryTracer::logOutput(String8& log) {
             for (const auto& typedValue : namedItem.second) {
                 TraceValue traceValue = convertUnits(typedValue.second);
                 const char* entry = (traceValue.count > 1) ? "entries" : "entry";
-                log.appendFormat("    %s: %.2f %s (%d %s)\n", typedValue.first, traceValue.value,
-                                 traceValue.units, traceValue.count, entry);
+                log.appendFormat("    %s: %.2f %s (%d %s)\n", typedValue.first.c_str(),
+                                 traceValue.value, traceValue.units.c_str(), traceValue.count,
+                                 entry);
             }
         } else {
             auto result = namedItem.second.find("size");
@@ -148,7 +148,8 @@ void SkiaMemoryTracer::logOutput(String8& log) {
                 TraceValue traceValue = convertUnits(result->second);
                 const char* entry = (traceValue.count > 1) ? "entries" : "entry";
                 log.appendFormat("  %s: %.2f %s (%d %s)\n", namedItem.first.c_str(),
-                                 traceValue.value, traceValue.units, traceValue.count, entry);
+                                 traceValue.value, traceValue.units.c_str(), traceValue.count,
+                                 entry);
             }
         }
     }
@@ -156,7 +157,7 @@ void SkiaMemoryTracer::logOutput(String8& log) {
 
 size_t SkiaMemoryTracer::total() {
     processElement();
-    if (!strcmp("bytes", mTotalSize.units)) {
+    if ("bytes" == mTotalSize.units) {
         return mTotalSize.value;
     }
     return 0;
@@ -166,16 +167,16 @@ void SkiaMemoryTracer::logTotals(String8& log) {
     TraceValue total = convertUnits(mTotalSize);
     TraceValue purgeable = convertUnits(mPurgeableSize);
     log.appendFormat("  %.0f bytes, %.2f %s (%.2f %s is purgeable)\n", mTotalSize.value,
-                     total.value, total.units, purgeable.value, purgeable.units);
+                     total.value, total.units.c_str(), purgeable.value, purgeable.units.c_str());
 }
 
 SkiaMemoryTracer::TraceValue SkiaMemoryTracer::convertUnits(const TraceValue& value) {
     TraceValue output(value);
-    if (SkString("bytes") == SkString(output.units) && output.value >= 1024) {
+    if ("bytes" == output.units && output.value >= 1024) {
         output.value = output.value / 1024.0f;
         output.units = "KB";
     }
-    if (SkString("KB") == SkString(output.units) && output.value >= 1024) {
+    if ("KB" == output.units && output.value >= 1024) {
         output.value = output.value / 1024.0f;
         output.units = "MB";
     }

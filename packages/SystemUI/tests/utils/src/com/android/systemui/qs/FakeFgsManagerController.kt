@@ -16,18 +16,16 @@
 
 package com.android.systemui.qs
 
-import android.view.View
+import com.android.systemui.animation.Expandable
 import com.android.systemui.qs.FgsManagerController.OnDialogDismissedListener
 import com.android.systemui.qs.FgsManagerController.OnNumberOfPackagesChangedListener
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /** A fake [FgsManagerController] to be used in tests. */
 class FakeFgsManagerController(
-    isAvailable: Boolean = true,
     showFooterDot: Boolean = false,
     numRunningPackages: Int = 0,
 ) : FgsManagerController {
-    override val isAvailable: MutableStateFlow<Boolean> = MutableStateFlow(isAvailable)
 
     override var numRunningPackages = numRunningPackages
         set(value) {
@@ -43,6 +41,9 @@ class FakeFgsManagerController(
 
     override val showFooterDot: MutableStateFlow<Boolean> = MutableStateFlow(showFooterDot)
 
+    override var includesUserVisibleJobs = false
+        private set
+
     private val numRunningPackagesListeners = LinkedHashSet<OnNumberOfPackagesChangedListener>()
     private val dialogDismissedListeners = LinkedHashSet<OnDialogDismissedListener>()
 
@@ -54,7 +55,7 @@ class FakeFgsManagerController(
 
     override fun init() {}
 
-    override fun showDialog(viewLaunchedFrom: View?) {}
+    override fun showDialog(expandable: Expandable?) {}
 
     override fun addOnNumberOfPackagesChangedListener(listener: OnNumberOfPackagesChangedListener) {
         numRunningPackagesListeners.add(listener)
@@ -73,8 +74,6 @@ class FakeFgsManagerController(
     override fun removeOnDialogDismissedListener(listener: OnDialogDismissedListener) {
         dialogDismissedListeners.remove(listener)
     }
-
-    override fun shouldUpdateFooterVisibility(): Boolean = false
 
     override fun visibleButtonsCount(): Int = 0
 }

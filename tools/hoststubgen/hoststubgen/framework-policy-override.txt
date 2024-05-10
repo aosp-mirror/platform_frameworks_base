@@ -1,0 +1,105 @@
+# --------------------------------------------------------------------------------------------------
+# This file contains rules to process `framework-all.jar` to generate the host side test "stub" and
+# "impl" jars, without using Java annotations.
+#
+# Useful when:
+# - The class is auto-generated and annotations can't be added.
+#   (We need to figure out what to do on auto-generated classes.)
+# - Want to quickly change filter rules without having to rebuild framework.jar.
+#
+# Using this file, one can control the visibility of APIs on a per-class, per-field and per-method
+# basis, but in most cases, per-class directives would be sufficient. That is:
+#
+# - To put the entire class, including its members and nested classes, in the "stub" jar,
+#   so that the test / target code can use the API, use `stubclass`.
+#
+# class package.class	stubclass
+#
+# - To put the entire class, including its members and nested classes, in the "impl" jar,
+#   but not in the "stub" jar, use `keepclass`. Use this when you don't want to expose an API to
+#   tests/target directly, but it's still needed at runtime, because it's used by other "stub" APIs
+#   directly or indirectly.
+#
+# class package.class	keepclass
+#
+# All other classes will be removed from both the stub jar and impl jar.
+#
+# --------------------------------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------------------------------
+# Directions on auto-generated classes, where we can't use Java annotations (yet).
+# --------------------------------------------------------------------------------------------------
+class android.Manifest stubclass
+class android.R        stubclass
+class android.os.PersistableBundleProto	keepclass
+
+# This is in module-utils, where using a HostStubGen annotation would be complicated, so we
+# add a direction here rather than using a java annotation.
+# The build file says it's deprecated, anyway...? Figure out what to do with it.
+class com.android.internal.util.Preconditions keepclass
+
+# --------------------------------------------------------------------------------------------------
+# Actual framework classes
+# --------------------------------------------------------------------------------------------------
+
+# Put basic exception classes in the "impl" jar.
+# We don't put them in stub yet (until something actually needs them).
+class android.os.DeadObjectException          keepclass
+class android.os.DeadSystemRuntimeException   keepclass
+class android.os.NetworkOnMainThreadException keepclass
+class android.os.RemoteException              keepclass
+class android.os.ServiceSpecificException     keepclass
+class android.util.AndroidException           keepclass
+class android.util.AndroidRuntimeException    keepclass
+class android.os.DeadSystemException          keepclass
+
+
+# For now, we only want to expose ArrayMap and Log, but they and their tests depend on
+# more classes.
+
+class android.util.ArrayMap             stubclass
+
+# Used by ArrayMap. No need to put them in the stub, but we need them in impl.
+class android.util.MapCollections         keepclass
+class android.util.ContainerHelpers       keepclass
+class android.util.EmptyArray             stubclass
+class com.android.internal.util.XmlUtils  keepclass
+class com.android.internal.util.FastMath  keepclass
+class android.util.MathUtils              keepclass
+
+
+class android.util.Log          stubclass
+class android.util.Slog         stubclass
+# We don't use Log's native code, yet. Instead, the following line enables the Java substitution.
+# Comment it out to disable Java substitution of Log's native methods.
+class android.util.Log	!com.android.hoststubgen.nativesubstitution.Log_host
+
+# Used by log
+class com.android.internal.util.FastPrintWriter         keepclass
+class com.android.internal.util.LineBreakBufferedWriter keepclass
+
+class android.util.EventLog stubclass
+class android.util.EventLog !com.android.hoststubgen.nativesubstitution.EventLog_host
+class android.util.EventLog$Event stubclass
+
+# Expose Context because it's referred to by AndroidTestCase, but don't need to expose any of
+# its members.
+class android.content.Context        keep
+
+# Expose Parcel, Parcel and there relevant classes, which are used by ArrayMapTets.
+class android.os.Parcelable     StubClass
+class android.os.Parcel         StubClass
+class android.os.Parcel         !com.android.hoststubgen.nativesubstitution.Parcel_host
+
+class android.os.IBinder        stubClass
+class android.os.IInterface     stubclass
+
+class android.os.BadParcelableException     stubclass
+class android.os.BadTypeParcelableException stubclass
+
+class android.os.BaseBundle        stubclass
+class android.os.Bundle            stubclass
+class android.os.PersistableBundle stubclass
+
+class android.os.MessageQueue stubclass
+class android.os.MessageQueue !com.android.hoststubgen.nativesubstitution.MessageQueue_host

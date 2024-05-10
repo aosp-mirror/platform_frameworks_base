@@ -33,10 +33,10 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -52,6 +52,7 @@ import android.content.pm.ShortcutManager;
 import android.graphics.Color;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
@@ -65,10 +66,17 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
+import com.android.internal.statusbar.IStatusBarService;
+import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
+import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository;
+import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -80,8 +88,11 @@ import com.android.systemui.statusbar.notification.collection.provider.HighPrior
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.kotlin.JavaAdapter;
+import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.wmshell.BubblesManager;
 
 import org.junit.Before;
@@ -95,6 +106,8 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.Optional;
 
+import kotlinx.coroutines.test.TestScope;
+
 /**
  * Tests for {@link NotificationGutsManager}.
  */
@@ -106,6 +119,10 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
+
+    private TestScope mTestScope = TestScopeProvider.getTestScope();
+    private JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
+    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
     private TestableLooper mTestableLooper;
     private Handler mHandler;
     private NotificationTestHelper mHelper;
@@ -117,13 +134,12 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationActivityStarter mNotificationActivityStarter;
     @Mock private NotificationListContainer mNotificationListContainer;
-    @Mock private NotificationInfo.CheckSaveListener mCheckSaveListener;
     @Mock private OnSettingsClickListener mOnSettingsClickListener;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
-    @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private AccessibilityManager mAccessibilityManager;
     @Mock private HighPriorityProvider mHighPriorityProvider;
     @Mock private INotificationManager mINotificationManager;
+    @Mock private IStatusBarService mBarService;
     @Mock private LauncherApps mLauncherApps;
     @Mock private ShortcutManager mShortcutManager;
     @Mock private ChannelEditorDialogController mChannelEditorDialogController;
@@ -133,32 +149,61 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private ShadeController mShadeController;
     @Mock private PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
     @Mock private AssistantFeedbackController mAssistantFeedbackController;
+    @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
+    @Mock private StatusBarStateController mStatusBarStateController;
+    @Mock private HeadsUpManager mHeadsUpManager;
+    @Mock private ActivityStarter mActivityStarter;
+
+    @Mock private UserManager mUserManager;
+
+    private WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
 
     @Before
     public void setUp() {
         mTestableLooper = TestableLooper.get(this);
         allowTestableLooperAsMainThread();
-        mDependency.injectTestDependency(DeviceProvisionedController.class,
-                mDeviceProvisionedController);
-        mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
-        mDependency.injectTestDependency(
-                OnUserInteractionCallback.class,
-                mOnUserInteractionCallback);
-        mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
         mHandler = Handler.createAsync(mTestableLooper.getLooper());
         mHelper = new NotificationTestHelper(mContext, mDependency, TestableLooper.get(this));
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
 
-        mGutsManager = new NotificationGutsManager(mContext,
-                () -> Optional.of(mCentralSurfaces), mHandler, mHandler, mAccessibilityManager,
-                mHighPriorityProvider, mINotificationManager,
-                mPeopleSpaceWidgetManager, mLauncherApps, mShortcutManager,
-                mChannelEditorDialogController, mContextTracker, mAssistantFeedbackController,
-                Optional.of(mBubblesManager), new UiEventLoggerFake(), mOnUserInteractionCallback,
-                mShadeController);
+        mWindowRootViewVisibilityInteractor = new WindowRootViewVisibilityInteractor(
+                mTestScope.getBackgroundScope(),
+                new WindowRootViewVisibilityRepository(mBarService, mExecutor),
+                new FakeKeyguardRepository(),
+                mHeadsUpManager,
+                PowerInteractorFactory.create().getPowerInteractor());
+
+        mGutsManager = new NotificationGutsManager(
+                mContext,
+                mHandler,
+                mHandler,
+                mJavaAdapter,
+                mAccessibilityManager,
+                mHighPriorityProvider,
+                mINotificationManager,
+                mUserManager,
+                mPeopleSpaceWidgetManager,
+                mLauncherApps,
+                mShortcutManager,
+                mChannelEditorDialogController,
+                mContextTracker,
+                mAssistantFeedbackController,
+                Optional.of(mBubblesManager),
+                new UiEventLoggerFake(),
+                mOnUserInteractionCallback,
+                mShadeController,
+                mWindowRootViewVisibilityInteractor,
+                mNotificationLockscreenUserManager,
+                mStatusBarStateController,
+                mBarService,
+                mDeviceProvisionedController,
+                mMetricsLogger,
+                mHeadsUpManager,
+                mActivityStarter);
         mGutsManager.setUpWithPresenter(mPresenter, mNotificationListContainer,
                 mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
+        mGutsManager.start();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +219,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         // Test doesn't support animation since the guts view is not attached.
         doNothing().when(guts).openControls(
-                eq(true) /* shouldDoCircularReveal */,
                 anyInt(),
                 anyInt(),
                 anyBoolean(),
@@ -191,17 +235,75 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         assertEquals(View.INVISIBLE, guts.getVisibility());
         mTestableLooper.processAllMessages();
         verify(guts).openControls(
-                eq(true),
                 anyInt(),
                 anyInt(),
                 anyBoolean(),
                 any(Runnable.class));
+        verify(mHeadsUpManager).setGutsShown(realRow.getEntry(), true);
 
         assertEquals(View.VISIBLE, guts.getVisibility());
-        mGutsManager.closeAndSaveGuts(false, false, false, 0, 0, false);
+        mGutsManager.closeAndSaveGuts(false, false, true, 0, 0, false);
 
         verify(guts).closeControls(anyBoolean(), anyBoolean(), anyInt(), anyInt(), anyBoolean());
         verify(row, times(1)).setGutsView(any());
+        mTestableLooper.processAllMessages();
+        verify(mHeadsUpManager).setGutsShown(realRow.getEntry(), false);
+    }
+
+    @Test
+    public void testLockscreenShadeVisible_visible_gutsNotClosed() {
+        // First, start out lockscreen or shade as not visible
+        mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(false);
+        mTestScope.getTestScheduler().runCurrent();
+
+        NotificationGuts guts = mock(NotificationGuts.class);
+        mGutsManager.setExposedGuts(guts);
+
+        // WHEN the lockscreen or shade becomes visible
+        mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true);
+        mTestScope.getTestScheduler().runCurrent();
+
+        // THEN the guts are not closed
+        verify(guts, never()).removeCallbacks(any());
+        verify(guts, never()).closeControls(
+                anyBoolean(), anyBoolean(), anyInt(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void testLockscreenShadeVisible_notVisible_gutsClosed() {
+        // First, start out lockscreen or shade as visible
+        mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true);
+        mTestScope.getTestScheduler().runCurrent();
+
+        NotificationGuts guts = mock(NotificationGuts.class);
+        mGutsManager.setExposedGuts(guts);
+
+        // WHEN the lockscreen or shade is no longer visible
+        mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(false);
+        mTestScope.getTestScheduler().runCurrent();
+
+        // THEN the guts are closed
+        verify(guts).removeCallbacks(any());
+        verify(guts).closeControls(
+                /* leavebehinds= */ eq(true),
+                /* controls= */ eq(true),
+                /* x= */ anyInt(),
+                /* y= */ anyInt(),
+                /* force= */ eq(true));
+    }
+
+    @Test
+    public void testLockscreenShadeVisible_notVisible_listContainerReset() {
+        // First, start out lockscreen or shade as visible
+        mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true);
+        mTestScope.getTestScheduler().runCurrent();
+
+        // WHEN the lockscreen or shade is no longer visible
+        mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(false);
+        mTestScope.getTestScheduler().runCurrent();
+
+        // THEN the list container is reset
+        verify(mNotificationListContainer).resetExposedMenuView(anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -214,7 +316,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         // Test doesn't support animation since the guts view is not attached.
         doNothing().when(guts).openControls(
-                eq(true) /* shouldDoCircularReveal */,
                 anyInt(),
                 anyInt(),
                 anyBoolean(),
@@ -238,7 +339,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         assertTrue(mGutsManager.openGutsInternal(row, 0, 0, menuItem));
         mTestableLooper.processAllMessages();
         verify(guts).openControls(
-                eq(true),
                 anyInt(),
                 anyInt(),
                 anyBoolean(),
@@ -364,7 +464,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(mChannelEditorDialogController),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
-                anySet(),
                 eq(entry),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
@@ -372,14 +471,14 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false),
                 eq(true), /* wasShownHighPriority */
-                eq(mAssistantFeedbackController));
+                eq(mAssistantFeedbackController),
+                any(MetricsLogger.class));
     }
 
     @Test
     public void testInitializeNotificationInfoView_PassesAlongProvisionedState() throws Exception {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
         ExpandableNotificationRow row = spy(mHelper.createRow());
-        row.setBlockingHelperShowing(false);
         modifyRanking(row.getEntry())
                 .setUserSentiment(USER_SENTIMENT_NEGATIVE)
                 .build();
@@ -398,7 +497,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(mChannelEditorDialogController),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
-                anySet(),
                 eq(entry),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
@@ -406,14 +504,14 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(true),
                 eq(false),
                 eq(false), /* wasShownHighPriority */
-                eq(mAssistantFeedbackController));
+                eq(mAssistantFeedbackController),
+                any(MetricsLogger.class));
     }
 
     @Test
     public void testInitializeNotificationInfoView_withInitialAction() throws Exception {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
         ExpandableNotificationRow row = spy(mHelper.createRow());
-        row.setBlockingHelperShowing(true);
         modifyRanking(row.getEntry())
                 .setUserSentiment(USER_SENTIMENT_NEGATIVE)
                 .build();
@@ -430,7 +528,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(mChannelEditorDialogController),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
-                anySet(),
                 eq(entry),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
@@ -438,7 +535,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false),
                 eq(false), /* wasShownHighPriority */
-                eq(mAssistantFeedbackController));
+                eq(mAssistantFeedbackController),
+                any(MetricsLogger.class));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

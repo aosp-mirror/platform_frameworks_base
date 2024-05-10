@@ -3,11 +3,15 @@ package com.android.systemui.statusbar.phone
 import android.app.StatusBarManager
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -24,13 +28,14 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class StatusBarHideIconsForBouncerManager @Inject constructor(
+    @Application private val scope: CoroutineScope,
     private val commandQueue: CommandQueue,
     @Main private val mainExecutor: DelayableExecutor,
     statusBarWindowStateController: StatusBarWindowStateController,
+    val shadeInteractor: ShadeInteractor,
     dumpManager: DumpManager
 ) : Dumpable {
     // State variables set by external classes.
-    private var panelExpanded: Boolean = false
     private var isOccluded: Boolean = false
     private var bouncerShowing: Boolean = false
     private var topAppHidesStatusBar: Boolean = false
@@ -47,6 +52,11 @@ class StatusBarHideIconsForBouncerManager @Inject constructor(
         statusBarWindowStateController.addListener {
                 state -> setStatusBarStateAndTriggerUpdate(state)
         }
+        scope.launch {
+            shadeInteractor.isAnyExpanded.collect {
+                updateHideIconsForBouncer(false)
+            }
+        }
     }
 
     /** Returns true if the status bar icons should be hidden in the bouncer. */
@@ -61,11 +71,6 @@ class StatusBarHideIconsForBouncerManager @Inject constructor(
 
     fun setDisplayId(displayId: Int) {
         this.displayId = displayId
-    }
-
-    fun setPanelExpandedAndTriggerUpdate(panelExpanded: Boolean) {
-        this.panelExpanded = panelExpanded
-        updateHideIconsForBouncer(animate = false)
     }
 
     fun setIsOccludedAndTriggerUpdate(isOccluded: Boolean) {
@@ -98,7 +103,7 @@ class StatusBarHideIconsForBouncerManager @Inject constructor(
             topAppHidesStatusBar &&
                     isOccluded &&
                     (statusBarWindowHidden || bouncerShowing)
-        val hideBecauseKeyguard = !panelExpanded && !isOccluded && bouncerShowing
+        val hideBecauseKeyguard = !isShadeOrQsExpanded() && !isOccluded && bouncerShowing
         val shouldHideIconsForBouncer = hideBecauseApp || hideBecauseKeyguard
         if (hideIconsForBouncer != shouldHideIconsForBouncer) {
             hideIconsForBouncer = shouldHideIconsForBouncer
@@ -122,9 +127,13 @@ class StatusBarHideIconsForBouncerManager @Inject constructor(
         }
     }
 
+    private fun isShadeOrQsExpanded(): Boolean {
+        return shadeInteractor.isAnyExpanded.value
+    }
+
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("---- State variables set externally ----")
-        pw.println("panelExpanded=$panelExpanded")
+        pw.println("isShadeOrQsExpanded=${isShadeOrQsExpanded()}")
         pw.println("isOccluded=$isOccluded")
         pw.println("bouncerShowing=$bouncerShowing")
         pw.println("topAppHideStatusBar=$topAppHidesStatusBar")

@@ -29,13 +29,14 @@ import java.io.PrintWriter;
 /**
  * A proxy to a Recents implementation.
  */
-public class Recents extends CoreStartable implements CommandQueue.Callbacks {
+public class Recents implements CoreStartable, CommandQueue.Callbacks {
 
+    private final Context mContext;
     private final RecentsImplementation mImpl;
     private final CommandQueue mCommandQueue;
 
     public Recents(Context context, RecentsImplementation impl, CommandQueue commandQueue) {
-        super(context);
+        mContext = context;
         mImpl = impl;
         mCommandQueue = commandQueue;
     }

@@ -21,6 +21,8 @@ import android.annotation.SystemApi;
 import android.annotation.UptimeMillisLong;
 import android.os.SystemClock;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * Writes an EventLog event capturing the performance of system config file writes.
  * The event log entry is formatted like this:
@@ -56,8 +58,9 @@ public class SystemConfigFileCommitEventLogger {
 
     /**
      * Invoked just before the configuration file writing begins.
+     * @hide
      */
-    void onStartWrite() {
+    public void onStartWrite() {
         if (mStartTime == 0) {
             mStartTime = SystemClock.uptimeMillis();
         }
@@ -65,9 +68,18 @@ public class SystemConfigFileCommitEventLogger {
 
     /**
      * Invoked just after the configuration file writing ends.
+     * @hide
      */
-    void onFinishWrite() {
-        com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(mName,
-                SystemClock.uptimeMillis() - mStartTime);
+    public void onFinishWrite() {
+        writeLogRecord(SystemClock.uptimeMillis() - mStartTime);
+    }
+
+    /**
+     * The actual write of the log record.
+     * @hide
+     */
+    @VisibleForTesting
+    public void writeLogRecord(long durationMs) {
+        com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(mName, durationMs);
     }
 }

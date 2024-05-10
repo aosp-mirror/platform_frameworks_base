@@ -41,6 +41,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 /** Tests for {@link MainStage} */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -61,7 +63,7 @@ public class MainStageTests extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mRootTaskInfo = new TestRunningTaskInfoBuilder().build();
         mMainStage = new MainStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks,
-                mSyncQueue, mSurfaceSession, mIconProvider);
+                mSyncQueue, mSurfaceSession, mIconProvider, Optional.empty());
         mMainStage.onTaskAppeared(mRootTaskInfo, mRootLeash);
     }
 

@@ -181,4 +181,14 @@ public final class SurroundingText implements Parcelable {
             }
         }
     }
+
+    /** @hide */
+    public boolean isEqualTo(@Nullable SurroundingText that) {
+        if (that == null) return false;
+        if (this == that) return true;
+        return mSelectionStart == that.mSelectionStart
+                && mSelectionEnd == that.mSelectionEnd
+                && mOffset == that.mOffset
+                && TextUtils.equals(mText, that.mText);
+    }
 }

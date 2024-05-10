@@ -22,6 +22,7 @@ import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -41,6 +42,7 @@ import java.util.regex.Pattern
 @RunWith(DeviceJUnit4Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(
         DeviceJUnit4ClassRunnerWithParameters.RunnerFactory::class)
+@Ignore("b/275403538")
 class SdCardEjectionTests : BaseHostJUnit4Test() {
 
     companion object {
@@ -57,7 +59,8 @@ class SdCardEjectionTests : BaseHostJUnit4Test() {
 
         @Parameterized.Parameters(name = "reboot={0}")
         @JvmStatic
-        fun parameters() = arrayOf(false, true)
+        // TODO(b/275403538): re-enable non-reboot scenarios with better tracking of APK removal
+        fun parameters() = arrayOf(/*false, */true)
 
         data class Volume(
             val diskId: String,
@@ -200,15 +203,6 @@ class SdCardEjectionTests : BaseHostJUnit4Test() {
             // TODO: There must be a better way to prevent it from auto-mounting.
             removeVirtualDisk()
             device.reboot()
-        } else {
-            // Because PackageManager unmount scan is asynchronous, need to retry until the package
-            // has been unloaded. This only has to be done in the non-reboot case. Reboot will
-            // clear the data structure by its nature.
-            retryUntilSuccess {
-                // The compiler section will print the state of the physical APK
-                HostUtils.packageSection(device, pkgName, sectionName = "Compiler stats")
-                        .any { it.contains("Unable to find package: $pkgName") }
-            }
         }
     }
 

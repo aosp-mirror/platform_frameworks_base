@@ -18,7 +18,11 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
-    android:layout_width="match_parent">
+    android:layout_width="match_parent"
+    android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:paddingRight="?android:attr/listPreferredItemPaddingRight"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
 
     <TextView
         android:id="@+id/switch_text"
@@ -34,23 +38,11 @@
         android:layout_marginStart="@dimen/settingslib_switchbar_subsettings_margin_start"
         android:textAlignment="viewStart"/>
 
-    <ImageView
-        android:id="@+id/restricted_icon"
-        android:layout_width="@dimen/settingslib_restricted_icon_size"
-        android:layout_height="@dimen/settingslib_restricted_icon_size"
-        android:tint="?android:attr/colorAccent"
-        android:theme="@android:style/Theme.Material"
-        android:layout_gravity="center_vertical"
-        android:layout_marginEnd="@dimen/settingslib_restricted_icon_margin_end"
-        android:src="@drawable/settingslib_ic_info"
-        android:visibility="gone"/>
-
     <Switch
         android:id="@android:id/switch_widget"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginEnd="@dimen/settingslib_switchbar_subsettings_margin_end"
         android:focusable="false"
         android:clickable="false"
         android:theme="@style/SwitchBar.Switch.Settingslib"/>

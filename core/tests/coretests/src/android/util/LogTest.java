@@ -20,23 +20,24 @@ import android.os.SystemProperties;
 import android.test.PerformanceTestCase;
 
 import androidx.test.filters.Suppress;
+import androidx.test.runner.AndroidJUnit4;
 
 import junit.framework.TestCase;
 
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 //This is an empty TestCase.
 @Suppress
-public class LogTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class LogTest {
     private static final String PROPERTY_TAG = "log.tag.LogTest";
     private static final String LOG_TAG = "LogTest";
 
-
-    // TODO: remove this test once we uncomment out the following test.
-    public void testLogTestDummy() {
-      return;
-    }
-
-
-    /* TODO: This test is commented out because we will not be able to set properities. Fix the test.
+    @Test
+    @Ignore
     public void testIsLoggable() {
         // First clear any SystemProperty setting for our test key.
         SystemProperties.set(PROPERTY_TAG, null);
@@ -129,8 +130,7 @@ public class LogTest extends TestCase {
         Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.ERROR));
         Assert.assertFalse(Log.isLoggable(LOG_TAG, Log.ASSERT));
     }
-    */
-    
+
     public static class PerformanceTest extends TestCase implements PerformanceTestCase {
         private static final int ITERATIONS = 1000;
 

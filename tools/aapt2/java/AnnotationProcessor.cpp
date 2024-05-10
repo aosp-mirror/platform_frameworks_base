@@ -30,7 +30,7 @@ using ::android::StringPiece;
 
 namespace aapt {
 
-StringPiece AnnotationProcessor::ExtractFirstSentence(const StringPiece& comment) {
+StringPiece AnnotationProcessor::ExtractFirstSentence(StringPiece comment) {
   Utf8Iterator iter(comment);
   while (iter.HasNext()) {
     const char32_t codepoint = iter.Next();
@@ -49,20 +49,23 @@ struct AnnotationRule {
     kDeprecated = 0x01,
     kSystemApi = 0x02,
     kTestApi = 0x04,
+    kFlaggedApi = 0x08,
   };
 
   StringPiece doc_str;
   uint32_t bit_mask;
   StringPiece annotation;
+  bool preserve_params;
 };
 
-static std::array<AnnotationRule, 2> sAnnotationRules = {{
-    {"@SystemApi", AnnotationRule::kSystemApi, "@android.annotation.SystemApi"},
-    {"@TestApi", AnnotationRule::kTestApi, "@android.annotation.TestApi"},
+static std::array<AnnotationRule, 3> sAnnotationRules = {{
+    {"@SystemApi", AnnotationRule::kSystemApi, "@android.annotation.SystemApi", true},
+    {"@TestApi", AnnotationRule::kTestApi, "@android.annotation.TestApi", false},
+    {"@FlaggedApi", AnnotationRule::kFlaggedApi, "@android.annotation.FlaggedApi", true},
 }};
 
 void AnnotationProcessor::AppendCommentLine(std::string comment) {
-  static const std::string sDeprecated = "@deprecated";
+  static constexpr std::string_view sDeprecated = "@deprecated";
 
   // Treat deprecated specially, since we don't remove it from the source comment.
   if (comment.find(sDeprecated) != std::string::npos) {
@@ -73,12 +76,11 @@ void AnnotationProcessor::AppendCommentLine(std::string comment) {
     std::string::size_type idx = comment.find(rule.doc_str.data());
     if (idx != std::string::npos) {
       // Captures all parameters associated with the specified annotation rule
-      // by matching the first pair of parantheses after the rule.
-      std::regex re(rule.doc_str.to_string() + "\\s*\\((.+)\\)");
+      // by matching the first pair of parentheses after the rule.
+      std::regex re(std::string(rule.doc_str).append(R"(\s*\((.+)\))"));
       std::smatch match_result;
       const bool is_match = std::regex_search(comment, match_result, re);
-      // We currently only capture and preserve parameters for SystemApi.
-      if (is_match && rule.bit_mask == AnnotationRule::kSystemApi) {
+      if (is_match && rule.preserve_params) {
         annotation_parameter_map_[rule.bit_mask] = match_result[1].str();
         comment.erase(comment.begin() + match_result.position(),
                       comment.begin() + match_result.position() + match_result.length());
@@ -97,7 +99,7 @@ void AnnotationProcessor::AppendCommentLine(std::string comment) {
 
   // If there was trimming to do, copy the string.
   if (trimmed.size() != comment.size()) {
-    comment = trimmed.to_string();
+    comment = std::string(trimmed);
   }
 
   if (!has_comments_) {
@@ -107,12 +109,12 @@ void AnnotationProcessor::AppendCommentLine(std::string comment) {
   comment_ << "\n * " << std::move(comment);
 }
 
-void AnnotationProcessor::AppendComment(const StringPiece& comment) {
+void AnnotationProcessor::AppendComment(StringPiece comment) {
   // We need to process line by line to clean-up whitespace and append prefixes.
   for (StringPiece line : util::Tokenize(comment, '\n')) {
     line = util::TrimWhitespace(line);
     if (!line.empty()) {
-      AppendCommentLine(line.to_string());
+      AppendCommentLine(std::string(line));
     }
   }
 }
@@ -126,7 +128,7 @@ void AnnotationProcessor::AppendNewLine() {
 void AnnotationProcessor::Print(Printer* printer, bool strip_api_annotations) const {
   if (has_comments_) {
     std::string result = comment_.str();
-    for (const StringPiece& line : util::Tokenize(result, '\n')) {
+    for (StringPiece line : util::Tokenize(result, '\n')) {
       printer->Println(line);
     }
     printer->Println(" */");

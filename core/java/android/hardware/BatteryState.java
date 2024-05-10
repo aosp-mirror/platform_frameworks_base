@@ -62,7 +62,8 @@ public abstract class BatteryState {
      *
      * @return the battery status.
      */
-    public abstract @BatteryStatus int getStatus();
+    @BatteryStatus
+    public abstract int getStatus();
 
     /**
      * Get remaining battery capacity as float percentage [0.0f, 1.0f] of total capacity
@@ -70,5 +71,6 @@ public abstract class BatteryState {
      *
      * @return the battery capacity.
      */
-    public abstract @FloatRange(from = -1.0f, to = 1.0f) float getCapacity();
+    @FloatRange(from = -1.0f, to = 1.0f)
+    public abstract float getCapacity();
 }

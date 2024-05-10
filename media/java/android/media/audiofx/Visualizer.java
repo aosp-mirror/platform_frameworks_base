@@ -17,6 +17,7 @@
 package android.media.audiofx;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AttributionSource;
 import android.content.AttributionSource.ScopedParcelState;
@@ -110,10 +111,18 @@ public class Visualizer {
     public static final int MEASUREMENT_MODE_NONE = 0;
 
     /**
-     * Defines a measurement mode which computes the peak and RMS value in mB, where 0mB is the
-     * maximum sample value, and -9600mB is the minimum value.
-     * Values for peak and RMS can be retrieved with
-     * {@link #getMeasurementPeakRms(MeasurementPeakRms)}.
+     * Defines a measurement mode which computes the peak and RMS value in mB below the
+     * "full scale", where 0mB is normally the maximum sample value (but see the note
+     * below). Minimum value depends on the resolution of audio samples used by the audio
+     * framework. The value of -9600mB is the minimum value for 16-bit audio systems and
+     * -14400mB or below for "high resolution" systems. Values for peak and RMS can be
+     * retrieved with {@link #getMeasurementPeakRms(MeasurementPeakRms)}.
+     *
+     * <p class=note><strong>Note:</strong> when Visualizer effect is attached to the
+     * global session (with session ID 0), it is possible to observe RMS peaks higher than
+     * 0 dBFS, for example in the case when there are multiple audio sources playing
+     * simultaneously. In this case {@link #getMeasurementPeakRms(MeasurementPeakRms)}
+     * method can return a positive value.
      */
     public static final int MEASUREMENT_MODE_PEAK_RMS = 1 << 0;
 
@@ -183,17 +192,17 @@ public class Visualizer {
      * Handler for events coming from the native code
      */
     @GuardedBy("mListenerLock")
-    private Handler mNativeEventHandler = null;
+    @Nullable private Handler mNativeEventHandler = null;
     /**
      *  PCM and FFT capture listener registered by client
      */
     @GuardedBy("mListenerLock")
-    private OnDataCaptureListener mCaptureListener = null;
+    @Nullable private OnDataCaptureListener mCaptureListener = null;
     /**
      *  Server Died listener registered by client
      */
     @GuardedBy("mListenerLock")
-    private OnServerDiedListener mServerDiedListener = null;
+    @Nullable private OnServerDiedListener mServerDiedListener = null;
 
     // accessed by native methods
     private long mNativeVisualizer;  // guarded by a static lock in native code
@@ -327,8 +336,9 @@ public class Visualizer {
      * This method must not be called when the Visualizer is enabled.
      * @param size requested capture size
      * @return {@link #SUCCESS} in case of success,
-     * {@link #ERROR_BAD_VALUE} in case of failure.
-     * @throws IllegalStateException
+     * {@link #ERROR_INVALID_OPERATION} if Visualizer effect enginer not enabled.
+     * @throws IllegalStateException if the effect is not in proper state.
+     * @throws IllegalArgumentException if the size parameter is invalid (out of supported range).
      */
     public int setCaptureSize(int size)
     throws IllegalStateException {
@@ -336,7 +346,13 @@ public class Visualizer {
             if (mState != STATE_INITIALIZED) {
                 throw(new IllegalStateException("setCaptureSize() called in wrong state: "+mState));
             }
-            return native_setCaptureSize(size);
+
+            int ret = native_setCaptureSize(size);
+            if (ret == ERROR_BAD_VALUE) {
+                throw(new IllegalArgumentException("setCaptureSize to " + size + " failed"));
+            }
+
+            return ret;
         }
     }
 
@@ -446,17 +462,25 @@ public class Visualizer {
      * a number of consecutive 8-bit (unsigned) mono PCM samples equal to the capture size returned
      * by {@link #getCaptureSize()}.
      * <p>This method must be called when the Visualizer is enabled.
-     * @param waveform array of bytes where the waveform should be returned
+     * @param waveform array of bytes where the waveform should be returned, array length must be
+     * at least equals to the capture size returned by {@link #getCaptureSize()}.
      * @return {@link #SUCCESS} in case of success,
      * {@link #ERROR_NO_MEMORY}, {@link #ERROR_INVALID_OPERATION} or {@link #ERROR_DEAD_OBJECT}
      * in case of failure.
      * @throws IllegalStateException
+     * @throws IllegalArgumentException
      */
     public int getWaveForm(byte[] waveform)
     throws IllegalStateException {
         synchronized (mStateLock) {
             if (mState != STATE_ENABLED) {
                 throw(new IllegalStateException("getWaveForm() called in wrong state: "+mState));
+            }
+            int captureSize = getCaptureSize();
+            if (captureSize > waveform.length) {
+                throw(new IllegalArgumentException("getWaveForm() called with illegal size: "
+                                                   + waveform.length + " expecting at least "
+                                                   + captureSize + " bytes"));
             }
             return native_getWaveForm(waveform);
         }
@@ -618,7 +642,7 @@ public class Visualizer {
      * @return {@link #SUCCESS} in case of success,
      * {@link #ERROR_NO_INIT} or {@link #ERROR_BAD_VALUE} in case of failure.
      */
-    public int setDataCaptureListener(OnDataCaptureListener listener,
+    public int setDataCaptureListener(@Nullable OnDataCaptureListener listener,
             int rate, boolean waveform, boolean fft) {
         if (listener == null) {
             // make sure capture callback is stopped in native code
@@ -678,7 +702,7 @@ public class Visualizer {
      * <p>Call this method with a null listener to stop receiving server death notifications.
      * @return {@link #SUCCESS} in case of success,
      */
-    public int setServerDiedListener(OnServerDiedListener listener) {
+    public int setServerDiedListener(@Nullable OnServerDiedListener listener) {
         synchronized (mListenerLock) {
             mServerDiedListener = listener;
         }

@@ -21,8 +21,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
-import libcore.util.EmptyArray;
-
 import java.util.Arrays;
 
 /**
@@ -58,7 +56,7 @@ public class SparseIntArray implements Cloneable {
      * Creates a new SparseIntArray containing no mappings.
      */
     public SparseIntArray() {
-        this(10);
+        this(0);
     }
 
     /**

@@ -24,10 +24,8 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Configuration;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -52,8 +50,9 @@ import com.android.settingslib.bluetooth.LocalBluetoothAdapter;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -66,7 +65,7 @@ import javax.inject.Provider;
 
 /** */
 @SysUISingleton
-public class KeyboardUI extends CoreStartable implements InputManager.OnTabletModeChangedListener {
+public class KeyboardUI implements CoreStartable, InputManager.OnTabletModeChangedListener {
     private static final String TAG = "KeyboardUI";
     private static final boolean DEBUG = false;
 
@@ -109,6 +108,7 @@ public class KeyboardUI extends CoreStartable implements InputManager.OnTabletMo
     protected volatile Context mContext;
 
     private final Provider<LocalBluetoothManager> mBluetoothManagerProvider;
+    private final SecureSettings mSecureSettings;
 
     private boolean mEnabled;
     private String mKeyboardName;
@@ -126,22 +126,19 @@ public class KeyboardUI extends CoreStartable implements InputManager.OnTabletMo
     private int mState;
 
     @Inject
-    public KeyboardUI(Context context, Provider<LocalBluetoothManager> bluetoothManagerProvider) {
-        super(context);
+    public KeyboardUI(Context context, Provider<LocalBluetoothManager> bluetoothManagerProvider,
+            SecureSettings secureSettings) {
+        mContext = context;
         this.mBluetoothManagerProvider = bluetoothManagerProvider;
+        mSecureSettings = secureSettings;
     }
 
     @Override
     public void start() {
-        mContext = super.mContext;
         HandlerThread thread = new HandlerThread("Keyboard", Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
         mHandler = new KeyboardHandler(thread.getLooper());
         mHandler.sendEmptyMessage(MSG_INIT);
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
     }
 
     @Override
@@ -156,7 +153,7 @@ public class KeyboardUI extends CoreStartable implements InputManager.OnTabletMo
     }
 
     @Override
-    protected void onBootCompleted() {
+    public void onBootCompleted() {
         mHandler.sendEmptyMessage(MSG_ON_BOOT_COMPLETED);
     }
 
@@ -304,9 +301,8 @@ public class KeyboardUI extends CoreStartable implements InputManager.OnTabletMo
     }
 
     private boolean isUserSetupComplete() {
-        ContentResolver resolver = mContext.getContentResolver();
-        return Secure.getIntForUser(
-                resolver, Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
+        return mSecureSettings.getIntForUser(
+                Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
     }
 
     private CachedBluetoothDevice getPairedKeyboard() {

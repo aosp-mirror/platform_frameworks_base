@@ -1,5 +1,3 @@
-# Assign bugs to android-enterprise-triage@google.com
-file:WorkDeviceExperience_OWNERS
-file:Provisioning_OWNERS
-file:WorkProfile_OWNERS
-file:EnterprisePlatformSecurity_OWNERS
+sandness@google.com #{LAST_RESORT_SUGGESTION}
+scottjonathan@google.com #{LAST_RESORT_SUGGESTION}
+rubinxu@google.com #{LAST_RESORT_SUGGESTION}

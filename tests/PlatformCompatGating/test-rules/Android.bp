@@ -29,7 +29,7 @@ java_library {
     static_libs: [
         "junit",
         "androidx.test.core",
-        "truth-prebuilt",
-        "core-compat-test-rules"
+        "truth",
+        "core-compat-test-rules",
     ],
 }
