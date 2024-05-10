@@ -3028,6 +3028,13 @@ public final class ContactsContract {
         @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
         public static final class DefaultAccount {
             /**
+             * no public constructor since this is a utility class
+             */
+            private DefaultAccount() {
+
+            }
+
+            /**
              * Key in the outgoing Bundle for the default account list.
              *
              * @hide
@@ -3062,11 +3069,6 @@ public final class ContactsContract {
              */
             public static final String QUERY_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD =
                     "queryDefaultAccountForNewContacts";
-
-            private DefaultAccount() {
-
-            }
-
 
             /**
              * Represents the state of the default account, and the actual {@link Account} if it's
@@ -3356,6 +3358,161 @@ public final class ContactsContract {
                 nullSafeCall(resolver, ContactsContract.AUTHORITY_URI,
                         SET_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD, null, extras);
             }
+
+
+
+            /**
+             * The method to invoke to move local {@link RawContacts} and {@link Groups} from local
+             * account(s) to the Cloud Default Account (if any).
+             *
+             * @hide
+             */
+            public static final String MOVE_LOCAL_CONTACTS_TO_CLOUD_DEFAULT_ACCOUNT_METHOD =
+                    "moveLocalContactsToCloudDefaultAccount";
+
+            /**
+             * Move {@link RawContacts} and {@link Groups} (if any) from the local account to the
+             * Cloud Default Account (if any).
+             * @param resolver the ContentResolver to query.
+             * @throws RuntimeException if it fails to move contacts to the default account.
+             *
+             * @hide
+             */
+            @SystemApi
+            @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
+            @RequiresPermission(allOf = {android.Manifest.permission.WRITE_CONTACTS,
+                    android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS})
+            public static void moveLocalContactsToCloudDefaultAccount(
+                    @NonNull ContentResolver resolver) {
+
+                Bundle extras = new Bundle();
+                Bundle result = nullSafeCall(
+                        resolver,
+                        ContactsContract.AUTHORITY_URI,
+                        MOVE_LOCAL_CONTACTS_TO_CLOUD_DEFAULT_ACCOUNT_METHOD,
+                        null,
+                        extras);
+            }
+
+            /**
+             * The method to invoke to move {@link RawContacts} and {@link Groups} from SIM
+             * account(s) to the Cloud Default Account (if any).
+             *
+             * @hide
+             */
+            public static final String MOVE_SIM_CONTACTS_TO_CLOUD_DEFAULT_ACCOUNT_METHOD =
+                    "moveSimContactsToCloudDefaultAccount";
+
+            /**
+             * Move {@link RawContacts} and {@link Groups} (if any) from the local account to the
+             * Cloud Default Account (if any).
+             * @param resolver the ContentResolver to query.
+             * @throws RuntimeException if it fails to move contacts to the default account.
+             *
+             * @hide
+             */
+            @SystemApi
+            @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
+            @RequiresPermission(allOf = {android.Manifest.permission.WRITE_CONTACTS,
+                    android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS})
+            public static void moveSimContactsToCloudDefaultAccount(
+                    @NonNull ContentResolver resolver) {
+                Bundle result = nullSafeCall(
+                        resolver,
+                        ContactsContract.AUTHORITY_URI,
+                        MOVE_SIM_CONTACTS_TO_CLOUD_DEFAULT_ACCOUNT_METHOD,
+                        /* arg= */ null,
+                        /* extras= */ null);
+            }
+
+            /**
+             * The method to invoke to get the number of {@link RawContacts} that are in local
+             * account(s) and movable to the Cloud Default Account (if any).
+             *
+             * @hide
+             */
+            public static final String GET_NUMBER_OF_MOVABLE_LOCAL_CONTACTS_METHOD =
+                    "getNumberOfMovableLocalContacts";
+
+            /**
+             * The result key for moving local {@link RawContacts} and {@link Groups} from SIM
+             * account(s) to the Cloud Default Account (if any).
+             *
+             * @hide
+             */
+            public static final String KEY_NUMBER_OF_MOVABLE_LOCAL_CONTACTS =
+                    "key_number_of_movable_local_contacts";
+
+            /**
+             * Gets the number of {@link RawContacts} in the local account(s) which may be moved
+             * using {@link DefaultAccount#moveLocalContactsToCloudDefaultAccount} (if any).
+             * @param resolver the ContentResolver to query.
+             * @return the number of {@link RawContacts} in the local account(s), or 0 if there is
+             * no Cloud Default Account.
+             * @throws RuntimeException if it fails get the number of movable local contacts.
+             *
+             * @hide
+             */
+            @SystemApi
+            @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
+            @RequiresPermission(allOf = {android.Manifest.permission.READ_CONTACTS,
+                    android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS})
+            public static int getNumberOfMovableLocalContacts(
+                    @NonNull ContentResolver resolver) {
+                Bundle result = nullSafeCall(
+                        resolver,
+                        ContactsContract.AUTHORITY_URI,
+                        GET_NUMBER_OF_MOVABLE_LOCAL_CONTACTS_METHOD,
+                        /* arg= */ null,
+                        /* extras= */ null);
+                return result.getInt(KEY_NUMBER_OF_MOVABLE_LOCAL_CONTACTS,
+                        /* defaultValue= */ 0);
+            }
+
+            /**
+             * The method to invoke to get the number of {@link RawContacts} that are in SIM
+             * account(s) and movable to the Cloud Default Account (if any).
+             *
+             * @hide
+             */
+            public static final String GET_NUMBER_OF_MOVABLE_SIM_CONTACTS_METHOD =
+                    "getNumberOfMovableSimContacts";
+
+            /**
+             * The result key for moving local {@link RawContacts} and {@link Groups} from SIM
+             * account(s) to the Cloud Default Account (if any).
+             *
+             * @hide
+             */
+            public static final String KEY_NUMBER_OF_MOVABLE_SIM_CONTACTS =
+                    "key_number_of_movable_sim_contacts";
+
+            /**
+             * Gets the number of {@link RawContacts} in the SIM account(s) which may be moved using
+             * {@link DefaultAccount#moveSimContactsToCloudDefaultAccount} (if any).
+             * @param resolver the ContentResolver to query.
+             * @return the number of {@link RawContacts} in the SIM account(s), or 0 if there is
+             * no Cloud Default Account.
+             * @throws RuntimeException if it fails get the number of movable sim contacts.
+             *
+             * @hide
+             */
+            @SystemApi
+            @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
+            @RequiresPermission(allOf = {android.Manifest.permission.READ_CONTACTS,
+                    android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS})
+            public static int getNumberOfMovableSimContacts(
+                    @NonNull ContentResolver resolver) {
+                Bundle result = nullSafeCall(
+                        resolver,
+                        ContactsContract.AUTHORITY_URI,
+                        GET_NUMBER_OF_MOVABLE_SIM_CONTACTS_METHOD,
+                        /* arg= */ null,
+                        /* extras= */ null);
+                return result.getInt(KEY_NUMBER_OF_MOVABLE_SIM_CONTACTS,
+                        /* defaultValue= */ 0);
+            }
+
         }
 
         /**
@@ -9181,6 +9338,30 @@ public final class ContactsContract {
          * @hide
          */
         public static final String KEY_DEFAULT_ACCOUNT = "key_default_account";
+
+        /**
+         * Key in the Bundle for the default account state.
+         *
+         * @hide
+         */
+        public static final String KEY_DEFAULT_ACCOUNT_STATE =
+                "key_default_contacts_account_state";
+
+        /**
+         * The method to invoke in order to set the default account.
+         *
+         * @hide
+         */
+        public static final String SET_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD =
+                "setDefaultAccountForNewContacts";
+
+        /**
+         * The method to invoke in order to query the default account.
+         *
+         * @hide
+         */
+        public static final String QUERY_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD =
+                "queryDefaultAccountForNewContacts";
 
         /**
          * Get the account that is set as the default account for new contacts, which should be
