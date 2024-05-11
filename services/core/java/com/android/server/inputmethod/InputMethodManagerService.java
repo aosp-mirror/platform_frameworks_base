@@ -562,16 +562,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     boolean mInFullscreenMode;
 
     /**
-     * The Intent used to connect to the current input method.
-     */
-    @GuardedBy("ImfLock.class")
-    @Nullable
-    private Intent getCurIntentLocked() {
-        final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
-        return userData.mBindingController.getCurIntent();
-    }
-
-    /**
      * The token we have made for the currently active input method, to
      * identify it in the future.
      */
@@ -3812,10 +3802,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (mCurrentUserId != UserHandle.getUserId(uid)) {
             return false;
         }
-        if (getCurIntentLocked() != null && InputMethodUtils.checkIfPackageBelongsToUid(
-                mPackageManagerInternal,
-                uid,
-                getCurIntentLocked().getComponent().getPackageName())) {
+        final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
+        final var curIntent = userData.mBindingController.getCurIntent();
+        if (curIntent != null && InputMethodUtils.checkIfPackageBelongsToUid(
+                mPackageManagerInternal, uid, curIntent.getComponent().getPackageName())) {
             return true;
         }
         return false;
@@ -5904,7 +5894,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             p.println("  mCurToken=" + getCurTokenLocked());
             p.println("  mCurTokenDisplayId=" + mCurTokenDisplayId);
             p.println("  mCurHostInputToken=" + mAutofillController.getCurHostInputToken());
-            p.println("  mCurIntent=" + getCurIntentLocked());
+            p.println("  mCurIntent=" + userData.mBindingController.getCurIntent());
             method = getCurMethodLocked();
             p.println("  mCurMethod=" + getCurMethodLocked());
             p.println("  mEnabledSession=" + mEnabledSession);
