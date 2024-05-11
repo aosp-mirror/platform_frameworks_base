@@ -45,6 +45,7 @@ object ScreenshotShelfViewBinder {
         layoutInflater: LayoutInflater,
         onDismissalRequested: (event: ScreenshotEvent, velocity: Float?) -> Unit,
         onDismissalCancelled: () -> Unit,
+        onUserInteraction: () -> Unit
     ) {
         val swipeGestureListener =
             SwipeGestureListener(
@@ -55,6 +56,7 @@ object ScreenshotShelfViewBinder {
                 onCancel = onDismissalCancelled
             )
         view.onTouchInterceptListener = { swipeGestureListener.onMotionEvent(it) }
+        view.userInteractionCallback = onUserInteraction
 
         val previewView: ImageView = view.requireViewById(R.id.screenshot_preview)
         val previewViewBlur: ImageView = view.requireViewById(R.id.screenshot_preview_blur)

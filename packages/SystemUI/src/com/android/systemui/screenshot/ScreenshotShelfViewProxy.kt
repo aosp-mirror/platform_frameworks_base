@@ -86,7 +86,8 @@ constructor(
             viewModel,
             LayoutInflater.from(context),
             onDismissalRequested = { event, velocity -> requestDismissal(event, velocity) },
-            onDismissalCancelled = { animationController.getSwipeReturnAnimation().start() }
+            onDismissalCancelled = { animationController.getSwipeReturnAnimation().start() },
+            onUserInteraction = { callbacks?.onUserInteraction() }
         )
         view.updateInsets(windowManager.currentWindowMetrics.windowInsets)
         addPredictiveBackListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }

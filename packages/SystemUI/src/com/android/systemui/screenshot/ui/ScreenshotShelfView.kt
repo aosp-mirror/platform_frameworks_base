@@ -39,10 +39,19 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
     private lateinit var screenshotStatic: ViewGroup
     var onTouchInterceptListener: ((MotionEvent) -> Boolean)? = null
 
+    var userInteractionCallback: (() -> Unit)? = null
+
     private val displayMetrics = context.resources.displayMetrics
     private val tmpRect = Rect()
     private lateinit var actionsContainerBackground: View
     private lateinit var dismissButton: View
+
+    init {
+        setOnTouchListener({ _: View, _: MotionEvent ->
+            userInteractionCallback?.invoke()
+            true
+        })
+    }
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -127,7 +136,14 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
         private const val TOUCH_PADDING_DP = 12f
     }
 
+    override fun onInterceptHoverEvent(event: MotionEvent): Boolean {
+        userInteractionCallback?.invoke()
+        return super.onInterceptHoverEvent(event)
+    }
+
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        userInteractionCallback?.invoke()
+
         if (onTouchInterceptListener?.invoke(ev) == true) {
             return true
         }

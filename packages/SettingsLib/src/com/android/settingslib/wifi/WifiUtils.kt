@@ -502,5 +502,6 @@ open class WifiUtils {
             }
 
         const val SSID = "ssid"
+        const val DIALOG_WINDOW_TYPE = "dialog_window_type"
     }
 }
