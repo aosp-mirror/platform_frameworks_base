@@ -857,6 +857,16 @@ flag {
 }
 
 flag {
+   name: "restart_dream_on_unocclude"
+   namespace: "systemui"
+   description: "re-enters dreaming upon unocclude when dreaming when originally occluding"
+   bug: "338051457"
+   metadata {
+     purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
   name: "communal_bouncer_do_not_modify_plugin_open"
   namespace: "systemui"
   description: "do not modify notification shade when handling bouncer expansion."
