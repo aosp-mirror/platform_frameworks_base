@@ -625,15 +625,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     /**
-     * If not {@link Process#INVALID_UID}, then the UID of {@link #getCurIntentLocked()}.
-     */
-    @GuardedBy("ImfLock.class")
-    private int getCurMethodUidLocked() {
-        final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
-        return userData.mBindingController.getCurMethodUid();
-    }
-
-    /**
      * Have we called mCurMethod.bindInput()?
      */
     @MultiUserUnawareField
@@ -2034,8 +2025,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // INTERACT_ACROSS_USERS(_FULL) permissions, which is actually almost always the case.
         if (mCurrentUserId == UserHandle.getUserId(
                 mCurClient.mUid)) {
-            mPackageManagerInternal.grantImplicitAccess(mCurrentUserId,
-                    null /* intent */, UserHandle.getAppId(getCurMethodUidLocked()),
+            mPackageManagerInternal.grantImplicitAccess(mCurrentUserId, null /* intent */,
+                    UserHandle.getAppId(userData.mBindingController.getCurMethodUid()),
                     mCurClient.mUid, true /* direct */);
         }
 
@@ -4908,7 +4899,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (mCurClient == null || mCurClient.mClient == null) {
                 return;
             }
-            if (mImePlatformCompatUtils.shouldUseSetInteractiveProtocol(getCurMethodUidLocked())) {
+            // TODO(b/325515685): user data must be retrieved by a userId parameter
+            final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
+            if (mImePlatformCompatUtils.shouldUseSetInteractiveProtocol(
+                    userData.mBindingController.getCurMethodUid())) {
                 // Handle IME visibility when interactive changed before finishing the input to
                 // ensure we preserve the last state as possible.
                 final ImeVisibilityResult imeVisRes = mVisibilityStateComputer.onInteractiveChanged(
