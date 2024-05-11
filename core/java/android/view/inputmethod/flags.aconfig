@@ -62,6 +62,17 @@ flag {
 }
 
 flag {
+    name: "use_input_method_info_safe_list"
+    namespace: "input_method"
+    description: "Use InputMethodInfoSafeList for more reliable binder IPCs"
+    bug: "339761278"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "ime_switcher_revamp"
     is_exported: true
     namespace: "input_method"
