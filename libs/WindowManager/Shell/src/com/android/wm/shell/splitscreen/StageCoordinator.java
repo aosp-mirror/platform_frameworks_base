@@ -1456,7 +1456,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mMainStage : mSideStage;
         final SurfaceControl bottomRightScreenshot = ScreenshotUtils.takeScreenshot(t,
                 bottomRightStage.mRootLeash, mTempRect1, Integer.MAX_VALUE - 1);
-        mSplitLayout.splitSwitching(t, topLeftStage.mRootLeash, bottomRightStage.mRootLeash,
+        mSplitLayout.playSwapAnimation(t, topLeftStage.mRootLeash, bottomRightStage.mRootLeash,
                 insets -> {
                     WindowContainerTransaction wct = new WindowContainerTransaction();
                     setSideStagePosition(reverseSplitPosition(mSideStagePosition), wct);
