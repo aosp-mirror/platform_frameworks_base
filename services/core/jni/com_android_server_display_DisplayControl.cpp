@@ -24,9 +24,11 @@
 namespace android {
 
 static jobject nativeCreateDisplay(JNIEnv* env, jclass clazz, jstring nameObj, jboolean secure,
-                                   jfloat requestedRefreshRate) {
-    ScopedUtfChars name(env, nameObj);
+                                   jstring uniqueIdStr, jfloat requestedRefreshRate) {
+    const ScopedUtfChars name(env, nameObj);
+    const ScopedUtfChars uniqueId(env, uniqueIdStr);
     sp<IBinder> token(SurfaceComposerClient::createDisplay(String8(name.c_str()), bool(secure),
+                                                           std::string(uniqueId.c_str()),
                                                            requestedRefreshRate));
     return javaObjectForIBinder(env, token);
 }
@@ -178,7 +180,7 @@ static jobject nativeGetPhysicalDisplayToken(JNIEnv* env, jclass clazz, jlong ph
 
 static const JNINativeMethod sDisplayMethods[] = {
         // clang-format off
-    {"nativeCreateDisplay", "(Ljava/lang/String;ZF)Landroid/os/IBinder;",
+    {"nativeCreateDisplay", "(Ljava/lang/String;ZLjava/lang/String;F)Landroid/os/IBinder;",
             (void*)nativeCreateDisplay },
     {"nativeDestroyDisplay", "(Landroid/os/IBinder;)V",
             (void*)nativeDestroyDisplay },
