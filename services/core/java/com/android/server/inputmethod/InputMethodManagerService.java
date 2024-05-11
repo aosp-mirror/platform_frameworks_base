@@ -583,16 +583,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private final WeakHashMap<IBinder, Boolean> mFocusedWindowPerceptible = new WeakHashMap<>();
 
     /**
-     * Set to true if our ServiceConnection is currently actively bound to
-     * a service (whether or not we have gotten its IBinder back yet).
-     */
-    @GuardedBy("ImfLock.class")
-    private boolean hasConnectionLocked() {
-        final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
-        return userData.mBindingController.hasMainConnection();
-    }
-
-    /**
      * The token tracking the current IME show request that is waiting for a connection to an IME,
      * otherwise {@code null}.
      */
@@ -2147,7 +2137,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @NonNull EditorInfo editorInfo, @StartInputFlags int startInputFlags,
             @StartInputReason int startInputReason,
             int unverifiedTargetSdkVersion,
-            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher,
+            @NonNull UserDataRepository.UserData userData) {
 
         // Compute the final shown display ID with validated cs.selfReportedDisplayId for this
         // session & other conditions.
@@ -2210,7 +2201,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (connectionIsActive != connectionWasActive) {
             mInputManagerInternal.notifyInputMethodConnectionActive(connectionIsActive);
         }
-        final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
         final var bindingController = userData.mBindingController;
 
         // If configured, we want to avoid starting up the IME if it is not supposed to be showing
@@ -2248,7 +2238,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         (startInputFlags & StartInputFlags.INITIAL_CONNECTION) != 0);
             }
 
-            InputBindResult bindResult = tryReuseConnectionLocked(cs);
+            InputBindResult bindResult = tryReuseConnectionLocked(userData, cs);
             if (bindResult != null) {
                 return bindResult;
             }
@@ -2360,8 +2350,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     @Nullable
-    private InputBindResult tryReuseConnectionLocked(@NonNull ClientState cs) {
-        if (hasConnectionLocked()) {
+    private InputBindResult tryReuseConnectionLocked(@NonNull UserDataRepository.UserData userData,
+            @NonNull ClientState cs) {
+        if (userData.mBindingController.hasMainConnection()) {
             if (getCurMethodLocked() != null) {
                 // Return to client, and we will get back with it when
                 // we have had a session made for it.
@@ -3751,6 +3742,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 startInputByWinGainedFocus, toolType);
         mVisibilityStateComputer.setWindowState(windowToken, windowState);
 
+        final var userData = mUserDataRepository.getOrCreate(userId);
         if (sameWindowFocused && isTextEditor) {
             if (DEBUG) {
                 Slog.w(TAG, "Window already focused, ignoring focus gain of: " + client
@@ -3761,7 +3753,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (editorInfo != null) {
                 return startInputUncheckedLocked(cs, inputContext,
                         remoteAccessibilityInputConnection, editorInfo, startInputFlags,
-                        startInputReason, unverifiedTargetSdkVersion, imeDispatcher);
+                        startInputReason, unverifiedTargetSdkVersion, imeDispatcher, userData);
             }
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
@@ -3793,7 +3785,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         res = startInputUncheckedLocked(cs, inputContext,
                                 remoteAccessibilityInputConnection, editorInfo, startInputFlags,
                                 startInputReason, unverifiedTargetSdkVersion,
-                                imeDispatcher);
+                                imeDispatcher, userData);
                         didStart = true;
                     }
                     break;
@@ -3808,7 +3800,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 // Note that we can trust client's display ID as long as it matches
                 // to the display ID obtained from the window.
                 if (cs.mSelfReportedDisplayId != mCurTokenDisplayId) {
-                    final var userData = mUserDataRepository.getOrCreate(userId);
                     userData.mBindingController.unbindCurrentMethod();
                 }
             }
@@ -3818,7 +3809,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 res = startInputUncheckedLocked(cs, inputContext,
                         remoteAccessibilityInputConnection, editorInfo, startInputFlags,
                         startInputReason, unverifiedTargetSdkVersion,
-                        imeDispatcher);
+                        imeDispatcher, userData);
             } else {
                 res = InputBindResult.NULL_EDITOR_INFO;
             }
@@ -4453,6 +4444,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     private void dumpDebug(ProtoOutputStream proto, long fieldId) {
         synchronized (ImfLock.class) {
+            final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
             final long token = proto.start(fieldId);
             proto.write(CUR_METHOD_ID, getSelectedMethodIdLocked());
             proto.write(CUR_SEQ, getSequenceNumberLocked());
@@ -4471,7 +4463,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             proto.write(CUR_TOKEN, Objects.toString(getCurTokenLocked()));
             proto.write(CUR_TOKEN_DISPLAY_ID, mCurTokenDisplayId);
             proto.write(SYSTEM_READY, mSystemReady);
-            proto.write(HAVE_CONNECTION, hasConnectionLocked());
+            proto.write(HAVE_CONNECTION, userData.mBindingController.hasMainConnection());
             proto.write(BOUND_TO_METHOD, mBoundToMethod);
             proto.write(IS_INTERACTIVE, mIsInteractive);
             proto.write(BACK_DISPOSITION, mBackDisposition);
@@ -5924,7 +5916,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             p.println("  mFocusedWindowPerceptible=" + mFocusedWindowPerceptible);
             mImeBindingState.dump("  ", p);
             final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
-            p.println("  mCurId=" + getCurIdLocked() + " mHaveConnection=" + hasConnectionLocked()
+            p.println("  mCurId=" + getCurIdLocked()
+                    + " mHaveConnection=" + userData.mBindingController.hasMainConnection()
                     + " mBoundToMethod=" + mBoundToMethod + " mVisibleBound="
                     + userData.mBindingController.isVisibleBound());
             p.println("  mCurToken=" + getCurTokenLocked());
