@@ -5914,12 +5914,24 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             client = mCurClient;
             p.println("  mCurClient=" + client + " mCurSeq=" + getSequenceNumberLocked());
             p.println("  mFocusedWindowPerceptible=" + mFocusedWindowPerceptible);
-            mImeBindingState.dump("  ", p);
+            mImeBindingState.dump(/* prefix= */ "  ", p);
             final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
             p.println("  mCurId=" + getCurIdLocked()
                     + " mHaveConnection=" + userData.mBindingController.hasMainConnection()
                     + " mBoundToMethod=" + mBoundToMethod + " mVisibleBound="
                     + userData.mBindingController.isVisibleBound());
+
+            p.println("  mUserDataRepository=");
+            // TODO(b/324907325): Remove the suppress warnings once b/324907325 is fixed.
+            @SuppressWarnings("GuardedBy") Consumer<UserDataRepository.UserData> userDataDump =
+                    u -> {
+                        p.println("    mUserId=" + u.mUserId);
+                        p.println("      hasMainConnection="
+                                + u.mBindingController.hasMainConnection());
+                        p.println("      isVisibleBound=" + u.mBindingController.isVisibleBound());
+                    };
+            mUserDataRepository.forAllUserData(userDataDump);
+
             p.println("  mCurToken=" + getCurTokenLocked());
             p.println("  mCurTokenDisplayId=" + mCurTokenDisplayId);
             p.println("  mCurHostInputToken=" + mAutofillController.getCurHostInputToken());
