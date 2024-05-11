@@ -651,16 +651,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     /**
-     * Time that we last initiated a bind to the input method, to determine
-     * if we should try to disconnect and reconnect to it.
-     */
-    @GuardedBy("ImfLock.class")
-    private long getLastBindTimeLocked() {
-        final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
-        return userData.mBindingController.getLastBindTime();
-    }
-
-    /**
      * Have we called mCurMethod.bindInput()?
      */
     @MultiUserUnawareField
@@ -2353,7 +2343,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
                         null, null, null, getCurIdLocked(), getSequenceNumberLocked(), false);
             } else {
-                long bindingDuration = SystemClock.uptimeMillis() - getLastBindTimeLocked();
+                final long lastBindTime = userData.mBindingController.getLastBindTime();
+                long bindingDuration = SystemClock.uptimeMillis() - lastBindTime;
                 if (bindingDuration < TIME_TO_RECONNECT) {
                     // In this case we have connected to the service, but
                     // don't yet have its interface.  If it hasn't been too
