@@ -30,7 +30,9 @@ import static com.android.window.flags.Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULL
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -42,6 +44,7 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -102,6 +105,7 @@ import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutT
 import com.android.internal.accessibility.util.AccessibilityUtils;
 import com.android.internal.accessibility.util.ShortcutUtils;
 import com.android.internal.compat.IPlatformCompat;
+import com.android.internal.content.PackageMonitor;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService.AccessibilityDisplayListener;
 import com.android.server.accessibility.magnification.FullScreenMagnificationController;
@@ -1620,6 +1624,67 @@ public class AccessibilityManagerServiceTest {
                 .containsExactlyElementsIn(Set.of(daltonizerTile));
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_MANAGER_PACKAGE_MONITOR_LOGIC_FIX)
+    public void onHandleForceStop_dontDoIt_packageEnabled_returnsTrue() {
+        setupShortcutTargetServices();
+        AccessibilityUserState userState = mA11yms.getCurrentUserState();
+        userState.mEnabledServices.addAll(
+                userState.mInstalledServices.stream().map(
+                        (AccessibilityServiceInfo::getComponentName)).toList());
+        String[] packages = userState.mEnabledServices.stream().map(
+                ComponentName::getPackageName).toList().toArray(new String[0]);
+
+        PackageMonitor monitor = spy(mA11yms.getPackageMonitor());
+        when(monitor.getChangingUserId()).thenReturn(UserHandle.USER_SYSTEM);
+        mA11yms.setPackageMonitor(monitor);
+
+        assertTrue(mA11yms.getPackageMonitor().onHandleForceStop(
+                new Intent(),
+                packages,
+                UserHandle.USER_SYSTEM,
+                false
+        ));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MANAGER_PACKAGE_MONITOR_LOGIC_FIX)
+    public void onHandleForceStop_doIt_packageEnabled_returnsFalse() {
+        setupShortcutTargetServices();
+        AccessibilityUserState userState = mA11yms.getCurrentUserState();
+        userState.mEnabledServices.addAll(
+                userState.mInstalledServices.stream().map(
+                        (AccessibilityServiceInfo::getComponentName)).toList());
+        String[] packages = userState.mEnabledServices.stream().map(
+                ComponentName::getPackageName).toList().toArray(new String[0]);
+
+        PackageMonitor monitor = spy(mA11yms.getPackageMonitor());
+        when(monitor.getChangingUserId()).thenReturn(UserHandle.USER_SYSTEM);
+        mA11yms.setPackageMonitor(monitor);
+
+        assertFalse(mA11yms.getPackageMonitor().onHandleForceStop(
+                new Intent(),
+                packages,
+                UserHandle.USER_SYSTEM,
+                true
+        ));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MANAGER_PACKAGE_MONITOR_LOGIC_FIX)
+    public void onHandleForceStop_dontDoIt_packageNotEnabled_returnsFalse() {
+        PackageMonitor monitor = spy(mA11yms.getPackageMonitor());
+        when(monitor.getChangingUserId()).thenReturn(UserHandle.USER_SYSTEM);
+        mA11yms.setPackageMonitor(monitor);
+
+        assertFalse(mA11yms.getPackageMonitor().onHandleForceStop(
+                new Intent(),
+                new String[]{ "FOO", "BAR"},
+                UserHandle.USER_SYSTEM,
+                false
+        ));
+    }
+
     private static AccessibilityServiceInfo mockAccessibilityServiceInfo(
             ComponentName componentName) {
         return mockAccessibilityServiceInfo(
@@ -1630,7 +1695,7 @@ public class AccessibilityManagerServiceTest {
             ComponentName componentName,
             boolean isSystemApp, boolean isAlwaysOnService) {
         AccessibilityServiceInfo accessibilityServiceInfo =
-                Mockito.spy(new AccessibilityServiceInfo());
+                spy(new AccessibilityServiceInfo());
         accessibilityServiceInfo.setComponentName(componentName);
         ResolveInfo mockResolveInfo = Mockito.mock(ResolveInfo.class);
         when(accessibilityServiceInfo.getResolveInfo()).thenReturn(mockResolveInfo);
