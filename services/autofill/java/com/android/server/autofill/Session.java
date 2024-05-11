@@ -5382,7 +5382,20 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
         mPresentationStatsEventLogger.maybeSetViewFillFailureCounts(ids.size());
-        mPresentationStatsEventLogger.logAndEndEvent();
+    }
+
+    /**
+     * Sets the state of views that failed to autofill.
+     */
+    @GuardedBy("mLock")
+    void setViewAutofilled(@NonNull AutofillId id) {
+        if (sVerbose) {
+            Slog.v(TAG, "View autofilled: " + id);
+        }
+        if (id.getSessionId() == AutofillId.NO_SESSION) {
+            id.setSessionId(this.id);
+        }
+        mPresentationStatsEventLogger.maybeAddSuccessId(id);
     }
 
     @GuardedBy("mLock")
@@ -6590,7 +6603,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     if (sVerbose) {
                         Slog.v(TAG, "Total views to be autofilled: " + ids.size());
                     }
-                    mPresentationStatsEventLogger.maybeSetViewFillableCounts(ids.size());
+                    mPresentationStatsEventLogger.maybeSetViewFillablesAndCount(ids);
                     if (sDebug) Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
                     mClient.autofill(id, ids, values, hideHighlight);
                     if (dataset.getId() != null) {
