@@ -80,6 +80,7 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.os.storage.StorageManagerInternal;
@@ -178,6 +179,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     public static final String TAG = "JobScheduler";
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final boolean DEBUG_STANDBY = DEBUG || false;
+
+    public static final String TRACE_TRACK_NAME = "JobScheduler";
 
     /** The maximum number of jobs that we allow an app to schedule */
     private static final int MAX_JOBS_PER_APP = 150;
@@ -4348,7 +4351,11 @@ public class JobSchedulerService extends com.android.server.SystemService
 
                 final boolean wasConsideredCharging = isConsideredCharging();
                 mChargingPolicy = newPolicy;
-
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
+                    Trace.instantForTrack(Trace.TRACE_TAG_SYSTEM_SERVER,
+                            JobSchedulerService.TRACE_TRACK_NAME,
+                            "CHARGING POLICY CHANGED#" + mChargingPolicy);
+                }
                 if (isConsideredCharging() != wasConsideredCharging) {
                     for (int c = mControllers.size() - 1; c >= 0; --c) {
                         mControllers.get(c).onBatteryStateChangedLocked();
