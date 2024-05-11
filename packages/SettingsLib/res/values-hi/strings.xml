@@ -349,7 +349,7 @@
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"हार्डवेयर ऐक्सेलरेटेड रेंडरिंग"</string>
     <string name="media_category" msgid="8122076702526144053">"मीडिया"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"निगरानी"</string>
-    <string name="strict_mode" msgid="889864762140862437">"स्ट्रिक्ट मोड चालू किया गया"</string>
+    <string name="strict_mode" msgid="889864762140862437">"स्ट्रिक्ट मोड चालू रखें"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"थ्रेड पर लंबा प्रोसेस होने पर स्‍क्रीन फ़्लैश करें"</string>
     <string name="pointer_location" msgid="7516929526199520173">"पॉइंटर की जगह"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"मौजूदा टच डेटा दिखाने वाला स्‍क्रीन ओवरले"</string>
