@@ -495,16 +495,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         return userData.mBindingController.getSequenceNumber();
     }
 
-    /**
-     * Increase the current binding sequence number by one.
-     * Reset to 1 on overflow.
-     */
-    @GuardedBy("ImfLock.class")
-    private void advanceSequenceNumberLocked() {
-        final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
-        userData.mBindingController.advanceSequenceNumber();
-    }
-
     @GuardedBy("ImfLock.class")
     @Nullable
     InputMethodInfo queryInputMethodForCurrentUserLocked(@NonNull String imeId) {
@@ -2179,7 +2169,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final boolean connectionWasActive = mCurInputConnection != null;
 
         // Bump up the sequence for this client and attach it.
-        advanceSequenceNumberLocked();
+        userData.mBindingController.advanceSequenceNumber();
+
         mCurClient = cs;
         mCurInputConnection = inputConnection;
         mCurRemoteAccessibilityInputConnection = remoteAccessibilityInputConnection;
