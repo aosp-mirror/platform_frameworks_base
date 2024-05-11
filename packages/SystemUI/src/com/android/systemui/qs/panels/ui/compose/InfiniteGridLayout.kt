@@ -23,10 +23,12 @@ import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
 import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
@@ -71,7 +73,7 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
-import com.android.compose.modifiers.background
+import com.android.compose.animation.Expandable
 import com.android.compose.theme.colorAttr
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
@@ -134,7 +136,7 @@ class InfiniteGridLayout @Inject constructor(private val iconTilesInteractor: Ic
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class, ExperimentalFoundationApi::class)
     @Composable
     private fun Tile(
         tile: TileViewModel,
@@ -147,28 +149,39 @@ class InfiniteGridLayout @Inject constructor(private val iconTilesInteractor: Ic
                 .collectAsState(initial = tile.currentState.toUiState())
         val context = LocalContext.current
 
-        Row(
-            modifier = modifier.clickable { tile.onClick(null) }.tileModifier(state.colors),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = tileHorizontalArrangement(iconOnly)
+        Expandable(
+            color = colorAttr(state.colors.background),
+            shape = RoundedCornerShape(dimensionResource(R.dimen.qs_corner_radius)),
         ) {
-            val icon =
-                remember(state.icon) {
-                    state.icon.get().let {
-                        if (it is QSTileImpl.ResourceIcon) {
-                            Icon.Resource(it.resId, null)
-                        } else {
-                            Icon.Loaded(it.getDrawable(context), null)
+            Row(
+                modifier =
+                    modifier
+                        .combinedClickable(
+                            onClick = { tile.onClick(it) },
+                            onLongClick = { tile.onLongClick(it) }
+                        )
+                        .tileModifier(state.colors),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = tileHorizontalArrangement(iconOnly),
+            ) {
+                val icon =
+                    remember(state.icon) {
+                        state.icon.get().let {
+                            if (it is QSTileImpl.ResourceIcon) {
+                                Icon.Resource(it.resId, null)
+                            } else {
+                                Icon.Loaded(it.getDrawable(context), null)
+                            }
                         }
                     }
-                }
-            TileContent(
-                label = state.label.toString(),
-                secondaryLabel = state.secondaryLabel.toString(),
-                icon = icon,
-                colors = state.colors,
-                iconOnly = iconOnly
-            )
+                TileContent(
+                    label = state.label.toString(),
+                    secondaryLabel = state.secondaryLabel?.toString(),
+                    icon = icon,
+                    colors = state.colors,
+                    iconOnly = iconOnly
+                )
+            }
         }
     }
 

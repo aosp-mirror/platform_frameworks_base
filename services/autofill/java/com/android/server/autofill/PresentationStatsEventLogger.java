@@ -65,6 +65,7 @@ import android.content.pm.PackageManager;
 import android.provider.Settings;
 import android.service.autofill.Dataset;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
@@ -548,9 +549,10 @@ public final class PresentationStatsEventLogger {
     /**
      * Set views_fillable_total_count as long as mEventInternal presents.
      */
-    public void maybeSetViewFillableCounts(int totalFillableCount) {
+    public void maybeSetViewFillablesAndCount(List<AutofillId> autofillIds) {
         mEventInternal.ifPresent(event -> {
-            event.mViewFillableTotalCount = totalFillableCount;
+            event.mAutofillIdsAttemptedAutofill = new ArraySet<>(autofillIds);
+            event.mViewFillableTotalCount = event.mAutofillIdsAttemptedAutofill.size();
         });
     }
 
@@ -573,6 +575,29 @@ public final class PresentationStatsEventLogger {
     public void maybeSetFocusedId(int id) {
         mEventInternal.ifPresent(event -> {
             event.mFocusedId = id;
+        });
+    }
+    /**
+     * Set views_filled_failure_count using failure count as long as mEventInternal
+     * presents.
+     */
+    public void maybeAddSuccessId(AutofillId autofillId) {
+        mEventInternal.ifPresent(event -> {
+            ArraySet<AutofillId> autofillIds = event.mAutofillIdsAttemptedAutofill;
+            if (autofillIds == null) {
+                Slog.w(TAG, "Attempted autofill ids is null, but received autofillId:" + autofillId
+                        + " successfully filled");
+                event.mViewFilledButUnexpectedCount++;
+            } else if (autofillIds.contains(autofillId)) {
+                if (sVerbose) {
+                    Slog.v(TAG, "Logging autofill for id:" + autofillId);
+                    event.mViewFillSuccessCount++;
+                }
+            } else {
+                Slog.w(TAG, "Successfully filled autofillId:" + autofillId
+                        + " not found in list of attempted autofill ids: " + autofillIds);
+                event.mViewFilledButUnexpectedCount++;
+            }
         });
     }
 
@@ -621,7 +646,9 @@ public final class PresentationStatsEventLogger {
                     + " mWebviewRequestedCredential=" + event.mWebviewRequestedCredential
                     + " mViewFillableTotalCount=" + event.mViewFillableTotalCount
                     + " mViewFillFailureCount=" + event.mViewFillFailureCount
-                    + " mFocusedId=" + event.mFocusedId);
+                    + " mFocusedId=" + event.mFocusedId
+                    + " mViewFillSuccessCount=" + event.mViewFillSuccessCount
+                    + " mViewFilledButUnexpectedCount=" + event.mViewFilledButUnexpectedCount);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -665,7 +692,9 @@ public final class PresentationStatsEventLogger {
                 event.mWebviewRequestedCredential,
                 event.mViewFillableTotalCount,
                 event.mViewFillFailureCount,
-                event.mFocusedId);
+                event.mFocusedId,
+                event.mViewFillSuccessCount,
+                event.mViewFilledButUnexpectedCount);
         mEventInternal = Optional.empty();
     }
 
@@ -705,6 +734,12 @@ public final class PresentationStatsEventLogger {
         int mViewFillFailureCount = -1;
         int mFocusedId = -1;
 
+        // Default value for success count is set to 0 explicitly. Setting it to -1 for
+        // uninitialized doesn't help much, as this would be non-zero only if callback is received.
+        int mViewFillSuccessCount = 0;
+        int mViewFilledButUnexpectedCount = 0;
+
+        ArraySet<AutofillId> mAutofillIdsAttemptedAutofill;
         PresentationStatsEventInternal() {}
     }
 

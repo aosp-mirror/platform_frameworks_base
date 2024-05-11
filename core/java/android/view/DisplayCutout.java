@@ -1392,10 +1392,6 @@ public final class DisplayCutout {
 
     private static Rect computeSafeInsets(int displayW, int displayH, Insets waterFallInsets,
             Rect[] bounds) {
-        if (displayW == displayH) {
-            throw new UnsupportedOperationException("not implemented: display=" + displayW + "x"
-                    + displayH + " bounding rects=" + Arrays.toString(bounds));
-        }
 
         int leftInset = Math.max(waterFallInsets.left, findCutoutInsetForSide(
                 displayW, displayH, bounds[BOUNDS_POSITION_LEFT], Gravity.LEFT));

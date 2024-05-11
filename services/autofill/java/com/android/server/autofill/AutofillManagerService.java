@@ -1998,6 +1998,19 @@ public final class AutofillManagerService
         }
 
         @Override
+        public void setViewAutofilled(int sessionId, @NonNull AutofillId id, int userId) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
+                if (service != null) {
+                    service.setViewAutofilled(sessionId, getCallingUid(), id);
+                } else if (sVerbose) {
+                    Slog.v(TAG, "setAutofillFailure(): no service for " + userId);
+                }
+            }
+        }
+
+        @Override
         public void finishSession(int sessionId, int userId,
                 @AutofillCommitReason int commitReason) {
             synchronized (mLock) {

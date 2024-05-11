@@ -254,7 +254,7 @@ public class InputManagerService extends IInputManager.Stub
     // to {DisplayInfo#uniqueId} (String) so that events from the Input Device go to a
     // specific display.
     @GuardedBy("mAssociationsLock")
-    private final Map<String, String> mUniqueIdAssociations = new ArrayMap<>();
+    private final Map<String, String> mUniqueIdAssociationsByPort = new ArrayMap<>();
 
     // The associations of input devices to displays by descriptor. Maps from
     // {InputDevice#mDescriptor} to {DisplayInfo#uniqueId} (String) so that events from the
@@ -1656,7 +1656,8 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @Override // Binder call
-    public void addUniqueIdAssociation(@NonNull String inputPort, @NonNull String displayUniqueId) {
+    public void addUniqueIdAssociationByPort(@NonNull String inputPort,
+            @NonNull String displayUniqueId) {
         if (!checkCallingPermission(
                 android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY,
                 "addUniqueIdAssociation()")) {
@@ -1667,13 +1668,13 @@ public class InputManagerService extends IInputManager.Stub
         Objects.requireNonNull(inputPort);
         Objects.requireNonNull(displayUniqueId);
         synchronized (mAssociationsLock) {
-            mUniqueIdAssociations.put(inputPort, displayUniqueId);
+            mUniqueIdAssociationsByPort.put(inputPort, displayUniqueId);
         }
         mNative.changeUniqueIdAssociation();
     }
 
     @Override // Binder call
-    public void removeUniqueIdAssociation(@NonNull String inputPort) {
+    public void removeUniqueIdAssociationByPort(@NonNull String inputPort) {
         if (!checkCallingPermission(
                 android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY,
                 "removeUniqueIdAssociation()")) {
@@ -1682,7 +1683,7 @@ public class InputManagerService extends IInputManager.Stub
 
         Objects.requireNonNull(inputPort);
         synchronized (mAssociationsLock) {
-            mUniqueIdAssociations.remove(inputPort);
+            mUniqueIdAssociationsByPort.remove(inputPort);
         }
         mNative.changeUniqueIdAssociation();
     }
@@ -2101,9 +2102,9 @@ public class InputManagerService extends IInputManager.Stub
                     pw.println("  display: " + v);
                 });
             }
-            if (!mUniqueIdAssociations.isEmpty()) {
+            if (!mUniqueIdAssociationsByPort.isEmpty()) {
                 pw.println("Unique Id Associations:");
-                mUniqueIdAssociations.forEach((k, v) -> {
+                mUniqueIdAssociationsByPort.forEach((k, v) -> {
                     pw.print("  port: " + k);
                     pw.println("  uniqueId: " + v);
                 });
@@ -2530,10 +2531,10 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback
     @SuppressWarnings("unused")
-    private String[] getInputUniqueIdAssociations() {
+    private String[] getInputUniqueIdAssociationsByPort() {
         final Map<String, String> associations;
         synchronized (mAssociationsLock) {
-            associations = new HashMap<>(mUniqueIdAssociations);
+            associations = new HashMap<>(mUniqueIdAssociationsByPort);
         }
 
         return flatten(associations);

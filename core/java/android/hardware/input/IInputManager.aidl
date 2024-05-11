@@ -171,9 +171,9 @@ interface IInputManager {
     void removeUniqueIdAssociationByDescriptor(in String inputDeviceDescriptor);
 
     // Add a runtime association between the input device and display, using device's port.
-    void addUniqueIdAssociation(in String inputPort, in String displayUniqueId);
+    void addUniqueIdAssociationByPort(in String inputPort, in String displayUniqueId);
     // Remove the runtime association between the input device and display, using device's port.
-    void removeUniqueIdAssociation(in String inputPort);
+    void removeUniqueIdAssociationByPort(in String inputPort);
 
     InputSensorInfo[] getSensorList(int deviceId);
 

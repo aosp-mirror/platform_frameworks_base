@@ -40,6 +40,13 @@ final class AutofillSuggestionsController {
 
     @NonNull private final InputMethodManagerService mService;
 
+    /**
+     * The host input token of the input method that is currently associated with this controller.
+     */
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    private IBinder mCurHostInputToken;
+
     private static final class CreateInlineSuggestionsRequest {
         @NonNull final InlineSuggestionsRequestInfo mRequestInfo;
         @NonNull final IInlineSuggestionsRequestCallback mCallback;
@@ -75,6 +82,17 @@ final class AutofillSuggestionsController {
 
     AutofillSuggestionsController(@NonNull InputMethodManagerService service) {
         mService = service;
+    }
+
+    @GuardedBy("ImfLock.class")
+    void onResetSystemUi() {
+        mCurHostInputToken = null;
+    }
+
+    @Nullable
+    @GuardedBy("ImfLock.class")
+    IBinder getCurHostInputToken() {
+        return mCurHostInputToken;
     }
 
     @GuardedBy("ImfLock.class")
@@ -124,8 +142,7 @@ final class AutofillSuggestionsController {
                             mPendingInlineSuggestionsRequest.mCallback,
                             mPendingInlineSuggestionsRequest.mPackageName,
                             mService.getCurTokenDisplayIdLocked(),
-                            mService.getCurTokenLocked(),
-                            mService);
+                            mService.getCurTokenLocked());
             curMethod.onCreateInlineSuggestionsRequest(
                     mPendingInlineSuggestionsRequest.mRequestInfo, callback);
         } else {
@@ -161,22 +178,20 @@ final class AutofillSuggestionsController {
      * The decorator which validates the host package name in the
      * {@link InlineSuggestionsRequest} argument to make sure it matches the IME package name.
      */
-    private static final class InlineSuggestionsRequestCallbackDecorator
+    private final class InlineSuggestionsRequestCallbackDecorator
             extends IInlineSuggestionsRequestCallback.Stub {
         @NonNull private final IInlineSuggestionsRequestCallback mCallback;
         @NonNull private final String mImePackageName;
         private final int mImeDisplayId;
         @NonNull private final IBinder mImeToken;
-        @NonNull private final InputMethodManagerService mImms;
 
         InlineSuggestionsRequestCallbackDecorator(
                 @NonNull IInlineSuggestionsRequestCallback callback, @NonNull String imePackageName,
-                int displayId, @NonNull IBinder imeToken, @NonNull InputMethodManagerService imms) {
+                int displayId, @NonNull IBinder imeToken) {
             mCallback = callback;
             mImePackageName = imePackageName;
             mImeDisplayId = displayId;
             mImeToken = imeToken;
-            mImms = imms;
         }
 
         @Override
@@ -195,7 +210,12 @@ final class AutofillSuggestionsController {
                                 + "].");
             }
             request.setHostDisplayId(mImeDisplayId);
-            mImms.setCurHostInputToken(mImeToken, request.getHostInputToken());
+            synchronized (ImfLock.class) {
+                final IBinder curImeToken = mService.getCurTokenLocked();
+                if (mImeToken == curImeToken) {
+                    mCurHostInputToken = request.getHostInputToken();
+                }
+            }
             mCallback.onInlineSuggestionsRequest(request, callback);
         }
 

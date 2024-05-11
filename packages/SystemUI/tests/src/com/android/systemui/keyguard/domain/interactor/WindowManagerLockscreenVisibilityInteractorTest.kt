@@ -18,29 +18,20 @@ package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.flags.DisableSceneContainer
-import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.scene.data.repository.sceneContainerRepository
-import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -66,22 +57,14 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
                 .thenReturn(surfaceBehindIsAnimatingFlow)
         }
 
-    private val underTest = lazy { kosmos.windowManagerLockscreenVisibilityInteractor }
+    private val underTest = kosmos.windowManagerLockscreenVisibilityInteractor
     private val testScope = kosmos.testScope
     private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
 
-    @Before
-    fun setUp() {
-        // lazy value needs to be called here otherwise flow collection misbehaves
-        underTest.value
-        kosmos.sceneContainerRepository.setTransitionState(sceneTransitions)
-    }
-
     @Test
-    @DisableSceneContainer
     fun surfaceBehindVisibility_switchesToCorrectFlow() =
         testScope.runTest {
-            val values by collectValues(underTest.value.surfaceBehindVisibility)
+            val values by collectValues(underTest.surfaceBehindVisibility)
 
             // Start on LOCKSCREEN.
             transitionRepository.sendTransitionStep(
@@ -187,10 +170,9 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableSceneContainer
     fun testUsingGoingAwayAnimation_duringTransitionToGone() =
         testScope.runTest {
-            val values by collectValues(underTest.value.usingKeyguardGoingAwayAnimation)
+            val values by collectValues(underTest.usingKeyguardGoingAwayAnimation)
 
             // Start on LOCKSCREEN.
             transitionRepository.sendTransitionStep(
@@ -248,10 +230,9 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableSceneContainer
     fun testNotUsingGoingAwayAnimation_evenWhenAnimating_ifStateIsNotGone() =
         testScope.runTest {
-            val values by collectValues(underTest.value.usingKeyguardGoingAwayAnimation)
+            val values by collectValues(underTest.usingKeyguardGoingAwayAnimation)
 
             // Start on LOCKSCREEN.
             transitionRepository.sendTransitionStep(
@@ -338,10 +319,9 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableSceneContainer
     fun lockscreenVisibility_visibleWhenGone() =
         testScope.runTest {
-            val values by collectValues(underTest.value.lockscreenVisibility)
+            val values by collectValues(underTest.lockscreenVisibility)
 
             // Start on LOCKSCREEN.
             transitionRepository.sendTransitionStep(
@@ -405,10 +385,9 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableSceneContainer
     fun testLockscreenVisibility_usesFromState_ifCanceled() =
         testScope.runTest {
-            val values by collectValues(underTest.value.lockscreenVisibility)
+            val values by collectValues(underTest.lockscreenVisibility)
 
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
@@ -507,10 +486,9 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
      * state during the AOD/isAsleep -> GONE transition is AOD (where lockscreen visibility = true).
      */
     @Test
-    @DisableSceneContainer
     fun testLockscreenVisibility_falseDuringTransitionToGone_fromCanceledGone() =
         testScope.runTest {
-            val values by collectValues(underTest.value.lockscreenVisibility)
+            val values by collectValues(underTest.lockscreenVisibility)
 
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
@@ -609,11 +587,11 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
             )
         }
 
+    /**  */
     @Test
-    @DisableSceneContainer
     fun testLockscreenVisibility_trueDuringTransitionToGone_fromNotCanceledGone() =
         testScope.runTest {
-            val values by collectValues(underTest.value.lockscreenVisibility)
+            val values by collectValues(underTest.lockscreenVisibility)
 
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
@@ -724,109 +702,4 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
                 values
             )
         }
-
-    @Test
-    @EnableSceneContainer
-    fun sceneContainer_lockscreenVisibility_visibleWhenNotGone() =
-        testScope.runTest {
-            val lockscreenVisibility by collectLastValue(underTest.value.lockscreenVisibility)
-
-            sceneTransitions.value = lsToGone
-            assertThat(lockscreenVisibility).isTrue()
-
-            sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Gone)
-            assertThat(lockscreenVisibility).isFalse()
-
-            sceneTransitions.value = goneToLs
-            assertThat(lockscreenVisibility).isFalse()
-
-            sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Lockscreen)
-            assertThat(lockscreenVisibility).isTrue()
-        }
-
-    @Test
-    @EnableSceneContainer
-    fun sceneContainer_lockscreenVisibility_notVisibleWhenReturningToGone() =
-        testScope.runTest {
-            val lockscreenVisibility by collectLastValue(underTest.value.lockscreenVisibility)
-
-            sceneTransitions.value = goneToLs
-            assertThat(lockscreenVisibility).isFalse()
-
-            sceneTransitions.value = lsToGone
-            assertThat(lockscreenVisibility).isFalse()
-
-            sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Gone)
-            assertThat(lockscreenVisibility).isFalse()
-
-            sceneTransitions.value = goneToLs
-            assertThat(lockscreenVisibility).isFalse()
-
-            sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Lockscreen)
-            assertThat(lockscreenVisibility).isTrue()
-        }
-
-    @Test
-    @EnableSceneContainer
-    fun sceneContainer_usingGoingAwayAnimation_duringTransitionToGone() =
-        testScope.runTest {
-            val usingKeyguardGoingAwayAnimation by
-                collectLastValue(underTest.value.usingKeyguardGoingAwayAnimation)
-
-            sceneTransitions.value = lsToGone
-            assertThat(usingKeyguardGoingAwayAnimation).isTrue()
-
-            sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Gone)
-            assertThat(usingKeyguardGoingAwayAnimation).isFalse()
-        }
-
-    @Test
-    @EnableSceneContainer
-    fun sceneContainer_usingGoingAwayAnimation_surfaceBehindIsAnimating() =
-        testScope.runTest {
-            val usingKeyguardGoingAwayAnimation by
-                collectLastValue(underTest.value.usingKeyguardGoingAwayAnimation)
-
-            sceneTransitions.value = lsToGone
-            surfaceBehindIsAnimatingFlow.emit(true)
-            assertThat(usingKeyguardGoingAwayAnimation).isTrue()
-
-            sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Gone)
-            assertThat(usingKeyguardGoingAwayAnimation).isTrue()
-
-            sceneTransitions.value = goneToLs
-            assertThat(usingKeyguardGoingAwayAnimation).isTrue()
-
-            surfaceBehindIsAnimatingFlow.emit(false)
-            assertThat(usingKeyguardGoingAwayAnimation).isFalse()
-        }
-
-    companion object {
-        private val progress = MutableStateFlow(0f)
-
-        private val sceneTransitions =
-            MutableStateFlow<ObservableTransitionState>(
-                ObservableTransitionState.Idle(Scenes.Lockscreen)
-            )
-
-        private val lsToGone =
-            ObservableTransitionState.Transition(
-                Scenes.Lockscreen,
-                Scenes.Gone,
-                flowOf(Scenes.Lockscreen),
-                progress,
-                false,
-                flowOf(false)
-            )
-
-        private val goneToLs =
-            ObservableTransitionState.Transition(
-                Scenes.Gone,
-                Scenes.Lockscreen,
-                flowOf(Scenes.Lockscreen),
-                progress,
-                false,
-                flowOf(false)
-            )
-    }
 }

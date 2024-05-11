@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
+import com.android.systemui.Flags.restartDreamOnUnocclude
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -26,7 +27,6 @@ import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -90,10 +90,21 @@ constructor(
                     .filterRelevantKeyguardStateAnd { onTop -> !onTop }
                     .sample(
                         communalInteractor.isIdleOnCommunal,
-                        communalInteractor.showCommunalFromOccluded
+                        communalInteractor.showCommunalFromOccluded,
+                        communalInteractor.dreamFromOccluded
                     )
-                    .collect { (_, isIdleOnCommunal, showCommunalFromOccluded) ->
-                        startTransitionToLockscreenOrHub(isIdleOnCommunal, showCommunalFromOccluded)
+                    .collect { (_, isIdleOnCommunal, showCommunalFromOccluded, dreamFromOccluded) ->
+                        // Occlusion signals come from the framework, and should interrupt any
+                        // existing transition
+                        val to =
+                            if (restartDreamOnUnocclude() && dreamFromOccluded) {
+                                KeyguardState.DREAMING
+                            } else if (isIdleOnCommunal || showCommunalFromOccluded) {
+                                KeyguardState.GLANCEABLE_HUB
+                            } else {
+                                KeyguardState.LOCKSCREEN
+                            }
+                        startTransitionTo(to)
                     }
             }
         } else {
@@ -103,33 +114,30 @@ constructor(
                         keyguardInteractor.isKeyguardShowing,
                         communalInteractor.isIdleOnCommunal,
                         communalInteractor.showCommunalFromOccluded,
+                        communalInteractor.dreamFromOccluded,
                     )
-                    .filterRelevantKeyguardStateAnd { (isOccluded, isShowing, _, _) ->
+                    .filterRelevantKeyguardStateAnd { (isOccluded, isShowing, _, _, _) ->
                         !isOccluded && isShowing
                     }
-                    .collect { (_, _, isIdleOnCommunal, showCommunalFromOccluded) ->
-                        startTransitionToLockscreenOrHub(isIdleOnCommunal, showCommunalFromOccluded)
+                    .collect { (_, _, isIdleOnCommunal, showCommunalFromOccluded, dreamFromOccluded)
+                        ->
+                        // Occlusion signals come from the framework, and should interrupt any
+                        // existing transition
+                        val to =
+                            if (restartDreamOnUnocclude() && dreamFromOccluded) {
+                                KeyguardState.DREAMING
+                            } else if (isIdleOnCommunal || showCommunalFromOccluded) {
+                                KeyguardState.GLANCEABLE_HUB
+                            } else {
+                                KeyguardState.LOCKSCREEN
+                            }
+                        startTransitionTo(to)
                     }
             }
         }
     }
 
-    private suspend fun FromOccludedTransitionInteractor.startTransitionToLockscreenOrHub(
-        isIdleOnCommunal: Boolean,
-        showCommunalFromOccluded: Boolean,
-    ) {
-        if (isIdleOnCommunal || showCommunalFromOccluded) {
-            // TODO(b/336576536): Check if adaptation for scene framework is needed
-            if (SceneContainerFlag.isEnabled) return
-            startTransitionTo(KeyguardState.GLANCEABLE_HUB)
-        } else {
-            startTransitionTo(KeyguardState.LOCKSCREEN)
-        }
-    }
-
     private fun listenForOccludedToGone() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
-        if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) {
             // We don't think OCCLUDED to GONE is possible. You should always have to go via a
             // *_BOUNCER state to end up GONE. Launching an activity over a dismissable keyguard
@@ -148,6 +156,10 @@ constructor(
                     startTransitionTo(KeyguardState.GONE)
                 }
         }
+    }
+
+    fun dismissToGone() {
+        scope.launch { startTransitionTo(KeyguardState.GONE) }
     }
 
     private fun listenForOccludedToAsleep() {

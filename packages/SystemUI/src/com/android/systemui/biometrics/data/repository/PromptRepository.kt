@@ -125,7 +125,7 @@ constructor(
     private val _userId: MutableStateFlow<Int?> = MutableStateFlow(null)
     override val userId = _userId.asStateFlow()
 
-    private val _kind: MutableStateFlow<PromptKind> = MutableStateFlow(PromptKind.Biometric())
+    private val _kind: MutableStateFlow<PromptKind> = MutableStateFlow(PromptKind.None)
     override val kind = _kind.asStateFlow()
 
     private val _opPackageName: MutableStateFlow<String?> = MutableStateFlow(null)
@@ -149,7 +149,7 @@ constructor(
     override val showBpWithoutIconForCredential = _showBpWithoutIconForCredential.asStateFlow()
 
     override fun setShouldShowBpWithoutIconForCredential(promptInfo: PromptInfo) {
-        val hasCredentialViewShown = kind.value !is PromptKind.Biometric
+        val hasCredentialViewShown = kind.value.isCredential()
         val showBpForCredential =
             Flags.customBiometricPrompt() &&
                 constraintBp() &&
@@ -178,7 +178,7 @@ constructor(
         _promptInfo.value = null
         _userId.value = null
         _challenge.value = null
-        _kind.value = PromptKind.Biometric()
+        _kind.value = PromptKind.None
         _opPackageName.value = null
     }
 

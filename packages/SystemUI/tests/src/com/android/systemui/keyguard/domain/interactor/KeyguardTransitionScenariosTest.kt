@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.app.StatusBarManager
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
@@ -1417,6 +1418,39 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
                     ownerName = "FromDreamingTransitionInteractor(Occluded but no longer dreaming)",
                     from = KeyguardState.DREAMING,
                     to = KeyguardState.OCCLUDED,
+                    animatorAssertion = { it.isNotNull() },
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    @BrokenWithSceneContainer(339465026)
+    @EnableFlags(Flags.FLAG_RESTART_DREAM_ON_UNOCCLUDE)
+    fun dreamingToOccludedToDreaming() =
+        testScope.runTest {
+            // GIVEN a device on lockscreen
+            keyguardRepository.setKeyguardShowing(true)
+            runCurrent()
+
+            // Given a device that is dreaming
+            keyguardRepository.setDreaming(true)
+
+            // GIVEN a prior transition has run to OCCLUDED
+            runTransitionAndSetWakefulness(KeyguardState.DREAMING, KeyguardState.OCCLUDED)
+            keyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+
+            // WHEN occlusion ends
+            keyguardRepository.setKeyguardOccluded(false)
+            runCurrent()
+
+            // THEN a transition to GLANCEABLE_HUB should occur
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = FromOccludedTransitionInteractor::class.simpleName,
+                    from = KeyguardState.OCCLUDED,
+                    to = KeyguardState.DREAMING,
                     animatorAssertion = { it.isNotNull() },
                 )
 

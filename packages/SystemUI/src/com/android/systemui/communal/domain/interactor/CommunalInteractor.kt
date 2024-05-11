@@ -163,6 +163,13 @@ constructor(
                 initialValue = false,
             )
 
+    /** Whether to start dreaming when returning from occluded */
+    val dreamFromOccluded: Flow<Boolean> =
+        keyguardTransitionInteractor
+            .transitionStepsToState(KeyguardState.OCCLUDED)
+            .map { it.from == KeyguardState.DREAMING }
+            .stateIn(scope = applicationScope, SharingStarted.Eagerly, false)
+
     /**
      * Target scene as requested by the underlying [SceneTransitionLayout] or through [changeScene].
      *

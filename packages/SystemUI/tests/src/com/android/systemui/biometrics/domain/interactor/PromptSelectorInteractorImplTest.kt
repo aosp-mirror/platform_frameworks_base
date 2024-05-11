@@ -22,7 +22,6 @@ import android.hardware.biometrics.PromptInfo
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
 import com.android.systemui.biometrics.faceSensorPropertiesInternal
@@ -143,21 +142,20 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun usePinCredentialAndReset() =
-        testScope.runTest { useCredentialAndReset(Utils.CREDENTIAL_PIN) }
+    fun usePinCredentialAndReset() = testScope.runTest { useCredentialAndReset(PromptKind.Pin) }
 
     @Test
     fun usePatternCredentialAndReset() =
-        testScope.runTest { useCredentialAndReset(Utils.CREDENTIAL_PATTERN) }
+        testScope.runTest { useCredentialAndReset(PromptKind.Pattern) }
 
     @Test
     fun usePasswordCredentialAndReset() =
-        testScope.runTest { useCredentialAndReset(Utils.CREDENTIAL_PASSWORD) }
+        testScope.runTest { useCredentialAndReset(PromptKind.Password) }
 
-    private fun TestScope.useCredentialAndReset(@Utils.CredentialType kind: Int) {
+    private fun TestScope.useCredentialAndReset(kind: PromptKind) {
         setUserCredentialType(
-            isPin = kind == Utils.CREDENTIAL_PIN,
-            isPassword = kind == Utils.CREDENTIAL_PASSWORD,
+            isPin = kind == PromptKind.Pin,
+            isPassword = kind == PromptKind.Password,
         )
 
         val info =

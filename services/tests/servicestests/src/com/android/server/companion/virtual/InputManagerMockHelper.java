@@ -53,7 +53,7 @@ class InputManagerMockHelper {
     private IInputDevicesChangedListener mDevicesChangedListener;
     private final Map<String /* uniqueId */, Integer /* displayId */> mDisplayIdMapping =
             new HashMap<>();
-    private final Map<String /* phys */, String /* uniqueId */> mUniqueIdAssociation =
+    private final Map<String /* phys */, String /* uniqueId */> mUniqueIdAssociationByPort =
             new HashMap<>();
 
     InputManagerMockHelper(TestableLooper testableLooper,
@@ -79,11 +79,11 @@ class InputManagerMockHelper {
         when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[0]);
         doAnswer(inv -> mDevices.get(inv.getArgument(0)))
                 .when(mIInputManagerMock).getInputDevice(anyInt());
-        doAnswer(inv -> mUniqueIdAssociation.put(inv.getArgument(0),
-                inv.getArgument(1))).when(mIInputManagerMock).addUniqueIdAssociation(
+        doAnswer(inv -> mUniqueIdAssociationByPort.put(inv.getArgument(0),
+                inv.getArgument(1))).when(mIInputManagerMock).addUniqueIdAssociationByPort(
                         anyString(), anyString());
-        doAnswer(inv -> mUniqueIdAssociation.remove(inv.getArgument(0))).when(
-                mIInputManagerMock).removeUniqueIdAssociation(anyString());
+        doAnswer(inv -> mUniqueIdAssociationByPort.remove(inv.getArgument(0))).when(
+                mIInputManagerMock).removeUniqueIdAssociationByPort(anyString());
 
         // Set a new instance of InputManager for testing that uses the IInputManager mock as the
         // interface to the server.
@@ -113,7 +113,7 @@ class InputManagerMockHelper {
                 .setDescriptor(phys)
                 .setExternal(true)
                 .setAssociatedDisplayId(
-                        mDisplayIdMapping.getOrDefault(mUniqueIdAssociation.get(phys),
+                        mDisplayIdMapping.getOrDefault(mUniqueIdAssociationByPort.get(phys),
                                 Display.INVALID_DISPLAY))
                 .build();
 

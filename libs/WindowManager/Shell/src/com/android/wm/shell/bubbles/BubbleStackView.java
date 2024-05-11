@@ -536,7 +536,8 @@ public class BubbleStackView extends FrameLayout
     private OnClickListener mBubbleClickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
-            mIsDraggingStack = false; // If the touch ended in a click, we're no longer dragging.
+            // If the touch ended in a click, we're no longer dragging.
+            onDraggingEnded();
 
             // Bubble clicks either trigger expansion/collapse or a bubble switch, both of which we
             // shouldn't interrupt. These are quick transitions, so it's not worth trying to adjust
@@ -719,8 +720,7 @@ public class BubbleStackView extends FrameLayout
                 mDismissView.hide();
             }
 
-            mIsDraggingStack = false;
-            mMagnetizedObject = null;
+            onDraggingEnded();
 
             // Hide the stack after a delay, if needed.
             updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
@@ -1096,6 +1096,7 @@ public class BubbleStackView extends FrameLayout
             } else {
                 maybeShowStackEdu();
             }
+            onDraggingEnded();
         });
 
         animate()
@@ -1150,6 +1151,14 @@ public class BubbleStackView extends FrameLayout
                 releaseAnimatingOutBubbleBuffer();
             }
         });
+    }
+
+    /**
+     * Reset state related to dragging.
+     */
+    private void onDraggingEnded() {
+        mIsDraggingStack = false;
+        mMagnetizedObject = null;
     }
 
     /**

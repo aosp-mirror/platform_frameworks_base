@@ -4,6 +4,16 @@ container: "system"
 # NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
 
 flag {
+    name: "delay_show_magnification_button"
+    namespace: "accessibility"
+    description: "Delays the showing of magnification mode switch button."
+    bug: "338259519"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "floating_menu_animated_tuck"
     namespace: "accessibility"
     description: "Sets up animations for tucking/untucking and adjusts clipbounds."

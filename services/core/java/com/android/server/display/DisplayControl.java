@@ -29,7 +29,7 @@ import java.util.Objects;
  */
 public class DisplayControl {
     private static native IBinder nativeCreateDisplay(String name, boolean secure,
-            float requestedRefreshRate);
+            String uniqueId, float requestedRefreshRate);
     private static native void nativeDestroyDisplay(IBinder displayToken);
     private static native void nativeOverrideHdrTypes(IBinder displayToken, int[] modes);
     private static native long[] nativeGetPhysicalDisplayIds();
@@ -43,20 +43,21 @@ public class DisplayControl {
     /**
      * Create a display in SurfaceFlinger.
      *
-     * @param name The name of the display
+     * @param name The name of the display.
      * @param secure Whether this display is secure.
      * @return The token reference for the display in SurfaceFlinger.
      */
     public static IBinder createDisplay(String name, boolean secure) {
         Objects.requireNonNull(name, "name must not be null");
-        return nativeCreateDisplay(name, secure, 0.0f);
+        return nativeCreateDisplay(name, secure, "", 0.0f);
     }
 
     /**
      * Create a display in SurfaceFlinger.
      *
-     * @param name The name of the display
+     * @param name The name of the display.
      * @param secure Whether this display is secure.
+     * @param uniqueId The unique ID for the display.
      * @param requestedRefreshRate The requested refresh rate in frames per second.
      * For best results, specify a divisor of the physical refresh rate, e.g., 30 or 60 on
      * 120hz display. If an arbitrary refresh rate is specified, the rate will be rounded
@@ -65,9 +66,10 @@ public class DisplayControl {
      * @return The token reference for the display in SurfaceFlinger.
      */
     public static IBinder createDisplay(String name, boolean secure,
-            float requestedRefreshRate) {
+            String uniqueId, float requestedRefreshRate) {
         Objects.requireNonNull(name, "name must not be null");
-        return nativeCreateDisplay(name, secure, requestedRefreshRate);
+        Objects.requireNonNull(uniqueId, "uniqueId must not be null");
+        return nativeCreateDisplay(name, secure, uniqueId, requestedRefreshRate);
     }
 
     /**
@@ -79,7 +81,6 @@ public class DisplayControl {
         if (displayToken == null) {
             throw new IllegalArgumentException("displayToken must not be null");
         }
-
         nativeDestroyDisplay(displayToken);
     }
 

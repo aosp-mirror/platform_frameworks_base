@@ -67,6 +67,9 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
 
     private final ResultReceiver mAutofillCallback;
 
+    @Nullable
+    private ComponentName mPrimaryProviderComponentName = null;
+
     public GetCandidateRequestSession(
             Context context, SessionLifetime sessionCallback,
             Object lock, int userId, int callingUid,
@@ -104,8 +107,12 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
         if (providerGetCandidateSessions != null) {
             Slog.d(TAG, "In startProviderSession - provider session created and "
                     + "being added for: " + providerInfo.getComponentName());
-            mProviders.put(providerGetCandidateSessions.getComponentName().flattenToString(),
-                    providerGetCandidateSessions);
+            ComponentName componentName = providerGetCandidateSessions
+                    .getComponentName();
+            if (providerInfo.isPrimary()) {
+                mPrimaryProviderComponentName = componentName;
+            }
+            mProviders.put(componentName.flattenToString(), providerGetCandidateSessions);
         }
         return providerGetCandidateSessions;
     }
@@ -138,7 +145,7 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
 
         try {
             invokeClientCallbackSuccess(new GetCandidateCredentialsResponse(
-                    candidateProviderDataList, intent));
+                    candidateProviderDataList, intent, mPrimaryProviderComponentName));
         } catch (RemoteException e) {
             Slog.e(TAG, "Issue while responding to client with error : " + e);
         }

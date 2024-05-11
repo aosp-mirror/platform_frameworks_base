@@ -16,6 +16,8 @@
 
 package com.android.server.credentials;
 
+import static com.android.server.credentials.CredentialManagerService.getPrimaryProvidersForUserId;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -30,6 +32,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.infra.AbstractPerUserSystemService;
 
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -80,9 +83,12 @@ public final class CredentialManagerServiceImpl extends
             Slog.i(TAG, "newServiceInfoLocked, mInfo null, "
                     + serviceComponent.flattenToString());
         }
+        Set<ComponentName> primaryProviders =
+                getPrimaryProvidersForUserId(mMaster.getContext(), mUserId);
         mInfo = CredentialProviderInfoFactory.create(
                 getContext(), serviceComponent,
-                mUserId, /*isSystemProvider=*/false);
+                mUserId, /*isSystemProvider=*/false,
+                primaryProviders.contains(serviceComponent));
         return mInfo.getServiceInfo();
     }
 
