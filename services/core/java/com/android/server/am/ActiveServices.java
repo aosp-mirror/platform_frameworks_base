@@ -157,6 +157,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.RemoteServiceException.ForegroundServiceDidNotStartInTimeException;
+import android.app.RemoteServiceException.ForegroundServiceDidNotStopInTimeException;
 import android.app.Service;
 import android.app.ServiceStartArgs;
 import android.app.StartForegroundCalledOnStoppedServiceException;
@@ -784,7 +785,7 @@ public final class ActiveServices {
                 ActivityManagerService.SERVICE_FOREGROUND_TIMEOUT_MSG,
                 "SERVICE_FOREGROUND_TIMEOUT");
         this.mFGSAnrTimer = new ServiceAnrTimer(service,
-                ActivityManagerService.SERVICE_FGS_ANR_TIMEOUT_MSG,
+                ActivityManagerService.SERVICE_FGS_CRASH_TIMEOUT_MSG,
                 "FGS_TIMEOUT");
     }
 
@@ -2456,12 +2457,14 @@ public final class ActiveServices {
                                             + " foreground service type "
                                             + ServiceInfo.foregroundServiceTypeToLabel(
                                                     foregroundServiceType);
-                                    if (!android.app.Flags.gateFgsTimeoutAnrBehavior()) {
+                                    // Only throw an exception if the new ANR behavior
+                                    // ("do nothing") is not gated or the new crashing logic gate
+                                    // is enabled; otherwise, reset the limit temporarily.
+                                    if (!android.app.Flags.gateFgsTimeoutAnrBehavior()
+                                            || android.app.Flags.enableFgsTimeoutCrashBehavior()) {
                                         throw new ForegroundServiceStartNotAllowedException(
                                                     exceptionMsg);
                                     } else {
-                                        // Only throw an exception above while the new ANR behavior
-                                        // is not gated, otherwise, reset the limit temporarily.
                                         Slog.wtf(TAG, exceptionMsg);
                                         fgsTypeInfo.reset();
                                     }
@@ -3936,12 +3939,12 @@ public final class ActiveServices {
                 Slog.w(TAG_SERVICE, "Exception from scheduleTimeoutServiceForType: " + e);
             }
 
-            // ANR the service after giving the service some time to clean up.
-            mFGSAnrTimer.start(sr, mAm.mConstants.mFgsAnrExtraWaitDuration);
+            // Crash the service after giving the service some time to clean up.
+            mFGSAnrTimer.start(sr, mAm.mConstants.mFgsCrashExtraWaitDuration);
         }
     }
 
-    void onFgsAnrTimeout(ServiceRecord sr) {
+    void onFgsCrashTimeout(ServiceRecord sr) {
         final int fgsType = getTimeLimitedFgsType(sr.foregroundServiceType);
         if (fgsType == ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE) {
             return; // no timed out FGS type was found (either it was stopped or it switched types)
@@ -3956,20 +3959,36 @@ public final class ActiveServices {
             return;
         }
 
-        final TimeoutRecord tr = TimeoutRecord.forFgsTimeout(reason);
-        tr.mLatencyTracker.waitingOnAMSLockStarted();
-        synchronized (mAm) {
-            tr.mLatencyTracker.waitingOnAMSLockEnded();
-
-            Slog.e(TAG_SERVICE, "FGS ANR'ed: " + sr);
-            traceInstant("FGS ANR: ", sr);
-            if (sr.app != null) {
-                mAm.appNotResponding(sr.app, tr);
+        if (android.app.Flags.enableFgsTimeoutCrashBehavior()) {
+            // Crash the app
+            synchronized (mAm) {
+                Slog.e(TAG_SERVICE, "FGS Crashed: " + sr);
+                traceInstant("FGS Crash: ", sr);
+                if (sr.app != null) {
+                    mAm.crashApplicationWithTypeWithExtras(sr.app.uid, sr.app.getPid(),
+                            sr.app.info.packageName, sr.app.userId, reason, false /*force*/,
+                            ForegroundServiceDidNotStopInTimeException.TYPE_ID,
+                            ForegroundServiceDidNotStopInTimeException
+                                    .createExtrasForService(sr.getComponentName()));
+                }
             }
+        } else {
+            // ANR the app if the new crash behavior is not enabled
+            final TimeoutRecord tr = TimeoutRecord.forFgsTimeout(reason);
+            tr.mLatencyTracker.waitingOnAMSLockStarted();
+            synchronized (mAm) {
+                tr.mLatencyTracker.waitingOnAMSLockEnded();
 
-            // TODO: Can we close the ANR dialog here, if it's still shown? Currently, the ANR
-            // dialog really doesn't remember the "cause" (especially if there have been multiple
-            // ANRs), so it's not doable.
+                Slog.e(TAG_SERVICE, "FGS ANR'ed: " + sr);
+                traceInstant("FGS ANR: ", sr);
+                if (sr.app != null) {
+                    mAm.appNotResponding(sr.app, tr);
+                }
+
+                // TODO: Can we close the ANR dialog here, if it's still shown? Currently, the ANR
+                // dialog really doesn't remember the "cause" (especially if there have been
+                // multiple ANRs), so it's not doable.
+            }
         }
     }
 

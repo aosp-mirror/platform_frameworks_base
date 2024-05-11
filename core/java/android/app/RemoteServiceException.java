@@ -71,6 +71,33 @@ public class RemoteServiceException extends AndroidRuntimeException {
     }
 
     /**
+     * Exception used to crash an app process when it didn't stop after hitting its time limit.
+     *
+     * @hide
+     */
+    public static class ForegroundServiceDidNotStopInTimeException extends RemoteServiceException {
+        /** The type ID passed to {@link IApplicationThread#scheduleCrash}. */
+        public static final int TYPE_ID = 7;
+
+        private static final String KEY_SERVICE_CLASS_NAME = "serviceclassname";
+
+        public ForegroundServiceDidNotStopInTimeException(String msg, Throwable cause) {
+            super(msg, cause);
+        }
+
+        public static Bundle createExtrasForService(@NonNull ComponentName service) {
+            Bundle b = new Bundle();
+            b.putString(KEY_SERVICE_CLASS_NAME, service.getClassName());
+            return b;
+        }
+
+        @Nullable
+        public static String getServiceClassNameFromExtras(@Nullable Bundle extras) {
+            return (extras == null) ? null : extras.getString(KEY_SERVICE_CLASS_NAME);
+        }
+    }
+
+    /**
      * Exception used to crash an app process when the system received a RemoteException
      * while posting a notification of a foreground service.
      *
