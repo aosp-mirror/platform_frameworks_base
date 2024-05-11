@@ -16,10 +16,12 @@
 package com.android.wm.shell.common.pip
 
 import android.app.ActivityTaskManager
+import android.app.AppGlobals
 import android.app.RemoteAction
 import android.app.WindowConfiguration
 import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.RemoteException
 import android.os.SystemProperties
 import android.util.DisplayMetrics
@@ -136,8 +138,23 @@ object PipUtils {
         }
     }
 
+    private var isPip2ExperimentEnabled: Boolean? = null
+
+    /**
+     * Returns true if PiP2 implementation should be used. Besides the trunk stable flag,
+     * system property can be used to override this read only flag during development.
+     * It's currently limited to phone form factor, i.e., not enabled on ARC / TV.
+     */
     @JvmStatic
-    val isPip2ExperimentEnabled: Boolean
-        get() = Flags.enablePip2Implementation() || SystemProperties.getBoolean(
-                "wm_shell.pip2", false)
+    fun isPip2ExperimentEnabled(): Boolean {
+        if (isPip2ExperimentEnabled == null) {
+            val isArc = AppGlobals.getPackageManager().hasSystemFeature(
+                "org.chromium.arc", 0)
+            val isTv = AppGlobals.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_LEANBACK, 0)
+            isPip2ExperimentEnabled = SystemProperties.getBoolean("wm_shell.pip2", false) ||
+                    (Flags.enablePip2Implementation() && !isArc && !isTv)
+        }
+        return isPip2ExperimentEnabled as Boolean
+    }
 }
