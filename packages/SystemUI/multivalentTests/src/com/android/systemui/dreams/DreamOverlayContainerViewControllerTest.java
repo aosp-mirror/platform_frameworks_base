@@ -170,7 +170,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     @Test
     public void testBurnInProtectionStopsWhenContentViewDetached() {
         mController.onViewDetached();
-        verify(mHandler).removeCallbacks(any(Runnable.class));
+        verify(mHandler).removeCallbacksAndMessages(null);
     }
 
     @Test
@@ -280,5 +280,17 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
         mController.onViewDetached();
 
         verify(mAnimationsController).cancelAnimations();
+    }
+
+    @Test
+    public void onViewAttached_addsScrimExpansionCallback() {
+        mController.onViewAttached();
+        verify(mBouncerlessScrimController).addCallback(any());
+    }
+
+    @Test
+    public void onViewDetached_removesScrimExpansionCallback() {
+        mController.onViewDetached();
+        verify(mBouncerlessScrimController).removeCallback(any());
     }
 }

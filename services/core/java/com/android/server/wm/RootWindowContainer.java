@@ -911,7 +911,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
             dc.updateSystemGestureExclusion();
             dc.updateKeepClearAreas();
-            dc.updateTouchExcludeRegion();
         });
 
         // Check to see if we are now in a state where the screen should

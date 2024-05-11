@@ -112,6 +112,7 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
+import com.android.systemui.statusbar.notification.shared.NotificationHeadsUpCycling;
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
@@ -151,7 +152,6 @@ import java.util.function.Consumer;
 public class NotificationStackScrollLayout
         extends ViewGroup
         implements Dumpable, NotificationScrollView {
-
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
     private static final boolean SPEW = Log.isLoggable(TAG, Log.VERBOSE);
@@ -3144,6 +3144,11 @@ public class NotificationStackScrollLayout
                 type = row.wasJustClicked()
                         ? AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK
                         : AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
+                if (NotificationHeadsUpCycling.isEnabled()) {
+                    if (mStackScrollAlgorithm.isCyclingOut(row, mAmbientState)) {
+                        type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_CYCLING_OUT;
+                    }
+                }
                 if (row.isChildInGroup()) {
                     // We can otherwise get stuck in there if it was just isolated
                     row.setHeadsUpAnimatingAway(false);
@@ -3164,6 +3169,11 @@ public class NotificationStackScrollLayout
                     if (pinnedAndClosed || shouldHunAppearFromTheBottom) {
                         // Our custom add animation
                         type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR;
+                        if (NotificationHeadsUpCycling.isEnabled()) {
+                            if (mStackScrollAlgorithm.isCyclingIn(row, mAmbientState)) {
+                                type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_CYCLING_IN;
+                            }
+                        }
                     } else {
                         // Normal add animation
                         type = AnimationEvent.ANIMATION_TYPE_ADD;
@@ -6135,6 +6145,22 @@ public class NotificationStackScrollLayout
                         .animateTopInset()
                         .animateY()
                         .animateZ(),
+
+                // ANIMATION_TYPE_HEADS_UP_CYCLING_OUT
+                new AnimationFilter()
+                        .animateHeight()
+                        .animateTopInset()
+                        .animateY()
+                        .animateZ()
+                        .hasDelays(),
+
+                // ANIMATION_TYPE_HEADS_UP_CYCLING_IN
+                new AnimationFilter()
+                        .animateHeight()
+                        .animateTopInset()
+                        .animateY()
+                        .animateZ()
+                        .hasDelays(),
         };
 
         static int[] LENGTHS = new int[]{
@@ -6186,6 +6212,12 @@ public class NotificationStackScrollLayout
 
                 // ANIMATION_TYPE_EVERYTHING
                 StackStateAnimator.ANIMATION_DURATION_STANDARD,
+
+                // ANIMATION_TYPE_HEADS_UP_CYCLING_OUT
+                StackStateAnimator.ANIMATION_DURATION_HEADS_UP_CYCLING,
+
+                // ANIMATION_TYPE_HEADS_UP_CYCLING_IN
+                StackStateAnimator.ANIMATION_DURATION_HEADS_UP_CYCLING,
         };
 
         static final int ANIMATION_TYPE_ADD = 0;
@@ -6204,6 +6236,8 @@ public class NotificationStackScrollLayout
         static final int ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK = 13;
         static final int ANIMATION_TYPE_HEADS_UP_OTHER = 14;
         static final int ANIMATION_TYPE_EVERYTHING = 15;
+        static final int ANIMATION_TYPE_HEADS_UP_CYCLING_OUT = 16;
+        static final int ANIMATION_TYPE_HEADS_UP_CYCLING_IN = 17;
 
         final long eventStartTime;
         final ExpandableView mChangingView;

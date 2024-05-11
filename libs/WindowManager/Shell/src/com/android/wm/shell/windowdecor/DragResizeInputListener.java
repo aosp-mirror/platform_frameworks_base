@@ -24,7 +24,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERL
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
 
-import static com.android.input.flags.Flags.enablePointerChoreographer;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_BOTTOM;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_LEFT;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT;
@@ -54,6 +54,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowManagerGlobal;
 import android.window.InputTransferToken;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 
@@ -399,12 +400,17 @@ class DragResizeInputListener implements AutoCloseable {
                         float rawX = e.getRawX(0);
                         float rawY = e.getRawY(0);
                         int ctrlType = mDragResizeWindowGeometry.calculateCtrlType(isTouch, x, y);
+                        ProtoLog.d(WM_SHELL_DESKTOP_MODE,
+                                "%s: Handling action down, update ctrlType to %d", TAG, ctrlType);
                         mDragStartTaskBounds = mCallback.onDragPositioningStart(ctrlType,
                                 rawX, rawY);
                         // Increase the input sink region to cover the whole screen; this is to
                         // prevent input and focus from going to other tasks during a drag resize.
                         updateInputSinkRegionForDrag(mDragStartTaskBounds);
                         result = true;
+                    } else {
+                        ProtoLog.d(WM_SHELL_DESKTOP_MODE,
+                                "%s: Handling action down, but ignore event", TAG);
                     }
                     break;
                 }
@@ -499,12 +505,10 @@ class DragResizeInputListener implements AutoCloseable {
             // where views in the task can receive input events because we can't set touch regions
             // of input sinks to have rounded corners.
             if (mLastCursorType != cursorType || cursorType != PointerIcon.TYPE_DEFAULT) {
-                if (enablePointerChoreographer()) {
-                    mInputManager.setPointerIcon(PointerIcon.getSystemIcon(mContext, cursorType),
-                            displayId, deviceId, pointerId, mInputChannel.getToken());
-                } else {
-                    mInputManager.setPointerIconType(cursorType);
-                }
+                ProtoLog.d(WM_SHELL_DESKTOP_MODE, "%s: update pointer icon from %d to %d",
+                        TAG, mLastCursorType, cursorType);
+                mInputManager.setPointerIcon(PointerIcon.getSystemIcon(mContext, cursorType),
+                        displayId, deviceId, pointerId, mInputChannel.getToken());
                 mLastCursorType = cursorType;
             }
         }

@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.animation.FloatEvaluator
 import android.animation.IntEvaluator
 import com.android.keyguard.KeyguardViewController
+import com.android.systemui.accessibility.domain.interactor.AccessibilityInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
@@ -68,6 +69,7 @@ constructor(
     private val keyguardViewController: Lazy<KeyguardViewController>,
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val deviceEntrySourceInteractor: DeviceEntrySourceInteractor,
+    private val accessibilityInteractor: AccessibilityInteractor,
     @Application private val scope: CoroutineScope,
 ) {
     val isUdfpsSupported: StateFlow<Boolean> = deviceEntryUdfpsInteractor.isUdfpsSupported
@@ -232,7 +234,8 @@ constructor(
             }
         }
     val isVisible: Flow<Boolean> = deviceEntryViewAlpha.map { it > 0f }.distinctUntilChanged()
-    val isLongPressEnabled: Flow<Boolean> =
+
+    private val isInteractive: Flow<Boolean> =
         combine(
             iconType,
             isUdfpsSupported,
@@ -244,17 +247,24 @@ constructor(
                 DeviceEntryIconView.IconType.NONE -> false
             }
         }
-
     val accessibilityDelegateHint: Flow<DeviceEntryIconView.AccessibilityHintType> =
-        combine(iconType, isLongPressEnabled) { deviceEntryStatus, longPressEnabled ->
-            if (longPressEnabled) {
-                deviceEntryStatus.toAccessibilityHintType()
+        accessibilityInteractor.isEnabled.flatMapLatest { touchExplorationEnabled ->
+            if (touchExplorationEnabled) {
+                combine(iconType, isInteractive) { iconType, isInteractive ->
+                    if (isInteractive) {
+                        iconType.toAccessibilityHintType()
+                    } else {
+                        DeviceEntryIconView.AccessibilityHintType.NONE
+                    }
+                }
             } else {
-                DeviceEntryIconView.AccessibilityHintType.NONE
+                flowOf(DeviceEntryIconView.AccessibilityHintType.NONE)
             }
         }
 
-    suspend fun onLongPress() {
+    val isLongPressEnabled: Flow<Boolean> = isInteractive
+
+    suspend fun onUserInteraction() {
         if (SceneContainerFlag.isEnabled) {
             deviceEntryInteractor.attemptDeviceEntry()
         } else {

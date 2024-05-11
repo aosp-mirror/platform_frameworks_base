@@ -90,7 +90,7 @@ import platform.test.runner.parameterized.Parameters
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class CommunalViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
     @Mock private lateinit var user: UserInfo
     @Mock private lateinit var providerInfo: AppWidgetProviderInfo
@@ -111,7 +111,7 @@ class CommunalViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private lateinit var underTest: CommunalViewModel
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before

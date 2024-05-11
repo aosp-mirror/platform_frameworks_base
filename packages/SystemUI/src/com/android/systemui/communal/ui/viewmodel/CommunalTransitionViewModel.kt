@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
 /** View model for transitions related to the communal hub. */
@@ -49,6 +50,27 @@ constructor(
     communalInteractor: CommunalInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) {
+    // Show UMO on glanceable hub immediately on transition into glanceable hub
+    private val showUmoFromOccludedToGlanceableHub: Flow<Boolean> =
+        keyguardTransitionInteractor
+            .transitionStepsFromState(KeyguardState.OCCLUDED)
+            .filter {
+                it.to == KeyguardState.GLANCEABLE_HUB &&
+                    (it.transitionState == TransitionState.STARTED ||
+                        it.transitionState == TransitionState.CANCELED)
+            }
+            .map { it.transitionState == TransitionState.STARTED }
+
+    private val showUmoFromGlanceableHubToOccluded: Flow<Boolean> =
+        keyguardTransitionInteractor
+            .transitionStepsFromState(KeyguardState.GLANCEABLE_HUB)
+            .filter {
+                it.to == KeyguardState.OCCLUDED &&
+                    (it.transitionState == TransitionState.FINISHED ||
+                        it.transitionState == TransitionState.CANCELED)
+            }
+            .map { it.transitionState != TransitionState.FINISHED }
+
     /**
      * Whether UMO location should be on communal. This flow is responsive to transitions so that a
      * new value is emitted at the right step of a transition to/from communal hub that the location
@@ -60,6 +82,8 @@ constructor(
                 glanceableHubToLockscreenTransitionViewModel.showUmo,
                 dreamToGlanceableHubTransitionViewModel.showUmo,
                 glanceableHubToDreamTransitionViewModel.showUmo,
+                showUmoFromOccludedToGlanceableHub,
+                showUmoFromGlanceableHubToOccluded,
             )
             .distinctUntilChanged()
 

@@ -25,6 +25,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.activity.EmptyTestActivity
+import com.android.systemui.concurrency.fakeExecutor
+import com.android.systemui.kosmos.Kosmos
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,9 +60,11 @@ class TransitionAnimatorTest : SysuiTestCase() {
             )
     }
 
+    private val kosmos = Kosmos()
     private val pathManager = GoldenPathManager(context, GOLDENS_PATH, pathConfig = PathConfig())
     private val transitionAnimator =
         TransitionAnimator(
+            kosmos.fakeExecutor,
             ActivityTransitionAnimator.TIMINGS,
             ActivityTransitionAnimator.INTERPOLATORS
         )

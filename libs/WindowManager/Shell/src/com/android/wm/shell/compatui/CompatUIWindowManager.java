@@ -81,6 +81,10 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
         mCallback = callback;
         mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
+        if (Flags.enableDesktopWindowingMode() && Flags.enableWindowingDynamicInitialBounds()) {
+            // Don't show the SCM button for freeform tasks
+            mHasSizeCompat &= !taskInfo.isFreeform();
+        }
         mCameraCompatControlState =
                 taskInfo.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState;
         mCompatUIHintsState = compatUIHintsState;
@@ -136,6 +140,10 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         final boolean prevHasSizeCompat = mHasSizeCompat;
         final int prevCameraCompatControlState = mCameraCompatControlState;
         mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
+        if (Flags.enableDesktopWindowingMode() && Flags.enableWindowingDynamicInitialBounds()) {
+            // Don't show the SCM button for freeform tasks
+            mHasSizeCompat &= !taskInfo.isFreeform();
+        }
         mCameraCompatControlState =
                 taskInfo.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState;
 

@@ -65,12 +65,12 @@ constructor(
             object : AccessibilityDelegate() {
                 private val accessibilityAuthenticateHint =
                     AccessibilityNodeInfo.AccessibilityAction(
-                        AccessibilityNodeInfoCompat.ACTION_LONG_CLICK,
+                        AccessibilityNodeInfoCompat.ACTION_CLICK,
                         resources.getString(R.string.accessibility_authenticate_hint)
                     )
                 private val accessibilityEnterHint =
                     AccessibilityNodeInfo.AccessibilityAction(
-                        AccessibilityNodeInfoCompat.ACTION_LONG_CLICK,
+                        AccessibilityNodeInfoCompat.ACTION_CLICK,
                         resources.getString(R.string.accessibility_enter_hint)
                     )
                 override fun onInitializeAccessibilityNodeInfo(

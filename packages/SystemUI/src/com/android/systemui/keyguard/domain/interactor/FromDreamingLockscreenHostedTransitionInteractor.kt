@@ -26,6 +26,7 @@ import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -93,6 +94,8 @@ constructor(
     }
 
     private fun listenForDreamingLockscreenHostedToPrimaryBouncer() {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
                 .filterRelevantKeyguardStateAnd { isBouncerShowing -> isBouncerShowing }
@@ -101,6 +104,8 @@ constructor(
     }
 
     private fun listenForDreamingLockscreenHostedToGone() {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.biometricUnlockState
                 .filterRelevantKeyguardStateAnd { biometricUnlockState ->

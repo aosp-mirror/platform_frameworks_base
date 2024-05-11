@@ -88,7 +88,7 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Mock private lateinit var expandable: Expandable
     @Mock private lateinit var burnInHelperWrapper: BurnInHelperWrapper
@@ -115,7 +115,7 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization?) : SysuiTest
     private val kosmos = testKosmos()
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before

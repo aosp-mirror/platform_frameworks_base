@@ -28,16 +28,16 @@ import android.text.format.DateFormat
 import android.util.AttributeSet
 import android.util.MathUtils.constrainedMap
 import android.util.TypedValue
-import android.view.View.MeasureSpec.EXACTLY
 import android.view.View
+import android.view.View.MeasureSpec.EXACTLY
 import android.widget.TextView
 import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.animation.GlyphCallback
 import com.android.systemui.animation.TextAnimator
 import com.android.systemui.customization.R
-import com.android.systemui.log.core.LogcatOnlyMessageBuffer
 import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogcatOnlyMessageBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.core.MessageBuffer
 import java.io.PrintWriter
@@ -47,11 +47,13 @@ import java.util.TimeZone
 import kotlin.math.min
 
 /**
- * Displays the time with the hour positioned above the minutes. (ie: 09 above 30 is 9:30)
- * The time's text color is a gradient that changes its colors based on its controller.
+ * Displays the time with the hour positioned above the minutes (ie: 09 above 30 is 9:30). The
+ * time's text color is a gradient that changes its colors based on its controller.
  */
 @SuppressLint("AppCompatCustomView")
-class AnimatableClockView @JvmOverloads constructor(
+class AnimatableClockView
+@JvmOverloads
+constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
@@ -63,7 +65,9 @@ class AnimatableClockView @JvmOverloads constructor(
         get() = field ?: DEFAULT_LOGGER
     var messageBuffer: MessageBuffer
         get() = logger.buffer
-        set(value) { logger = Logger(value, TAG) }
+        set(value) {
+            logger = Logger(value, TAG)
+        }
 
     var hasCustomPositionUpdatedAnimation: Boolean = false
     var migratedClocks: Boolean = false
@@ -77,16 +81,13 @@ class AnimatableClockView @JvmOverloads constructor(
     private var format: CharSequence? = null
     private var descFormat: CharSequence? = null
 
-    @ColorInt
-    private var dozingColor = 0
-
-    @ColorInt
-    private var lockScreenColor = 0
+    @ColorInt private var dozingColor = 0
+    @ColorInt private var lockScreenColor = 0
 
     private var lineSpacingScale = 1f
     private val chargeAnimationDelay: Int
     private var textAnimator: TextAnimator? = null
-    private var onTextAnimatorInitialized: Runnable? = null
+    private var onTextAnimatorInitialized: ((TextAnimator) -> Unit)? = null
 
     private var translateForCenterAnimation = false
     private val parentWidth: Int
@@ -94,9 +95,11 @@ class AnimatableClockView @JvmOverloads constructor(
 
     // last text size which is not constrained by view height
     private var lastUnconstrainedTextSize: Float = Float.MAX_VALUE
-    @VisibleForTesting var textAnimatorFactory: (Layout, () -> Unit) -> TextAnimator =
-        { layout, invalidateCb ->
-            TextAnimator(layout, NUM_CLOCK_FONT_ANIMATION_STEPS, invalidateCb) }
+
+    @VisibleForTesting
+    var textAnimatorFactory: (Layout, () -> Unit) -> TextAnimator = { layout, invalidateCb ->
+        TextAnimator(layout, NUM_CLOCK_FONT_ANIMATION_STEPS, invalidateCb)
+    }
 
     // Used by screenshot tests to provide stability
     @VisibleForTesting var isAnimationEnabled: Boolean = true
@@ -109,40 +112,55 @@ class AnimatableClockView @JvmOverloads constructor(
         get() = if (useBoldedVersion()) lockScreenWeightInternal + 100 else lockScreenWeightInternal
 
     /**
-     * The number of pixels below the baseline. For fonts that support languages such as
-     * Burmese, this space can be significant and should be accounted for when computing layout.
+     * The number of pixels below the baseline. For fonts that support languages such as Burmese,
+     * this space can be significant and should be accounted for when computing layout.
      */
-    val bottom get() = paint?.fontMetrics?.bottom ?: 0f
+    val bottom: Float
+        get() = paint?.fontMetrics?.bottom ?: 0f
 
     init {
-        val animatableClockViewAttributes = context.obtainStyledAttributes(
-            attrs, R.styleable.AnimatableClockView, defStyleAttr, defStyleRes
-        )
+        val animatableClockViewAttributes =
+            context.obtainStyledAttributes(
+                attrs,
+                R.styleable.AnimatableClockView,
+                defStyleAttr,
+                defStyleRes
+            )
 
         try {
-            dozingWeightInternal = animatableClockViewAttributes.getInt(
-                R.styleable.AnimatableClockView_dozeWeight,
-                /* default = */ 100
-            )
-            lockScreenWeightInternal = animatableClockViewAttributes.getInt(
-                R.styleable.AnimatableClockView_lockScreenWeight,
-                /* default = */ 300
-            )
-            chargeAnimationDelay = animatableClockViewAttributes.getInt(
-                R.styleable.AnimatableClockView_chargeAnimationDelay, /* default = */ 200
-            )
+            dozingWeightInternal =
+                animatableClockViewAttributes.getInt(
+                    R.styleable.AnimatableClockView_dozeWeight,
+                    /* default = */ 100
+                )
+            lockScreenWeightInternal =
+                animatableClockViewAttributes.getInt(
+                    R.styleable.AnimatableClockView_lockScreenWeight,
+                    /* default = */ 300
+                )
+            chargeAnimationDelay =
+                animatableClockViewAttributes.getInt(
+                    R.styleable.AnimatableClockView_chargeAnimationDelay,
+                    /* default = */ 200
+                )
         } finally {
             animatableClockViewAttributes.recycle()
         }
 
-        val textViewAttributes = context.obtainStyledAttributes(
-            attrs, android.R.styleable.TextView,
-            defStyleAttr, defStyleRes
-        )
+        val textViewAttributes =
+            context.obtainStyledAttributes(
+                attrs,
+                android.R.styleable.TextView,
+                defStyleAttr,
+                defStyleRes
+            )
 
         try {
-            isSingleLineInternal = textViewAttributes.getBoolean(
-                android.R.styleable.TextView_singleLine, /* default = */ false)
+            isSingleLineInternal =
+                textViewAttributes.getBoolean(
+                    android.R.styleable.TextView_singleLine,
+                    /* default = */ false
+                )
         } finally {
             textViewAttributes.recycle()
         }
@@ -156,9 +174,7 @@ class AnimatableClockView @JvmOverloads constructor(
         refreshFormat()
     }
 
-    /**
-     * Whether to use a bolded version based on the user specified fontWeightAdjustment.
-     */
+    /** Whether to use a bolded version based on the user specified fontWeightAdjustment. */
     fun useBoldedVersion(): Boolean {
         // "Bold text" fontWeightAdjustment is 300.
         return resources.configuration.fontWeightAdjustment > 100
@@ -169,25 +185,30 @@ class AnimatableClockView @JvmOverloads constructor(
         contentDescription = DateFormat.format(descFormat, time)
         val formattedText = DateFormat.format(format, time)
         logger.d({ "refreshTime: new formattedText=$str1" }) { str1 = formattedText?.toString() }
-        // Setting text actually triggers a layout pass (because the text view is set to
-        // wrap_content width and TextView always relayouts for this). Avoid needless
-        // relayout if the text didn't actually change.
-        if (!TextUtils.equals(text, formattedText)) {
-            text = formattedText
-            logger.d({ "refreshTime: done setting new time text to: $str1" }) {
-                str1 = formattedText?.toString()
-            }
-            // Because the TextLayout may mutate under the hood as a result of the new text, we
-            // notify the TextAnimator that it may have changed and request a measure/layout. A
-            // crash will occur on the next invocation of setTextStyle if the layout is mutated
-            // without being notified TextInterpolator being notified.
-            if (layout != null) {
-                textAnimator?.updateLayout(layout)
-                logger.d("refreshTime: done updating textAnimator layout")
-            }
-            requestLayout()
-            logger.d("refreshTime: after requestLayout")
+
+        // Setting text actually triggers a layout pass in TextView (because the text view is set to
+        // wrap_content width and TextView always relayouts for this). This avoids needless relayout
+        // if the text didn't actually change.
+        if (TextUtils.equals(text, formattedText)) {
+            return
         }
+
+        text = formattedText
+        logger.d({ "refreshTime: done setting new time text to: $str1" }) {
+            str1 = formattedText?.toString()
+        }
+
+        // Because the TextLayout may mutate under the hood as a result of the new text, we notify
+        // the TextAnimator that it may have changed and request a measure/layout. A crash will
+        // occur on the next invocation of setTextStyle if the layout is mutated without being
+        // notified TextInterpolator being notified.
+        if (layout != null) {
+            textAnimator?.updateLayout(layout)
+            logger.d("refreshTime: done updating textAnimator layout")
+        }
+
+        requestLayout()
+        logger.d("refreshTime: after requestLayout")
     }
 
     fun onTimeZoneChanged(timeZone: TimeZone?) {
@@ -206,19 +227,27 @@ class AnimatableClockView @JvmOverloads constructor(
     @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         logger.d("onMeasure")
-        if (migratedClocks && !isSingleLineInternal &&
-                MeasureSpec.getMode(heightMeasureSpec) == EXACTLY) {
+
+        if (
+            migratedClocks &&
+                !isSingleLineInternal &&
+                MeasureSpec.getMode(heightMeasureSpec) == EXACTLY
+        ) {
             // Call straight into TextView.setTextSize to avoid setting lastUnconstrainedTextSize
-            super.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                    min(lastUnconstrainedTextSize, MeasureSpec.getSize(heightMeasureSpec) / 2F))
+            super.setTextSize(
+                TypedValue.COMPLEX_UNIT_PX,
+                min(lastUnconstrainedTextSize, MeasureSpec.getSize(heightMeasureSpec) / 2F)
+            )
         }
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val animator = textAnimator
         if (animator == null) {
-            textAnimator = textAnimatorFactory(layout, ::invalidate)
-            onTextAnimatorInitialized?.run()
-            onTextAnimatorInitialized = null
+            textAnimator =
+                textAnimatorFactory(layout, ::invalidate)?.also {
+                    onTextAnimatorInitialized?.invoke(it)
+                    onTextAnimatorInitialized = null
+                }
         } else {
             animator.updateLayout(layout)
         }
@@ -243,15 +272,13 @@ class AnimatableClockView @JvmOverloads constructor(
             canvas.translate(parentWidth / 4f, 0f)
         }
 
-        logger.d({ "onDraw($str1)"}) { str1 = text.toString() }
+        logger.d({ "onDraw($str1)" }) { str1 = text.toString() }
         // intentionally doesn't call super.onDraw here or else the text will be rendered twice
         textAnimator?.draw(canvas)
         canvas.restore()
     }
 
     override fun invalidate() {
-        @Suppress("UNNECESSARY_SAFE_CALL")
-        // logger won't be initialized when called by TextView's constructor
         logger.d("invalidate")
         super.invalidate()
     }
@@ -325,6 +352,7 @@ class AnimatableClockView @JvmOverloads constructor(
         if (textAnimator == null) {
             return
         }
+
         logger.d("animateFoldAppear")
         setTextStyle(
             weight = lockScreenWeightInternal,
@@ -348,10 +376,11 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     fun animateCharge(isDozing: () -> Boolean) {
+        // Skip charge animation if dozing animation is already playing.
         if (textAnimator == null || textAnimator!!.isRunning()) {
-            // Skip charge animation if dozing animation is already playing.
             return
         }
+
         logger.d("animateCharge")
         val startAnimPhase2 = Runnable {
             setTextStyle(
@@ -409,10 +438,9 @@ class AnimatableClockView @JvmOverloads constructor(
 
     /**
      * Set text style with an optional animation.
-     *
-     * By passing -1 to weight, the view preserves its current weight.
-     * By passing -1 to textSize, the view preserves its current text size.
-     * By passing null to color, the view preserves its current color.
+     * - By passing -1 to weight, the view preserves its current weight.
+     * - By passing -1 to textSize, the view preserves its current text size.
+     * - By passing null to color, the view preserves its current color.
      *
      * @param weight text weight.
      * @param textSize font size.
@@ -428,8 +456,8 @@ class AnimatableClockView @JvmOverloads constructor(
         delay: Long,
         onAnimationEnd: Runnable?
     ) {
-        if (textAnimator != null) {
-            textAnimator?.setTextStyle(
+        textAnimator?.let {
+            it.setTextStyle(
                 weight = weight,
                 textSize = textSize,
                 color = color,
@@ -439,23 +467,24 @@ class AnimatableClockView @JvmOverloads constructor(
                 delay = delay,
                 onAnimationEnd = onAnimationEnd
             )
-            textAnimator?.glyphFilter = glyphFilter
-        } else {
-            // when the text animator is set, update its start values
-            onTextAnimatorInitialized = Runnable {
-                textAnimator?.setTextStyle(
-                    weight = weight,
-                    textSize = textSize,
-                    color = color,
-                    animate = false,
-                    duration = duration,
-                    interpolator = interpolator,
-                    delay = delay,
-                    onAnimationEnd = onAnimationEnd
-                )
-                textAnimator?.glyphFilter = glyphFilter
-            }
+            it.glyphFilter = glyphFilter
         }
+            ?: run {
+                // when the text animator is set, update its start values
+                onTextAnimatorInitialized = { textAnimator ->
+                    textAnimator.setTextStyle(
+                        weight = weight,
+                        textSize = textSize,
+                        color = color,
+                        animate = false,
+                        duration = duration,
+                        interpolator = interpolator,
+                        delay = delay,
+                        onAnimationEnd = onAnimationEnd
+                    )
+                    textAnimator.glyphFilter = glyphFilter
+                }
+            }
     }
 
     private fun setTextStyle(
@@ -483,12 +512,13 @@ class AnimatableClockView @JvmOverloads constructor(
     fun refreshFormat(use24HourFormat: Boolean) {
         Patterns.update(context)
 
-        format = when {
-            isSingleLineInternal && use24HourFormat -> Patterns.sClockView24
-            !isSingleLineInternal && use24HourFormat -> DOUBLE_LINE_FORMAT_24_HOUR
-            isSingleLineInternal && !use24HourFormat -> Patterns.sClockView12
-            else -> DOUBLE_LINE_FORMAT_12_HOUR
-        }
+        format =
+            when {
+                isSingleLineInternal && use24HourFormat -> Patterns.sClockView24
+                !isSingleLineInternal && use24HourFormat -> DOUBLE_LINE_FORMAT_24_HOUR
+                isSingleLineInternal && !use24HourFormat -> Patterns.sClockView12
+                else -> DOUBLE_LINE_FORMAT_12_HOUR
+            }
         logger.d({ "refreshFormat($str1)" }) { str1 = format?.toString() }
 
         descFormat = if (use24HourFormat) Patterns.sClockView24 else Patterns.sClockView12
@@ -510,10 +540,10 @@ class AnimatableClockView @JvmOverloads constructor(
         pw.println("    time=$time")
     }
 
-    private val moveToCenterDelays
+    private val moveToCenterDelays: List<Int>
         get() = if (isLayoutRtl) MOVE_LEFT_DELAYS else MOVE_RIGHT_DELAYS
 
-    private val moveToSideDelays
+    private val moveToSideDelays: List<Int>
         get() = if (isLayoutRtl) MOVE_RIGHT_DELAYS else MOVE_LEFT_DELAYS
 
     /**
@@ -531,7 +561,7 @@ class AnimatableClockView @JvmOverloads constructor(
     fun offsetGlyphsForStepClockAnimation(
         clockStartLeft: Int,
         clockMoveDirection: Int,
-        moveFraction: Float
+        moveFraction: Float,
     ) {
         val isMovingToCenter = if (isLayoutRtl) clockMoveDirection < 0 else clockMoveDirection > 0
         val currentMoveAmount = left - clockStartLeft
@@ -558,8 +588,8 @@ class AnimatableClockView @JvmOverloads constructor(
      *
      * @param distance is the total distance in pixels to offset the glyphs when animation
      *   completes. Negative distance means we are animating the position towards the center.
-     * @param fraction fraction of the clock movement. 0 means it is at the beginning, and 1
-     *   means it finished moving.
+     * @param fraction fraction of the clock movement. 0 means it is at the beginning, and 1 means
+     *   it finished moving.
      */
     fun offsetGlyphsForStepClockAnimation(
         distance: Float,
@@ -568,13 +598,17 @@ class AnimatableClockView @JvmOverloads constructor(
         for (i in 0 until NUM_DIGITS) {
             val dir = if (isLayoutRtl) -1 else 1
             val digitFraction =
-                getDigitFraction(digit = i, isMovingToCenter = distance > 0, fraction = fraction)
+                getDigitFraction(
+                    digit = i,
+                    isMovingToCenter = distance > 0,
+                    fraction = fraction,
+                )
             val moveAmountForDigit = dir * distance * digitFraction
             glyphOffsets[i] = moveAmountForDigit
 
             if (distance > 0) {
-                // If distance > 0 then we are moving from the left towards the center.
-                // We need ensure that the glyphs are offset to the initial position.
+                // If distance > 0 then we are moving from the left towards the center. We need to
+                // ensure that the glyphs are offset to the initial position.
                 glyphOffsets[i] -= dir * distance
             }
         }
@@ -582,27 +616,25 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     private fun getDigitFraction(digit: Int, isMovingToCenter: Boolean, fraction: Float): Float {
-        // The delay for the digit, in terms of fraction (i.e. the digit should not move
-        // during 0.0 - 0.1).
-        val digitInitialDelay =
-            if (isMovingToCenter) {
-                moveToCenterDelays[digit] * MOVE_DIGIT_STEP
-            } else {
-                moveToSideDelays[digit] * MOVE_DIGIT_STEP
-            }
+        // The delay for the digit, in terms of fraction.
+        // (i.e. the digit should not move during 0.0 - 0.1).
+        val delays = if (isMovingToCenter) moveToCenterDelays else moveToSideDelays
+        val digitInitialDelay = delays[digit] * MOVE_DIGIT_STEP
         return MOVE_INTERPOLATOR.getInterpolation(
-                constrainedMap(
-                    0.0f,
-                    1.0f,
-                    digitInitialDelay,
-                    digitInitialDelay + AVAILABLE_ANIMATION_TIME,
-                    fraction,
-                )
+            constrainedMap(
+                /* rangeMin= */ 0.0f,
+                /* rangeMax= */ 1.0f,
+                /* valueMin= */ digitInitialDelay,
+                /* valueMax= */ digitInitialDelay + AVAILABLE_ANIMATION_TIME,
+                /* value= */ fraction,
             )
+        )
     }
 
-    // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
-    // This is an optimization to ensure we only recompute the patterns when the inputs change.
+    /**
+     * DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often. This
+     * is a cache optimization to ensure we only recompute the patterns when the inputs change.
+     */
     private object Patterns {
         var sClockView12: String? = null
         var sClockView24: String? = null
@@ -610,20 +642,21 @@ class AnimatableClockView @JvmOverloads constructor(
 
         fun update(context: Context) {
             val locale = Locale.getDefault()
-            val res = context.resources
-            val clockView12Skel = res.getString(R.string.clock_12hr_format)
-            val clockView24Skel = res.getString(R.string.clock_24hr_format)
-            val key = locale.toString() + clockView12Skel + clockView24Skel
-            if (key == sCacheKey) return
-
-            val clockView12 = DateFormat.getBestDateTimePattern(locale, clockView12Skel)
-            sClockView12 = clockView12
-
-            // CLDR insists on adding an AM/PM indicator even though it wasn't in the skeleton
-            // format.  The following code removes the AM/PM indicator if we didn't want it.
-            if (!clockView12Skel.contains("a")) {
-                sClockView12 = clockView12.replace("a".toRegex(), "").trim { it <= ' ' }
+            val clockView12Skel = context.resources.getString(R.string.clock_12hr_format)
+            val clockView24Skel = context.resources.getString(R.string.clock_24hr_format)
+            val key = "$locale$clockView12Skel$clockView24Skel"
+            if (key == sCacheKey) {
+                return
             }
+
+            sClockView12 =
+                DateFormat.getBestDateTimePattern(locale, clockView12Skel).let {
+                    // CLDR insists on adding an AM/PM indicator even though it wasn't in the format
+                    // string. The following code removes the AM/PM indicator if we didn't want it.
+                    if (!clockView12Skel.contains("a")) {
+                        it.replace("a".toRegex(), "").trim { it <= ' ' }
+                    } else it
+                }
 
             sClockView24 = DateFormat.getBestDateTimePattern(locale, clockView24Skel)
             sCacheKey = key

@@ -992,21 +992,14 @@ public final class InputManager {
     }
 
     /**
-     * Changes the mouse pointer's icon shape into the specified id.
+     * This method exists for backwards-compatibility, and is a no-op.
      *
-     * @param iconId The id of the pointer graphic, as a value between
-     * {@link PointerIcon#TYPE_ARROW} and {@link PointerIcon#TYPE_HANDWRITING}.
-     *
+     * @deprecated
      * @hide
      */
     @UnsupportedAppUsage
     public void setPointerIconType(int iconId) {
-        mGlobal.setPointerIconType(iconId);
-    }
-
-    /** @hide */
-    public void setCustomPointerIcon(PointerIcon icon) {
-        mGlobal.setCustomPointerIcon(icon);
+        Log.e(TAG, "setPointerIcon: Unsupported app usage!");
     }
 
     /** @hide */

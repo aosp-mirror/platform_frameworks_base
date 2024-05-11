@@ -74,7 +74,6 @@ import static android.view.ViewRootImplProto.WIDTH;
 import static android.view.ViewRootImplProto.WINDOW_ATTRIBUTES;
 import static android.view.ViewRootImplProto.WIN_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -96,6 +95,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_V
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OPTIMIZE_MEASURE;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -122,7 +122,6 @@ import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 
-import static com.android.input.flags.Flags.enablePointerChoreographer;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.window.flags.Flags.activityWindowInfoFlag;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
@@ -195,6 +194,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -268,11 +268,15 @@ import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.PhoneFallbackEventHandler;
+import com.android.internal.util.FastPrintWriter;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.SurfaceCallbackHelper;
 import com.android.modules.expresslog.Counter;
 
+import libcore.io.IoUtils;
+
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -7975,46 +7979,20 @@ public final class ViewRootImpl implements ViewParent,
         if (event.isStylusPointer() && mIsStylusPointerIconEnabled) {
             pointerIcon = mHandwritingInitiator.onResolvePointerIcon(mContext, event);
         }
-
         if (pointerIcon == null) {
             pointerIcon = mView.onResolvePointerIcon(event, pointerIndex);
         }
-
-        if (enablePointerChoreographer()) {
-            if (pointerIcon == null) {
-                pointerIcon = PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_NOT_SPECIFIED);
-            }
-            if (Objects.equals(mResolvedPointerIcon, pointerIcon)) {
-                return true;
-            }
-            mResolvedPointerIcon = pointerIcon;
-
-            InputManagerGlobal.getInstance()
-                    .setPointerIcon(pointerIcon, event.getDisplayId(),
-                            event.getDeviceId(), event.getPointerId(0), getInputToken());
+        if (pointerIcon == null) {
+            pointerIcon = PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_NOT_SPECIFIED);
+        }
+        if (Objects.equals(mResolvedPointerIcon, pointerIcon)) {
             return true;
         }
+        mResolvedPointerIcon = pointerIcon;
 
-        final int pointerType = (pointerIcon != null) ?
-                pointerIcon.getType() : PointerIcon.TYPE_NOT_SPECIFIED;
-
-        if (mPointerIconType == null || mPointerIconType != pointerType) {
-            mPointerIconType = pointerType;
-            mCustomPointerIcon = null;
-            if (mPointerIconType != PointerIcon.TYPE_CUSTOM) {
-                InputManagerGlobal
-                        .getInstance()
-                        .setPointerIconType(pointerType);
-                return true;
-            }
-        }
-        if (mPointerIconType == PointerIcon.TYPE_CUSTOM &&
-                !pointerIcon.equals(mCustomPointerIcon)) {
-            mCustomPointerIcon = pointerIcon;
-            InputManagerGlobal
-                    .getInstance()
-                    .setCustomPointerIcon(mCustomPointerIcon);
-        }
+        InputManagerGlobal.getInstance()
+                .setPointerIcon(pointerIcon, event.getDisplayId(),
+                        event.getDeviceId(), event.getPointerId(0), getInputToken());
         return true;
     }
 
@@ -10618,16 +10596,6 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
-    public void updatePointerIcon(float x, float y) {
-        final int what = MSG_UPDATE_POINTER_ICON;
-        mHandler.removeMessages(what);
-        final long now = SystemClock.uptimeMillis();
-        final MotionEvent event = MotionEvent.obtain(
-                0, now, MotionEvent.ACTION_HOVER_MOVE, x, y, 0);
-        Message msg = mHandler.obtainMessage(what, event);
-        mHandler.sendMessage(msg);
-    }
-
     public void dispatchCheckFocus() {
         if (!mHandler.hasMessages(MSG_CHECK_FOCUS)) {
             // This will result in a call to checkFocus() below.
@@ -11491,14 +11459,6 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void updatePointerIcon(float x, float y) {
-            final ViewRootImpl viewAncestor = mViewAncestor.get();
-            if (viewAncestor != null) {
-                viewAncestor.updatePointerIcon(x, y);
-            }
-        }
-
-        @Override
         public void dispatchWindowShown() {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
@@ -11520,6 +11480,26 @@ public final class ViewRootImpl implements ViewParent,
             if (viewAncestor != null) {
                 viewAncestor.dispatchScrollCaptureRequest(listener);
             }
+        }
+
+        @Override
+        public void dumpWindow(ParcelFileDescriptor pfd) {
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
+            if (viewAncestor == null) {
+                return;
+            }
+            viewAncestor.mHandler.postAtFrontOfQueue(() -> {
+                final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+                try {
+                    PrintWriter pw = new FastPrintWriter(new FileOutputStream(
+                            pfd.getFileDescriptor()));
+                    viewAncestor.dump("", pw);
+                    pw.flush();
+                } finally {
+                    IoUtils.closeQuietly(pfd);
+                    StrictMode.setThreadPolicy(oldPolicy);
+                }
+            });
         }
     }
 

@@ -34,6 +34,8 @@ sealed interface SliderState {
      * enough to trigger rounding to the correct value.
      */
     val a11yStep: Int
+    val a11yClickDescription: String?
+    val a11yStateDescription: String?
     val disabledMessage: String?
     val isMutable: Boolean
 
@@ -44,6 +46,8 @@ sealed interface SliderState {
         override val label: String = ""
         override val disabledMessage: String? = null
         override val a11yStep: Int = 0
+        override val a11yClickDescription: String? = null
+        override val a11yStateDescription: String? = null
         override val isEnabled: Boolean = true
         override val isMutable: Boolean = false
     }

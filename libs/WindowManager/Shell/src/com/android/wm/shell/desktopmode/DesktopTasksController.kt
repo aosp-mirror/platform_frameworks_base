@@ -47,6 +47,7 @@ import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import androidx.annotation.BinderThread
+import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.window.flags.Flags
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
@@ -85,7 +86,6 @@ import com.android.wm.shell.util.KtProtoLog
 import com.android.wm.shell.windowdecor.DragPositioningCallbackUtility
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
-import com.android.wm.shell.windowdecor.extension.isFreeform
 import com.android.wm.shell.windowdecor.extension.isFullscreen
 import java.io.PrintWriter
 import java.util.Optional
@@ -201,6 +201,11 @@ class DesktopTasksController(
             }
         )
         dragAndDropController.addListener(this)
+    }
+
+    @VisibleForTesting
+    fun getVisualIndicator(): DesktopModeVisualIndicator? {
+        return visualIndicator
     }
 
     fun setOnTaskResizeAnimationListener(listener: OnTaskResizeAnimationListener) {
@@ -605,8 +610,9 @@ class DesktopTasksController(
     }
 
     /**
-     * Quick-resizes a desktop task, toggling between the stable bounds and the last saved bounds
-     * if available or the default bounds otherwise.
+     * Quick-resizes a desktop task, toggling between a fullscreen state (represented by the
+     * stable bounds) and a free floating state (either the last saved bounds if available or the
+     * default bounds otherwise).
      */
     fun toggleDesktopTaskSize(taskInfo: RunningTaskInfo) {
         val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
@@ -623,7 +629,11 @@ class DesktopTasksController(
             if (taskBoundsBeforeMaximize != null) {
                 destinationBounds.set(taskBoundsBeforeMaximize)
             } else {
-                destinationBounds.set(getDefaultDesktopTaskBounds(displayLayout))
+                if (Flags.enableWindowingDynamicInitialBounds()){
+                    destinationBounds.set(calculateInitialBounds(displayLayout, taskInfo))
+                } else {
+                    destinationBounds.set(getDefaultDesktopTaskBounds(displayLayout))
+                }
             }
         } else {
             // Save current bounds so that task can be restored back to original bounds if necessary
@@ -1011,6 +1021,7 @@ class DesktopTasksController(
         wct: WindowContainerTransaction,
         taskInfo: RunningTaskInfo
     ) {
+        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
         val tdaInfo = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(taskInfo.displayId)!!
         val tdaWindowingMode = tdaInfo.configuration.windowConfiguration.windowingMode
         val targetWindowingMode = if (tdaWindowingMode == WINDOWING_MODE_FREEFORM) {
@@ -1018,6 +1029,9 @@ class DesktopTasksController(
             WINDOWING_MODE_UNDEFINED
         } else {
             WINDOWING_MODE_FREEFORM
+        }
+        if (Flags.enableWindowingDynamicInitialBounds()) {
+            wct.setBounds(taskInfo.token, calculateInitialBounds(displayLayout, taskInfo))
         }
         wct.setWindowingMode(taskInfo.token, targetWindowingMode)
         wct.reorder(taskInfo.token, true /* onTop */)
@@ -1239,13 +1253,17 @@ class DesktopTasksController(
      * @param y height of drag, to be checked against status bar height.
      */
     fun onDragPositioningEndThroughStatusBar(inputCoordinates: PointF, taskInfo: RunningTaskInfo) {
-        val indicator = visualIndicator ?: return
+        val indicator = getVisualIndicator() ?: return
         val indicatorType = indicator
             .updateIndicatorType(inputCoordinates, taskInfo.windowingMode)
         when (indicatorType) {
             DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR -> {
                 val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
-                finalizeDragToDesktop(taskInfo, getDefaultDesktopTaskBounds(displayLayout))
+                if (Flags.enableWindowingDynamicInitialBounds()) {
+                    finalizeDragToDesktop(taskInfo, calculateInitialBounds(displayLayout, taskInfo))
+                } else {
+                    finalizeDragToDesktop(taskInfo, getDefaultDesktopTaskBounds(displayLayout))
+                }
             }
             DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR,
             DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR -> {

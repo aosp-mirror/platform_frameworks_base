@@ -33,7 +33,7 @@ public:
     MOCK_METHOD(void, setLayer, (int32_t), (override));
     MOCK_METHOD(void, setAlpha, (float), (override));
     MOCK_METHOD(void, setTransformationMatrix, (const SpriteTransformationMatrix&), (override));
-    MOCK_METHOD(void, setDisplayId, (int32_t), (override));
+    MOCK_METHOD(void, setDisplayId, (ui::LogicalDisplayId), (override));
     MOCK_METHOD(void, setSkipScreenshot, (bool), (override));
 };
 

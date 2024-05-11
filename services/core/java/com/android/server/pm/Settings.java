@@ -2139,10 +2139,17 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     continue;
                 }
 
+                ComponentName unflattenOriginalComponentName = ComponentName.unflattenFromString(
+                        originalComponentName);
+                if (unflattenOriginalComponentName == null) {
+                    Slog.d(TAG, "Incorrect component name from the attributes");
+                    continue;
+                }
+
                 activityInfos.add(
                         new ArchiveState.ArchiveActivityInfo(
                                 title,
-                                ComponentName.unflattenFromString(originalComponentName),
+                                unflattenOriginalComponentName,
                                 iconPath,
                                 monochromeIconPath));
             }

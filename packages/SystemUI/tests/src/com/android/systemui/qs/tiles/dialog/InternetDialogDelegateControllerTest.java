@@ -5,6 +5,7 @@ import static android.provider.Settings.Global.AIRPLANE_MODE_ON;
 import static android.telephony.SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
 import static android.telephony.SignalStrength.SIGNAL_STRENGTH_GREAT;
 import static android.telephony.SignalStrength.SIGNAL_STRENGTH_POOR;
+import static android.telephony.SubscriptionManager.PROFILE_CLASS_PROVISIONING;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.settingslib.wifi.WifiUtils.getHotspotIconResource;
@@ -217,6 +218,8 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
         when(mAccessPointController.getMergedCarrierEntry()).thenReturn(mMergedCarrierEntry);
         when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{SUB_ID});
         when(SubscriptionManager.getDefaultDataSubscriptionId()).thenReturn(SUB_ID);
+        SubscriptionInfo info = mock(SubscriptionInfo.class);
+        when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(info);
         when(mToastFactory.createToast(any(), anyString(), anyString(), anyInt(), anyInt()))
             .thenReturn(mSystemUIToast);
         when(mSystemUIToast.getView()).thenReturn(mToastView);
@@ -1083,19 +1086,34 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void hasActiveSubId_activeSubIdListIsEmpty_returnFalse() {
-        when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{});
+    public void hasActiveSubIdOnDds_noDds_returnFalse() {
+        when(SubscriptionManager.getDefaultDataSubscriptionId())
+                .thenReturn(SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+
         mInternetDialogController.mOnSubscriptionsChangedListener.onSubscriptionsChanged();
 
-        assertThat(mInternetDialogController.hasActiveSubId()).isFalse();
+        assertThat(mInternetDialogController.hasActiveSubIdOnDds()).isFalse();
     }
 
     @Test
-    public void hasActiveSubId_activeSubIdListNotEmpty_returnTrue() {
-        when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{SUB_ID});
+    public void hasActiveSubIdOnDds_activeDds_returnTrue() {
         mInternetDialogController.mOnSubscriptionsChangedListener.onSubscriptionsChanged();
 
-        assertThat(mInternetDialogController.hasActiveSubId()).isTrue();
+        assertThat(mInternetDialogController.hasActiveSubIdOnDds()).isTrue();
+    }
+
+    @Test
+    public void hasActiveSubIdOnDds_activeDdsAndHasProvisioning_returnFalse() {
+        when(SubscriptionManager.getDefaultDataSubscriptionId())
+                .thenReturn(SUB_ID);
+        SubscriptionInfo info = mock(SubscriptionInfo.class);
+        when(info.isEmbedded()).thenReturn(true);
+        when(info.getProfileClass()).thenReturn(PROFILE_CLASS_PROVISIONING);
+        when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(info);
+
+        mInternetDialogController.mOnSubscriptionsChangedListener.onSubscriptionsChanged();
+
+        assertThat(mInternetDialogController.hasActiveSubIdOnDds()).isFalse();
     }
 
     private String getResourcesString(String name) {

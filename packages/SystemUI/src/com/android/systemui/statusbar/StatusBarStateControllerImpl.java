@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_TO_AOD;
+import static com.android.systemui.keyguard.shared.model.KeyguardState.GONE;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.combineFlows;
 
 import android.animation.Animator;
@@ -49,6 +50,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteract
 import com.android.systemui.deviceentry.shared.model.DeviceUnlockStatus;
 import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
@@ -108,6 +110,7 @@ public class StatusBarStateControllerImpl implements
     private final UiEventLogger mUiEventLogger;
     private final Lazy<InteractionJankMonitor> mInteractionJankMonitorLazy;
     private final JavaAdapter mJavaAdapter;
+    private final Lazy<KeyguardTransitionInteractor> mKeyguardTransitionInteractorLazy;
     private final Lazy<ShadeInteractor> mShadeInteractorLazy;
     private final Lazy<DeviceUnlockedInteractor> mDeviceUnlockedInteractorLazy;
     private final Lazy<SceneInteractor> mSceneInteractorLazy;
@@ -175,6 +178,7 @@ public class StatusBarStateControllerImpl implements
             UiEventLogger uiEventLogger,
             Lazy<InteractionJankMonitor> interactionJankMonitorLazy,
             JavaAdapter javaAdapter,
+            Lazy<KeyguardTransitionInteractor> keyguardTransitionInteractor,
             Lazy<ShadeInteractor> shadeInteractorLazy,
             Lazy<DeviceUnlockedInteractor> deviceUnlockedInteractorLazy,
             Lazy<SceneInteractor> sceneInteractorLazy,
@@ -182,6 +186,7 @@ public class StatusBarStateControllerImpl implements
         mUiEventLogger = uiEventLogger;
         mInteractionJankMonitorLazy = interactionJankMonitorLazy;
         mJavaAdapter = javaAdapter;
+        mKeyguardTransitionInteractorLazy = keyguardTransitionInteractor;
         mShadeInteractorLazy = shadeInteractorLazy;
         mDeviceUnlockedInteractorLazy = deviceUnlockedInteractorLazy;
         mSceneInteractorLazy = sceneInteractorLazy;
@@ -193,6 +198,14 @@ public class StatusBarStateControllerImpl implements
 
     @Override
     public void start() {
+        mJavaAdapter.alwaysCollectFlow(
+                mKeyguardTransitionInteractorLazy.get().isFinishedInState(GONE),
+                (Boolean isFinishedInState) -> {
+                    if (isFinishedInState) {
+                        setLeaveOpenOnKeyguardHide(false);
+                    }
+                });
+
         mJavaAdapter.alwaysCollectFlow(mShadeInteractorLazy.get().isAnyExpanded(),
                 this::onShadeOrQsExpanded);
 

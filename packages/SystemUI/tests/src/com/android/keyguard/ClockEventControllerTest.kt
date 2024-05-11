@@ -371,7 +371,7 @@ class ClockEventControllerTest : SysuiTestCase() {
         }
 
     @Test
-    fun listenForTransitionToLSFromOccluded_updatesClockDozeAmountToOne() =
+    fun listenForTransitionToLSFromOccluded_updatesClockDozeAmountToZero() =
         runBlocking(IMMEDIATE) {
             val transitionStep = MutableStateFlow(TransitionStep())
             whenever(keyguardTransitionInteractor.transitionStepsToState(KeyguardState.LOCKSCREEN))
@@ -429,6 +429,27 @@ class ClockEventControllerTest : SysuiTestCase() {
             yield()
 
             verify(animations, never()).doze(0f)
+
+            job.cancel()
+        }
+
+    @Test
+    fun listenForAnyStateToDozingTransition_UpdatesClockDozeAmountToOne() =
+        runBlocking(IMMEDIATE) {
+            val transitionStep = MutableStateFlow(TransitionStep())
+            whenever(keyguardTransitionInteractor.transitionStepsToState(KeyguardState.DOZING))
+                    .thenReturn(transitionStep)
+
+            val job = underTest.listenForAnyStateToDozingTransition(this)
+            transitionStep.value =
+                    TransitionStep(
+                            from = KeyguardState.LOCKSCREEN,
+                            to = KeyguardState.DOZING,
+                            transitionState = TransitionState.STARTED,
+                    )
+            yield()
+
+            verify(animations, times(2)).doze(1f)
 
             job.cancel()
         }

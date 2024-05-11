@@ -11271,6 +11271,9 @@ public class NotificationManagerService extends SystemService {
 
             // Lifetime extended notifications don't need to alert on state change.
             record.setPostSilently(true);
+            // We also set FLAG_ONLY_ALERT_ONCE to avoid the notification from HUN-ing again.
+            record.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
+
             mHandler.post(new EnqueueNotificationRunnable(record.getUser().getIdentifier(),
                     record, isAppForeground,
                     mPostNotificationTrackerFactory.newTracker(null)));

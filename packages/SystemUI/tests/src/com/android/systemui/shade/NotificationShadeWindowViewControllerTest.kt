@@ -102,7 +102,7 @@ import org.mockito.Mockito.`when` as whenever
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 @RunWithLooper(setAsMainLooper = true)
-class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Mock private lateinit var view: NotificationShadeWindowView
     @Mock private lateinit var sysuiStatusBarStateController: SysuiStatusBarStateController
@@ -160,7 +160,7 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization?) :
     private lateinit var featureFlagsClassic: FakeFeatureFlagsClassic
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before

@@ -550,15 +550,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     // TODO(multi-display): remove some of the usages.
     boolean isDefaultDisplay;
 
-    /** Detect user tapping outside of current focused task bounds .*/
-    // TODO(b/315321016): Remove once pointer event detection is removed from WM.
-    @VisibleForTesting
-    final TaskTapPointerEventListener mTapDetector;
-
-    /** Detect user tapping outside of current focused root task bounds .*/
-    // TODO(b/315321016): Remove once pointer event detection is removed from WM.
-    private Region mTouchExcludeRegion = new Region();
-
     /** Save allocating when calculating rects */
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRect2 = new Rect();
@@ -570,10 +561,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private boolean mDeferredRemoval;
 
     final PinnedTaskController mPinnedTaskController;
-
-    final ArrayList<WindowState> mTapExcludedWindows = new ArrayList<>();
-    /** A collection of windows that provide tap exclude regions inside of them. */
-    final ArraySet<WindowState> mTapExcludeProvidingWindows = new ArraySet<>();
 
     private final LinkedList<ActivityRecord> mTmpUpdateAllDrawn = new LinkedList();
 
@@ -1193,18 +1180,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 "PointerEventDispatcher" + mDisplayId, mDisplayId);
         mPointerEventDispatcher = new PointerEventDispatcher(inputChannel);
 
-        if (com.android.input.flags.Flags.removePointerEventTrackingInWm()) {
-            mTapDetector = null;
-        } else {
-            // Tap Listeners are supported for:
-            // 1. All physical displays (multi-display).
-            // 2. VirtualDisplays on VR, AA (and everything else).
-            mTapDetector = new TaskTapPointerEventListener(mWmService, this);
-            registerPointerEventListener(mTapDetector);
-        }
-        if (mWmService.mMousePositionTracker != null) {
-            registerPointerEventListener(mWmService.mMousePositionTracker);
-        }
         if (mWmService.mAtmService.getRecentTasks() != null) {
             registerPointerEventListener(
                     mWmService.mAtmService.getRecentTasks().getInputListener());
@@ -3304,117 +3279,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mTmpTaskForResizePointSearchResult.process(taskDisplayArea, x, y, delta));
     }
 
-    void updateTouchExcludeRegion() {
-        if (mTapDetector == null) {
-            // The touch exclude region is used to detect the region outside of the focused task
-            // so that the tap detector can detect outside touches. Don't calculate the exclude
-            // region when the tap detector is disabled.
-            return;
-        }
-        final Task focusedTask = (mFocusedApp != null ? mFocusedApp.getTask() : null);
-        if (focusedTask == null) {
-            mTouchExcludeRegion.setEmpty();
-        } else {
-            mTouchExcludeRegion.set(0, 0, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
-            final int delta = dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
-            mTmpRect.setEmpty();
-            mTmpRect2.setEmpty();
-
-            forAllTasks(t -> { processTaskForTouchExcludeRegion(t, focusedTask, delta); });
-
-            // If we removed the focused task above, add it back and only leave its
-            // outside touch area in the exclusion. TapDetector is not interested in
-            // any touch inside the focused task itself.
-            if (!mTmpRect2.isEmpty()) {
-                mTouchExcludeRegion.op(mTmpRect2, Region.Op.UNION);
-            }
-        }
-        if (mInputMethodWindow != null && mInputMethodWindow.isVisible()) {
-            // If the input method is visible and the user is typing, we don't want these touch
-            // events to be intercepted and used to change focus. This would likely cause a
-            // disappearance of the input method.
-            mInputMethodWindow.getTouchableRegion(mTmpRegion);
-            mTouchExcludeRegion.op(mTmpRegion, Op.UNION);
-        }
-        for (int i = mTapExcludedWindows.size() - 1; i >= 0; i--) {
-            final WindowState win = mTapExcludedWindows.get(i);
-            if (!win.isVisible()) {
-                continue;
-            }
-            win.getTouchableRegion(mTmpRegion);
-            mTouchExcludeRegion.op(mTmpRegion, Region.Op.UNION);
-        }
-        amendWindowTapExcludeRegion(mTouchExcludeRegion);
-        mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion);
-    }
-
-    private void processTaskForTouchExcludeRegion(Task task, Task focusedTask, int delta) {
-        if (mTapDetector == null) {
-            // The touch exclude region is used to detect the region outside of the focused task
-            // so that the tap detector can detect outside touches. Don't calculate the exclude
-            // region when the tap detector is disabled.
-        }
-        final ActivityRecord topVisibleActivity = task.getTopVisibleActivity();
-
-        if (topVisibleActivity == null || !topVisibleActivity.hasContentToDisplay()) {
-            return;
-        }
-
-        // Exclusion region is the region that TapDetector doesn't care about.
-        // Here we want to remove all non-focused tasks from the exclusion region.
-        // We also remove the outside touch area for resizing for all freeform
-        // tasks (including the focused).
-        // We save the focused task region once we find it, and add it back at the end.
-        // If the task is root home task and it is resizable and visible (top of its root task),
-        // we want to exclude the root docked task from touch so we need the entire screen area
-        // and not just a small portion which the root home task currently is resized to.
-        if (task.isActivityTypeHome() && task.isVisible() && task.isResizeable()) {
-            task.getDisplayArea().getBounds(mTmpRect);
-        } else {
-            task.getDimBounds(mTmpRect);
-        }
-
-        if (task == focusedTask) {
-            // Add the focused task rect back into the exclude region once we are done
-            // processing root tasks.
-            // NOTE: this *looks* like a no-op, but this usage of mTmpRect2 is expected by
-            //       updateTouchExcludeRegion.
-            mTmpRect2.set(mTmpRect);
-        }
-
-        final boolean isFreeformed = task.inFreeformWindowingMode();
-        if (task != focusedTask || isFreeformed) {
-            if (isFreeformed) {
-                // If the task is freeformed, enlarge the area to account for outside
-                // touch area for resize.
-                mTmpRect.inset(-delta, -delta);
-                // Intersect with display content frame. If we have system decor (status bar/
-                // navigation bar), we want to exclude that from the tap detection.
-                // Otherwise, if the app is partially placed under some system button (eg.
-                // Recents, Home), pressing that button would cause a full series of
-                // unwanted transfer focus/resume/pause, before we could go home.
-                mTmpRect.inset(getInsetsStateController().getRawInsetsState().calculateInsets(
-                        mTmpRect, systemBars() | ime(), false /* ignoreVisibility */));
-            }
-            mTouchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
-        }
-    }
-
-    /**
-     * Union the region with all the tap exclude region provided by windows on this display.
-     *
-     * @param inOutRegion The region to be amended.
-     */
-    private void amendWindowTapExcludeRegion(Region inOutRegion) {
-        final Region region = Region.obtain();
-        for (int i = mTapExcludeProvidingWindows.size() - 1; i >= 0; i--) {
-            final WindowState win = mTapExcludeProvidingWindows.valueAt(i);
-            win.getTapExcludeRegion(region);
-            inOutRegion.op(region, Op.UNION);
-        }
-        region.recycle();
-    }
-
     @Override
     void switchUser(int userId) {
         super.switchUser(userId);
@@ -3771,7 +3635,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
         pw.print(subPrefix + "deferred=" + mDeferredRemoval
                 + " mLayoutNeeded=" + mLayoutNeeded);
-        pw.println(" mTouchExcludeRegion=" + mTouchExcludeRegion);
 
         pw.println();
         super.dump(pw, prefix, dumpAll);
@@ -4120,7 +3983,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         getInputMonitor().setFocusedAppLw(newFocus);
-        updateTouchExcludeRegion();
         return true;
     }
 

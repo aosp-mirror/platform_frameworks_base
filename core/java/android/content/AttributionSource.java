@@ -162,17 +162,6 @@ public final class AttributionSource implements Parcelable {
 
     /** @hide */
     @TestApi
-    @FlaggedApi(Flags.FLAG_ATTRIBUTION_SOURCE_CONSTRUCTOR)
-    public AttributionSource(int uid, int pid, @Nullable String packageName,
-            @Nullable String attributionTag, @NonNull IBinder token,
-            @Nullable String[] renouncedPermissions,
-            @Nullable AttributionSource next) {
-        this(uid, pid, packageName, attributionTag, token, renouncedPermissions,
-                Context.DEVICE_ID_DEFAULT, next);
-    }
-
-    /** @hide */
-    @TestApi
     @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public AttributionSource(int uid, int pid, @Nullable String packageName,
             @Nullable String attributionTag, @NonNull IBinder token,
@@ -470,6 +459,20 @@ public final class AttributionSource implements Parcelable {
             return mAttributionSourceState.next[0].token;
         }
         return null;
+    }
+
+    /**
+     * @return The next package's device Id from its context.
+     * This device ID is used for permissions checking during attribution source validation.
+     *
+     * @hide
+     */
+    public int getNextDeviceId() {
+        if (mAttributionSourceState.next != null
+                && mAttributionSourceState.next.length > 0) {
+            return mAttributionSourceState.next[0].deviceId;
+        }
+        return Context.DEVICE_ID_DEFAULT;
     }
 
     /**

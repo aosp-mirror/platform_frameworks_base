@@ -258,6 +258,8 @@ java_library_static {
         "core_os_flags_lib",
         "connectivity_flags_lib",
         "dreams_flags_lib",
+        "aconfig_new_storage_flags_lib",
+        "aconfigd_java_proto_lib",
     ],
     javac_shard_size: 50,
     javacflags: [

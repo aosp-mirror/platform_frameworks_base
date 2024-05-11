@@ -31,12 +31,17 @@ import android.view.animation.Interpolator
 import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators.LINEAR
 import com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary
+import java.util.concurrent.Executor
 import kotlin.math.roundToInt
 
 private const val TAG = "TransitionAnimator"
 
 /** A base class to animate a window (activity or dialog) launch to or return from a view . */
-class TransitionAnimator(private val timings: Timings, private val interpolators: Interpolators) {
+class TransitionAnimator(
+    private val mainExecutor: Executor,
+    private val timings: Timings,
+    private val interpolators: Interpolators,
+) {
     companion object {
         internal const val DEBUG = false
         private val SRC_MODE = PorterDuffXfermode(PorterDuff.Mode.SRC)
@@ -351,11 +356,27 @@ class TransitionAnimator(private val timings: Timings, private val interpolators
                     if (DEBUG) {
                         Log.d(TAG, "Animation ended")
                     }
-                    controller.onTransitionAnimationEnd(isExpandingFullyAbove)
-                    transitionContainerOverlay.remove(windowBackgroundLayer)
 
-                    if (moveBackgroundLayerWhenAppVisibilityChanges && controller.isLaunching) {
-                        openingWindowSyncViewOverlay?.remove(windowBackgroundLayer)
+                    // onAnimationEnd is called at the end of the animation, on a Choreographer
+                    // animation tick. During dialog launches, the following calls will move the
+                    // animated content from the dialog overlay back to its original position, and
+                    // this change must be reflected in the next frame given that we then sync the
+                    // next frame of both the content and dialog ViewRoots. During SysUI activity
+                    // launches, we will instantly collapse the shade at the end of the transition.
+                    // However, if those are rendered by Compose, whose compositions are also
+                    // scheduled on a Choreographer frame, any state change made *right now* won't
+                    // be reflected in the next frame given that a Choreographer frame can't
+                    // schedule another and have it happen in the same frame. So we post the
+                    // forwarded calls to [Controller.onLaunchAnimationEnd] in the main executor,
+                    // leaving this Choreographer frame, ensuring that any state change applied by
+                    // onTransitionAnimationEnd() will be reflected in the same frame.
+                    mainExecutor.execute {
+                        controller.onTransitionAnimationEnd(isExpandingFullyAbove)
+                        transitionContainerOverlay.remove(windowBackgroundLayer)
+
+                        if (moveBackgroundLayerWhenAppVisibilityChanges && controller.isLaunching) {
+                            openingWindowSyncViewOverlay?.remove(windowBackgroundLayer)
+                        }
                     }
                 }
             }

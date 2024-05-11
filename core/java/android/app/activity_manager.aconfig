@@ -50,3 +50,13 @@ flag {
          purpose: PURPOSE_BUGFIX
      }
 }
+
+flag {
+     namespace: "backstage_power"
+     name: "gate_fgs_timeout_anr_behavior"
+     description: "Gate the new behavior where an ANR is thrown once an FGS times out."
+     bug: "339315145"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}

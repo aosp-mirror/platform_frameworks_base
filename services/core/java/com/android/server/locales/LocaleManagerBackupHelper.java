@@ -32,6 +32,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.HandlerThread;
 import android.os.LocaleList;
@@ -101,6 +102,11 @@ class LocaleManagerBackupHelper {
     // the application setting the app-locale itself.
     private final SharedPreferences mDelegateAppLocalePackages;
     private final BroadcastReceiver mUserMonitor;
+    // To determine whether an app is pre-archived, check for Intent.EXTRA_ARCHIVAL upon receiving
+    // the initial PACKAGE_ADDED broadcast. If it is indeed pre-archived, perform the data
+    // restoration during the second PACKAGE_ADDED broadcast, which is sent subsequently when the
+    // app is installed.
+    private final Set<String> mPkgsToRestore;
 
     LocaleManagerBackupHelper(LocaleManagerService localeManagerService,
             PackageManager packageManager, HandlerThread broadcastHandlerThread) {
@@ -119,6 +125,7 @@ class LocaleManagerBackupHelper {
         mStagedData = stagedData;
         mDelegateAppLocalePackages = delegateAppLocalePackages != null ? delegateAppLocalePackages
                 : createPersistedInfo();
+        mPkgsToRestore = new ArraySet<>();
 
         mUserMonitor = new UserMonitor();
         IntentFilter filter = new IntentFilter();
@@ -251,6 +258,9 @@ class LocaleManagerBackupHelper {
                 LocalesInfo localesInfo = pkgStates.get(pkgName);
                 // Check if the application is already installed for the concerned user.
                 if (isPackageInstalledForUser(pkgName, userId)) {
+                    if (mPkgsToRestore != null) {
+                        mPkgsToRestore.remove(pkgName);
+                    }
                     // Don't apply the restore if the locales have already been set for the app.
                     checkExistingLocalesAndApplyRestore(pkgName, localesInfo, userId);
                 } else {
@@ -279,23 +289,18 @@ class LocaleManagerBackupHelper {
 
     /**
      * <p><b>Note:</b> This is invoked by service's common monitor
-     * {@link LocaleManagerServicePackageMonitor#onPackageAdded} when a new package is
+     * {@link LocaleManagerServicePackageMonitor#onPackageAddedWithExtras} when a new package is
      * added on device.
      */
-    void onPackageAdded(String packageName, int uid) {
-        try {
-            synchronized (mStagedDataLock) {
-                cleanStagedDataForOldEntriesLocked();
-
-                int userId = UserHandle.getUserId(uid);
-                if (mStagedData.contains(userId)) {
-                    // Perform lazy restore only if the staged data exists.
-                    doLazyRestoreLocked(packageName, userId);
-                }
+    void onPackageAddedWithExtras(String packageName, int uid, Bundle extras) {
+        boolean archived = false;
+        if (extras != null) {
+            archived = extras.getBoolean(Intent.EXTRA_ARCHIVAL, false);
+            if (archived && mPkgsToRestore != null) {
+                mPkgsToRestore.add(packageName);
             }
-        } catch (Exception e) {
-            Slog.e(TAG, "Exception in onPackageAdded.", e);
         }
+        checkStageDataAndApplyRestore(packageName, uid);
     }
 
     /**
@@ -305,6 +310,10 @@ class LocaleManagerBackupHelper {
      */
     void onPackageUpdateFinished(String packageName, int uid) {
         int userId = UserHandle.getUserId(uid);
+        if (mPkgsToRestore != null && mPkgsToRestore.contains(packageName)) {
+            mPkgsToRestore.remove(packageName);
+            checkStageDataAndApplyRestore(packageName, uid);
+        }
         cleanApplicationLocalesIfNeeded(packageName, userId);
     }
 
@@ -335,6 +344,25 @@ class LocaleManagerBackupHelper {
             removePackageFromPersistedInfo(packageName, userId);
         } catch (Exception e) {
             Slog.e(TAG, "Exception in onPackageRemoved.", e);
+        }
+    }
+
+    private void checkStageDataAndApplyRestore(String packageName, int uid) {
+        try {
+            synchronized (mStagedDataLock) {
+                cleanStagedDataForOldEntriesLocked();
+
+                int userId = UserHandle.getUserId(uid);
+                if (mStagedData.contains(userId)) {
+                    if (mPkgsToRestore != null) {
+                        mPkgsToRestore.remove(packageName);
+                    }
+                    // Perform lazy restore only if the staged data exists.
+                    doLazyRestoreLocked(packageName, userId);
+                }
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, "Exception in onPackageAdded.", e);
         }
     }
 

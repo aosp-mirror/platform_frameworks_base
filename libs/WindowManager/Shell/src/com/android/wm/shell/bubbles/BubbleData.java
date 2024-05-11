@@ -77,6 +77,7 @@ public class BubbleData {
         boolean suppressedSummaryChanged;
         boolean expanded;
         boolean shouldShowEducation;
+        boolean showOverflowChanged;
         @Nullable BubbleViewProvider selectedBubble;
         @Nullable Bubble addedBubble;
         @Nullable Bubble updatedBubble;
@@ -109,7 +110,8 @@ public class BubbleData {
                     || suppressedBubble != null
                     || unsuppressedBubble != null
                     || suppressedSummaryChanged
-                    || suppressedSummaryGroup != null;
+                    || suppressedSummaryGroup != null
+                    || showOverflowChanged;
         }
 
         void bubbleRemoved(Bubble bubbleToRemove, @DismissReason int reason) {
@@ -410,6 +412,9 @@ public class BubbleData {
             if (bubbleToReturn != null) {
                 // Promoting from overflow
                 mOverflowBubbles.remove(bubbleToReturn);
+                if (mOverflowBubbles.isEmpty()) {
+                    mStateChange.showOverflowChanged = true;
+                }
             } else if (mPendingBubbles.containsKey(key)) {
                 // Update while it was pending
                 bubbleToReturn = mPendingBubbles.get(key);
@@ -494,19 +499,6 @@ public class BubbleData {
     public void dismissBubbleWithKey(String key, @DismissReason int reason) {
         doRemove(key, reason);
         dispatchPendingChanges();
-    }
-
-    /**
-     * Explicitly removes a bubble from the overflow, if it exists.
-     *
-     * @param bubble the bubble to remove.
-     */
-    public void removeOverflowBubble(Bubble bubble) {
-        if (bubble == null) return;
-        if (mOverflowBubbles.remove(bubble)) {
-            mStateChange.removedOverflowBubble = bubble;
-            dispatchPendingChanges();
-        }
     }
 
     /**
@@ -683,7 +675,6 @@ public class BubbleData {
         if (indexToRemove == -1) {
             if (hasOverflowBubbleWithKey(key)
                     && shouldRemoveHiddenBubble) {
-
                 Bubble b = getOverflowBubbleWithKey(key);
                 ProtoLog.d(WM_SHELL_BUBBLES, "doRemove - cancel overflow bubble=%s", key);
                 if (b != null) {
@@ -693,6 +684,7 @@ public class BubbleData {
                 mOverflowBubbles.remove(b);
                 mStateChange.bubbleRemoved(b, reason);
                 mStateChange.removedOverflowBubble = b;
+                mStateChange.showOverflowChanged = mOverflowBubbles.isEmpty();
             }
             if (hasSuppressedBubbleWithKey(key) && shouldRemoveHiddenBubble) {
                 Bubble b = getSuppressedBubbleWithKey(key);
@@ -792,6 +784,9 @@ public class BubbleData {
         }
         ProtoLog.d(WM_SHELL_BUBBLES, "overflowBubble=%s", bubble.getKey());
         mLogger.logOverflowAdd(bubble, reason);
+        if (mOverflowBubbles.isEmpty()) {
+            mStateChange.showOverflowChanged = true;
+        }
         mOverflowBubbles.remove(bubble);
         mOverflowBubbles.add(0, bubble);
         mStateChange.addedOverflowBubble = bubble;

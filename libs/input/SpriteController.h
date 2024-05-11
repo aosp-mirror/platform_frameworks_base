@@ -95,7 +95,7 @@ public:
     virtual void setTransformationMatrix(const SpriteTransformationMatrix& matrix) = 0;
 
     /* Sets the id of the display where the sprite should be shown. */
-    virtual void setDisplayId(int32_t displayId) = 0;
+    virtual void setDisplayId(ui::LogicalDisplayId displayId) = 0;
 
     /* Sets the flag to hide sprite on mirrored displays.
      * This will add ISurfaceComposerClient::eSkipScreenshot flag to the sprite. */
@@ -115,7 +115,7 @@ public:
  */
 class SpriteController {
 public:
-    using ParentSurfaceProvider = std::function<sp<SurfaceControl>(int /*displayId*/)>;
+    using ParentSurfaceProvider = std::function<sp<SurfaceControl>(ui::LogicalDisplayId)>;
     SpriteController(const sp<Looper>& looper, int32_t overlayLayer, ParentSurfaceProvider parent);
     SpriteController(const SpriteController&) = delete;
     SpriteController& operator=(const SpriteController&) = delete;
@@ -174,7 +174,7 @@ private:
         int32_t layer{0};
         float alpha{1.0f};
         SpriteTransformationMatrix transformationMatrix;
-        int32_t displayId{ADISPLAY_ID_DEFAULT};
+        ui::LogicalDisplayId displayId{ui::ADISPLAY_ID_DEFAULT};
 
         sp<SurfaceControl> surfaceControl;
         int32_t surfaceWidth{0};
@@ -208,7 +208,7 @@ private:
         virtual void setLayer(int32_t layer);
         virtual void setAlpha(float alpha);
         virtual void setTransformationMatrix(const SpriteTransformationMatrix& matrix);
-        virtual void setDisplayId(int32_t displayId);
+        virtual void setDisplayId(ui::LogicalDisplayId displayId);
         virtual void setSkipScreenshot(bool skip);
 
         inline const SpriteState& getStateLocked() const {
@@ -273,7 +273,7 @@ private:
     void doDisposeSurfaces();
 
     void ensureSurfaceComposerClient();
-    sp<SurfaceControl> obtainSurface(int32_t width, int32_t height, int32_t displayId,
+    sp<SurfaceControl> obtainSurface(int32_t width, int32_t height, ui::LogicalDisplayId displayId,
                                      bool hideOnMirrored);
 };
 

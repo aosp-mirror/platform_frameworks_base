@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -68,6 +69,8 @@ import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.modifiers.thenIf
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.battery.BatteryMeterViewController
+import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
+import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
@@ -152,6 +155,8 @@ private fun SceneScope.QuickSettingsScene(
     modifier: Modifier = Modifier,
     shadeSession: SaveableSession,
 ) {
+    val cutoutLocation = LocalDisplayCutout.current.location
+
     val brightnessMirrorShowing by viewModel.brightnessMirrorViewModel.isShowing.collectAsState()
     val contentAlpha by
         animateFloatAsState(
@@ -183,6 +188,9 @@ private fun SceneScope.QuickSettingsScene(
                     // scene (and not the one under it) during a scene transition.
                     Modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
                 }
+                .thenIf(cutoutLocation != CutoutLocation.CENTER) {
+                    Modifier.displayCutoutPadding()
+                },
     ) {
         val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
         val isCustomizerShowing by viewModel.qsSceneAdapter.isCustomizerShowing.collectAsState()

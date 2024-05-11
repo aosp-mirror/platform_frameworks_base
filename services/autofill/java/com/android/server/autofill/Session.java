@@ -4669,6 +4669,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mFieldClassificationIdSnapshot);
         mPresentationStatsEventLogger.maybeSetAvailableCount(
                 response.getDatasets(), mCurrentViewId);
+        mPresentationStatsEventLogger.maybeSetFocusedId(mCurrentViewId);
     }
 
     @GuardedBy("mLock")

@@ -198,7 +198,6 @@ public class DreamOverlayContainerViewController extends
         mLowLightTransitionCoordinator = lowLightTransitionCoordinator;
 
         mBouncerlessScrimController = bouncerlessScrimController;
-        mBouncerlessScrimController.addCallback(mBouncerlessExpansionCallback);
 
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
 
@@ -234,6 +233,7 @@ public class DreamOverlayContainerViewController extends
         mJitterStartTimeMillis = System.currentTimeMillis();
         mHandler.postDelayed(this::updateBurnInOffsets, mBurnInProtectionUpdateInterval);
         mPrimaryBouncerCallbackInteractor.addBouncerExpansionCallback(mBouncerExpansionCallback);
+        mBouncerlessScrimController.addCallback(mBouncerlessExpansionCallback);
         final Region emptyRegion = Region.obtain();
         mView.getRootSurfaceControl().setTouchableRegion(emptyRegion);
         emptyRegion.recycle();
@@ -255,8 +255,9 @@ public class DreamOverlayContainerViewController extends
 
     @Override
     protected void onViewDetached() {
-        mHandler.removeCallbacks(this::updateBurnInOffsets);
+        mHandler.removeCallbacksAndMessages(null);
         mPrimaryBouncerCallbackInteractor.removeBouncerExpansionCallback(mBouncerExpansionCallback);
+        mBouncerlessScrimController.removeCallback(mBouncerlessExpansionCallback);
 
         mDreamOverlayAnimationsController.cancelAnimations();
     }

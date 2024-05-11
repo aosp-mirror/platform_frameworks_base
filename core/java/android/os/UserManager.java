@@ -1930,12 +1930,10 @@ public class UserManager {
     public static final String DISALLOW_THREAD_NETWORK = "no_thread_network";
 
     /**
-     * This user restriction specifies if the user is able to add SIMs to the device.
+     * This user restriction specifies if the user is able to add embedded SIMs to the device.
      *
      * <p>
-     * This restriction blocks the download of embedded SIMs, and disables any physical SIMs.
-     * If any embedded SIMs are already on the device, then they are removed. This restriction
-     * does not affect SIMs provisioned to the device by device owners or profile owners.
+     * This restriction blocks the download of embedded SIMs.
      *
      * <p>
      * This restriction can only be set by a device owner or a profile owner of an
@@ -1951,6 +1949,7 @@ public class UserManager {
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
+     *
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()

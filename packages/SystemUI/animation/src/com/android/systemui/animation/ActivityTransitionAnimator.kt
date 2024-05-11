@@ -44,6 +44,7 @@ import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.systemui.Flags.activityTransitionUseLargestWindow
+import java.util.concurrent.Executor
 import kotlin.math.roundToInt
 
 private const val TAG = "ActivityTransitionAnimator"
@@ -52,14 +53,19 @@ private const val TAG = "ActivityTransitionAnimator"
  * A class that allows activities to be started in a seamless way from a view that is transforming
  * nicely into the starting window.
  */
-class ActivityTransitionAnimator(
+class ActivityTransitionAnimator
+@JvmOverloads
+constructor(
+    /** The executor that runs on the main thread. */
+    private val mainExecutor: Executor,
+
     /** The animator used when animating a View into an app. */
-    private val transitionAnimator: TransitionAnimator = DEFAULT_TRANSITION_ANIMATOR,
+    private val transitionAnimator: TransitionAnimator = defaultTransitionAnimator(mainExecutor),
 
     /** The animator used when animating a Dialog into an app. */
     // TODO(b/218989950): Remove this animator and instead set the duration of the dim fade out to
     // TIMINGS.contentBeforeFadeOutDuration.
-    private val dialogToAppAnimator: TransitionAnimator = DEFAULT_DIALOG_TO_APP_ANIMATOR,
+    private val dialogToAppAnimator: TransitionAnimator = defaultDialogToAppAnimator(mainExecutor),
 
     /**
      * Whether we should disable the WindowManager timeout. This should be set to true in tests
@@ -100,10 +106,6 @@ class ActivityTransitionAnimator(
         // TODO(b/288507023): Remove this flag.
         @JvmField val DEBUG_TRANSITION_ANIMATION = Build.IS_DEBUGGABLE
 
-        private val DEFAULT_TRANSITION_ANIMATOR = TransitionAnimator(TIMINGS, INTERPOLATORS)
-        private val DEFAULT_DIALOG_TO_APP_ANIMATOR =
-            TransitionAnimator(DIALOG_TIMINGS, INTERPOLATORS)
-
         /** Durations & interpolators for the navigation bar fading in & out. */
         private const val ANIMATION_DURATION_NAV_FADE_IN = 266L
         private const val ANIMATION_DURATION_NAV_FADE_OUT = 133L
@@ -121,6 +123,14 @@ class ActivityTransitionAnimator(
          * cancelled by WM.
          */
         private const val LONG_TRANSITION_TIMEOUT = 5_000L
+
+        private fun defaultTransitionAnimator(mainExecutor: Executor): TransitionAnimator {
+            return TransitionAnimator(mainExecutor, TIMINGS, INTERPOLATORS)
+        }
+
+        private fun defaultDialogToAppAnimator(mainExecutor: Executor): TransitionAnimator {
+            return TransitionAnimator(mainExecutor, DIALOG_TIMINGS, INTERPOLATORS)
+        }
     }
 
     /**
@@ -257,9 +267,7 @@ class ActivityTransitionAnimator(
 
     private fun Controller.callOnIntentStartedOnMainThread(willAnimate: Boolean) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            this.transitionContainer.context.mainExecutor.execute {
-                callOnIntentStartedOnMainThread(willAnimate)
-            }
+            mainExecutor.execute { callOnIntentStartedOnMainThread(willAnimate) }
         } else {
             if (DEBUG_TRANSITION_ANIMATION) {
                 Log.d(
@@ -479,12 +487,10 @@ class ActivityTransitionAnimator(
         controller: Controller,
         callback: Callback,
         /** The animator to use to animate the window transition. */
-        transitionAnimator: TransitionAnimator = DEFAULT_TRANSITION_ANIMATOR,
+        transitionAnimator: TransitionAnimator,
         /** Listener for animation lifecycle events. */
         listener: Listener? = null
     ) : IRemoteAnimationRunner.Stub() {
-        private val context = controller.transitionContainer.context
-
         // This is being passed across IPC boundaries and cycles (through PendingIntentRecords,
         // etc.) are possible. So we need to make sure we drop any references that might
         // transitively cause leaks when we're done with animation.
@@ -493,11 +499,12 @@ class ActivityTransitionAnimator(
         init {
             delegate =
                 AnimationDelegate(
+                    mainExecutor,
                     controller,
                     callback,
                     DelegatingAnimationCompletionListener(listener, this::dispose),
                     transitionAnimator,
-                    disableWmTimeout
+                    disableWmTimeout,
                 )
         }
 
@@ -510,7 +517,7 @@ class ActivityTransitionAnimator(
             finishedCallback: IRemoteAnimationFinishedCallback?
         ) {
             val delegate = delegate
-            context.mainExecutor.execute {
+            mainExecutor.execute {
                 if (delegate == null) {
                     Log.i(TAG, "onAnimationStart called after completion")
                     // Animation started too late and timed out already. We need to still
@@ -525,7 +532,7 @@ class ActivityTransitionAnimator(
         @BinderThread
         override fun onAnimationCancelled() {
             val delegate = delegate
-            context.mainExecutor.execute {
+            mainExecutor.execute {
                 delegate ?: Log.wtf(TAG, "onAnimationCancelled called after completion")
                 delegate?.onAnimationCancelled()
             }
@@ -535,19 +542,21 @@ class ActivityTransitionAnimator(
         fun dispose() {
             // Drop references to animation controller once we're done with the animation
             // to avoid leaking.
-            context.mainExecutor.execute { delegate = null }
+            mainExecutor.execute { delegate = null }
         }
     }
 
     class AnimationDelegate
     @JvmOverloads
     constructor(
+        private val mainExecutor: Executor,
         private val controller: Controller,
         private val callback: Callback,
         /** Listener for animation lifecycle events. */
         private val listener: Listener? = null,
         /** The animator to use to animate the window transition. */
-        private val transitionAnimator: TransitionAnimator = DEFAULT_TRANSITION_ANIMATOR,
+        private val transitionAnimator: TransitionAnimator =
+            defaultTransitionAnimator(mainExecutor),
 
         /**
          * Whether we should disable the WindowManager timeout. This should be set to true in tests

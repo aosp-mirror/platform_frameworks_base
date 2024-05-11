@@ -81,15 +81,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
-import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
@@ -203,7 +199,6 @@ import android.hardware.configstore.V1_0.OptionalBool;
 import android.hardware.configstore.V1_1.ISurfaceFlingerConfigs;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
-import android.hardware.input.InputManager;
 import android.hardware.input.InputSettings;
 import android.net.Uri;
 import android.os.Binder;
@@ -289,8 +284,6 @@ import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
-import android.view.MotionEvent;
-import android.view.PointerIcon;
 import android.view.RemoteAnimationAdapter;
 import android.view.ScrollCaptureResponse;
 import android.view.Surface;
@@ -335,6 +328,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.os.TransferPipe;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardLockedStateListener;
 import com.android.internal.policy.IShortcutService;
@@ -545,13 +539,16 @@ public class WindowManagerService extends IWindowManager.Stub
             if (asProto) {
                 return;
             }
+
+            final long timeoutMs = 1000L;
             mAtmService.dumpActivity(fd, pw, /* name= */ "all", /* args= */ new String[]{},
                     /* opti= */ 0,
                     /* dumpAll= */ true,
                     /* dumpVisibleRootTasksOnly= */ true,
                     /* dumpFocusedRootTaskOnly= */ false, INVALID_DISPLAY, UserHandle.USER_ALL,
-                    /* timeout= */ 1000
+                    timeoutMs
             );
+            dumpVisibleWindowClients(fd, pw, timeoutMs);
         }
 
         @Override
@@ -1523,18 +1520,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    static boolean excludeWindowTypeFromTapOutTask(int windowType) {
-        switch (windowType) {
-            case TYPE_STATUS_BAR:
-            case TYPE_NOTIFICATION_SHADE:
-            case TYPE_NAVIGATION_BAR:
-            case TYPE_INPUT_METHOD_DIALOG:
-            case TYPE_VOLUME_OVERLAY:
-                return true;
-        }
-        return false;
-    }
-
     public int addWindow(Session session, IWindow client, LayoutParams attrs, int viewVisibility,
             int displayId, int requestUserId, @InsetsType int requestedVisibleTypes,
             InputChannel outInputChannel, InsetsState outInsetsState,
@@ -1831,10 +1816,6 @@ public class WindowManagerService extends IWindowManager.Stub
             // From now on, no exceptions or errors allowed!
             if (displayContent.mCurrentFocus == null) {
                 displayContent.mWinAddedSinceNullFocus.add(win);
-            }
-
-            if (excludeWindowTypeFromTapOutTask(type)) {
-                displayContent.mTapExcludedWindows.add(win);
             }
 
             win.mSession.onWindowAdded(win);
@@ -5716,7 +5697,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int UPDATE_ANIMATION_SCALE = 51;
         public static final int WINDOW_HIDE_TIMEOUT = 52;
-        public static final int RESTORE_POINTER_ICON = 55;
         public static final int SET_HAS_OVERLAY_UI = 58;
         public static final int ANIMATION_FAILSAFE = 60;
         public static final int RECOMPUTE_FOCUS = 61;
@@ -5946,12 +5926,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         window.hidePermanentlyLw();
                         window.setDisplayLayoutNeeded();
                         mWindowPlacerLocked.performSurfacePlacement();
-                    }
-                    break;
-                }
-                case RESTORE_POINTER_ICON: {
-                    synchronized (mGlobalLock) {
-                        restorePointerIconLocked((DisplayContent)msg.obj, msg.arg1, msg.arg2);
                     }
                     break;
                 }
@@ -7572,144 +7546,6 @@ public class WindowManagerService extends IWindowManager.Stub
             outInsets.set(dc.getDisplayPolicy().getDecorInsetsInfo(
                     di.rotation, di.logicalWidth, di.logicalHeight).mConfigInsets);
         }
-    }
-
-    // The mouse position tracker will be obsolete after the Pointer Icon Refactor.
-    // TODO(b/293587049): Remove after the refactoring is fully rolled out.
-    @Nullable
-    final MousePositionTracker mMousePositionTracker =
-            com.android.input.flags.Flags.enablePointerChoreographer() ? null
-                    : new MousePositionTracker();
-
-    private static class MousePositionTracker implements PointerEventListener {
-        private boolean mLatestEventWasMouse;
-        private float mLatestMouseX;
-        private float mLatestMouseY;
-
-        /**
-         * The display that the pointer (mouse cursor) is currently shown on. This is updated
-         * directly by InputManagerService when the pointer display changes.
-         */
-        private int mPointerDisplayId = INVALID_DISPLAY;
-
-        /**
-         * Update the mouse cursor position as a result of a mouse movement.
-         * @return true if the position was successfully updated, false otherwise.
-         */
-        boolean updatePosition(int displayId, float x, float y) {
-            synchronized (this) {
-                mLatestEventWasMouse = true;
-
-                if (displayId != mPointerDisplayId) {
-                    // The display of the position update does not match the display on which the
-                    // mouse pointer is shown, so do not update the position.
-                    return false;
-                }
-                mLatestMouseX = x;
-                mLatestMouseY = y;
-                return true;
-            }
-        }
-
-        void setPointerDisplayId(int displayId) {
-            synchronized (this) {
-                mPointerDisplayId = displayId;
-            }
-        }
-
-        @Override
-        public void onPointerEvent(MotionEvent motionEvent) {
-            if (motionEvent.isFromSource(InputDevice.SOURCE_MOUSE)) {
-                updatePosition(motionEvent.getDisplayId(), motionEvent.getRawX(),
-                        motionEvent.getRawY());
-            } else {
-                synchronized (this) {
-                    mLatestEventWasMouse = false;
-                }
-            }
-        }
-    };
-
-    void updatePointerIcon(IWindow client) {
-        if (mMousePositionTracker == null) {
-            return;
-        }
-        int pointerDisplayId;
-        float mouseX, mouseY;
-
-        synchronized(mMousePositionTracker) {
-            if (!mMousePositionTracker.mLatestEventWasMouse) {
-                return;
-            }
-            mouseX = mMousePositionTracker.mLatestMouseX;
-            mouseY = mMousePositionTracker.mLatestMouseY;
-            pointerDisplayId = mMousePositionTracker.mPointerDisplayId;
-        }
-
-        synchronized (mGlobalLock) {
-            if (mDragDropController.dragDropActiveLocked()) {
-                // Drag cursor overrides the app cursor.
-                return;
-            }
-            WindowState callingWin = windowForClientLocked(null, client, false);
-            if (callingWin == null) {
-                ProtoLog.w(WM_ERROR, "Bad requesting window %s", client);
-                return;
-            }
-            final DisplayContent displayContent = callingWin.getDisplayContent();
-            if (displayContent == null) {
-                return;
-            }
-            if (pointerDisplayId != displayContent.getDisplayId()) {
-                // Do not let the pointer icon be updated by a window on a different display.
-                return;
-            }
-            WindowState windowUnderPointer =
-                    displayContent.getTouchableWinAtPointLocked(mouseX, mouseY);
-            if (windowUnderPointer != callingWin) {
-                return;
-            }
-            try {
-                windowUnderPointer.mClient.updatePointerIcon(
-                        windowUnderPointer.translateToWindowX(mouseX),
-                        windowUnderPointer.translateToWindowY(mouseY));
-            } catch (RemoteException e) {
-                ProtoLog.w(WM_ERROR, "unable to update pointer icon");
-            }
-        }
-    }
-
-    void restorePointerIconLocked(DisplayContent displayContent, float latestX, float latestY) {
-        if (mMousePositionTracker == null) {
-            return;
-        }
-        // Mouse position tracker has not been getting updates while dragging, update it now.
-        if (!mMousePositionTracker.updatePosition(
-                displayContent.getDisplayId(), latestX, latestY)) {
-            // The mouse position could not be updated, so ignore this request.
-            return;
-        }
-
-        WindowState windowUnderPointer =
-                displayContent.getTouchableWinAtPointLocked(latestX, latestY);
-        if (windowUnderPointer != null) {
-            try {
-                windowUnderPointer.mClient.updatePointerIcon(
-                        windowUnderPointer.translateToWindowX(latestX),
-                        windowUnderPointer.translateToWindowY(latestY));
-            } catch (RemoteException e) {
-                ProtoLog.w(WM_ERROR, "unable to restore pointer icon");
-            }
-        } else {
-            mContext.getSystemService(InputManager.class)
-                    .setPointerIconType(PointerIcon.TYPE_DEFAULT);
-        }
-    }
-    void setMousePointerDisplayId(int displayId) {
-        if (mMousePositionTracker == null) {
-            return;
-        }
-        mMousePositionTracker.setPointerDisplayId(displayId);
     }
 
     /**
@@ -10349,5 +10185,33 @@ public class WindowManagerService extends IWindowManager.Stub
             return SystemProperties.getBoolean(ENABLE_SHELL_TRANSITIONS, true);
         }
         return true;
+    }
+
+    /**
+     * Dump ViewRootImpl for visible non-activity windows.
+     */
+    private void dumpVisibleWindowClients(FileDescriptor fd, PrintWriter pw, long timeout) {
+        final ArrayList<WindowState> systemWindows = new ArrayList<>();
+        synchronized (mGlobalLock) {
+            mRoot.forAllWindows(w -> {
+                if (!w.isActivityWindow() && w.isVisibleNow()) {
+                    systemWindows.add(w);
+                }
+            }, false /* traverseTopToBottom */);
+        }
+
+        systemWindows.forEach(w -> {
+            pw.println("---------------------------------");
+            pw.println(w.toString());
+            pw.flush();
+            try (TransferPipe tp = new TransferPipe()) {
+                w.mClient.dumpWindow(tp.getWriteFd());
+                tp.go(fd, timeout);
+            } catch (IOException e) {
+                pw.println("Failure while dumping the window: " + e);
+            } catch (RemoteException e) {
+                pw.println("Got a RemoteException while dumping the window");
+            }
+        });
     }
 }

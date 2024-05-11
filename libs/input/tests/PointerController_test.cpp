@@ -52,12 +52,13 @@ std::pair<float, float> getHotSpotCoordinatesForType(int32_t type) {
 
 class MockPointerControllerPolicyInterface : public PointerControllerPolicyInterface {
 public:
-    virtual void loadPointerIcon(SpriteIcon* icon, int32_t displayId) override;
-    virtual void loadPointerResources(PointerResources* outResources, int32_t displayId) override;
+    virtual void loadPointerIcon(SpriteIcon* icon, ui::LogicalDisplayId displayId) override;
+    virtual void loadPointerResources(PointerResources* outResources,
+                                      ui::LogicalDisplayId displayId) override;
     virtual void loadAdditionalMouseResources(
             std::map<PointerIconStyle, SpriteIcon>* outResources,
             std::map<PointerIconStyle, PointerAnimation>* outAnimationResources,
-            int32_t displayId) override;
+            ui::LogicalDisplayId displayId) override;
     virtual PointerIconStyle getDefaultPointerIconId() override;
     virtual PointerIconStyle getDefaultStylusIconId() override;
     virtual PointerIconStyle getCustomPointerIconId() override;
@@ -73,13 +74,13 @@ private:
     bool additionalMouseResourcesLoaded{false};
 };
 
-void MockPointerControllerPolicyInterface::loadPointerIcon(SpriteIcon* icon, int32_t) {
+void MockPointerControllerPolicyInterface::loadPointerIcon(SpriteIcon* icon, ui::LogicalDisplayId) {
     loadPointerIconForType(icon, CURSOR_TYPE_DEFAULT);
     pointerIconLoaded = true;
 }
 
 void MockPointerControllerPolicyInterface::loadPointerResources(PointerResources* outResources,
-        int32_t) {
+                                                                ui::LogicalDisplayId) {
     loadPointerIconForType(&outResources->spotHover, CURSOR_TYPE_HOVER);
     loadPointerIconForType(&outResources->spotTouch, CURSOR_TYPE_TOUCH);
     loadPointerIconForType(&outResources->spotAnchor, CURSOR_TYPE_ANCHOR);
@@ -88,7 +89,7 @@ void MockPointerControllerPolicyInterface::loadPointerResources(PointerResources
 
 void MockPointerControllerPolicyInterface::loadAdditionalMouseResources(
         std::map<PointerIconStyle, SpriteIcon>* outResources,
-        std::map<PointerIconStyle, PointerAnimation>* outAnimationResources, int32_t) {
+        std::map<PointerIconStyle, PointerAnimation>* outAnimationResources, ui::LogicalDisplayId) {
     SpriteIcon icon;
     PointerAnimation anim;
 
@@ -165,7 +166,7 @@ protected:
     PointerControllerTest();
     ~PointerControllerTest();
 
-    void ensureDisplayViewportIsSet(int32_t displayId = ADISPLAY_ID_DEFAULT);
+    void ensureDisplayViewportIsSet(ui::LogicalDisplayId displayId = ui::ADISPLAY_ID_DEFAULT);
 
     sp<MockSprite> mPointerSprite;
     sp<MockPointerControllerPolicyInterface> mPolicy;
@@ -204,7 +205,7 @@ PointerControllerTest::~PointerControllerTest() {
     mThread.join();
 }
 
-void PointerControllerTest::ensureDisplayViewportIsSet(int32_t displayId) {
+void PointerControllerTest::ensureDisplayViewportIsSet(ui::LogicalDisplayId displayId) {
     DisplayViewport viewport;
     viewport.displayId = displayId;
     viewport.logicalRight = 1600;
@@ -334,23 +335,23 @@ TEST_F(PointerControllerTest, updatesSkipScreenshotFlagForTouchSpots) {
 
     // Update spots to sync state with sprite
     mPointerController->setSpots(&testSpotCoords, testIdToIndex.cbegin(), testIdBits,
-                                 ADISPLAY_ID_DEFAULT);
+                                 ui::ADISPLAY_ID_DEFAULT);
     testing::Mock::VerifyAndClearExpectations(testSpotSprite.get());
 
     // Marking the display to skip screenshot should update sprite as well
-    mPointerController->setSkipScreenshot(ADISPLAY_ID_DEFAULT, true);
+    mPointerController->setSkipScreenshot(ui::ADISPLAY_ID_DEFAULT, true);
     EXPECT_CALL(*testSpotSprite, setSkipScreenshot).With(testing::Args<0>(true));
 
     // Update spots to sync state with sprite
     mPointerController->setSpots(&testSpotCoords, testIdToIndex.cbegin(), testIdBits,
-                                 ADISPLAY_ID_DEFAULT);
+                                 ui::ADISPLAY_ID_DEFAULT);
     testing::Mock::VerifyAndClearExpectations(testSpotSprite.get());
 
     // Reset flag and verify again
-    mPointerController->setSkipScreenshot(ADISPLAY_ID_DEFAULT, false);
+    mPointerController->setSkipScreenshot(ui::ADISPLAY_ID_DEFAULT, false);
     EXPECT_CALL(*testSpotSprite, setSkipScreenshot).With(testing::Args<0>(false));
     mPointerController->setSpots(&testSpotCoords, testIdToIndex.cbegin(), testIdBits,
-                                 ADISPLAY_ID_DEFAULT);
+                                 ui::ADISPLAY_ID_DEFAULT);
     testing::Mock::VerifyAndClearExpectations(testSpotSprite.get());
 }
 

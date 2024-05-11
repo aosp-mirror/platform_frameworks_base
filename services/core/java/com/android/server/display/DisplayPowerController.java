@@ -1442,6 +1442,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // If there's an offload session, we need to set the initial doze brightness before
         // the offload session starts controlling the brightness.
+        // During the transition DOZE_SUSPEND -> DOZE -> DOZE_SUSPEND, this brightness strategy
+        // will be selected again, meaning that no new brightness will be sent to the hardware and
+        // the display will stay at the brightness level set by the offload session.
         if (Float.isNaN(brightnessState) && mFlags.isDisplayOffloadEnabled()
                 && Display.isDozeState(state) && mDisplayOffloadSession != null) {
             if (mAutomaticBrightnessController != null
@@ -1459,6 +1462,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             if (BrightnessUtils.isValidBrightnessValue(rawBrightnessState)) {
                 brightnessState = clampScreenBrightness(rawBrightnessState);
                 mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_INITIAL);
+
+                if (mAutomaticBrightnessController != null
+                        && mAutomaticBrightnessStrategy.shouldUseAutoBrightness()) {
+                    // Keep the brightness in the setting so that we can use it after the screen
+                    // turns on, until a lux sample becomes available. We don't do this when
+                    // auto-brightness is disabled - in that situation we still want to use
+                    // the last brightness from when the screen was on.
+                    updateScreenBrightnessSetting = currentBrightnessSetting != brightnessState;
+                }
             }
         }
 
