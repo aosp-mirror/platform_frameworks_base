@@ -5176,4 +5176,7 @@
 
   <!-- Whether we order unlocking and waking -->
   <java-symbol type="bool" name="config_orderUnlockAndWake" />
+
+  <!-- For PowerManagerService to determine whether to use auto-suspend mode -->
+  <java-symbol type="bool" name="config_useAutoSuspend" />
 </resources>
