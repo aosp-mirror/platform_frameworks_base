@@ -63,7 +63,7 @@
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Of ontgrendel met vingerafdruk"</string>
     <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Vingerafdruk niet herkend"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Gezicht niet herkend"</string>
-    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Probeer het opnieuw of geef de pincode op"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Probeer het opnieuw of voer de pincode in"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Probeer het opnieuw of geef het wachtwoord op"</string>
     <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"Probeer het opnieuw of teken het patroon"</string>
     <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"Na te veel pogingen is de pincode vereist"</string>
