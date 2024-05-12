@@ -626,7 +626,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"स्क्रिन लक प्रयोग गर्नुहोस्"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"जारी राख्न आफ्नो स्क्रिन लक हाल्नुहोस्"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"सेन्सरमा बेसरी थिच्नुहोस्"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"फिंगरप्रिन्ट पहिचान गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"फिंगरप्रिन्ट मिलेन। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"फिंगरप्रिन्ट सेन्सर सफा गरेर फेरि प्रयास गर्नुहोस्"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"सेन्सर सफा गरेर फेरि प्रयास गर्नुहोस्"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेन्सरमा बेसरी थिच्नुहोस्"</string>
@@ -638,8 +638,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"हरेक पटक आफ्नो औँला थोरै यताउता सार्नुहोस्"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"फिंगरप्रिन्ट पहिचान गर्न सकिएन"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"फिंगरप्रिन्ट पहिचान गर्न सकिएन"</string>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"फिंगरप्रिन्ट मिलेन"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"फिंगरप्रिन्ट मिलेन"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फिंगरप्रिन्ट प्रमाणीकरण गरियो"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"अनुहार प्रमाणीकरण गरियो"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"अनुहार प्रमाणीकरण गरियो, कृपया पुष्टि गर्नुहोस् थिच्नुहोस्"</string>
