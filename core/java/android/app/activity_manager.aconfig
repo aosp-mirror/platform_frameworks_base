@@ -60,3 +60,13 @@ flag {
          purpose: PURPOSE_BUGFIX
      }
 }
+
+flag {
+     namespace: "backstage_power"
+     name: "enable_fgs_timeout_crash_behavior"
+     description: "Enable the new behavior where the app is crashed once an FGS times out."
+     bug: "339526947"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
