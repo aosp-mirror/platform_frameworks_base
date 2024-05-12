@@ -116,7 +116,7 @@
     <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"اضافی سیکیورٹی کیلئے پاس ورڈ درکار ہے"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"آلہ منتظم کی جانب سے مقفل ہے"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"آلہ کو دستی طور پر مقفل کیا گیا تھا"</string>
-    <string name="kg_face_not_recognized" msgid="7903950626744419160">"تسلیم شدہ نہیں ہے"</string>
+    <string name="kg_face_not_recognized" msgid="7903950626744419160">"شناخت نہیں ہو سکی"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"فیس اَنلاک استعمال کرنے کیلئے، ترتیبات میں کیمرا تک رسائی کو آن کریں"</string>
     <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{‏SIM کا PIN درج کریں۔ اس سے پہلے کہ آپ اپنا آلہ غیر مقفل کرنے کیلئے لازمی طور پر اپنے کیریئر سے رابطہ کریں آپ کے پاس # کوشش بچی ہے۔}other{‏SIM کا PIN درج کریں۔ آپ کے پاس # کوششیں بچی ہیں۔}}"</string>
     <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{‏SIM اب غیر فعال ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ SIM کے مستقل طور پر ناقابل استعمال ہونے سے پہلے آپ کے پاس # کوشش بچی ہے۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔}other{‏SIM اب غیر فعال ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ SIM کے مستقل طور پر ناقابل استعمال ہونے سے پہلے آپ کے پاس # کوششیں بچی ہیں۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔}}"</string>
