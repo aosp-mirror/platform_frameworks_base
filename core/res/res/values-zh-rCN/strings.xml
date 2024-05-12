@@ -154,12 +154,12 @@
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"移动网络安全"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"加密，连接到未加密网络时通知"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"加密、通知（连接到未加密网络时）"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"有网络获取了设备 ID"</string>
     <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>，当您使用<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM 卡时，一个附近的网络记录了您设备的唯一 ID（IMSI 或 IMEI）"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>，当您使用<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM 卡时，一个附近的网络记录了您设备的唯一 ID（IMSI 或 IMEI）。\n\n这意味着您的位置信息、活动或身份信息都被记录了。这是常见做法，但对注重隐私的人来说可能是一个问题。"</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"连接到了名为“<xliff:g id="NETWORK_NAME">%1$s</xliff:g>”的加密网络"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM 卡连接现在更安全了"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM 卡的连接现在更安全了"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"连接到了一个未加密的网络"</string>
     <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"目前，当您使用<xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM 卡时，通话、消息和数据更易受到攻击"</string>
     <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"目前，当您使用<xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM 卡时，通话、消息和数据更易受到攻击。\n\n当您的连接再次加密时，您会另收到一条通知。"</string>
@@ -2413,4 +2413,22 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"打开“信息”应用"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"运作方式"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"待归档…"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

@@ -156,7 +156,7 @@
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Sikkerhet for mobilnettverk"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Kryptering, varsler for ukrypterte nettverk"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Enhets-ID-en er lest"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> registrerte et nettverk i nærheten den unike ID-en (IMSI eller IMEI) til enheten din mens du brukte SIM-kortet fra <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> registrerte et nettverk i nærheten enhetens unike ID (IMSI eller IMEI) mens du brukte <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>-SIM-kortet"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> registrerte et nettverk i nærheten den unike ID-en (IMSI eller IMEI) til enheten din mens du brukte SIM-kortet fra <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>.\n\nDette betyr at posisjonen, aktiviteten eller identiteten din er registrert. Dette er en vanlig praksis, men kan være et problem for folk som er opptatt av personvern."</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Koblet til det krypterte nettverket <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Tilkoblingen til SIM-kortet fra <xliff:g id="NETWORK_NAME">%1$s</xliff:g> er sikrere nå"</string>
@@ -2413,4 +2413,22 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Åpne Meldinger"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Slik fungerer det"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Venter …"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

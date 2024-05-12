@@ -157,7 +157,7 @@
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"এনক্রিপশন, এনক্রিপটেড নয় এমন নেটওয়ার্কের জন্য বিজ্ঞপ্তি"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"ডিভাইস আইডি অ্যাক্সেস করা হয়েছে"</string>
     <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"আপনার <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> সিম কার্ড ব্যবহার করে <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>-এ, আশেপাশের নেটওয়ার্ক আপনার ডিভাইসের অনন্য আইডি (IMSI অথবা IMEI) রেকর্ড করেছে"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"আপনার <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> সিম কার্ড ব্যবহার করে <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>-এ, আশেপাশের নেটওয়ার্ক আপনার ডিভাইসের অনন্য আইডি (IMSI অথবা IMEI) রেকর্ড করেছে।\n\nএটির মানে হল আপনার লোকেশন, অ্যাক্টিভিটি বা পরিচিতি লগ-ইন করা হয়েছে। এটি সাধারণ পদ্ধতি কিন্তু সেইসব লোকজনের জন্য সমস্যা হতে পারে যারা নিজেদের গোপনীয়তা নিয়ে উদ্বেগে থাকেন।"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"আপনার <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> সিম কার্ড ব্যবহার করে <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>-এ, আশেপাশের নেটওয়ার্ক আপনার ডিভাইসের অনন্য আইডি (IMSI অথবা IMEI) রেকর্ড করেছে।\n\nএটির মানে হল আপনার লোকেশন, অ্যাক্টিভিটি বা পরিচিতি লগ করা হয়েছে। এটি সাধারণ পদ্ধতি কিন্তু সেইসব লোকজনের জন্য সমস্যা হতে পারে যারা নিজেদের গোপনীয়তা নিয়ে উদ্বেগে থাকেন।"</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> এনক্রিপটেড নেটওয়ার্কের সাথে কানেক্ট করা রয়েছে"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"এখন <xliff:g id="NETWORK_NAME">%1$s</xliff:g> সিম কার্ডের কানেকশন আরও সুরক্ষিত"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"এনক্রিপটেড নয় এমন নেটওয়ার্কের সাথে কানেক্ট করা রয়েছে"</string>
@@ -2413,4 +2413,22 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages খুলুন"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"এটি কীভাবে কাজ করে"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"বাকি আছে…"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

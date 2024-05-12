@@ -156,12 +156,12 @@
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Sicherheit des Mobilfunknetzes"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Verschlüsselung, Benachrichtigungen für unverschlüsselte Netzwerke"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Auf Geräte-ID zugegriffen"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"Um <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> hat ein Netzwerk in der Nähe die eindeutige ID (IMSI oder IMEI) deines Geräts aufgezeichnet, während du deine <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>-SIM verwendet hast."</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"Um <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> hat ein Netzwerk in der Nähe die eindeutige ID (IMSI oder IMEI) deines Geräts aufgezeichnet, während du deine <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>-SIM verwendet hast.\n\nDaher wurden dein Standort, deine Aktivitäten oder deine Identität protokolliert. Das ist zwar üblich, kann jedoch ein Problem für Personen sein, denen ihre Privatsphäre wichtig ist."</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"Um <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> hat ein Netzwerk in der Nähe die eindeutige ID (IMSI oder IMEI) deines Geräts aufgezeichnet, während du <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>-SIM verwendet hast."</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"Um <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> hat ein Netzwerk in der Nähe die eindeutige ID (IMSI oder IMEI) deines Geräts aufgezeichnet, während du <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>-SIM verwendet hast.\n\nDaher wurden dein Standort, deine Aktivitäten oder deine Identität protokolliert. Das ist zwar üblich, kann jedoch ein Problem für Personen sein, denen ihre Privatsphäre wichtig ist."</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Mit verschlüsseltem Netzwerk „<xliff:g id="NETWORK_NAME">%1$s</xliff:g>“ verbunden"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Verbindung der <xliff:g id="NETWORK_NAME">%1$s</xliff:g>-SIM ist jetzt sicherer"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Mit unverschlüsseltem Netzwerk verbunden"</string>
-    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Anrufe, Nachrichten und Daten sind momentan anfälliger für Angriffe, während du deine <xliff:g id="NETWORK_NAME">%1$s</xliff:g>-SIM verwendest"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Anrufe, Nachrichten und Daten sind anfälliger für Angriffe, während du <xliff:g id="NETWORK_NAME">%1$s</xliff:g>-SIM verwendest"</string>
     <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Anrufe, Nachrichten und Daten sind momentan anfälliger für Angriffe, während du deine <xliff:g id="NETWORK_NAME">%1$s</xliff:g>-SIM verwendest.\n\nWenn deine Verbindung wieder verschlüsselt ist, erhältst du eine weitere Benachrichtigung."</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Einstellungen für die Sicherheit des Mobilfunknetzes"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Weitere Informationen"</string>
@@ -2413,4 +2413,22 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages öffnen"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"So funktionierts"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Ausstehend…"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

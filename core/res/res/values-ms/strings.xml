@@ -157,7 +157,7 @@
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Penyulitan, pemberitahuan untuk rangkaian yang tidak disulitkan"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"ID peranti diakses"</string>
     <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"Pada <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, rangkaian berdekatan merekodkan ID unik peranti anda (IMSI atau IMEI) semasa menggunakan SIM <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> anda"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"Pada <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, rangkaian berdekatan merekodkan ID unik peranti anda (IMSI atau IMEI) semasa menggunakan SIM <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> anda.\n\nHal ini bermaksud bahawa lokasi, aktiviti atau identiti anda telah dilog. Amalan ini biasa dilakukan tetapi mungkin sukar dilakukan oleh pengguna yang bimbang tentang privasi."</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"Pada <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, rangkaian berdekatan merekodkan ID unik peranti anda (IMSI atau IMEI) semasa menggunakan SIM <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> anda.\n\nHal ini bermaksud bahawa lokasi, aktiviti atau identiti anda telah dilog. Amalan ini biasa dilakukan tetapi mungkin menjadi hal kepada pengguna yang bimbang tentang privasi."</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Disambungkan kepada rangkaian <xliff:g id="NETWORK_NAME">%1$s</xliff:g> yang disulitkan"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Sambungan SIM <xliff:g id="NETWORK_NAME">%1$s</xliff:g> kini lebih selamat"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Disambungkan kepada rangkaian yang tidak disulitkan"</string>
@@ -2413,4 +2413,22 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Buka Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cara ciri ini berfungsi"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Belum selesai..."</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

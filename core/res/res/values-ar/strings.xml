@@ -165,8 +165,8 @@
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"تم الاتصال بشبكة \"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>\" المشفَّرة"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"‏أصبح الاتصال باستخدام شريحة SIM لشبكة \"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>\" أكثر أمانًا الآن"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"تم الاتصال بشبكة غير مشفَّرة"</string>
-    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"‏المكالمات والرسائل والبيانات هي أكثر عرضة للاختراق في الوقت الحالي أثناء استخدام شريحة SIM لشبكة \"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>\""</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"‏المكالمات والرسائل والبيانات هي أكثر عرضة للاختراق في الوقت الحالي أثناء استخدام شريحة SIM لشبكة \"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>\".\n\nستتلقّى إشعارًا آخر عندما يتم تشفير اتصالك مرة أخرى."</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"‏تكون المكالمات والرسائل والبيانات في الوقت الحالي أكثر عرضة للاختراق أثناء استخدام شريحة SIM من شبكة \"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>\""</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"‏تكون المكالمات والرسائل والبيانات في الوقت الحالي أكثر عرضة للاختراق أثناء استخدام شريحة SIM من شبكة \"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>\".\n\nستتلقّى إشعارًا آخر عندما يتم تشفير اتصالك مرة أخرى."</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"إعدادات أمان شبكة الجوّال"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"مزيد من المعلومات"</string>
     <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"حسنًا"</string>
@@ -849,7 +849,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"قفل الشاشة"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"التحكّم في طريقة ووقت قفل الشاشة"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"محو جميع البيانات"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"يمكنك محو بيانات الجهاز اللوحي بدون تحذير، وذلك عبر إجراء إعادة الضبط على الإعدادات الأصلية."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"محو بيانات الجهاز اللوحي بدون تحذير، وذلك عبر إعادة الضبط على الإعدادات الأصلية"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"‏يمكنك محو بيانات جهاز Android TV بدون تحذير عن طريق تنفيذ إعادة الضبط على الإعدادات الأصلية."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"يمكنك محو بيانات \"نظام الترفيه والمعلومات\" بدون تحذير، وذلك من خلال إعادة الضبط على الإعدادات الأصلية."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"محو بيانات الهاتف بدون تحذير، وذلك من خلال إعادة ضبط البيانات على الإعدادات الأصلية"</string>
@@ -2417,4 +2417,22 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"فتح تطبيق \"الرسائل\""</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"طريقة العمل"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"بانتظار الإزالة من الأرشيف…"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

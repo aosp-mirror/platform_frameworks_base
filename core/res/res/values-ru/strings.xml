@@ -158,11 +158,11 @@
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Безопасность мобильной сети"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Шифрование, уведомления о незашифрованных сетях"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Получен доступ к идентификатору устройства"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"В <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> при использовании SIM-карты (<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>) в сети поблизости был записан уникальный идентификатор вашего устройства (IMSI или IMEI)."</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"В <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> при использовании SIM-карты (<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>) в сети поблизости был записан уникальный идентификатор вашего устройства (IMSI или IMEI).\n\nВаше местоположение, действия или личность были зарегистрированы. Хотя в этом нет ничего необычного, раскрытие данных может доставлять проблемы людям, которые беспокоятся о своей конфиденциальности."</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Подключение к зашифрованной сети \"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>\""</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Теперь подключение SIM-карты (<xliff:g id="NETWORK_NAME">%1$s</xliff:g>) более безопасное."</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Подключение к незашифрованной сети"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"В <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, когда вы использовали SIM-карту \"<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>\", сетью поблизости от вас был записан уникальный идентификатор вашего устройства (IMSI или IMEI)."</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"В <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, когда вы использовали SIM-карту \"<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>\", сетью поблизости от вас был записан уникальный идентификатор вашего устройства (IMSI или IMEI).\n\nЭто значит, что было зарегистрировано ваше местоположение, действия или личность. Это распространенная практика, однако она может вызывать беспокойство у тех, кто заботится о своей конфиденциальности."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Подключено к зашифрованной сети <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Теперь подключение SIM-карты (<xliff:g id="NETWORK_NAME">%1$s</xliff:g>) лучше защищено."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Подключено к незашифрованной сети"</string>
     <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Сейчас звонки, сообщения и данные более уязвимы при использовании SIM-карты (<xliff:g id="NETWORK_NAME">%1$s</xliff:g>)."</string>
     <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Сейчас звонки, сообщения и данные более уязвимы при использовании SIM-карты (<xliff:g id="NETWORK_NAME">%1$s</xliff:g>).\n\nКогда соединение будет снова зашифровано, вы получите ещё одно уведомление."</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Настройки безопасности мобильной сети"</string>
@@ -2415,4 +2415,22 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Открыть Сообщения"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Узнать принцип работы"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Обработка…"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

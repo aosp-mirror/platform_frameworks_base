@@ -162,9 +162,9 @@
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"יש חיבור לרשת המוצפנת <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"‏החיבור של כרטיס ה-SIM של <xliff:g id="NETWORK_NAME">%1$s</xliff:g> מאובטח יותר עכשיו"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"יש חיבור לרשת לא מוצפנת"</string>
-    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"‏השיחות, ההודעות והנתונים שלך פגיעים יותר עכשיו בזמן השימוש בכרטיס ה-SIM של <xliff:g id="NETWORK_NAME">%1$s</xliff:g> שלך"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"‏שיחות, הודעות ונתונים פגיעים יותר עכשיו בזמן השימוש בכרטיס ה-SIM של <xliff:g id="NETWORK_NAME">%1$s</xliff:g> שלך.\n\nכשהחיבור שלך יוצפן שוב, תישלח אליך התראה נוספת."</string>
-    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"הגדרות אבטחה של רשת סלולרית"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"‏השיחות, ההודעות והנתונים שלך פגיעים יותר עכשיו בזמן השימוש בכרטיס ה-SIM של <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"‏השיחות, ההודעות והנתונים שלך פגיעים יותר עכשיו בזמן השימוש בכרטיס ה-SIM של <xliff:g id="NETWORK_NAME">%1$s</xliff:g>.\n\nכשהחיבור שלך יוצפן שוב, תישלח אליך התראה נוספת."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"הגדרות אבטחה של הרשת הסלולרית"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"מידע נוסף"</string>
     <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"הבנתי"</string>
     <string name="fcComplete" msgid="1080909484660507044">"קוד תכונה הושלם."</string>
@@ -2414,4 +2414,22 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"‏לפתיחת Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"איך זה עובד"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"בהמתנה..."</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>
