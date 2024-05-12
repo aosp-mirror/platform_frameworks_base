@@ -32,6 +32,7 @@ import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dock.fakeDockManager
 import com.android.systemui.flags.BrokenWithSceneContainer
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -157,6 +158,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
     }
 
     @Test
+    @DisableSceneContainer
     fun lockscreenToPrimaryBouncerViaBouncerShowingCall() =
         testScope.runTest {
             // GIVEN a prior transition has run to LOCKSCREEN
@@ -370,6 +372,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun dreamingLockscreenHostedToGone() =
         testScope.runTest {
             // GIVEN a prior transition has run to DREAMING_LOCKSCREEN_HOSTED
@@ -396,6 +399,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun dreamingLockscreenHostedToPrimaryBouncer() =
         testScope.runTest {
             // GIVEN a device dreaming with lockscreen hosted dream and not dozing
@@ -623,6 +627,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
     /** This handles security method NONE and screen off with lock timeout */
     @Test
+    @DisableSceneContainer
     fun dreamingToGoneWithKeyguardNotShowing() =
         testScope.runTest {
             // GIVEN a prior transition has run to DREAMING
@@ -679,6 +684,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun goneToDozing() =
         testScope.runTest {
             // GIVEN a device with AOD not available
@@ -704,6 +710,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun goneToAod() =
         testScope.runTest {
             // GIVEN a device with AOD available
@@ -751,6 +758,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun goneToDreaming() =
         testScope.runTest {
             // GIVEN a device that is not dreaming or dozing
@@ -809,6 +817,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun alternateBouncerToPrimaryBouncer() =
         testScope.runTest {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
@@ -985,6 +994,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun primaryBouncerToAod() =
         testScope.runTest {
             // GIVEN aod available
@@ -1015,6 +1025,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun primaryBouncerToDozing() =
         testScope.runTest {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
@@ -1043,6 +1054,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun primaryBouncerToLockscreen() =
         testScope.runTest {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
@@ -1066,6 +1078,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun primaryBouncerToGlanceableHub() =
         testScope.runTest {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
@@ -1097,6 +1110,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun primaryBouncerToGlanceableHubWhileDreaming() =
         testScope.runTest {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
@@ -1132,6 +1146,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun primaryBouncerToDreamingLockscreenHosted() =
         testScope.runTest {
             // GIVEN device dreaming with the lockscreen hosted dream and not dozing
@@ -1445,7 +1460,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
             keyguardRepository.setKeyguardOccluded(false)
             runCurrent()
 
-            // THEN a transition to GLANCEABLE_HUB should occur
+            // THEN a transition to DREAMING should occur
             assertThat(transitionRepository)
                 .startedTransition(
                     ownerName = FromOccludedTransitionInteractor::class.simpleName,
@@ -1511,6 +1526,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun dreamingToGlanceableHub() =
         testScope.runTest {
             // GIVEN a prior transition has run to DREAMING
@@ -1598,6 +1614,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun aodToPrimaryBouncer() =
         testScope.runTest {
             // GIVEN a prior transition has run to AOD
@@ -1699,6 +1716,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun lockscreenToGlanceableHub() =
         testScope.runTest {
             // GIVEN a prior transition has run to LOCKSCREEN
@@ -1756,6 +1774,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun glanceableHubToLockscreen() =
         testScope.runTest {
             // GIVEN a prior transition has run to GLANCEABLE_HUB
@@ -1810,6 +1829,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun glanceableHubToDozing() =
         testScope.runTest {
             // GIVEN a prior transition has run to GLANCEABLE_HUB
@@ -1831,6 +1851,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun glanceableHubToPrimaryBouncer() =
         testScope.runTest {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
@@ -1852,6 +1873,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun glanceableHubToAlternateBouncer() =
         testScope.runTest {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
@@ -1904,6 +1926,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun glanceableHubToGone() =
         testScope.runTest {
             // GIVEN a prior transition has run to GLANCEABLE_HUB
@@ -1925,6 +1948,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
 
     @Test
+    @DisableSceneContainer
     fun glanceableHubToDreaming() =
         testScope.runTest {
             // GIVEN that we are dreaming and not dozing
