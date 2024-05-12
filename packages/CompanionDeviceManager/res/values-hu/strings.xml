@@ -49,7 +49,7 @@
     <string name="vendor_header_button_description" msgid="7994879208461111473">"További információ"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Telefon"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
-    <string name="permission_contacts" msgid="3858319347208004438">"Címtár"</string>
+    <string name="permission_contacts" msgid="3858319347208004438">"Névjegyek"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Naptár"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofon"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Hívásnaplók"</string>
