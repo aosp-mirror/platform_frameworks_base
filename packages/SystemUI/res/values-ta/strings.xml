@@ -269,7 +269,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"சேமிக்கப்பட்டது"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"இணைப்பு நீக்கும்"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"செயல்படுத்தும்"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"நாளைக்குத் தானாகவே மீண்டும் இயக்கப்படும்"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"நாளைக்குத் தானாகவே மீண்டும் இயக்கப்படுதல்"</string>
     <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"விரைவுப் பகிர்தல், Find My Device போன்ற அம்சங்களும் சாதன இருப்பிடமும் புளூடூத்தைப் பயன்படுத்துகின்றன"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> பேட்டரி"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ஆடியோ"</string>

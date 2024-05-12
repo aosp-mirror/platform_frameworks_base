@@ -565,14 +565,14 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Апликацијата е откачена"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Повик"</string>
     <string name="stream_system" msgid="7663148785370565134">"Систем"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Ѕвони"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Ѕвонење"</string>
     <string name="stream_music" msgid="2188224742361847580">"Аудиовизуелни содржини"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Аларм"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Известување"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Двојна повеќетонска фреквенција"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"Пристапност"</string>
-    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Ѕвони"</string>
+    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Ѕвонење"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Вибрации"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Исклучи звук"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Емитување"</string>
