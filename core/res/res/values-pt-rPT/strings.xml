@@ -1383,7 +1383,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Não são necessárias permissões"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"isto poderá estar sujeito a custos"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"O dispositivo está a carregar por USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"O dispositivo está a ser carregado por USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"A carregar o dispositivo ligado por USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"A transferência de ficheiros por USB está ativada"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"O PTP por USB está ativado"</string>
@@ -2136,6 +2136,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificação de informações do Modo rotina"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Poupança de bateria ativada"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Reduzir a utilização da bateria para prolongar a autonomia da mesma"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"Poupança de bateria ativada"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"A Poupança de bateria está ativada para prolongar a autonomia da bateria"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Poupança de bateria"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"A Poupança de bateria está desativada"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"O telemóvel tem carga suficiente. As funcionalidades já não estão restritas."</string>
@@ -2394,4 +2396,22 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Pode enviar e receber mensagens sem uma rede móvel ou Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abre a app Mensagens"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Como funciona"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

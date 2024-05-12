@@ -640,7 +640,7 @@
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"جاری رکھنے کے لیے اپنے بایو میٹرک اور اسکرین لاک کا استعمال کریں"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"بایومیٹرک ہارڈ ویئر دستیاب نہیں ہے"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"تصدیق کا عمل منسوخ ہو گیا"</string>
-    <string name="biometric_not_recognized" msgid="5106687642694635888">"تسلیم شدہ نہیں ہے"</string>
+    <string name="biometric_not_recognized" msgid="5106687642694635888">"شناخت نہیں ہو سکی"</string>
     <string name="biometric_face_not_recognized" msgid="5535599455744525200">"چہرے کی شناخت نہیں ہو سکی"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"تصدیق کا عمل منسوخ ہو گیا"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"کوئی پن، پیٹرن، یا پاس ورڈ سیٹ نہیں ہے"</string>
@@ -2135,6 +2135,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"روٹین موڈ معلومات کی اطلاع"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"بیٹری سیور کو آن کیا گیا"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"بیٹری لائف کو بڑھانے کے لیے بیٹری کے استعمال کو کم کیا جا رہا ہے"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"بیٹری سیور آن ہے"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"بیٹری لائف کو بڑھانے کے لیے بیٹری سیور کو آن کر دیا گیا ہے"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"بیٹری سیور"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"بیٹری سیور کو آف کر دیا گیا"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"فون میں کافی چارج ہے۔ خصوصیات پر اب پابندی نہیں ہے۔"</string>
@@ -2393,4 +2395,22 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"‏آپ موبائل یا Wi-Fi نیٹ ورک کے بغیر پیغامات بھیج اور موصول کر سکتے ہیں"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"پیغامات ایپ کو کھولیں"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"اس کے کام کرنے کا طریقہ"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

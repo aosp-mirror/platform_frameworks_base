@@ -313,7 +313,7 @@
     <string name="managed_profile_app_label" msgid="367401088383965725">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਦੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ \'ਤੇ ਜਾਓ"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"ਸੰਪਰਕ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ਆਪਣੇ ਸੰਪਰਕਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"ਟਿਕਾਣਾ"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"ਟਿਕਾਣੇ ਦੀ ਜਾਣਕਾਰੀ"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ਇਸ ਡੀਵਾਈਸ ਦੇ ਨਿਰਧਾਰਤ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚੋ"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"ਕੈਲੰਡਰ"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
@@ -2135,6 +2135,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ਨਿਯਮਬੱਧ ਮੋਡ ਦੀ ਜਾਣਕਾਰੀ ਵਾਲੀ ਸੂਚਨਾ"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਹੈ"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ ਬੈਟਰੀ ਵਰਤੋਂ ਨੂੰ ਘਟਾਉਣਾ"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਹੈ"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ਬੈਟਰੀ ਸੇਵਰ"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ਬੈਟਰੀ ਸੇਵਰ ਬੰਦ ਕੀਤਾ ਗਿਆ"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ਫ਼ੋਨ ਲੋੜੀਂਦਾ ਚਾਰਜ ਹੈ। ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਹੁਣ ਪ੍ਰਤਿਬੰਧਿਤ ਨਹੀਂ ਹਨ।"</string>
@@ -2393,4 +2395,22 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"ਤੁਸੀਂ ਮੋਬਾਈਲ ਜਾਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜ ਅਤੇ ਪ੍ਰਾਪਤ ਕਰ ਸਕਦੇ ਹੋ"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ਐਪ ਖੋਲ੍ਹੋ"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ਇਹ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>
