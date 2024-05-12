@@ -447,6 +447,8 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Притиснете долго за да ги приспособите виџетите"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Приспособете ги виџетите"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Икона за апликација за оневозможен виџет"</string>
+    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"Изменување виџети"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Отстранува"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Додајте виџет"</string>
@@ -596,14 +598,14 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Апликацијата е откачена"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Повик"</string>
     <string name="stream_system" msgid="7663148785370565134">"Систем"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Ѕвони"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Ѕвонење"</string>
     <string name="stream_music" msgid="2188224742361847580">"Аудиовизуелни содржини"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Аларм"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Известување"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Двојна повеќетонска фреквенција"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"Пристапност"</string>
-    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Ѕвони"</string>
+    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Ѕвонење"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Вибрации"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Исклучи звук"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Емитување"</string>
@@ -629,12 +631,17 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"Внесете ги поставките за излез"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"Лизгачите за јачина на звукот се проширени"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"Лизгачите за јачина на звукот се собрани"</string>
-    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"исклучување звук на %s"</string>
-    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"вклучување звук на %s"</string>
+    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g>: пуштено на"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"Аудиото ќе се пушти на"</string>
-    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
-    <skip />
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"Повик во тек"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Адаптер на УИ на системот"</string>
     <string name="status_bar" msgid="4357390266055077437">"Статусна лента"</string>
     <string name="demo_mode" msgid="263484519766901593">"Демо-режим на кориснички интерфејс на систем"</string>
