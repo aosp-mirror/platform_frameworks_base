@@ -1358,7 +1358,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Não são necessárias permissões"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"isto poderá estar sujeito a custos"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"O dispositivo está a carregar por USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"O dispositivo está a ser carregado por USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"A carregar o dispositivo ligado por USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"A transferência de ficheiros por USB está ativada"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"O PTP por USB está ativado"</string>

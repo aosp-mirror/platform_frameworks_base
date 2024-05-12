@@ -1588,7 +1588,7 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="101888478915677895">"เกินปริมาณเน็ตมือถือที่กำหนดไว้"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="1622359254521960508">"เกินขีดจำกัดของข้อมูล Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"คุณใช้อินเทอร์เน็ตเกินไป <xliff:g id="SIZE">%s</xliff:g> จากปริมาณที่กำหนดไว้"</string>
-    <string name="data_usage_restricted_title" msgid="126711424380051268">"จำกัดอินเทอร์เน็ตที่ใช้งานอยู่เบื้องหลัง"</string>
+    <string name="data_usage_restricted_title" msgid="126711424380051268">"จำกัดข้อมูลในเบื้องหลัง"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"แตะเพื่อนำข้อจำกัดออก"</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"ปริมาณการใช้เน็ตมือถือสูง"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"แอปของคุณใช้อินเทอร์เน็ตมากกว่าปกติ"</string>
