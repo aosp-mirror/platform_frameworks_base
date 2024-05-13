@@ -963,10 +963,10 @@
     <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Touchez pour afficher le bouton d\'accessibilité"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Le raccourci <xliff:g id="FEATURE_NAME">%s</xliff:g> a été retiré"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# raccourci retiré}one{# raccourci retiré}many{# de raccourcis retirés}other{# raccourcis retirés}}"</string>
-    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Déplacer dans coin sup. gauche"</string>
-    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Déplacer dans coin sup. droit"</string>
-    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Déplacer dans coin inf. gauche"</string>
-    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Déplacer dans coin inf. droit"</string>
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Déplacer en haut à gauche"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Déplacer en haut à droite"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Déplacer en bas à gauche"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Déplacer en bas à droite"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Rapprocher du bord et masquer"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Éloigner du bord et afficher"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Retirer"</string>
