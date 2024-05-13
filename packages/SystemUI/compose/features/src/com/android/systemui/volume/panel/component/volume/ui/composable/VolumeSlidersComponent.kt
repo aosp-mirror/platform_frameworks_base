@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import com.android.compose.PlatformSliderDefaults
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.SliderViewModel
 import com.android.systemui.volume.panel.component.volume.ui.viewmodel.AudioVolumeComponentViewModel
+import com.android.systemui.volume.panel.component.volume.ui.viewmodel.SlidersExpandableViewModel
 import com.android.systemui.volume.panel.ui.composable.ComposeVolumePanelUiComponent
 import com.android.systemui.volume.panel.ui.composable.VolumePanelComposeScope
 import com.android.systemui.volume.panel.ui.composable.isPortrait
@@ -48,13 +49,21 @@ constructor(
                 modifier = modifier.fillMaxWidth(),
             )
         } else {
-            val isExpanded by viewModel.isExpanded.collectAsState()
+            val expandableViewModel: SlidersExpandableViewModel by
+                viewModel
+                    .isExpandable(isPortrait)
+                    .collectAsState(SlidersExpandableViewModel.Unavailable)
+            if (expandableViewModel is SlidersExpandableViewModel.Unavailable) {
+                return
+            }
+            val isExpanded =
+                (expandableViewModel as? SlidersExpandableViewModel.Expandable)?.isExpanded ?: true
             ColumnVolumeSliders(
                 viewModels = sliderViewModels,
                 isExpanded = isExpanded,
                 onExpandedChanged = viewModel::onExpandedChanged,
                 sliderColors = PlatformSliderDefaults.defaultPlatformSliderColors(),
-                isExpandable = isPortrait,
+                isExpandable = expandableViewModel is SlidersExpandableViewModel.Expandable,
                 modifier = modifier.fillMaxWidth(),
             )
         }
