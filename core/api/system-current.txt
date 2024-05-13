@@ -1143,16 +1143,13 @@ package android.app {
     field public static final int NAV_BAR_MODE_KIDS = 1; // 0x1
   }
 
-  public static final class StatusBarManager.DisableInfo implements android.os.Parcelable {
+  public static final class StatusBarManager.DisableInfo {
     method public boolean areAllComponentsEnabled();
-    method public int describeContents();
     method public boolean isNavigateToHomeDisabled();
     method public boolean isNotificationPeekingDisabled();
     method public boolean isRecentsDisabled();
     method public boolean isSearchDisabled();
     method public boolean isStatusBarExpansionDisabled();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.StatusBarManager.DisableInfo> CREATOR;
   }
 
   public final class SystemServiceRegistry {
