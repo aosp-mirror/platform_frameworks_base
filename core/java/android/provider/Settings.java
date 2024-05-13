@@ -7440,6 +7440,12 @@ public final class Settings {
                 "bluetooth_le_broadcast_program_info";
 
         /**
+         * This is used by LocalBluetoothLeBroadcast to store the broadcast name.
+         * @hide
+         */
+        public static final String BLUETOOTH_LE_BROADCAST_NAME = "bluetooth_le_broadcast_name";
+
+        /**
          * This is used by LocalBluetoothLeBroadcast to store the broadcast code.
          * @hide
          */
