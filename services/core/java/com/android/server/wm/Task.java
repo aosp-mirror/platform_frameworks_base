@@ -445,6 +445,7 @@ class Task extends TaskFragment {
     int mPrevDisplayId = INVALID_DISPLAY;
 
     int mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
+    WindowContainerToken mMultiWindowRestoreParent;
 
     /**
      * Last requested orientation reported to DisplayContent. This is different from {@link
@@ -4618,6 +4619,25 @@ class Task extends TaskFragment {
     @Override
     long getProtoFieldId() {
         return TASK;
+    }
+
+    /**
+     * Restores to the windowing mode saved when task requested to enter fullscreen using
+     * {@link Activity#requestFullscreenMode} API if it is valid. The task is also reparented to
+     * the previous parent if parent has changed.
+     */
+    void restoreWindowingMode() {
+        if (mMultiWindowRestoreWindowingMode == INVALID_WINDOWING_MODE) {
+            return;
+        }
+        if (!getParent().mRemoteToken.toWindowContainerToken()
+                .equals(mMultiWindowRestoreParent)) {
+            // Restore previous parent if parent has changed.
+            final Task parent = fromWindowContainerToken(mMultiWindowRestoreParent);
+            reparent(parent, MAX_VALUE);
+        }
+
+        setWindowingMode(mMultiWindowRestoreWindowingMode);
     }
 
     @Override
