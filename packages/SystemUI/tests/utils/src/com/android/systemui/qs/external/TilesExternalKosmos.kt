@@ -18,12 +18,8 @@ package com.android.systemui.qs.external
 
 import android.content.ComponentName
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
 
 var Kosmos.componentName: ComponentName by Kosmos.Fixture()
-
-/** Returns mocks */
-var Kosmos.tileLifecycleManagerFactory: TileLifecycleManager.Factory by Kosmos.Fixture { mock {} }
 
 val Kosmos.iQSTileService: FakeIQSTileService by Kosmos.Fixture { FakeIQSTileService() }
 val Kosmos.tileServiceManagerFacade: FakeTileServiceManagerFacade by
@@ -34,4 +30,3 @@ val Kosmos.tileServiceManager: TileServiceManager by
 
 val Kosmos.tileServicesFacade: FakeTileServicesFacade by
     Kosmos.Fixture { (FakeTileServicesFacade(tileServiceManager)) }
-val Kosmos.tileServices: TileServices by Kosmos.Fixture { tileServicesFacade.tileServices }
