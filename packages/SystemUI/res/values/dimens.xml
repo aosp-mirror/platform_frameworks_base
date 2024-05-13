@@ -449,6 +449,8 @@
     <dimen name="overlay_preview_container_margin">8dp</dimen>
     <dimen name="overlay_action_container_margin_horizontal">8dp</dimen>
     <dimen name="overlay_action_container_margin_bottom">6dp</dimen>
+    <!-- minimum distance to the left, right or bottom edges. -->
+    <dimen name="overlay_action_container_minimum_edge_spacing">12dp</dimen>
     <dimen name="overlay_bg_protection_height">242dp</dimen>
     <dimen name="overlay_action_container_corner_radius">20dp</dimen>
     <dimen name="overlay_action_container_padding_vertical">8dp</dimen>
