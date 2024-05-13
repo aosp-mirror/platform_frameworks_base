@@ -81,6 +81,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
     @Mock private lateinit var sysuiState: SysUiState
     @Mock private lateinit var systemUIDialogManager: SystemUIDialogManager
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
+    @Mock private lateinit var traceurMessageSender: TraceurMessageSender
     private val systemClock = FakeSystemClock()
     private val bgExecutor = FakeExecutor(systemClock)
     private val mainExecutor = FakeExecutor(systemClock)
@@ -131,6 +132,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
                     userFileManager,
                     screenCaptureDisabledDialogDelegate,
                     issueRecordingState,
+                    traceurMessageSender
                 ) {
                     latch.countDown()
                 }

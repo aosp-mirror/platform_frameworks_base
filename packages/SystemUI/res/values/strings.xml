@@ -893,11 +893,9 @@
     <string name="qs_record_issue_dropdown_screenrecord">Screen record</string>
 
     <!-- QuickSettings: Issue Type Drop down choices list in Record Issue Start Dialog [CHAR LIMIT=30] -->
-    <string-array name="qs_record_issue_types">
-        <item>Performance</item>
-        <item>User Interface</item>
-        <item>Battery</item>
-    </string-array>
+    <string name="performance">Performance</string>
+    <string name="user_interface">User Interface</string>
+    <string name="thermal">Thermal</string>
 
     <!-- QuickSettings: Label for the toggle that controls whether One-handed mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_onehanded_label">One-handed mode</string>
