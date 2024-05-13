@@ -26,6 +26,8 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.model.sysUiState
+import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SHORTCUT_HELPER_SHOWING
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -47,7 +49,7 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
 
     private val testScope = kosmos.testScope
     private val testHelper = kosmos.shortcutHelperTestHelper
-
+    private val sysUiState = kosmos.sysUiState
     private val viewModel = kosmos.shortcutHelperViewModel
 
     @Test
@@ -90,12 +92,12 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun shouldShow_falseAfterViewDestroyed() =
+    fun shouldShow_falseAfterViewClosed() =
         testScope.runTest {
             val shouldShow by collectLastValue(viewModel.shouldShow)
 
             testHelper.toggle(deviceId = 567)
-            viewModel.onUserLeave()
+            viewModel.onViewClosed()
 
             assertThat(shouldShow).isFalse()
         }
@@ -108,7 +110,7 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
             testHelper.hideForSystem()
             testHelper.toggle(deviceId = 987)
             testHelper.showFromActivity()
-            viewModel.onUserLeave()
+            viewModel.onViewClosed()
             testHelper.hideFromActivity()
             testHelper.hideForSystem()
             testHelper.toggle(deviceId = 456)
@@ -126,5 +128,28 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
 
             val shouldShowNew by collectLastValue(viewModel.shouldShow)
             assertThat(shouldShowNew).isEqualTo(shouldShow)
+        }
+
+    @Test
+    fun sysUiStateFlag_disabledByDefault() =
+        testScope.runTest {
+            assertThat(sysUiState.isFlagEnabled(SYSUI_STATE_SHORTCUT_HELPER_SHOWING)).isFalse()
+        }
+
+    @Test
+    fun sysUiStateFlag_trueAfterViewOpened() =
+        testScope.runTest {
+            viewModel.onViewOpened()
+
+            assertThat(sysUiState.isFlagEnabled(SYSUI_STATE_SHORTCUT_HELPER_SHOWING)).isTrue()
+        }
+
+    @Test
+    fun sysUiStateFlag_falseAfterViewClosed() =
+        testScope.runTest {
+            viewModel.onViewOpened()
+            viewModel.onViewClosed()
+
+            assertThat(sysUiState.isFlagEnabled(SYSUI_STATE_SHORTCUT_HELPER_SHOWING)).isFalse()
         }
 }
