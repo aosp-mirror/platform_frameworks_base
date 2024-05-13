@@ -4532,8 +4532,13 @@ public class AccountManagerService
     public Account[] getAccountsAsUser(String type, int userId, String opPackageName) {
         int callingUid = Binder.getCallingUid();
         mAppOpsManager.checkPackage(callingUid, opPackageName);
-        return getAccountsAsUserForPackage(type, userId, opPackageName /* callingPackage */, -1,
-                opPackageName, false /* includeUserManagedNotVisible */);
+        try {
+            return getAccountsAsUserForPackage(type, userId, opPackageName /* callingPackage */, -1,
+                    opPackageName, false /* includeUserManagedNotVisible */);
+        } catch (SQLiteCantOpenDatabaseException e) {
+            Log.e(TAG, "Could not get accounts for user " + userId, e);
+            return new Account[]{};
+        }
     }
 
     @NonNull
