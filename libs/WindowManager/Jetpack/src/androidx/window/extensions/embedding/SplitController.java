@@ -855,7 +855,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (!parentInfo.isVisible()) {
             // Only making the TaskContainer invisible and drops the other info, and perform the
             // update when the next time the Task becomes visible.
-            taskContainer.setIsVisible(false);
+            if (taskContainer.isVisible()) {
+                taskContainer.setInvisible();
+            }
             return;
         }
 
@@ -3228,10 +3230,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             @NonNull WindowContainerTransaction wct, @NonNull TaskContainer taskContainer) {
         final DividerPresenter dividerPresenter = mDividerPresenters.get(taskContainer.getTaskId());
         final TaskFragmentParentInfo parentInfo = taskContainer.getTaskFragmentParentInfo();
-        if (parentInfo != null) {
-            dividerPresenter.updateDivider(
-                    wct, parentInfo, taskContainer.getTopNonFinishingSplitContainer());
-        }
+        dividerPresenter.updateDivider(
+                wct, parentInfo, taskContainer.getTopNonFinishingSplitContainer());
     }
 
     @Override
