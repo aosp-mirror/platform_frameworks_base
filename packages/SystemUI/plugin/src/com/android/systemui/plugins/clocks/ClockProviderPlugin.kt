@@ -109,6 +109,12 @@ data class ClockMessageBuffers(
     val largeClockMessageBuffer: MessageBuffer,
 )
 
+data class AodClockBurnInModel(
+    val scale: Float,
+    val translationX: Float,
+    val translationY: Float,
+)
+
 /** Specifies layout information for the */
 interface ClockFaceLayout {
     /** All clock views to add to the root constraint layout before applying constraints. */
@@ -118,6 +124,8 @@ interface ClockFaceLayout {
     fun applyConstraints(constraints: ConstraintSet): ConstraintSet
 
     fun applyPreviewConstraints(constraints: ConstraintSet): ConstraintSet
+
+    fun applyAodBurnIn(aodBurnInModel: AodClockBurnInModel)
 }
 
 /** A ClockFaceLayout that applies the default lockscreen layout to a single view */
@@ -136,6 +144,10 @@ class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
 
     override fun applyPreviewConstraints(constraints: ConstraintSet): ConstraintSet {
         return constraints
+    }
+
+    override fun applyAodBurnIn(aodBurnInModel: AodClockBurnInModel) {
+        // Default clock doesn't need detailed control of view
     }
 }
 

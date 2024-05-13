@@ -38,6 +38,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardClockViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFaceLayout
@@ -64,6 +65,7 @@ constructor(
     private val context: Context,
     val smartspaceViewModel: KeyguardSmartspaceViewModel,
     val blueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
+    private val rootViewModel: KeyguardRootViewModel,
 ) : KeyguardSection() {
     override fun addViews(constraintLayout: ConstraintLayout) {}
     override fun bindData(constraintLayout: ConstraintLayout) {
@@ -75,7 +77,8 @@ constructor(
             constraintLayout,
             keyguardClockViewModel,
             clockInteractor,
-            blueprintInteractor.get()
+            blueprintInteractor.get(),
+            rootViewModel,
         )
     }
 

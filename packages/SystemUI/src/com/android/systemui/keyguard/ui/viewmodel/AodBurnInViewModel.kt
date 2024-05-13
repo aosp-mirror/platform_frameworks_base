@@ -27,7 +27,6 @@ import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.ui.StateToValue
@@ -121,11 +120,13 @@ constructor(
             ),
         ) { interpolated, burnIn ->
             val useAltAod =
-                keyguardClockViewModel.currentClock.value?.let { clock ->
-                    clock.config.useAlternateSmartspaceAODTransition
-                } == true
+                keyguardClockViewModel.currentClock.value
+                    ?.config
+                    ?.useAlternateSmartspaceAODTransition == true
+            // Only scale large non-weather clocks
+            // elements in large weather clock will translate the same as smartspace
             val useScaleOnly =
-                useAltAod && keyguardClockViewModel.clockSize.value == ClockSize.LARGE
+                (!useAltAod) && keyguardClockViewModel.clockSize.value == ClockSize.LARGE
 
             val burnInY = MathUtils.lerp(0, burnIn.translationY, interpolated).toInt()
             val translationY =
@@ -134,35 +135,12 @@ constructor(
                 } else {
                     max(params.topInset, params.minViewY + burnInY) - params.minViewY
                 }
-            if (ComposeLockscreen.isEnabled) {
-                BurnInModel(
-                    translationX = MathUtils.lerp(0, burnIn.translationX, interpolated).toInt(),
-                    translationY = translationY,
-                    scale = MathUtils.lerp(burnIn.scale, 1f, 1f - interpolated),
-                    scaleClockOnly = !useScaleOnly,
-                )
-            } else {
-                if (useScaleOnly) {
-                    BurnInModel(
-                        translationX = 0,
-                        translationY = 0,
-                        scale = MathUtils.lerp(burnIn.scale, 1f, 1f - interpolated),
-                    )
-                } else {
-                    // Ensure the desired translation doesn't encroach on the top inset
-                    BurnInModel(
-                        translationX = MathUtils.lerp(0, burnIn.translationX, interpolated).toInt(),
-                        translationY = translationY,
-                        scale =
-                            MathUtils.lerp(
-                                /* start= */ burnIn.scale,
-                                /* stop= */ 1f,
-                                /* amount= */ 1f - interpolated,
-                            ),
-                        scaleClockOnly = true,
-                    )
-                }
-            }
+            BurnInModel(
+                translationX = MathUtils.lerp(0, burnIn.translationX, interpolated).toInt(),
+                translationY = translationY,
+                scale = MathUtils.lerp(burnIn.scale, 1f, 1f - interpolated),
+                scaleClockOnly = useScaleOnly
+            )
         }
     }
 }

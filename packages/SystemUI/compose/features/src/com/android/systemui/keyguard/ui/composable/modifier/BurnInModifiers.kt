@@ -58,15 +58,11 @@ fun Modifier.burnInAware(
             .collectAsState(initial = BurnInScaleViewModel())
 
     return this.graphicsLayer {
-        val scale =
-            when {
-                scaleViewModel.scaleClockOnly && isClock -> scaleViewModel.scale
-                else -> 1f
-            }
-
         this.translationX = if (isClock) 0F else translationX
         this.translationY = translationY
         this.alpha = alpha
+
+        val scale = if (scaleViewModel.scaleClockOnly) scaleViewModel.scale else 1f
         this.scaleX = scale
         this.scaleY = scale
     }

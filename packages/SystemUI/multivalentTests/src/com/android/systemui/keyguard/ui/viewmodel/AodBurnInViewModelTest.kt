@@ -62,8 +62,8 @@ class AodBurnInViewModelTest : SysuiTestCase() {
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     private val keyguardClockRepository = kosmos.fakeKeyguardClockRepository
     private lateinit var underTest: AodBurnInViewModel
-
-    private var burnInParameters = BurnInParameters()
+    // assign a smaller value to minViewY to avoid overflow
+    private var burnInParameters = BurnInParameters(minViewY = Int.MAX_VALUE / 2)
     private val burnInFlow = MutableStateFlow(BurnInModel())
 
     @Before
@@ -296,52 +296,111 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     scale = 0.5f,
                 )
 
-            assertThat(movement?.translationX).isEqualTo(0)
-            assertThat(movement?.translationY).isEqualTo(0)
+            assertThat(movement?.translationX).isEqualTo(20)
+            assertThat(movement?.translationY).isEqualTo(30)
             assertThat(movement?.scale).isEqualTo(0.5f)
             assertThat(movement?.scaleClockOnly).isEqualTo(false)
         }
 
     @Test
-    fun translationAndScale_composeFlagOn_weatherLargeClock() =
-        testBurnInViewModelWhenComposeFlagOn(
+    fun translationAndScale_composeFlagOff_weatherLargeClock() =
+        testBurnInViewModelForClocks(
             isSmallClock = false,
             isWeatherClock = true,
-            expectedScaleOnly = false
+            expectedScaleOnly = false,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = false
+        )
+
+    @Test
+    fun translationAndScale_composeFlagOff_weatherSmallClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = true,
+            isWeatherClock = true,
+            expectedScaleOnly = false,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = false
+        )
+
+    @Test
+    fun translationAndScale_composeFlagOff_nonWeatherLargeClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = false,
+            isWeatherClock = false,
+            expectedScaleOnly = true,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = false
+        )
+
+    @Test
+    fun translationAndScale_composeFlagOff_nonWeatherSmallClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = true,
+            isWeatherClock = false,
+            expectedScaleOnly = false,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = false
+        )
+
+    @Test
+    fun translationAndScale_composeFlagOn_weatherLargeClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = false,
+            isWeatherClock = true,
+            expectedScaleOnly = false,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = true
         )
 
     @Test
     fun translationAndScale_composeFlagOn_weatherSmallClock() =
-        testBurnInViewModelWhenComposeFlagOn(
+        testBurnInViewModelForClocks(
             isSmallClock = true,
             isWeatherClock = true,
-            expectedScaleOnly = true
+            expectedScaleOnly = false,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = true
         )
 
     @Test
     fun translationAndScale_composeFlagOn_nonWeatherLargeClock() =
-        testBurnInViewModelWhenComposeFlagOn(
+        testBurnInViewModelForClocks(
             isSmallClock = false,
             isWeatherClock = false,
-            expectedScaleOnly = true
+            expectedScaleOnly = true,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = true
         )
 
     @Test
     fun translationAndScale_composeFlagOn_nonWeatherSmallClock() =
-        testBurnInViewModelWhenComposeFlagOn(
+        testBurnInViewModelForClocks(
             isSmallClock = true,
             isWeatherClock = false,
-            expectedScaleOnly = true
+            expectedScaleOnly = false,
+            enableMigrateClocksToBlueprintFlag = true,
+            enableComposeLockscreenFlag = true
         )
 
-    private fun testBurnInViewModelWhenComposeFlagOn(
+    private fun testBurnInViewModelForClocks(
         isSmallClock: Boolean,
         isWeatherClock: Boolean,
-        expectedScaleOnly: Boolean
+        expectedScaleOnly: Boolean,
+        enableMigrateClocksToBlueprintFlag: Boolean,
+        enableComposeLockscreenFlag: Boolean
     ) =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-            mSetFlagsRule.enableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
+            if (enableMigrateClocksToBlueprintFlag) {
+                mSetFlagsRule.enableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+            } else {
+                mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+            }
+
+            if (enableComposeLockscreenFlag) {
+                mSetFlagsRule.enableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
+            } else {
+                mSetFlagsRule.disableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
+            }
             if (isSmallClock) {
                 keyguardClockRepository.setClockSize(ClockSize.SMALL)
                 // we need the following step to update stateFlow value

@@ -257,23 +257,6 @@ object KeyguardRootViewBinder {
                                         it.scaleX = scaleViewModel.scale
                                         it.scaleY = scaleViewModel.scale
                                     }
-                                    // Make sure to reset these views, or they will be invisible
-                                    if (childViews[burnInLayerId]?.scaleX != 1f) {
-                                        childViews[burnInLayerId]?.scaleX = 1f
-                                        childViews[burnInLayerId]?.scaleY = 1f
-                                        childViews[aodNotificationIconContainerId]?.scaleX = 1f
-                                        childViews[aodNotificationIconContainerId]?.scaleY = 1f
-                                        view.requestLayout()
-                                    }
-                                } else {
-                                    // For weather clock, large clock should have only scale
-                                    // transition with other parts in burnInLayer
-                                    childViews[burnInLayerId]?.scaleX = scaleViewModel.scale
-                                    childViews[burnInLayerId]?.scaleY = scaleViewModel.scale
-                                    childViews[aodNotificationIconContainerId]?.scaleX =
-                                        scaleViewModel.scale
-                                    childViews[aodNotificationIconContainerId]?.scaleY =
-                                        scaleViewModel.scale
                                 }
                             }
                         }
