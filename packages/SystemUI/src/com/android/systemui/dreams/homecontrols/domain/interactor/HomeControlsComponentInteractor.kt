@@ -21,7 +21,6 @@ import android.app.DreamManager
 import android.content.ComponentName
 import android.os.PowerManager
 import android.os.UserHandle
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.domain.interactor.PackageChangeInteractor
 import com.android.systemui.common.shared.model.PackageChangeModel
 import com.android.systemui.controls.ControlsServiceInfo
@@ -36,6 +35,7 @@ import com.android.systemui.util.kotlin.getOrNull
 import com.android.systemui.util.kotlin.pairwiseBy
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.time.SystemClock
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
@@ -132,7 +132,7 @@ constructor(
                         ?: panels.firstOrNull()
                 item?.panelActivity
             }
-            .stateIn(bgScope, SharingStarted.WhileSubscribed(), null)
+            .stateIn(bgScope, SharingStarted.Eagerly, null)
 
     private val taskFragmentFinished =
         MutableSharedFlow<Long>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
