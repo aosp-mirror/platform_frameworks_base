@@ -71,7 +71,7 @@
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Калкып чыкма билдирмени жабуу"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Жазышууда калкып чыкма билдирмелер көрүнбөсүн"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Калкып чыкма билдирмелер аркылуу маектешүү"</string>
-    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Жаңы жазышуулар калкыма сүрөтчөлөр же калкып чыкма билдирмелер түрүндө көрүнөт. Калкып чыкма билдирмелерди ачуу үчүн таптап коюңуз. Жылдыруу үчүн сүйрөңүз."</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Жаңы жазышуулар калкыма сүрөтчөлөр же калкып чыкма билдирмелер түрүндө көрүнөт. Калкып чыкма билдирмелерди ачуу үчүн тийип коюңуз. Жылдыруу үчүн сүйрөңүз."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Калкып чыкма билдирмелерди каалаган убакта көзөмөлдөңүз"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Бул колдонмодогу калкып чыкма билдирмелерди өчүрүү үчүн \"Башкарууну\" басыңыз"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Түшүндүм"</string>

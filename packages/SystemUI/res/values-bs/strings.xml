@@ -149,7 +149,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Skeniranje lica"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Pošalji"</string>
     <string name="cancel" msgid="1089011503403416730">"Otkaži"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Potvrdite"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Potvrdi"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Pokušaj ponovo"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Dodirnite da otkažete autentifikaciju"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"Pokušajte ponovo"</string>
@@ -262,7 +262,7 @@
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Nema dostupnih uparenih uređaja"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Dodirnite da povežete ili prekinete povezanost uređaja"</string>
-    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Upari novi uređaj"</string>
+    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Uparite novi uređaj"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Prikaži sve"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Koristi Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Povezano"</string>

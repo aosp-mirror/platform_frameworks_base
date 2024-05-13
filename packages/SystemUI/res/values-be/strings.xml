@@ -618,8 +618,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Спадарожнікавая сувязь, дрэннае падключэнне"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Спадарожнікавая сувязь, добрае падключэнне"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Спадарожнікавая сувязь, падключэнне даступнае"</string>
-    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Экстраннае спадарожнікавае падключэнне"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Працоўны профіль"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Цікава для некаторых, але не для ўсіх"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Наладка сістэмнага інтэрфейсу карыстальніка дае вам дадатковыя спосабы наладжвання і дапасоўвання карыстальніцкага інтэрфейсу Android. Гэтыя эксперыментальныя функцыі могуць змяніцца, перастаць працаваць або знікнуць у будучых версіях. Карыстайцеся з асцярожнасцю."</string>

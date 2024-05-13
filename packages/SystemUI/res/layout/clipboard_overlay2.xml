@@ -31,7 +31,7 @@
         android:layout_width="0dp"
         android:elevation="4dp"
         android:background="@drawable/shelf_action_chip_container_background"
-        android:layout_marginStart="@dimen/overlay_action_container_margin_horizontal"
+        android:layout_marginStart="@dimen/overlay_action_container_minimum_edge_spacing"
         android:layout_marginBottom="@dimen/overlay_action_container_margin_bottom"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/actions_container"

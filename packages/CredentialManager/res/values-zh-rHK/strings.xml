@@ -73,7 +73,7 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"要以此登入方式使用「<xliff:g id="APP_NAME">%1$s</xliff:g>」嗎？"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"要解鎖「<xliff:g id="APP_NAME">%1$s</xliff:g>」的登入選項嗎？"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"選擇已儲存的「<xliff:g id="APP_NAME">%1$s</xliff:g>」密鑰"</string>
-    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"選擇已儲存的「<xliff:g id="APP_NAME">%1$s</xliff:g>」密碼"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"選擇「<xliff:g id="APP_NAME">%1$s</xliff:g>」的儲存密碼"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"選擇已儲存的「<xliff:g id="APP_NAME">%1$s</xliff:g>」登入資料"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"選擇用於「<xliff:g id="APP_NAME">%1$s</xliff:g>」的登入方式"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"要選擇適用於「<xliff:g id="APP_NAME">%1$s</xliff:g>」的項目嗎？"</string>

@@ -153,7 +153,7 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> след <xliff:g id="TIME_DELAY">{2}</xliff:g> секунди"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Не е пренасочено"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Не е пренасочено"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Сигурност на мобилната мрежа"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Сигурност на клетъчната мрежа"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Преглед на настройките"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Осъществен е достъп до идентификатора на устройството"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Мрежа, свързана с(ъс) <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g>, записа уникалния идентификатор на устройството ви (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> пъти за периода <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> – <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
@@ -2135,6 +2135,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Известие с информация за режима на поредица"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Режимът за запазване на батерията е включен"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Използването на батерията се намалява с цел удължаване на живота ѝ"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"Режимът за запазване на батерията е включен"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"Режимът за запазване на батерията е включен с цел удължаване на живота ѝ"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Режим за запазване на батерията"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Режимът за запазване на батерията е изключен"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Батерията на телефона има достатъчно заряд. Функциите вече не са ограничени."</string>
@@ -2393,4 +2395,22 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Можете да изпращате и получавате съобщения без мобилна или Wi-Fi мрежа"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Отваряне на Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Начин на работа"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

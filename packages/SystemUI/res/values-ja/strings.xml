@@ -266,7 +266,7 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"すべて表示"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth を使用"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"接続しました"</string>
-    <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"保存しました"</string>
+    <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"保存済み"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"接続を解除"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"有効化"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"明日自動的に ON に戻す"</string>

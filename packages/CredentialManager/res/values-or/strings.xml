@@ -57,9 +57,9 @@
     <string name="set_as_default" msgid="4415328591568654603">"ଡିଫଲ୍ଟ ଭାବେ ସେଟ କରନ୍ତୁ"</string>
     <string name="settings" msgid="6536394145760913145">"ସେଟିଂସ"</string>
     <string name="use_once" msgid="9027366575315399714">"ଥରେ ବ୍ୟବହାର କରନ୍ତୁ"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>ଟି ପାସୱାର୍ଡ • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>ଟି ପାସକୀ"</string>
-    <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>ଟି ପାସୱାର୍ଡ"</string>
-    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>ଟି ପାସକୀ"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ପାସୱାର୍ଡ • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> ପାସକୀ"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ପାସୱାର୍ଡ"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> ପାସକୀ"</string>
     <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>ଟି କ୍ରେଡେନସିଆଲ"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"ପାସକୀ"</string>
     <string name="another_device" msgid="5147276802037801217">"ଅନ୍ୟ ଏକ ଡିଭାଇସ"</string>

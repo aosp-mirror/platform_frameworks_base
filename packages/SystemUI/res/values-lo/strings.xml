@@ -590,7 +590,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"ການຄວບຄຸມສຽງ %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"ການໂທ ແລະ ການແຈ້ງເຕືອນຈະມີສຽງດັງ (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"ກຳລັງຫຼິ້ນ <xliff:g id="LABEL">%s</xliff:g> ໃນ"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ສຽງຈະຫຼິ້ນຕໍ່ໄປ"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ສຽງຈະຫຼິ້ນຢູ່"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"ແຖບສະຖານະ"</string>
     <string name="demo_mode" msgid="263484519766901593">"ໂໝດເດໂມສ່ວນຕິດຕໍ່ຜູ້ໃຊ້ລະບົບ"</string>

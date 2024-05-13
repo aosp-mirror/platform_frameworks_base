@@ -16,11 +16,11 @@
 
 package com.android.wm.shell.draganddrop;
 
-import static android.app.StatusBarManager.DISABLE2_NONE;
 import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.content.pm.ActivityInfo.CONFIG_ASSETS_PATHS;
 import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
@@ -516,20 +516,18 @@ public class DragLayout extends LinearLayout
     }
 
     private void animateFullscreenContainer(boolean visible) {
-        int flags = visible ? HIDE_STATUS_BAR_FLAGS : DISABLE_NONE;
-        StatusBarManager.DisableInfo disableInfo = new StatusBarManager.DisableInfo(flags,
-                DISABLE2_NONE);
-        mStatusBarManager.requestDisabledComponent(disableInfo, "animateFullscreenContainer");
+        mStatusBarManager.disable(visible
+                ? HIDE_STATUS_BAR_FLAGS
+                : DISABLE_NONE);
         // We're only using the first drop zone if there is one fullscreen target
         mDropZoneView1.setShowingMargin(visible);
         mDropZoneView1.setShowingHighlight(visible);
     }
 
     private void animateSplitContainers(boolean visible, Runnable animCompleteCallback) {
-        int flags = visible ? HIDE_STATUS_BAR_FLAGS : DISABLE_NONE;
-        StatusBarManager.DisableInfo disableInfo = new StatusBarManager.DisableInfo(flags,
-                DISABLE2_NONE);
-        mStatusBarManager.requestDisabledComponent(disableInfo, "animateSplitContainers");
+        mStatusBarManager.disable(visible
+                ? HIDE_STATUS_BAR_FLAGS
+                : DISABLE_NONE);
         mDropZoneView1.setShowingMargin(visible);
         mDropZoneView2.setShowingMargin(visible);
         Animator animator = mDropZoneView1.getAnimator();
