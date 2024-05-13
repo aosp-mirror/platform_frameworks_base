@@ -37,6 +37,14 @@ object ActionButtonViewBinder {
         // models would remove/create separate views.
         drawable?.setIcon(viewModel.appearance.icon)
         textView.text = viewModel.appearance.label
+
+        viewModel.appearance.customBackground?.also {
+            if (it.canApplyTheme()) {
+                it.applyTheme(view.rootView.context.theme)
+            }
+            view.background = it
+        }
+
         setMargins(iconView, textView, viewModel.appearance.label?.isNotEmpty() ?: false)
         if (viewModel.onClicked != null) {
             view.setOnClickListener { viewModel.onClicked.invoke() }
