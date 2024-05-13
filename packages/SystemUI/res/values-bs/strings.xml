@@ -134,7 +134,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Skeniranje lica"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Pošalji"</string>
     <string name="cancel" msgid="1089011503403416730">"Otkaži"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Potvrdite"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Potvrdi"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Pokušaj ponovo"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Dodirnite da otkažete autentifikaciju"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"Pokušajte ponovo"</string>
