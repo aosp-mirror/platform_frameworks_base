@@ -1704,6 +1704,15 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         final Transition transit = task.mTransitionController.requestCloseTransitionIfNeeded(task);
         if (transit != null) {
             transit.collectClose(task);
+            if (!task.mTransitionController.useFullReadyTracking()) {
+                // If a transition was created here, it means this is an isolated removeTask. It's
+                // possible for there to be no consequent operations (eg. this is a multiwindow task
+                // closing so nothing becomes visible in response) so we must "touch" the old ready
+                // tracker so that it doesn't get stuck. However, since the old ready tracker
+                // doesn't support multiple conditions, we have to touch it here at the beginning
+                // before anything that may need it to wait (setReady(false)).
+                transit.setReady(task, true);
+            }
         } else if (task.mTransitionController.isCollecting()) {
             task.mTransitionController.getCollectingTransition().collectClose(task);
         }
