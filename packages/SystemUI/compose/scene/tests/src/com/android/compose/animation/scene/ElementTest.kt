@@ -1078,7 +1078,6 @@ class ElementTest {
                         from(SceneA, to = SceneB) { spec = tween(duration, easing = LinearEasing) }
                         from(SceneB, to = SceneC) { spec = tween(duration, easing = LinearEasing) }
                     },
-                    enableInterruptions = false,
                 )
             }
 
