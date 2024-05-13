@@ -17,7 +17,18 @@
 package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.log.core.FakeLogBuffer
+import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 
-val Kosmos.infiniteGridLayout by
-    Kosmos.Fixture { InfiniteGridLayout(iconTilesInteractor, infiniteGridSizeInteractor) }
+val Kosmos.gridConsistencyInteractor by
+    Kosmos.Fixture {
+        GridConsistencyInteractor(
+            gridLayoutTypeInteractor,
+            currentTilesInteractor,
+            gridConsistencyInteractorsMap,
+            noopGridConsistencyInteractor,
+            FakeLogBuffer.Factory.create(),
+            applicationCoroutineScope,
+        )
+    }

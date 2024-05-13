@@ -16,8 +16,12 @@
 
 package com.android.systemui.qs.panels.domain.interactor
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.pipeline.shared.TileSpec
+import javax.inject.Inject
 
-val Kosmos.infiniteGridLayout by
-    Kosmos.Fixture { InfiniteGridLayout(iconTilesInteractor, infiniteGridSizeInteractor) }
+/** [GridTypeConsistencyInteractor] implementation that doesn't do any changes to tiles. */
+@SysUISingleton
+class NoopGridConsistencyInteractor @Inject constructor() : GridTypeConsistencyInteractor {
+    override fun reconcileTiles(tiles: List<TileSpec>): List<TileSpec> = tiles
+}

@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.data.repository
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
 
-val Kosmos.infiniteGridLayout by
-    Kosmos.Fixture { InfiniteGridLayout(iconTilesInteractor, infiniteGridSizeInteractor) }
+val Kosmos.infiniteGridSizeRepository by Kosmos.Fixture { InfiniteGridSizeRepository() }

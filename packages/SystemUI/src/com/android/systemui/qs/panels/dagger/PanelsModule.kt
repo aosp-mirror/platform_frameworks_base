@@ -16,8 +16,17 @@
 
 package com.android.systemui.qs.panels.dagger
 
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogBufferFactory
+import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepository
+import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepositoryImpl
 import com.android.systemui.qs.panels.data.repository.IconTilesRepository
 import com.android.systemui.qs.panels.data.repository.IconTilesRepositoryImpl
+import com.android.systemui.qs.panels.domain.interactor.GridTypeConsistencyInteractor
+import com.android.systemui.qs.panels.domain.interactor.InfiniteGridConsistencyInteractor
+import com.android.systemui.qs.panels.domain.interactor.NoopGridConsistencyInteractor
+import com.android.systemui.qs.panels.shared.model.GridConsistencyLog
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
 import com.android.systemui.qs.panels.ui.compose.GridLayout
@@ -31,7 +40,22 @@ import dagger.multibindings.IntoSet
 interface PanelsModule {
     @Binds fun bindIconTilesRepository(impl: IconTilesRepositoryImpl): IconTilesRepository
 
+    @Binds
+    fun bindGridLayoutTypeRepository(impl: GridLayoutTypeRepositoryImpl): GridLayoutTypeRepository
+
+    @Binds
+    fun bindDefaultGridConsistencyInteractor(
+        impl: NoopGridConsistencyInteractor
+    ): GridTypeConsistencyInteractor
+
     companion object {
+        @Provides
+        @SysUISingleton
+        @GridConsistencyLog
+        fun providesGridConsistencyLog(factory: LogBufferFactory): LogBuffer {
+            return factory.create("GridConsistencyLog", 50)
+        }
+
         @Provides
         @IntoSet
         fun provideGridLayout(gridLayout: InfiniteGridLayout): Pair<GridLayoutType, GridLayout> {
@@ -42,6 +66,21 @@ interface PanelsModule {
         fun provideGridLayoutMap(
             entries: Set<@JvmSuppressWildcards Pair<GridLayoutType, GridLayout>>
         ): Map<GridLayoutType, GridLayout> {
+            return entries.toMap()
+        }
+
+        @Provides
+        @IntoSet
+        fun provideGridConsistencyInteractor(
+            consistencyInteractor: InfiniteGridConsistencyInteractor
+        ): Pair<GridLayoutType, GridTypeConsistencyInteractor> {
+            return Pair(InfiniteGridLayoutType, consistencyInteractor)
+        }
+
+        @Provides
+        fun provideGridConsistencyInteractorMap(
+            entries: Set<@JvmSuppressWildcards Pair<GridLayoutType, GridTypeConsistencyInteractor>>
+        ): Map<GridLayoutType, GridTypeConsistencyInteractor> {
             return entries.toMap()
         }
     }

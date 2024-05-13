@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.shared.model
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
+import javax.inject.Qualifier
 
-val Kosmos.infiniteGridLayout by
-    Kosmos.Fixture { InfiniteGridLayout(iconTilesInteractor, infiniteGridSizeInteractor) }
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class GridConsistencyLog()
