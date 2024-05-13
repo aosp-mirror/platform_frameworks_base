@@ -1188,10 +1188,12 @@ public class BubbleController implements ConfigurationChangeListener,
      * A bubble is no longer being dragged in Launcher. And was released in given location.
      * Will be called only when bubble bar is expanded.
      *
-     * @param location  location where bubble was released
+     * @param location location where bubble was released
+     * @param topOnScreen      top coordinate of the bubble bar on the screen after release
      */
-    public void stopBubbleDrag(BubbleBarLocation location) {
+    public void stopBubbleDrag(BubbleBarLocation location, int topOnScreen) {
         mBubblePositioner.setBubbleBarLocation(location);
+        mBubblePositioner.setBubbleBarTopOnScreen(topOnScreen);
         if (mBubbleData.getSelectedBubble() != null) {
             mBubbleBarViewCallback.expansionChanged(/* isExpanded = */ true);
         }
@@ -1247,8 +1249,8 @@ public class BubbleController implements ConfigurationChangeListener,
      * <p>This is used by external callers (launcher).
      */
     @VisibleForTesting
-    public void expandStackAndSelectBubbleFromLauncher(String key, Rect bubbleBarBounds) {
-        mBubblePositioner.setBubbleBarBounds(bubbleBarBounds);
+    public void expandStackAndSelectBubbleFromLauncher(String key, int topOnScreen) {
+        mBubblePositioner.setBubbleBarTopOnScreen(topOnScreen);
 
         if (BubbleOverflow.KEY.equals(key)) {
             mBubbleData.setSelectedBubbleFromLauncher(mBubbleData.getOverflow());
@@ -2359,10 +2361,9 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         @Override
-        public void showBubble(String key, Rect bubbleBarBounds) {
+        public void showBubble(String key, int topOnScreen) {
             mMainExecutor.execute(
-                    () -> mController.expandStackAndSelectBubbleFromLauncher(
-                            key, bubbleBarBounds));
+                    () -> mController.expandStackAndSelectBubbleFromLauncher(key, topOnScreen));
         }
 
         @Override
@@ -2381,8 +2382,8 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         @Override
-        public void stopBubbleDrag(BubbleBarLocation location) {
-            mMainExecutor.execute(() -> mController.stopBubbleDrag(location));
+        public void stopBubbleDrag(BubbleBarLocation location, int topOnScreen) {
+            mMainExecutor.execute(() -> mController.stopBubbleDrag(location, topOnScreen));
         }
 
         @Override
@@ -2403,9 +2404,9 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         @Override
-        public void setBubbleBarBounds(Rect bubbleBarBounds) {
+        public void updateBubbleBarTopOnScreen(int topOnScreen) {
             mMainExecutor.execute(() -> {
-                mBubblePositioner.setBubbleBarBounds(bubbleBarBounds);
+                mBubblePositioner.setBubbleBarTopOnScreen(topOnScreen);
                 if (mLayerView != null) mLayerView.updateExpandedView();
             });
         }

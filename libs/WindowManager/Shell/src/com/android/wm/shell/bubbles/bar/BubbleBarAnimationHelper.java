@@ -237,12 +237,10 @@ public class BubbleBarAnimationHelper {
 
     private void setScaleFromBubbleBar(AnimatableScaleMatrix matrix, float scale) {
         // Set the pivot point for the scale, so the view animates out from the bubble bar.
-        Rect bubbleBarBounds = mPositioner.getBubbleBarBounds();
-        matrix.setScale(
-                scale,
-                scale,
-                bubbleBarBounds.centerX(),
-                bubbleBarBounds.top);
+        Rect availableRect = mPositioner.getAvailableRect();
+        float pivotX = mPositioner.isBubbleBarOnLeft() ? availableRect.left : availableRect.right;
+        float pivotY = mPositioner.getBubbleBarTopOnScreen();
+        matrix.setScale(scale, scale, pivotX, pivotY);
     }
 
     /**
