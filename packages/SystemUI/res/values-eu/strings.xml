@@ -447,6 +447,8 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Widgetak pertsonalizatzeko, sakatu luze"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Pertsonalizatu widgetak"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Desgaitutako widgetaren aplikazio-ikonoa"</string>
+    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"Editatu widgeta"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Kendu"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Gehitu widget bat"</string>
@@ -461,10 +463,8 @@
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"Pertsonalizatu widgetak"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"Pantaila blokeatuko widgetak"</string>
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"hautatu widget bat"</string>
-    <!-- no translation found for accessibility_action_label_remove_widget (3373779447448758070) -->
-    <skip />
-    <!-- no translation found for accessibility_action_label_place_widget (1914197458644168978) -->
-    <skip />
+    <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"kendu widgeta"</string>
+    <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"kokatu hautatutako widgeta"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Aldatu erabiltzailea"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"zabaldu menua"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Saioko aplikazio eta datu guztiak ezabatuko dira."</string>
@@ -629,12 +629,17 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"Ireki emaitzaren ezarpenak"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"Bolumenaren botoi lerrakorrak zabalduta daude"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"Bolumenaren botoi lerrakorrak tolestuta daude"</string>
-    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"desaktibatu honen audioa: %s"</string>
-    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"aktibatu honen audioa: %s"</string>
+    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> hemen erreproduzitzen:"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"Audioak abian jarraituko du hemen:"</string>
-    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
-    <skip />
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"Honen bidez deitzen"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Sistemaren erabiltzaile-interfazearen konfiguratzailea"</string>
     <string name="status_bar" msgid="4357390266055077437">"Egoera-barra"</string>
     <string name="demo_mode" msgid="263484519766901593">"Sistemaren erabiltzaile-interfazearen demo modua"</string>
