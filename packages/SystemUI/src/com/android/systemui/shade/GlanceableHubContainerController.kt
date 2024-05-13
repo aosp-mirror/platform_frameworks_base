@@ -40,6 +40,7 @@ import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
 import com.android.systemui.communal.dagger.Communal
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.ui.compose.CommunalContainer
+import com.android.systemui.communal.ui.compose.CommunalContent
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -50,7 +51,6 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
@@ -69,12 +69,12 @@ class GlanceableHubContainerController
 constructor(
     private val communalInteractor: CommunalInteractor,
     private val communalViewModel: CommunalViewModel,
-    private val dialogFactory: SystemUIDialogFactory,
     private val keyguardInteractor: KeyguardInteractor,
     private val shadeInteractor: ShadeInteractor,
     private val powerManager: PowerManager,
     private val communalColors: CommunalColors,
     private val ambientTouchComponentFactory: AmbientTouchComponent.Factory,
+    private val communalContent: CommunalContent,
     @Communal private val dataSourceDelegator: SceneDataSourceDelegator
 ) : LifecycleOwner {
     /** The container view for the hub. This will not be initialized until [initView] is called. */
@@ -180,7 +180,7 @@ constructor(
                                         viewModel = communalViewModel,
                                         colors = communalColors,
                                         dataSourceDelegator = dataSourceDelegator,
-                                        dialogFactory = dialogFactory,
+                                        content = communalContent,
                                     )
                                 }
                             }
