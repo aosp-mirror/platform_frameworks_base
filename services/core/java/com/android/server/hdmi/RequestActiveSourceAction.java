@@ -21,13 +21,20 @@ import android.hardware.hdmi.IHdmiControlCallback;
 import android.util.Slog;
 
 /**
- * Feature action that sends <Request Active Source> message and waits for <Active Source>.
+ * Feature action that sends <Request Active Source> message and waits for <Active Source> on TV
+ * panels.
+ * This action has a delay before sending <Request Active Source>. This is because it should wait
+ * for a possible request from LauncherX and can be cancelled if an <Active Source> message was
+ * received or the TV switched to another input.
  */
 public class RequestActiveSourceAction extends HdmiCecFeatureAction {
     private static final String TAG = "RequestActiveSourceAction";
 
+    // State to wait for the LauncherX to call the CEC API.
+    private static final int STATE_WAIT_FOR_LAUNCHERX_API_CALL = 1;
+
     // State to wait for the <Active Source> message.
-    private static final int STATE_WAIT_FOR_ACTIVE_SOURCE = 1;
+    private static final int STATE_WAIT_FOR_ACTIVE_SOURCE = 2;
 
     // Number of retries <Request Active Source> is sent if no device answers this message.
     private static final int MAX_SEND_RETRY_COUNT = 1;
@@ -43,10 +50,12 @@ public class RequestActiveSourceAction extends HdmiCecFeatureAction {
     boolean start() {
         Slog.v(TAG, "RequestActiveSourceAction started.");
 
-        sendCommand(HdmiCecMessageBuilder.buildRequestActiveSource(getSourceAddress()));
+        mState = STATE_WAIT_FOR_LAUNCHERX_API_CALL;
 
-        mState = STATE_WAIT_FOR_ACTIVE_SOURCE;
-        addTimer(mState, HdmiConfig.TIMEOUT_MS);
+        // We wait for default timeout to allow the message triggered by the LauncherX API call to
+        // be sent by the TV and another default timeout in case the message has to be answered
+        // (e.g. TV sent a <Set Stream Path> or <Routing Change>).
+        addTimer(mState, HdmiConfig.TIMEOUT_MS * 2);
         return true;
     }
 
@@ -65,13 +74,23 @@ public class RequestActiveSourceAction extends HdmiCecFeatureAction {
         if (mState != state) {
             return;
         }
-        if (mState == STATE_WAIT_FOR_ACTIVE_SOURCE) {
-            if (mSendRetryCount++ < MAX_SEND_RETRY_COUNT) {
+
+        switch (mState) {
+            case STATE_WAIT_FOR_LAUNCHERX_API_CALL:
+                mState = STATE_WAIT_FOR_ACTIVE_SOURCE;
                 sendCommand(HdmiCecMessageBuilder.buildRequestActiveSource(getSourceAddress()));
                 addTimer(mState, HdmiConfig.TIMEOUT_MS);
-            } else {
-                finishWithCallback(HdmiControlManager.RESULT_TIMEOUT);
-            }
+                return;
+            case STATE_WAIT_FOR_ACTIVE_SOURCE:
+                if (mSendRetryCount++ < MAX_SEND_RETRY_COUNT) {
+                    sendCommand(HdmiCecMessageBuilder.buildRequestActiveSource(getSourceAddress()));
+                    addTimer(mState, HdmiConfig.TIMEOUT_MS);
+                } else {
+                    finishWithCallback(HdmiControlManager.RESULT_TIMEOUT);
+                }
+                return;
+            default:
+                return;
         }
     }
 }
