@@ -288,7 +288,8 @@ private fun SceneScope.QuickSettingsScene(
                     }
 
                 Column(
-                    modifier = shadeHeaderAndQuickSettingsModifier,
+                    modifier =
+                        shadeHeaderAndQuickSettingsModifier.sysuiResTag("expanded_qs_scroll_view"),
                 ) {
                     when (LocalWindowSizeClass.current.widthSizeClass) {
                         WindowWidthSizeClass.Compact ->
@@ -336,7 +337,7 @@ private fun SceneScope.QuickSettingsScene(
                         viewModel.qsSceneAdapter,
                         { viewModel.qsSceneAdapter.qsHeight },
                         isSplitShade = false,
-                        modifier = Modifier.sysuiResTag("expanded_qs_scroll_view")
+                        modifier = Modifier.sysuiResTag("quick_settings_panel")
                     )
 
                     MediaCarousel(
