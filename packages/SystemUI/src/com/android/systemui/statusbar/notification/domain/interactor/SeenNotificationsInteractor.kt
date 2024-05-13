@@ -17,7 +17,9 @@
 package com.android.systemui.statusbar.notification.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 
@@ -36,4 +38,15 @@ constructor(
     fun setHasFilteredOutSeenNotifications(value: Boolean) {
         notificationListRepository.hasFilteredOutSeenNotifications.value = value
     }
+
+    /** Set the entry that is identified as the top unseen notification. */
+    fun setTopUnseenNotification(entry: NotificationEntry?) {
+        if (NotificationMinimalismPrototype.V2.isUnexpectedlyInLegacyMode()) return
+        notificationListRepository.topUnseenNotificationKey.value = entry?.key
+    }
+
+    /** Determine if the given notification is the top unseen notification. */
+    fun isTopUnseenNotification(entry: NotificationEntry?): Boolean =
+        if (NotificationMinimalismPrototype.V2.isUnexpectedlyInLegacyMode()) false
+        else entry != null && notificationListRepository.topUnseenNotificationKey.value == entry.key
 }

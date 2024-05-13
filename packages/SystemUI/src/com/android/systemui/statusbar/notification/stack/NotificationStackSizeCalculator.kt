@@ -72,6 +72,9 @@ constructor(
      */
     private var maxNotificationsExcludesMedia = false
 
+    /** Whether we allow keyguard to show less important notifications above the shelf. */
+    private var limitLockScreenToImportant = false
+
     /** Minimum space between two notifications, see [calculateGapAndDividerHeight]. */
     private var dividerHeight by notNull<Float>()
 
@@ -84,6 +87,14 @@ constructor(
     init {
         updateResources()
     }
+
+    private fun allowedByPolicy(stackHeight: StackHeight): Boolean =
+        if (limitLockScreenToImportant && stackHeight.includesLessImportantNotification) {
+            log { "\tallowedByPolicy = false" }
+            false
+        } else {
+            true
+        }
 
     /**
      * Returns whether notifications and (shelf if visible) can fit in total space available.
@@ -183,11 +194,12 @@ constructor(
         log { "\tGet maxNotifWithoutSavingSpace ---" }
         val maxNotifWithoutSavingSpace =
             stackHeightSequence.lastIndexWhile { heightResult ->
-                canStackFitInSpace(
-                    heightResult,
-                    notifSpace = notifSpace,
-                    shelfSpace = shelfSpace
-                ) == FitResult.FIT
+                allowedByPolicy(heightResult) &&
+                    canStackFitInSpace(
+                        heightResult,
+                        notifSpace = notifSpace,
+                        shelfSpace = shelfSpace
+                    ) == FitResult.FIT
             }
 
         // How many notifications we can show at heightWithoutLockscreenConstraints
@@ -212,11 +224,12 @@ constructor(
             saveSpaceOnLockscreen = true
             maxNotifications =
                 stackHeightSequence.lastIndexWhile { heightResult ->
-                    canStackFitInSpace(
-                        heightResult,
-                        notifSpace = notifSpace,
-                        shelfSpace = shelfSpace
-                    ) != FitResult.NO_FIT
+                    allowedByPolicy(heightResult) &&
+                        canStackFitInSpace(
+                            heightResult,
+                            notifSpace = notifSpace,
+                            shelfSpace = shelfSpace
+                        ) != FitResult.NO_FIT
                 }
             log { "\t--- maxNotifications=$maxNotifications" }
         }
@@ -318,7 +331,10 @@ constructor(
 
         // Float height of shelf (0 if shelf is not showing), and space before the shelf that
         // changes during the lockscreen <=> full shade transition.
-        val shelfHeightWithSpaceBefore: Float
+        val shelfHeightWithSpaceBefore: Float,
+
+        /** Whether this stack height includes less at least one important notification. */
+        val includesLessImportantNotification: Boolean
     )
 
     private fun computeHeightPerNotificationLimit(
@@ -331,12 +347,15 @@ constructor(
         var previous: ExpandableView? = null
         val onLockscreen = onLockscreen()
 
+        var includesLessImportantNotification = false
+
         // Only shelf. This should never happen, since we allow 1 view minimum (EmptyViewState).
         yield(
             StackHeight(
                 notifsHeight = 0f,
                 notifsHeightSavingSpace = 0f,
-                shelfHeightWithSpaceBefore = shelfHeight
+                shelfHeightWithSpaceBefore = shelfHeight,
+                includesLessImportantNotification = includesLessImportantNotification,
             )
         )
 
@@ -362,6 +381,18 @@ constructor(
                     spaceBeforeShelf + shelfHeight
                 }
 
+            if (limitLockScreenToImportant && !includesLessImportantNotification) {
+                val bucket = (currentNotification as? ExpandableNotificationRow)?.entry?.bucket
+                includesLessImportantNotification =
+                    when (bucket) {
+                        null,
+                        BUCKET_MEDIA_CONTROLS,
+                        BUCKET_HEADS_UP,
+                        BUCKET_FOREGROUND_SERVICE -> false
+                        else -> true
+                    }
+            }
+
             log {
                 "\tcomputeHeightPerNotificationLimit i=$i notifs=$notifications " +
                     "notifsHeightSavingSpace=$notifsWithCollapsedHun" +
@@ -371,7 +402,8 @@ constructor(
                 StackHeight(
                     notifsHeight = notifications,
                     notifsHeightSavingSpace = notifsWithCollapsedHun,
-                    shelfHeightWithSpaceBefore = shelfWithSpaceBefore
+                    shelfHeightWithSpaceBefore = shelfWithSpaceBefore,
+                    includesLessImportantNotification = includesLessImportantNotification,
                 )
             )
         }
@@ -382,11 +414,16 @@ constructor(
             infiniteIfNegative(
                 if (NotificationMinimalismPrototype.V1.isEnabled) {
                     NotificationMinimalismPrototype.V1.maxNotifs
+                } else if (NotificationMinimalismPrototype.V2.isEnabled) {
+                    1
                 } else {
                     resources.getInteger(R.integer.keyguard_max_notification_count)
                 }
             )
-        maxNotificationsExcludesMedia = NotificationMinimalismPrototype.V1.isEnabled
+        maxNotificationsExcludesMedia =
+            NotificationMinimalismPrototype.V1.isEnabled ||
+                NotificationMinimalismPrototype.V2.isEnabled
+        limitLockScreenToImportant = NotificationMinimalismPrototype.V2.isEnabled
 
         dividerHeight =
             max(1f, resources.getDimensionPixelSize(R.dimen.notification_divider_height).toFloat())

@@ -31,9 +31,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.compose.animation.scene.ObservableTransitionState;
@@ -57,6 +57,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
+import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
@@ -75,7 +76,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
@@ -86,6 +87,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Mock private WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private Pluggable.PluggableListener<NotifStabilityManager> mInvalidateListener;
+    @Mock private SeenNotificationsInteractor mSeenNotificationsInteractor;
     @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private VisibilityLocationProvider mVisibilityLocationProvider;
     @Mock private VisualStabilityProvider mVisualStabilityProvider;
@@ -121,6 +123,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
                 mHeadsUpManager,
                 mShadeAnimationInteractor,
                 mJavaAdapter,
+                mSeenNotificationsInteractor,
                 mStatusBarStateController,
                 mVisibilityLocationProvider,
                 mVisualStabilityProvider,

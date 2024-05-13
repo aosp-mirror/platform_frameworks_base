@@ -24,6 +24,11 @@ import com.android.systemui.flags.RefactorFlagUtils
 /** Helper for reading or using the minimalism prototype flag state. */
 @Suppress("NOTHING_TO_INLINE")
 object NotificationMinimalismPrototype {
+
+    val version: Int by lazy {
+        SystemProperties.getInt("persist.notification_minimalism_prototype.version", 2)
+    }
+
     object V1 {
         /** The aconfig flag name */
         const val FLAG_NAME = Flags.FLAG_NOTIFICATION_MINIMALISM_PROTOTYPE
@@ -35,7 +40,7 @@ object NotificationMinimalismPrototype {
         /** Is the heads-up cycling animation enabled */
         @JvmStatic
         inline val isEnabled
-            get() = Flags.notificationMinimalismPrototype()
+            get() = Flags.notificationMinimalismPrototype() && version == 1
 
         /**
          * the prototype will now show seen notifications on the locked shade by default, but this
@@ -58,6 +63,47 @@ object NotificationMinimalismPrototype {
                     SystemProperties.getInt(
                         "persist.notification_minimalism_prototype.lock_screen_max_notifs",
                         1
+                    )
+
+        /**
+         * Called to ensure code is only run when the flag is enabled. This protects users from the
+         * unintended behaviors caused by accidentally running new logic, while also crashing on an
+         * eng build to ensure that the refactor author catches issues in testing.
+         */
+        @JvmStatic
+        inline fun isUnexpectedlyInLegacyMode() =
+            RefactorFlagUtils.isUnexpectedlyInLegacyMode(isEnabled, FLAG_NAME)
+
+        /**
+         * Called to ensure code is only run when the flag is disabled. This will throw an exception
+         * if the flag is enabled to ensure that the refactor author catches issues in testing.
+         */
+        @JvmStatic
+        inline fun assertInLegacyMode() = RefactorFlagUtils.assertInLegacyMode(isEnabled, FLAG_NAME)
+    }
+    object V2 {
+        const val FLAG_NAME = Flags.FLAG_NOTIFICATION_MINIMALISM_PROTOTYPE
+
+        /** A token used for dependency declaration */
+        val token: FlagToken
+            get() = FlagToken(FLAG_NAME, isEnabled)
+
+        /** Is the heads-up cycling animation enabled */
+        @JvmStatic
+        inline val isEnabled
+            get() = Flags.notificationMinimalismPrototype() && version == 2
+
+        /**
+         * The prototype will (by default) use a promoter to ensure that the top unseen notification
+         * is not grouped, but this property read allows that behavior to be disabled.
+         */
+        val ungroupTopUnseen: Boolean
+            get() =
+                if (isUnexpectedlyInLegacyMode()) false
+                else
+                    SystemProperties.getBoolean(
+                        "persist.notification_minimalism_prototype.ungroup_top_unseen",
+                        true
                     )
 
         /**

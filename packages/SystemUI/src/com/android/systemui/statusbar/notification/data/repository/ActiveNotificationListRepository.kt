@@ -41,6 +41,9 @@ class ActiveNotificationListRepository @Inject constructor() {
 
     /** Stats about the list of notifications attached to the shade */
     val notifStats = MutableStateFlow(NotifStats.empty)
+
+    /** The key of the top unseen notification */
+    val topUnseenNotificationKey = MutableStateFlow<String?>(null)
 }
 
 /** Represents the notification list, comprised of groups and individual notifications. */
