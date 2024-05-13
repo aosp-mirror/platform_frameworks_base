@@ -79,6 +79,7 @@ import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createSplit
 import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
+import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController

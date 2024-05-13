@@ -115,7 +115,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
-import com.android.wm.shell.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInterface;
 
 import dagger.Lazy;

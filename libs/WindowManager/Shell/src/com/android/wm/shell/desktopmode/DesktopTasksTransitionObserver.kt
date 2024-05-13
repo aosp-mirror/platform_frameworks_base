@@ -23,6 +23,7 @@ import android.view.WindowManager
 import android.window.TransitionInfo
 import com.android.window.flags.Flags.enableDesktopWindowingWallpaperActivity
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.util.KtProtoLog
