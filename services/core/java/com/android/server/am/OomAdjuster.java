@@ -3313,7 +3313,13 @@ public class OomAdjuster {
         }
 
         final int curSchedGroup = state.getCurrentSchedulingGroup();
-        if (state.getSetSchedGroup() != curSchedGroup) {
+        if (app.getWaitingToKill() != null && app.mReceivers.numberOfCurReceivers() == 0
+                && ActivityManager.isProcStateBackground(state.getCurProcState())
+                && !state.hasStartedServices()) {
+            app.killLocked(app.getWaitingToKill(), ApplicationExitInfo.REASON_USER_REQUESTED,
+                    ApplicationExitInfo.SUBREASON_REMOVE_TASK, true);
+            success = false;
+        } else if (state.getSetSchedGroup() != curSchedGroup) {
             int oldSchedGroup = state.getSetSchedGroup();
             state.setSetSchedGroup(curSchedGroup);
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ || mService.mCurOomAdjUid == app.uid) {
@@ -3321,98 +3327,90 @@ public class OomAdjuster {
                         + " to " + curSchedGroup + ": " + state.getAdjType();
                 reportOomAdjMessageLocked(TAG_OOM_ADJ, msg);
             }
-            if (app.getWaitingToKill() != null && app.mReceivers.numberOfCurReceivers() == 0
-                    && ActivityManager.isProcStateBackground(state.getSetProcState())
-                    && !state.hasStartedServices()) {
-                app.killLocked(app.getWaitingToKill(), ApplicationExitInfo.REASON_USER_REQUESTED,
-                        ApplicationExitInfo.SUBREASON_REMOVE_TASK, true);
-                success = false;
-            } else {
-                int processGroup;
-                switch (curSchedGroup) {
-                    case SCHED_GROUP_BACKGROUND:
-                        processGroup = THREAD_GROUP_BACKGROUND;
-                        break;
-                    case SCHED_GROUP_TOP_APP:
-                    case SCHED_GROUP_TOP_APP_BOUND:
-                        processGroup = THREAD_GROUP_TOP_APP;
-                        break;
-                    case SCHED_GROUP_RESTRICTED:
-                        processGroup = THREAD_GROUP_RESTRICTED;
-                        break;
-                    default:
-                        processGroup = THREAD_GROUP_DEFAULT;
-                        break;
-                }
-                mProcessGroupHandler.sendMessage(mProcessGroupHandler.obtainMessage(
-                        0 /* unused */, app.getPid(), processGroup, app.processName));
-                try {
-                    final int renderThreadTid = app.getRenderThreadTid();
-                    if (curSchedGroup == SCHED_GROUP_TOP_APP) {
-                        // do nothing if we already switched to RT
-                        if (oldSchedGroup != SCHED_GROUP_TOP_APP) {
-                            app.getWindowProcessController().onTopProcChanged();
-                            if (mService.mUseFifoUiScheduling) {
-                                // Switch UI pipeline for app to SCHED_FIFO
-                                state.setSavedPriority(Process.getThreadPriority(app.getPid()));
-                                mService.scheduleAsFifoPriority(app.getPid(), true);
-                                if (renderThreadTid != 0) {
-                                    mService.scheduleAsFifoPriority(renderThreadTid,
-                                            /* suppressLogs */true);
-                                    if (DEBUG_OOM_ADJ) {
-                                        Slog.d("UI_FIFO", "Set RenderThread (TID " +
-                                                renderThreadTid + ") to FIFO");
-                                    }
-                                } else {
-                                    if (DEBUG_OOM_ADJ) {
-                                        Slog.d("UI_FIFO", "Not setting RenderThread TID");
-                                    }
-                                }
-                            } else {
-                                // Boost priority for top app UI and render threads
-                                setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
-                                if (renderThreadTid != 0) {
-                                    try {
-                                        setThreadPriority(renderThreadTid,
-                                                THREAD_PRIORITY_TOP_APP_BOOST);
-                                    } catch (IllegalArgumentException e) {
-                                        // thread died, ignore
-                                    }
-                                }
-                            }
-                        }
-                    } else if (oldSchedGroup == SCHED_GROUP_TOP_APP
-                            && curSchedGroup != SCHED_GROUP_TOP_APP) {
+            int processGroup;
+            switch (curSchedGroup) {
+                case SCHED_GROUP_BACKGROUND:
+                    processGroup = THREAD_GROUP_BACKGROUND;
+                    break;
+                case SCHED_GROUP_TOP_APP:
+                case SCHED_GROUP_TOP_APP_BOUND:
+                    processGroup = THREAD_GROUP_TOP_APP;
+                    break;
+                case SCHED_GROUP_RESTRICTED:
+                    processGroup = THREAD_GROUP_RESTRICTED;
+                    break;
+                default:
+                    processGroup = THREAD_GROUP_DEFAULT;
+                    break;
+            }
+            mProcessGroupHandler.sendMessage(mProcessGroupHandler.obtainMessage(
+                    0 /* unused */, app.getPid(), processGroup, app.processName));
+            try {
+                final int renderThreadTid = app.getRenderThreadTid();
+                if (curSchedGroup == SCHED_GROUP_TOP_APP) {
+                    // do nothing if we already switched to RT
+                    if (oldSchedGroup != SCHED_GROUP_TOP_APP) {
                         app.getWindowProcessController().onTopProcChanged();
                         if (mService.mUseFifoUiScheduling) {
-                            try {
-                                // Reset UI pipeline to SCHED_OTHER
-                                setThreadScheduler(app.getPid(), SCHED_OTHER, 0);
-                                setThreadPriority(app.getPid(), state.getSavedPriority());
-                                if (renderThreadTid != 0) {
-                                    setThreadScheduler(renderThreadTid,
-                                            SCHED_OTHER, 0);
+                            // Switch UI pipeline for app to SCHED_FIFO
+                            state.setSavedPriority(Process.getThreadPriority(app.getPid()));
+                            mService.scheduleAsFifoPriority(app.getPid(), true);
+                            if (renderThreadTid != 0) {
+                                mService.scheduleAsFifoPriority(renderThreadTid,
+                                        /* suppressLogs */true);
+                                if (DEBUG_OOM_ADJ) {
+                                    Slog.d("UI_FIFO", "Set RenderThread (TID "
+                                            + renderThreadTid + ") to FIFO");
                                 }
-                            } catch (IllegalArgumentException e) {
-                                Slog.w(TAG,
-                                        "Failed to set scheduling policy, thread does not exist:\n"
-                                                + e);
-                            } catch (SecurityException e) {
-                                Slog.w(TAG, "Failed to set scheduling policy, not allowed:\n" + e);
+                            } else {
+                                if (DEBUG_OOM_ADJ) {
+                                    Slog.d("UI_FIFO", "Not setting RenderThread TID");
+                                }
                             }
                         } else {
-                            // Reset priority for top app UI and render threads
-                            setThreadPriority(app.getPid(), 0);
+                            // Boost priority for top app UI and render threads
+                            setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
+                            if (renderThreadTid != 0) {
+                                try {
+                                    setThreadPriority(renderThreadTid,
+                                            THREAD_PRIORITY_TOP_APP_BOOST);
+                                } catch (IllegalArgumentException e) {
+                                    // thread died, ignore
+                                }
+                            }
                         }
+                    }
+                } else if (oldSchedGroup == SCHED_GROUP_TOP_APP
+                        && curSchedGroup != SCHED_GROUP_TOP_APP) {
+                    app.getWindowProcessController().onTopProcChanged();
+                    if (mService.mUseFifoUiScheduling) {
+                        try {
+                            // Reset UI pipeline to SCHED_OTHER
+                            setThreadScheduler(app.getPid(), SCHED_OTHER, 0);
+                            setThreadPriority(app.getPid(), state.getSavedPriority());
+                            if (renderThreadTid != 0) {
+                                setThreadScheduler(renderThreadTid,
+                                        SCHED_OTHER, 0);
+                            }
+                        } catch (IllegalArgumentException e) {
+                            Slog.w(TAG,
+                                    "Failed to set scheduling policy, thread does not exist:\n"
+                                            + e);
+                        } catch (SecurityException e) {
+                            Slog.w(TAG, "Failed to set scheduling policy, not allowed:\n" + e);
+                        }
+                    } else {
+                        // Reset priority for top app UI and render threads
+                        setThreadPriority(app.getPid(), 0);
+                    }
 
-                        if (renderThreadTid != 0) {
-                            setThreadPriority(renderThreadTid, THREAD_PRIORITY_DISPLAY);
-                        }
+                    if (renderThreadTid != 0) {
+                        setThreadPriority(renderThreadTid, THREAD_PRIORITY_DISPLAY);
                     }
-                } catch (Exception e) {
-                    if (DEBUG_ALL) {
-                        Slog.w(TAG, "Failed setting thread priority of " + app.getPid(), e);
-                    }
+                }
+            } catch (Exception e) {
+                if (DEBUG_ALL) {
+                    Slog.w(TAG, "Failed setting thread priority of " + app.getPid(), e);
                 }
             }
         }
