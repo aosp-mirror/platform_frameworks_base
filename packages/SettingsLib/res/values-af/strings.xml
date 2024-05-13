@@ -105,9 +105,9 @@
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Regs: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> battery"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktief"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Gestoor"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktief (net linkerkant)"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktief (net regterkant)"</string>
-    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktief (linkerkant en regterkant)"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktief (net links)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktief (net regs)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktief (links en regs)"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktief (net media). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> battery."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktiewe (net media). L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> battery"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Gekoppel (steun oudiodeling). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> battery"</string>

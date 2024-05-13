@@ -94,7 +94,7 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (без телефон), ниво на батеријата <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (без аудиовизуелни содржини), ниво на батеријата <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (без телефон и аудиовизуелни содржини), ниво на батеријата <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Активно. <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија."</string>
+    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Активно. Батерија: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"Активно. Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батерија, Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерија."</string>
     <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"Активно. Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија."</string>
     <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"Активно. Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија."</string>
@@ -159,7 +159,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Откажи"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Кога е поврзано, спарувањето одобрува пристап до контактите и историјата на повиците."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Не може да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не може да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g> поради погрешен PIN или лозинка."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не може да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g> поради погрешен PIN или криптографски клуч."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Не може да комуницира со <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Спарувањето е одбиено од <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компјутер"</string>
