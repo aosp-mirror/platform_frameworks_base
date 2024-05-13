@@ -67,6 +67,16 @@ public class DesktopModeStatus {
     private static final boolean ENFORCE_DEVICE_RESTRICTIONS = SystemProperties.getBoolean(
             "persist.wm.debug.desktop_mode_enforce_device_restrictions", true);
 
+    /** Override density for tasks when they're inside the desktop. */
+    public static final int DESKTOP_DENSITY_OVERRIDE =
+            SystemProperties.getInt("persist.wm.debug.desktop_mode_density", 284);
+
+    /** The minimum override density allowed for tasks inside the desktop. */
+    private static final int DESKTOP_DENSITY_MIN = 100;
+
+    /** The maximum override density allowed for tasks inside the desktop. */
+    private static final int DESKTOP_DENSITY_MAX = 1000;
+
     /**
      * Default value for {@code MAX_TASK_LIMIT}.
      */
@@ -144,5 +154,13 @@ public class DesktopModeStatus {
      */
     public static boolean canEnterDesktopMode(@NonNull Context context) {
         return (!enforceDeviceRestrictions() || isDesktopModeSupported(context)) && isEnabled();
+    }
+
+    /**
+     * Return {@code true} if the override desktop density is set.
+     */
+    public static boolean isDesktopDensityOverrideSet() {
+        return DESKTOP_DENSITY_OVERRIDE >= DESKTOP_DENSITY_MIN
+                && DESKTOP_DENSITY_OVERRIDE <= DESKTOP_DENSITY_MAX;
     }
 }

@@ -67,7 +67,6 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.DesktopModeAppControlsWindowDecorationViewHolder;
@@ -388,7 +387,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             // Should match the density of the task. The task may have had its density overridden
             // to be different that SysUI's.
             windowDecorConfig.setTo(taskInfo.configuration);
-        } else if (DesktopTasksController.isDesktopDensityOverrideSet()) {
+        } else if (DesktopModeStatus.isDesktopDensityOverrideSet()) {
             // The task has had its density overridden, but keep using the system's density to
             // layout the header.
             windowDecorConfig.setTo(context.getResources().getConfiguration());
@@ -948,7 +947,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 SyncTransactionQueue syncQueue,
                 RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
             final Configuration windowDecorConfig =
-                    DesktopTasksController.isDesktopDensityOverrideSet()
+                    DesktopModeStatus.isDesktopDensityOverrideSet()
                     ? context.getResources().getConfiguration() // Use system context
                     : taskInfo.configuration; // Use task configuration
             return new DesktopModeWindowDecoration(
