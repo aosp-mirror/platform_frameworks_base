@@ -132,6 +132,7 @@ public abstract class Pip2Module {
             PhonePipMenuController menuPhoneController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
+            @NonNull PipTransitionState pipTransitionState,
             @NonNull SizeSpecSource sizeSpecSource,
             PipMotionHelper pipMotionHelper,
             FloatingContentCoordinator floatingContentCoordinator,
@@ -139,8 +140,9 @@ public abstract class Pip2Module {
             @ShellMainThread ShellExecutor mainExecutor,
             Optional<PipPerfHintController> pipPerfHintControllerOptional) {
         return new PipTouchHandler(context, shellInit, menuPhoneController, pipBoundsAlgorithm,
-                pipBoundsState, sizeSpecSource, pipMotionHelper, floatingContentCoordinator,
-                pipUiEventLogger, mainExecutor, pipPerfHintControllerOptional);
+                pipBoundsState, pipTransitionState, sizeSpecSource, pipMotionHelper,
+                floatingContentCoordinator, pipUiEventLogger, mainExecutor,
+                pipPerfHintControllerOptional);
     }
 
     @WMSingleton
@@ -149,9 +151,13 @@ public abstract class Pip2Module {
             PipBoundsState pipBoundsState, PhonePipMenuController menuController,
             PipSnapAlgorithm pipSnapAlgorithm,
             FloatingContentCoordinator floatingContentCoordinator,
-            Optional<PipPerfHintController> pipPerfHintControllerOptional) {
+            PipScheduler pipScheduler,
+            Optional<PipPerfHintController> pipPerfHintControllerOptional,
+            PipBoundsAlgorithm pipBoundsAlgorithm,
+            PipTransitionState pipTransitionState) {
         return new PipMotionHelper(context, pipBoundsState, menuController, pipSnapAlgorithm,
-                floatingContentCoordinator, pipPerfHintControllerOptional);
+                floatingContentCoordinator, pipScheduler, pipPerfHintControllerOptional,
+                pipBoundsAlgorithm, pipTransitionState);
     }
 
     @WMSingleton
