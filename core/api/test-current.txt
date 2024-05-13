@@ -463,7 +463,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void togglePanel();
   }
 
-  public static final class StatusBarManager.DisableInfo implements android.os.Parcelable {
+  public static final class StatusBarManager.DisableInfo {
     method public boolean isRotationSuggestionDisabled();
   }
 

@@ -15,6 +15,8 @@
  */
 package com.android.systemui.qs.external;
 
+import static com.android.systemui.Flags.qsCustomTileClickGuaranteedBugFix;
+
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -222,9 +224,13 @@ public class TileServices extends IQSService.Stub {
                 return;
             }
             service.setBindRequested(true);
-            try {
-                service.getTileService().onStartListening();
-            } catch (RemoteException e) {
+            if (qsCustomTileClickGuaranteedBugFix()) {
+                service.onStartListeningFromRequest();
+            } else {
+                try {
+                    service.getTileService().onStartListening();
+                } catch (RemoteException e) {
+                }
             }
         }
     }

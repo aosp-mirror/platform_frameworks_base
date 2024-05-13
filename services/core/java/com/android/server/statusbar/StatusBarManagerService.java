@@ -20,9 +20,7 @@ import static android.Manifest.permission.CONTROL_DEVICE_STATE;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS;
-import static android.app.StatusBarManager.DISABLE2_MASK;
 import static android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE;
-import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.StatusBarManager.NAV_BAR_MODE_DEFAULT;
 import static android.app.StatusBarManager.NAV_BAR_MODE_KIDS;
 import static android.app.StatusBarManager.NavBarMode;
@@ -222,9 +220,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         int what1;
         int what2;
         IBinder token;
-        private String mReason;
 
-        DisableRecord(int userId, IBinder token) {
+        public DisableRecord(int userId, IBinder token) {
             this.userId = userId;
             this.token = token;
             try {
@@ -237,12 +234,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         @Override
         public void binderDied() {
             Slog.i(TAG, "binder died for pkg=" + pkg);
-            StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
-            disableForUser(info, token, pkg, userId, "Binder Died");
+            disableForUser(0, token, pkg, userId);
+            disable2ForUser(0, token, pkg, userId);
             token.unlinkToDeath(this, 0);
         }
 
-        public void setFlags(int what, int which, String pkg, String reason) {
+        public void setFlags(int what, int which, String pkg) {
             switch (which) {
                 case 1:
                     what1 = what;
@@ -256,7 +253,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                     break;
             }
             this.pkg = pkg;
-            this.mReason = reason;
         }
 
         public int getFlags(int which) {
@@ -275,8 +271,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         @Override
         public String toString() {
-            return String.format("userId=%d what1=0x%08X what2=0x%08X pkg=%s token=%s reason=%s",
-                    userId, what1, what2, pkg, token, mReason);
+            return String.format("userId=%d what1=0x%08X what2=0x%08X pkg=%s token=%s",
+                    userId, what1, what2, pkg, token);
         }
     }
 
@@ -1184,59 +1180,57 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         return mTracingEnabled;
     }
 
-    /**
-     * @deprecated
-     * Disable some features in the status bar.
-     *
-     * This method is deprecated and callers should use
-     * {@link #disableForUser(StatusBarManager.DisableInfo, IBinder, String, int, String)}
-     *
-     * @hide
-     */
-    @Deprecated
+    // TODO(b/117478341): make it aware of multi-display if needed.
     @Override
     public void disable(int what, IBinder token, String pkg) {
-        StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo(what & DISABLE_MASK,
-                what & DISABLE2_MASK);
-        disableForUser(info, token, pkg, mCurrentUserId, null);
-    }
-
-    /**
-     * @deprecated
-     * Disable some features in the status bar.
-     *
-     * This method is deprecated and callers should use
-     * {@link #disableForUser(StatusBarManager.DisableInfo, IBinder, String, int, String)}
-     *
-     * @hide
-     */
-    @Deprecated
-    @Override
-    public void disable2(int what, IBinder token, String pkg) {
-        StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo(what & DISABLE_MASK,
-                what & DISABLE2_MASK);
-        disableForUser(info, token, pkg, mCurrentUserId, null);
+        disableForUser(what, token, pkg, mCurrentUserId);
     }
 
     // TODO(b/117478341): make it aware of multi-display if needed.
     @Override
-    public void disableForUser(StatusBarManager.DisableInfo disableInfo, IBinder token, String pkg,
-            int userId, String reason) {
+    public void disableForUser(int what, IBinder token, String pkg, int userId) {
         enforceStatusBar();
+
         synchronized (mLock) {
-            Pair<Integer, Integer> flags = disableInfo.toFlags();
-            disableLocked(DEFAULT_DISPLAY, userId, flags.first, token, pkg, 1, reason);
-            disableLocked(DEFAULT_DISPLAY, userId, flags.second, token, pkg, 2, reason);
+            disableLocked(DEFAULT_DISPLAY, userId, what, token, pkg, 1);
+        }
+    }
+
+    // TODO(b/117478341): make it aware of multi-display if needed.
+    /**
+     * Disable additional status bar features. Pass the bitwise-or of the DISABLE2_* flags.
+     * To re-enable everything, pass {@link #DISABLE2_NONE}.
+     *
+     * Warning: Only pass DISABLE2_* flags into this function, do not use DISABLE_* flags.
+     */
+    @Override
+    public void disable2(int what, IBinder token, String pkg) {
+        disable2ForUser(what, token, pkg, mCurrentUserId);
+    }
+
+    // TODO(b/117478341): make it aware of multi-display if needed.
+    /**
+     * Disable additional status bar features for a given user. Pass the bitwise-or of the
+     * DISABLE2_* flags. To re-enable everything, pass {@link #DISABLE_NONE}.
+     *
+     * Warning: Only pass DISABLE2_* flags into this function, do not use DISABLE_* flags.
+     */
+    @Override
+    public void disable2ForUser(int what, IBinder token, String pkg, int userId) {
+        enforceStatusBar();
+
+        synchronized (mLock) {
+            disableLocked(DEFAULT_DISPLAY, userId, what, token, pkg, 2);
         }
     }
 
     private void disableLocked(int displayId, int userId, int what, IBinder token, String pkg,
-            int whichFlag, String reason) {
+            int whichFlag) {
         // It's important that the the callback and the call to mBar get done
         // in the same order when multiple threads are calling this function
         // so they are paired correctly.  The messages on the handler will be
         // handled in the order they were enqueued, but will be outside the lock.
-        manageDisableListLocked(userId, what, token, pkg, whichFlag, reason);
+        manageDisableListLocked(userId, what, token, pkg, whichFlag);
 
         // Ensure state for the current user is applied, even if passed a non-current user.
         final int net1 = gatherDisableActionsLocked(mCurrentUserId, 1);
@@ -1385,7 +1379,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         // also allows calls from window manager which is in this process.
         enforceStatusBarService();
 
-        final int unknownFlags = flags & ~DISABLE_MASK;
+        final int unknownFlags = flags & ~StatusBarManager.DISABLE_MASK;
         if (unknownFlags != 0) {
             Slog.e(TAG, "Unknown disable flags: 0x" + Integer.toHexString(unknownFlags),
                     new RuntimeException());
@@ -1394,8 +1388,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         if (SPEW) Slog.d(TAG, "setDisableFlags(0x" + Integer.toHexString(flags) + ")");
 
         synchronized (mLock) {
-            disableLocked(displayId, mCurrentUserId, flags, mSysUiVisToken, cause, 1,
-                    "setDisableFlags");
+            disableLocked(displayId, mCurrentUserId, flags, mSysUiVisToken, cause, 1);
         }
     }
 
@@ -2450,8 +2443,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     // ================================================================================
 
     // lock on mDisableRecords
-    void manageDisableListLocked(int userId, int what, IBinder token, String pkg, int which,
-            String reason) {
+    void manageDisableListLocked(int userId, int what, IBinder token, String pkg, int which) {
         if (SPEW) {
             Slog.d(TAG, "manageDisableList userId=" + userId
                     + " what=0x" + Integer.toHexString(what) + " pkg=" + pkg);
@@ -2473,7 +2465,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         // Update existing record
         if (record != null) {
-            record.setFlags(what, which, pkg, reason);
+            record.setFlags(what, which, pkg);
             if (record.isEmpty()) {
                 mDisableRecords.remove(i);
                 record.token.unlinkToDeath(record, 0);
@@ -2483,7 +2475,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         // Record doesn't exist, so we create a new one
         record = new DisableRecord(userId, token);
-        record.setFlags(what, which, pkg, reason);
+        record.setFlags(what, which, pkg);
         mDisableRecords.add(record);
     }
 

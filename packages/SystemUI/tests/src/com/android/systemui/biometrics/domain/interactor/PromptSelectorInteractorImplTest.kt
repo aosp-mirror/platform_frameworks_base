@@ -18,7 +18,9 @@ package com.android.systemui.biometrics.domain.interactor
 
 import android.app.admin.DevicePolicyManager
 import android.hardware.biometrics.BiometricManager.Authenticators
+import android.hardware.biometrics.PromptContentViewWithMoreOptionsButton
 import android.hardware.biometrics.PromptInfo
+import android.hardware.biometrics.PromptVerticalListContentView
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
@@ -29,8 +31,10 @@ import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -64,6 +68,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
     private val testScope = TestScope()
     private val fingerprintRepository = FakeFingerprintPropertyRepository()
     private val promptRepository = FakePromptRepository()
+    private val fakeExecutor = FakeExecutor(FakeSystemClock())
 
     private lateinit var interactor: PromptSelectorInteractor
 
@@ -72,6 +77,23 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
         interactor =
             PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
     }
+
+    private fun basicPromptInfo() =
+        PromptInfo().apply {
+            title = TITLE
+            subtitle = SUBTITLE
+            description = DESCRIPTION
+            negativeButtonText = NEGATIVE_TEXT
+            isConfirmationRequested = true
+            isDeviceCredentialAllowed = true
+            authenticators = Authenticators.BIOMETRIC_STRONG or Authenticators.DEVICE_CREDENTIAL
+        }
+
+    private val modalities =
+        BiometricModalities(
+            fingerprintProperties = fingerprintSensorPropertiesInternal().first(),
+            faceProperties = faceSensorPropertiesInternal().first(),
+        )
 
     @Test
     fun useBiometricsAndReset() =
@@ -86,11 +108,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
 
         val confirmationRequired = true
         val info =
-            PromptInfo().apply {
-                title = TITLE
-                subtitle = SUBTITLE
-                description = DESCRIPTION
-                negativeButtonText = NEGATIVE_TEXT
+            basicPromptInfo().apply {
                 isConfirmationRequested = confirmationRequired
                 authenticators =
                     if (allowCredentialFallback) {
@@ -100,25 +118,22 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
                     }
                 isDeviceCredentialAllowed = allowCredentialFallback
             }
-        val modalities =
-            BiometricModalities(
-                fingerprintProperties = fingerprintSensorPropertiesInternal().first(),
-                faceProperties = faceSensorPropertiesInternal().first(),
-            )
 
         val currentPrompt by collectLastValue(interactor.prompt)
-        val credentialKind by collectLastValue(interactor.credentialKind)
+        val promptKind by collectLastValue(interactor.promptKind)
         val isCredentialAllowed by collectLastValue(interactor.isCredentialAllowed)
-        val isExplicitConfirmationRequired by collectLastValue(interactor.isConfirmationRequired)
+        val credentialKind by collectLastValue(interactor.credentialKind)
+        val isConfirmationRequired by collectLastValue(interactor.isConfirmationRequired)
 
         assertThat(currentPrompt).isNull()
 
-        interactor.useBiometricsForAuthentication(
+        interactor.setPrompt(
             info,
             USER_ID,
-            CHALLENGE,
             modalities,
-            OP_PACKAGE_NAME
+            CHALLENGE,
+            OP_PACKAGE_NAME,
+            false /*onSwitchToCredential*/
         )
 
         assertThat(currentPrompt).isNotNull()
@@ -127,15 +142,16 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
         assertThat(currentPrompt?.subtitle).isEqualTo(SUBTITLE)
         assertThat(currentPrompt?.negativeButtonText).isEqualTo(NEGATIVE_TEXT)
         assertThat(currentPrompt?.opPackageName).isEqualTo(OP_PACKAGE_NAME)
+        assertThat(promptKind!!.isBiometric()).isTrue()
 
         if (allowCredentialFallback) {
             assertThat(credentialKind).isSameInstanceAs(PromptKind.Password)
             assertThat(isCredentialAllowed).isTrue()
         } else {
-            assertThat(credentialKind).isEqualTo(PromptKind.Biometric())
+            assertThat(credentialKind).isEqualTo(PromptKind.None)
             assertThat(isCredentialAllowed).isFalse()
         }
-        assertThat(isExplicitConfirmationRequired).isEqualTo(confirmationRequired)
+        assertThat(isConfirmationRequired).isEqualTo(confirmationRequired)
 
         interactor.resetPrompt()
         verifyUnset()
@@ -151,6 +167,143 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
     @Test
     fun usePasswordCredentialAndReset() =
         testScope.runTest { useCredentialAndReset(PromptKind.Password) }
+
+    @Test
+    fun promptKind_isBiometric_whenBiometricAllowed() =
+        testScope.runTest {
+            setUserCredentialType(isPassword = true)
+            val info = basicPromptInfo()
+
+            val promptKind by collectLastValue(interactor.promptKind)
+            assertThat(promptKind).isEqualTo(PromptKind.None)
+
+            interactor.setPrompt(
+                info,
+                USER_ID,
+                modalities,
+                CHALLENGE,
+                OP_PACKAGE_NAME,
+                false /*onSwitchToCredential*/
+            )
+
+            assertThat(promptKind?.isBiometric()).isTrue()
+
+            interactor.resetPrompt()
+            verifyUnset()
+        }
+
+    @Test
+    fun promptKind_isCredential_onSwitchToCredential() =
+        testScope.runTest {
+            setUserCredentialType(isPassword = true)
+            val info = basicPromptInfo()
+
+            val promptKind by collectLastValue(interactor.promptKind)
+            assertThat(promptKind).isEqualTo(PromptKind.None)
+
+            interactor.setPrompt(
+                info,
+                USER_ID,
+                modalities,
+                CHALLENGE,
+                OP_PACKAGE_NAME,
+                true /*onSwitchToCredential*/
+            )
+
+            assertThat(promptKind).isEqualTo(PromptKind.Password)
+
+            interactor.resetPrompt()
+            verifyUnset()
+        }
+
+    @Test
+    fun promptKind_isCredential_whenBiometricIsNotAllowed() =
+        testScope.runTest {
+            setUserCredentialType(isPassword = true)
+            val info =
+                basicPromptInfo().apply {
+                    isDeviceCredentialAllowed = true
+                    authenticators = Authenticators.DEVICE_CREDENTIAL
+                }
+
+            val promptKind by collectLastValue(interactor.promptKind)
+            assertThat(promptKind).isEqualTo(PromptKind.None)
+
+            interactor.setPrompt(
+                info,
+                USER_ID,
+                modalities,
+                CHALLENGE,
+                OP_PACKAGE_NAME,
+                false /*onSwitchToCredential*/
+            )
+
+            assertThat(promptKind).isEqualTo(PromptKind.Password)
+
+            interactor.resetPrompt()
+            verifyUnset()
+        }
+
+    @Test
+    fun promptKind_isCredential_whenBiometricIsNotAllowed_withMoreOptionsButton() =
+        testScope.runTest {
+            setUserCredentialType(isPassword = true)
+            val info =
+                basicPromptInfo().apply {
+                    isDeviceCredentialAllowed = true
+                    authenticators = Authenticators.DEVICE_CREDENTIAL
+                    contentView =
+                        PromptContentViewWithMoreOptionsButton.Builder()
+                            .setMoreOptionsButtonListener(fakeExecutor) { _, _ -> }
+                            .build()
+                }
+
+            val promptKind by collectLastValue(interactor.promptKind)
+            assertThat(promptKind).isEqualTo(PromptKind.None)
+
+            interactor.setPrompt(
+                info,
+                USER_ID,
+                modalities,
+                CHALLENGE,
+                OP_PACKAGE_NAME,
+                false /*onSwitchToCredential*/
+            )
+
+            assertThat(promptKind).isEqualTo(PromptKind.Password)
+
+            interactor.resetPrompt()
+            verifyUnset()
+        }
+
+    @Test
+    fun promptKind_isBiometric_whenBiometricIsNotAllowed_withVerticalList() =
+        testScope.runTest {
+            setUserCredentialType(isPassword = true)
+            val info =
+                basicPromptInfo().apply {
+                    isDeviceCredentialAllowed = true
+                    authenticators = Authenticators.DEVICE_CREDENTIAL
+                    contentView = PromptVerticalListContentView.Builder().build()
+                }
+
+            val promptKind by collectLastValue(interactor.promptKind)
+            assertThat(promptKind).isEqualTo(PromptKind.None)
+
+            interactor.setPrompt(
+                info,
+                USER_ID,
+                modalities,
+                CHALLENGE,
+                OP_PACKAGE_NAME,
+                false /*onSwitchToCredential*/
+            )
+
+            assertThat(promptKind?.isBiometric()).isTrue()
+
+            interactor.resetPrompt()
+            verifyUnset()
+        }
 
     private fun TestScope.useCredentialAndReset(kind: PromptKind) {
         setUserCredentialType(
@@ -173,11 +326,18 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
 
         assertThat(currentPrompt).isNull()
 
-        interactor.useCredentialsForAuthentication(info, kind, USER_ID, CHALLENGE, OP_PACKAGE_NAME)
+        interactor.setPrompt(
+            info,
+            USER_ID,
+            BiometricModalities(),
+            CHALLENGE,
+            OP_PACKAGE_NAME,
+            false /*onSwitchToCredential*/
+        )
 
         // not using biometrics, should be null with no fallback option
         assertThat(currentPrompt).isNull()
-        assertThat(credentialKind).isEqualTo(PromptKind.Biometric())
+        assertThat(credentialKind).isEqualTo(PromptKind.None)
 
         interactor.resetPrompt()
         verifyUnset()
@@ -185,13 +345,16 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
 
     private fun TestScope.verifyUnset() {
         val currentPrompt by collectLastValue(interactor.prompt)
+        val promptKind by collectLastValue(interactor.promptKind)
+        val isCredentialAllowed by collectLastValue(interactor.isCredentialAllowed)
         val credentialKind by collectLastValue(interactor.credentialKind)
+        val isConfirmationRequired by collectLastValue(interactor.isConfirmationRequired)
 
         assertThat(currentPrompt).isNull()
-
-        val kind = credentialKind as? PromptKind.Biometric
-        assertThat(kind).isNotNull()
-        assertThat(kind?.activeModalities?.isEmpty).isTrue()
+        assertThat(promptKind).isEqualTo(PromptKind.None)
+        assertThat(isCredentialAllowed).isFalse()
+        assertThat(credentialKind).isEqualTo(PromptKind.None)
+        assertThat(isConfirmationRequired).isFalse()
     }
 
     private fun setUserCredentialType(isPin: Boolean = false, isPassword: Boolean = false) {

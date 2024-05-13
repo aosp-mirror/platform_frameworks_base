@@ -141,6 +141,88 @@ class MockExecutorHandlerTest : SysuiTestCase() {
         assertEquals(3, runnable.mRunCount)
     }
 
+    @Test
+    fun testRemoveCallback_postDelayed() {
+        val clock = FakeSystemClock()
+        val fakeExecutor = FakeExecutor(clock)
+        val handler = mockExecutorHandler(fakeExecutor)
+        val runnable = RunnableImpl()
+
+        handler.postDelayed(runnable, 50)
+        handler.postDelayed(runnable, 150)
+        fakeExecutor.advanceClockToNext()
+        fakeExecutor.runAllReady()
+
+        assertEquals(1, runnable.mRunCount)
+        assertEquals(1, fakeExecutor.numPending())
+
+        handler.removeCallbacks(runnable)
+        assertEquals(0, fakeExecutor.numPending())
+
+        assertEquals(1, runnable.mRunCount)
+    }
+
+    @Test
+    fun testRemoveCallback_postAtTime() {
+        val clock = FakeSystemClock()
+        val fakeExecutor = FakeExecutor(clock)
+        val handler = mockExecutorHandler(fakeExecutor)
+        val runnable = RunnableImpl()
+        assertEquals(10000, clock.uptimeMillis())
+
+        handler.postAtTime(runnable, 10050)
+        handler.postAtTime(runnable, 10150)
+        fakeExecutor.advanceClockToNext()
+        fakeExecutor.runAllReady()
+
+        assertEquals(1, runnable.mRunCount)
+        assertEquals(1, fakeExecutor.numPending())
+
+        handler.removeCallbacks(runnable)
+        assertEquals(0, fakeExecutor.numPending())
+
+        assertEquals(1, runnable.mRunCount)
+    }
+
+    @Test
+    fun testRemoveCallback_mixed_allRemoved() {
+        val clock = FakeSystemClock()
+        val fakeExecutor = FakeExecutor(clock)
+        val handler = mockExecutorHandler(fakeExecutor)
+        val runnable = RunnableImpl()
+        assertEquals(10000, clock.uptimeMillis())
+
+        handler.postAtTime(runnable, 10050)
+        handler.postDelayed(runnable, 150)
+
+        handler.removeCallbacks(runnable)
+        assertEquals(0, fakeExecutor.numPending())
+
+        fakeExecutor.advanceClockToLast()
+        fakeExecutor.runAllReady()
+        assertEquals(0, runnable.mRunCount)
+    }
+
+    @Test
+    fun testRemoveCallback_differentRunnables_onlyMatchingRemoved() {
+        val clock = FakeSystemClock()
+        val fakeExecutor = FakeExecutor(clock)
+        val handler = mockExecutorHandler(fakeExecutor)
+        val runnable1 = RunnableImpl()
+        val runnable2 = RunnableImpl()
+
+        handler.postDelayed(runnable1, 50)
+        handler.postDelayed(runnable2, 150)
+
+        handler.removeCallbacks(runnable1)
+        assertEquals(1, fakeExecutor.numPending())
+
+        fakeExecutor.advanceClockToLast()
+        fakeExecutor.runAllReady()
+        assertEquals(0, runnable1.mRunCount)
+        assertEquals(1, runnable2.mRunCount)
+    }
+
     /**
      * Verifies that `Handler.removeMessages`, which doesn't make sense with executor backing,
      * causes an error in the test (rather than failing silently like most mocks).

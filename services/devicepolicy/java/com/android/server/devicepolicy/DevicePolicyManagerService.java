@@ -15172,10 +15172,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (statusBarService != null) {
                 int flags1 = disabled ? STATUS_BAR_DISABLE_MASK : StatusBarManager.DISABLE_NONE;
                 int flags2 = disabled ? STATUS_BAR_DISABLE2_MASK : StatusBarManager.DISABLE2_NONE;
-                StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo(flags1,
-                        flags2);
-                statusBarService.disableForUser(info, mToken, mContext.getPackageName(), userId,
-                        "setStatusBarDisabledInternal");
+                statusBarService.disableForUser(flags1, mToken, mContext.getPackageName(), userId);
+                statusBarService.disable2ForUser(flags2, mToken, mContext.getPackageName(), userId);
                 return true;
             }
         } catch (RemoteException e) {
@@ -21605,9 +21603,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
             }
 
-            if (Flags.headlessSingleUserFixes() && mInjector.userManagerIsHeadlessSystemUserMode()
-                    && isSingleUserMode && !mInjector.isChangeEnabled(
-                    PROVISION_SINGLE_USER_MODE, deviceAdmin.getPackageName(), caller.getUserId())) {
+            if (Flags.headlessSingleMinTargetSdk()
+                    && mInjector.userManagerIsHeadlessSystemUserMode()
+                    && isSingleUserMode
+                    && !mInjector.isChangeEnabled(
+                            PROVISION_SINGLE_USER_MODE, deviceAdmin.getPackageName(),
+                    caller.getUserId())) {
                 throw new IllegalStateException("Device admin is not targeting Android V.");
             }
 

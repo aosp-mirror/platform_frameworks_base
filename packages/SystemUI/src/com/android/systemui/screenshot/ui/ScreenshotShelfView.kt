@@ -30,7 +30,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import com.android.systemui.res.R
 import com.android.systemui.screenshot.FloatingWindowUtil
-import kotlin.math.max
 
 class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
     FrameLayout(context, attrs) {
@@ -39,10 +38,19 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
     private lateinit var screenshotStatic: ViewGroup
     var onTouchInterceptListener: ((MotionEvent) -> Boolean)? = null
 
+    var userInteractionCallback: (() -> Unit)? = null
+
     private val displayMetrics = context.resources.displayMetrics
     private val tmpRect = Rect()
     private lateinit var actionsContainerBackground: View
     private lateinit var dismissButton: View
+
+    init {
+        setOnTouchListener({ _: View, _: MotionEvent ->
+            userInteractionCallback?.invoke()
+            true
+        })
+    }
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -79,6 +87,18 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
         val inPortrait = orientation == Configuration.ORIENTATION_PORTRAIT
         val cutout = insets.displayCutout
         val navBarInsets = insets.getInsets(WindowInsets.Type.navigationBars())
+
+        // When honoring the navbar or other obstacle offsets, include some extra padding above
+        // the inset itself.
+        val verticalPadding =
+            mContext.resources.getDimensionPixelOffset(R.dimen.screenshot_shelf_vertical_margin)
+
+        // Minimum bottom padding to always enforce (e.g. if there's no nav bar)
+        val minimumBottomPadding =
+            context.resources.getDimensionPixelOffset(
+                R.dimen.overlay_action_container_minimum_edge_spacing
+            )
+
         if (cutout == null) {
             screenshotStatic.setPadding(0, 0, 0, navBarInsets.bottom)
         } else {
@@ -86,23 +106,39 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
             if (inPortrait) {
                 screenshotStatic.setPadding(
                     waterfall.left,
-                    max(cutout.safeInsetTop.toDouble(), waterfall.top.toDouble()).toInt(),
+                    max(cutout.safeInsetTop, waterfall.top),
                     waterfall.right,
                     max(
-                            cutout.safeInsetBottom.toDouble(),
-                            max(navBarInsets.bottom.toDouble(), waterfall.bottom.toDouble())
-                        )
-                        .toInt()
+                        navBarInsets.bottom + verticalPadding,
+                        cutout.safeInsetBottom + verticalPadding,
+                        waterfall.bottom + verticalPadding,
+                        minimumBottomPadding,
+                    )
                 )
             } else {
                 screenshotStatic.setPadding(
-                    max(cutout.safeInsetLeft.toDouble(), waterfall.left.toDouble()).toInt(),
+                    max(cutout.safeInsetLeft, waterfall.left),
                     waterfall.top,
-                    max(cutout.safeInsetRight.toDouble(), waterfall.right.toDouble()).toInt(),
-                    max(navBarInsets.bottom.toDouble(), waterfall.bottom.toDouble()).toInt()
+                    max(cutout.safeInsetRight, waterfall.right),
+                    max(
+                        navBarInsets.bottom + verticalPadding,
+                        waterfall.bottom + verticalPadding,
+                        minimumBottomPadding,
+                    )
                 )
             }
         }
+    }
+
+    // Max function for two or more params.
+    private fun max(first: Int, second: Int, vararg items: Int): Int {
+        var largest = if (first > second) first else second
+        for (item in items) {
+            if (item > largest) {
+                largest = item
+            }
+        }
+        return largest
     }
 
     private fun getSwipeRegion(): Region {
@@ -127,7 +163,14 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
         private const val TOUCH_PADDING_DP = 12f
     }
 
+    override fun onInterceptHoverEvent(event: MotionEvent): Boolean {
+        userInteractionCallback?.invoke()
+        return super.onInterceptHoverEvent(event)
+    }
+
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        userInteractionCallback?.invoke()
+
         if (onTouchInterceptListener?.invoke(ev) == true) {
             return true
         }

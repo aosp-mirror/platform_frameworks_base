@@ -67,7 +67,7 @@ class PromptViewModel
 @Inject
 constructor(
     displayStateInteractor: DisplayStateInteractor,
-    promptSelectorInteractor: PromptSelectorInteractor,
+    private val promptSelectorInteractor: PromptSelectorInteractor,
     @Application private val context: Context,
     private val udfpsOverlayInteractor: UdfpsOverlayInteractor,
     private val biometricStatusInteractor: BiometricStatusInteractor,
@@ -195,8 +195,11 @@ constructor(
     /** The kind of credential the user has. */
     val credentialKind: Flow<PromptKind> = promptSelectorInteractor.credentialKind
 
-    val showBpWithoutIconForCredential: StateFlow<Boolean> =
-        promptSelectorInteractor.showBpWithoutIconForCredential
+    /** The kind of prompt to use (biometric, pin, pattern, etc.). */
+    val promptKind: StateFlow<PromptKind> = promptSelectorInteractor.promptKind
+
+    /** Whether the sensor icon on biometric prompt ui should be hidden. */
+    val hideSensorIcon: Flow<Boolean> = modalities.map { it.isEmpty }.distinctUntilChanged()
 
     /** The label to use for the cancel button. */
     val negativeButtonText: Flow<String> =
@@ -896,6 +899,7 @@ constructor(
      */
     fun onSwitchToCredential() {
         _forceLargeSize.value = true
+        promptSelectorInteractor.onSwitchToCredential()
     }
 
     private fun vibrateOnSuccess() {

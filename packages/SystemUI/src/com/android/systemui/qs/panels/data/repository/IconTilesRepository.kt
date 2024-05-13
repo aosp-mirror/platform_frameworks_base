@@ -19,20 +19,20 @@ package com.android.systemui.qs.panels.data.repository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /** Repository for retrieving the list of [TileSpec] to be displayed as icons. */
 interface IconTilesRepository {
-    val iconTilesSpecs: Flow<Set<TileSpec>>
+    val iconTilesSpecs: StateFlow<Set<TileSpec>>
 }
 
 @SysUISingleton
 class IconTilesRepositoryImpl @Inject constructor() : IconTilesRepository {
 
-    /** Set of toggleable tiles that are suitable for being shown as an icon. */
-    override val iconTilesSpecs: Flow<Set<TileSpec>> =
-        flowOf(
+    private val _iconTilesSpecs =
+        MutableStateFlow(
             setOf(
                 TileSpec.create("airplane"),
                 TileSpec.create("battery"),
@@ -50,4 +50,7 @@ class IconTilesRepositoryImpl @Inject constructor() : IconTilesRepository {
                 TileSpec.create("rotation")
             )
         )
+
+    /** Set of toggleable tiles that are suitable for being shown as an icon. */
+    override val iconTilesSpecs: StateFlow<Set<TileSpec>> = _iconTilesSpecs.asStateFlow()
 }

@@ -13,12 +13,16 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
-    <!-- Since this layer list has just one layer, we can remove it and replace with the inner
-         layer drawable. However this should only be done when the flag
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/qs_tile_ripple_color">
+    <!-- We don't really use the ripple effect here, but changing it to LayerDrawable causes
+         performance regression, see: b/339412453.
+         Since this ripple has just one layer inside, we can try to remove that extra "background"
+         layer. However this should only be done when the flag
          com.android.systemui.qs_tile_focus_state has completed all its stages and this drawable
          fully replaces the previous one to ensure consistency with code sections searching for
-         specific ids in drawable hierarchy -->
+         specific ids in drawable hierarchy 
+         -->
     <item
         android:id="@id/background">
         <layer-list>
@@ -48,4 +52,4 @@
             </item>
         </layer-list>
     </item>
-</layer-list>
+</ripple>

@@ -15,6 +15,10 @@
  */
 package com.android.systemui.qs.external;
 
+import static android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf;
+
+import static com.android.systemui.Flags.FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
@@ -33,8 +37,10 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.service.quicksettings.IQSTileService;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
@@ -64,13 +70,23 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Provider;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 @RunWithLooper
 public class TileServicesTest extends SysuiTestCase {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return allCombinationsOf(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX);
+    }
+
     private static int NUM_FAKES = TileServices.DEFAULT_MAX_BOUND * 2;
 
     private static final ComponentName TEST_COMPONENT =
@@ -105,6 +121,11 @@ public class TileServicesTest extends SysuiTestCase {
     private ArgumentCaptor<CommandQueue.Callbacks> mCallbacksArgumentCaptor;
     @Mock
     private CustomTileAddedRepository mCustomTileAddedRepository;
+
+    public TileServicesTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -194,6 +215,7 @@ public class TileServicesTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX)
     public void testRequestListeningStatusCommand() throws RemoteException {
         ArgumentCaptor<CommandQueue.Callbacks> captor =
                 ArgumentCaptor.forClass(CommandQueue.Callbacks.class);
@@ -210,6 +232,26 @@ public class TileServicesTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         verify(manager).setBindRequested(true);
         verify(manager.getTileService()).onStartListening();
+    }
+
+    @Test
+    @EnableFlags(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX)
+    public void testRequestListeningStatusCommand_onStartListeningFromRequest() {
+        ArgumentCaptor<CommandQueue.Callbacks> captor =
+                ArgumentCaptor.forClass(CommandQueue.Callbacks.class);
+        verify(mCommandQueue).addCallback(captor.capture());
+
+        CustomTile mockTile = mock(CustomTile.class);
+        when(mockTile.getComponent()).thenReturn(TEST_COMPONENT);
+
+        TileServiceManager manager = mTileService.getTileWrapper(mockTile);
+        when(manager.isActiveTile()).thenReturn(true);
+        when(manager.getTileService()).thenReturn(mock(IQSTileService.class));
+
+        captor.getValue().requestTileServiceListeningState(TEST_COMPONENT);
+        mTestableLooper.processAllMessages();
+        verify(manager).setBindRequested(true);
+        verify(manager).onStartListeningFromRequest();
     }
 
     @Test
@@ -263,6 +305,7 @@ public class TileServicesTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX)
     public void tileFreedForCorrectUser() throws RemoteException {
         verify(mCommandQueue).addCallback(mCallbacksArgumentCaptor.capture());
 
@@ -295,6 +338,42 @@ public class TileServicesTest extends SysuiTestCase {
         verify(manager1).setBindRequested(true);
         // and set it to listening
         verify(manager1.getTileService()).onStartListening();
+    }
+
+    @Test
+    @EnableFlags(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX)
+    public void tileFreedForCorrectUser_onStartListeningFromRequest() throws RemoteException {
+        verify(mCommandQueue).addCallback(mCallbacksArgumentCaptor.capture());
+
+        ComponentName componentName = new ComponentName("pkg", "cls");
+        CustomTile tileUser0 = mock(CustomTile.class);
+        CustomTile tileUser1 = mock(CustomTile.class);
+
+        when(tileUser0.getComponent()).thenReturn(componentName);
+        when(tileUser1.getComponent()).thenReturn(componentName);
+        when(tileUser0.getUser()).thenReturn(0);
+        when(tileUser1.getUser()).thenReturn(1);
+
+        // Create a tile for user 0
+        TileServiceManager manager0 = mTileService.getTileWrapper(tileUser0);
+        when(manager0.isActiveTile()).thenReturn(true);
+        // Then create a tile for user 1
+        TileServiceManager manager1 = mTileService.getTileWrapper(tileUser1);
+        when(manager1.isActiveTile()).thenReturn(true);
+
+        // When the tile for user 0 gets freed
+        mTileService.freeService(tileUser0, manager0);
+        // and the user is 1
+        when(mUserTracker.getUserId()).thenReturn(1);
+
+        // a call to requestListeningState
+        mCallbacksArgumentCaptor.getValue().requestTileServiceListeningState(componentName);
+        mTestableLooper.processAllMessages();
+
+        // will call in the correct tile
+        verify(manager1).setBindRequested(true);
+        // and set it to listening
+        verify(manager1).onStartListeningFromRequest();
     }
 
     private class TestTileServices extends TileServices {

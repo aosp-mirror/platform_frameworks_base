@@ -649,7 +649,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
         lockPatternUtils,
         interactionJankMonitor,
         { promptSelectorInteractor },
-        { bpCredentialInteractor },
         PromptViewModel(
             displayStateInteractor,
             promptSelectorInteractor,

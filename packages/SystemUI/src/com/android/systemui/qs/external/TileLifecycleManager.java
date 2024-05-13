@@ -19,6 +19,8 @@ import static android.os.PowerWhitelistManager.REASON_TILE_ONCLICK;
 import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
 import static android.service.quicksettings.TileService.START_ACTIVITY_NEEDS_PENDING_INTENT;
 
+import static com.android.systemui.Flags.qsCustomTileClickGuaranteedBugFix;
+
 import android.app.ActivityManager;
 import android.app.compat.CompatChanges;
 import android.content.BroadcastReceiver;
@@ -88,6 +90,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private static final int MSG_ON_REMOVED = 1;
     private static final int MSG_ON_CLICK = 2;
     private static final int MSG_ON_UNLOCK_COMPLETE = 3;
+    private static final int MSG_ON_STOP_LISTENING = 4;
 
     // Bind retry control.
     private static final int MAX_BIND_RETRIES = 5;
@@ -368,6 +371,16 @@ public class TileLifecycleManager extends BroadcastReceiver implements
                 onUnlockComplete();
             }
         }
+        if (qsCustomTileClickGuaranteedBugFix()) {
+            if (queue.contains(MSG_ON_STOP_LISTENING)) {
+                if (mDebug) Log.d(TAG, "Handling pending onStopListening " + getComponent());
+                if (mListening) {
+                    onStopListening();
+                } else {
+                    Log.w(TAG, "Trying to stop listening when not listening " + getComponent());
+                }
+            }
+        }
         if (queue.contains(MSG_ON_REMOVED)) {
             if (mDebug) Log.d(TAG, "Handling pending onRemoved " + getComponent());
             if (mListening) {
@@ -586,10 +599,15 @@ public class TileLifecycleManager extends BroadcastReceiver implements
 
     @Override
     public void onStopListening() {
-        if (mDebug) Log.d(TAG, "onStopListening " + getComponent());
-        mListening = false;
-        if (isNotNullAndFailedAction(mOptionalWrapper, QSTileServiceWrapper::onStopListening)) {
-            handleDeath();
+        if (qsCustomTileClickGuaranteedBugFix() && hasPendingClick()) {
+            Log.d(TAG, "Enqueue stop listening");
+            queueMessage(MSG_ON_STOP_LISTENING);
+        } else {
+            if (mDebug) Log.d(TAG, "onStopListening " + getComponent());
+            mListening = false;
+            if (isNotNullAndFailedAction(mOptionalWrapper, QSTileServiceWrapper::onStopListening)) {
+                handleDeath();
+            }
         }
     }
 

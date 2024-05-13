@@ -819,17 +819,20 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(win.getOrientationChanging());
     }
 
-    @SetupWindows(addWindows = W_ABOVE_ACTIVITY)
     @Test
     public void testRequestResizeForBlastSync() {
-        final WindowState win = mChildAppWindowAbove;
-        makeWindowVisible(win, win.getParentWindow());
+        final WindowState win = createWindow(null, TYPE_APPLICATION, "window");
+        makeWindowVisible(win);
+        makeLastConfigReportedToClient(win, true /* visible */);
         win.mLayoutSeq = win.getDisplayContent().mLayoutSeq;
         win.reportResized();
         win.updateResizingWindowIfNeeded();
         assertThat(mWm.mResizingWindows).doesNotContain(win);
 
         // Check that the window is in resizing if using blast sync.
+        final BLASTSyncEngine.SyncGroup syncGroup = mock(BLASTSyncEngine.SyncGroup.class);
+        syncGroup.mSyncMethod = BLASTSyncEngine.METHOD_BLAST;
+        win.mSyncGroup = syncGroup;
         win.reportResized();
         win.prepareSync();
         assertEquals(SYNC_STATE_WAITING_FOR_DRAW, win.mSyncState);
@@ -842,6 +845,20 @@ public class WindowStateTests extends WindowTestsBase {
         mWm.mResizingWindows.remove(win);
         win.updateResizingWindowIfNeeded();
         assertThat(mWm.mResizingWindows).doesNotContain(win);
+
+        // Non blast sync doesn't require to force resizing, because it won't use syncSeqId.
+        // And if the window is already drawn, it can report sync finish immediately so that the
+        // sync group won't be blocked.
+        win.finishSync(mTransaction, syncGroup, false /* cancel */);
+        syncGroup.mSyncMethod = BLASTSyncEngine.METHOD_NONE;
+        win.mSyncGroup = syncGroup;
+        win.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+        win.prepareSync();
+        assertEquals(SYNC_STATE_WAITING_FOR_DRAW, win.mSyncState);
+        win.updateResizingWindowIfNeeded();
+        assertThat(mWm.mResizingWindows).doesNotContain(win);
+        assertTrue(win.isSyncFinished(syncGroup));
+        assertEquals(WindowContainer.SYNC_STATE_READY, win.mSyncState);
     }
 
     @Test

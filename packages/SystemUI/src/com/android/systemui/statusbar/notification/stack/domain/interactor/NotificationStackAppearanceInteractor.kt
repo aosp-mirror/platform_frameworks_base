@@ -65,13 +65,6 @@ constructor(
             }
             .distinctUntilChanged()
 
-    /**
-     * The height in px of the contents of notification stack. Depending on the number of
-     * notifications, this can exceed the space available on screen to show notifications, at which
-     * point the notification stack should become scrollable.
-     */
-    val stackHeight: StateFlow<Float> = viewHeightRepository.stackHeight.asStateFlow()
-
     /** The height in px of the contents of the HUN. */
     val headsUpHeight: StateFlow<Float> = viewHeightRepository.headsUpHeight.asStateFlow()
 
@@ -121,11 +114,6 @@ constructor(
     fun setShadeScrimBounds(bounds: ShadeScrimBounds?) {
         check(bounds == null || bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
         placeholderRepository.shadeScrimBounds.value = bounds
-    }
-
-    /** Sets the height of the contents of the notification stack. */
-    fun setStackHeight(height: Float) {
-        viewHeightRepository.stackHeight.value = height
     }
 
     /** Sets the height of heads up notification. */

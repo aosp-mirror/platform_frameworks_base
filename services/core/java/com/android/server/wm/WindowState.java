@@ -1447,14 +1447,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " last=" + mWindowFrames.mLastFrame + " frame=" + mWindowFrames.mFrame);
         }
 
+        final boolean contentChanged = didFrameInsetsChange || configChanged
+                || dragResizingChanged || attachedFrameChanged;
+        // Cancel unchanged non-sync-buffer redraw request to avoid unnecessary reportResized().
+        if (!contentChanged && !mRedrawForSyncReported && mPrepareSyncSeqId <= 0
+                && mDrawHandlers.isEmpty()) {
+            mRedrawForSyncReported = true;
+        }
+
         // Add a window that is using blastSync to the resizing list if it hasn't been reported
         // already. This because the window is waiting on a finishDrawing from the client.
-        if (didFrameInsetsChange
-                || configChanged
-                || insetsChanged
-                || dragResizingChanged
-                || shouldSendRedrawForSync()
-                || attachedFrameChanged) {
+        if (contentChanged || insetsChanged || shouldSendRedrawForSync()) {
             ProtoLog.v(WM_DEBUG_RESIZE,
                         "Resize reasons for w=%s:  %s configChanged=%b didFrameInsetsChange=%b",
                         this, mWindowFrames.getInsetsChangedInfo(),

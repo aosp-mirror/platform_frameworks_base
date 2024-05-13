@@ -66,7 +66,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
@@ -80,6 +79,7 @@ import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.common.ui.compose.load
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.panels.domain.interactor.IconTilesInteractor
+import com.android.systemui.qs.panels.domain.interactor.InfiniteGridSizeInteractor
 import com.android.systemui.qs.panels.ui.viewmodel.ActiveTileColorAttributes
 import com.android.systemui.qs.panels.ui.viewmodel.AvailableEditActions
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
@@ -97,8 +97,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.mapLatest
 
 @SysUISingleton
-class InfiniteGridLayout @Inject constructor(private val iconTilesInteractor: IconTilesInteractor) :
-    GridLayout {
+class InfiniteGridLayout
+@Inject
+constructor(
+    private val iconTilesInteractor: IconTilesInteractor,
+    private val gridSizeInteractor: InfiniteGridSizeInteractor
+) : GridLayout {
 
     private object TileType
 
@@ -112,10 +116,10 @@ class InfiniteGridLayout @Inject constructor(private val iconTilesInteractor: Ic
             tiles.forEach { it.startListening(token) }
             onDispose { tiles.forEach { it.stopListening(token) } }
         }
-        val iconTilesSpecs by
-            iconTilesInteractor.iconTilesSpecs.collectAsState(initial = emptySet())
+        val iconTilesSpecs by iconTilesInteractor.iconTilesSpecs.collectAsState()
+        val columns by gridSizeInteractor.columns.collectAsState()
 
-        TileLazyGrid(modifier) {
+        TileLazyGrid(modifier = modifier, columns = GridCells.Fixed(columns)) {
             items(
                 tiles.size,
                 span = { index ->
@@ -200,8 +204,9 @@ class InfiniteGridLayout @Inject constructor(private val iconTilesInteractor: Ic
         val iconOnlySpecs by iconTilesInteractor.iconTilesSpecs.collectAsState(initial = emptySet())
         val isIconOnly: (TileSpec) -> Boolean =
             remember(iconOnlySpecs) { { tileSpec: TileSpec -> tileSpec in iconOnlySpecs } }
+        val columns by gridSizeInteractor.columns.collectAsState()
 
-        TileLazyGrid(modifier = modifier) {
+        TileLazyGrid(modifier = modifier, columns = GridCells.Fixed(columns)) {
             // These Text are just placeholders to see the different sections. Not final UI.
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Text("Current tiles", color = Color.White)
@@ -385,11 +390,11 @@ private fun TileIcon(
 @Composable
 private fun TileLazyGrid(
     modifier: Modifier = Modifier,
+    columns: GridCells,
     content: LazyGridScope.() -> Unit,
 ) {
     LazyVerticalGrid(
-        columns =
-            GridCells.Fixed(integerResource(R.integer.quick_settings_infinite_grid_num_columns)),
+        columns = columns,
         verticalArrangement = spacedBy(dimensionResource(R.dimen.qs_tile_margin_vertical)),
         horizontalArrangement = spacedBy(dimensionResource(R.dimen.qs_tile_margin_horizontal)),
         modifier = modifier,

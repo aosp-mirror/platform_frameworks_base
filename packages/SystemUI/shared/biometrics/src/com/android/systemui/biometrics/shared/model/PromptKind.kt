@@ -20,10 +20,11 @@ sealed interface PromptKind {
     object None : PromptKind
 
     data class Biometric(
+        /** The available modalities for the authentication on the prompt. */
         val activeModalities: BiometricModalities = BiometricModalities(),
         // TODO(b/330908557): Use this value to decide whether to show two pane layout, instead of
         // simply depending on rotations.
-        val showTwoPane: Boolean = false
+        val showTwoPane: Boolean = false,
     ) : PromptKind
 
     object Pin : PromptKind

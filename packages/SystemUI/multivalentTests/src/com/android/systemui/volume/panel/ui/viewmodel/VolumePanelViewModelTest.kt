@@ -28,15 +28,15 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.policy.fakeConfigurationController
 import com.android.systemui.testKosmos
-import com.android.systemui.volume.panel.componentByKey
-import com.android.systemui.volume.panel.componentsLayoutManager
-import com.android.systemui.volume.panel.criteriaByKey
-import com.android.systemui.volume.panel.mockVolumePanelUiComponentProvider
+import com.android.systemui.volume.panel.domain.interactor.criteriaByKey
+import com.android.systemui.volume.panel.domain.unavailableCriteria
 import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import com.android.systemui.volume.panel.shared.model.mockVolumePanelUiComponentProvider
+import com.android.systemui.volume.panel.ui.composable.componentByKey
 import com.android.systemui.volume.panel.ui.layout.DefaultComponentsLayoutManager
-import com.android.systemui.volume.panel.unavailableCriteria
-import com.android.systemui.volume.panel.volumePanelViewModel
+import com.android.systemui.volume.panel.ui.layout.componentsLayoutManager
 import com.google.common.truth.Truth.assertThat
+import javax.inject.Provider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -95,7 +95,7 @@ class VolumePanelViewModelTest : SysuiTestCase() {
                     COMPONENT_2 to mockVolumePanelUiComponentProvider,
                     BOTTOM_BAR to mockVolumePanelUiComponentProvider,
                 )
-            criteriaByKey = mapOf(COMPONENT_2 to unavailableCriteria)
+            criteriaByKey = mapOf(COMPONENT_2 to Provider { unavailableCriteria })
         }) {
             testScope.runTest {
                 val componentsLayout by collectLastValue(underTest.componentsLayout)

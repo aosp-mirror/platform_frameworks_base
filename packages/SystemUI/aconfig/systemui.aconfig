@@ -875,3 +875,20 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "app_clips_backlinks"
+  namespace: "systemui"
+  description: "Enables Backlinks improvement feature in App Clips"
+  bug: "300307759"
+}
+
+flag {
+  name: "qs_custom_tile_click_guaranteed_bug_fix"
+  namespace: "systemui"
+  description: "Guarantee that clicks on a tile always happen by postponing onStopListening until after the click."
+  bug: "339290820"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

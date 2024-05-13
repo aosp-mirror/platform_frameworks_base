@@ -32,7 +32,7 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
-import com.android.systemui.volume.panel.volumePanelViewModel
+import com.android.systemui.volume.panel.ui.viewmodel.volumePanelViewModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent

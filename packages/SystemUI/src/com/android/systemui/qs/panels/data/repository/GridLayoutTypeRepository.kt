@@ -20,10 +20,16 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+interface GridLayoutTypeRepository {
+    val layout: StateFlow<GridLayoutType>
+}
 
 @SysUISingleton
-class GridLayoutTypeRepository @Inject constructor() {
-    val layout: Flow<GridLayoutType> = flowOf(InfiniteGridLayoutType)
+class GridLayoutTypeRepositoryImpl @Inject constructor() : GridLayoutTypeRepository {
+    private val _layout: MutableStateFlow<GridLayoutType> = MutableStateFlow(InfiniteGridLayoutType)
+    override val layout = _layout.asStateFlow()
 }

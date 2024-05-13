@@ -35,7 +35,10 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
+import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
+import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
@@ -100,7 +103,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                 footerActionsViewModelFactory = footerActionsViewModelFactory,
                 footerActionsController = footerActionsController,
                 sceneBackInteractor = sceneBackInteractor,
-                mediaDataManager = mediaDataManager,
+                mediaCarouselInteractor = kosmos.mediaCarouselInteractor,
             )
     }
 
@@ -236,20 +239,34 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun hasMedia_mediaVisible() {
+    fun addAndRemoveMedia_mediaVisibilityIsUpdated() =
         testScope.runTest {
-            whenever(mediaDataManager.hasAnyMediaOrRecommendation()).thenReturn(true)
+            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
+            val isMediaVisible by collectLastValue(underTest.isMediaVisible)
+            val userMedia = MediaData(active = true)
 
-            assertThat(underTest.isMediaVisible()).isTrue()
+            assertThat(isMediaVisible).isFalse()
+
+            kosmos.mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
+
+            assertThat(isMediaVisible).isTrue()
+
+            kosmos.mediaFilterRepository.removeSelectedUserMediaEntry(userMedia.instanceId)
+
+            assertThat(isMediaVisible).isFalse()
         }
-    }
 
     @Test
-    fun doesNotHaveMedia_mediaNotVisible() {
+    fun addInactiveMedia_mediaVisibilityIsUpdated() =
         testScope.runTest {
-            whenever(mediaDataManager.hasAnyMediaOrRecommendation()).thenReturn(false)
+            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
+            val isMediaVisible by collectLastValue(underTest.isMediaVisible)
+            val userMedia = MediaData(active = false)
 
-            assertThat(underTest.isMediaVisible()).isFalse()
+            assertThat(isMediaVisible).isFalse()
+
+            kosmos.mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
+
+            assertThat(isMediaVisible).isTrue()
         }
-    }
 }

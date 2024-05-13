@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.ui.viewmodel
+package com.android.systemui.qs.panels.domain.interactor
 
-import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
 
-class MediaCarouselViewModel @Inject constructor(private val mediaDataManager: MediaDataManager) {
-    val isMediaVisible: Boolean
-        get() = mediaDataManager.hasActiveMediaOrRecommendation()
+/** [GridTypeConsistencyInteractor] implementation that doesn't do any changes to tiles. */
+@SysUISingleton
+class NoopGridConsistencyInteractor @Inject constructor() : GridTypeConsistencyInteractor {
+    override fun reconcileTiles(tiles: List<TileSpec>): List<TileSpec> = tiles
 }

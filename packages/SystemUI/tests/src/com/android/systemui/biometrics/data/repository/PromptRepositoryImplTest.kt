@@ -16,13 +16,8 @@
 
 package com.android.systemui.biometrics.data.repository
 
-import android.hardware.biometrics.BiometricManager
-import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
-import android.hardware.biometrics.PromptContentViewWithMoreOptionsButton
 import android.hardware.biometrics.PromptInfo
-import android.hardware.biometrics.PromptVerticalListContentView
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.shared.model.PromptKind
@@ -139,83 +134,6 @@ class PromptRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun showBpWithoutIconForCredential_withVerticalListContentView() =
-        testScope.runTest {
-            mSetFlagsRule.enableFlags(Flags.FLAG_CONSTRAINT_BP)
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            for (case in
-                listOf(
-                    PromptKind.Biometric(),
-                    PromptKind.Pin,
-                    PromptKind.Password,
-                    PromptKind.Pattern
-                )) {
-                val hasCredentialViewShown = case !is PromptKind.Biometric
-                val promptInfo =
-                    PromptInfo().apply {
-                        authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
-                        contentView = PromptVerticalListContentView.Builder().build()
-                    }
-                repository.setPrompt(promptInfo, USER_ID, CHALLENGE, case, OP_PACKAGE_NAME)
-                repository.setShouldShowBpWithoutIconForCredential(promptInfo)
-
-                assertThat(repository.showBpWithoutIconForCredential.value)
-                    .isEqualTo(!hasCredentialViewShown)
-            }
-        }
-
-    @Test
-    fun showBpWithoutIconForCredential_withContentViewWithMoreOptionsButton() =
-        testScope.runTest {
-            mSetFlagsRule.enableFlags(Flags.FLAG_CONSTRAINT_BP)
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            val promptInfo =
-                PromptInfo().apply {
-                    authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
-                    contentView =
-                        PromptContentViewWithMoreOptionsButton.Builder()
-                            .setMoreOptionsButtonListener(fakeExecutor) { _, _ -> }
-                            .build()
-                }
-            for (case in
-                listOf(
-                    PromptKind.Biometric(),
-                    PromptKind.Pin,
-                    PromptKind.Password,
-                    PromptKind.Pattern
-                )) {
-                repository.setPrompt(promptInfo, USER_ID, CHALLENGE, case, OP_PACKAGE_NAME)
-                repository.setShouldShowBpWithoutIconForCredential(promptInfo)
-
-                assertThat(repository.showBpWithoutIconForCredential.value).isFalse()
-            }
-        }
-
-    @Test
-    fun showBpWithoutIconForCredential_withDescription() =
-        testScope.runTest {
-            mSetFlagsRule.enableFlags(Flags.FLAG_CONSTRAINT_BP)
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            for (case in
-                listOf(
-                    PromptKind.Biometric(),
-                    PromptKind.Pin,
-                    PromptKind.Password,
-                    PromptKind.Pattern
-                )) {
-                val promptInfo =
-                    PromptInfo().apply {
-                        authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
-                        description = "description"
-                    }
-                repository.setPrompt(promptInfo, USER_ID, CHALLENGE, case, OP_PACKAGE_NAME)
-                repository.setShouldShowBpWithoutIconForCredential(promptInfo)
-
-                assertThat(repository.showBpWithoutIconForCredential.value).isFalse()
-            }
-        }
-
-    @Test
     fun setsAndUnsetsPrompt() =
         testScope.runTest {
             val kind = PromptKind.Pin
@@ -223,7 +141,7 @@ class PromptRepositoryImplTest : SysuiTestCase() {
 
             repository.setPrompt(promptInfo, USER_ID, CHALLENGE, kind, OP_PACKAGE_NAME)
 
-            assertThat(repository.kind.value).isEqualTo(kind)
+            assertThat(repository.promptKind.value).isEqualTo(kind)
             assertThat(repository.userId.value).isEqualTo(USER_ID)
             assertThat(repository.challenge.value).isEqualTo(CHALLENGE)
             assertThat(repository.promptInfo.value).isSameInstanceAs(promptInfo)

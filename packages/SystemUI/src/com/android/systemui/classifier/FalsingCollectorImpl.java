@@ -399,12 +399,13 @@ class FalsingCollectorImpl implements FalsingCollector {
     }
 
     private boolean shouldBeRegisteredToSensors() {
-        return mScreenOn
-                && (mState == StatusBarState.KEYGUARD
-                || (mState == StatusBarState.SHADE
-                && mKeyguardStateController.isOccluded()
-                && mKeyguardStateController.isShowing()))
-                && !mShowingAod;
+        final boolean isKeyguard = mState == StatusBarState.KEYGUARD;
+
+        final boolean isShadeOverOccludedKeyguard = mState == StatusBarState.SHADE
+                && mKeyguardStateController.isShowing()
+                && mKeyguardStateController.isOccluded();
+
+        return mScreenOn && !mShowingAod && (isKeyguard || isShadeOverOccludedKeyguard);
     }
 
     private void updateSensorRegistration() {
