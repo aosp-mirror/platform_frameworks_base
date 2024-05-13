@@ -7155,13 +7155,7 @@ public class Notification implements Parcelable
             // Adds any new extras provided by the user.
             if (mUserExtras != null) {
                 final Bundle saveExtras = (Bundle) mUserExtras.clone();
-                if (SystemProperties.getBoolean(
-                        "persist.sysui.notification.builder_extras_override", false)) {
-                    mN.extras.putAll(saveExtras);
-                } else {
-                    saveExtras.putAll(mN.extras);
-                    mN.extras = saveExtras;
-                }
+                mN.extras.putAll(saveExtras);
             }
 
             if (!Flags.sortSectionByTime()) {
