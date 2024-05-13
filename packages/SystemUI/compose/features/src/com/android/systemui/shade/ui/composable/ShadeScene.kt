@@ -221,6 +221,7 @@ private fun SceneScope.SingleShade(
             canOverflow = false
         )
     val isClickable by viewModel.isClickable.collectAsState()
+    val isMediaVisible by viewModel.isMediaVisible.collectAsState()
 
     val shouldPunchHoleBehindScrim =
         layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade) ||
@@ -274,7 +275,7 @@ private fun SceneScope.SingleShade(
                             }
 
                             MediaCarousel(
-                                isVisible = viewModel::isMediaVisible,
+                                isVisible = isMediaVisible,
                                 mediaHost = mediaHost,
                                 modifier = Modifier.fillMaxWidth(),
                                 carouselController = mediaCarouselController,
@@ -381,6 +382,8 @@ private fun SceneScope.SplitShade(
     viewModel.notifications.setAlphaForBrightnessMirror(contentAlpha)
     DisposableEffect(Unit) { onDispose { viewModel.notifications.setAlphaForBrightnessMirror(1f) } }
 
+    val isMediaVisible by viewModel.isMediaVisible.collectAsState()
+
     val brightnessMirrorShowingModifier = Modifier.graphicsLayer { alpha = contentAlpha }
 
     Box(
@@ -455,7 +458,7 @@ private fun SceneScope.SplitShade(
                             }
 
                             MediaCarousel(
-                                isVisible = viewModel::isMediaVisible,
+                                isVisible = isMediaVisible,
                                 mediaHost = mediaHost,
                                 modifier = Modifier.fillMaxWidth(),
                                 carouselController = mediaCarouselController,

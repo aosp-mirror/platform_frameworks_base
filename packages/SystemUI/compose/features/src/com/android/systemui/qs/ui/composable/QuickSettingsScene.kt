@@ -340,8 +340,10 @@ private fun SceneScope.QuickSettingsScene(
                         modifier = Modifier.sysuiResTag("quick_settings_panel")
                     )
 
+                    val isMediaVisible by viewModel.isMediaVisible.collectAsState()
+
                     MediaCarousel(
-                        isVisible = viewModel::isMediaVisible,
+                        isVisible = isMediaVisible,
                         mediaHost = mediaHost,
                         modifier = Modifier.fillMaxWidth(),
                         carouselController = mediaCarouselController,

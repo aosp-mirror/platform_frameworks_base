@@ -42,12 +42,12 @@ private object MediaCarousel {
 
 @Composable
 fun SceneScope.MediaCarousel(
-    isVisible: () -> Boolean,
+    isVisible: Boolean,
     mediaHost: MediaHost,
     modifier: Modifier = Modifier,
     carouselController: MediaCarouselController,
 ) {
-    if (!isVisible()) {
+    if (!isVisible) {
         return
     }
 

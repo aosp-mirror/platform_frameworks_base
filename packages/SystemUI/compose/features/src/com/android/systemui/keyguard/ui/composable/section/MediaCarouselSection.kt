@@ -18,9 +18,11 @@ package com.android.systemui.keyguard.ui.composable.section
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
-import com.android.systemui.keyguard.ui.viewmodel.MediaCarouselViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardMediaViewModel
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
@@ -33,20 +35,15 @@ class MediaCarouselSection
 constructor(
     private val mediaCarouselController: MediaCarouselController,
     @param:Named(MediaModule.KEYGUARD) private val mediaHost: MediaHost,
-    private val mediaCarouselViewModel: MediaCarouselViewModel,
+    private val keyguardMediaViewModel: KeyguardMediaViewModel,
 ) {
-
-    private fun isVisible(): Boolean {
-        if (mediaCarouselController.mediaFrame == null) {
-            return false
-        }
-        return mediaCarouselViewModel.isMediaVisible
-    }
 
     @Composable
     fun SceneScope.KeyguardMediaCarousel() {
+        val isMediaVisible by keyguardMediaViewModel.isMediaVisible.collectAsState()
+
         MediaCarousel(
-            isVisible = ::isVisible,
+            isVisible = isMediaVisible,
             mediaHost = mediaHost,
             modifier = Modifier.fillMaxWidth(),
             carouselController = mediaCarouselController,
