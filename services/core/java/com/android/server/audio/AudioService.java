@@ -9680,9 +9680,9 @@ public class AudioService extends IAudioService.Stub
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.DOCK_AUDIO_MEDIA_ENABLED), false, this);
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.MASTER_MONO), false, this);
+                    Settings.System.MASTER_MONO), false, this, UserHandle.USER_ALL);
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.MASTER_BALANCE), false, this);
+                    Settings.System.MASTER_BALANCE), false, this, UserHandle.USER_ALL);
 
             mEncodedSurroundMode = mSettings.getGlobalInt(
                     mContentResolver, Settings.Global.ENCODED_SURROUND_OUTPUT,
