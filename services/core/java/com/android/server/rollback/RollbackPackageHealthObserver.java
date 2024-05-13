@@ -642,6 +642,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                         .getPackages()
                         .get(0)
                         .getVersionRolledBackFrom();
+        Slog.i(TAG, "Rolling back high impact rollback for package: "
+                + firstRollback.getPackageName());
         rollbackPackage(sortedHighImpactRollbacks.get(0), firstRollback, rollbackReason);
     }
 
