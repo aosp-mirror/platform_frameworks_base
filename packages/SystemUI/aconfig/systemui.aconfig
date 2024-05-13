@@ -34,6 +34,13 @@ flag {
 }
 
 flag {
+   name: "priority_people_section"
+   namespace: "systemui"
+   description: "Add a new section for priority people (aka important conversations)."
+   bug: "340294566"
+}
+
+flag {
    name: "notification_minimalism_prototype"
    namespace: "systemui"
    description: "Prototype of notification minimalism; the new 'Intermediate' lockscreen customization proposal."

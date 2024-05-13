@@ -27,6 +27,8 @@ import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.logging.InstanceId;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SbnBuilder;
@@ -36,6 +38,7 @@ import com.android.systemui.util.time.FakeSystemClock;
 import kotlin.Unit;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Combined builder for constructing a NotificationEntry and its associated StatusBarNotification
@@ -71,6 +74,20 @@ public class NotificationEntryBuilder {
 
         mParent = source.getParent();
         mCreationTime = source.getCreationTime();
+    }
+
+    /** Allows the caller to sub-build the ranking */
+    @NonNull
+    public NotificationEntryBuilder updateRanking(@NonNull Consumer<RankingBuilder> rankingUpdater) {
+        rankingUpdater.accept(mRankingBuilder);
+        return this;
+    }
+
+    /** Allows the caller to sub-build the SBN */
+    @NonNull
+    public NotificationEntryBuilder updateSbn(@NonNull Consumer<SbnBuilder> sbnUpdater) {
+        sbnUpdater.accept(mSbnBuilder);
+        return this;
     }
 
     /** Update an the parent on an existing entry */
