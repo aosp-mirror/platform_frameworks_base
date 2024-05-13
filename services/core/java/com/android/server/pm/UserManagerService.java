@@ -1371,7 +1371,7 @@ public class UserManagerService extends IUserManager.Stub {
             for (int i = 0; i < userSize; i++) {
                 UserInfo ui = mUsers.valueAt(i).info;
                 if ((excludePartial && ui.partial)
-                        || (excludeDying && isDyingLU(ui))
+                        || (excludeDying && mRemovingUserIds.get(ui.id))
                         || (excludePreCreated && ui.preCreated)) {
                     continue;
                 }
@@ -1379,17 +1379,6 @@ public class UserManagerService extends IUserManager.Stub {
             }
             return users;
         }
-    }
-
-    @GuardedBy("mUsersLock")
-    private boolean isDyingLU(UserInfo ui) {
-        if (mRemovingUserIds.get(ui.id)) {
-            return true;
-        }
-        if (ui.isEphemeral() && ui.isInitialized() && ui.id != getCurrentUserId()) {
-            return true;
-        }
-        return false;
     }
 
     @Override
