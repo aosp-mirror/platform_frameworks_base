@@ -1300,6 +1300,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Bundle prevRestrictions) {
             resetCrossProfileIntentFiltersIfNeeded(userId, newRestrictions, prevRestrictions);
             resetUserVpnIfNeeded(userId, newRestrictions, prevRestrictions);
+            if (Flags.deletePrivateSpaceUnderRestriction()) {
+                removePrivateSpaceIfRestrictionIsSet(userId, newRestrictions, prevRestrictions);
+            }
         }
 
         private void resetUserVpnIfNeeded(
@@ -1331,6 +1334,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         UserHandle.of(userId));
             }
         }
+        private void removePrivateSpaceIfRestrictionIsSet(
+                int userId, Bundle newRestrictions, Bundle prevRestrictions) {
+            final boolean newlyEnforced =
+                    !prevRestrictions.getBoolean(UserManager.DISALLOW_ADD_PRIVATE_PROFILE)
+                            && newRestrictions.getBoolean(UserManager.DISALLOW_ADD_PRIVATE_PROFILE);
+            if (!newlyEnforced) {
+                return;
+            }
+            mDpms.removePrivateSpaceWithinUserGroupIfExists(userId);
+        }
+
     }
 
     private void clearUserConfiguredVpns(int userId) {
@@ -1373,6 +1387,42 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         pkgOps.getPackageName(), MODE_DEFAULT);
             }
         }
+    }
+
+    /**
+     * Given a parent userId, try removing all private space profiles with its profile group, and
+     * post a notification if at least one private space profile is removed.
+     */
+    private void removePrivateSpaceWithinUserGroupIfExists(int userId) {
+        boolean removed = false;
+        if (mUserManager.isProfile(userId)) return;
+        for (int profileId : mUserManager.getProfileIdsWithDisabled(userId)) {
+            if (profileId == userId) continue;
+            if (mUserManager.getUserInfo(profileId).isPrivateProfile()) {
+                Slogf.i(LOG_TAG, "Removing private space %d due to DISALLOW_ADD_PRIVATE_PROFILE",
+                        profileId);
+                removed |= mUserManager.removeUserEvenWhenDisallowed(profileId);
+            }
+        }
+        if (removed) {
+            mHandler.post(() -> sendPrivateSpaceRemovedNotification(userId));
+        }
+    }
+
+    private void sendPrivateSpaceRemovedNotification(int parentUserId) {
+        String notification_details = mContext.getString(
+                R.string.private_space_deleted_by_admin_details);
+        Notification notification =
+                new Notification.Builder(mContext, SystemNotificationChannels.DEVICE_ADMIN)
+                        .setSmallIcon(android.R.drawable.stat_sys_warning)
+                        .setContentTitle(mContext.getString(
+                                R.string.private_space_deleted_by_admin))
+                        .setContentText(notification_details)
+                        .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                        .setStyle(new Notification.BigTextStyle().bigText(notification_details))
+                        .build();
+        mInjector.getNotificationManager().notifyAsUser(/* tag= */ null,
+                SystemMessage.NOTE_PROFILE_WIPED, notification, UserHandle.of(parentUserId));
     }
 
     private final class UserLifecycleListener implements UserManagerInternal.UserLifecycleListener {
@@ -2128,9 +2178,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mDevicePolicyEngine.load();
 
         mContactSystemRoleHolders = fetchOemSystemHolders(/* roleResIds...= */
-                com.android.internal.R.string.config_defaultSms,
-                com.android.internal.R.string.config_defaultDialer,
-                com.android.internal.R.string.config_systemContacts
+                R.string.config_defaultSms,
+                R.string.config_defaultDialer,
+                R.string.config_systemContacts
         );
 
         // The binder caches are not enabled until the first invalidation.
@@ -10458,7 +10508,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         final String configComponent = mContext.getResources().getString(
-                com.android.internal.R.string.config_defaultSupervisionProfileOwnerComponent);
+                R.string.config_defaultSupervisionProfileOwnerComponent);
         if (configComponent != null) {
             final ComponentName componentName = ComponentName.unflattenFromString(configComponent);
             if (who.equals(componentName)) {
@@ -10468,7 +10518,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // Check the system supervision role.
         final String configPackage = mContext.getResources().getString(
-                com.android.internal.R.string.config_systemSupervision);
+                R.string.config_systemSupervision);
 
         return who.getPackageName().equals(configPackage);
     }
@@ -22560,7 +22610,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         private String[] getDefaultRoleHolderPackageNameAndSignature() {
             String packageNameAndSignature = mContext.getString(
-                    com.android.internal.R.string.config_devicePolicyManagement);
+                    R.string.config_devicePolicyManagement);
             if (TextUtils.isEmpty(packageNameAndSignature)) {
                 return null;
             }

@@ -4482,6 +4482,8 @@
 
   <!-- For device policy -->
   <java-symbol type="array" name="config_packagesExemptFromSuspension" />
+  <java-symbol type="string" name="private_space_deleted_by_admin" />
+  <java-symbol type="string" name="private_space_deleted_by_admin_details" />
 
   <!-- Accessibility take screenshot -->
   <java-symbol type="string" name="capability_desc_canTakeScreenshot" />
