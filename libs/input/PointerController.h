@@ -109,7 +109,7 @@ private:
 
     struct Locked {
         Presentation presentation;
-        ui::LogicalDisplayId pointerDisplayId = ui::ADISPLAY_ID_NONE;
+        ui::LogicalDisplayId pointerDisplayId = ui::LogicalDisplayId::INVALID;
 
         std::vector<gui::DisplayInfo> mDisplayInfos;
         std::unordered_map<ui::LogicalDisplayId, TouchSpotController> spotControllers;

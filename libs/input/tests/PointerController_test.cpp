@@ -166,7 +166,7 @@ protected:
     PointerControllerTest();
     ~PointerControllerTest();
 
-    void ensureDisplayViewportIsSet(ui::LogicalDisplayId displayId = ui::ADISPLAY_ID_DEFAULT);
+    void ensureDisplayViewportIsSet(ui::LogicalDisplayId displayId = ui::LogicalDisplayId::DEFAULT);
 
     sp<MockSprite> mPointerSprite;
     sp<MockPointerControllerPolicyInterface> mPolicy;
@@ -335,23 +335,23 @@ TEST_F(PointerControllerTest, updatesSkipScreenshotFlagForTouchSpots) {
 
     // Update spots to sync state with sprite
     mPointerController->setSpots(&testSpotCoords, testIdToIndex.cbegin(), testIdBits,
-                                 ui::ADISPLAY_ID_DEFAULT);
+                                 ui::LogicalDisplayId::DEFAULT);
     testing::Mock::VerifyAndClearExpectations(testSpotSprite.get());
 
     // Marking the display to skip screenshot should update sprite as well
-    mPointerController->setSkipScreenshot(ui::ADISPLAY_ID_DEFAULT, true);
+    mPointerController->setSkipScreenshot(ui::LogicalDisplayId::DEFAULT, true);
     EXPECT_CALL(*testSpotSprite, setSkipScreenshot).With(testing::Args<0>(true));
 
     // Update spots to sync state with sprite
     mPointerController->setSpots(&testSpotCoords, testIdToIndex.cbegin(), testIdBits,
-                                 ui::ADISPLAY_ID_DEFAULT);
+                                 ui::LogicalDisplayId::DEFAULT);
     testing::Mock::VerifyAndClearExpectations(testSpotSprite.get());
 
     // Reset flag and verify again
-    mPointerController->setSkipScreenshot(ui::ADISPLAY_ID_DEFAULT, false);
+    mPointerController->setSkipScreenshot(ui::LogicalDisplayId::DEFAULT, false);
     EXPECT_CALL(*testSpotSprite, setSkipScreenshot).With(testing::Args<0>(false));
     mPointerController->setSpots(&testSpotCoords, testIdToIndex.cbegin(), testIdBits,
-                                 ui::ADISPLAY_ID_DEFAULT);
+                                 ui::LogicalDisplayId::DEFAULT);
     testing::Mock::VerifyAndClearExpectations(testSpotSprite.get());
 }
 
