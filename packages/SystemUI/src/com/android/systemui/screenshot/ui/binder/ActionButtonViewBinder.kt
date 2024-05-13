@@ -36,6 +36,10 @@ object ActionButtonViewBinder {
         // Note we never re-bind a view to a different ActionButtonViewModel, different view
         // models would remove/create separate views.
         drawable?.setIcon(viewModel.appearance.icon)
+        iconView.setImageDrawable(viewModel.appearance.icon)
+        if (!viewModel.appearance.tint) {
+            iconView.setImageTintList(null)
+        }
         textView.text = viewModel.appearance.label
 
         viewModel.appearance.customBackground?.also {

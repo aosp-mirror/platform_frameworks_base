@@ -25,5 +25,6 @@ constructor(
     val icon: Drawable?,
     val label: CharSequence?,
     val description: CharSequence,
+    val tint: Boolean = true,
     val customBackground: Drawable? = null,
 )

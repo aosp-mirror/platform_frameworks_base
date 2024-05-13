@@ -66,10 +66,10 @@ import com.android.systemui.screenshot.ui.binder.ActionButtonViewBinder;
 import com.android.systemui.screenshot.ui.viewmodel.ActionButtonAppearance;
 import com.android.systemui.screenshot.ui.viewmodel.ActionButtonViewModel;
 
-import java.util.ArrayList;
-
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
+
+import java.util.ArrayList;
 
 /**
  * Handles the visual elements and animations for the clipboard overlay.
@@ -159,7 +159,8 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
                                             R.drawable.ic_baseline_devices_24).loadDrawable(
                                             mContext),
                                     null,
-                                    mContext.getString(R.string.clipboard_send_nearby_description)),
+                                    mContext.getString(R.string.clipboard_send_nearby_description),
+                                    true),
                             new Function0<>() {
                                 @Override
                                 public Unit invoke() {
@@ -174,7 +175,9 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
                             new ActionButtonAppearance(
                                     Icon.createWithResource(mContext,
                                             R.drawable.ic_screenshot_share).loadDrawable(mContext),
-                                    null, mContext.getString(com.android.internal.R.string.share)),
+                                    null,
+                                    mContext.getString(com.android.internal.R.string.share),
+                                    true),
                             new Function0<>() {
                                 @Override
                                 public Unit invoke() {
@@ -514,7 +517,7 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
                 R.layout.shelf_action_chip, mActionContainer, false);
         ActionButtonViewBinder.INSTANCE.bind(chip, ActionButtonViewModel.Companion.withNextId(
                 new ActionButtonAppearance(action.getIcon().loadDrawable(mContext),
-                        action.getTitle(), action.getTitle()), new Function0<>() {
+                        action.getTitle(), action.getTitle(), false), new Function0<>() {
                     @Override
                     public Unit invoke() {
                         try {
