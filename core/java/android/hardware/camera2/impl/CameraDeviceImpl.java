@@ -31,6 +31,7 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraExtensionCharacteristics;
+import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CameraOfflineSession;
 import android.hardware.camera2.CaptureFailure;
@@ -146,7 +147,8 @@ public class CameraDeviceImpl extends CameraDevice
 
     private final String mCameraId;
     private final CameraCharacteristics mCharacteristics;
-    private final Map<String, CameraCharacteristics> mPhysicalIdsToChars;
+    private Map<String, CameraCharacteristics> mPhysicalIdsToChars;
+    private final CameraManager mCameraManager;
     private final int mTotalPartialCount;
     private final Context mContext;
 
@@ -341,11 +343,12 @@ public class CameraDeviceImpl extends CameraDevice
 
     public CameraDeviceImpl(String cameraId, StateCallback callback, Executor executor,
                         CameraCharacteristics characteristics,
-                        Map<String, CameraCharacteristics> physicalIdsToChars,
+                        @NonNull CameraManager manager,
                         int appTargetSdkVersion,
                         Context ctx,
                         @Nullable CameraDevice.CameraDeviceSetup cameraDeviceSetup) {
-        if (cameraId == null || callback == null || executor == null || characteristics == null) {
+        if (cameraId == null || callback == null || executor == null || characteristics == null
+                || manager == null) {
             throw new IllegalArgumentException("Null argument given");
         }
         mCameraId = cameraId;
@@ -357,7 +360,7 @@ public class CameraDeviceImpl extends CameraDevice
             mDeviceExecutor = executor;
         }
         mCharacteristics = characteristics;
-        mPhysicalIdsToChars = physicalIdsToChars;
+        mCameraManager = manager;
         mAppTargetSdkVersion = appTargetSdkVersion;
         mContext = ctx;
         mCameraDeviceSetup = cameraDeviceSetup;
@@ -377,6 +380,18 @@ public class CameraDeviceImpl extends CameraDevice
         } else {
             mTotalPartialCount = partialCount;
         }
+    }
+
+    private Map<String, CameraCharacteristics> getPhysicalIdToChars() {
+        if (mPhysicalIdsToChars == null) {
+            try {
+                mPhysicalIdsToChars = mCameraManager.getPhysicalIdToCharsMap(mCharacteristics);
+            } catch (CameraAccessException e) {
+                Log.e(TAG, "Unable to query the physical characteristics map!");
+            }
+        }
+
+        return mPhysicalIdsToChars;
     }
 
     public CameraDeviceCallbacks getCallbacks() {
@@ -1598,7 +1613,7 @@ public class CameraDeviceImpl extends CameraDevice
             return true;
         }
 
-        for (Map.Entry<String, CameraCharacteristics> entry : mPhysicalIdsToChars.entrySet()) {
+        for (Map.Entry<String, CameraCharacteristics> entry : getPhysicalIdToChars().entrySet()) {
             configMap = entry.getValue().get(ck);
 
             if (configMap != null &&
@@ -2621,7 +2636,7 @@ public class CameraDeviceImpl extends CameraDevice
     public void createExtensionSession(ExtensionSessionConfiguration extensionConfiguration)
             throws CameraAccessException {
         HashMap<String, CameraCharacteristics> characteristicsMap = new HashMap<>(
-                mPhysicalIdsToChars);
+                getPhysicalIdToChars());
         characteristicsMap.put(mCameraId, mCharacteristics);
         boolean initializationFailed = true;
         IBinder token = new Binder(TAG + " : " + mNextSessionId++);
