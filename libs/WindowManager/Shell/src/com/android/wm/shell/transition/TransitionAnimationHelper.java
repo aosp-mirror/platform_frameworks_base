@@ -36,6 +36,7 @@ import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITI
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.WindowConfiguration;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -72,6 +73,9 @@ public class TransitionAnimationHelper {
         final int changeFlags = change.getFlags();
         final boolean enter = TransitionUtil.isOpeningType(changeMode);
         final boolean isTask = change.getTaskInfo() != null;
+        final boolean isFreeform = isTask && change.getTaskInfo().isFreeform();
+        final boolean isCoveredByOpaqueFullscreenChange =
+                isCoveredByOpaqueFullscreenChange(info, change);
         final TransitionInfo.AnimationOptions options;
         if (Flags.moveAnimationOptionsToChange()) {
             options = change.getAnimationOptions();
@@ -107,6 +111,24 @@ public class TransitionAnimationHelper {
             animAttr = enter
                     ? R.styleable.WindowAnimation_wallpaperCloseEnterAnimation
                     : R.styleable.WindowAnimation_wallpaperCloseExitAnimation;
+        } else if (!isCoveredByOpaqueFullscreenChange
+                && isFreeform
+                && TransitionUtil.isOpeningMode(type)
+                && change.getMode() == TRANSIT_TO_BACK) {
+            // Set translucent here so TransitionAnimation loads the appropriate animations for
+            // translucent activities and tasks later
+            translucent = (changeFlags & FLAG_TRANSLUCENT) != 0;
+            // The main Task is launching or being brought to front, this Task is being minimized
+            animAttr = R.styleable.WindowAnimation_activityCloseExitAnimation;
+        } else if (!isCoveredByOpaqueFullscreenChange
+                && isFreeform
+                && type == TRANSIT_TO_FRONT
+                && change.getMode() == TRANSIT_TO_FRONT) {
+            // Set translucent here so TransitionAnimation loads the appropriate animations for
+            // translucent activities and tasks later
+            translucent = (changeFlags & FLAG_TRANSLUCENT) != 0;
+            // Bring the minimized Task back to front
+            animAttr = R.styleable.WindowAnimation_activityOpenEnterAnimation;
         } else if (type == TRANSIT_OPEN) {
             // We will translucent open animation for translucent activities and tasks. Choose
             // WindowAnimation_activityOpenEnterAnimation and set translucent here, then
@@ -416,5 +438,26 @@ public class TransitionAnimationHelper {
         finishTransaction.remove(edgeExtensionLayer);
 
         return edgeExtensionLayer;
+    }
+
+    /**
+     * Returns whether there is an opaque fullscreen Change positioned in front of the given Change
+     * in the given TransitionInfo.
+     */
+    private static boolean isCoveredByOpaqueFullscreenChange(
+            TransitionInfo info, TransitionInfo.Change change) {
+        // TransitionInfo#getChanges() are ordered from front to back
+        for (TransitionInfo.Change coveringChange : info.getChanges()) {
+            if (coveringChange == change) {
+                return false;
+            }
+            if ((coveringChange.getFlags() & FLAG_TRANSLUCENT) == 0
+                    && coveringChange.getTaskInfo() != null
+                    && coveringChange.getTaskInfo().getWindowingMode()
+                    == WindowConfiguration.WINDOWING_MODE_FULLSCREEN) {
+                return true;
+            }
+        }
+        return false;
     }
 }
