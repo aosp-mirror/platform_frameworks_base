@@ -25,6 +25,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import javax.inject.Inject
@@ -49,6 +50,8 @@ constructor(
         fromState: KeyguardState,
         toState: KeyguardState,
     ) {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
         val toScene =
             if (fromState == KeyguardState.GLANCEABLE_HUB) {
                 CommunalScenes.Blank
