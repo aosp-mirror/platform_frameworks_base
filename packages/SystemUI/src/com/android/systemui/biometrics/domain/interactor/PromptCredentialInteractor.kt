@@ -66,13 +66,13 @@ constructor(
                 biometricPromptRepository.promptInfo,
                 biometricPromptRepository.challenge,
                 biometricPromptRepository.userId,
-                biometricPromptRepository.kind
-            ) { promptInfo, challenge, userId, kind ->
+                biometricPromptRepository.promptKind
+            ) { promptInfo, challenge, userId, promptKind ->
                 if (promptInfo == null || userId == null || challenge == null) {
                     return@combine null
                 }
 
-                when (kind) {
+                when (promptKind) {
                     PromptKind.Pin ->
                         BiometricPromptRequest.Credential.Pin(
                             info = promptInfo,

@@ -73,7 +73,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.biometrics.AuthController.ScaleFactorProvider;
-import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
 import com.android.systemui.biometrics.shared.model.BiometricModalities;
 import com.android.systemui.biometrics.shared.model.PromptKind;
@@ -150,7 +149,6 @@ public class AuthContainerView extends LinearLayout
     private final CoroutineScope mApplicationCoroutineScope;
 
     // TODO(b/287311775): these should be migrated out once ready
-    private final Provider<PromptCredentialInteractor> mPromptCredentialInteractor;
     private final @NonNull Provider<PromptSelectorInteractor> mPromptSelectorInteractorProvider;
     // TODO(b/287311775): these should be migrated out of the view
     private final Provider<CredentialViewModel> mCredentialViewModelProvider;
@@ -311,7 +309,6 @@ public class AuthContainerView extends LinearLayout
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull InteractionJankMonitor jankMonitor,
-            @NonNull Provider<PromptCredentialInteractor> promptCredentialInteractor,
             @NonNull Provider<PromptSelectorInteractor> promptSelectorInteractor,
             @NonNull PromptViewModel promptViewModel,
             @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
@@ -319,7 +316,7 @@ public class AuthContainerView extends LinearLayout
             @NonNull VibratorHelper vibratorHelper) {
         this(config, applicationCoroutineScope, fpProps, faceProps,
                 wakefulnessLifecycle, panelInteractionDetector, userManager, lockPatternUtils,
-                jankMonitor, promptSelectorInteractor, promptCredentialInteractor, promptViewModel,
+                jankMonitor, promptSelectorInteractor, promptViewModel,
                 credentialViewModelProvider, new Handler(Looper.getMainLooper()), bgExecutor,
                 vibratorHelper);
     }
@@ -335,7 +332,6 @@ public class AuthContainerView extends LinearLayout
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull InteractionJankMonitor jankMonitor,
             @NonNull Provider<PromptSelectorInteractor> promptSelectorInteractorProvider,
-            @NonNull Provider<PromptCredentialInteractor> credentialInteractor,
             @NonNull PromptViewModel promptViewModel,
             @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
             @NonNull Handler mainHandler,
@@ -358,13 +354,19 @@ public class AuthContainerView extends LinearLayout
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
         mBiometricCallback = new BiometricCallback();
 
+        mFpProps = fpProps;
+        mFaceProps = faceProps;
+        final BiometricModalities biometricModalities = new BiometricModalities(
+                Utils.findFirstSensorProperties(fpProps, mConfig.mSensorIds),
+                Utils.findFirstSensorProperties(faceProps, mConfig.mSensorIds));
+
         mPromptSelectorInteractorProvider = promptSelectorInteractorProvider;
-        mPromptSelectorInteractorProvider.get().setShouldShowBpWithoutIconForCredential(
-                config.mPromptInfo);
+        mPromptSelectorInteractorProvider.get().setPrompt(mConfig.mPromptInfo, mEffectiveUserId,
+                biometricModalities, mConfig.mOperationId, mConfig.mOpPackageName,
+                false /*onSwitchToCredential*/);
 
         final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
-        if (constraintBp() && (Utils.isBiometricAllowed(config.mPromptInfo)
-                || mPromptViewModel.getShowBpWithoutIconForCredential().getValue())) {
+        if (constraintBp() && mPromptViewModel.getPromptKind().getValue().isBiometric()) {
             mLayout = (ConstraintLayout) layoutInflater.inflate(
                     R.layout.biometric_prompt_constraint_layout, this, false /* attachToRoot */);
         } else {
@@ -398,10 +400,7 @@ public class AuthContainerView extends LinearLayout
         mPanelController = new AuthPanelController(mContext, mPanelView);
         mBackgroundExecutor = bgExecutor;
         mInteractionJankMonitor = jankMonitor;
-        mPromptCredentialInteractor = credentialInteractor;
         mCredentialViewModelProvider = credentialViewModelProvider;
-        mFpProps = fpProps;
-        mFaceProps = faceProps;
 
         showPrompt(config, layoutInflater, promptViewModel,
                 Utils.findFirstSensorProperties(fpProps, mConfig.mSensorIds),
@@ -430,11 +429,12 @@ public class AuthContainerView extends LinearLayout
             @Nullable FaceSensorPropertiesInternal faceProps,
             @NonNull VibratorHelper vibratorHelper
     ) {
-        if (Utils.isBiometricAllowed(config.mPromptInfo)
-                || mPromptViewModel.getShowBpWithoutIconForCredential().getValue()) {
+        if (mPromptViewModel.getPromptKind().getValue().isBiometric()) {
             addBiometricView(config, layoutInflater, viewModel, fpProps, faceProps, vibratorHelper);
-        } else if (constraintBp() && Utils.isDeviceCredentialAllowed(mConfig.mPromptInfo)) {
-            addCredentialView(true, false);
+        } else if (mPromptViewModel.getPromptKind().getValue().isCredential()) {
+            if (constraintBp()) {
+                addCredentialView(true, false);
+            }
         } else {
             mPromptSelectorInteractorProvider.get().resetPrompt();
         }
@@ -445,12 +445,6 @@ public class AuthContainerView extends LinearLayout
             @Nullable FingerprintSensorPropertiesInternal fpProps,
             @Nullable FaceSensorPropertiesInternal faceProps,
             @NonNull VibratorHelper vibratorHelper) {
-        mPromptSelectorInteractorProvider.get().useBiometricsForAuthentication(
-                config.mPromptInfo,
-                config.mUserId,
-                config.mOperationId,
-                new BiometricModalities(fpProps, faceProps),
-                config.mOpPackageName);
 
         if (constraintBp()) {
             mBiometricView = BiometricViewBinder.bind(mLayout, viewModel, null,
@@ -519,10 +513,6 @@ public class AuthContainerView extends LinearLayout
         // disable it.
         mBackgroundView.setOnClickListener(null);
         mBackgroundView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-
-        mPromptSelectorInteractorProvider.get().useCredentialsForAuthentication(
-                mConfig.mPromptInfo, credentialType, mConfig.mUserId, mConfig.mOperationId,
-                mConfig.mOpPackageName);
         final CredentialViewModel vm = mCredentialViewModelProvider.get();
         vm.setAnimateContents(animateContents);
         ((CredentialView) mCredentialView).init(vm, this, mPanelController, animatePanel,
@@ -557,10 +547,9 @@ public class AuthContainerView extends LinearLayout
                 () -> animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED));
         if (constraintBp()) {
             // Do nothing on attachment with constraintLayout
-        } else if (Utils.isBiometricAllowed(mConfig.mPromptInfo)
-                || mPromptViewModel.getShowBpWithoutIconForCredential().getValue()) {
+        } else if (mPromptViewModel.getPromptKind().getValue().isBiometric()) {
             mBiometricScrollView.addView(mBiometricView.asView());
-        } else if (Utils.isDeviceCredentialAllowed(mConfig.mPromptInfo)) {
+        } else if (mPromptViewModel.getPromptKind().getValue().isCredential()) {
             addCredentialView(true /* animatePanel */, false /* animateContents */);
         } else {
             throw new IllegalStateException("Unknown configuration: "
