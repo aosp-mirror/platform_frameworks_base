@@ -359,6 +359,8 @@ constructor(
         )
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
         mediaCarousel.repeatWhenAttached {
+            mediaCarouselViewModel.onAttached()
+            mediaCarouselScrollHandler.scrollToStart()
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 listenForAnyStateToGoneKeyguardTransition(this)
                 listenForAnyStateToLockscreenTransition(this)
@@ -734,6 +736,14 @@ constructor(
         viewController.setListening(mediaCarouselScrollHandler.visibleToUser && currentlyExpanded)
         updateViewControllerToState(viewController, noAnimation = true)
         updatePageIndicator()
+        if (
+            commonViewModel is MediaCommonViewModel.MediaControl && commonViewModel.isMediaFromRec
+        ) {
+            mediaCarouselScrollHandler.scrollToPlayer(
+                mediaCarouselScrollHandler.visibleMediaIndex,
+                destIndex = 0
+            )
+        }
         mediaCarouselScrollHandler.onPlayersChanged()
         mediaFrame.requiresRemeasuring = true
         commonViewModel.onAdded(commonViewModel)
