@@ -44,9 +44,9 @@ import com.android.systemui.qs.tiles.base.actions.pendingIntentInputs
 import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx.click
 import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx.longClick
 import com.android.systemui.qs.tiles.impl.custom.customTileServiceInteractor
+import com.android.systemui.qs.tiles.impl.custom.customTileSpec
 import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataModel
 import com.android.systemui.qs.tiles.impl.custom.qsTileLogger
-import com.android.systemui.qs.tiles.impl.custom.tileSpec
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.any
@@ -68,7 +68,7 @@ class CustomTileUserActionInteractorTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
             componentName = TEST_COMPONENT
-            tileSpec = TileSpec.create(componentName)
+            customTileSpec = TileSpec.create(componentName)
             testCase = this@CustomTileUserActionInteractorTest
         }
 
@@ -79,7 +79,7 @@ class CustomTileUserActionInteractorTest : SysuiTestCase() {
                     mock {
                         whenever(packageManager).thenReturn(packageManagerFacade.packageManager)
                     },
-                tileSpec = tileSpec,
+                tileSpec = customTileSpec,
                 qsTileLogger = qsTileLogger,
                 windowManager = windowManagerFacade.windowManager,
                 displayTracker = mock {},
@@ -227,7 +227,7 @@ class CustomTileUserActionInteractorTest : SysuiTestCase() {
     private fun pendingIntent(): PendingIntent = mock { whenever(isActivity).thenReturn(true) }
 
     private fun Kosmos.customTileModel(
-        componentName: ComponentName = tileSpec.componentName,
+        componentName: ComponentName = customTileSpec.componentName,
         activityLaunchForClick: PendingIntent? = null,
         tileState: Int = 111,
     ) =
