@@ -875,3 +875,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "app_clips_backlinks"
+  namespace: "systemui"
+  description: "Enables Backlinks improvement feature in App Clips"
+  bug: "300307759"
+}
