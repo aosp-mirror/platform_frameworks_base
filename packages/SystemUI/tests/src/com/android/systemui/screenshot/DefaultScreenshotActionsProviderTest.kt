@@ -37,6 +37,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verifyNoMoreInteractions
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidTestingRunner::class)
@@ -109,6 +110,47 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
         verify(actionExecutor)
             .startSharedTransition(capture(intentCaptor), eq(Process.myUserHandle()), eq(false))
         assertThat(intentCaptor.value.action).isEqualTo(Intent.ACTION_CHOOSER)
+    }
+
+    @Test
+    fun scrollChipClicked_callsOnClick() = runTest {
+        actionsProvider = createActionsProvider()
+
+        val onScrollClick = mock<Runnable>()
+        val numActions = viewModel.actions.value.size
+        actionsProvider.onScrollChipReady(onScrollClick)
+        viewModel.actions.value[numActions].onClicked!!.invoke()
+
+        verify(onScrollClick).run()
+    }
+
+    @Test
+    fun scrollChipClicked_afterInvalidate_doesNothing() = runTest {
+        actionsProvider = createActionsProvider()
+
+        val onScrollClick = mock<Runnable>()
+        val numActions = viewModel.actions.value.size
+        actionsProvider.onScrollChipReady(onScrollClick)
+        actionsProvider.onScrollChipInvalidated()
+        viewModel.actions.value[numActions].onClicked!!.invoke()
+
+        verify(onScrollClick, never()).run()
+    }
+
+    @Test
+    fun scrollChipClicked_afterUpdate_runsNewAction() = runTest {
+        actionsProvider = createActionsProvider()
+
+        val onScrollClick = mock<Runnable>()
+        val onScrollClick2 = mock<Runnable>()
+        val numActions = viewModel.actions.value.size
+        actionsProvider.onScrollChipReady(onScrollClick)
+        actionsProvider.onScrollChipInvalidated()
+        actionsProvider.onScrollChipReady(onScrollClick2)
+        viewModel.actions.value[numActions].onClicked!!.invoke()
+
+        verify(onScrollClick2).run()
+        verify(onScrollClick, never()).run()
     }
 
     private fun createActionsProvider(): ScreenshotActionsProvider {

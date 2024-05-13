@@ -586,7 +586,11 @@ public class ScreenshotController {
                             if (mConfigChanges.applyNewConfig(mContext.getResources())) {
                                 // Hide the scroll chip until we know it's available in this
                                 // orientation
-                                mViewProxy.hideScrollChip();
+                                if (screenshotShelfUi2()) {
+                                    mActionsProvider.onScrollChipInvalidated();
+                                } else {
+                                    mViewProxy.hideScrollChip();
+                                }
                                 // Delay scroll capture eval a bit to allow the underlying activity
                                 // to set up in the new orientation.
                                 mScreenshotHandler.postDelayed(
