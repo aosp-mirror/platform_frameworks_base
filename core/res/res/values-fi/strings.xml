@@ -2135,6 +2135,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ohjelmatilan tietoilmoitus"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Virransäästö päällä"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Akun käyttöä rajoitetaan akunkeston pidentämiseksi"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"Virransäästö on päällä"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"Virransäästö on laitettu päälle akunkeston pidentämiseksi"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Virransäästö"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Virransäästö laitettiin pois päältä"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Puhelimessa on tarpeeksi virtaa. Ominaisuuksia ei enää rajoiteta."</string>
@@ -2393,4 +2395,22 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Voit lähettää ja vastaanottaa viestejä ilman mobiili‑ tai Wi-Fi-verkkoa"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Avaa Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Näin se toimii"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

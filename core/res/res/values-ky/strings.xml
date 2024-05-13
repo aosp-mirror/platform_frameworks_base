@@ -1328,7 +1328,7 @@
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
     <skip />
     <string name="wifi_no_internet" msgid="1386911698276448061">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> Интернетке туташуусу жок"</string>
-    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Параметрлерди ачуу үчүн таптап коюңуз"</string>
+    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Параметрлерди ачуу үчүн тийип коюңуз"</string>
     <string name="mobile_no_internet" msgid="4014455157529909781">"Мобилдик Интернет жок"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Тармактын Интернет жок"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Жеке DNS сервери жеткиликсиз"</string>
@@ -1390,7 +1390,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB аркылуу MIDI режими күйгүзүлдү"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Түзмөк веб-камера катары туташты"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB шайманы туташты"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Кошумча параметрлерди ачуу үчүн таптап коюңуз."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Кошумча параметрлерди ачуу үчүн тийип коюңуз."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Туташкан түзмөк кубатталууда. Дагы параметрлерди көрүү үчүн таптап коюңуз."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Аналогдук аудио жабдуу табылды"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Тиркелген түзмөк бул телефонго шайкеш келбейт. Көбүрөөк маалымат алуу үчүн таптап коюңуз."</string>
@@ -2135,6 +2135,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Режимдин адаттагы билдирмеси"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Батареяны үнөмдөгүч күйгүзүлдү"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Кубат үнөмдөлсө, батарея көбүрөөк убакытка жетет"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"Батареяны үнөмдөгүч режими күйүк"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"Батареянын кубатынын мөөнөтүн узартуу үчүн Батареяны үнөмдөгүч режими күйгүзүлдү"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Батареяны үнөмдөгүч"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Батареяны үнөмдөө режими өчүк"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Телефондун кубаты жетиштүү. Функциялар мындан ары чектелбейт."</string>
@@ -2393,4 +2395,22 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Сиз мобилдик же Wi-Fi тармагы жок эле билдирүүлөрдү жөнөтүп, ала аласыз"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Жазышуулар колдонмосун ачуу"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ал кантип иштейт"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

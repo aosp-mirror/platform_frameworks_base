@@ -2135,6 +2135,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"루틴 모드 정보 알림"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"절전 모드 사용 설정됨"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"배터리 사용량을 줄여서 배터리 수명을 늘립니다."</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"절전 모드 사용 중"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"배터리 수명을 늘리기 위해 절전 모드가 사용 설정되었습니다"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"절전 모드"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"절전 모드가 사용 중지되었습니다"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"휴대전화의 배터리가 충분하므로 기능이 더 이상 제한되지 않습니다"</string>
@@ -2393,4 +2395,22 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"모바일 또는 Wi-Fi 네트워크 없이 메시지를 주고 받을 수 있습니다"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"메시지 열기"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"작동 방식"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

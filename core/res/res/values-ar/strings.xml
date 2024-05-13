@@ -845,7 +845,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"قفل الشاشة"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"التحكّم في طريقة ووقت قفل الشاشة"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"محو جميع البيانات"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"يمكنك محو بيانات الجهاز اللوحي بدون تحذير، وذلك عبر إجراء إعادة الضبط على الإعدادات الأصلية."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"محو بيانات الجهاز اللوحي بدون تحذير، وذلك عبر إعادة الضبط على الإعدادات الأصلية"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"‏يمكنك محو بيانات جهاز Android TV بدون تحذير عن طريق تنفيذ إعادة الضبط على الإعدادات الأصلية."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"يمكنك محو بيانات \"نظام الترفيه والمعلومات\" بدون تحذير، وذلك من خلال إعادة الضبط على الإعدادات الأصلية."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"محو بيانات الهاتف بدون تحذير، وذلك من خلال إعادة ضبط البيانات على الإعدادات الأصلية"</string>
@@ -2139,6 +2139,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"إشعار معلومات \"وضع سلسلة الإجراءات\""</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"تم تفعيل ميزة توفير شحن البطارية"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"يتم تقليل استخدام البطارية لإطالة عمرها."</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"تم تفعيل ميزة \"توفير شحن البطارية\""</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"تم تفعيل ميزة \"توفير شحن البطارية\" لإطالة عمر البطارية"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"توفير شحن البطارية"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"تم تفعيل ميزة \"توفير شحن البطارية\""</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"تم شحن الهاتف بدرجة كافية وتفعيل الميزات مرة أخرى"</string>
@@ -2397,4 +2399,22 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"‏يمكنك إرسال الرسائل واستلامها بدون شبكة الجوّال أو شبكة Wi-Fi."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"فتح تطبيق \"الرسائل\""</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"طريقة العمل"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

@@ -153,7 +153,7 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> sau <xliff:g id="TIME_DELAY">{2}</xliff:g> giây"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Không được chuyển tiếp"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Không được chuyển tiếp"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Chế độ bảo mật mạng di động"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"An ninh mạng di động"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Xem lại các chế độ cài đặt"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Đã truy cập vào mã nhận dạng thiết bị"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Một mạng trong kết nối <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> đã ghi lại giá trị nhận dạng duy nhất (IMSI) của thiết bị <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> lần trong khoảng thời gian từ <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> đến <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
@@ -2135,6 +2135,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Thông báo cung cấp thông tin về chế độ sạc thông thường"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Đã bật Trình tiết kiệm pin"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Giảm mức sử dụng pin để kéo dài thời lượng pin"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"Trình tiết kiệm pin đang bật"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"Trình tiết kiệm pin được bật để kéo dài thời lượng pin"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Trình tiết kiệm pin"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Trình tiết kiệm pin đã tắt"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Điện thoại còn đủ pin. Các tính năng không bị hạn chế nữa."</string>
@@ -2393,4 +2395,22 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Bạn có thể gửi và nhận tin nhắn mà không cần có mạng di động hoặc mạng Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Mở ứng dụng Tin nhắn"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cách hoạt động"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>
