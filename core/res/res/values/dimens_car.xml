@@ -151,10 +151,4 @@
     <dimen name="action_bar_button_margin">@*android:dimen/car_padding_4</dimen>
     <dimen name="action_bar_button_max_width">268dp</dimen>
     <dimen name="action_bar_toggle_internal_padding">@*android:dimen/car_padding_3</dimen>
-
-    <!-- Intent Resolver -->
-    <dimen name="car_activity_resolver_width">706dp</dimen>
-    <dimen name="car_activity_resolver_list_item_height">96dp</dimen>
-    <dimen name="car_activity_resolver_list_max_height">256dp</dimen>
-    <dimen name="car_activity_resolver_corner_radius">24dp</dimen>
 </resources>

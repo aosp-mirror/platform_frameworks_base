@@ -18,128 +18,146 @@
 -->
 <com.android.internal.widget.ResolverDrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="@dimen/car_activity_resolver_width"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:id="@id/contentPanel">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:weightSum="2"
-        android:orientation="vertical" >
-
-        <View android:id="@+id/empty_top"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent" />
+        android:layout_height="match_parent"
+        android:weightSum="5"
+        android:layout_alwaysShow="true"
+        android:orientation="vertical"
+        android:background="?attr/colorBackgroundFloating"
+        android:elevation="8dp">
 
         <LinearLayout
+            android:id="@+id/button_bar"
+            android:visibility="gone"
+            style="?attr/buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/car_activity_resolver_list_background">
+            android:layout_ignoreOffset="true"
+            android:layout_alwaysShow="true"
+            android:layout_hasNestedScrollIndicator="true"
+            android:background="?attr/colorBackgroundFloating"
+            android:orientation="horizontal"
+            android:paddingTop="8dp"
+            android:paddingStart="12dp"
+            android:weightSum="4"
+            android:paddingEnd="12dp"
+            android:elevation="8dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/profile_button"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/car_activity_resolver_list_background"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/car_padding_4"
-                android:paddingHorizontal="@dimen/car_padding_4" >
-                <TextView
-                    android:id="@+id/profile_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone" />
-
-                <TextView
-                    android:id="@+id/title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="start"
-                    android:textAppearance="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle" />
-            </LinearLayout>
-
-            <FrameLayout
-                android:id="@+id/stub"
+                android:layout_marginEnd="8dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:textSize="40sp"
+                android:layout_weight="4"
+                android:layout_gravity="left"
                 android:visibility="gone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:textColor="?attr/colorAccent"
+                android:singleLine="true"/>
 
-            <TabHost
-                android:id="@+id/profile_tabhost"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:background="?android:attr/colorBackgroundFloating">
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                    <TabWidget
-                        android:id="@android:id/tabs"
-                        android:visibility="gone"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-                    </TabWidget>
-                    <View
-                        android:id="@+id/resolver_tab_divider"
-                        android:visibility="gone"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                    <FrameLayout
-                        android:id="@android:id/tabcontent"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-                        <com.android.internal.app.ResolverViewPager
-                            android:id="@+id/profile_pager"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
-                    </FrameLayout>
-                </LinearLayout>
-            </TabHost>
+                android:layout_gravity="left"
+                android:layout_weight="3"
+                android:paddingTop="8dp"
+                android:layout_below="@id/profile_button"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:paddingBottom="8dp"/>
 
-            <LinearLayout
-                android:id="@+id/button_bar"
-                android:visibility="gone"
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/button_once"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/car_padding_4"
-                android:layout_marginHorizontal="@dimen/car_padding_4"
-                android:padding="0dp"
-                android:gravity="center"
-                android:background="@drawable/car_activity_resolver_list_background"
-                android:orientation="vertical">
+                android:enabled="false"
+                android:layout_gravity="right"
+                style="?attr/buttonBarButtonStyle"
+                android:text="@string/activity_resolver_use_once"
+                android:layout_weight="0.5"
+                android:onClick="onButtonClick"/>
 
-                <Button
-                    android:id="@+id/button_once"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/car_button_height"
-                    android:enabled="false"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="@dimen/car_padding_2"
-                    android:text="@string/activity_resolver_use_once"
-                    android:onClick="onButtonClick"/>
-
-                <Button
-                    android:id="@+id/button_always"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/car_button_height"
-                    android:enabled="false"
-                    android:layout_gravity="center"
-                    android:text="@string/activity_resolver_use_always"
-                    android:onClick="onButtonClick"/>
-            </LinearLayout>
+            <Button
+                android:id="@+id/button_always"
+                android:layout_marginLeft="2dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:layout_gravity="right"
+                style="?attr/buttonBarButtonStyle"
+                android:text="@string/activity_resolver_use_always"
+                android:layout_weight="0.5"
+                android:onClick="onButtonClick"/>
         </LinearLayout>
 
-        <View android:id="@+id/empty_bottom"
+        <FrameLayout
+            android:id="@+id/stub"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent" />
+            android:background="?attr/colorBackgroundFloating"/>
+
+        <TabHost
+            android:id="@+id/profile_tabhost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:background="?attr/colorBackgroundFloating">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TabWidget
+                    android:id="@android:id/tabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+                </TabWidget>
+                <View
+                    android:id="@+id/resolver_tab_divider"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?attr/colorBackgroundFloating"
+                    android:foreground="?attr/dividerVertical"
+                    android:layout_marginBottom="8dp"/>
+                <FrameLayout
+                    android:id="@android:id/tabcontent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <com.android.internal.app.ResolverViewPager
+                        android:id="@+id/profile_pager"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+                </FrameLayout>
+            </LinearLayout>
+        </TabHost>
+
+        <View
+            android:layout_alwaysShow="true"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/colorBackgroundFloating"
+            android:foreground="?attr/dividerVertical"/>
+
+        <TextView android:id="@+id/empty"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:background="?attr/colorBackgroundFloating"
+                  android:elevation="8dp"
+                  android:layout_alwaysShow="true"
+                  android:text="@string/noApplications"
+                  android:padding="32dp"
+                  android:gravity="center"
+                  android:visibility="gone"/>
 
     </LinearLayout>
 
