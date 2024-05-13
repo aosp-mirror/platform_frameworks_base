@@ -23,6 +23,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.qs.external.FakeCustomTileStatePersister
 import com.android.systemui.qs.external.tileServices
+import com.android.systemui.qs.external.tileServicesFacade
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.base.actions.FakeQSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.logging.QSTileLogger
@@ -86,7 +87,7 @@ val Kosmos.customTileServiceInteractor: CustomTileServiceInteractor by
             customTileInteractor,
             userRepository,
             qsTileLogger,
-            tileServices,
+            tileServicesFacade.tileServices,
             testScope.backgroundScope,
         )
     }

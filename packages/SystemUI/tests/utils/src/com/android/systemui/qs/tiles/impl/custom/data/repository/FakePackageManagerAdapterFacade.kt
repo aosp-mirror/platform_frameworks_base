@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.impl.custom.data.repository
 
 import android.content.ComponentName
+import android.content.pm.PackageInfo
 import android.content.pm.ServiceInfo
 import android.os.Bundle
 import com.android.systemui.qs.external.PackageManagerAdapter
@@ -24,6 +25,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import org.mockito.ArgumentMatchers.anyInt
 
 /**
  * Facade for [PackageManagerAdapter] to provide a fake-like behaviour. You can create this class
@@ -45,19 +47,33 @@ class FakePackageManagerAdapterFacade(
 
     init {
         whenever(packageManagerAdapter.getServiceInfo(eq(componentName), any())).thenAnswer {
-            ServiceInfo().apply {
-                metaData =
-                    Bundle().apply {
-                        putBoolean(
-                            android.service.quicksettings.TileService.META_DATA_TOGGLEABLE_TILE,
-                            isToggleable
-                        )
-                        putBoolean(
-                            android.service.quicksettings.TileService.META_DATA_ACTIVE_TILE,
-                            isActive
-                        )
-                    }
-            }
+            createServiceInfo()
+        }
+        whenever(
+                packageManagerAdapter.getPackageInfoAsUser(
+                    eq(componentName.packageName),
+                    anyInt(),
+                    anyInt()
+                )
+            )
+            .thenAnswer { PackageInfo().apply { packageName = componentName.packageName } }
+        whenever(packageManagerAdapter.getServiceInfo(eq(componentName), anyInt(), anyInt()))
+            .thenAnswer { createServiceInfo() }
+    }
+
+    private fun createServiceInfo(): ServiceInfo {
+        return ServiceInfo().apply {
+            metaData =
+                Bundle().apply {
+                    putBoolean(
+                        android.service.quicksettings.TileService.META_DATA_TOGGLEABLE_TILE,
+                        isToggleable
+                    )
+                    putBoolean(
+                        android.service.quicksettings.TileService.META_DATA_ACTIVE_TILE,
+                        isActive
+                    )
+                }
         }
     }
 
