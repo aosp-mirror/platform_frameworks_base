@@ -27,7 +27,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -49,6 +48,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.PlatformIconButton
 import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
 import com.android.systemui.common.ui.compose.SelectedUserAwareInputConnection
@@ -62,18 +62,20 @@ internal fun PasswordBouncer(
     modifier: Modifier = Modifier,
 ) {
     val focusRequester = remember { FocusRequester() }
-    val isTextFieldFocusRequested by viewModel.isTextFieldFocusRequested.collectAsState()
+    val isTextFieldFocusRequested by
+        viewModel.isTextFieldFocusRequested.collectAsStateWithLifecycle()
     LaunchedEffect(isTextFieldFocusRequested) {
         if (isTextFieldFocusRequested) {
             focusRequester.requestFocus()
         }
     }
 
-    val password: String by viewModel.password.collectAsState()
-    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
-    val animateFailure: Boolean by viewModel.animateFailure.collectAsState()
-    val isImeSwitcherButtonVisible by viewModel.isImeSwitcherButtonVisible.collectAsState()
-    val selectedUserId by viewModel.selectedUserId.collectAsState()
+    val password: String by viewModel.password.collectAsStateWithLifecycle()
+    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsStateWithLifecycle()
+    val animateFailure: Boolean by viewModel.animateFailure.collectAsStateWithLifecycle()
+    val isImeSwitcherButtonVisible by
+        viewModel.isImeSwitcherButtonVisible.collectAsStateWithLifecycle()
+    val selectedUserId by viewModel.selectedUserId.collectAsStateWithLifecycle()
 
     DisposableEffect(Unit) { onDispose { viewModel.onHidden() } }
 

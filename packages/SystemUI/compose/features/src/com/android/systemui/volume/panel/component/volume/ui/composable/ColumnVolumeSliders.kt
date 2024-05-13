@@ -40,7 +40,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +51,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.PlatformSliderColors
 import com.android.compose.modifiers.padding
 import com.android.systemui.res.R
@@ -84,7 +84,7 @@ fun ColumnVolumeSliders(
             modifier = Modifier.fillMaxWidth(),
         ) {
             val sliderViewModel: SliderViewModel = viewModels.first()
-            val sliderState by viewModels.first().slider.collectAsState()
+            val sliderState by viewModels.first().slider.collectAsStateWithLifecycle()
             val sliderPadding by topSliderPadding(isExpandable)
 
             VolumeSlider(
@@ -119,7 +119,7 @@ fun ColumnVolumeSliders(
                 Column {
                     for (index in 1..viewModels.lastIndex) {
                         val sliderViewModel: SliderViewModel = viewModels[index]
-                        val sliderState by sliderViewModel.slider.collectAsState()
+                        val sliderState by sliderViewModel.slider.collectAsStateWithLifecycle()
                         transition.AnimatedVisibility(
                             modifier = Modifier.padding(top = 16.dp),
                             visible = { it || !isExpandable },

@@ -18,9 +18,9 @@ package com.android.systemui.keyguard.ui.composable.section
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardMediaViewModel
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
@@ -40,7 +40,7 @@ constructor(
 
     @Composable
     fun SceneScope.KeyguardMediaCarousel() {
-        val isMediaVisible by keyguardMediaViewModel.isMediaVisible.collectAsState()
+        val isMediaVisible by keyguardMediaViewModel.isMediaVisible.collectAsStateWithLifecycle()
 
         MediaCarousel(
             isVisible = isMediaVisible,

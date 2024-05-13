@@ -51,7 +51,6 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -63,6 +62,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.animateSceneFloatAsState
@@ -163,7 +163,8 @@ private fun SceneScope.QuickSettingsScene(
 ) {
     val cutoutLocation = LocalDisplayCutout.current.location
 
-    val brightnessMirrorShowing by viewModel.brightnessMirrorViewModel.isShowing.collectAsState()
+    val brightnessMirrorShowing by
+        viewModel.brightnessMirrorViewModel.isShowing.collectAsStateWithLifecycle()
     val contentAlpha by
         animateFloatAsState(
             targetValue = if (brightnessMirrorShowing) 0f else 1f,
@@ -198,10 +199,11 @@ private fun SceneScope.QuickSettingsScene(
                     Modifier.displayCutoutPadding()
                 },
     ) {
-        val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
-        val isCustomizerShowing by viewModel.qsSceneAdapter.isCustomizerShowing.collectAsState()
+        val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsStateWithLifecycle()
+        val isCustomizerShowing by
+            viewModel.qsSceneAdapter.isCustomizerShowing.collectAsStateWithLifecycle()
         val customizingAnimationDuration by
-            viewModel.qsSceneAdapter.customizerAnimationDuration.collectAsState()
+            viewModel.qsSceneAdapter.customizerAnimationDuration.collectAsStateWithLifecycle()
         val screenHeight = LocalRawScreenHeight.current
 
         BackHandler(
@@ -346,7 +348,7 @@ private fun SceneScope.QuickSettingsScene(
                         modifier = Modifier.sysuiResTag("quick_settings_panel")
                     )
 
-                    val isMediaVisible by viewModel.isMediaVisible.collectAsState()
+                    val isMediaVisible by viewModel.isMediaVisible.collectAsStateWithLifecycle()
 
                     MediaCarousel(
                         isVisible = isMediaVisible,

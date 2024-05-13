@@ -45,7 +45,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +57,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
@@ -177,7 +177,7 @@ private fun SceneScope.ShadeScene(
     modifier: Modifier = Modifier,
     shadeSession: SaveableSession,
 ) {
-    val shadeMode by viewModel.shadeMode.collectAsState()
+    val shadeMode by viewModel.shadeMode.collectAsStateWithLifecycle()
     when (shadeMode) {
         is ShadeMode.Single ->
             SingleShade(
@@ -228,8 +228,8 @@ private fun SceneScope.SingleShade(
             key = QuickSettings.SharedValues.TilesSquishiness,
             canOverflow = false
         )
-    val isClickable by viewModel.isClickable.collectAsState()
-    val isMediaVisible by viewModel.isMediaVisible.collectAsState()
+    val isClickable by viewModel.isClickable.collectAsStateWithLifecycle()
+    val isMediaVisible by viewModel.isMediaVisible.collectAsStateWithLifecycle()
 
     val shouldPunchHoleBehindScrim =
         layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade) ||
@@ -335,10 +335,11 @@ private fun SceneScope.SplitShade(
 ) {
     val screenCornerRadius = LocalScreenCornerRadius.current
 
-    val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
-    val isCustomizerShowing by viewModel.qsSceneAdapter.isCustomizerShowing.collectAsState()
+    val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsStateWithLifecycle()
+    val isCustomizerShowing by
+        viewModel.qsSceneAdapter.isCustomizerShowing.collectAsStateWithLifecycle()
     val customizingAnimationDuration by
-        viewModel.qsSceneAdapter.customizerAnimationDuration.collectAsState()
+        viewModel.qsSceneAdapter.customizerAnimationDuration.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
     val footerActionsViewModel =
         remember(lifecycleOwner, viewModel) { viewModel.getFooterActionsViewModel(lifecycleOwner) }
@@ -353,13 +354,13 @@ private fun SceneScope.SplitShade(
             .unfoldTranslationX(
                 isOnStartSide = true,
             )
-            .collectAsState(0f)
+            .collectAsStateWithLifecycle(0f)
     val unfoldTranslationXForEndSide by
         viewModel
             .unfoldTranslationX(
                 isOnStartSide = false,
             )
-            .collectAsState(0f)
+            .collectAsStateWithLifecycle(0f)
 
     val navBarBottomHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomPadding by
@@ -383,7 +384,8 @@ private fun SceneScope.SplitShade(
         }
     }
 
-    val brightnessMirrorShowing by viewModel.brightnessMirrorViewModel.isShowing.collectAsState()
+    val brightnessMirrorShowing by
+        viewModel.brightnessMirrorViewModel.isShowing.collectAsStateWithLifecycle()
     val contentAlpha by
         animateFloatAsState(
             targetValue = if (brightnessMirrorShowing) 0f else 1f,
@@ -393,7 +395,7 @@ private fun SceneScope.SplitShade(
     viewModel.notifications.setAlphaForBrightnessMirror(contentAlpha)
     DisposableEffect(Unit) { onDispose { viewModel.notifications.setAlphaForBrightnessMirror(1f) } }
 
-    val isMediaVisible by viewModel.isMediaVisible.collectAsState()
+    val isMediaVisible by viewModel.isMediaVisible.collectAsStateWithLifecycle()
 
     val brightnessMirrorShowingModifier = Modifier.graphicsLayer { alpha = contentAlpha }
 

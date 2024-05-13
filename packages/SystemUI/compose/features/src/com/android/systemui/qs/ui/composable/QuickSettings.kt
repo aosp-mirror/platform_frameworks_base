@@ -22,12 +22,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.MovableElementScenePicker
 import com.android.compose.animation.scene.SceneScope
@@ -161,9 +161,11 @@ private fun QuickSettingsContent(
     state: QSSceneAdapter.State,
     modifier: Modifier = Modifier,
 ) {
-    val qsView by qsSceneAdapter.qsView.collectAsState(null)
+    val qsView by qsSceneAdapter.qsView.collectAsStateWithLifecycle(null)
     val isCustomizing by
-        qsSceneAdapter.isCustomizerShowing.collectAsState(qsSceneAdapter.isCustomizerShowing.value)
+        qsSceneAdapter.isCustomizerShowing.collectAsStateWithLifecycle(
+            qsSceneAdapter.isCustomizerShowing.value
+        )
     QuickSettingsTheme {
         val context = LocalContext.current
 

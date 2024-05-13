@@ -45,7 +45,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,6 +54,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Expandable
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.common.ui.compose.toColor
@@ -77,9 +77,9 @@ constructor(
     @Composable
     override fun VolumePanelComposeScope.Content(modifier: Modifier) {
         val connectedDeviceViewModel: ConnectedDeviceViewModel? by
-            viewModel.connectedDeviceViewModel.collectAsState()
+            viewModel.connectedDeviceViewModel.collectAsStateWithLifecycle()
         val deviceIconViewModel: DeviceIconViewModel? by
-            viewModel.deviceIconViewModel.collectAsState()
+            viewModel.deviceIconViewModel.collectAsStateWithLifecycle()
         val clickLabel = stringResource(R.string.volume_panel_enter_media_output_settings)
 
         Expandable(

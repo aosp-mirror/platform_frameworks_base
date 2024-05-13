@@ -21,11 +21,11 @@ import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalDensity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.plugins.clocks.ClockController
@@ -37,7 +37,7 @@ import kotlin.math.roundToInt
 fun rememberBurnIn(
     clockInteractor: KeyguardClockInteractor,
 ): BurnInState {
-    val clock by clockInteractor.currentClock.collectAsState()
+    val clock by clockInteractor.currentClock.collectAsStateWithLifecycle()
 
     val (smartspaceTop, onSmartspaceTopChanged) = remember { mutableStateOf<Float?>(null) }
     val (smallClockTop, onSmallClockTopChanged) = remember { mutableStateOf<Float?>(null) }

@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.ui.composable.modifier
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onPlaced
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.BurnInScaleViewModel
@@ -44,8 +44,10 @@ fun Modifier.burnInAware(
     val translationYState = remember { mutableStateOf(0F) }
     val copiedParams = params.copy(translationY = { translationYState.value })
     val burnIn = viewModel.movement(copiedParams)
-    val translationX by burnIn.map { it.translationX.toFloat() }.collectAsState(initial = 0f)
-    val translationY by burnIn.map { it.translationY.toFloat() }.collectAsState(initial = 0f)
+    val translationX by
+        burnIn.map { it.translationX.toFloat() }.collectAsStateWithLifecycle(initialValue = 0f)
+    val translationY by
+        burnIn.map { it.translationY.toFloat() }.collectAsStateWithLifecycle(initialValue = 0f)
     translationYState.value = translationY
     val scaleViewModel by
         burnIn
@@ -55,7 +57,7 @@ fun Modifier.burnInAware(
                     scaleClockOnly = it.scaleClockOnly,
                 )
             }
-            .collectAsState(initial = BurnInScaleViewModel())
+            .collectAsStateWithLifecycle(initialValue = BurnInScaleViewModel())
 
     return this.graphicsLayer {
         this.translationX = if (isClock) 0F else translationX

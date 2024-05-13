@@ -30,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +46,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Easings
 import com.android.compose.modifiers.thenIf
 import com.android.internal.R
@@ -86,14 +86,15 @@ internal fun PatternBouncer(
     val lineStrokeWidth = with(density) { LINE_STROKE_WIDTH_DP.dp.toPx() }
 
     // All dots that should be rendered on the grid.
-    val dots: List<PatternDotViewModel> by viewModel.dots.collectAsState()
+    val dots: List<PatternDotViewModel> by viewModel.dots.collectAsStateWithLifecycle()
     // The most recently selected dot, if the user is currently dragging.
-    val currentDot: PatternDotViewModel? by viewModel.currentDot.collectAsState()
+    val currentDot: PatternDotViewModel? by viewModel.currentDot.collectAsStateWithLifecycle()
     // The dots selected so far, if the user is currently dragging.
-    val selectedDots: List<PatternDotViewModel> by viewModel.selectedDots.collectAsState()
-    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
-    val isAnimationEnabled: Boolean by viewModel.isPatternVisible.collectAsState()
-    val animateFailure: Boolean by viewModel.animateFailure.collectAsState()
+    val selectedDots: List<PatternDotViewModel> by
+        viewModel.selectedDots.collectAsStateWithLifecycle()
+    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsStateWithLifecycle()
+    val isAnimationEnabled: Boolean by viewModel.isPatternVisible.collectAsStateWithLifecycle()
+    val animateFailure: Boolean by viewModel.animateFailure.collectAsStateWithLifecycle()
 
     // Map of animatables for the scale of each dot, keyed by dot.
     val dotScalingAnimatables = remember(dots) { dots.associateWith { Animatable(1f) } }
