@@ -153,7 +153,7 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> по <xliff:g id="TIME_DELAY">{2}</xliff:g> секунди"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не е препратено"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не е проследен"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Обезбедување на мобилна мрежа"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Безбедност на мобилна мрежа"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Шифрирање, известувања за нешифрирани мрежи"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Пристапено е до ID на уредот"</string>
     <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"Во <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, мрежа во близина го сними уникатниот ID (IMSI или IMEI) на вашиот телефон со користење на вашата SIM-картичка на <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
@@ -161,9 +161,9 @@
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Поврзано со шифрирана мрежа <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Врската со SIM-картичката на <xliff:g id="NETWORK_NAME">%1$s</xliff:g> сега е побезбедна"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Поврзано со нешифрирана мрежа"</string>
-    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Повиците, пораките и податоците во моментов се почувствителни додека ја користите вашата SIM-картичка на <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Повиците, пораките и податоците се почувствителни кога го користите вашиот SIM од <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Повиците, пораките и податоците во моментов се почувствителни додека ја користите вашата SIM-картичка на <xliff:g id="NETWORK_NAME">%1$s</xliff:g>.\n\nКога вашата врска ќе биде шифрирана повторно, ќе добиете уште едно известување."</string>
-    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Поставки за обезбедување на мобилна мрежа"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Поставки за безбедност на мобилната мрежа"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Дознајте повеќе"</string>
     <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"Сфатив"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Кодот за карактеристиката заврши."</string>
@@ -2413,4 +2413,22 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Отворете ја Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Дознајте како функционира"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Во фаза на чекање…"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

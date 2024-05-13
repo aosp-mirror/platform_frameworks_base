@@ -156,7 +156,7 @@
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"ମୋବାଇଲ ନେଟୱାର୍କ ସୁରକ୍ଷା"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"ଏନକ୍ରିପସନ, ଏନକ୍ରିପ୍ଟ କରାଯାଇନଥିବା ନେଟୱାର୍କ ପାଇଁ ବିଜ୍ଞପ୍ତି"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"ଡିଭାଇସ ID ଆକ୍ସେସ କରାଯାଇଛି"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"ଆପଣଙ୍କ <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> ରେକର୍ଡ କରିବା ସମୟରେ <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>ରେ ଏକ ଆଖପାଖର ନେଟୱାର୍କ ଆପଣଙ୍କ ଡିଭାଇସର ସ୍ୱତନ୍ତ୍ର ID (IMSI କିମ୍ବା IMEI) ରେକର୍ଡ କରିଛି"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"ଆପଣଙ୍କ <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM ବ୍ୟବହାର କରିବା ସମୟରେ <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>ରେ ଏକ ଆଖପାଖର ନେଟୱାର୍କ ଆପଣଙ୍କ ଡିଭାଇସର ସ୍ୱତନ୍ତ୍ର ID (IMSI କିମ୍ବା IMEI) ରେକର୍ଡ କରିଛି"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"ଆପଣଙ୍କ <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM ବ୍ୟବହାର କରିବା ସମୟରେ <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>ରେ ଏକ ଆଖପାଖର ନେଟୱାର୍କ ଆପଣଙ୍କ ଡିଭାଇସର ସ୍ୱତନ୍ତ୍ର ID (IMSI କିମ୍ବା IMEI) ରେକର୍ଡ କରିଛି। \n\nଏହାର ଅର୍ଥ ହେଉଛି ଯେ ଆପଣଙ୍କ ଲୋକେସନ, କାର୍ଯ୍ୟକଳାପ କିମ୍ବା ପରିଚୟକୁ ଲଗ କରାଯାଇଛି। ଏହା ସାଧାରଣ ଅଭ୍ୟାସ ଅଟେ କିନ୍ତୁ ଗୋପନୀୟତା ବିଷୟରେ ଚିନ୍ତିତ ଲୋକମାନଙ୍କ ପାଇଁ ଏହା ଏକ ସମସ୍ୟା ହୋଇପାରେ।"</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"ଏନକ୍ରିପ୍ଟ କରାଯାଇଥିବା ନେଟୱାର୍କ <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ସହ କନେକ୍ଟ କରାଯାଇଛି"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM କନେକ୍ସନ ବର୍ତ୍ତମାନ ଅଧିକ ସୁରକ୍ଷିତ ଅଟେ"</string>
@@ -2413,4 +2413,22 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ଖୋଲନ୍ତୁ"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ଏହା କିପରି କାମ କରେ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ବାକି ଅଛି…"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

@@ -156,8 +156,8 @@
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"សុវត្ថិភាពបណ្ដាញទូរសព្ទចល័ត"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"ការ​អ៊ីនគ្រីប ការ​ជូនដំណឹងសម្រាប់បណ្ដាញដែលមិនបានអ៊ីនគ្រីប"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"បានចូលប្រើប្រាស់លេខសម្គាល់​ឧបករណ៍"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"នៅម៉ោង <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> បណ្ដាញនៅជិតបានកត់ត្រាលេខសម្គាល់ពិសេស (IMSI ឬ IMEI) របស់ឧបករណ៍អ្នក ពេលកំពុងប្រើស៊ីម <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> របស់អ្នក"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"នៅម៉ោង <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> បណ្ដាញនៅជិតបានកត់ត្រាលេខសម្គាល់ពិសេស (IMSI ឬ IMEI) របស់ឧបករណ៍អ្នក ពេលកំពុងប្រើស៊ីម <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> របស់អ្នក។\n\nនេះមានន័យថា ទីតាំង សកម្មភាព ឬអត្តសញ្ញាណរបស់អ្នកត្រូវបានចុះកំណត់ហេតុ។ នេះគឺជាការអនុវត្តទូទៅ ប៉ុន្តែអាចនឹងមានបញ្ហាសម្រាប់អ្នកដែលមានកង្វល់ពាក់ព័ន្ធនឹងឯកជនភាព។"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"នៅម៉ោង <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> បណ្ដាញនៅជិតបានកត់ត្រាលេខកូដសម្គាល់ខុសពីគេ (IMSI ឬ IMEI) របស់ឧបករណ៍អ្នក ពេលកំពុងប្រើស៊ីម <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> របស់អ្នក"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"នៅម៉ោង <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> បណ្ដាញនៅជិតបានកត់ត្រាលេខកូដសម្គាល់ខុសពីគេ (IMSI ឬ IMEI) របស់ឧបករណ៍អ្នក ពេលកំពុងប្រើស៊ីម <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> របស់អ្នក។\n\nនេះមានន័យថា ទីតាំង សកម្មភាព ឬអត្តសញ្ញាណរបស់អ្នកត្រូវបានកត់ត្រាទុក។ នេះគឺជាការអនុវត្តទូទៅ ប៉ុន្តែអាចនឹងមានបញ្ហាសម្រាប់អ្នកដែលមានកង្វល់ពាក់ព័ន្ធនឹងឯកជនភាព។"</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"បានភ្ជាប់ទៅបណ្ដាញដែលបានអ៊ីនគ្រីប <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"ការតភ្ជាប់ស៊ីម <xliff:g id="NETWORK_NAME">%1$s</xliff:g> កាន់តែមានសុវត្ថិភាពឥឡូវនេះ"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"បានភ្ជាប់ទៅបណ្ដាញដែលមិនបានអ៊ីនគ្រីប"</string>
@@ -2413,4 +2413,22 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"បើក​កម្មវិធី Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"របៀបដែលវាដំណើរការ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"កំពុងរង់ចាំ..."</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

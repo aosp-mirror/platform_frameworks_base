@@ -157,12 +157,12 @@
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Enkripsi, notifikasi untuk jaringan yang tidak terenkripsi"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"ID perangkat diakses"</string>
     <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"Pada <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, jaringan di sekitar merekam ID unik perangkat Anda (IMSI atau IMEI) saat menggunakan kartu SIM <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> Anda"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"Pada <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, jaringan di sekitar merekam ID unik perangkat Anda (IMSI atau IMEI) saat menggunakan kartu SIM <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> Anda.\n\nHal ini berarti lokasi, aktifitas, atau identitas Anda telah dicatat dalam log. Tindakan ini adalah praktik umum tetapi dapat menjadi masalah bagi orang yang mengkhawatirkan privasi."</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"Pada <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, jaringan di sekitar merekam ID unik perangkat Anda (IMSI atau IMEI) saat menggunakan kartu SIM <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> Anda.\n\nHal ini berarti lokasi, aktivitas, atau identitas Anda telah dicatat dalam log. Tindakan ini adalah praktik umum tetapi dapat menjadi masalah bagi orang yang mengkhawatirkan privasi."</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Terhubung ke jaringan yang terenkripsi <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Koneksi kartu SIM <xliff:g id="NETWORK_NAME">%1$s</xliff:g> kini lebih aman"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Terhubung ke jaringan yang tidak terenkripsi"</string>
     <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Panggilan, pesan, dan data saat ini lebih rentan saat menggunakan kartu SIM <xliff:g id="NETWORK_NAME">%1$s</xliff:g> Anda"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Panggilan, pesan, dan data saat ini lebih rentan saat menggunakan kartu SIM <xliff:g id="NETWORK_NAME">%1$s</xliff:g> Anda.\n\nKetika koneksi Anda terenkripsi lagi, Anda akan menerima notifikasi lainnya."</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Panggilan, pesan, dan data saat ini lebih rentan saat menggunakan kartu SIM <xliff:g id="NETWORK_NAME">%1$s</xliff:g> Anda.\n\nKetika koneksi Anda terenkripsi lagi, Anda akan kembali menerima notifikasi."</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Setelan keamanan jaringan seluler"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Pelajari lebih lanjut"</string>
     <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"Oke"</string>
@@ -639,7 +639,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Mengizinkan aplikasi untuk membaca lokasi dari koleksi media Anda."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Gunakan biometrik"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Gunakan biometrik atau kunci layar"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifikasi bahwa ini memang Anda"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifikasi diri Anda"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Gunakan biometrik untuk melanjutkan"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Gunakan biometrik atau kunci layar untuk melanjutkan"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Hardware biometrik tidak tersedia"</string>
@@ -2221,7 +2221,7 @@
     <string name="miniresolver_call_information" msgid="6739417525304184083">"Organisasi Anda hanya mengizinkan menelepon dari aplikasi kerja"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"Organisasi Anda hanya mengizinkan pengiriman pesan dari aplikasi kerja"</string>
     <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"Anda hanya dapat melakukan panggilan telepon dari aplikasi Telepon pribadi. Panggilan yang dilakukan dengan aplikasi Telepon pribadi akan ditambahkan ke histori panggilan pribadi."</string>
-    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"Anda hanya dapat mengirim pesan SMS dari aplikasi Message pribadi."</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"Anda hanya dapat mengirim pesan SMS dari aplikasi Pesan pribadi."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Gunakan browser pribadi"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Gunakan browser kerja"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"Telepon"</string>
@@ -2413,4 +2413,22 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Buka Message"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cara kerjanya"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Tertunda..."</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

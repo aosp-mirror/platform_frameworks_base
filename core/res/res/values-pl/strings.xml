@@ -161,9 +161,9 @@
     <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"O godzinie <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> pobliska sieć zarejestrowała unikalny identyfikator Twojego urządzenia (IMSI lub IMEI) podczas korzystania z karty SIM <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"O godzinie <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> pobliska sieć zarejestrowała unikalny identyfikator Twojego urządzenia (IMSI lub IMEI) podczas korzystania z karty SIM <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>.\n\nOznacza to, że zarejestrowano Twoją lokalizację, aktywność lub tożsamość. Jest to powszechna praktyka, ale może stanowić problem dla osób dbających o prywatność."</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Połączono z szyfrowaną siecią <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Połączenie SIM <xliff:g id="NETWORK_NAME">%1$s</xliff:g> jest teraz bezpieczniejsze"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Połączenie przy użyciu karty SIM w sieci <xliff:g id="NETWORK_NAME">%1$s</xliff:g> jest teraz bezpieczniejsze"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Połączono z niezaszyfrowaną siecią"</string>
-    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Połączenia, wiadomości i dane są obecnie bardziej podatne na ataki podczas korzystania z karty SIM <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Gdy korzystasz z karty SIM w sieci <xliff:g id="NETWORK_NAME">%1$s</xliff:g>, połączenia, wiadomości i dane są bardziej narażone na ataki"</string>
     <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Połączenia, wiadomości i dane są obecnie bardziej podatne na ataki podczas korzystania z karty SIM <xliff:g id="NETWORK_NAME">%1$s</xliff:g>.\n\nGdy połączenie zostanie ponownie zaszyfrowane, otrzymasz kolejne powiadomienie."</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Ustawienia bezpieczeństwa sieci komórkowej"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Więcej informacji"</string>
@@ -2415,4 +2415,22 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otwórz Wiadomości"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Jak to działa"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Oczekiwanie…"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>
