@@ -485,6 +485,16 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // Flush EVENT_APPEARED.
         mController.dispatchPendingEvents();
 
+        // Even if the activity is not launched in an organized TaskFragment, it is still considered
+        // as the remote activity to the organizer process. Because when the task becomes visible,
+        // the organizer process needs to be interactive (unfrozen) to receive TaskFragment events.
+        activity.setVisibleRequested(true);
+        activity.setState(ActivityRecord.State.RESUMED, "test");
+        assertTrue(organizerProc.hasVisibleActivities());
+        activity.setVisibleRequested(false);
+        activity.setState(ActivityRecord.State.STOPPED, "test");
+        assertFalse(organizerProc.hasVisibleActivities());
+
         // Make sure the activity belongs to the same app, but it is in a different pid.
         activity.info.applicationInfo.uid = uid;
         doReturn(pid + 1).when(activity).getPid();
