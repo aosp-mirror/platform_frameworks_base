@@ -28,6 +28,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
@@ -89,10 +90,15 @@ constructor(
         shadeMode: ShadeMode,
     ): Map<UserAction, UserActionResult> {
         val shadeSceneKey =
-            if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade
+            UserActionResult(
+                toScene =
+                    if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade,
+                transitionKey = ToSplitShade.takeIf { shadeMode is ShadeMode.Split },
+            )
 
         val quickSettingsIfSingleShade =
-            if (shadeMode is ShadeMode.Single) Scenes.QuickSettings else shadeSceneKey
+            if (shadeMode is ShadeMode.Single) UserActionResult(Scenes.QuickSettings)
+            else shadeSceneKey
 
         return mapOf(
                 Swipe.Left to UserActionResult(Scenes.Communal).takeIf { isCommunalAvailable },
@@ -103,7 +109,7 @@ constructor(
                 swipeDownFromTop(pointerCount = 2) to
                     // TODO(b/338577208): Remove 'Dual' once we add Dual Shade invocation zones.
                     if (shadeMode is ShadeMode.Dual) {
-                        Scenes.QuickSettingsShade
+                        UserActionResult(Scenes.QuickSettingsShade)
                     } else {
                         quickSettingsIfSingleShade
                     },

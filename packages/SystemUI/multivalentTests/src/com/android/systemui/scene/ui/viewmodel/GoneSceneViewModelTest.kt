@@ -25,7 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.scene.shared.model.TransitionKeys.GoneToSplitShade
+import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
@@ -67,7 +67,7 @@ class GoneSceneViewModelTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Down))?.transitionKey)
-                .isEqualTo(GoneToSplitShade)
+                .isEqualTo(ToSplitShade)
         }
 
     @Test

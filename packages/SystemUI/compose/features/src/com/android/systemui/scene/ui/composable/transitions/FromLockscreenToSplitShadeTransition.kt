@@ -18,8 +18,8 @@ package com.android.systemui.scene.ui.composable.transitions
 
 import com.android.compose.animation.scene.TransitionBuilder
 
-fun TransitionBuilder.goneToSplitShadeTransition(
+fun TransitionBuilder.lockscreenToSplitShadeTransition(
     durationScale: Double = 1.0,
 ) {
-    toSplitShadeTransition(durationScale)
+    toSplitShadeTransition(durationScale = durationScale)
 }
