@@ -45,16 +45,16 @@ import com.android.systemui.plugins.activityStarter
 import com.android.systemui.statusbar.notificationLockscreenUserManager
 import com.android.systemui.statusbar.policy.keyguardStateController
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -121,7 +121,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
         whenever(kosmos.activityIntentHelper.wouldPendingShowOverLockscreen(any(), any()))
             .thenReturn(true)
 
-        val clickIntent = mock<PendingIntent> { whenever(isActivity).thenReturn(true) }
+        val clickIntent = mock<PendingIntent> { whenever(it.isActivity).thenReturn(true) }
         val expandable = mock<Expandable>()
 
         underTest.startClickIntent(expandable, clickIntent)
@@ -133,7 +133,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
     fun startClickIntent_hideOverLockscreen() {
         whenever(keyguardStateController.isShowing).thenReturn(false)
 
-        val clickIntent = mock<PendingIntent> { whenever(isActivity).thenReturn(true) }
+        val clickIntent = mock<PendingIntent> { whenever(it.isActivity).thenReturn(true) }
         val expandable = mock<Expandable>()
         val activityController = mock<ActivityTransitionAnimator.Controller>()
         whenever(expandable.activityTransitionController(any())).thenReturn(activityController)
@@ -150,7 +150,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
         whenever(kosmos.activityIntentHelper.wouldPendingShowOverLockscreen(any(), any()))
             .thenReturn(true)
 
-        val deviceIntent = mock<PendingIntent> { whenever(isActivity).thenReturn(true) }
+        val deviceIntent = mock<PendingIntent> { whenever(it.isActivity).thenReturn(true) }
 
         underTest.startDeviceIntent(deviceIntent)
 
@@ -163,7 +163,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
         whenever(kosmos.activityIntentHelper.wouldPendingShowOverLockscreen(any(), any()))
             .thenReturn(true)
 
-        val deviceIntent = mock<PendingIntent> { whenever(isActivity).thenReturn(false) }
+        val deviceIntent = mock<PendingIntent> { whenever(it.isActivity).thenReturn(false) }
 
         underTest.startDeviceIntent(deviceIntent)
 
@@ -174,7 +174,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
     fun startDeviceIntent_hideOverLockscreen() {
         whenever(keyguardStateController.isShowing).thenReturn(false)
 
-        val deviceIntent = mock<PendingIntent> { whenever(isActivity).thenReturn(true) }
+        val deviceIntent = mock<PendingIntent> { whenever(it.isActivity).thenReturn(true) }
 
         underTest.startDeviceIntent(deviceIntent)
 
