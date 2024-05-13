@@ -985,13 +985,13 @@ final class InstallPackageHelper {
     }
 
     void installPackagesTraced(List<InstallRequest> requests) {
-        synchronized (mPm.mInstallLock) {
-            try {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackages");
-                installPackagesLI(requests);
-            } finally {
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            }
+        mPm.mInstallLock.lock();
+        try {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackages");
+            installPackagesLI(requests);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            mPm.mInstallLock.unlock();
         }
     }
 
@@ -2590,22 +2590,30 @@ final class InstallPackageHelper {
             final boolean performDexopt = DexOptHelper.shouldPerformDexopt(installRequest,
                     dexoptOptions, mContext);
             if (performDexopt) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+                // dexopt can take long, and ArtService doesn't require installd, so we release
+                // the lock here and re-acquire the lock after dexopt is finished.
+                mPm.mInstallLock.unlock();
+                try {
+                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
 
-                // This mirrors logic from commitReconciledScanResultLocked, where the library files
-                // needed for dexopt are assigned.
-                PackageSetting realPkgSetting = installRequest.getRealPackageSetting();
+                    // This mirrors logic from commitReconciledScanResultLocked, where the library
+                    // files needed for dexopt are assigned.
+                    PackageSetting realPkgSetting = installRequest.getRealPackageSetting();
 
-                // Unfortunately, the updated system app flag is only tracked on this PackageSetting
-                boolean isUpdatedSystemApp =
-                        installRequest.getScannedPackageSetting().isUpdatedSystemApp();
+                    // Unfortunately, the updated system app flag is only tracked on this
+                    // PackageSetting
+                    boolean isUpdatedSystemApp =
+                            installRequest.getScannedPackageSetting().isUpdatedSystemApp();
 
-                realPkgSetting.getPkgState().setUpdatedSystemApp(isUpdatedSystemApp);
+                    realPkgSetting.getPkgState().setUpdatedSystemApp(isUpdatedSystemApp);
 
-                DexoptResult dexOptResult =
-                        DexOptHelper.dexoptPackageUsingArtService(installRequest, dexoptOptions);
-                installRequest.onDexoptFinished(dexOptResult);
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                    DexoptResult dexOptResult = DexOptHelper.dexoptPackageUsingArtService(
+                            installRequest, dexoptOptions);
+                    installRequest.onDexoptFinished(dexOptResult);
+                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                } finally {
+                    mPm.mInstallLock.lock();
+                }
             }
         }
         PackageManagerServiceUtils.waitForNativeBinariesExtractionForIncremental(
