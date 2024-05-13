@@ -116,3 +116,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "skip_unimportant_connections"
+    namespace: "backstage_power"
+    description: "Avoid OomAdjuster calculations for connections that won't change importance"
+    bug: "323376416"
+}
