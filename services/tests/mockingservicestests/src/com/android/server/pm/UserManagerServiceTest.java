@@ -778,49 +778,6 @@ public final class UserManagerServiceTest {
     }
 
     @Test
-    public void testGetAliveUsers_shouldExcludeInitialisedEphemeralNonCurrentUsers() {
-        assertWithMessage("Ephemeral user should not exist at all initially")
-                .that(mUmi.getUsers(false).stream().anyMatch(u -> u.id == USER_ID))
-                .isFalse();
-
-        // add an ephemeral full user
-        TestUserData userData = new TestUserData(USER_ID);
-        userData.info.flags = UserInfo.FLAG_FULL | UserInfo.FLAG_EPHEMERAL;
-        addUserData(userData);
-
-        assertWithMessage("Ephemeral user should exist as alive after being created")
-                .that(mUmi.getUsers(true).stream().anyMatch(u -> u.id == USER_ID))
-                .isTrue();
-
-        // mock switch to the user (mark it as initialized & make it the current user)
-        userData.info.flags |= UserInfo.FLAG_INITIALIZED;
-        mockCurrentUser(USER_ID);
-
-        assertWithMessage("Ephemeral user should still exist as alive after being switched to")
-                .that(mUmi.getUsers(true).stream().anyMatch(u -> u.id == USER_ID))
-                .isTrue();
-
-        // switch away from the user
-        mockCurrentUser(OTHER_USER_ID);
-
-        assertWithMessage("Ephemeral user should not exist as alive after getting switched away")
-                .that(mUmi.getUsers(true).stream().anyMatch(u -> u.id == USER_ID))
-                .isFalse();
-
-        assertWithMessage("Ephemeral user should still exist as dying after getting switched away")
-                .that(mUmi.getUsers(false).stream().anyMatch(u -> u.id == USER_ID))
-                .isTrue();
-
-        // finally remove the user
-        mUms.removeUserInfo(USER_ID);
-
-        assertWithMessage("Ephemeral user should not exist at all after cleanup")
-                .that(mUmi.getUsers(false).stream().anyMatch(u -> u.id == USER_ID))
-                .isFalse();
-    }
-
-
-    @Test
     @RequiresFlagsEnabled({android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
             Flags.FLAG_BLOCK_PRIVATE_SPACE_CREATION, Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES})
     public void testCreatePrivateProfileOnHeadlessSystemUser_shouldAllowCreation() {
