@@ -19,9 +19,8 @@ package com.android.systemui.volume
 import android.content.packageManager
 import android.content.pm.ApplicationInfo
 import android.os.Handler
-import android.testing.TestableLooper
+import android.os.looper
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.mediaOutputDialogManager
 import com.android.systemui.util.mockito.any
@@ -54,7 +53,7 @@ val Kosmos.mediaOutputInteractor by
             testScope.backgroundScope,
             testScope.testScheduler,
             mediaControllerRepository,
-            Handler(TestableLooper.get(testCase).looper),
+            Handler(looper),
         )
     }
 
@@ -62,7 +61,7 @@ val Kosmos.mediaDeviceSessionInteractor by
     Kosmos.Fixture {
         MediaDeviceSessionInteractor(
             testScope.testScheduler,
-            Handler(TestableLooper.get(testCase).looper),
+            Handler(looper),
             mediaControllerRepository,
         )
     }
