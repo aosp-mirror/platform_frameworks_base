@@ -45,6 +45,12 @@ class ScrollViewFields {
     var isScrolledToTop: Boolean = true
 
     /**
+     * Height in view pixels at which the Notification Stack would like to be laid out, including
+     * Notification rows, paddings the Shelf and the Footer.
+     */
+    var intrinsicStackHeight: Int = 0
+
+    /**
      * When internal NSSL expansion requires the stack to be scrolled (e.g. to keep an expanding
      * notification in view), that scroll amount can be sent here and it will be handled by the
      * placeholder
@@ -55,11 +61,6 @@ class ScrollViewFields {
      * as the notif scrim) as overscroll, we can notify the placeholder through here.
      */
     var currentGestureOverscrollConsumer: Consumer<Boolean>? = null
-    /**
-     * Any time the stack height is recalculated, it should be updated here to be used by the
-     * placeholder
-     */
-    var stackHeightConsumer: Consumer<Float>? = null
     /**
      * Any time the heads up height is recalculated, it should be updated here to be used by the
      * placeholder
@@ -72,8 +73,6 @@ class ScrollViewFields {
     /** send [isCurrentGestureOverscroll] to the [currentGestureOverscrollConsumer], if present. */
     fun sendCurrentGestureOverscroll(isCurrentGestureOverscroll: Boolean) =
         currentGestureOverscrollConsumer?.accept(isCurrentGestureOverscroll)
-    /** send the [stackHeight] to the [stackHeightConsumer], if present. */
-    fun sendStackHeight(stackHeight: Float) = stackHeightConsumer?.accept(stackHeight)
     /** send the [headsUpHeight] to the [headsUpHeightConsumer], if present. */
     fun sendHeadsUpHeight(headsUpHeight: Float) = headsUpHeightConsumer?.accept(headsUpHeight)
 

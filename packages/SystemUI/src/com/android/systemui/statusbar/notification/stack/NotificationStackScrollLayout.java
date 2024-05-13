@@ -128,6 +128,7 @@ import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.ColorUtilKt;
 import com.android.systemui.util.DumpUtilsKt;
+import com.android.systemui.util.ListenerSet;
 
 import com.google.errorprone.annotations.CompileTimeConstant;
 
@@ -254,6 +255,7 @@ public class NotificationStackScrollLayout
      * The raw amount of the overScroll on the bottom, which is not rubber-banded.
      */
     private float mOverScrolledBottomPixels;
+    private ListenerSet<Runnable> mStackHeightChangedListeners = new ListenerSet<>();
     private NotificationLogger.OnChildLocationsChangedListener mListener;
     private OnNotificationLocationsChangedListener mLocationsChangedListener;
     private OnOverscrollTopChangedListener mOverscrollTopChangedListener;
@@ -316,7 +318,7 @@ public class NotificationStackScrollLayout
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
         public boolean onPreDraw() {
-            if (SceneContainerFlag.isEnabled() && !mChildrenUpdateRequested) {
+            if (SceneContainerFlag.isEnabled()) {
                 getViewTreeObserver().removeOnPreDrawListener(this);
                 return true;
             }
@@ -1083,6 +1085,10 @@ public class NotificationStackScrollLayout
         for (int i = 0; i < size; i++) {
             measureChild(getChildAt(i), childWidthSpec, childHeightSpec);
         }
+        if (SceneContainerFlag.isEnabled()) {
+            setMaxLayoutHeight(getMeasuredHeight());
+            updateContentHeight();
+        }
         Trace.endSection();
     }
 
@@ -1090,6 +1096,22 @@ public class NotificationStackScrollLayout
     public void requestLayout() {
         Trace.instant(TRACE_TAG_APP, "NotificationStackScrollLayout#requestLayout");
         super.requestLayout();
+    }
+
+    private void notifyStackHeightChangedListeners() {
+        for (Runnable listener : mStackHeightChangedListeners) {
+            listener.run();
+        }
+    }
+
+    @Override
+    public void addStackHeightChangedListener(@NonNull Runnable runnable) {
+        mStackHeightChangedListeners.addIfAbsent(runnable);
+    }
+
+    @Override
+    public void removeStackHeightChangedListener(@NonNull Runnable runnable) {
+        mStackHeightChangedListeners.remove(runnable);
     }
 
     @Override
@@ -1110,8 +1132,10 @@ public class NotificationStackScrollLayout
                         (int) height);
             }
         }
-        setMaxLayoutHeight(getHeight());
-        updateContentHeight();
+        if (!SceneContainerFlag.isEnabled()) {
+            setMaxLayoutHeight(getHeight());
+            updateContentHeight();
+        }
         clampScrollPosition();
         requestChildrenUpdate();
         updateFirstAndLastBackgroundViews();
@@ -1174,11 +1198,6 @@ public class NotificationStackScrollLayout
     @Override
     public void setCurrentGestureOverscrollConsumer(@Nullable Consumer<Boolean> consumer) {
         mScrollViewFields.setCurrentGestureOverscrollConsumer(consumer);
-    }
-
-    @Override
-    public void setStackHeightConsumer(@Nullable Consumer<Float> consumer) {
-        mScrollViewFields.setStackHeightConsumer(consumer);
     }
 
     @Override
@@ -2404,16 +2423,25 @@ public class NotificationStackScrollLayout
                         /* notificationStackScrollLayout= */ this, mMaxDisplayedNotifications,
                         shelfIntrinsicHeight);
         mIntrinsicContentHeight = height;
-        mScrollViewFields.sendStackHeight(height + footerIntrinsicHeight);
 
         // The topPadding can be bigger than the regular padding when qs is expanded, in that
         // state the maxPanelHeight and the contentHeight should be bigger
         mContentHeight =
                 (int) (height + Math.max(mIntrinsicPadding, getTopPadding()) + mBottomPadding);
+        mScrollViewFields.setIntrinsicStackHeight(
+                (int) (mIntrinsicPadding + mIntrinsicContentHeight + footerIntrinsicHeight
+                        + mBottomPadding));
         updateScrollability();
         clampScrollPosition();
         updateStackPosition();
         mAmbientState.setContentHeight(mContentHeight);
+
+        notifyStackHeightChangedListeners();
+    }
+
+    @Override
+    public int getIntrinsicStackHeight() {
+        return mScrollViewFields.getIntrinsicStackHeight();
     }
 
     /**
