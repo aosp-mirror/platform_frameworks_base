@@ -294,7 +294,7 @@
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wifi-sareen bilaketaren moteltzea"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wifi-konexioetan iraunkorrak ez diren MAC helbideak ausaz antolatzea"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Datu-konexioa beti aktibo"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Konexioa partekatzeko hardwarearen azelerazioa"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Konexioa partekatzeko hardwarearen bizkortzea"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Erakutsi Bluetooth bidezko gailuak izenik gabe"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Desgaitu bolumen absolutua"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gaitu Gabeldorsche"</string>
@@ -339,7 +339,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Onartu kokapen faltsuak"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Gaitu ikuspegiaren atributuak ikuskatzeko aukera"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mantendu datu-konexioa beti aktibo, baita wifi-konexioa aktibo dagoenean ere (sare batetik bestera bizkor aldatu ahal izateko)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Erabilgarri badago, erabili konexioa partekatzeko hardwarearen azelerazioa"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Erabilgarri badago, erabili konexioa partekatzeko hardwarearen bizkortzea"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB bidezko arazketa onartu?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB bidezko arazketa garapen-xedeetarako soilik dago diseinatuta. Erabil ezazu ordenagailuaren eta gailuaren artean datuak kopiatzeko, aplikazioak gailuan jakinarazi gabe instalatzeko eta erregistro-datuak irakurtzeko."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Hari gabeko arazketa baimendu nahi duzu?"</string>

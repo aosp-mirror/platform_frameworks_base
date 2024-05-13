@@ -94,7 +94,7 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Подключено (кроме звонков), уровень заряда батареи: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Подключено (кроме аудио), уровень заряда батареи: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Подключено (кроме звонков и аудио), уровень заряда батареи: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Используется, заряд: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Используется, заряд: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"Используется, заряд: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> (Л), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> (П)."</string>
     <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"Используется, заряд: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> (Л)"</string>
     <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"Используется, заряд: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> (П)"</string>
