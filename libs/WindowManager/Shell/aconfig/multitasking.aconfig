@@ -71,3 +71,10 @@ flag {
     description: "Hides the bubble overflow if there aren't any overflowed bubbles"
     bug: "334175587"
 }
+
+flag {
+    name: "enable_retrievable_bubbles"
+    namespace: "multitasking"
+    description: "Allow opening bubbles overflow UI without bubbles being visible"
+    bug: "340337839"
+}
