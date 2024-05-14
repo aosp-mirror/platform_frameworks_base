@@ -99,7 +99,7 @@ public class PipSurfaceTransactionHelper {
             final float startScale = sourceRectHint.width() <= sourceRectHint.height()
                     ? (float) destinationBounds.width() / sourceBounds.width()
                     : (float) destinationBounds.height() / sourceBounds.height();
-            scale = (1 - progress) * startScale + progress * endScale;
+            scale = Math.min((1 - progress) * startScale + progress * endScale, 1.0f);
         }
         final float left = destinationBounds.left - (insets.left + sourceBounds.left) * scale;
         final float top = destinationBounds.top - (insets.top + sourceBounds.top) * scale;
