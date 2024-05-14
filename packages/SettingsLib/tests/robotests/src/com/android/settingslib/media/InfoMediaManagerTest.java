@@ -146,7 +146,11 @@ public class InfoMediaManagerTest {
                 Context.MEDIA_SESSION_SERVICE);
         mInfoMediaManager =
                 new ManagerInfoMediaManager(
-                        mContext, TEST_PACKAGE_NAME, mContext.getUser(), mLocalBluetoothManager);
+                        mContext,
+                        TEST_PACKAGE_NAME,
+                        mContext.getUser(),
+                        mLocalBluetoothManager,
+                        /* mediaController */ null);
         mShadowRouter2Manager = ShadowRouter2Manager.getShadow();
         mInfoMediaManager.mRouterManager = MediaRouter2Manager.getInstance(mContext);
     }

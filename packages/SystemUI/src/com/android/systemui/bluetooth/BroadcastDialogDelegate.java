@@ -221,7 +221,8 @@ public class BroadcastDialogDelegate implements SystemUIDialog.Delegate {
                 (view) -> {
                     // TODO: b/321969740 - Take the userHandle as a parameter and pass it through.
                     //  The package name is not sufficient to unambiguously identify an app.
-                    mMediaOutputDialogManager.createAndShow(mOutputPackageName, true, null, null);
+                    mMediaOutputDialogManager.createAndShow(
+                            mOutputPackageName, true, null, null, null);
                     dialog.dismiss();
                 });
         cancelBtn.setOnClickListener((view) -> {

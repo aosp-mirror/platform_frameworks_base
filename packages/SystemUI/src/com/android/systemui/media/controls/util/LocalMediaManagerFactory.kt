@@ -17,6 +17,7 @@
 package com.android.systemui.media.controls.util
 
 import android.content.Context
+import android.media.session.MediaSession
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.media.InfoMediaManager
 import com.android.settingslib.media.LocalMediaManager
@@ -30,10 +31,16 @@ constructor(
     private val localBluetoothManager: LocalBluetoothManager?
 ) {
     /** Creates a [LocalMediaManager] for the given package. */
-    fun create(packageName: String?): LocalMediaManager {
+    fun create(packageName: String?, token: MediaSession.Token? = null): LocalMediaManager {
         // TODO: b/321969740 - Populate the userHandle parameter in InfoMediaManager. The user
         // handle is necessary to disambiguate the same package running on different users.
-        return InfoMediaManager.createInstance(context, packageName, null, localBluetoothManager)
+        return InfoMediaManager.createInstance(
+                context,
+                packageName,
+                null,
+                localBluetoothManager,
+                token
+            )
             .run { LocalMediaManager(context, localBluetoothManager, this, packageName) }
     }
 }

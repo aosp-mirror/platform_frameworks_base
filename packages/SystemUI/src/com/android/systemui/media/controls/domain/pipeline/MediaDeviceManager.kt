@@ -102,7 +102,8 @@ constructor(
                 return
             }
             val controller = data.token?.let { controllerFactory.create(it) }
-            val localMediaManager = localMediaManagerFactory.create(data.packageName)
+            val localMediaManager =
+                localMediaManagerFactory.create(data.packageName, controller?.sessionToken)
             val muteAwaitConnectionManager =
                 muteAwaitConnectionManagerFactory.create(localMediaManager)
             entry = Entry(key, oldKey, controller, localMediaManager, muteAwaitConnectionManager)
