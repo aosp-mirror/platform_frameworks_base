@@ -330,6 +330,21 @@ open class QSTileViewImpl @JvmOverloads constructor(
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
         updateHeight()
+        maybeUpdateLongPressEffectDimensions()
+    }
+
+    private fun maybeUpdateLongPressEffectDimensions() {
+        if (!isLongClickable || longPressEffect == null) return
+
+        val actualHeight = if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
+            heightOverride
+        } else {
+            measuredHeight
+        }
+        initialLongPressProperties?.height = actualHeight.toFloat()
+        initialLongPressProperties?.width = measuredWidth.toFloat()
+        finalLongPressProperties?.height = LONG_PRESS_EFFECT_HEIGHT_SCALE * actualHeight
+        finalLongPressProperties?.width = LONG_PRESS_EFFECT_WIDTH_SCALE * measuredWidth
     }
 
     private fun updateHeight() {
