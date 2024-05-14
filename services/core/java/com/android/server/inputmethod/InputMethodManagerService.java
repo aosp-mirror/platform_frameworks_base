@@ -3664,7 +3664,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     result = startInputOrWindowGainedFocusInternalLocked(startInputReason,
                             client, windowToken, startInputFlags, softInputMode, windowFlags,
                             editorInfo, inputConnection, remoteAccessibilityInputConnection,
-                            unverifiedTargetSdkVersion, userId, imeDispatcher, cs);
+                            unverifiedTargetSdkVersion, userData, imeDispatcher, cs);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -3692,7 +3692,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @SoftInputModeFlags int softInputMode, int windowFlags, EditorInfo editorInfo,
             IRemoteInputConnection inputContext,
             @Nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
-            int unverifiedTargetSdkVersion, @UserIdInt int userId,
+            int unverifiedTargetSdkVersion, @NonNull UserDataRepository.UserData userData,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher, @NonNull ClientState cs) {
         if (DEBUG) {
             Slog.v(TAG, "startInputOrWindowGainedFocusInternalLocked: reason="
@@ -3705,7 +3705,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     + " softInputMode=" + InputMethodDebug.softInputModeToString(softInputMode)
                     + " windowFlags=#" + Integer.toHexString(windowFlags)
                     + " unverifiedTargetSdkVersion=" + unverifiedTargetSdkVersion
-                    + " userId=" + userId
+                    + " userData=" + userData
                     + " imeDispatcher=" + imeDispatcher
                     + " cs=" + cs);
         }
@@ -3724,7 +3724,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 startInputByWinGainedFocus, toolType);
         mVisibilityStateComputer.setWindowState(windowToken, windowState);
 
-        final var userData = mUserDataRepository.getOrCreate(userId);
         if (sameWindowFocused && isTextEditor) {
             if (DEBUG) {
                 Slog.w(TAG, "Window already focused, ignoring focus gain of: " + client
