@@ -1041,6 +1041,7 @@ public class AppWidgetManager {
      */
     public AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId) {
         if (mService == null) {
+            Log.e(TAG, "Service wasn't initialized, appWidgetId=" + appWidgetId);
             return null;
         }
         try {
@@ -1048,6 +1049,9 @@ public class AppWidgetManager {
             if (info != null) {
                 // Converting complex to dp.
                 info.updateDimensions(mDisplayMetrics);
+            } else {
+                Log.e(TAG, "App widget provider info is null. PackageName=" + mPackageName
+                        + " appWidgetId-" + appWidgetId);
             }
             return info;
         } catch (RemoteException e) {

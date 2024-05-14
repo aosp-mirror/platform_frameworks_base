@@ -172,8 +172,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         OnCrossProfileWidgetProvidersChangeListener {
     private static final String TAG = "AppWidgetServiceImpl";
 
-    private static final boolean DEBUG = false;
-    private static final boolean DEBUG_NULL_PROVIDER_INFO = Build.IS_DEBUGGABLE;
+    private static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
     private static final String OLD_KEYGUARD_HOST_PACKAGE = "android";
     private static final String NEW_KEYGUARD_HOST_PACKAGE = "com.android.keyguard";
@@ -1573,9 +1572,36 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     Binder.getCallingUid(), callingPackage);
 
             if (widget != null && widget.provider != null && !widget.provider.zombie) {
-                return cloneIfLocalBinder(widget.provider.getInfoLocked(mContext));
+                final AppWidgetProviderInfo info = widget.provider.getInfoLocked(mContext);
+                if (info == null) {
+                    Slog.e(TAG, "getAppWidgetInfo() returns null because"
+                            + " widget.provider.getInfoLocked() returned null."
+                            + " appWidgetId=" + appWidgetId + " userId=" + userId
+                            + " widget=" + widget);
+                    return null;
+                }
+                final AppWidgetProviderInfo ret = cloneIfLocalBinder(info);
+                if (ret == null) {
+                    Slog.e(TAG, "getAppWidgetInfo() returns null because"
+                            + " cloneIfLocalBinder() returned null."
+                            + " appWidgetId=" + appWidgetId + " userId=" + userId
+                            + " widget=" + widget + " appWidgetProviderInfo=" + info);
+                }
+                return ret;
+            } else {
+                if (widget == null) {
+                    Slog.e(TAG, "getAppWidgetInfo() returns null because widget is null."
+                            + " appWidgetId=" + appWidgetId + " userId=" + userId);
+                } else if (widget.provider == null) {
+                    Slog.e(TAG, "getAppWidgetInfo() returns null because widget.provider is null."
+                            + " appWidgetId=" + appWidgetId + " userId=" + userId
+                            + " widget=" + widget);
+                } else {
+                    Slog.e(TAG, "getAppWidgetInfo() returns null because widget.provider is zombie."
+                            + " appWidgetId=" + appWidgetId + " userId=" + userId
+                            + " widget=" + widget);
+                }
             }
-
             return null;
         }
     }
@@ -2960,7 +2986,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             AppWidgetProviderInfo info = new AppWidgetProviderInfo();
             info.provider = providerId.componentName;
             info.providerInfo = ri.activityInfo;
-            if (DEBUG_NULL_PROVIDER_INFO) {
+            if (DEBUG) {
                 Objects.requireNonNull(ri.activityInfo);
             }
             return info;
@@ -2997,7 +3023,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             AppWidgetProviderInfo info = new AppWidgetProviderInfo();
             info.provider = providerId.componentName;
             info.providerInfo = activityInfo;
-            if (DEBUG_NULL_PROVIDER_INFO) {
+            if (DEBUG) {
                 Objects.requireNonNull(activityInfo);
             }
 
@@ -3575,7 +3601,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                             AppWidgetProviderInfo info = new AppWidgetProviderInfo();
                             info.provider = providerId.componentName;
                             info.providerInfo = providerInfo;
-                            if (DEBUG_NULL_PROVIDER_INFO) {
+                            if (DEBUG) {
                                 Objects.requireNonNull(providerInfo);
                             }
 
@@ -3594,7 +3620,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                             if (info != null) {
                                 info.provider = providerId.componentName;
                                 info.providerInfo = providerInfo;
-                                if (DEBUG_NULL_PROVIDER_INFO) {
+                                if (DEBUG) {
                                     Objects.requireNonNull(providerInfo);
                                 }
                                 provider.setInfoLocked(info);
@@ -4678,6 +4704,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     }
                     if (newInfo != null) {
                         info = newInfo;
+                        if (DEBUG) {
+                            Objects.requireNonNull(info);
+                        }
                         updateGeneratedPreviewCategoriesLocked();
                     }
                 }
@@ -4699,12 +4728,18 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         @GuardedBy("AppWidgetServiceImpl.mLock")
         public void setPartialInfoLocked(AppWidgetProviderInfo info) {
             this.info = info;
+            if (DEBUG) {
+                Objects.requireNonNull(this.info);
+            }
             mInfoParsed = false;
         }
 
         @GuardedBy("AppWidgetServiceImpl.mLock")
         public void setInfoLocked(AppWidgetProviderInfo info) {
             this.info = info;
+            if (DEBUG) {
+                Objects.requireNonNull(this.info);
+            }
             mInfoParsed = true;
         }
 
