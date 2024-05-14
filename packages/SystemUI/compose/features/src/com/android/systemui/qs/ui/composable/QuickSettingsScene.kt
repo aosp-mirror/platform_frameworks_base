@@ -345,7 +345,7 @@ private fun SceneScope.QuickSettingsScene(
                         viewModel.qsSceneAdapter,
                         { viewModel.qsSceneAdapter.qsHeight },
                         isSplitShade = false,
-                        modifier = Modifier.sysuiResTag("quick_settings_panel")
+                        modifier = Modifier
                     )
 
                     val isMediaVisible by viewModel.isMediaVisible.collectAsStateWithLifecycle()
@@ -364,7 +364,8 @@ private fun SceneScope.QuickSettingsScene(
                 isCustomizing = isCustomizing,
                 customizingAnimationDuration = customizingAnimationDuration,
                 lifecycleOwner = lifecycleOwner,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
+                modifier =
+                    Modifier.align(Alignment.CenterHorizontally).sysuiResTag("qs_footer_actions"),
             )
         }
         NotificationScrollingStack(

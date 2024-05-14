@@ -71,6 +71,7 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
@@ -446,6 +447,7 @@ private fun SceneScope.SplitShade(
                         Column(
                             modifier =
                                 Modifier.fillMaxSize()
+                                    .sysuiResTag("expanded_qs_scroll_view")
                                     .weight(1f)
                                     .thenIf(!isCustomizerShowing) {
                                         Modifier.verticalNestedScrollToScene()
@@ -484,6 +486,7 @@ private fun SceneScope.SplitShade(
                             lifecycleOwner = lifecycleOwner,
                             modifier =
                                 Modifier.align(Alignment.CenterHorizontally)
+                                    .sysuiResTag("qs_footer_actions")
                                     .then(brightnessMirrorShowingModifier),
                         )
                     }

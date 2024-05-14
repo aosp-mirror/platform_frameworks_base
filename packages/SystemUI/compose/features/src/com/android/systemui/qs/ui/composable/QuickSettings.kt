@@ -34,6 +34,7 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.modifiers.thenIf
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Companion.Collapsing
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Expanding
@@ -143,7 +144,9 @@ fun SceneScope.QuickSettings(
     MovableElement(
         key = QuickSettings.Elements.Content,
         modifier =
-            modifier.fillMaxWidth().layout { measurable, constraints ->
+            modifier.sysuiResTag("quick_settings_panel").fillMaxWidth().layout {
+                measurable,
+                constraints ->
                 val placeable = measurable.measure(constraints)
                 // Use the height of the correct view based on the scene it is being composed in
                 val height = heightProvider().coerceAtLeast(0)
