@@ -798,7 +798,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 return;
             }
             mDisplayStateController.overrideDozeScreenState(displayState, reason);
-            sendUpdatePowerState();
+            updatePowerState();
         }, mClock.uptimeMillis());
     }
 
