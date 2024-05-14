@@ -2727,6 +2727,11 @@ static void nativeSetInputMethodConnectionIsActive(JNIEnv* env, jobject nativeIm
     im->setInputMethodConnectionIsActive(isActive);
 }
 
+static jint nativeGetLastUsedInputDeviceId(JNIEnv* env, jobject nativeImplObj) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    return static_cast<jint>(im->getInputManager()->getReader().getLastUsedInputDeviceId());
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2835,6 +2840,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setAccessibilityStickyKeysEnabled", "(Z)V",
          (void*)nativeSetAccessibilityStickyKeysEnabled},
         {"setInputMethodConnectionIsActive", "(Z)V", (void*)nativeSetInputMethodConnectionIsActive},
+        {"getLastUsedInputDeviceId", "()I", (void*)nativeGetLastUsedInputDeviceId},
 };
 
 #define FIND_CLASS(var, className) \
