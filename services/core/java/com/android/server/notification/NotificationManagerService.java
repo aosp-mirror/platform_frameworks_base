@@ -593,6 +593,8 @@ public class NotificationManagerService extends SystemService {
 
     static final long NOTIFICATION_TTL = Duration.ofDays(3).toMillis();
 
+    static final long NOTIFICATION_MAX_AGE_AT_POST = Duration.ofDays(14).toMillis();
+
     private IActivityManager mAm;
     private ActivityTaskManagerInternal mAtm;
     private ActivityManager mActivityManager;
@@ -2637,27 +2639,48 @@ public class NotificationManagerService extends SystemService {
      * Cleanup broadcast receivers change listeners.
      */
     public void onDestroy() {
-        getContext().unregisterReceiver(mIntentReceiver);
-        getContext().unregisterReceiver(mPackageIntentReceiver);
-        if (Flags.allNotifsNeedTtl()) {
-            mTtlHelper.destroy();
-        } else {
-            getContext().unregisterReceiver(mNotificationTimeoutReceiver);
+        if (mIntentReceiver != null) {
+            getContext().unregisterReceiver(mIntentReceiver);
         }
-        getContext().unregisterReceiver(mRestoreReceiver);
-        getContext().unregisterReceiver(mLocaleChangeReceiver);
-
-        mSettingsObserver.destroy();
-        mRoleObserver.destroy();
+        if (mPackageIntentReceiver != null) {
+            getContext().unregisterReceiver(mPackageIntentReceiver);
+        }
+        if (Flags.allNotifsNeedTtl()) {
+            if (mTtlHelper != null) {
+                mTtlHelper.destroy();
+            }
+        } else {
+            if (mNotificationTimeoutReceiver != null) {
+                getContext().unregisterReceiver(mNotificationTimeoutReceiver);
+            }
+        }
+        if (mRestoreReceiver != null) {
+            getContext().unregisterReceiver(mRestoreReceiver);
+        }
+        if (mLocaleChangeReceiver != null) {
+            getContext().unregisterReceiver(mLocaleChangeReceiver);
+        }
+        if (mSettingsObserver != null) {
+            mSettingsObserver.destroy();
+        }
+        if (mRoleObserver != null) {
+            mRoleObserver.destroy();
+        }
         if (mShortcutHelper != null) {
             mShortcutHelper.destroy();
         }
-        mStatsManager.clearPullAtomCallback(PACKAGE_NOTIFICATION_PREFERENCES);
-        mStatsManager.clearPullAtomCallback(PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES);
-        mStatsManager.clearPullAtomCallback(PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES);
-        mStatsManager.clearPullAtomCallback(DND_MODE_RULE);
-        mAppOps.stopWatchingMode(mAppOpsListener);
-        mAlarmManager.cancelAll();
+        if (mStatsManager != null) {
+            mStatsManager.clearPullAtomCallback(PACKAGE_NOTIFICATION_PREFERENCES);
+            mStatsManager.clearPullAtomCallback(PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES);
+            mStatsManager.clearPullAtomCallback(PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES);
+            mStatsManager.clearPullAtomCallback(DND_MODE_RULE);
+        }
+        if (mAppOps != null) {
+            mAppOps.stopWatchingMode(mAppOpsListener);
+        }
+        if (mAlarmManager != null) {
+            mAlarmManager.cancelAll();
+        }
     }
 
     protected String[] getStringArrayResource(int key) {
@@ -8013,6 +8036,13 @@ public class NotificationManagerService extends SystemService {
                         + " by user request.");
             }
             mUsageStats.registerBlocked(r);
+            return false;
+        }
+
+        if (Flags.rejectOldNotifications() && n.hasAppProvidedWhen() && n.getWhen() > 0
+                && (System.currentTimeMillis() - n.getWhen()) > NOTIFICATION_MAX_AGE_AT_POST) {
+            Slog.d(TAG, "Ignored enqueue for old " + n.getWhen() + " notification " + r.getKey());
+            mUsageStats.registerTooOldBlocked(r);
             return false;
         }
 
