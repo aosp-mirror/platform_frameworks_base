@@ -148,7 +148,7 @@ static const JNINativeMethod gColorSpaceRgbMethods[] = {
 namespace android {
 
 int register_android_graphics_ColorSpace(JNIEnv* env) {
-    return android::RegisterMethodsOrDie(env, "android/graphics/ColorSpace$Rgb",
+    return android::RegisterMethodsOrDie(env, "android/graphics/ColorSpace$Rgb$Native",
                                          gColorSpaceRgbMethods, NELEM(gColorSpaceRgbMethods));
 }
 

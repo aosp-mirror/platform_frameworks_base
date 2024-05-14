@@ -135,6 +135,9 @@ import java.util.function.DoubleUnaryOperator;
 @AnyThread
 @SuppressWarnings("StaticInitializerReferencesSubClass")
 @SuppressAutoDoc
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
+@android.ravenwood.annotation.RavenwoodClassLoadHook(
+        android.ravenwood.annotation.RavenwoodClassLoadHook.LIBANDROID_LOADING_HOOK)
 public abstract class ColorSpace {
     /**
      * Standard CIE 1931 2° illuminant A, encoded in xyY.
@@ -2490,9 +2493,12 @@ public abstract class ColorSpace {
             return mNativePtr;
         }
 
-        private static native long nativeGetNativeFinalizer();
-        private static native long nativeCreate(float a, float b, float c, float d,
-                float e, float f, float g, float[] xyz);
+        /** Need a nested class due to b/337329128. */
+        static class Native {
+            static native long nativeGetNativeFinalizer();
+            static native long nativeCreate(float a, float b, float c, float d,
+                    float e, float f, float g, float[] xyz);
+        }
 
         private static DoubleUnaryOperator generateOETF(TransferParameters function) {
             if (function.isHLGish()) {
@@ -2959,7 +2965,7 @@ public abstract class ColorSpace {
 
                 // This mimics the old code that was in native.
                 float[] nativeTransform = adaptToIlluminantD50(mWhitePoint, mTransform);
-                mNativePtr = nativeCreate((float) mTransferParameters.a,
+                mNativePtr = Native.nativeCreate((float) mTransferParameters.a,
                                           (float) mTransferParameters.b,
                                           (float) mTransferParameters.c,
                                           (float) mTransferParameters.d,
@@ -2975,7 +2981,7 @@ public abstract class ColorSpace {
 
         private static class NoImagePreloadHolder {
             public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                ColorSpace.Rgb.class.getClassLoader(), nativeGetNativeFinalizer(), 0);
+                ColorSpace.Rgb.class.getClassLoader(), Native.nativeGetNativeFinalizer(), 0);
         }
 
         /**

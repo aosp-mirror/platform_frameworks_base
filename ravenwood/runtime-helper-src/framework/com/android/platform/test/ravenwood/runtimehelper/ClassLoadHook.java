@@ -162,20 +162,23 @@ public class ClassLoadHook {
             android.graphics.Interpolator.class,
             android.graphics.Matrix.class,
             android.graphics.Path.class,
+            android.graphics.Color.class,
+            android.graphics.ColorSpace.class,
     };
 
     /**
-     * @return if a given class has any native method or not.
+     * @return if a given class and its nested classes, if any, have any native method or not.
      */
     private static boolean hasNativeMethod(Class<?> clazz) {
-        for (var method : clazz.getDeclaredMethods()) {
-            if (Modifier.isNative(method.getModifiers())) {
-                return true;
+        for (var nestedClass : clazz.getNestMembers()) {
+            for (var method : nestedClass.getDeclaredMethods()) {
+                if (Modifier.isNative(method.getModifiers())) {
+                    return true;
+                }
             }
         }
         return false;
     }
-
     /**
      * Create a list of classes as comma-separated that require JNI methods to be set up from
      * a given class list, ignoring classes with no native methods.
