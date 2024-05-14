@@ -359,8 +359,10 @@ constructor(
         )
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
         mediaCarousel.repeatWhenAttached {
-            mediaCarouselViewModel.onAttached()
-            mediaCarouselScrollHandler.scrollToStart()
+            if (mediaFlags.isMediaControlsRefactorEnabled()) {
+                mediaCarouselViewModel.onAttached()
+                mediaCarouselScrollHandler.scrollToStart()
+            }
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 listenForAnyStateToGoneKeyguardTransition(this)
                 listenForAnyStateToLockscreenTransition(this)
