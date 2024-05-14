@@ -204,11 +204,7 @@ internal constructor(
         isEnabled: Boolean,
         @StringRes infoResId: Int
     ) {
-        getAutoOnToggle(dialog).apply {
-            isChecked = isEnabled
-            setEnabled(true)
-            alpha = ENABLED_ALPHA
-        }
+        getAutoOnToggle(dialog).isChecked = isEnabled
         getAutoOnToggleInfoTextView(dialog).text = dialog.context.getString(infoResId)
     }
 
@@ -236,12 +232,8 @@ internal constructor(
         }
 
         getAutoOnToggleView(dialog).visibility = initialUiProperties.autoOnToggleVisibility
-        getAutoOnToggle(dialog).setOnCheckedChangeListener { view, isChecked ->
+        getAutoOnToggle(dialog).setOnCheckedChangeListener { _, isChecked ->
             mutableBluetoothAutoOnToggle.value = isChecked
-            view.apply {
-                isEnabled = false
-                alpha = DISABLED_ALPHA
-            }
             uiEventLogger.log(BluetoothTileDialogUiEvent.BLUETOOTH_AUTO_ON_TOGGLE_CLICKED)
         }
     }

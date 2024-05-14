@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlagsClassic
@@ -55,18 +54,6 @@ constructor(
     /** Notifies that the bounds of the notification scrim have changed. */
     fun onScrimBoundsChanged(bounds: ShadeScrimBounds?) {
         interactor.setShadeScrimBounds(bounds)
-    }
-
-    /** Notifies that the bounds of the notification placeholder have changed. */
-    fun onStackBoundsChanged(
-        top: Float,
-        bottom: Float,
-    ) {
-        keyguardInteractor.setNotificationContainerBounds(
-            NotificationContainerBounds(top = top, bottom = bottom)
-        )
-        interactor.setStackTop(top)
-        interactor.setStackBottom(bottom)
     }
 
     /** Sets the available space */

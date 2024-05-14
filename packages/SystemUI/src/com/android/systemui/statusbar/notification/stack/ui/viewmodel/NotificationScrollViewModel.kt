@@ -130,10 +130,6 @@ constructor(
     val maxAlpha: Flow<Float> =
         stackAppearanceInteractor.alphaForBrightnessMirror.dumpValue("maxAlpha")
 
-    /** The y-coordinate in px of top of the contents of the notification stack. */
-    val stackTop: Flow<Float> = stackAppearanceInteractor.stackTop.dumpValue("stackTop")
-    /** The y-coordinate in px of bottom of the contents of the notification stack. */
-    val stackBottom: Flow<Float> = stackAppearanceInteractor.stackBottom.dumpValue("stackBottom")
     /**
      * Whether the notification stack is scrolled to the top; i.e., it cannot be scrolled down any
      * further.

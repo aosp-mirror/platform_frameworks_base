@@ -38,6 +38,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 
 final class AttributedOp {
     private final @NonNull AppOpsService mAppOpsService;
@@ -253,6 +254,19 @@ final class AttributedOp {
             mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
                     parent.packageName, tag, uidState, flags, startTime, attributionFlags,
                     attributionChainId);
+        }
+    }
+
+    public void doForAllInProgressStartOpEvents(Consumer<InProgressStartOpEvent> action) {
+        ArrayMap<IBinder, AttributedOp.InProgressStartOpEvent> events = isPaused()
+                ? mPausedInProgressEvents : mInProgressEvents;
+        if (events == null) {
+            return;
+        }
+
+        int numStartedOps = events.size();
+        for (int i = 0; i < numStartedOps; i++) {
+            action.accept(events.valueAt(i));
         }
     }
 

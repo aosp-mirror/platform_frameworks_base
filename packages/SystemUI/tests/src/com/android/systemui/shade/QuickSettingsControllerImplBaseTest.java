@@ -42,13 +42,10 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
-import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor;
-import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
@@ -59,9 +56,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.QSFragmentLegacy;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.data.repository.SceneContainerRepository;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
-import com.android.systemui.scene.shared.logger.SceneLogger;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
@@ -176,12 +171,7 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
     protected Handler mMainHandler;
     protected LockscreenShadeTransitionController.Callback mLockscreenShadeTransitionCallback;
 
-    protected final ShadeExpansionStateManager mShadeExpansionStateManager =
-            new ShadeExpansionStateManager();
-
     protected FragmentHostManager.FragmentListener mFragmentListener;
-    private FromLockscreenTransitionInteractor mFromLockscreenTransitionInteractor;
-    private FromPrimaryBouncerTransitionInteractor mFromPrimaryBouncerTransitionInteractor;
 
     @Before
     public void setup() {
@@ -190,19 +180,11 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
         mStatusBarStateController = mKosmos.getStatusBarStateController();
 
         mKosmos.getFakeDeviceProvisioningRepository().setDeviceProvisioned(true);
-        FakeFeatureFlagsClassic featureFlags = new FakeFeatureFlagsClassic();
         FakeConfigurationRepository configurationRepository = new FakeConfigurationRepository();
 
         PowerInteractor powerInteractor = mKosmos.getPowerInteractor();
 
-        SceneInteractor sceneInteractor = new SceneInteractor(
-                mTestScope.getBackgroundScope(),
-                new SceneContainerRepository(
-                        mTestScope.getBackgroundScope(),
-                        mKosmos.getFakeSceneContainerConfig(),
-                        mKosmos.getSceneDataSource()),
-                mock(SceneLogger.class),
-                mKosmos.getDeviceUnlockedInteractor());
+        SceneInteractor sceneInteractor = mKosmos.getSceneInteractor();
 
         KeyguardTransitionInteractor keyguardTransitionInteractor =
                 mKosmos.getKeyguardTransitionInteractor();
@@ -219,10 +201,6 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 () -> mKosmos.getFromLockscreenTransitionInteractor(),
                 () -> mKosmos.getSharedNotificationContainerInteractor(),
                 mTestScope);
-
-        mFromLockscreenTransitionInteractor = mKosmos.getFromLockscreenTransitionInteractor();
-        mFromPrimaryBouncerTransitionInteractor =
-                mKosmos.getFromPrimaryBouncerTransitionInteractor();
 
         ResourcesSplitShadeStateController splitShadeStateController =
                 new ResourcesSplitShadeStateController();

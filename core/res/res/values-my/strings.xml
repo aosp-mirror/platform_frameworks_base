@@ -157,12 +157,12 @@
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"အသွင်ဝှက်ခြင်း၊ အသွင်ဝှက်မထားသော ကွန်ရက်များအတွက် အကြောင်းကြားချက်များ"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"စက် ID သုံးထားသည်"</string>
     <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> တွင် သင့် <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> ဆင်းမ်ကတ်ကို သုံးနေစဉ် အနီးရှိ ကွန်ရက်သည် စက်ပစ္စည်း၏ သီးသန့် ID (IMSI (သို့) IMEI) ကို မှတ်တမ်းတင်ထားသည်"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> တွင် သင့် <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> ဆင်းမ်ကတ်ကို သုံးနေစဉ် အနီးရှိ ကွန်ရက်သည် စက်ပစ္စည်း၏ သီးသန့် ID (IMSI (သို့) IMEI) ကို မှတ်တမ်းတင်ထားသည်။\n\nဆိုလိုသည်မှာ သင့်တည်နေရာ၊ လုပ်ဆောင်ချက် (သို့) အထောက်အထားကို မှတ်တမ်းတင်ထားသည်။ ၎င်းသည် သာမန်လုပ်ဆောင်မှုဖြစ်သော်လည်း ကိုယ်ရေးအချက်အလက်လုံခြုံမှုနှင့်ပတ်သက်၍ စိုးရိမ်သောသူများအတွက် ပြဿနာတစ်ခု ဖြစ်နိုင်သည်။"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> တွင် သင့် <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> ဆင်းမ်ကတ်ကို သုံးနေစဉ် အနီးရှိ ကွန်ရက်သည် စက်ပစ္စည်း၏ သီးသန့် ID (IMSI (သို့) IMEI) ကို မှတ်တမ်းတင်ထားသည်။\n\nဆိုလိုသည်မှာ သင့်တည်နေရာ၊ လုပ်ဆောင်ချက် (သို့) အထောက်အထားကို မှတ်တမ်းတင်ထားသည်။ ၎င်းသည် သာမန်လုပ်ဆောင်မှုဖြစ်သော်လည်း ကိုယ်ရေးအချက်အလက်လုံခြုံမှုနှင့် ပတ်သက်၍ အချို့သူများအတွက် စိုးရိမ်စရာ ဖြစ်နိုင်သည်။"</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"အသွင်ဝှက်ထားသော ကွန်ရက် <xliff:g id="NETWORK_NAME">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားသည်"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ဆင်းမ်ကတ် ချိတ်ဆက်မှုသည် ယခု ပိုမိုလုံခြုံပါပြီ"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"အသွင်ဝှက်မထားသော ကွန်ရက်သို့ ချိတ်ဆက်ထားသည်"</string>
-    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"သင့် <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ဆင်းမ်ကတ်ကို သုံးနေစဉ် ဖုန်းခေါ်ဆိုမှု၊ မက်ဆေ့ဂျ်နှင့် ဒေတာများသည် လက်ရှိတွင် ပိုမိုထိခိုက်လွယ်သည်"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"သင့် <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ဆင်းမ်ကတ်ကို သုံးနေစဉ် ဖုန်းခေါ်ဆိုမှု၊ မက်ဆေ့ဂျ်နှင့် ဒေတာများသည် လက်ရှိတွင် ပိုမိုထိခိုက်လွယ်သည်။\n\nသင့်ချိတ်ဆက်မှုကို ထပ်မံအသွင်ဝှက်လိုက်သောအခါ အကြောင်းကြားချက်နောက်တစ်ခု ရရှိပါမည်။"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"သင့် <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ဆင်းမ် သုံးချိန်တွင် ဖုန်း၊ မက်ဆေ့ဂျ်၊ ဒေတာ လုံခြုံမှုအားနည်းသည်"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"သင့် <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ဆင်းမ် သုံးချိန်တွင် ဖုန်း၊ မက်ဆေ့ဂျ်၊ ဒေတာ လုံခြုံမှုအားနည်းသည်။\n\nသင့်ချိတ်ဆက်မှုကို ထပ်မံအသွင်ဝှက်ပါက အကြောင်းကြားချက်နောက်တစ်ခု ရရှိပါမည်။"</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"မိုဘိုင်းကွန်ရက် လုံခြုံရေး ဆက်တင်များ"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"ပိုမိုလေ့လာရန်"</string>
     <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"နားလည်ပြီ"</string>
@@ -644,7 +644,7 @@
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"ရှေ့ဆက်ရန် သင်၏ ဇီဝမက်ထရစ်အချက်အလက် (သို့) ဖန်သားပြင်လော့ခ်ကို သုံးပါ"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ဇီဝအချက်အလက်သုံး ကွန်ပျူတာစက်ပစ္စည်း မရရှိနိုင်ပါ"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
-    <string name="biometric_not_recognized" msgid="5106687642694635888">"မသိ"</string>
+    <string name="biometric_not_recognized" msgid="5106687642694635888">"မသိပါ"</string>
     <string name="biometric_face_not_recognized" msgid="5535599455744525200">"မျက်နှာကို မသိရှိပါ"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"ပင်နံပါတ်၊ လော့ခ်ပုံစံ သို့မဟုတ် စကားဝှက် သတ်မှတ်မထားပါ"</string>
@@ -2220,7 +2220,7 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"အလုပ်သုံးအက်ပ်သို့ ပြောင်းမလား။"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"သင့်အဖွဲ့အစည်းသည် သင့်အား အလုပ်သုံးအက်ပ်များမှသာ ဖုန်းဆက်ခွင့်ပြုသည်"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"သင့်အဖွဲ့အစည်းသည် သင့်အား အလုပ်သုံးအက်ပ်များမှသာ မက်ဆေ့ဂျ်ပို့ခွင့်ပြုသည်"</string>
-    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"သင့်ကိုယ်ပိုင် ‘ဖုန်းအက်ပ်’ မှသာ ဖုန်းခေါ်ဆိုနိုင်သည်။ ကိုယ်ပိုင် ‘ဖုန်း’ ဖြင့် ပြုလုပ်သော ခေါ်ဆိုမှုများကို သင်၏ကိုယ်ပိုင် ခေါ်ဆိုမှုမှတ်တမ်းသို့ ထည့်ပါမည်။"</string>
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"သင့်ကိုယ်ပိုင် ‘ဖုန်းအက်ပ်’ မှသာ ဖုန်းခေါ်ဆိုနိုင်သည်။ ကိုယ်ပိုင် ‘ဖုန်း’ ဖြင့် ခေါ်ဆိုမှုများကို သင်၏ ကိုယ်ပိုင် ခေါ်ဆိုမှုမှတ်တမ်းသို့ ထည့်ပါမည်။"</string>
     <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"သင့်ကိုယ်ပိုင် Messages အက်ပ်မှသာ SMS မက်ဆေ့ဂျ်များကို ပို့နိုင်သည်။"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ကိုယ်ပိုင်ဘရောင်ဇာ သုံးရန်"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"အလုပ်သုံးဘရောင်ဇာ သုံးရန်"</string>
@@ -2413,4 +2413,22 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ဖွင့်ရန်"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"အလုပ်လုပ်ပုံ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ဆိုင်းငံ့ထားသည်…"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

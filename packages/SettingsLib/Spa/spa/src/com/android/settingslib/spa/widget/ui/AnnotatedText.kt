@@ -17,26 +17,17 @@
 package com.android.settingslib.spa.widget.ui
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalUriHandler
-import com.android.settingslib.spa.framework.util.URL_SPAN_TAG
 import com.android.settingslib.spa.framework.util.annotatedStringResource
 
 @Composable
 fun AnnotatedText(@StringRes id: Int) {
-    val uriHandler = LocalUriHandler.current
-    val annotatedString = annotatedStringResource(id)
-    ClickableText(
-        text = annotatedString,
+    Text(
+        text = annotatedStringResource(id),
         style = MaterialTheme.typography.bodyMedium.copy(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
-    ) { offset ->
-        // Gets the url at the clicked position.
-        annotatedString.getStringAnnotations(URL_SPAN_TAG, offset, offset)
-            .firstOrNull()
-            ?.let { uriHandler.openUri(it.item) }
-    }
+    )
 }

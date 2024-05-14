@@ -13114,39 +13114,41 @@ public class TelephonyManager {
     })
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
     public @Nullable ServiceState getServiceState(@IncludeLocationData int includeLocationData) {
-        return getServiceStateForSubscriber(getSubId(),
+        return getServiceStateForSlot(SubscriptionManager.getSlotIndex(getSubId()),
                 includeLocationData != INCLUDE_LOCATION_DATA_FINE,
                 includeLocationData == INCLUDE_LOCATION_DATA_NONE);
     }
 
     /**
-     * Returns the service state information on specified subscription. Callers require
-     * either READ_PRIVILEGED_PHONE_STATE or READ_PHONE_STATE to retrieve the information.
+     * Returns the service state information on specified SIM slot.
      *
-     * May return {@code null} when the subscription is inactive or when there was an error
+     * May return {@code null} when the {@code slotIndex} is invalid or when there was an error
      * communicating with the phone process.
+     *
+     * @param slotIndex of phone whose service state is returned
      * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
      * location related information which will be sent if the caller already possess
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permission
      * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
      * receive location related information which will be sent if the caller already possess
      * {@link Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the permissions.
+     * @return Service state on specified SIM slot.
      */
-    private ServiceState getServiceStateForSubscriber(int subId,
-            boolean renounceFineLocationAccess,
+    private ServiceState getServiceStateForSlot(int slotIndex, boolean renounceFineLocationAccess,
             boolean renounceCoarseLocationAccess) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.getServiceStateForSubscriber(subId, renounceFineLocationAccess,
-                        renounceCoarseLocationAccess, getOpPackageName(), getAttributionTag());
+                return service.getServiceStateForSlot(slotIndex,
+                        renounceFineLocationAccess, renounceCoarseLocationAccess,
+                        getOpPackageName(), getAttributionTag());
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
+            Log.e(TAG, "Error calling ITelephony#getServiceStateForSlot", e);
         } catch (NullPointerException e) {
             AnomalyReporter.reportAnomaly(
                     UUID.fromString("e2bed88e-def9-476e-bd71-3e572a8de6d1"),
-                    "getServiceStateForSubscriber " + subId + " NPE");
+                    "getServiceStateForSlot " + slotIndex + " NPE");
         }
         return null;
     }
@@ -13161,7 +13163,35 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public ServiceState getServiceStateForSubscriber(int subId) {
-        return getServiceStateForSubscriber(subId, false, false);
+        return getServiceStateForSlot(
+                SubscriptionManager.getSlotIndex(subId), false, false);
+    }
+
+    /**
+     * Returns the service state information on specified SIM slot.
+     *
+     * If you want continuous updates of service state info, register a {@link TelephonyCallback}
+     * that implements {@link TelephonyCallback.ServiceStateListener} through
+     * {@link #registerTelephonyCallback}.
+     *
+     * May return {@code null} when the {@code slotIndex} is invalid or when there was an error
+     * communicating with the phone process
+     *
+     * See {@link #getActiveModemCount()} to get the total number of slots
+     * that are active on the device.
+     *
+     * @param slotIndex of phone whose service state is returned
+     * @return ServiceState on specified SIM slot.
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+    })
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
+    public @Nullable ServiceState getServiceStateForSlot(int slotIndex) {
+        return getServiceStateForSlot(slotIndex, false, false);
     }
 
     /**

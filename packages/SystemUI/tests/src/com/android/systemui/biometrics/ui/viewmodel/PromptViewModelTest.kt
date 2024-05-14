@@ -16,9 +16,13 @@
 
 package com.android.systemui.biometrics.ui.viewmodel
 
+import android.app.ActivityManager.RunningTaskInfo
 import android.app.ActivityTaskManager
+import android.content.ComponentName
+import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Point
@@ -37,6 +41,7 @@ import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
+import com.android.launcher3.icons.IconProvider
 import com.android.systemui.Flags.FLAG_BP_TALKBACK
 import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
@@ -94,6 +99,7 @@ private const val CHALLENGE = 2L
 private const val DELAY = 1000L
 private const val OP_PACKAGE_NAME = "biometric.testapp"
 private const val OP_PACKAGE_NAME_NO_ICON = "biometric.testapp.noicon"
+private const val OP_PACKAGE_NAME_CAN_NOT_BE_FOUND = "can.not.be.found"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -107,18 +113,23 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var udfpsUtils: UdfpsUtils
     @Mock private lateinit var packageManager: PackageManager
+    @Mock private lateinit var iconProvider: IconProvider
     @Mock private lateinit var applicationInfoWithIcon: ApplicationInfo
     @Mock private lateinit var applicationInfoNoIcon: ApplicationInfo
     @Mock private lateinit var activityTaskManager: ActivityTaskManager
+    @Mock private lateinit var activityInfo: ActivityInfo
+    @Mock private lateinit var runningTaskInfo: RunningTaskInfo
 
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val testScope = TestScope()
     private val defaultLogoIcon = context.getDrawable(R.drawable.ic_android)
+    private val defaultLogoIconWithOverrides = context.getDrawable(R.drawable.ic_add)
     private val logoResFromApp = R.drawable.ic_cake
     private val logoFromApp = context.getDrawable(logoResFromApp)
     private val logoBitmapFromApp = Bitmap.createBitmap(400, 400, Bitmap.Config.RGB_565)
     private val defaultLogoDescription = "Test Android App"
     private val logoDescriptionFromApp = "Test Cake App"
+    private val packageNameForLogoWithOverrides = "should.use.overridden.logo"
 
     private lateinit var fingerprintRepository: FakeFingerprintPropertyRepository
     private lateinit var promptRepository: FakePromptRepository
@@ -174,9 +185,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 biometricStatusRepository,
                 fingerprintRepository
             )
-        selector =
-            PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
-        selector.resetPrompt()
+
         promptContentView =
             PromptVerticalListContentView.Builder()
                 .addListItem(PromptContentItemBulletedText("content item 1"))
@@ -189,29 +198,32 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 .setMoreOptionsButtonListener(fakeExecutor) { _, _ -> }
                 .build()
 
-        viewModel =
-            PromptViewModel(
-                displayStateInteractor,
-                selector,
-                mContext,
-                udfpsOverlayInteractor,
-                biometricStatusInteractor,
-                udfpsUtils
-            )
-        iconViewModel = viewModel.iconViewModel
-
-        // Set up default logo icon and app customized icon
+        // Set up default logo info and app customized info
         whenever(packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME_NO_ICON), anyInt()))
             .thenReturn(applicationInfoNoIcon)
         whenever(packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME), anyInt()))
             .thenReturn(applicationInfoWithIcon)
+        whenever(packageManager.getApplicationInfo(eq(packageNameForLogoWithOverrides), anyInt()))
+            .thenReturn(applicationInfoWithIcon)
+        whenever(packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME_CAN_NOT_BE_FOUND), anyInt()))
+            .thenThrow(NameNotFoundException())
+
+        whenever(packageManager.getActivityInfo(any(), anyInt())).thenReturn(activityInfo)
+        whenever(iconProvider.getIcon(activityInfo)).thenReturn(defaultLogoIconWithOverrides)
         whenever(packageManager.getApplicationIcon(applicationInfoWithIcon))
             .thenReturn(defaultLogoIcon)
         whenever(packageManager.getApplicationLabel(applicationInfoWithIcon))
             .thenReturn(defaultLogoDescription)
+        whenever(packageManager.getUserBadgedIcon(any(), any())).then { it.getArgument(0) }
+        whenever(packageManager.getUserBadgedLabel(any(), any())).then { it.getArgument(0) }
+
         context.setMockPackageManager(packageManager)
         val resources = context.getOrCreateTestableResources()
         resources.addOverride(logoResFromApp, logoFromApp)
+        resources.addOverride(
+            R.array.biometric_dialog_package_names_for_logo_with_overrides,
+            arrayOf(packageNameForLogoWithOverrides)
+        )
     }
 
     @Test
@@ -1322,7 +1334,30 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    fun logoIsNullIfPackageNameNotFound() =
+    fun logo_nullIfPkgNameNotFound() =
+        runGenericTest(packageName = OP_PACKAGE_NAME_CAN_NOT_BE_FOUND) {
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
+            val logo by collectLastValue(viewModel.logo)
+            assertThat(logo).isNull()
+        }
+
+    @Test
+    fun logo_defaultWithOverrides() =
+        runGenericTest(packageName = packageNameForLogoWithOverrides) {
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
+            val logo by collectLastValue(viewModel.logo)
+
+            // 1. PM.getApplicationInfo(packageNameForLogoWithOverrides) is set to return
+            // applicationInfoWithIcon with defaultLogoIcon,
+            // 2. iconProvider.getIcon() is set to return defaultLogoIconForGMSCore
+            // For the apps with packageNameForLogoWithOverrides, 2 should be called instead of 1
+            assertThat(logo).isEqualTo(defaultLogoIconWithOverrides)
+        }
+
+    @Test
+    fun logo_defaultIsNull() =
         runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
             mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
             mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
@@ -1331,7 +1366,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    fun defaultLogoIfNoLogoSet() = runGenericTest {
+    fun logo_default() = runGenericTest {
         mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
         val logo by collectLastValue(viewModel.logo)
@@ -1339,7 +1374,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun logoResSetByApp() =
+    fun logo_resSetByApp() =
         runGenericTest(logoRes = logoResFromApp) {
             mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
             mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
@@ -1348,7 +1383,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    fun logoBitmapSetByApp() =
+    fun logo_bitmapSetByApp() =
         runGenericTest(logoBitmap = logoBitmapFromApp) {
             mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
             mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
@@ -1357,7 +1392,16 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    fun logoDescriptionIsEmptyIfPackageNameNotFound() =
+    fun logoDescription_emptyIfPkgNameNotFound() =
+        runGenericTest(packageName = OP_PACKAGE_NAME_CAN_NOT_BE_FOUND) {
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
+            val logoDescription by collectLastValue(viewModel.logoDescription)
+            assertThat(logoDescription).isEqualTo("")
+        }
+
+    @Test
+    fun logoDescription_defaultIsEmpty() =
         runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
             mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
             mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
@@ -1366,7 +1410,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    fun defaultLogoDescriptionIfNoLogoDescriptionSet() = runGenericTest {
+    fun logoDescription_default() = runGenericTest {
         mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
         val logoDescription by collectLastValue(viewModel.logoDescription)
@@ -1374,7 +1418,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun logoDescriptionSetByApp() =
+    fun logoDescription_setByApp() =
         runGenericTest(logoDescription = logoDescriptionFromApp) {
             mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
             mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
@@ -1420,6 +1464,26 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         packageName: String = OP_PACKAGE_NAME,
         block: suspend TestScope.() -> Unit,
     ) {
+        val topActivity = ComponentName(packageName, "test app")
+        runningTaskInfo.topActivity = topActivity
+        whenever(activityTaskManager.getTasks(1)).thenReturn(listOf(runningTaskInfo))
+        selector =
+            PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
+        selector.resetPrompt()
+
+        viewModel =
+            PromptViewModel(
+                displayStateInteractor,
+                selector,
+                mContext,
+                udfpsOverlayInteractor,
+                biometricStatusInteractor,
+                udfpsUtils,
+                iconProvider,
+                activityTaskManager
+            )
+        iconViewModel = viewModel.iconViewModel
+
         selector.initializePrompt(
             requireConfirmation = testCase.confirmationRequested,
             allowCredentialFallback = allowCredentialFallback,

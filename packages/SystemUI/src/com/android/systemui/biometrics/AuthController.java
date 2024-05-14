@@ -1249,6 +1249,8 @@ public class AuthController implements
         }
         mCurrentDialog = newDialog;
 
+        // TODO(b/339532378): We should check whether |allowBackgroundAuthentication| should be
+        //  removed.
         if (!promptInfo.isAllowBackgroundAuthentication() && !isOwnerInForeground()) {
             cancelIfOwnerIsNotInForeground();
         } else {

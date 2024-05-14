@@ -103,6 +103,7 @@ constructor(
             KeyguardState.LOCKSCREEN -> true
             KeyguardState.GONE -> true
             KeyguardState.OCCLUDED -> true
+            KeyguardState.UNDEFINED -> true
         }
     }
 

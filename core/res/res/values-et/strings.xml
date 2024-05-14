@@ -154,7 +154,7 @@
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: pole suunatud"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: pole edastatud"</string>
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Mobiilsidevõrgu turve"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Krüpteerimine, märguanded krüpteerimata võrkude jaoks"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Krüpteerimine, märguanded krüpteerimata võrkude kohta"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Seadme ID-le on juurde pääsetud"</string>
     <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"Kell <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> salvestas lähedal olev võrk võrgu <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM-i kasutamise ajal teie seadme kordumatu ID (IMSI või IMEI)"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"Kell <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> salvestas lähedal olev võrk võrgu <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM-i kasutamise ajal teie seadme kordumatu ID (IMSI või IMEI).\n\nSee tähendab, et teie asukoht, tegevus või isik salvestati. See on levinud tava, kuid võib osutada probleemiks inimeste jaoks, kellele on privaatsus eriti oluline."</string>
@@ -2413,4 +2413,22 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Ava rakendus Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Tööpõhimõtted"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Ootel …"</string>
+    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
+    <skip />
+    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
+    <skip />
+    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
+    <skip />
 </resources>

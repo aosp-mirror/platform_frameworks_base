@@ -626,7 +626,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     // Lock for state used when installing and doing other long running
     // operations.  Methods that must be called with this lock held have
     // the suffix "LI".
-    final Object mInstallLock;
+    final PackageManagerTracedLock mInstallLock;
 
     // ----------------------------------------------------------------
 
@@ -1692,8 +1692,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
                 Trace.TRACE_TAG_PACKAGE_MANAGER);
         t.traceBegin("create package manager");
-        final PackageManagerTracedLock lock = new PackageManagerTracedLock();
-        final Object installLock = new Object();
+        final PackageManagerTracedLock lock = new PackageManagerTracedLock("mLock");
+        final PackageManagerTracedLock installLock = new PackageManagerTracedLock("mInstallLock");
 
         HandlerThread backgroundThread = new ServiceThread("PackageManagerBg",
                 Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);

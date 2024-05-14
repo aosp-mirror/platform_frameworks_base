@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.FixedSizeEdgeDetector
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
@@ -33,33 +34,38 @@ import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.composable.SceneTransitionLayoutDataSource
-import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 
 object Communal {
     object Elements {
         val Scrim = ElementKey("Scrim", scenePicker = LowestZIndexScenePicker)
-        val Content = ElementKey("CommunalContent")
+        val Grid = ElementKey("CommunalContent")
+        val LockIcon = ElementKey("CommunalLockIcon")
+        val IndicationArea = ElementKey("CommunalIndicationArea")
     }
+}
+
+object AllElements : ElementMatcher {
+    override fun matches(key: ElementKey, scene: SceneKey) = true
 }
 
 val sceneTransitions = transitions {
     to(CommunalScenes.Communal, key = CommunalTransitionKeys.SimpleFade) {
         spec = tween(durationMillis = 250)
-        fade(Communal.Elements.Scrim)
-        fade(Communal.Elements.Content)
+        fade(AllElements)
     }
     to(CommunalScenes.Communal) {
         spec = tween(durationMillis = 1000)
-        translate(Communal.Elements.Content, Edge.Right)
-        timestampRange(startMillis = 167, endMillis = 334) {
-            fade(Communal.Elements.Scrim)
-            fade(Communal.Elements.Content)
-        }
+        translate(Communal.Elements.Grid, Edge.Right)
+        timestampRange(startMillis = 167, endMillis = 334) { fade(AllElements) }
     }
     to(CommunalScenes.Blank) {
         spec = tween(durationMillis = 1000)
-        translate(Communal.Elements.Content, Edge.Right)
-        timestampRange(endMillis = 167) { fade(Communal.Elements.Content) }
+        translate(Communal.Elements.Grid, Edge.Right)
+        timestampRange(endMillis = 167) {
+            fade(Communal.Elements.Grid)
+            fade(Communal.Elements.IndicationArea)
+            fade(Communal.Elements.LockIcon)
+        }
         timestampRange(startMillis = 167, endMillis = 334) { fade(Communal.Elements.Scrim) }
     }
 }
@@ -75,8 +81,8 @@ fun CommunalContainer(
     modifier: Modifier = Modifier,
     viewModel: CommunalViewModel,
     dataSourceDelegator: SceneDataSourceDelegator,
-    dialogFactory: SystemUIDialogFactory,
     colors: CommunalColors,
+    content: CommunalContent,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val currentSceneKey: SceneKey by viewModel.currentScene.collectAsState(CommunalScenes.Blank)
@@ -127,7 +133,7 @@ fun CommunalContainer(
             userActions =
                 mapOf(Swipe(SwipeDirection.Right, fromSource = Edge.Left) to CommunalScenes.Blank)
         ) {
-            CommunalScene(viewModel, colors, dialogFactory, modifier = modifier)
+            CommunalScene(colors, content)
         }
     }
 
@@ -139,20 +145,16 @@ fun CommunalContainer(
 /** Scene containing the glanceable hub UI. */
 @Composable
 private fun SceneScope.CommunalScene(
-    viewModel: CommunalViewModel,
     colors: CommunalColors,
-    dialogFactory: SystemUIDialogFactory,
+    content: CommunalContent,
     modifier: Modifier = Modifier,
 ) {
     val backgroundColor by colors.backgroundColor.collectAsState()
-
     Box(
         modifier =
             Modifier.element(Communal.Elements.Scrim)
                 .fillMaxSize()
                 .background(Color(backgroundColor.toArgb())),
     )
-    Box(modifier.element(Communal.Elements.Content)) {
-        CommunalHub(viewModel = viewModel, dialogFactory = dialogFactory)
-    }
+    with(content) { Content(modifier = modifier) }
 }

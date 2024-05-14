@@ -22,6 +22,8 @@ import android.graphics.Insets
 import android.graphics.Rect
 import android.graphics.Region
 import android.util.AttributeSet
+import android.view.GestureDetector
+import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -43,13 +45,43 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
     private val displayMetrics = context.resources.displayMetrics
     private val tmpRect = Rect()
     private lateinit var actionsContainerBackground: View
+    private lateinit var actionsContainer: View
     private lateinit var dismissButton: View
 
+    // Prepare an internal `GestureDetector` to determine when we can initiate a touch-interception
+    // session (with the client's provided `onTouchInterceptListener`). We delegate out to their
+    // listener only for gestures that can't be handled by scrolling our `actionsContainer`.
+    private val gestureDetector =
+        GestureDetector(
+            context,
+            object : SimpleOnGestureListener() {
+                override fun onScroll(
+                    ev1: MotionEvent?,
+                    ev2: MotionEvent,
+                    distanceX: Float,
+                    distanceY: Float
+                ): Boolean {
+                    actionsContainer.getBoundsOnScreen(tmpRect)
+                    val touchedInActionsContainer =
+                        tmpRect.contains(ev2.rawX.toInt(), ev2.rawY.toInt())
+                    val canHandleInternallyByScrolling =
+                        touchedInActionsContainer
+                        && actionsContainer.canScrollHorizontally(distanceX.toInt())
+                    return !canHandleInternallyByScrolling
+                }
+            }
+        )
+
     init {
-        setOnTouchListener({ _: View, _: MotionEvent ->
+
+        // Delegate to the client-provided `onTouchInterceptListener` if we've already initiated
+        // touch-interception.
+        setOnTouchListener({ _: View, ev: MotionEvent ->
             userInteractionCallback?.invoke()
-            true
+            onTouchInterceptListener?.invoke(ev) ?: false
         })
+
+        gestureDetector.setIsLongpressEnabled(false)
     }
 
     override fun onFinishInflate() {
@@ -60,7 +92,15 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
         blurredScreenshotPreview = requireViewById(R.id.screenshot_preview_blur)
         screenshotStatic = requireViewById(R.id.screenshot_static)
         actionsContainerBackground = requireViewById(R.id.actions_container_background)
+        actionsContainer = requireViewById(R.id.actions_container)
         dismissButton = requireViewById(R.id.screenshot_dismiss_button)
+
+        // Configure to extend the timeout during ongoing gestures (i.e. scrolls) that are already
+        // being handled by our child views.
+        actionsContainer.setOnTouchListener({ _: View, ev: MotionEvent ->
+            userInteractionCallback?.invoke()
+            false
+        })
     }
 
     fun getTouchRegion(gestureInsets: Insets): Region {
@@ -171,9 +211,16 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         userInteractionCallback?.invoke()
 
-        if (onTouchInterceptListener?.invoke(ev) == true) {
-            return true
+        // Let the client-provided listener see all `DOWN` events so that they'll be able to
+        // interpret the remainder of the gesture, even if interception starts partway-through.
+        // TODO: is this really necessary? And if we don't go on to start interception, should we
+        // follow up with `ACTION_CANCEL`?
+        if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            onTouchInterceptListener?.invoke(ev)
         }
-        return super.onInterceptTouchEvent(ev)
+
+        // Only allow the client-provided touch interceptor to take over the gesture if our
+        // top-level `GestureDetector` decides not to scroll the action container.
+        return gestureDetector.onTouchEvent(ev)
     }
 }

@@ -4444,8 +4444,8 @@
     <!-- True if camera app should be pinned via Pinner Service -->
     <bool name="config_pinnerCameraApp">false</bool>
 
-    <!-- True if home app should be pinned via Pinner Service -->
-    <bool name="config_pinnerHomeApp">false</bool>
+    <!-- Bytes that the PinnerService will pin for Home app -->
+    <integer name="config_pinnerHomePinBytes">0</integer>
 
     <!-- True if assistant app should be pinned via Pinner Service -->
     <bool name="config_pinnerAssistantApp">false</bool>
@@ -4652,6 +4652,19 @@
      -->
     <string-array name="config_companionDeviceCerts" translatable="false"></string-array>
 
+    <!-- A list of packages that auto-enable permissions sync feature.
+         Note that config_companionPermSyncEnabledPackages and config_companionPermSyncEnabledCerts
+         are parallel arrays.
+     -->
+    <string-array name="config_companionPermSyncEnabledPackages" translatable="false"></string-array>
+
+    <!-- A list of SHA256 Certificates corresponding to config_companionPermSyncEnabledPackages.
+         Note that config_companionPermSyncEnabledPackages and config_companionPermSyncEnabledCerts
+         are parallel arrays.
+         Example: "1A:2B:3C:4D"
+     -->
+    <string-array name="config_companionPermSyncEnabledCerts" translatable="false"></string-array>
+
     <!-- The package name for the default wellbeing app.
          This package must be trusted, as it has the permissions to control other applications
          on the device.
@@ -4703,6 +4716,13 @@
 
     <!-- The component name for the default system on-device sandboxed inference service. -->
     <string name="config_defaultOnDeviceSandboxedInferenceService" translatable="false"></string>
+
+    <!-- The broadcast intent name for notifying when the on-device model is loading  -->
+    <string name="config_onDeviceIntelligenceModelLoadedBroadcastKey" translatable="false"></string>
+
+    <!-- The broadcast intent name for notifying when the on-device model has been unloaded  -->
+    <string name="config_onDeviceIntelligenceModelUnloadedBroadcastKey" translatable="false"></string>
+
 
     <!-- Component name that accepts ACTION_SEND intents for requesting ambient context consent for
          wearable sensing. -->

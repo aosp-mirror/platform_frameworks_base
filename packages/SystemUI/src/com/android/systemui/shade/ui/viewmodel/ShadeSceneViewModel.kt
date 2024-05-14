@@ -33,7 +33,7 @@ import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.TransitionKeys.GoneToSplitShade
+import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.settings.brightness.ui.viewModel.BrightnessMirrorViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
@@ -150,7 +150,7 @@ constructor(
                 else -> Scenes.Lockscreen
             }
 
-        val upTransitionKey = GoneToSplitShade.takeIf { shadeMode is ShadeMode.Split }
+        val upTransitionKey = ToSplitShade.takeIf { shadeMode is ShadeMode.Split }
 
         val down = Scenes.QuickSettings.takeIf { shadeMode is ShadeMode.Single }
 

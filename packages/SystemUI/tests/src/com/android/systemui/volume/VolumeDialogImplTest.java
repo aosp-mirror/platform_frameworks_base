@@ -65,7 +65,6 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 
 import androidx.test.core.view.MotionEventBuilder;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -273,54 +272,30 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     @Test
     @DisableFlags(FLAG_HAPTIC_VOLUME_SLIDER)
-    public void testVolumeChange_noSliderHaptics_doesNotDeliverOnProgressChangedHaptics() {
-        final State shellState = createShellState();
-        VolumeDialogController.StreamState musicStreamState =
-                shellState.states.get(AudioSystem.STREAM_MUSIC);
+    public void addSliderHaptics_withHapticsDisabled_doesNotDeliverOnProgressChangedHaptics() {
+        // GIVEN that the slider haptics flag is disabled and we try to add haptics to volume rows
+        mDialog.addSliderHapticsToRows();
 
-        mDialog.show(SHOW_REASON_UNKNOWN);
-        mTestableLooper.processMessages(1); //Only the SHOW message
-        mDialog.removeDismissMessages(); // Temporarily remove the rescheduled DISMISS
+        // WHEN haptics try to be delivered to a volume stream
+        boolean canDeliverHaptics =
+                mDialog.canDeliverProgressHapticsToStream(AudioSystem.STREAM_MUSIC, true, 50);
 
-        // Change the volume two times
-        musicStreamState.level += 10;
-        mDialog.onStateChangedH(shellState);
-        musicStreamState.level += 10;
-        mDialog.onStateChangedH(shellState);
-
-        // expected: the type of the latest progress haptics for the stream should be DISABLED
-        int type = mDialog.progressHapticsForStream(AudioSystem.STREAM_MUSIC);
-        assertEquals(VolumeDialogImpl.PROGRESS_HAPTICS_DISABLED, type);
-
-        mDialog.dismiss(DISMISS_REASON_UNKNOWN); // Dismiss
-        mTestableLooper.processAllMessages();
+        // THEN the result is that haptics are not successfully delivered
+        assertFalse(canDeliverHaptics);
     }
 
-    @Test @FlakyTest(bugId = 329099861)
+    @Test
     @EnableFlags(FLAG_HAPTIC_VOLUME_SLIDER)
-    public void testVolumeChange_withSliderHaptics_deliversOnProgressChangedHapticsEagerly() {
-        // create haptic plugins on the rows with the flag enabled
+    public void addSliderHaptics_withHapticsEnabled_canDeliverOnProgressChangedHaptics() {
+        // GIVEN that the slider haptics flag is enabled and we try to add haptics to volume rows
         mDialog.addSliderHapticsToRows();
-        final State shellState = createShellState();
-        VolumeDialogController.StreamState musicStreamState =
-                shellState.states.get(AudioSystem.STREAM_MUSIC);
 
-        mDialog.show(SHOW_REASON_UNKNOWN);
-        mTestableLooper.processMessages(1); //Only the SHOW message
-        mDialog.removeDismissMessages(); // Temporarily remove the rescheduled DISMISS
+        // WHEN haptics try to be delivered to a volume stream
+        boolean canDeliverHaptics =
+                mDialog.canDeliverProgressHapticsToStream(AudioSystem.STREAM_MUSIC, true, 50);
 
-        // Change the volume two times
-        musicStreamState.level += 10;
-        mDialog.onStateChangedH(shellState);
-        musicStreamState.level += 10;
-        mDialog.onStateChangedH(shellState);
-
-        // expected: the type of the latest progress haptics for the stream should be EAGER
-        int type = mDialog.progressHapticsForStream(AudioSystem.STREAM_MUSIC);
-        assertEquals(VolumeDialogImpl.PROGRESS_HAPTICS_EAGER, type);
-
-        mDialog.dismiss(DISMISS_REASON_UNKNOWN); // Dismiss
-        mTestableLooper.processAllMessages();
+        // THEN the result is that haptics are successfully delivered
+        assertTrue(canDeliverHaptics);
     }
 
     @Test

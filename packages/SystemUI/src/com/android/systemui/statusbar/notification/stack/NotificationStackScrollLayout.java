@@ -3433,15 +3433,19 @@ public class NotificationStackScrollLayout
             int action = ev.getActionMasked();
             boolean isUpOrCancel = action == ACTION_UP || action == ACTION_CANCEL;
             if (mSendingTouchesToSceneFramework) {
-                mController.sendTouchToSceneFramework(ev);
+                MotionEvent adjustedEvent = MotionEvent.obtain(ev);
+                adjustedEvent.setLocation(ev.getRawX(), ev.getRawY());
+                mController.sendTouchToSceneFramework(adjustedEvent);
                 mScrollViewFields.sendCurrentGestureOverscroll(
                         getExpandedInThisMotion() && !isUpOrCancel);
+                adjustedEvent.recycle();
             } else if (!isUpOrCancel) {
                 // if this is the first touch being sent to the scene framework,
                 // convert it into a synthetic DOWN event.
                 mSendingTouchesToSceneFramework = true;
                 MotionEvent downEvent = MotionEvent.obtain(ev);
                 downEvent.setAction(MotionEvent.ACTION_DOWN);
+                downEvent.setLocation(ev.getRawX(), ev.getRawY());
                 mController.sendTouchToSceneFramework(downEvent);
                 mScrollViewFields.sendCurrentGestureOverscroll(getExpandedInThisMotion());
                 downEvent.recycle();

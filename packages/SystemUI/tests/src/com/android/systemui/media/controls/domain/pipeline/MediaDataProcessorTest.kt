@@ -384,7 +384,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         // THEN it is removed and listeners are informed
         foregroundExecutor.advanceClockToLast()
         foregroundExecutor.runAllReady()
-        verify(listener).onMediaDataRemoved(PACKAGE_NAME)
+        verify(listener).onMediaDataRemoved(PACKAGE_NAME, false)
     }
 
     @Test
@@ -567,7 +567,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         addNotificationAndLoad()
         val data = mediaDataCaptor.value
         mediaDataProcessor.onNotificationRemoved(KEY)
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
     }
 
@@ -812,7 +812,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
                 eq(false)
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
-        verify(listener, never()).onMediaDataRemoved(eq(KEY))
+        verify(listener, never()).onMediaDataRemoved(eq(KEY), anyBoolean())
         // WHEN the second is removed
         mediaDataProcessor.onNotificationRemoved(KEY_2)
         // THEN the data is for resumption and the second key is removed
@@ -826,7 +826,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
                 eq(false)
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
-        verify(listener).onMediaDataRemoved(eq(KEY_2))
+        verify(listener).onMediaDataRemoved(eq(KEY_2), eq(false))
     }
 
     @Test
@@ -851,7 +851,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         mediaDataProcessor.onNotificationRemoved(KEY)
 
         // THEN the media data is removed
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
     }
 
     @Test
@@ -901,7 +901,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         mediaDataProcessor.onNotificationRemoved(KEY)
 
         // THEN the media data is removed
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
     }
 
     @Test
@@ -940,7 +940,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         assertThat(mediaDataCaptor.value.isPlaying).isFalse()
 
         // And the oldest resume control was removed
-        verify(listener).onMediaDataRemoved(eq("0:$PACKAGE_NAME"))
+        verify(listener).onMediaDataRemoved(eq("0:$PACKAGE_NAME"), eq(false))
     }
 
     fun testOnNotificationRemoved_lockDownMode() {
@@ -950,7 +950,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         val data = mediaDataCaptor.value
         mediaDataProcessor.onNotificationRemoved(KEY)
 
-        verify(listener, never()).onMediaDataRemoved(eq(KEY))
+        verify(listener, never()).onMediaDataRemoved(eq(KEY), eq(false))
         verify(logger, never())
             .logActiveConvertedToResume(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
@@ -1183,7 +1183,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         mediaDataProcessor.setMediaResumptionEnabled(false)
 
         // THEN the resume controls are dismissed
-        verify(listener).onMediaDataRemoved(eq(PACKAGE_NAME))
+        verify(listener).onMediaDataRemoved(eq(PACKAGE_NAME), eq(false))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
     }
 
@@ -1191,19 +1191,19 @@ class MediaDataProcessorTest : SysuiTestCase() {
     fun testDismissMedia_listenerCalled() {
         addNotificationAndLoad()
         val data = mediaDataCaptor.value
-        val removed = mediaDataProcessor.dismissMediaData(KEY, 0L)
+        val removed = mediaDataProcessor.dismissMediaData(KEY, 0L, true)
         assertThat(removed).isTrue()
 
         foregroundExecutor.advanceClockToLast()
         foregroundExecutor.runAllReady()
 
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(true))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
     }
 
     @Test
     fun testDismissMedia_keyDoesNotExist_returnsFalse() {
-        val removed = mediaDataProcessor.dismissMediaData(KEY, 0L)
+        val removed = mediaDataProcessor.dismissMediaData(KEY, 0L, true)
         assertThat(removed).isFalse()
     }
 
@@ -2102,7 +2102,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         sessionCallbackCaptor.value.invoke(KEY)
 
         // It remains as a regular player
-        verify(listener, never()).onMediaDataRemoved(eq(KEY))
+        verify(listener, never()).onMediaDataRemoved(eq(KEY), anyBoolean())
         verify(listener, never())
             .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
     }
@@ -2118,7 +2118,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         mediaDataProcessor.onNotificationRemoved(KEY)
 
         // It is fully removed
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
         verify(listener, never())
             .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
@@ -2171,7 +2171,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         mediaDataProcessor.onNotificationRemoved(KEY)
 
         // It remains as a regular player
-        verify(listener, never()).onMediaDataRemoved(eq(KEY))
+        verify(listener, never()).onMediaDataRemoved(eq(KEY), anyBoolean())
         verify(listener, never())
             .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
     }
@@ -2224,7 +2224,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         sessionCallbackCaptor.value.invoke(KEY)
 
         // It is fully removed
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
         verify(listener, never())
             .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
@@ -2278,7 +2278,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         sessionCallbackCaptor.value.invoke(KEY)
 
         // It is fully removed.
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
         verify(listener, never())
             .onMediaDataLoaded(
@@ -2304,7 +2304,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         sessionCallbackCaptor.value.invoke(KEY)
 
         // It is fully removed
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
         verify(listener, never())
             .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
@@ -2354,7 +2354,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         mediaDataProcessor.onNotificationRemoved(KEY)
 
         // We still make sure to remove it
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
     }
 
     @Test

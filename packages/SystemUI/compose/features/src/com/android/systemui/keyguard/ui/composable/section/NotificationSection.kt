@@ -40,16 +40,19 @@ import com.android.systemui.notifications.ui.composable.ConstrainedNotificationS
 import com.android.systemui.res.R
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
+import dagger.Lazy
 import javax.inject.Inject
 
 @SysUISingleton
 class NotificationSection
 @Inject
 constructor(
+    private val stackScrollView: Lazy<NotificationScrollView>,
     private val viewModel: NotificationsPlaceholderViewModel,
     private val aodBurnInViewModel: AodBurnInViewModel,
     sharedNotificationContainer: SharedNotificationContainer,
@@ -103,6 +106,7 @@ constructor(
         }
 
         ConstrainedNotificationStack(
+            stackScrollView = stackScrollView.get(),
             viewModel = viewModel,
             modifier =
                 modifier

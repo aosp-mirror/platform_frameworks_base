@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics.domain.interactor
 
 import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
 import android.hardware.biometrics.BiometricManager.Authenticators
 import android.hardware.biometrics.PromptContentViewWithMoreOptionsButton
 import android.hardware.biometrics.PromptInfo
@@ -47,19 +48,22 @@ import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 
-private const val TITLE = "hey there"
-private const val SUBTITLE = "ok"
-private const val DESCRIPTION = "football"
-private const val NEGATIVE_TEXT = "escape"
-
-private const val USER_ID = 8
-private const val CHALLENGE = 999L
-private const val OP_PACKAGE_NAME = "biometric.testapp"
-
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class PromptSelectorInteractorImplTest : SysuiTestCase() {
+    companion object {
+        private const val TITLE = "hey there"
+        private const val SUBTITLE = "ok"
+        private const val DESCRIPTION = "football"
+        private const val NEGATIVE_TEXT = "escape"
+
+        private const val USER_ID = 8
+        private const val CHALLENGE = 999L
+        private const val OP_PACKAGE_NAME = "biometric.testapp"
+        private val componentNameOverriddenForConfirmDeviceCredentialActivity =
+            ComponentName("not.com.android.settings", "testapp")
+    }
 
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
 
@@ -103,7 +107,19 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
     fun useBiometricsAndResetWithoutFallback() =
         testScope.runTest { useBiometricsAndReset(allowCredentialFallback = false) }
 
-    private fun TestScope.useBiometricsAndReset(allowCredentialFallback: Boolean) {
+    @Test
+    fun useBiometricsAndResetOnConfirmDeviceCredentialActivity() =
+        testScope.runTest {
+            useBiometricsAndReset(
+                allowCredentialFallback = true,
+                setComponentNameForConfirmDeviceCredentialActivity = true
+            )
+        }
+
+    private fun TestScope.useBiometricsAndReset(
+        allowCredentialFallback: Boolean,
+        setComponentNameForConfirmDeviceCredentialActivity: Boolean = false
+    ) {
         setUserCredentialType(isPassword = true)
 
         val confirmationRequired = true
@@ -117,6 +133,10 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
                         Authenticators.BIOMETRIC_STRONG
                     }
                 isDeviceCredentialAllowed = allowCredentialFallback
+                componentNameForConfirmDeviceCredentialActivity =
+                    if (setComponentNameForConfirmDeviceCredentialActivity)
+                        componentNameOverriddenForConfirmDeviceCredentialActivity
+                    else null
             }
 
         val currentPrompt by collectLastValue(interactor.prompt)
@@ -143,6 +163,12 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
         assertThat(currentPrompt?.negativeButtonText).isEqualTo(NEGATIVE_TEXT)
         assertThat(currentPrompt?.opPackageName).isEqualTo(OP_PACKAGE_NAME)
         assertThat(promptKind!!.isBiometric()).isTrue()
+        assertThat(currentPrompt?.componentNameForConfirmDeviceCredentialActivity)
+            .isEqualTo(
+                if (setComponentNameForConfirmDeviceCredentialActivity)
+                    componentNameOverriddenForConfirmDeviceCredentialActivity
+                else null
+            )
 
         if (allowCredentialFallback) {
             assertThat(credentialKind).isSameInstanceAs(PromptKind.Password)

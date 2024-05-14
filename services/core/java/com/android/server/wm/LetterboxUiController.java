@@ -989,6 +989,10 @@ final class LetterboxUiController {
         }
     }
 
+    boolean isLetterboxEducationEnabled() {
+        return mLetterboxConfiguration.getIsEducationEnabled();
+    }
+
     /**
      * Whether we use split screen aspect ratio for the activity when camera compat treatment
      * is active because the corresponding config is enabled and activity supports resizing.

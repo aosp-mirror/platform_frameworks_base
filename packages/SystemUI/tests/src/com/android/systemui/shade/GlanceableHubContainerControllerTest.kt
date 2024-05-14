@@ -40,6 +40,7 @@ import com.android.systemui.communal.data.repository.fakeCommunalRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.ui.compose.CommunalContent
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.coroutines.collectLastValue
@@ -50,7 +51,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.sceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
@@ -83,9 +83,9 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var communalViewModel: CommunalViewModel
     @Mock private lateinit var powerManager: PowerManager
-    @Mock private lateinit var dialogFactory: SystemUIDialogFactory
     @Mock private lateinit var touchMonitor: TouchMonitor
     @Mock private lateinit var communalColors: CommunalColors
+    @Mock private lateinit var communalContent: CommunalContent
     private lateinit var ambientTouchComponentFactory: AmbientTouchComponent.Factory
 
     private lateinit var parentView: FrameLayout
@@ -117,12 +117,12 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 GlanceableHubContainerController(
                     communalInteractor,
                     communalViewModel,
-                    dialogFactory,
                     keyguardInteractor,
                     shadeInteractor,
                     powerManager,
                     communalColors,
                     ambientTouchComponentFactory,
+                    communalContent,
                     kosmos.sceneDataSourceDelegator,
                 )
         }
@@ -159,12 +159,12 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     GlanceableHubContainerController(
                         communalInteractor,
                         communalViewModel,
-                        dialogFactory,
                         keyguardInteractor,
                         shadeInteractor,
                         powerManager,
                         communalColors,
                         ambientTouchComponentFactory,
+                        communalContent,
                         kosmos.sceneDataSourceDelegator,
                     )
 
@@ -303,12 +303,12 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 GlanceableHubContainerController(
                     communalInteractor,
                     communalViewModel,
-                    dialogFactory,
                     keyguardInteractor,
                     shadeInteractor,
                     powerManager,
                     communalColors,
                     ambientTouchComponentFactory,
+                    communalContent,
                     kosmos.sceneDataSourceDelegator,
                 )
 
@@ -322,12 +322,12 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 GlanceableHubContainerController(
                     communalInteractor,
                     communalViewModel,
-                    dialogFactory,
                     keyguardInteractor,
                     shadeInteractor,
                     powerManager,
                     communalColors,
                     ambientTouchComponentFactory,
+                    communalContent,
                     kosmos.sceneDataSourceDelegator,
                 )
 

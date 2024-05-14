@@ -269,7 +269,7 @@
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Klepnutím pripojíte alebo odpojíte zariadenie"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Spárovať nové zariadenie"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Zobraziť všetko"</string>
-    <string name="turn_on_bluetooth" msgid="5681370462180289071">"Použiť Bluetooth"</string>
+    <string name="turn_on_bluetooth" msgid="5681370462180289071">"Používať Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Pripojené"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Zdieľanie zvuku"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Uložené"</string>
@@ -370,7 +370,7 @@
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Vysoký"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Načúvacie zariadenia"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Načúvacie zariadenia"</string>
-    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Párovanie nového zariadenia"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Spárovať nové zariadenie"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Kliknutím spárujete nové zariadenie"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Predvoľbu sa nepodarilo aktualizovať"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Chcete odblokovať mikrofón zariadenia?"</string>
@@ -447,6 +447,8 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Miniaplikácie prispôsobíte dlhým stlačením"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Prispôsobiť miniaplikácie"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Ikona deaktivovanej miniaplikácie"</string>
+    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"Upraviť miniaplikáciu"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Odstrániť"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Pridať miniaplikáciu"</string>
@@ -461,10 +463,8 @@
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"Prispôsobiť miniaplikácie"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"Miniaplikácie na uzamknutej obrazovke"</string>
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"vybrať miniaplikáciu"</string>
-    <!-- no translation found for accessibility_action_label_remove_widget (3373779447448758070) -->
-    <skip />
-    <!-- no translation found for accessibility_action_label_place_widget (1914197458644168978) -->
-    <skip />
+    <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"odstrániť miniaplikáciu"</string>
+    <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"prepnúť vybranú miniaplikáciu"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Prepnutie používateľa"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"rozbaľovacia ponuka"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Všetky aplikácie a údaje v tejto relácii budú odstránené."</string>
@@ -619,7 +619,7 @@
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Priestorový zvuk"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Vypnuté"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Pevné"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Sled. pohybov hlavy"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Sled. polohy hlavy"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Režim zvonenia zmeníte klepnutím"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"vypnite zvuk"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"zapnite zvuk"</string>
@@ -629,12 +629,17 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"Zadať nastavenia výstupu"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"Posúvače hlasitosti sú rozbalené"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"Posúvače hlasitosti sú zbalené"</string>
-    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"vypnete zvuk %s"</string>
-    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"zapnete zvuk %s"</string>
+    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> sa prehráva v:"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"Zvuk sa prehrá cez"</string>
-    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
-    <skip />
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"Volanie je zapnuté"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Tuner používateľského rozhrania systému"</string>
     <string name="status_bar" msgid="4357390266055077437">"Stavový riadok"</string>
     <string name="demo_mode" msgid="263484519766901593">"Ukážka používateľského rozhrania systému"</string>

@@ -27,12 +27,16 @@ import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.bluetooth.mockBroadcastDialogController
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.media.controls.data.repository.mediaDataRepository
 import com.android.systemui.media.controls.domain.pipeline.MediaDataFilterImpl
+import com.android.systemui.media.controls.domain.pipeline.MediaDataProcessor
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaControlInteractor
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaControlInteractor
 import com.android.systemui.media.controls.domain.pipeline.mediaDataFilter
+import com.android.systemui.media.controls.domain.pipeline.mediaDataProcessor
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.util.mediaInstanceId
 import com.android.systemui.media.mediaOutputDialogManager
@@ -209,6 +213,21 @@ class MediaControlInteractorTest : SysuiTestCase() {
                 eq(PACKAGE_NAME),
                 eq(dialogTransitionController)
             )
+    }
+
+    @Test
+    fun removeMediaControl() {
+        val listener = mock<MediaDataProcessor.Listener>()
+        kosmos.mediaDataProcessor.addInternalListener(listener)
+
+        var mediaData = MediaData(userId = USER_ID, instanceId = instanceId, artist = ARTIST)
+        kosmos.mediaDataRepository.addMediaEntry(KEY, mediaData)
+
+        underTest.removeMediaControl(null, instanceId, 0L)
+        kosmos.fakeExecutor.advanceClockToNext()
+        kosmos.fakeExecutor.runAllReady()
+
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(true))
     }
 
     companion object {

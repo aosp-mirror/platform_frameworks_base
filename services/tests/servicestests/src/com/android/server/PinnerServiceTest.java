@@ -112,7 +112,7 @@ public class PinnerServiceTest {
         resources.addOverride(
                 com.android.internal.R.array.config_defaultPinnerServiceFiles, new String[0]);
         resources.addOverride(com.android.internal.R.bool.config_pinnerCameraApp, false);
-        resources.addOverride(com.android.internal.R.bool.config_pinnerHomeApp, false);
+        resources.addOverride(com.android.internal.R.integer.config_pinnerHomePinBytes, 0);
         resources.addOverride(com.android.internal.R.bool.config_pinnerAssistantApp, false);
 
         mFakeDeviceConfigInterface = new FakeDeviceConfigInterface();
@@ -242,7 +242,7 @@ public class PinnerServiceTest {
     public void testPinHomeApp() throws Exception {
         // Enable HOME app pinning
         mContext.getOrCreateTestableResources()
-                .addOverride(com.android.internal.R.bool.config_pinnerHomeApp, true);
+                .addOverride(com.android.internal.R.integer.config_pinnerHomePinBytes, 1024);
         PinnerService pinnerService = new PinnerService(mContext, mInjector);
         pinnerService.onStart();
 
@@ -266,7 +266,7 @@ public class PinnerServiceTest {
     public void testPinHomeAppOnBootCompleted() throws Exception {
         // Enable HOME app pinning
         mContext.getOrCreateTestableResources()
-                .addOverride(com.android.internal.R.bool.config_pinnerHomeApp, true);
+                .addOverride(com.android.internal.R.integer.config_pinnerHomePinBytes, 1024);
         PinnerService pinnerService = new PinnerService(mContext, mInjector);
         pinnerService.onStart();
 

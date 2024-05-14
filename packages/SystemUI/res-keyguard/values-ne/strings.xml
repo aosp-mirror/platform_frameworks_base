@@ -58,7 +58,7 @@
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN मिलेन। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"वा फिंगरप्रिन्ट प्रयोग गरी अनलक गर्नुहोस्"</string>
     <string name="kg_fp_not_recognized" msgid="5183108260932029241">"फिंगरप्रिन्ट मिलेन"</string>
-    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"अनुहार पहिचान गर्न सकिएन"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"अनुहार मिलेन"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"फेरि प्रयास गर्नुहोस् वा PIN हाल्नुहोस्"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"फेरि प्रयास गर्नुहोस् वा पासवर्ड हाल्नुहोस्"</string>
     <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"फेरि प्रयास गर्नुहोस् वा प्याटर्न हाल्नुहोस्"</string>

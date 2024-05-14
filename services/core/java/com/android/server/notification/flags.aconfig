@@ -135,3 +135,10 @@ flag {
   description: "This flag controls which signal is used to handle a user switch system event"
   bug: "337077643"
 }
+
+flag {
+  name: "reject_old_notifications"
+  namespace: "systemui"
+  description: "This flag does not allow notifications older than 2 weeks old to be posted"
+  bug: "339833083"
+}

@@ -29,6 +29,7 @@ import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICA
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED
+import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags
 import dagger.Lazy
 import javax.inject.Inject
 
@@ -48,7 +49,7 @@ constructor(
      * Returns an override value for the given [flag] or `null` if the scene framework isn't enabled
      * or if the flag value doesn't need to be overridden.
      */
-    fun flagValueOverride(flag: Int): Boolean? {
+    fun flagValueOverride(@SystemUiStateFlags flag: Long): Boolean? {
         if (!SceneContainerFlag.isEnabled) {
             return null
         }
@@ -79,7 +80,7 @@ constructor(
          * to be overridden by the scene framework.
          */
         val EvaluatorByFlag =
-            mapOf<Int, (SceneContainerPluginState) -> Boolean>(
+            mapOf<Long, (SceneContainerPluginState) -> Boolean>(
                 SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE to { it.scene != Scenes.Gone },
                 SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED to
                     {

@@ -298,7 +298,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     private void updateSysuiFlags() {
-        int a11yFlags = mNavBarHelper.getA11yButtonState();
+        long a11yFlags = mNavBarHelper.getA11yButtonState();
         boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
         boolean longClickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
 

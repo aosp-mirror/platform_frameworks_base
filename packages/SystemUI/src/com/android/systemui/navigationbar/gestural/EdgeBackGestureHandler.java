@@ -84,6 +84,7 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -270,7 +271,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private BackAnimation mBackAnimation;
     private int mLeftInset;
     private int mRightInset;
-    private int mSysUiFlags;
+    @SystemUiStateFlags
+    private long mSysUiFlags;
 
     // For Tf-Lite model.
     private BackGestureTfClassifierProvider mBackGestureTfClassifierProvider;
@@ -334,7 +336,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private final SysUiState.SysUiStateCallback mSysUiStateCallback =
             new SysUiState.SysUiStateCallback() {
         @Override
-        public void onSystemUiStateChanged(int sysUiFlags) {
+        public void onSystemUiStateChanged(@SystemUiStateFlags long sysUiFlags) {
             mSysUiFlags = sysUiFlags;
         }
     };

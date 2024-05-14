@@ -94,7 +94,7 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Холбогдсон (утас байхгүй), батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Холбогдсон (медиа байхгүй), батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Холбогдсон (утас эсвэл медиа байхгүй), батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Идэвхтэй байна. <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батарей."</string>
+    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Идэвхтэй байна. <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> цэнэгтэй."</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"Идэвхтэй байна. З: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Б: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батарей."</string>
     <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"Идэвхтэй байна. З: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батарей."</string>
     <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"Идэвхтэй байна. Б: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батарей."</string>

@@ -347,9 +347,6 @@ public class SpatializerHelper {
     //------------------------------------------------------
     // routing monitoring
     synchronized void onRoutingUpdated() {
-        if (!mFeatureEnabled) {
-            return;
-        }
         switch (mState) {
             case STATE_UNINITIALIZED:
             case STATE_NOT_SUPPORTED:
@@ -393,7 +390,7 @@ public class SpatializerHelper {
             setDispatchAvailableState(false);
         }
 
-        boolean enabled = able && enabledAvailable.first;
+        boolean enabled = mFeatureEnabled && able && enabledAvailable.first;
         if (enabled) {
             loglogi("Enabling Spatial Audio since enabled for media device:"
                     + currentDevice);

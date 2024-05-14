@@ -17,6 +17,7 @@
 package com.android.systemui.volume.panel.component.popup.ui.composable
 
 import android.view.Gravity
+import androidx.annotation.GravityInt
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.paneTitle
@@ -60,13 +63,14 @@ constructor(
      */
     fun show(
         expandable: Expandable?,
+        @GravityInt gravity: Int,
         title: @Composable (SystemUIDialog) -> Unit,
         content: @Composable (SystemUIDialog) -> Unit,
     ) {
         val dialog =
             dialogFactory.create(
                 theme = R.style.Theme_VolumePanel_Popup,
-                dialogGravity = Gravity.BOTTOM,
+                dialogGravity = gravity,
             ) {
                 PopupComposable(it, title, content)
             }
@@ -119,6 +123,25 @@ constructor(
                     painterResource(R.drawable.ic_close),
                     contentDescription = stringResource(R.string.accessibility_desc_close),
                 )
+            }
+        }
+    }
+
+    companion object {
+
+        /**
+         * Returns absolute ([Gravity.LEFT], [Gravity.RIGHT] or [Gravity.CENTER_HORIZONTAL])
+         * [GravityInt] for the popup based on the [coordinates] global position relative to the
+         * [screenWidthPx].
+         */
+        @GravityInt
+        fun calculateGravity(coordinates: LayoutCoordinates, screenWidthPx: Float): Int {
+            val bottomCenter: Float = coordinates.boundsInRoot().bottomCenter.x
+            val rootBottomCenter: Float = screenWidthPx / 2
+            return when {
+                bottomCenter < rootBottomCenter -> Gravity.LEFT
+                bottomCenter > rootBottomCenter -> Gravity.RIGHT
+                else -> Gravity.CENTER_HORIZONTAL
             }
         }
     }

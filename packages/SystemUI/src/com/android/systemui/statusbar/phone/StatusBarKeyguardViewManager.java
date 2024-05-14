@@ -696,6 +696,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         Trace.beginSection("StatusBarKeyguardViewManager#show");
         mNotificationShadeWindowController.setKeyguardShowing(true);
         if (SceneContainerFlag.isEnabled()) {
+            // TODO(b/336581871): add sceneState?
             mSceneInteractorLazy.get().changeScene(
                     Scenes.Lockscreen, "StatusBarKeyguardViewManager.show");
         }

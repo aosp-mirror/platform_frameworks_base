@@ -368,24 +368,32 @@ public class AuthServiceTest {
     }
 
     @Test
-    public void testAuthenticate_throwsWhenUsingTestConfigurations() {
+    public void testAuthenticate_throwsWhenUsingTestApis() {
         final PromptInfo promptInfo = mock(PromptInfo.class);
-        when(promptInfo.containsPrivateApiConfigurations()).thenReturn(false);
-        when(promptInfo.containsTestConfigurations()).thenReturn(true);
+        when(promptInfo.requiresInternalPermission()).thenReturn(false);
+        when(promptInfo.requiresTestOrInternalPermission()).thenReturn(true);
 
-        testAuthenticate_throwsWhenUsingTestConfigurations(promptInfo);
+        testAuthenticate_throwsSecurityException(promptInfo);
     }
 
     @Test
     public void testAuthenticate_throwsWhenUsingPrivateApis() {
         final PromptInfo promptInfo = mock(PromptInfo.class);
-        when(promptInfo.containsPrivateApiConfigurations()).thenReturn(true);
-        when(promptInfo.containsTestConfigurations()).thenReturn(false);
+        when(promptInfo.requiresInternalPermission()).thenReturn(true);
+        when(promptInfo.requiresTestOrInternalPermission()).thenReturn(false);
 
-        testAuthenticate_throwsWhenUsingTestConfigurations(promptInfo);
+        testAuthenticate_throwsSecurityException(promptInfo);
     }
 
-    private void testAuthenticate_throwsWhenUsingTestConfigurations(PromptInfo promptInfo) {
+    @Test
+    public void testAuthenticate_throwsWhenUsingAdvancedApis() {
+        final PromptInfo promptInfo = mock(PromptInfo.class);
+        when(promptInfo.requiresAdvancedPermission()).thenReturn(true);
+
+        testAuthenticate_throwsSecurityException(promptInfo);
+    }
+
+    private void testAuthenticate_throwsSecurityException(PromptInfo promptInfo) {
         mAuthService = new AuthService(mContext, mInjector);
         mAuthService.onStart();
 

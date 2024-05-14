@@ -39,12 +39,14 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
 
+import com.android.settingslib.widget.flags.Flags;
 import com.android.settingslib.widget.preference.illustration.R;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.airbnb.lottie.LottieDrawable;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -142,7 +144,7 @@ public class IllustrationPreference extends Preference {
         illustrationFrame.setLayoutParams(lp);
 
         illustrationView.setCacheComposition(mCacheComposition);
-        handleImageWithAnimation(illustrationView);
+        handleImageWithAnimation(illustrationView, illustrationFrame);
         handleImageFrameMaxHeight(backgroundView, illustrationView);
 
         if (mIsAutoScale) {
@@ -332,7 +334,8 @@ public class IllustrationPreference extends Preference {
         }
     }
 
-    private void handleImageWithAnimation(LottieAnimationView illustrationView) {
+    private void handleImageWithAnimation(LottieAnimationView illustrationView,
+            ViewGroup container) {
         if (mImageDrawable != null) {
             resetAnimations(illustrationView);
             illustrationView.setImageDrawable(mImageDrawable);
@@ -356,6 +359,25 @@ public class IllustrationPreference extends Preference {
         }
 
         if (mImageResId > 0) {
+            if (Flags.autoHideEmptyLottieRes()) {
+                // Check if resource is empty
+                try (InputStream is = illustrationView.getResources()
+                        .openRawResource(mImageResId)) {
+                    int check = is.read();
+                    // -1 = end of stream. if first read is end of stream, then file is empty
+                    if (check == -1) {
+                        illustrationView.setVisibility(View.GONE);
+                        container.setVisibility(View.GONE);
+                        return;
+                    }
+                } catch (IOException e) {
+                    Log.w(TAG, "Unable to open Lottie raw resource", e);
+                }
+
+                illustrationView.setVisibility(View.VISIBLE);
+                container.setVisibility(View.VISIBLE);
+            }
+
             resetAnimations(illustrationView);
             illustrationView.setImageResource(mImageResId);
             final Drawable drawable = illustrationView.getDrawable();

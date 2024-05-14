@@ -51,6 +51,7 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeHeaderController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -80,6 +81,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private QuickSettingsController mQuickSettingsController;
     @Mock private ShadeViewController mShadeViewController;
     @Mock private PanelExpansionInteractor mPanelExpansionInteractor;
+    @Mock private Lazy<ShadeInteractor> mShadeInteractorLazy;
     @Mock private ShadeHeaderController mShadeHeaderController;
     @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MetricsLogger mMetricsLogger = new FakeMetricsLogger();
@@ -115,6 +117,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 mShadeController,
                 mCommandQueue,
                 mPanelExpansionInteractor,
+                mShadeInteractorLazy,
                 mShadeHeaderController,
                 mRemoteInputQuickSettingsDisabler,
                 mMetricsLogger,

@@ -658,11 +658,13 @@ public class TransportConnection {
      * This class is a proxy to TransportClient methods that doesn't hold a strong reference to the
      * TransportClient, allowing it to be GC'ed. If the reference was lost it logs a message.
      */
-    private static class TransportConnectionMonitor implements ServiceConnection {
+    @VisibleForTesting
+    static class TransportConnectionMonitor implements ServiceConnection {
         private final Context mContext;
         private final WeakReference<TransportConnection> mTransportClientRef;
 
-        private TransportConnectionMonitor(Context context,
+        @VisibleForTesting
+        TransportConnectionMonitor(Context context,
                 TransportConnection transportConnection) {
             mContext = context;
             mTransportClientRef = new WeakReference<>(transportConnection);
@@ -704,7 +706,13 @@ public class TransportConnection {
 
         /** @see TransportConnection#finalize() */
         private void referenceLost(String caller) {
-            mContext.unbindService(this);
+            try {
+                mContext.unbindService(this);
+            } catch (IllegalArgumentException e) {
+                TransportUtils.log(Priority.WARN, TAG,
+                        caller + " called but unbindService failed: " + e.getMessage());
+                return;
+            }
             TransportUtils.log(
                     Priority.INFO,
                     TAG,

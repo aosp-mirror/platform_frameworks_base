@@ -172,20 +172,20 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
     fun testOnRemovedForCurrent_callsListener() {
         // GIVEN a media was removed for main user
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataMain)
-        mediaDataFilter.onMediaDataRemoved(KEY)
+        mediaDataFilter.onMediaDataRemoved(KEY, false)
 
         // THEN we should tell the listener
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
     }
 
     @Test
     fun testOnRemovedForGuest_doesNotCallListener() {
         // GIVEN a media was removed for guest user
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataGuest)
-        mediaDataFilter.onMediaDataRemoved(KEY)
+        mediaDataFilter.onMediaDataRemoved(KEY, false)
 
         // THEN we should NOT tell the listener
-        verify(listener, never()).onMediaDataRemoved(eq(KEY))
+        verify(listener, never()).onMediaDataRemoved(eq(KEY), anyBoolean())
     }
 
     @Test
@@ -197,7 +197,7 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
         setUser(USER_GUEST)
 
         // THEN we should remove the main user's media
-        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
     }
 
     @Test
@@ -230,7 +230,7 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
         setPrivateProfileUnavailable()
 
         // THEN we should add the private profile media
-        verify(listener).onMediaDataRemoved(eq(KEY_ALT))
+        verify(listener).onMediaDataRemoved(eq(KEY_ALT), eq(false))
     }
 
     @Test
@@ -360,7 +360,7 @@ class LegacyMediaDataFilterImplTest : SysuiTestCase() {
     @Test
     fun testOnNotificationRemoved_doesntHaveMedia() {
         mediaDataFilter.onMediaDataLoaded(KEY, oldKey = null, data = dataMain)
-        mediaDataFilter.onMediaDataRemoved(KEY)
+        mediaDataFilter.onMediaDataRemoved(KEY, false)
         assertThat(mediaDataFilter.hasAnyMediaOrRecommendation()).isFalse()
         assertThat(mediaDataFilter.hasAnyMedia()).isFalse()
     }

@@ -660,9 +660,6 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
             overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
-            keyguardInteractor.setNotificationContainerBounds(
-                NotificationContainerBounds(top = 1f, bottom = 2f)
-            )
 
             assertThat(maxNotifications).isEqualTo(10)
 
@@ -691,9 +688,6 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
             overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
-            keyguardInteractor.setNotificationContainerBounds(
-                NotificationContainerBounds(top = 1f, bottom = 2f)
-            )
 
             assertThat(maxNotifications).isEqualTo(10)
 
@@ -728,9 +722,6 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
             overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
-            keyguardInteractor.setNotificationContainerBounds(
-                NotificationContainerBounds(top = 1f, bottom = 2f)
-            )
 
             // -1 means No Limit
             assertThat(maxNotifications).isEqualTo(-1)

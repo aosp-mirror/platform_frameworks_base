@@ -24,6 +24,7 @@ import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
+import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
@@ -39,6 +40,7 @@ import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.TransitionKeys
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
@@ -117,6 +119,17 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             }
         }
 
+        private fun expectedDownTransitionKey(
+            isSingleShade: Boolean,
+            isShadeTouchable: Boolean,
+        ): TransitionKey? {
+            return when {
+                !isShadeTouchable -> null
+                !isSingleShade -> TransitionKeys.ToSplitShade
+                else -> null
+            }
+        }
+
         private fun expectedUpDestination(
             canSwipeToEnter: Boolean,
             isShadeTouchable: Boolean,
@@ -184,21 +197,27 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             )
 
             val destinationScenes by collectLastValue(underTest.destinationScenes)
-
-            assertThat(
-                    destinationScenes
-                        ?.get(
-                            Swipe(
-                                SwipeDirection.Down,
-                                fromSource = Edge.Top.takeIf { downFromEdge },
-                                pointerCount = if (downWithTwoPointers) 2 else 1,
-                            )
-                        )
-                        ?.toScene
+            val downDestination =
+                destinationScenes?.get(
+                    Swipe(
+                        SwipeDirection.Down,
+                        fromSource = Edge.Top.takeIf { downFromEdge },
+                        pointerCount = if (downWithTwoPointers) 2 else 1,
+                    )
                 )
+
+            assertThat(downDestination?.toScene)
                 .isEqualTo(
                     expectedDownDestination(
                         downFromEdge = downFromEdge,
+                        isSingleShade = isSingleShade,
+                        isShadeTouchable = isShadeTouchable,
+                    )
+                )
+
+            assertThat(downDestination?.transitionKey)
+                .isEqualTo(
+                    expectedDownTransitionKey(
                         isSingleShade = isSingleShade,
                         isShadeTouchable = isShadeTouchable,
                     )

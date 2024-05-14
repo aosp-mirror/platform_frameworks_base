@@ -33,10 +33,11 @@ import android.view.WindowManager
 import android.view.WindowManagerGlobal
 import com.android.app.tracing.coroutines.launch
 import com.android.internal.infra.ServiceConnector
-import com.android.systemui.Flags.screenshotActionDismissSystemWindows
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.screenshot.proxy.SystemUiProxy
 import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.statusbar.phone.CentralSurfaces
@@ -54,8 +55,8 @@ constructor(
     private val activityManagerWrapper: ActivityManagerWrapper,
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
+    private val systemUiProxy: SystemUiProxy,
     private val displayTracker: DisplayTracker,
-    private val keyguardController: ScreenshotKeyguardController,
 ) {
     /**
      * Execute the given intent with startActivity while performing operations for screenshot action
@@ -83,14 +84,12 @@ constructor(
         options: ActivityOptions?,
         transitionCoordinator: ExitTransitionCoordinator?,
     ) {
-        if (screenshotActionDismissSystemWindows()) {
-            keyguardController.dismiss()
+        if (Flags.fixScreenshotActionDismissSystemWindows()) {
             activityManagerWrapper.closeSystemWindows(
                 CentralSurfaces.SYSTEM_DIALOG_REASON_SCREENSHOT
             )
-        } else {
-            dismissKeyguard()
         }
+        systemUiProxy.dismissKeyguard()
         transitionCoordinator?.startExit()
 
         if (user == myUserHandle()) {
@@ -108,27 +107,6 @@ constructor(
                 Log.e(TAG, "Error overriding screenshot app transition", e)
             }
         }
-    }
-
-    private val proxyConnector: ServiceConnector<IScreenshotProxy> =
-        ServiceConnector.Impl(
-            context,
-            Intent(context, ScreenshotProxyService::class.java),
-            Context.BIND_AUTO_CREATE or Context.BIND_WAIVE_PRIORITY or Context.BIND_NOT_VISIBLE,
-            context.userId,
-            IScreenshotProxy.Stub::asInterface,
-        )
-
-    private suspend fun dismissKeyguard() {
-        val completion = CompletableDeferred<Unit>()
-        val onDoneBinder =
-            object : IOnDoneCallback.Stub() {
-                override fun onDone(success: Boolean) {
-                    completion.complete(Unit)
-                }
-            }
-        proxyConnector.post { it.dismissKeyguard(onDoneBinder) }
-        completion.await()
     }
 
     private fun getCrossProfileConnector(user: UserHandle): ServiceConnector<ICrossProfileService> =

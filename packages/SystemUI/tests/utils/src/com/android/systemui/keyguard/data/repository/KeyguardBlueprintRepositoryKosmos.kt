@@ -24,6 +24,7 @@ import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBl
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
 import com.android.systemui.keyguard.ui.viewmodel.keyguardClockViewModel
+import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardSmartspaceViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.mockito.mock
@@ -37,6 +38,7 @@ val Kosmos.keyguardClockSection: ClockSection by
             context = applicationContext,
             smartspaceViewModel = keyguardSmartspaceViewModel,
             blueprintInteractor = { keyguardBlueprintInteractor },
+            rootViewModel = keyguardRootViewModel,
         )
     }
 

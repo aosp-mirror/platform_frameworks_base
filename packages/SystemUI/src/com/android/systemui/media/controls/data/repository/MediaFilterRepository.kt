@@ -107,14 +107,11 @@ constructor(
             .thenByDescending { it.updateTime }
             .thenByDescending { it.notificationKey }
 
-    private val _sortedMedia: MutableStateFlow<TreeMap<MediaSortKeyModel, MediaCommonModel>> =
-        MutableStateFlow(TreeMap<MediaSortKeyModel, MediaCommonModel>(comparator))
-    val sortedMedia: StateFlow<Map<MediaSortKeyModel, MediaCommonModel>> =
-        _sortedMedia.asStateFlow()
+    private val _currentMedia: MutableStateFlow<List<MediaCommonModel>> =
+        MutableStateFlow(mutableListOf())
+    val currentMedia = _currentMedia.asStateFlow()
 
-    private val _isMediaFromRec: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val isMediaFromRec: StateFlow<Boolean> = _isMediaFromRec.asStateFlow()
-
+    private var sortedMedia = TreeMap<MediaSortKeyModel, MediaCommonModel>(comparator)
     private var mediaFromRecPackageName: String? = null
     private var locale: Locale = applicationContext.resources.configuration.locales.get(0)
 
@@ -186,7 +183,7 @@ constructor(
     fun addMediaDataLoadingState(mediaDataLoadingModel: MediaDataLoadingModel) {
         val sortedMap = TreeMap<MediaSortKeyModel, MediaCommonModel>(comparator)
         sortedMap.putAll(
-            _sortedMedia.value.filter { (_, commonModel) ->
+            sortedMedia.filter { (_, commonModel) ->
                 commonModel !is MediaCommonModel.MediaControl ||
                     commonModel.mediaLoadedModel.instanceId != mediaDataLoadingModel.instanceId
             }
@@ -207,18 +204,52 @@ constructor(
                 )
 
             if (mediaDataLoadingModel is MediaDataLoadingModel.Loaded) {
-                val isMediaFromRec = isMediaFromRec(it)
+                val newCommonModel =
+                    MediaCommonModel.MediaControl(
+                        mediaDataLoadingModel,
+                        canBeRemoved(it),
+                        isMediaFromRec(it)
+                    )
+                sortedMap[sortKey] = newCommonModel
 
-                _isMediaFromRec.value = isMediaFromRec
-                if (isMediaFromRec) {
-                    mediaFromRecPackageName = null
+                // On Addition or tapping on recommendations, we should show the new order of media.
+                if (mediaFromRecPackageName == it.packageName) {
+                    if (it.isPlaying == true) {
+                        mediaFromRecPackageName = null
+                        _currentMedia.value = sortedMap.values.toList()
+                    }
+                } else if (sortedMap.size > sortedMedia.size) {
+                    _currentMedia.value = sortedMap.values.toList()
+                } else if (sortedMap.size == sortedMedia.size) {
+                    // When loading an update for an existing media control.
+                    val currentList =
+                        mutableListOf<MediaCommonModel>().apply { addAll(_currentMedia.value) }
+                    currentList.forEachIndexed { index, mediaCommonModel ->
+                        if (
+                            mediaCommonModel is MediaCommonModel.MediaControl &&
+                                mediaCommonModel.mediaLoadedModel.instanceId ==
+                                    mediaDataLoadingModel.instanceId &&
+                                mediaCommonModel != newCommonModel
+                        ) {
+                            // Update media model if changed.
+                            currentList[index] = newCommonModel
+                        }
+                    }
+                    _currentMedia.value = currentList
                 }
-                sortedMap[sortKey] =
-                    MediaCommonModel.MediaControl(mediaDataLoadingModel, canBeRemoved(it))
             }
         }
 
-        _sortedMedia.value = sortedMap
+        sortedMedia = sortedMap
+
+        // On removal we want to keep the order being shown to user.
+        if (mediaDataLoadingModel is MediaDataLoadingModel.Removed) {
+            _currentMedia.value =
+                _currentMedia.value.filter { commonModel ->
+                    commonModel !is MediaCommonModel.MediaControl ||
+                        mediaDataLoadingModel.instanceId != commonModel.mediaLoadedModel.instanceId
+                }
+        }
     }
 
     fun setRecommendationsLoadingState(smartspaceMediaLoadingModel: SmartspaceMediaLoadingModel) {
@@ -229,7 +260,7 @@ constructor(
             }
         val sortedMap = TreeMap<MediaSortKeyModel, MediaCommonModel>(comparator)
         sortedMap.putAll(
-            _sortedMedia.value.filter { (_, commonModel) ->
+            sortedMedia.filter { (_, commonModel) ->
                 commonModel !is MediaCommonModel.MediaRecommendations
             }
         )
@@ -240,11 +271,25 @@ constructor(
                 isPlaying = false,
                 active = _smartspaceMediaData.value.isActive,
             )
-        if (smartspaceMediaLoadingModel is SmartspaceMediaLoadingModel.Loaded) {
-            sortedMap[sortKey] = MediaCommonModel.MediaRecommendations(smartspaceMediaLoadingModel)
+        when (smartspaceMediaLoadingModel) {
+            is SmartspaceMediaLoadingModel.Loaded ->
+                sortedMap[sortKey] =
+                    MediaCommonModel.MediaRecommendations(smartspaceMediaLoadingModel)
+            is SmartspaceMediaLoadingModel.Removed ->
+                _currentMedia.value =
+                    _currentMedia.value.filter { commonModel ->
+                        commonModel !is MediaCommonModel.MediaRecommendations
+                    }
         }
 
-        _sortedMedia.value = sortedMap
+        if (sortedMap.size > sortedMedia.size) {
+            _currentMedia.value = sortedMap.values.toList()
+        }
+        sortedMedia = sortedMap
+    }
+
+    fun setOrderedMedia() {
+        _currentMedia.value = sortedMedia.values.toList()
     }
 
     fun setMediaFromRecPackageName(packageName: String) {

@@ -108,7 +108,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
@@ -263,17 +262,6 @@ fun CommunalHub(
                     widgetConfigurator = widgetConfigurator,
                 )
             }
-        }
-
-        // TODO(b/326060686): Remove this once keyguard indication area can persist over hub
-        if (viewModel is CommunalViewModel) {
-            val isUnlocked by viewModel.deviceUnlocked.collectAsState(initial = false)
-            LockStateIcon(
-                modifier =
-                    Modifier.align(Alignment.BottomCenter)
-                        .padding(bottom = Dimensions.LockIconBottomPadding),
-                isUnlocked = isUnlocked,
-            )
         }
 
         if (viewModel.isEditMode && onOpenWidgetPicker != null && onEditDone != null) {
@@ -547,26 +535,6 @@ private fun EmptyStateCta(
             }
         }
     }
-}
-
-@Composable
-private fun LockStateIcon(
-    isUnlocked: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalAndroidColorScheme.current
-    val resource =
-        if (isUnlocked) {
-            R.drawable.ic_unlocked
-        } else {
-            R.drawable.ic_lock
-        }
-    Icon(
-        painter = painterResource(id = resource),
-        contentDescription = null,
-        tint = colors.onPrimaryContainer,
-        modifier = modifier.size(Dimensions.LockIconSize),
-    )
 }
 
 /**

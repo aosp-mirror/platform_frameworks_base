@@ -31,9 +31,12 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -88,6 +91,8 @@ class FalsingCollectorImpl implements FalsingCollector {
     private final JavaAdapter mJavaAdapter;
     private final SystemClock mSystemClock;
     private final Lazy<SelectedUserInteractor> mUserInteractor;
+    private final Lazy<DeviceEntryInteractor> mDeviceEntryInteractor;
+    private final Lazy<SceneContainerOcclusionInteractor> mSceneContainerOcclusionInteractor;
 
     private int mState;
     private boolean mShowingAod;
@@ -170,7 +175,9 @@ class FalsingCollectorImpl implements FalsingCollector {
             JavaAdapter javaAdapter,
             SystemClock systemClock,
             Lazy<SelectedUserInteractor> userInteractor,
-            Lazy<CommunalInteractor> communalInteractorLazy) {
+            Lazy<CommunalInteractor> communalInteractorLazy,
+            Lazy<DeviceEntryInteractor> deviceEntryInteractor,
+            Lazy<SceneContainerOcclusionInteractor> sceneContainerOcclusionInteractor) {
         mFalsingDataProvider = falsingDataProvider;
         mFalsingManager = falsingManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -186,6 +193,8 @@ class FalsingCollectorImpl implements FalsingCollector {
         mSystemClock = systemClock;
         mUserInteractor = userInteractor;
         mCommunalInteractorLazy = communalInteractorLazy;
+        mDeviceEntryInteractor = deviceEntryInteractor;
+        mSceneContainerOcclusionInteractor = sceneContainerOcclusionInteractor;
     }
 
     @Override
@@ -196,7 +205,18 @@ class FalsingCollectorImpl implements FalsingCollector {
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mState = mStatusBarStateController.getState();
 
-        mKeyguardStateController.addCallback(mKeyguardStateControllerCallback);
+        if (SceneContainerFlag.isEnabled()) {
+            mJavaAdapter.alwaysCollectFlow(
+                    mDeviceEntryInteractor.get().isDeviceEntered(),
+                    this::isDeviceEnteredChanged
+            );
+            mJavaAdapter.alwaysCollectFlow(
+                    mSceneContainerOcclusionInteractor.get().getInvisibleDueToOcclusion(),
+                    this::isInvisibleDueToOcclusionChanged
+            );
+        } else {
+            mKeyguardStateController.addCallback(mKeyguardStateControllerCallback);
+        }
 
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateCallback);
 
@@ -214,6 +234,14 @@ class FalsingCollectorImpl implements FalsingCollector {
 
         mBatteryController.addCallback(mBatteryListener);
         mDockManager.addListener(mDockEventListener);
+    }
+
+    public void isDeviceEnteredChanged(boolean unused) {
+        updateSensorRegistration();
+    }
+
+    public void isInvisibleDueToOcclusionChanged(boolean unused) {
+        updateSensorRegistration();
     }
 
     @Override
@@ -302,7 +330,7 @@ class FalsingCollectorImpl implements FalsingCollector {
     @Override
     public void onTouchEvent(MotionEvent ev) {
         logDebug("REAL: onTouchEvent(" + MotionEvent.actionToString(ev.getActionMasked()) + ")");
-        if (!mKeyguardStateController.isShowing()) {
+        if (!isKeyguardShowing()) {
             avoidGesture();
             return;
         }
@@ -402,8 +430,8 @@ class FalsingCollectorImpl implements FalsingCollector {
         final boolean isKeyguard = mState == StatusBarState.KEYGUARD;
 
         final boolean isShadeOverOccludedKeyguard = mState == StatusBarState.SHADE
-                && mKeyguardStateController.isShowing()
-                && mKeyguardStateController.isOccluded();
+                && isKeyguardShowing()
+                && isKeyguardOccluded();
 
         return mScreenOn && !mShowingAod && (isKeyguard || isShadeOverOccludedKeyguard);
     }
@@ -447,6 +475,32 @@ class FalsingCollectorImpl implements FalsingCollector {
         mFalsingManager.onProximityEvent(new ProximityEventImpl(proximityEvent));
     }
 
+    /**
+     * Returns {@code true} if the keyguard is showing (whether or not the screen is on, whether or
+     * not an activity is occluding the keyguard, and whether or not the shade is open on top of the
+     * keyguard), or {@code false} if the user has dismissed the keyguard by authenticating or
+     * swiping up.
+     */
+    private boolean isKeyguardShowing() {
+        if (SceneContainerFlag.isEnabled()) {
+            return !mDeviceEntryInteractor.get().isDeviceEntered().getValue();
+        } else {
+            return mKeyguardStateController.isShowing();
+        }
+    }
+
+    /**
+     * Returns {@code true} if there is an activity display on top of ("occluding") the keyguard, or
+     * {@code false} if an activity is not occluding the keyguard (including if the keyguard is not
+     * showing at all).
+     */
+    private boolean isKeyguardOccluded() {
+        if (SceneContainerFlag.isEnabled()) {
+            return mSceneContainerOcclusionInteractor.get().getInvisibleDueToOcclusion().getValue();
+        } else {
+            return mKeyguardStateController.isOccluded();
+        }
+    }
 
     static void logDebug(String msg) {
         if (DEBUG) {

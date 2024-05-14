@@ -32,6 +32,11 @@ public class AppCompatTaskInfo implements Parcelable {
     public boolean topActivityEligibleForLetterboxEducation;
 
     /**
+     * Whether the letterbox education is enabled
+     */
+    public boolean isLetterboxEducationEnabled;
+
+    /**
      * Whether the direct top activity is in size compat mode on foreground.
      */
     public boolean topActivityInSizeCompat;
@@ -178,6 +183,7 @@ public class AppCompatTaskInfo implements Parcelable {
                     == that.topActivityEligibleForUserAspectRatioButton
                 && topActivityEligibleForLetterboxEducation
                     == that.topActivityEligibleForLetterboxEducation
+                && isLetterboxEducationEnabled == that.isLetterboxEducationEnabled
                 && topActivityLetterboxVerticalPosition == that.topActivityLetterboxVerticalPosition
                 && topActivityLetterboxHorizontalPosition
                     == that.topActivityLetterboxHorizontalPosition
@@ -192,6 +198,7 @@ public class AppCompatTaskInfo implements Parcelable {
      * Reads the AppCompatTaskInfo from a parcel.
      */
     void readFromParcel(Parcel source) {
+        isLetterboxEducationEnabled = source.readBoolean();
         topActivityInSizeCompat = source.readBoolean();
         topActivityEligibleForLetterboxEducation = source.readBoolean();
         isLetterboxDoubleTapEnabled = source.readBoolean();
@@ -212,6 +219,7 @@ public class AppCompatTaskInfo implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeBoolean(isLetterboxEducationEnabled);
         dest.writeBoolean(topActivityInSizeCompat);
         dest.writeBoolean(topActivityEligibleForLetterboxEducation);
         dest.writeBoolean(isLetterboxDoubleTapEnabled);
@@ -232,6 +240,7 @@ public class AppCompatTaskInfo implements Parcelable {
         return "AppCompatTaskInfo { topActivityInSizeCompat=" + topActivityInSizeCompat
                 + " topActivityEligibleForLetterboxEducation= "
                 + topActivityEligibleForLetterboxEducation
+                + "isLetterboxEducationEnabled= " + isLetterboxEducationEnabled
                 + " isLetterboxDoubleTapEnabled= " + isLetterboxDoubleTapEnabled
                 + " topActivityEligibleForUserAspectRatioButton= "
                 + topActivityEligibleForUserAspectRatioButton

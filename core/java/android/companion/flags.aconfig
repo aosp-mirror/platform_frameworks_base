@@ -39,3 +39,11 @@ flag {
     description: "Expose perm sync user consent API"
     bug: "309528663"
 }
+
+flag {
+    name: "ongoing_perm_sync"
+    is_exported: true
+    namespace: "companion"
+    description: "Enable ongoing perm sync"
+    bug: "338469649"
+}

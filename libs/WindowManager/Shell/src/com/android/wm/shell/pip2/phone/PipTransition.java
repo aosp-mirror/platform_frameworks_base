@@ -61,11 +61,15 @@ import com.android.wm.shell.transition.Transitions;
 public class PipTransition extends PipTransitionController implements
         PipTransitionState.PipTransitionStateChangedListener {
     private static final String TAG = PipTransition.class.getSimpleName();
+
+    // Used when for ENTERING_PIP state update.
     private static final String PIP_TASK_TOKEN = "pip_task_token";
     private static final String PIP_TASK_LEASH = "pip_task_leash";
-    private static final String PIP_START_TX = "pip_start_tx";
-    private static final String PIP_FINISH_TX = "pip_finish_tx";
-    private static final String PIP_DESTINATION_BOUNDS = "pip_dest_bounds";
+
+    // Used for PiP CHANGING_BOUNDS state update.
+    static final String PIP_START_TX = "pip_start_tx";
+    static final String PIP_FINISH_TX = "pip_finish_tx";
+    static final String PIP_DESTINATION_BOUNDS = "pip_dest_bounds";
 
     /**
      * The fixed start delay in ms when fading out the content overlay from bounds animation.

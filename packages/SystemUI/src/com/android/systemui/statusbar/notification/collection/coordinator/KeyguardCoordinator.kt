@@ -18,12 +18,10 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator
 
-import android.os.SystemProperties
 import android.os.UserHandle
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
-import com.android.systemui.Flags.notificationMinimalismPrototype
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
@@ -41,6 +39,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.provider.SectionHeaderVisibilityProvider
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.headsUpEvents
 import com.android.systemui.util.asIndenting
@@ -264,7 +263,7 @@ constructor(
     }
 
     private fun unseenFeatureEnabled(): Flow<Boolean> {
-        if (notificationMinimalismPrototype()) {
+        if (NotificationMinimalismPrototype.V1.isEnabled) {
             return flowOf(true)
         }
         return secureSettings
@@ -342,18 +341,6 @@ constructor(
             var hasFilteredAnyNotifs = false
 
             /**
-             * the [notificationMinimalismPrototype] will now show seen notifications on the locked
-             * shade by default, but this property read allows that to be quickly disabled for
-             * testing
-             */
-            private val minimalismShowOnLockedShade
-                get() =
-                    SystemProperties.getBoolean(
-                        "persist.notification_minimalism_prototype.show_on_locked_shade",
-                        true
-                    )
-
-            /**
              * Encapsulates a definition of "being on the keyguard". Note that these two definitions
              * are wildly different: [StatusBarState.KEYGUARD] is when on the lock screen and does
              * not include shade or occluded states, whereas [KeyguardRepository.isKeyguardShowing]
@@ -364,7 +351,10 @@ constructor(
              * allow seen notifications to appear in the locked shade.
              */
             private fun isOnKeyguard(): Boolean =
-                if (notificationMinimalismPrototype() && minimalismShowOnLockedShade) {
+                if (
+                    NotificationMinimalismPrototype.V1.isEnabled &&
+                        NotificationMinimalismPrototype.V1.showOnLockedShade
+                ) {
                     statusBarStateController.state == StatusBarState.KEYGUARD
                 } else {
                     keyguardRepository.isKeyguardShowing()

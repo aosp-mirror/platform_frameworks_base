@@ -86,6 +86,7 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.Shade
@@ -370,6 +371,7 @@ private fun SceneScope.QuickSettingsScene(
             shadeSession = shadeSession,
             maxScrimTop = { screenHeight },
             shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
+            shadeMode = ShadeMode.Single,
             modifier =
                 Modifier.fillMaxWidth().offset { IntOffset(x = 0, y = screenHeight.roundToInt()) },
         )

@@ -1276,7 +1276,23 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     packageName,
                     permissionName
                 )
-            else -> permissionAllowlist.getSignatureAppAllowlistState(packageName, permissionName)
+            else ->
+                permissionAllowlist.getProductSignatureAppAllowlistState(
+                    packageName,
+                    permissionName
+                )
+                    ?: permissionAllowlist.getVendorSignatureAppAllowlistState(
+                        packageName,
+                        permissionName
+                    )
+                    ?: permissionAllowlist.getSystemExtSignatureAppAllowlistState(
+                        packageName,
+                        permissionName
+                    )
+                    ?: permissionAllowlist.getSignatureAppAllowlistState(
+                        packageName,
+                        permissionName
+                    )
         }
     }
 

@@ -68,6 +68,7 @@ interface AppOpsUidStateTracker {
             return UID_STATE_BACKGROUND;
         }
 
+        // UID_STATE_NONEXISTENT is deliberately excluded here
         return UID_STATE_CACHED;
     }
 

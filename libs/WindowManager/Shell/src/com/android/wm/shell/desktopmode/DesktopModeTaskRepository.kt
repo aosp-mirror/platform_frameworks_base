@@ -48,7 +48,6 @@ class DesktopModeTaskRepository {
         val activeTasks: ArraySet<Int> = ArraySet(),
         val visibleTasks: ArraySet<Int> = ArraySet(),
         val minimizedTasks: ArraySet<Int> = ArraySet(),
-        var stashed: Boolean = false
     )
 
     // Token of the current wallpaper activity, used to remove it when the last task is removed
@@ -95,10 +94,8 @@ class DesktopModeTaskRepository {
         visibleTasksListeners[visibleTasksListener] = executor
         displayData.keyIterator().forEach { displayId ->
             val visibleTasksCount = getVisibleTaskCount(displayId)
-            val stashed = isStashed(displayId)
             executor.execute {
                 visibleTasksListener.onTasksVisibilityChanged(displayId, visibleTasksCount)
-                visibleTasksListener.onStashedChanged(displayId, stashed)
             }
         }
     }
@@ -400,26 +397,6 @@ class DesktopModeTaskRepository {
     }
 
     /**
-     * Update stashed status on display with id [displayId]
-     */
-    fun setStashed(displayId: Int, stashed: Boolean) {
-        val data = displayData.getOrCreate(displayId)
-        val oldValue = data.stashed
-        data.stashed = stashed
-        if (oldValue != stashed) {
-            KtProtoLog.d(
-                    WM_SHELL_DESKTOP_MODE,
-                    "DesktopTaskRepo: mark stashed=%b displayId=%d",
-                    stashed,
-                    displayId
-            )
-            visibleTasksListeners.forEach { (listener, executor) ->
-                executor.execute { listener.onStashedChanged(displayId, stashed) }
-            }
-        }
-    }
-
-    /**
      * Removes and returns the bounds saved before maximizing the given task.
      */
     fun removeBoundsBeforeMaximize(taskId: Int): Rect? {
@@ -431,13 +408,6 @@ class DesktopModeTaskRepository {
      */
     fun saveBoundsBeforeMaximize(taskId: Int, bounds: Rect) {
         boundsBeforeMaximizeByTaskId.set(taskId, Rect(bounds))
-    }
-
-    /**
-     * Check if display with id [displayId] has desktop tasks stashed
-     */
-    fun isStashed(displayId: Int): Boolean {
-        return displayData[displayId]?.stashed ?: false
     }
 
     internal fun dump(pw: PrintWriter, prefix: String) {
@@ -455,7 +425,6 @@ class DesktopModeTaskRepository {
             pw.println("${prefix}Display $displayId:")
             pw.println("${innerPrefix}activeTasks=${data.activeTasks.toDumpString()}")
             pw.println("${innerPrefix}visibleTasks=${data.visibleTasks.toDumpString()}")
-            pw.println("${innerPrefix}stashed=${data.stashed}")
         }
     }
 

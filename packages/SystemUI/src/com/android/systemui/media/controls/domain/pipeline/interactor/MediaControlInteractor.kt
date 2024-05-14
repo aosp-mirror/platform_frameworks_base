@@ -90,7 +90,8 @@ constructor(
         instanceId: InstanceId,
         delayMs: Long
     ): Boolean {
-        val dismissed = mediaDataProcessor.dismissMediaData(instanceId, delayMs)
+        val dismissed =
+            mediaDataProcessor.dismissMediaData(instanceId, delayMs, userInitiated = true)
         if (!dismissed) {
             Log.w(
                 TAG,

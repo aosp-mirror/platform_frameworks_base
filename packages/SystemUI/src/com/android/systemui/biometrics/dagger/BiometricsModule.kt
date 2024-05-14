@@ -16,8 +16,10 @@
 
 package com.android.systemui.biometrics.dagger
 
+import android.content.Context
 import android.content.res.Resources
 import com.android.internal.R
+import com.android.launcher3.icons.IconProvider
 import com.android.systemui.CoreStartable
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.EllipseOverlapDetectorParams
@@ -109,6 +111,9 @@ interface BiometricsModule {
             threadFactory.buildExecutorOnNewThread("biometrics")
 
         @Provides fun providesUdfpsUtils(): UdfpsUtils = UdfpsUtils()
+
+        @Provides
+        fun provideIconProvider(context: Context): IconProvider = IconProvider(context)
 
         @Provides
         @SysUISingleton

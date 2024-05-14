@@ -92,13 +92,29 @@ class MediaCarouselViewModelTest : SysuiTestCase() {
             val instanceId1 = InstanceId.fakeInstanceId(123)
             val instanceId2 = InstanceId.fakeInstanceId(456)
 
-            loadMediaControl(KEY, instanceId1)
-            loadMediaControl(KEY_2, instanceId2)
+            loadMediaControl(KEY, instanceId1, isPlaying = true)
+            loadMediaControl(KEY_2, instanceId2, isPlaying = true)
+            loadMediaControl(KEY, instanceId1, isPlaying = false)
 
-            val firstMediaControl = sortedMedia?.get(0) as MediaCommonViewModel.MediaControl
-            val secondMediaControl = sortedMedia?.get(1) as MediaCommonViewModel.MediaControl
-            assertThat(firstMediaControl.instanceId).isEqualTo(instanceId2)
-            assertThat(secondMediaControl.instanceId).isEqualTo(instanceId1)
+            var mediaControl2 = sortedMedia?.get(0) as MediaCommonViewModel.MediaControl
+            var mediaControl1 = sortedMedia?.get(1) as MediaCommonViewModel.MediaControl
+            assertThat(mediaControl2.instanceId).isEqualTo(instanceId2)
+            assertThat(mediaControl1.instanceId).isEqualTo(instanceId1)
+
+            loadMediaControl(KEY, instanceId1, isPlaying = true)
+            loadMediaControl(KEY_2, instanceId2, isPlaying = false)
+
+            mediaControl2 = sortedMedia?.get(0) as MediaCommonViewModel.MediaControl
+            mediaControl1 = sortedMedia?.get(1) as MediaCommonViewModel.MediaControl
+            assertThat(mediaControl2.instanceId).isEqualTo(instanceId2)
+            assertThat(mediaControl1.instanceId).isEqualTo(instanceId1)
+
+            underTest.onAttached()
+
+            mediaControl1 = sortedMedia?.get(0) as MediaCommonViewModel.MediaControl
+            mediaControl2 = sortedMedia?.get(1) as MediaCommonViewModel.MediaControl
+            assertThat(mediaControl1.instanceId).isEqualTo(instanceId1)
+            assertThat(mediaControl2.instanceId).isEqualTo(instanceId2)
         }
 
     @Test
@@ -147,6 +163,7 @@ class MediaCarouselViewModelTest : SysuiTestCase() {
             val mediaControl = sortedMedia?.get(0) as MediaCommonViewModel.MediaControl
             assertThat(sortedMedia).hasSize(2)
             assertThat(mediaControl.instanceId).isEqualTo(instanceId)
+            assertThat(mediaControl.isMediaFromRec).isTrue()
         }
 
     private fun loadMediaControl(key: String, instanceId: InstanceId, isPlaying: Boolean = true) {

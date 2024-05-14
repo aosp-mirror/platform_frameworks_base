@@ -85,7 +85,6 @@ class KeyguardClockViewBinderTest : SysuiTestCase() {
         setupWeatherClock()
         KeyguardClockViewBinder.updateBurnInLayer(rootView, clockViewModel, ClockSize.LARGE)
         verify(burnInLayer).removeView(smallClockView)
-        verify(burnInLayer).addView(largeClockView)
     }
 
     @Test
@@ -101,7 +100,6 @@ class KeyguardClockViewBinderTest : SysuiTestCase() {
         setupNonWeatherClock()
         KeyguardClockViewBinder.updateBurnInLayer(rootView, clockViewModel, ClockSize.SMALL)
         verify(burnInLayer).addView(smallClockView)
-        verify(burnInLayer).removeView(largeClockView)
     }
 
     private fun setupWeatherClock() {

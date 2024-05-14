@@ -96,5 +96,10 @@ final class UserDataRepository {
             mUserId = userId;
             mBindingController = bindingController;
         }
+
+        @Override
+        public String toString() {
+            return "UserData{" + "mUserId=" + mUserId + '}';
+        }
     }
 }
