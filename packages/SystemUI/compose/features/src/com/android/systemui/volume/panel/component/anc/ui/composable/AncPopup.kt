@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.panel.component.anc.ui.composable
 
+import android.view.Gravity
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
@@ -47,9 +48,10 @@ constructor(
 ) {
 
     /** Shows a popup with the [expandable] animation. */
-    fun show(expandable: Expandable?) {
+    fun show(expandable: Expandable?, horizontalGravity: Int) {
         uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_ANC_POPUP_SHOWN)
-        volumePanelPopup.show(expandable, { Title() }, { Content(it) })
+        val gravity = horizontalGravity or Gravity.BOTTOM
+        volumePanelPopup.show(expandable, gravity, { Title() }, { Content(it) })
     }
 
     @Composable

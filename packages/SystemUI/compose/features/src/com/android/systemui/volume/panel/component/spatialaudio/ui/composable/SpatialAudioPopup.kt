@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.panel.component.spatialaudio.ui.composable
 
+import android.view.Gravity
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -47,14 +48,15 @@ constructor(
 ) {
 
     /** Shows a popup with the [expandable] animation. */
-    fun show(expandable: Expandable) {
+    fun show(expandable: Expandable, horizontalGravity: Int) {
         uiEventLogger.logWithPosition(
             VolumePanelUiEvent.VOLUME_PANEL_SPATIAL_AUDIO_POP_UP_SHOWN,
             0,
             null,
             viewModel.spatialAudioButtons.value.indexOfFirst { it.button.isActive }
         )
-        volumePanelPopup.show(expandable, { Title() }, { Content(it) })
+        val gravity = horizontalGravity or Gravity.BOTTOM
+        volumePanelPopup.show(expandable, gravity, { Title() }, { Content(it) })
     }
 
     @Composable

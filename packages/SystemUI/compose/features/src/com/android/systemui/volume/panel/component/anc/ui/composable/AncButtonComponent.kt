@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.panel.component.anc.ui.composable
 
+import android.view.Gravity
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,9 +28,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -39,6 +46,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.android.systemui.res.R
 import com.android.systemui.volume.panel.component.anc.ui.viewmodel.AncViewModel
+import com.android.systemui.volume.panel.component.popup.ui.composable.VolumePanelPopup
 import com.android.systemui.volume.panel.ui.composable.ComposeVolumePanelUiComponent
 import com.android.systemui.volume.panel.ui.composable.VolumePanelComposeScope
 import javax.inject.Inject
@@ -54,15 +62,22 @@ constructor(
     override fun VolumePanelComposeScope.Content(modifier: Modifier) {
         val slice by viewModel.buttonSlice.collectAsState()
         val label = stringResource(R.string.volume_panel_noise_control_title)
+        val screenWidth: Float =
+            with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp.dp.toPx() }
+        var gravity by remember { mutableIntStateOf(Gravity.CENTER_HORIZONTAL) }
         val isClickable = viewModel.isClickable(slice)
         val onClick =
             if (isClickable) {
-                { ancPopup.show(null) }
+                { with(ancPopup) { show(null, gravity) } }
             } else {
                 null
             }
+
         Column(
-            modifier = modifier,
+            modifier =
+                modifier.onGloballyPositioned {
+                    gravity = VolumePanelPopup.calculateGravity(it, screenWidth)
+                },
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
