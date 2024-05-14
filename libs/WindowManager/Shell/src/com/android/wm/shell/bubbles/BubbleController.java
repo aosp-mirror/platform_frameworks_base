@@ -2709,6 +2709,15 @@ public class BubbleController implements ConfigurationChangeListener,
                     () -> BubbleController.this.onSensitiveNotificationProtectionStateChanged(
                             sensitiveNotificationProtectionActive));
         }
+
+        @Override
+        public boolean canShowBubbleNotification() {
+            // in bubble bar mode, when the IME is visible we can't animate new bubbles.
+            if (BubbleController.this.isShowingAsBubbleBar()) {
+                return !BubbleController.this.mBubblePositioner.getIsImeVisible();
+            }
+            return true;
+        }
     }
 
     /**
