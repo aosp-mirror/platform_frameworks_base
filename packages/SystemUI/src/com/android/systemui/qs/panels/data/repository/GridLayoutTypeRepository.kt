@@ -18,7 +18,7 @@ package com.android.systemui.qs.panels.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
-import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
+import com.android.systemui.qs.panels.shared.model.PartitionedGridLayoutType
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +31,8 @@ interface GridLayoutTypeRepository {
 
 @SysUISingleton
 class GridLayoutTypeRepositoryImpl @Inject constructor() : GridLayoutTypeRepository {
-    private val _layout: MutableStateFlow<GridLayoutType> = MutableStateFlow(InfiniteGridLayoutType)
+    private val _layout: MutableStateFlow<GridLayoutType> =
+        MutableStateFlow(PartitionedGridLayoutType)
     override val layout = _layout.asStateFlow()
 
     override fun setLayout(type: GridLayoutType) {

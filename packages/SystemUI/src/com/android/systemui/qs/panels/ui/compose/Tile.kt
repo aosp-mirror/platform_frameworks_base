@@ -208,7 +208,7 @@ fun DefaultEditTileGrid(
     }
 }
 
-private fun LazyGridScope.editTiles(
+fun LazyGridScope.editTiles(
     tiles: List<EditTileViewModel>,
     clickAction: ClickAction,
     onClick: (TileSpec) -> Unit,
