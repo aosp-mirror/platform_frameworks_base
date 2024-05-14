@@ -50,7 +50,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
-import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
@@ -104,7 +104,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
         dispatcher = UnconfinedTestDispatcher(scheduler)
         testScope = TestScope(dispatcher)
 
-        whenever(sysuiState.setFlag(anyInt(), anyBoolean())).thenReturn(sysuiState)
+        whenever(sysuiState.setFlag(anyLong(), anyBoolean())).thenReturn(sysuiState)
 
         mBluetoothTileDialogDelegate =
             BluetoothTileDialogDelegate(

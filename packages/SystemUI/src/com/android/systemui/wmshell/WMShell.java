@@ -98,7 +98,7 @@ public final class WMShell implements
         CoreStartable,
         CommandQueue.Callbacks {
     private static final String TAG = WMShell.class.getName();
-    private static final int INVALID_SYSUI_STATE_MASK =
+    private static final long INVALID_SYSUI_STATE_MASK =
             SYSUI_STATE_DIALOG_SHOWING
                     | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
                     | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED
