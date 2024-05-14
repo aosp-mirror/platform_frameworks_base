@@ -1732,7 +1732,10 @@ class BackNavigationController {
             // The activity was detached from hierarchy.
             return;
         }
-        activity.mDisplayContent.continueUpdateOrientationForDiffOrienLaunchingApp();
+
+        if (activity.mDisplayContent.isFixedRotationLaunchingApp(activity)) {
+            activity.mDisplayContent.continueUpdateOrientationForDiffOrienLaunchingApp();
+        }
 
         // Restore the launch-behind state.
         activity.mTaskSupervisor.scheduleLaunchTaskBehindComplete(activity.token);
