@@ -2999,6 +2999,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     @Override
     void removeImmediately() {
+        if (asTask() == null) {
+            EventLogTags.writeWmTfRemoved(System.identityHashCode(this), getTaskId());
+        }
         mIsRemovalRequested = false;
         resetAdjacentTaskFragment();
         cleanUpEmbeddedTaskFragment();

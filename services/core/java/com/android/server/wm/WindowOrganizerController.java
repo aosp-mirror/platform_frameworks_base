@@ -2361,6 +2361,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             position = POSITION_TOP;
         }
         ownerTask.addChild(taskFragment, position);
+        EventLogTags.writeWmTfCreated(System.identityHashCode(taskFragment), ownerTask.mTaskId);
         taskFragment.setWindowingMode(creationParams.getWindowingMode());
         if (!creationParams.getInitialRelativeBounds().isEmpty()) {
             // The surface operations for the task fragment should sync with the transition.
