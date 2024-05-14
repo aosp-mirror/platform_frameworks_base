@@ -522,14 +522,16 @@ public abstract class WMShellModule {
             RecentsTransitionHandler recentsTransitionHandler,
             MultiInstanceHelper multiInstanceHelper,
             @ShellMainThread ShellExecutor mainExecutor,
-            Optional<DesktopTasksLimiter> desktopTasksLimiter) {
+            Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            Optional<RecentTasksController> recentTasksController) {
         return new DesktopTasksController(context, shellInit, shellCommandHandler, shellController,
                 displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
                 dragAndDropController, transitions, enterDesktopTransitionHandler,
                 exitDesktopTransitionHandler, toggleResizeDesktopTaskTransitionHandler,
                 dragToDesktopTransitionHandler, desktopModeTaskRepository,
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
-                recentsTransitionHandler, multiInstanceHelper, mainExecutor, desktopTasksLimiter);
+                recentsTransitionHandler, multiInstanceHelper,
+                mainExecutor, desktopTasksLimiter, recentTasksController.orElse(null));
     }
 
     @WMSingleton
