@@ -166,6 +166,16 @@ flag {
 }
 
 flag {
+    name: "finish_running_ops_for_killed_packages"
+    namespace: "permissions"
+    description: "Finish all appops for a dead app process"
+    bug: "234630570"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "runtime_permission_appops_mapping_enabled"
     is_fixed_read_only: true
     namespace: "permissions"
