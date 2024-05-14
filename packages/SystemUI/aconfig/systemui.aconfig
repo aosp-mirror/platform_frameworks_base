@@ -1012,3 +1012,13 @@ flag {
      purpose: PURPOSE_BUGFIX
    }
 }
+
+flag {
+  name: "notification_media_manager_background_execution"
+  namespace: "systemui"
+  description: "Decide whether to execute binder calls in background thread"
+  bug: "336612071"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
