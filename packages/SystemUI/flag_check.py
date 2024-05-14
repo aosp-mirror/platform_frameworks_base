@@ -12,19 +12,20 @@ following case-sensitive regex:
     %s
 
 The Flag: stanza is regex matched and should describe whether your change is behind a flag or flags.
-
-As a CL author, you'll have a consistent place to describe the risk of the proposed change by explicitly calling out the name of the
-flag in addition to its state (ENABLED|DISABLED|DEVELOPMENT|STAGING|TEAMFOOD|TRUNKFOOD|NEXTFOOD).
+As a CL author, you'll have a consistent place to describe the risk of the proposed change by explicitly calling out the name of the flag.
+For legacy flags use EXEMPT with your flag name.
 
 Some examples below:
 
-Flag: NONE
-Flag: NA
-Flag: LEGACY ENABLE_ONE_SEARCH DISABLED
-Flag: ACONFIG com.android.launcher3.enable_twoline_allapps DEVELOPMENT
-Flag: ACONFIG com.android.launcher3.enable_twoline_allapps TRUNKFOOD
+Flag: NONE Repohook Update
+Flag: TEST_ONLY
+Flag: EXEMPT resource only update
+Flag: EXEMPT bugfix
+Flag: EXEMPT refactor
+Flag: com.android.launcher3.enable_twoline_allapps
+Flag: com.google.android.apps.nexuslauncher.zero_state_web_data_loader
 
-Check the git history for more examples. It's a regex matched field.
+Check the git history for more examples. It's a regex matched field. See go/android-flag-directive for more details on various formats.
 """
 
 def main():
@@ -63,28 +64,31 @@ def main():
         return
 
     field = 'Flag'
-    none = '(NONE|NA|N\/A)' # NONE|NA|N/A
+    none = 'NONE'
+    testOnly = 'TEST_ONLY'
+    docsOnly = 'DOCS_ONLY'
+    exempt = 'EXEMPT'
+    justification = '<justification>'
 
-    typeExpression = '\s*(LEGACY|ACONFIG)' # [type:LEGACY|ACONFIG]
-
-    # legacyFlagName contains only uppercase alphabets with '_' - Ex: ENABLE_ONE_SEARCH
-    # Aconfig Flag name format = "packageName"."flagName"
+    # Aconfig Flag name format = <packageName>.<flagName>
     # package name - Contains only lowercase alphabets + digits + '.' - Ex: com.android.launcher3
-    # For now alphabets, digits, "_", "." characters are allowed in flag name and not adding stricter format check.
+    # For now alphabets, digits, "_", "." characters are allowed in flag name.
+    # Checks if there is "one dot" between packageName and flagName and not adding stricter format check
     #common_typos_disable
-    flagName = '([a-zA-z0-9_.])+'
+    flagName = '([a-zA-Z0-9.]+)([.]+)([a-zA-Z0-9_.]+)'
 
-    #[state:ENABLED|DISABLED|DEVELOPMENT|TEAM*(TEAMFOOD)|STAGING|TRUNK*(TRUNK_STAGING, TRUNK_FOOD)|NEXT*(NEXTFOOD)]
-    stateExpression = '\s*(ENABLED|DISABLED|DEVELOPMENT|TEAM[a-zA-z]*|STAGING|TRUNK[a-zA-z]*|NEXT[a-zA-z]*)'
+    # None and Exempt needs justification
+    exemptRegex = fr'{exempt}\s*[a-zA-Z]+'
+    noneRegex = fr'{none}\s*[a-zA-Z]+'
     #common_typos_enable
 
-    readableRegexMsg = '\n\tFlag: (NONE|NA)\n\tFlag: LEGACY|ACONFIG FlagName|packageName.flagName ENABLED|DISABLED|DEVELOPMENT|TEAMFOOD|STAGING|TRUNKFOOD|NEXTFOOD'
+    readableRegexMsg = '\n\tFlag: '+none+' '+justification+'\n\tFlag: <packageName>.<flagName>\n\tFlag: ' +exempt+' '+justification+'\n\tFlag: '+testOnly+'\n\tFlag: '+docsOnly
 
     flagRegex = fr'^{field}: .*$'
     check_flag = re.compile(flagRegex) #Flag:
 
     # Ignore case for flag name format.
-    flagNameRegex = fr'(?i)^{field}:\s*({none}|{typeExpression}\s*{flagName}\s*{stateExpression})\s*'
+    flagNameRegex = fr'(?i)^{field}:\s*({noneRegex}|{flagName}|{testOnly}|{docsOnly}|{exemptRegex})\s*'
     check_flagName = re.compile(flagNameRegex) #Flag: <flag name format>
 
     flagError = False
