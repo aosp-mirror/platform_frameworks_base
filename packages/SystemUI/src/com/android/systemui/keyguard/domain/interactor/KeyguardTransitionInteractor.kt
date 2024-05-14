@@ -17,6 +17,8 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.annotation.FloatRange
+import android.annotation.SuppressLint
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -34,6 +36,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.pairwise
+import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -76,6 +79,8 @@ constructor(
      * single state. This prevent the redundant filters from running.
      */
     private val transitionValueCache = mutableMapOf<KeyguardState, MutableSharedFlow<Float>>()
+
+    @SuppressLint("SharedFlowCreation")
     private fun getTransitionValueFlow(state: KeyguardState): MutableSharedFlow<Float> {
         return transitionValueCache.getOrPut(state) {
             MutableSharedFlow<Float>(
@@ -90,6 +95,9 @@ constructor(
     @Deprecated("Not performant - Use something else in this class")
     val transitions = repository.transitions
 
+    val transitionState: StateFlow<TransitionStep> =
+        transitions.stateIn(scope, SharingStarted.Eagerly, TransitionStep())
+
     /**
      * A pair of the most recent STARTED step, and the transition step immediately preceding it. The
      * transition framework enforces that the previous step is either a CANCELED or FINISHED step,
@@ -99,6 +107,7 @@ constructor(
      * FINISHED. In the case of a CANCELED step, we can also figure out which state we were coming
      * from when we were canceled.
      */
+    @SuppressLint("SharedFlowCreation")
     val startedStepWithPrecedingStep =
         repository.transitions
             .pairwise()
@@ -144,9 +153,10 @@ constructor(
     }
 
     /** Given an [edge], return a SharedFlow to collect only relevant [TransitionStep]. */
+    @SuppressLint("SharedFlowCreation")
     fun getOrCreateFlow(edge: Edge): MutableSharedFlow<TransitionStep> {
         return transitionMap.getOrPut(edge) {
-            MutableSharedFlow<TransitionStep>(
+            MutableSharedFlow(
                 extraBufferCapacity = 10,
                 onBufferOverflow = BufferOverflow.DROP_OLDEST
             )
@@ -180,6 +190,7 @@ constructor(
      * AOD<->* transition information, mapped to dozeAmount range of AOD (1f) <->
      * * (0f).
      */
+    @SuppressLint("SharedFlowCreation")
     val dozeAmountTransition: Flow<TransitionStep> =
         repository.transitions
             .filter { step -> step.from == AOD || step.to == AOD }
@@ -201,9 +212,18 @@ constructor(
         repository.transitions.filter { step -> step.transitionState == TransitionState.FINISHED }
 
     /** The destination state of the last [TransitionState.STARTED] transition. */
+    @SuppressLint("SharedFlowCreation")
     val startedKeyguardState: SharedFlow<KeyguardState> =
         startedKeyguardTransitionStep
             .map { step -> step.to }
+            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
+
+    /** The from state of the last [TransitionState.STARTED] transition. */
+    // TODO: is it performant to have several SharedFlows side by side instead of one?
+    @SuppressLint("SharedFlowCreation")
+    val startedKeyguardFromState: SharedFlow<KeyguardState> =
+        startedKeyguardTransitionStep
+            .map { step -> step.from }
             .shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
     /** Which keyguard state to use when the device goes to sleep. */
@@ -243,6 +263,7 @@ constructor(
      * sufficient. However, if you're having issues with state *during* transitions started after
      * one or more canceled transitions, you probably need to use [currentKeyguardState].
      */
+    @SuppressLint("SharedFlowCreation")
     val finishedKeyguardState: SharedFlow<KeyguardState> =
         finishedKeyguardTransitionStep
             .map { step -> step.to }
@@ -491,7 +512,19 @@ constructor(
         return startedKeyguardState.replayCache.last()
     }
 
+    fun getStartedFromState(): KeyguardState {
+        return startedKeyguardFromState.replayCache.last()
+    }
+
     fun getFinishedState(): KeyguardState {
         return finishedKeyguardState.replayCache.last()
     }
+
+    suspend fun startTransition(info: TransitionInfo) = repository.startTransition(info)
+
+    fun updateTransition(
+        transitionId: UUID,
+        @FloatRange(from = 0.0, to = 1.0) value: Float,
+        state: TransitionState
+    ) = repository.updateTransition(transitionId, value, state)
 }

@@ -55,6 +55,18 @@ constructor(
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
 ) {
 
+    interface OnSceneAboutToChangeListener {
+
+        /**
+         * Notifies that the scene is about to change to [toScene].
+         *
+         * The implementation can choose to consume the [sceneState] to prepare the incoming scene.
+         */
+        fun onSceneAboutToChange(toScene: SceneKey, sceneState: Any?)
+    }
+
+    private val onSceneAboutToChangeListener = mutableSetOf<OnSceneAboutToChangeListener>()
+
     /**
      * The current scene.
      *
@@ -149,6 +161,10 @@ constructor(
         return repository.allSceneKeys()
     }
 
+    fun registerSceneStateProcessor(processor: OnSceneAboutToChangeListener) {
+        onSceneAboutToChangeListener.add(processor)
+    }
+
     /**
      * Requests a scene change to the given scene.
      *
@@ -161,6 +177,7 @@ constructor(
         toScene: SceneKey,
         loggingReason: String,
         transitionKey: TransitionKey? = null,
+        sceneState: Any? = null,
     ) {
         val currentSceneKey = currentScene.value
         if (
@@ -180,6 +197,7 @@ constructor(
             isInstant = false,
         )
 
+        onSceneAboutToChangeListener.forEach { it.onSceneAboutToChange(toScene, sceneState) }
         repository.changeScene(toScene, transitionKey)
     }
 

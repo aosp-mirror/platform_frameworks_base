@@ -148,10 +148,11 @@ constructor(
             KeyguardState.GLANCEABLE_HUB,
             KeyguardState.GONE,
             KeyguardState.OCCLUDED,
-            KeyguardState.DREAMING_LOCKSCREEN_HOSTED, -> 0f
+            KeyguardState.DREAMING_LOCKSCREEN_HOSTED,
+            KeyguardState.UNDEFINED, -> 0f
             KeyguardState.AOD,
             KeyguardState.ALTERNATE_BOUNCER,
-            KeyguardState.LOCKSCREEN -> 1f
+            KeyguardState.LOCKSCREEN, -> 1f
         }
     }
     val useBackgroundProtection: StateFlow<Boolean> = isUdfpsSupported

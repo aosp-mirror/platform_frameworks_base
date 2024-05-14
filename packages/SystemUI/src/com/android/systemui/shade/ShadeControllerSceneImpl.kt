@@ -140,7 +140,7 @@ constructor(
 
     private fun animateCollapseShadeInternal() {
         sceneInteractor.changeScene(
-            getCollapseDestinationScene(),
+            getCollapseDestinationScene(), // TODO(b/336581871): add sceneState?
             "ShadeController.animateCollapseShade",
             SlightlyFasterShadeCollapse,
         )
