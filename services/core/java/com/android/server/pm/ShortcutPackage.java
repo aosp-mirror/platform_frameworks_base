@@ -850,6 +850,8 @@ class ShortcutPackage extends ShortcutPackageItem {
             @Nullable Predicate<ShortcutInfo> filter, int cloneFlag,
             @Nullable String callingLauncher, int launcherUserId, boolean getPinnedByAnyLauncher) {
         if (getPackageInfo().isShadow()) {
+            Log.d(TAG, "findAll() returned empty results because " + getPackageName()
+                    + " isn't installed yet");
             // Restored and the app not installed yet, so don't return any.
             return;
         }
@@ -877,6 +879,8 @@ class ShortcutPackage extends ShortcutPackageItem {
         if (!getPinnedByAnyLauncher) {
             if (si.isFloating() && !si.isCached()) {
                 if (!isPinnedByCaller) {
+                    Log.d(TAG, si.getId() + " ignored because it isn't pinned by "
+                            + callingLauncher);
                     return;
                 }
             }
