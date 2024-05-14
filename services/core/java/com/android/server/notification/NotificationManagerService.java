@@ -7745,6 +7745,9 @@ public class NotificationManagerService extends SystemService {
             return true;
         }
         // Check if an app has been given system exemption
+        if (ai.uid == Process.SYSTEM_UID) {
+            return false;
+        }
         return mAppOps.checkOpNoThrow(
                 AppOpsManager.OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS, ai.uid,
                 ai.packageName) == MODE_ALLOWED;
