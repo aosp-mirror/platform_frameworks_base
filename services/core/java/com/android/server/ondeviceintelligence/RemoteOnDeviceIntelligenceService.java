@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class RemoteOnDeviceIntelligenceService extends
         ServiceConnector.Impl<IOnDeviceIntelligenceService> {
+    private static final long LONG_TIMEOUT = TimeUnit.HOURS.toMillis(4);
     private static final String TAG =
             RemoteOnDeviceIntelligenceService.class.getSimpleName();
 
@@ -48,6 +49,11 @@ public class RemoteOnDeviceIntelligenceService extends
 
         // Bind right away
         connect();
+    }
+
+    @Override
+    protected long getRequestTimeoutMs() {
+        return LONG_TIMEOUT;
     }
 
     @Override

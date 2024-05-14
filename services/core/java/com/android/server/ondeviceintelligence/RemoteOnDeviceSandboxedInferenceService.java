@@ -38,6 +38,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class RemoteOnDeviceSandboxedInferenceService extends
         ServiceConnector.Impl<IOnDeviceSandboxedInferenceService> {
+    private static final long LONG_TIMEOUT = TimeUnit.HOURS.toMillis(1);
+
     /**
      * Creates an instance of {@link ServiceConnector}
      *
@@ -57,6 +59,12 @@ public class RemoteOnDeviceSandboxedInferenceService extends
         // Bind right away
         connect();
     }
+
+    @Override
+    protected long getRequestTimeoutMs() {
+        return LONG_TIMEOUT;
+    }
+
 
     @Override
     protected long getAutoDisconnectTimeoutMs() {
