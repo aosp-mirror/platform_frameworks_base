@@ -122,7 +122,8 @@ public class DisplayBrightnessStrategySelector {
         mInvalidBrightnessStrategy = injector.getInvalidBrightnessStrategy();
         mAutomaticBrightnessStrategy1 =
                 (!mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()) ? null
-                        : injector.getAutomaticBrightnessStrategy1(context, displayId);
+                        : injector.getAutomaticBrightnessStrategy1(context, displayId,
+                                mDisplayManagerFlags);
         mAutomaticBrightnessStrategy2 =
                 (mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()) ? null
                         : injector.getAutomaticBrightnessStrategy2(context, displayId);
@@ -343,8 +344,8 @@ public class DisplayBrightnessStrategySelector {
         }
 
         AutomaticBrightnessStrategy getAutomaticBrightnessStrategy1(Context context,
-                int displayId) {
-            return new AutomaticBrightnessStrategy(context, displayId);
+                int displayId, DisplayManagerFlags displayManagerFlags) {
+            return new AutomaticBrightnessStrategy(context, displayId, displayManagerFlags);
         }
 
         AutomaticBrightnessStrategy2 getAutomaticBrightnessStrategy2(Context context,

@@ -1334,12 +1334,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mDisplayStateController.shouldPerformScreenOffTransition());
         state = mPowerState.getScreenState();
 
-        // Switch to doze auto-brightness mode if needed
-        if (mFlags.areAutoBrightnessModesEnabled() && mAutomaticBrightnessController != null
-                && !mAutomaticBrightnessController.isInIdleMode()) {
-            mAutomaticBrightnessController.switchMode(Display.isDozeState(state)
-                    ? AUTO_BRIGHTNESS_MODE_DOZE : AUTO_BRIGHTNESS_MODE_DEFAULT);
-        }
 
         DisplayBrightnessState displayBrightnessState = mDisplayBrightnessController
                 .updateBrightness(mPowerRequest, state);
@@ -1373,6 +1367,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final boolean wasShortTermModelActive =
                 mAutomaticBrightnessStrategy.isShortTermModelActive();
         if (!mFlags.isRefactorDisplayPowerControllerEnabled()) {
+            // Switch to doze auto-brightness mode if needed
+            if (mFlags.areAutoBrightnessModesEnabled() && mAutomaticBrightnessController != null
+                    && !mAutomaticBrightnessController.isInIdleMode()) {
+                mAutomaticBrightnessController.switchMode(Display.isDozeState(state)
+                        ? AUTO_BRIGHTNESS_MODE_DOZE : AUTO_BRIGHTNESS_MODE_DEFAULT);
+            }
+
             mAutomaticBrightnessStrategy.setAutoBrightnessState(state,
                     mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig(),
                     mBrightnessReasonTemp.getReason(), mPowerRequest.policy,
