@@ -936,6 +936,10 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             mHasActiveSubIdOnDds = false;
             Log.e(TAG, "Can't get DDS subscriptionInfo");
             return;
+        } else if (ddsSubInfo.isOnlyNonTerrestrialNetwork()) {
+            mHasActiveSubIdOnDds = false;
+            Log.d(TAG, "This is NTN, so do not show mobile data");
+            return;
         }
 
         mHasActiveSubIdOnDds = isEmbeddedSubscriptionVisible(ddsSubInfo);

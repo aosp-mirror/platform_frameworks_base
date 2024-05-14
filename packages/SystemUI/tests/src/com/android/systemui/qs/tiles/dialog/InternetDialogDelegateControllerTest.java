@@ -14,7 +14,9 @@ import static com.android.systemui.qs.tiles.dialog.InternetDialogController.TOAS
 import static com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MAX;
 import static com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MIN;
 import static com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_UNREACHABLE;
+
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -1099,6 +1101,34 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
         mInternetDialogController.mOnSubscriptionsChangedListener.onSubscriptionsChanged();
 
         assertThat(mInternetDialogController.hasActiveSubIdOnDds()).isFalse();
+    }
+
+    @Test
+    public void hasActiveSubIdOnDds_activeDdsAndIsOnlyNonTerrestrialNetwork_returnFalse() {
+        when(SubscriptionManager.getDefaultDataSubscriptionId())
+                .thenReturn(SUB_ID);
+        SubscriptionInfo info = mock(SubscriptionInfo.class);
+        when(info.isEmbedded()).thenReturn(true);
+        when(info.isOnlyNonTerrestrialNetwork()).thenReturn(true);
+        when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(info);
+
+        mInternetDialogController.mOnSubscriptionsChangedListener.onSubscriptionsChanged();
+
+        assertFalse(mInternetDialogController.hasActiveSubIdOnDds());
+    }
+
+    @Test
+    public void hasActiveSubIdOnDds_activeDdsAndIsNotOnlyNonTerrestrialNetwork_returnTrue() {
+        when(SubscriptionManager.getDefaultDataSubscriptionId())
+                .thenReturn(SUB_ID);
+        SubscriptionInfo info = mock(SubscriptionInfo.class);
+        when(info.isEmbedded()).thenReturn(true);
+        when(info.isOnlyNonTerrestrialNetwork()).thenReturn(false);
+        when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(info);
+
+        mInternetDialogController.mOnSubscriptionsChangedListener.onSubscriptionsChanged();
+
+        assertTrue(mInternetDialogController.hasActiveSubIdOnDds());
     }
 
     private String getResourcesString(String name) {
