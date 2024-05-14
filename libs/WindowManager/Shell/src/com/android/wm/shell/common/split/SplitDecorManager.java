@@ -57,7 +57,13 @@ import com.android.wm.shell.common.SurfaceUtils;
 import java.util.function.Consumer;
 
 /**
- * Handles split decor like showing resizing hint for a specific split.
+ * Handles additional layers over a running task in a split pair, for example showing a veil with an
+ * app icon when the task is being resized (usually to hide weird layouts while the app is being
+ * stretched). One SplitDecorManager is initialized on each window.
+ * <br>
+ * Currently, we show a veil when:
+ *  a) Task is resizing down from a fullscreen window.
+ *  b) Task is being stretched past its original bounds.
  */
 public class SplitDecorManager extends WindowlessWindowManager {
     private static final String TAG = SplitDecorManager.class.getSimpleName();
@@ -78,7 +84,11 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
     private boolean mShown;
     private boolean mIsResizing;
-    private final Rect mOldBounds = new Rect();
+    /** The original bounds of the main task, captured at the beginning of a resize transition. */
+    private final Rect mOldMainBounds = new Rect();
+    /** The original bounds of the side task, captured at the beginning of a resize transition. */
+    private final Rect mOldSideBounds = new Rect();
+    /** The current bounds of the main task, mid-resize. */
     private final Rect mResizingBounds = new Rect();
     private final Rect mTempRect = new Rect();
     private ValueAnimator mFadeAnimator;
@@ -184,7 +194,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
         mResizingIconView = null;
         mIsResizing = false;
         mShown = false;
-        mOldBounds.setEmpty();
+        mOldMainBounds.setEmpty();
+        mOldSideBounds.setEmpty();
         mResizingBounds.setEmpty();
     }
 
@@ -198,15 +209,23 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
         if (!mIsResizing) {
             mIsResizing = true;
-            mOldBounds.set(newBounds);
+            mOldMainBounds.set(newBounds);
+            mOldSideBounds.set(sideBounds);
         }
         mResizingBounds.set(newBounds);
         mOffsetX = offsetX;
         mOffsetY = offsetY;
 
-        final boolean show =
-                newBounds.width() > mOldBounds.width() || newBounds.height() > mOldBounds.height();
-        final boolean update = show != mShown;
+        // Show a veil when:
+        //  a) Task is resizing down from a fullscreen window.
+        //  b) Task is being stretched past its original bounds.
+        final boolean isResizingDownFromFullscreen =
+                mOldSideBounds.width() <= 1 || mOldSideBounds.height() <= 1;
+        final boolean isStretchingPastOriginalBounds =
+                newBounds.width() > mOldMainBounds.width()
+                        || newBounds.height() > mOldMainBounds.height();
+        final boolean showVeil = isResizingDownFromFullscreen || isStretchingPastOriginalBounds;
+        final boolean update = showVeil != mShown;
         if (update && mFadeAnimator != null && mFadeAnimator.isRunning()) {
             // If we need to animate and animator still running, cancel it before we ensure both
             // background and icon surfaces are non null for next animation.
@@ -222,8 +241,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
         if (mGapBackgroundLeash == null && !immediately) {
             final boolean isLandscape = newBounds.height() == sideBounds.height();
-            final int left = isLandscape ? mOldBounds.width() : 0;
-            final int top = isLandscape ? 0 : mOldBounds.height();
+            final int left = isLandscape ? mOldMainBounds.width() : 0;
+            final int top = isLandscape ? 0 : mOldMainBounds.height();
             mGapBackgroundLeash = SurfaceUtils.makeColorLayer(mHostLeash,
                     GAP_BACKGROUND_SURFACE_NAME, mSurfaceSession);
             // Fill up another side bounds area.
@@ -251,12 +270,12 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
         if (update) {
             if (immediately) {
-                t.setVisibility(mBackgroundLeash, show);
-                t.setVisibility(mIconLeash, show);
+                t.setVisibility(mBackgroundLeash, showVeil);
+                t.setVisibility(mIconLeash, showVeil);
             } else {
-                startFadeAnimation(show, false, null);
+                startFadeAnimation(showVeil, false, null);
             }
-            mShown = show;
+            mShown = showVeil;
         }
     }
 
@@ -309,7 +328,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
         mIsResizing = false;
         mOffsetX = 0;
         mOffsetY = 0;
-        mOldBounds.setEmpty();
+        mOldMainBounds.setEmpty();
+        mOldSideBounds.setEmpty();
         mResizingBounds.setEmpty();
         if (mFadeAnimator != null && mFadeAnimator.isRunning()) {
             if (!mShown) {
@@ -346,14 +366,14 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
     /** Screenshot host leash and attach on it if meet some conditions */
     public void screenshotIfNeeded(SurfaceControl.Transaction t) {
-        if (!mShown && mIsResizing && !mOldBounds.equals(mResizingBounds)) {
+        if (!mShown && mIsResizing && !mOldMainBounds.equals(mResizingBounds)) {
             if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
                 mScreenshotAnimator.cancel();
             } else if (mScreenshot != null) {
                 t.remove(mScreenshot);
             }
 
-            mTempRect.set(mOldBounds);
+            mTempRect.set(mOldMainBounds);
             mTempRect.offsetTo(0, 0);
             mScreenshot = ScreenshotUtils.takeScreenshot(t, mHostLeash, mTempRect,
                     Integer.MAX_VALUE - 1);
@@ -364,7 +384,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
     public void setScreenshotIfNeeded(SurfaceControl screenshot, SurfaceControl.Transaction t) {
         if (screenshot == null || !screenshot.isValid()) return;
 
-        if (!mShown && mIsResizing && !mOldBounds.equals(mResizingBounds)) {
+        if (!mShown && mIsResizing && !mOldMainBounds.equals(mResizingBounds)) {
             if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
                 mScreenshotAnimator.cancel();
             } else if (mScreenshot != null) {
