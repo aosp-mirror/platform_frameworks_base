@@ -31,10 +31,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
-/**
- * Test IME window opening transitions.
- * To run this test: `atest FlickerTestsIme2:ShowImeWhenFocusingOnInputFieldTest`
- */
+/** Test IME window opening transitions. To run this test: `atest FlickerTests:OpenImeWindowTest` */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

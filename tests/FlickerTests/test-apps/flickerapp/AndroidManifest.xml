@@ -17,10 +17,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.server.wm.flicker.testapp">
 
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
     <uses-sdk android:minSdkVersion="29"
-              android:targetSdkVersion="35"/>
+              android:targetSdkVersion="29"/>
     <application android:allowBackup="false"
                  android:supportsRtl="true">
         <uses-library android:name="androidx.window.extensions" android:required="false"/>
@@ -109,7 +107,7 @@
                   android:immersive="true"
                   android:resizeableActivity="true"
                   android:screenOrientation="portrait"
-                  android:theme="@style/OptOutEdgeToEdge.NoTitleBar"
+                  android:theme="@android:style/Theme.NoTitleBar"
                   android:configChanges="screenSize"
                   android:label="PortraitImmersiveActivity"
                   android:exported="true">
@@ -121,7 +119,7 @@
         <activity android:name=".LaunchTransparentActivity"
                   android:resizeableActivity="false"
                   android:screenOrientation="portrait"
-                  android:theme="@style/OptOutEdgeToEdge"
+                  android:theme="@android:style/Theme"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.LaunchTransparentActivity"
                   android:label="LaunchTransparentActivity"
                   android:exported="true">
@@ -284,7 +282,7 @@
         <activity android:name=".GameActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.GameActivity"
                   android:immersive="true"
-                  android:theme="@style/OptOutEdgeToEdge.NoTitleBar"
+                  android:theme="@android:style/Theme.NoTitleBar"
                   android:configChanges="screenSize"
                   android:label="GameActivity"
                   android:exported="true">

@@ -16,9 +16,6 @@
 
 package com.android.server.wm.flicker.testapp;
 
-import static android.Manifest.permission.POST_NOTIFICATIONS;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -26,7 +23,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -38,13 +34,6 @@ public class NotificationActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-                && checkSelfPermission(POST_NOTIFICATIONS) != PERMISSION_GRANTED) {
-            // POST_NOTIFICATIONS permission required for notification post sdk 33.
-            requestPermissions(new String[] { POST_NOTIFICATIONS }, 0);
-        }
-
         WindowManager.LayoutParams p = getWindow().getAttributes();
         p.layoutInDisplayCutoutMode = WindowManager.LayoutParams
                 .LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
