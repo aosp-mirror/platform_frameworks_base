@@ -27,13 +27,10 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.DisplayAreaOrganizer.FEATURE_RUNTIME_TASK_CONTAINER_FIRST;
 
 import static com.android.server.wm.ActivityStarter.Request;
-import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
 
@@ -51,14 +48,10 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 import android.view.Gravity;
-import android.view.InsetsSource;
-import android.view.InsetsState;
-import android.view.WindowInsets;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.LaunchParamsController.LaunchParams;
-import com.android.server.wm.LaunchParamsController.LaunchParamsModifier.Result;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,23 +70,11 @@ import java.util.Locale;
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class TaskLaunchParamsModifierTests extends WindowTestsBase {
-    private static final Rect DISPLAY_BOUNDS = new Rect(/* left */ 0, /* top */ 0,
-            /* right */ 1920, /* bottom */ 1080);
-    private static final Rect DISPLAY_STABLE_BOUNDS = new Rect(/* left */ 100,
-            /* top */ 200, /* right */ 1620, /* bottom */ 680);
-
+public class TaskLaunchParamsModifierTests extends LaunchParamsModifierTestsBase {
     private static final Rect SMALL_DISPLAY_BOUNDS = new Rect(/* left */ 0, /* top */ 0,
             /* right */ 1000, /* bottom */ 500);
     private static final Rect SMALL_DISPLAY_STABLE_BOUNDS = new Rect(/* left */ 100,
             /* top */ 50, /* right */ 900, /* bottom */ 450);
-
-    private ActivityRecord mActivity;
-
-    private TaskLaunchParamsModifier mTarget;
-
-    private LaunchParams mCurrent;
-    private LaunchParams mResult;
 
     @Before
     public void setUp() throws Exception {
@@ -1917,7 +1898,8 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         }
         Rect startingBounds = new Rect(0, 0, 20, 20);
         Rect adjustedBounds = new Rect(startingBounds);
-        mTarget.adjustBoundsToAvoidConflict(displayBounds, existingTaskBounds, adjustedBounds);
+        ((TaskLaunchParamsModifier) mTarget).adjustBoundsToAvoidConflict(displayBounds,
+                existingTaskBounds, adjustedBounds);
         assertEquals(startingBounds, adjustedBounds);
     }
 
@@ -1935,60 +1917,6 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         } finally {
             mAtm.mSupportsMultiDisplay = orgValue;
         }
-    }
-
-    private TestDisplayContent createNewDisplayContent(int windowingMode) {
-        return createNewDisplayContent(windowingMode, DISPLAY_BOUNDS, DISPLAY_STABLE_BOUNDS);
-    }
-
-    private TestDisplayContent createNewDisplayContent(int windowingMode, Rect displayBounds,
-                                                       Rect displayStableBounds) {
-        final TestDisplayContent display = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
-        display.getDefaultTaskDisplayArea().setWindowingMode(windowingMode);
-        display.setBounds(displayBounds);
-        display.getConfiguration().densityDpi = DENSITY_DEFAULT;
-        display.getConfiguration().orientation = ORIENTATION_LANDSCAPE;
-        configInsetsState(display.getInsetsStateController().getRawInsetsState(), display,
-                displayStableBounds);
-        return display;
-    }
-
-    /**
-     * Creates insets sources so that we can get the expected stable frame.
-     */
-    private static void configInsetsState(InsetsState state, DisplayContent display,
-            Rect stableFrame) {
-        final Rect displayFrame = display.getBounds();
-        final int dl = displayFrame.left;
-        final int dt = displayFrame.top;
-        final int dr = displayFrame.right;
-        final int db = displayFrame.bottom;
-        final int sl = stableFrame.left;
-        final int st = stableFrame.top;
-        final int sr = stableFrame.right;
-        final int sb = stableFrame.bottom;
-        final @WindowInsets.Type.InsetsType int statusBarType = WindowInsets.Type.statusBars();
-        final @WindowInsets.Type.InsetsType int navBarType = WindowInsets.Type.navigationBars();
-
-        state.setDisplayFrame(displayFrame);
-        if (sl > dl) {
-            state.getOrCreateSource(InsetsSource.createId(null, 0, statusBarType), statusBarType)
-                    .setFrame(dl, dt, sl, db);
-        }
-        if (st > dt) {
-            state.getOrCreateSource(InsetsSource.createId(null, 1, statusBarType), statusBarType)
-                    .setFrame(dl, dt, dr, st);
-        }
-        if (sr < dr) {
-            state.getOrCreateSource(InsetsSource.createId(null, 0, navBarType), navBarType)
-                    .setFrame(sr, dt, dr, db);
-        }
-        if (sb < db) {
-            state.getOrCreateSource(InsetsSource.createId(null, 1, navBarType), navBarType)
-                    .setFrame(dl, sb, dr, db);
-        }
-        // Recompute config and push to children.
-        display.onRequestedOverrideConfigurationChanged(display.getConfiguration());
     }
 
     private ActivityRecord createSourceActivity(TestDisplayContent display) {
@@ -2024,102 +1952,5 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
     private int orientationFromBounds(Rect bounds) {
         return bounds.width() > bounds.height() ? SCREEN_ORIENTATION_LANDSCAPE
                 : SCREEN_ORIENTATION_PORTRAIT;
-    }
-
-    private class CalculateRequestBuilder {
-        private Task mTask;
-        private ActivityInfo.WindowLayout mLayout;
-        private ActivityRecord mActivity = TaskLaunchParamsModifierTests.this.mActivity;
-        private ActivityRecord mSource;
-        private ActivityOptions mOptions;
-        private Request mRequest;
-        private int mPhase = PHASE_BOUNDS;
-        private LaunchParams mCurrentParams = mCurrent;
-        private LaunchParams mOutParams = mResult;
-
-        private CalculateRequestBuilder setTask(Task task) {
-            mTask = task;
-            return this;
-        }
-
-        private CalculateRequestBuilder setLayout(ActivityInfo.WindowLayout layout) {
-            mLayout = layout;
-            return this;
-        }
-
-        private CalculateRequestBuilder setActivity(ActivityRecord activity) {
-            mActivity = activity;
-            return this;
-        }
-
-        private CalculateRequestBuilder setSource(ActivityRecord source) {
-            mSource = source;
-            return this;
-        }
-
-        private CalculateRequestBuilder setOptions(ActivityOptions options) {
-            mOptions = options;
-            return this;
-        }
-
-        private CalculateRequestBuilder setRequest(Request request) {
-            mRequest = request;
-            return this;
-        }
-
-        private @Result int calculate() {
-            return mTarget.onCalculate(mTask, mLayout, mActivity, mSource, mOptions, mRequest,
-                    mPhase, mCurrentParams, mOutParams);
-        }
-    }
-
-    private static class WindowLayoutBuilder {
-        private int mWidth = -1;
-        private int mHeight = -1;
-        private float mWidthFraction = -1f;
-        private float mHeightFraction = -1f;
-        private int mGravity = Gravity.NO_GRAVITY;
-        private int mMinWidth = -1;
-        private int mMinHeight = -1;
-
-        private WindowLayoutBuilder setWidth(int width) {
-            mWidth = width;
-            return this;
-        }
-
-        private WindowLayoutBuilder setHeight(int height) {
-            mHeight = height;
-            return this;
-        }
-
-        private WindowLayoutBuilder setWidthFraction(float widthFraction) {
-            mWidthFraction = widthFraction;
-            return this;
-        }
-
-        private WindowLayoutBuilder setHeightFraction(float heightFraction) {
-            mHeightFraction = heightFraction;
-            return this;
-        }
-
-        private WindowLayoutBuilder setGravity(int gravity) {
-            mGravity = gravity;
-            return this;
-        }
-
-        private WindowLayoutBuilder setMinWidth(int minWidth) {
-            mMinWidth = minWidth;
-            return this;
-        }
-
-        private WindowLayoutBuilder setMinHeight(int minHeight) {
-            mMinHeight = minHeight;
-            return this;
-        }
-
-        private ActivityInfo.WindowLayout build() {
-            return new ActivityInfo.WindowLayout(mWidth, mWidthFraction, mHeight, mHeightFraction,
-                    mGravity, mMinWidth, mMinHeight);
-        }
     }
 }

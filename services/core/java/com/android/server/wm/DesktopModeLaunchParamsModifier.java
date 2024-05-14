@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.LaunchParamsModifierUtils.applyLayoutGravity;
+import static com.android.server.wm.LaunchParamsModifierUtils.calculateLayoutBounds;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -26,7 +28,9 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.os.SystemProperties;
+import android.util.Size;
 import android.util.Slog;
+import android.view.Gravity;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -119,10 +123,37 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
             return RESULT_SKIP;
         }
 
-        calculateAndCentreInitialBounds(task, outParams);
+        // Use stable frame instead of raw frame to avoid launching freeform windows on top of
+        // stable insets, which usually are system widgets such as sysbar & navbar.
+        final Rect stableBounds = new Rect();
+        task.getDisplayArea().getStableRect(stableBounds);
+        final int desiredWidth = (int) (stableBounds.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredHeight = (int) (stableBounds.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
 
-        appendLog("setting desktop mode task bounds to %s", outParams.mBounds);
+        if (options != null && options.getLaunchBounds() != null) {
+            outParams.mBounds.set(options.getLaunchBounds());
+            appendLog("inherit-from-options=" + outParams.mBounds);
+        } else if (layout != null) {
+            final int verticalGravity = layout.gravity & Gravity.VERTICAL_GRAVITY_MASK;
+            final int horizontalGravity = layout.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+            if (layout.hasSpecifiedSize()) {
+                calculateLayoutBounds(stableBounds, layout, outParams.mBounds,
+                        new Size(desiredWidth, desiredHeight));
+                applyLayoutGravity(verticalGravity, horizontalGravity, outParams.mBounds,
+                        stableBounds);
+                appendLog("layout specifies sizes, inheriting size and applying gravity");
+            } else if (verticalGravity > 0 || horizontalGravity > 0) {
+                calculateAndCentreInitialBounds(task, outParams);
+                applyLayoutGravity(verticalGravity, horizontalGravity, outParams.mBounds,
+                        stableBounds);
+                appendLog("layout specifies gravity, applying desired bounds and gravity");
+            }
+        } else {
+            calculateAndCentreInitialBounds(task, outParams);
+            appendLog("layout not specified, applying desired bounds");
+        }
 
+        appendLog("final desktop mode task bounds set to %s", outParams.mBounds);
         return RESULT_CONTINUE;
     }
 
@@ -133,13 +164,17 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
     private void calculateAndCentreInitialBounds(Task task,
             LaunchParamsController.LaunchParams outParams) {
         // TODO(b/319819547): Account for app constraints so apps do not become letterboxed
-        final Rect windowBounds = task.getDisplayArea().getBounds();
-        final int width = (int) (windowBounds.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
-        final int height = (int) (windowBounds.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
-        outParams.mBounds.right = width;
-        outParams.mBounds.bottom = height;
-        outParams.mBounds.offset(windowBounds.centerX() - outParams.mBounds.centerX(),
-                windowBounds.centerY() - outParams.mBounds.centerY());
+        final Rect stableBounds = new Rect();
+        task.getDisplayArea().getStableRect(stableBounds);
+        // The desired dimensions that a fully resizable window should take when initially entering
+        // desktop mode. Calculated as a percentage of the available display area as defined by the
+        // DESKTOP_MODE_INITIAL_BOUNDS_SCALE.
+        final int desiredWidth = (int) (stableBounds.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredHeight = (int) (stableBounds.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        outParams.mBounds.right = desiredWidth;
+        outParams.mBounds.bottom = desiredHeight;
+        outParams.mBounds.offset(stableBounds.centerX() - outParams.mBounds.centerX(),
+                stableBounds.centerY() - outParams.mBounds.centerY());
     }
 
     private void initLogBuilder(Task task, ActivityRecord activity) {
