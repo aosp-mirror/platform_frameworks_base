@@ -260,7 +260,7 @@
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"La pantalla nunca quedará inactiva mientras el dispositivo se esté cargando"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Registro de Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Capturar paquetes de Bluetooth (activa/desactiva el Bluetooth después de cambiar esta configuración)"</string>
-    <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueo de OEM"</string>
+    <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueo para OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Permitir que el cargador de inicio se desbloquee"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"¿Permitir desbloqueo de OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ADVERTENCIA: Las funciones de protección de dispositivos no funcionarán en este dispositivo mientras esta configuración esté activada."</string>

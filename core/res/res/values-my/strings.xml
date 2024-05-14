@@ -619,7 +619,7 @@
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"ရှေ့ဆက်ရန် သင်၏ ဇီဝမက်ထရစ်အချက်အလက် (သို့) ဖန်သားပြင်လော့ခ်ကို သုံးပါ"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ဇီဝအချက်အလက်သုံး ကွန်ပျူတာစက်ပစ္စည်း မရရှိနိုင်ပါ"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
-    <string name="biometric_not_recognized" msgid="5106687642694635888">"မသိ"</string>
+    <string name="biometric_not_recognized" msgid="5106687642694635888">"မသိပါ"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"ပင်နံပါတ်၊ လော့ခ်ပုံစံ သို့မဟုတ် စကားဝှက် သတ်မှတ်မထားပါ"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"အထောက်အထားစိစစ်ရာတွင် အမှားအယွင်းရှိနေသည်"</string>

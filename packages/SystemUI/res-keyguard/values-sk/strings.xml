@@ -61,7 +61,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Nesprávny kód PIN"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"Nesprávny kód PIN. Zopakujte."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Alebo odomknite odtlačkom prsta"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Nerozpoz. odtlačok prsta"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Odtlačok prsta nebol rozpoznaný"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Tvár nebola rozpoznaná"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Skúste to znova alebo zadajte PIN"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Skúste to znova alebo zadajte heslo"</string>
