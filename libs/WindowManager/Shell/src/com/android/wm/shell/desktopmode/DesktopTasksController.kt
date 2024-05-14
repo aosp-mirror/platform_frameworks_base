@@ -240,34 +240,6 @@ class DesktopTasksController(
         }
     }
 
-    /**
-     * Stash desktop tasks on display with id [displayId].
-     *
-     * When desktop tasks are stashed, launcher home screen icons are fully visible. New apps
-     * launched in this state will be added to the desktop. Existing desktop tasks will be brought
-     * back to front during the launch.
-     */
-    fun stashDesktopApps(displayId: Int) {
-        if (DesktopModeStatus.isStashingEnabled()) {
-            KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: stashDesktopApps")
-            desktopModeTaskRepository.setStashed(displayId, true)
-        }
-    }
-
-    /**
-     * Clear the stashed state for the given display
-     */
-    fun hideStashedDesktopApps(displayId: Int) {
-        if (DesktopModeStatus.isStashingEnabled()) {
-            KtProtoLog.v(
-                    WM_SHELL_DESKTOP_MODE,
-                    "DesktopTasksController: hideStashedApps displayId=%d",
-                    displayId
-            )
-            desktopModeTaskRepository.setStashed(displayId, false)
-        }
-    }
-
     /** Get number of tasks that are marked as visible */
     fun getVisibleTaskCount(displayId: Int): Int {
         return desktopModeTaskRepository.getVisibleTaskCount(displayId)
@@ -871,8 +843,6 @@ class DesktopTasksController(
         val result = triggerTask?.let { task ->
             when {
                 request.type == TRANSIT_TO_BACK -> handleBackNavigation(task)
-                // If display has tasks stashed, handle as stashed launch
-                task.isStashed -> handleStashedTaskLaunch(task, transition)
                 // Check if the task has a top transparent activity
                 shouldLaunchAsModal(task) -> handleTransparentTaskLaunch(task)
                 // Check if fullscreen task should be updated
@@ -911,12 +881,8 @@ class DesktopTasksController(
                 .forEach { finishTransaction.setCornerRadius(it.leash, cornerRadius) }
     }
 
-    private val TaskInfo.isStashed: Boolean
-        get() = desktopModeTaskRepository.isStashed(displayId)
-
-    private fun shouldLaunchAsModal(task: TaskInfo): Boolean {
-        return Flags.enableDesktopWindowingModalsPolicy() && isSingleTopActivityTranslucent(task)
-    }
+    private fun shouldLaunchAsModal(task: TaskInfo) =
+        Flags.enableDesktopWindowingModalsPolicy() && isSingleTopActivityTranslucent(task)
 
     private fun shouldRemoveWallpaper(request: TransitionRequestInfo): Boolean {
         return Flags.enableDesktopWindowingWallpaperActivity() &&
@@ -974,24 +940,6 @@ class DesktopTasksController(
             }
         }
         return null
-    }
-
-    private fun handleStashedTaskLaunch(
-            task: RunningTaskInfo,
-            transition: IBinder
-    ): WindowContainerTransaction {
-        KtProtoLog.d(
-                WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksController: launch apps with stashed on transition taskId=%d",
-                task.taskId
-        )
-        val wct = WindowContainerTransaction()
-        val taskToMinimize =
-                bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
-        addMoveToDesktopChanges(wct, task)
-        desktopModeTaskRepository.setStashed(task.displayId, false)
-        addPendingMinimizeTransition(transition, taskToMinimize)
-        return wct
     }
 
     // Always launch transparent tasks in fullscreen.
@@ -1467,25 +1415,25 @@ class DesktopTasksController(
             ) { c -> c.showDesktopApps(displayId, remoteTransition) }
         }
 
-        override fun stashDesktopApps(displayId: Int) {
-            ExecutorUtils.executeRemoteCallWithTaskPermission(
-                    controller,
-                    "stashDesktopApps"
-            ) { c -> c.stashDesktopApps(displayId) }
-        }
-
-        override fun hideStashedDesktopApps(displayId: Int) {
-            ExecutorUtils.executeRemoteCallWithTaskPermission(
-                    controller,
-                    "hideStashedDesktopApps"
-            ) { c -> c.hideStashedDesktopApps(displayId) }
-        }
-
         override fun showDesktopApp(taskId: Int) {
             ExecutorUtils.executeRemoteCallWithTaskPermission(
                     controller,
                     "showDesktopApp"
             ) { c -> c.moveTaskToFront(taskId) }
+        }
+
+        override fun stashDesktopApps(displayId: Int) {
+            KtProtoLog.w(
+                WM_SHELL_DESKTOP_MODE,
+                "IDesktopModeImpl: stashDesktopApps is deprecated"
+            )
+        }
+
+        override fun hideStashedDesktopApps(displayId: Int) {
+            KtProtoLog.w(
+                WM_SHELL_DESKTOP_MODE,
+                "IDesktopModeImpl: hideStashedDesktopApps is deprecated"
+            )
         }
 
         override fun getVisibleTaskCount(displayId: Int): Int {

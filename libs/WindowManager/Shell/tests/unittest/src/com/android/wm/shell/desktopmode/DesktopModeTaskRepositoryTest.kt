@@ -182,18 +182,6 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     @Test
-    fun addListener_notifiesStashed() {
-        repo.setStashed(DEFAULT_DISPLAY, true)
-        val listener = TestVisibilityListener()
-        val executor = TestShellExecutor()
-        repo.addVisibleTasksListener(listener, executor)
-        executor.flushAll()
-
-        assertThat(listener.stashedOnDefaultDisplay).isTrue()
-        assertThat(listener.stashedChangesOnDefaultDisplay).isEqualTo(1)
-    }
-
-    @Test
     fun addListener_tasksOnDifferentDisplay_doesNotNotify() {
         repo.updateVisibleFreeformTasks(SECOND_DISPLAY, taskId = 1, visible = true)
         val listener = TestVisibilityListener()
@@ -400,65 +388,6 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     @Test
-    fun setStashed_stateIsUpdatedForTheDisplay() {
-        repo.setStashed(DEFAULT_DISPLAY, true)
-        assertThat(repo.isStashed(DEFAULT_DISPLAY)).isTrue()
-        assertThat(repo.isStashed(SECOND_DISPLAY)).isFalse()
-
-        repo.setStashed(DEFAULT_DISPLAY, false)
-        assertThat(repo.isStashed(DEFAULT_DISPLAY)).isFalse()
-    }
-
-    @Test
-    fun setStashed_notifyListener() {
-        val listener = TestVisibilityListener()
-        val executor = TestShellExecutor()
-        repo.addVisibleTasksListener(listener, executor)
-        repo.setStashed(DEFAULT_DISPLAY, true)
-        executor.flushAll()
-        assertThat(listener.stashedOnDefaultDisplay).isTrue()
-        assertThat(listener.stashedChangesOnDefaultDisplay).isEqualTo(1)
-
-        repo.setStashed(DEFAULT_DISPLAY, false)
-        executor.flushAll()
-        assertThat(listener.stashedOnDefaultDisplay).isFalse()
-        assertThat(listener.stashedChangesOnDefaultDisplay).isEqualTo(2)
-    }
-
-    @Test
-    fun setStashed_secondCallDoesNotNotify() {
-        val listener = TestVisibilityListener()
-        val executor = TestShellExecutor()
-        repo.addVisibleTasksListener(listener, executor)
-        repo.setStashed(DEFAULT_DISPLAY, true)
-        repo.setStashed(DEFAULT_DISPLAY, true)
-        executor.flushAll()
-        assertThat(listener.stashedChangesOnDefaultDisplay).isEqualTo(1)
-    }
-
-    @Test
-    fun setStashed_tracksPerDisplay() {
-        val listener = TestVisibilityListener()
-        val executor = TestShellExecutor()
-        repo.addVisibleTasksListener(listener, executor)
-
-        repo.setStashed(DEFAULT_DISPLAY, true)
-        executor.flushAll()
-        assertThat(listener.stashedOnDefaultDisplay).isTrue()
-        assertThat(listener.stashedOnSecondaryDisplay).isFalse()
-
-        repo.setStashed(SECOND_DISPLAY, true)
-        executor.flushAll()
-        assertThat(listener.stashedOnDefaultDisplay).isTrue()
-        assertThat(listener.stashedOnSecondaryDisplay).isTrue()
-
-        repo.setStashed(DEFAULT_DISPLAY, false)
-        executor.flushAll()
-        assertThat(listener.stashedOnDefaultDisplay).isFalse()
-        assertThat(listener.stashedOnSecondaryDisplay).isTrue()
-    }
-
-    @Test
     fun removeFreeformTask_removesTaskBoundsBeforeMaximize() {
         val taskId = 1
         repo.saveBoundsBeforeMaximize(taskId, Rect(0, 0, 200, 200))
@@ -598,12 +527,6 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         var visibleChangesOnDefaultDisplay = 0
         var visibleChangesOnSecondaryDisplay = 0
 
-        var stashedOnDefaultDisplay = false
-        var stashedOnSecondaryDisplay = false
-
-        var stashedChangesOnDefaultDisplay = 0
-        var stashedChangesOnSecondaryDisplay = 0
-
         override fun onTasksVisibilityChanged(displayId: Int, visibleTasksCount: Int) {
             when (displayId) {
                 DEFAULT_DISPLAY -> {
@@ -613,20 +536,6 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
                 SECOND_DISPLAY -> {
                     visibleTasksCountOnSecondaryDisplay = visibleTasksCount
                     visibleChangesOnSecondaryDisplay++
-                }
-                else -> fail("Visible task listener received unexpected display id: $displayId")
-            }
-        }
-
-        override fun onStashedChanged(displayId: Int, stashed: Boolean) {
-            when (displayId) {
-                DEFAULT_DISPLAY -> {
-                    stashedOnDefaultDisplay = stashed
-                    stashedChangesOnDefaultDisplay++
-                }
-                SECOND_DISPLAY -> {
-                    stashedOnSecondaryDisplay = stashed
-                    stashedChangesOnDefaultDisplay++
                 }
                 else -> fail("Visible task listener received unexpected display id: $displayId")
             }
