@@ -30,7 +30,9 @@ import javax.inject.Inject
  * succession, by delaying visual listener side effects and removal handling from BaseHeadsUpManager
  */
 @SysUISingleton
-class AvalancheController @Inject constructor(
+class AvalancheController
+@Inject
+constructor(
     dumpManager: DumpManager,
 ) : Dumpable {
 
@@ -79,7 +81,7 @@ class AvalancheController @Inject constructor(
         val fn = "[$label] => AvalancheController.update [${getKey(entry)}]"
         if (entry == null) {
             log { "Entry is NULL, stop update." }
-            return;
+            return
         }
         if (debug) {
             debugRunnableLabelMap[runnable] = label
@@ -142,9 +144,12 @@ class AvalancheController @Inject constructor(
         } else if (isShowing(entry)) {
             log { "$fn => [remove showing ${getKey(entry)}]" }
             previousHunKey = getKey(headsUpEntryShowing)
-
+            // Show the next HUN before removing this one, so that we don't tell listeners
+            // onHeadsUpPinnedModeChanged, which causes
+            // NotificationPanelViewController.updateTouchableRegion to hide the window while the
+            // HUN is animating out, resulting in a flicker.
+            showNext()
             runnable.run()
-            showNextAfterRemove()
         } else {
             log { "$fn => [removing untracked ${getKey(entry)}]" }
         }
@@ -247,7 +252,7 @@ class AvalancheController @Inject constructor(
         }
     }
 
-    private fun showNextAfterRemove() {
+    private fun showNext() {
         log { "SHOW NEXT" }
         headsUpEntryShowing = null
 
@@ -294,17 +299,21 @@ class AvalancheController @Inject constructor(
 
     private fun getStateStr(): String {
         return "SHOWING: [${getKey(headsUpEntryShowing)}]" +
-                "\nPREVIOUS: [$previousHunKey]" +
-                "\nNEXT LIST: $nextListStr" +
-                "\nNEXT MAP: $nextMapStr" +
-                "\nDROPPED: $dropSetStr"
+            "\nPREVIOUS: [$previousHunKey]" +
+            "\nNEXT LIST: $nextListStr" +
+            "\nNEXT MAP: $nextMapStr" +
+            "\nDROPPED: $dropSetStr"
     }
 
     private fun logState(reason: String) {
-        log { "\n================================================================================="}
+        log {
+            "\n================================================================================="
+        }
         log { "STATE $reason" }
         log { getStateStr() }
-        log { "=================================================================================\n"}
+        log {
+            "=================================================================================\n"
+        }
     }
 
     private val dropSetStr: String
