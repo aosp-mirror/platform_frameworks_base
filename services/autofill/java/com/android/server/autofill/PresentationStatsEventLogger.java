@@ -62,6 +62,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.service.autofill.Dataset;
 import android.text.TextUtils;
@@ -218,10 +219,12 @@ public final class PresentationStatsEventLogger {
      */
     private final int mCallingAppUid;
     private Optional<PresentationStatsEventInternal> mEventInternal;
+    private final long mSessionStartTimestamp;
 
-    private PresentationStatsEventLogger(int sessionId, int callingAppUid) {
+    private PresentationStatsEventLogger(int sessionId, int callingAppUid, long timestamp ) {
         mSessionId = sessionId;
         mCallingAppUid = callingAppUid;
+        mSessionStartTimestamp = timestamp;
         mEventInternal = Optional.empty();
     }
 
@@ -229,8 +232,8 @@ public final class PresentationStatsEventLogger {
      * Create PresentationStatsEventLogger, populated with sessionId and the callingAppUid
      */
     public static PresentationStatsEventLogger createPresentationLog(
-            int sessionId, int callingAppUid) {
-        return new PresentationStatsEventLogger(sessionId, callingAppUid);
+            int sessionId, int callingAppUid, long timestamp ) {
+        return new PresentationStatsEventLogger(sessionId, callingAppUid, timestamp);
     }
 
     public void startNewEvent() {
@@ -370,10 +373,18 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    public void maybeSetFillRequestSentTimestampMs() {
+        maybeSetFillRequestSentTimestampMs(getElapsedTime());
+    }
+
     public void maybeSetFillResponseReceivedTimestampMs(int timestamp) {
         mEventInternal.ifPresent(event -> {
             event.mFillResponseReceivedTimestampMs = timestamp;
         });
+    }
+
+    public void maybeSetFillResponseReceivedTimestampMs() {
+        maybeSetFillResponseReceivedTimestampMs(getElapsedTime());
     }
 
     public void maybeSetSuggestionSentTimestampMs(int timestamp) {
@@ -382,10 +393,18 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    public void maybeSetSuggestionSentTimestampMs() {
+        maybeSetSuggestionSentTimestampMs(getElapsedTime());
+    }
+
     public void maybeSetSuggestionPresentedTimestampMs(int timestamp) {
         mEventInternal.ifPresent(event -> {
             event.mSuggestionPresentedTimestampMs = timestamp;
         });
+    }
+
+    public void maybeSetSuggestionPresentedTimestampMs() {
+        maybeSetSuggestionPresentedTimestampMs(getElapsedTime());
     }
 
     public void maybeSetSelectedDatasetId(int selectedDatasetId) {
@@ -479,6 +498,11 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    /** Set latency_authentication_ui_display_millis as long as mEventInternal presents. */
+    public void maybeSetLatencyAuthenticationUiDisplayMillis() {
+        maybeSetLatencyAuthenticationUiDisplayMillis(getElapsedTime());
+    }
+
     /**
      * Set latency_dataset_display_millis as long as mEventInternal presents.
      */
@@ -486,6 +510,11 @@ public final class PresentationStatsEventLogger {
         mEventInternal.ifPresent(event -> {
             event.mLatencyDatasetDisplayMillis = val;
         });
+    }
+
+    /** Set latency_dataset_display_millis as long as mEventInternal presents. */
+    public void maybeSetLatencyDatasetDisplayMillis() {
+        maybeSetLatencyDatasetDisplayMillis(getElapsedTime());
     }
 
     /**
@@ -523,6 +552,14 @@ public final class PresentationStatsEventLogger {
             event.mDetectionPreference = detectionPreference;
         });
     }
+
+    /**
+     * Returns timestamp (relative to mSessionStartTimestamp)
+     */
+    private int getElapsedTime() {
+        return (int)(SystemClock.elapsedRealtime() - mSessionStartTimestamp);
+    }
+
 
     private int convertDatasetPickReason(@Dataset.DatasetEligibleReason int val) {
         switch (val) {

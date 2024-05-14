@@ -1552,7 +1552,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mLatencyBaseTime = mStartTime;
         mRequestCount = 0;
         mPresentationStatsEventLogger = PresentationStatsEventLogger.createPresentationLog(
-                sessionId, uid);
+                sessionId, uid, mLatencyBaseTime);
         mFillRequestEventLogger = FillRequestEventLogger.forSessionId(sessionId);
         mFillResponseEventLogger = FillResponseEventLogger.forSessionId(sessionId);
         mSessionCommittedEventLogger = SessionCommittedEventLogger.forSessionId(sessionId);
@@ -1574,14 +1574,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     @Override
                     public void notifyInlineUiShown(AutofillId autofillId) {
                         notifyFillUiShown(autofillId);
-
-                        synchronized (mLock) {
-                            // TODO(b/262448552): Log when chip inflates instead of here
-                            final long inlineUiShownRelativeTimestamp =
-                                    SystemClock.elapsedRealtime() - mLatencyBaseTime;
-                            mPresentationStatsEventLogger.maybeSetSuggestionPresentedTimestampMs(
-                                    (int) (inlineUiShownRelativeTimestamp));
-                        }
                     }
 
                     @Override
@@ -2677,6 +2669,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mLoggedInlineDatasetShown = true;
             }
             mService.logDatasetShown(this.id, mClientState, uiType);
+            mPresentationStatsEventLogger.maybeSetSuggestionPresentedTimestampMs();
             Slog.d(TAG, "onShown(): " + uiType);
         }
     }
@@ -4899,10 +4892,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         synchronized (mLock) {
             // Time passed since Session was created
-            final long suggestionSentRelativeTimestamp =
-                    SystemClock.elapsedRealtime() - mLatencyBaseTime;
-            mPresentationStatsEventLogger.maybeSetSuggestionSentTimestampMs(
-                    (int) (suggestionSentRelativeTimestamp));
+            mPresentationStatsEventLogger.maybeSetSuggestionSentTimestampMs();
         }
 
         final AutofillId[] ids = response.getFillDialogTriggerIds();
@@ -4919,13 +4909,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // Note: Cannot disable before requestShowFillDialog() because the method
                 //       need to check whether fill dialog enabled.
                 setFillDialogDisabled();
-                synchronized (mLock) {
-                    // Logs when fill dialog ui is shown; time since Session was created
-                    final long fillDialogUiShownRelativeTimestamp =
-                            SystemClock.elapsedRealtime() - mLatencyBaseTime;
-                    mPresentationStatsEventLogger.maybeSetSuggestionPresentedTimestampMs(
-                            (int) (fillDialogUiShownRelativeTimestamp));
-                }
                 return;
             } else {
                 setFillDialogDisabled();
@@ -4967,10 +4950,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // Log first time UI is shown.
                 mUiShownTime = SystemClock.elapsedRealtime();
                 final long duration = mUiShownTime - mStartTime;
-                // This logs when dropdown ui was shown. Timestamp is relative to
-                // when the session was created
-                mPresentationStatsEventLogger.maybeSetSuggestionPresentedTimestampMs(
-                        (int) (mUiShownTime - mLatencyBaseTime));
 
                 if (sDebug) {
                     final StringBuilder msg = new StringBuilder("1st UI for ")
