@@ -84,6 +84,7 @@ import com.android.server.display.brightness.BrightnessUtils;
 import com.android.server.display.brightness.DisplayBrightnessController;
 import com.android.server.display.brightness.clamper.BrightnessClamperController;
 import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy2;
+import com.android.server.display.brightness.strategy.DisplayBrightnessStrategyConstants;
 import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.display.color.ColorDisplayService.ReduceBrightColorsListener;
 import com.android.server.display.config.HysteresisLevels;
@@ -1440,45 +1441,52 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             brightnessState = clampScreenBrightness(brightnessState);
         }
 
-        // If there's an offload session, we need to set the initial doze brightness before
-        // the offload session starts controlling the brightness.
-        // During the transition DOZE_SUSPEND -> DOZE -> DOZE_SUSPEND, this brightness strategy
-        // will be selected again, meaning that no new brightness will be sent to the hardware and
-        // the display will stay at the brightness level set by the offload session.
-        if (Float.isNaN(brightnessState) && mFlags.isDisplayOffloadEnabled()
-                && Display.isDozeState(state) && mDisplayOffloadSession != null) {
-            if (mAutomaticBrightnessController != null
-                    && mAutomaticBrightnessStrategy.shouldUseAutoBrightness()) {
-                // Use the auto-brightness curve and the last observed lux
-                rawBrightnessState = mAutomaticBrightnessController
-                        .getAutomaticScreenBrightnessBasedOnLastUsedLux(
-                                mTempBrightnessEvent);
-            } else {
-                rawBrightnessState = getDozeBrightnessForOffload();
-                mTempBrightnessEvent.setFlags(mTempBrightnessEvent.getFlags()
-                        | BrightnessEvent.FLAG_DOZE_SCALE);
-            }
-
-            if (BrightnessUtils.isValidBrightnessValue(rawBrightnessState)) {
-                brightnessState = clampScreenBrightness(rawBrightnessState);
-                mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_INITIAL);
-
+        if (Display.isDozeState(state)) {
+            // If there's an offload session, we need to set the initial doze brightness before
+            // the offload session starts controlling the brightness.
+            // During the transition DOZE_SUSPEND -> DOZE -> DOZE_SUSPEND, this brightness strategy
+            // will be selected again, meaning that no new brightness will be sent to the hardware
+            // and the display will stay at the brightness level set by the offload session.
+            if ((Float.isNaN(brightnessState)
+                    || displayBrightnessState.getDisplayBrightnessStrategyName()
+                    .equals(DisplayBrightnessStrategyConstants.FALLBACK_BRIGHTNESS_STRATEGY_NAME))
+                    && mFlags.isDisplayOffloadEnabled()
+                    && mDisplayOffloadSession != null) {
                 if (mAutomaticBrightnessController != null
                         && mAutomaticBrightnessStrategy.shouldUseAutoBrightness()) {
-                    // Keep the brightness in the setting so that we can use it after the screen
-                    // turns on, until a lux sample becomes available. We don't do this when
-                    // auto-brightness is disabled - in that situation we still want to use
-                    // the last brightness from when the screen was on.
-                    updateScreenBrightnessSetting = currentBrightnessSetting != brightnessState;
+                    // Use the auto-brightness curve and the last observed lux
+                    rawBrightnessState = mAutomaticBrightnessController
+                            .getAutomaticScreenBrightnessBasedOnLastUsedLux(
+                                    mTempBrightnessEvent);
+                } else {
+                    rawBrightnessState = getDozeBrightnessForOffload();
+                    mTempBrightnessEvent.setFlags(mTempBrightnessEvent.getFlags()
+                            | BrightnessEvent.FLAG_DOZE_SCALE);
+                }
+
+                if (BrightnessUtils.isValidBrightnessValue(rawBrightnessState)) {
+                    brightnessState = clampScreenBrightness(rawBrightnessState);
+                    mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_INITIAL);
+
+                    if (mAutomaticBrightnessController != null
+                            && mAutomaticBrightnessStrategy.shouldUseAutoBrightness()) {
+                        // Keep the brightness in the setting so that we can use it after the screen
+                        // turns on, until a lux sample becomes available. We don't do this when
+                        // auto-brightness is disabled - in that situation we still want to use
+                        // the last brightness from when the screen was on.
+                        updateScreenBrightnessSetting = currentBrightnessSetting != brightnessState;
+                    }
                 }
             }
-        }
 
-        // Use default brightness when dozing unless overridden.
-        if (Float.isNaN(brightnessState) && Display.isDozeState(state)) {
-            rawBrightnessState = mScreenBrightnessDozeConfig;
-            brightnessState = clampScreenBrightness(rawBrightnessState);
-            mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_DEFAULT);
+            // Use default brightness when dozing unless overridden.
+            if (Float.isNaN(brightnessState)
+                    || displayBrightnessState.getDisplayBrightnessStrategyName()
+                    .equals(DisplayBrightnessStrategyConstants.FALLBACK_BRIGHTNESS_STRATEGY_NAME)) {
+                rawBrightnessState = mScreenBrightnessDozeConfig;
+                brightnessState = clampScreenBrightness(rawBrightnessState);
+                mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_DEFAULT);
+            }
         }
 
         if (!mFlags.isRefactorDisplayPowerControllerEnabled()) {
@@ -1502,7 +1510,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
 
         // Apply manual brightness.
-        if (Float.isNaN(brightnessState)) {
+        if (Float.isNaN(brightnessState) && !mFlags.isRefactorDisplayPowerControllerEnabled()) {
             rawBrightnessState = currentBrightnessSetting;
             brightnessState = clampScreenBrightness(rawBrightnessState);
             if (brightnessState != currentBrightnessSetting) {

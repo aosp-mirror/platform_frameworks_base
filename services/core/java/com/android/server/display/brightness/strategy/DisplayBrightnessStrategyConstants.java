@@ -18,4 +18,5 @@ package com.android.server.display.brightness.strategy;
 
 public class DisplayBrightnessStrategyConstants {
     static final String INVALID_BRIGHTNESS_STRATEGY_NAME = "InvalidBrightnessStrategy";
+    public static final String FALLBACK_BRIGHTNESS_STRATEGY_NAME = "FallbackBrightnessStrategy";
 }
