@@ -26,10 +26,14 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.AnimatedImageDrawable;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,11 +43,13 @@ import android.widget.ImageView;
 import androidx.preference.PreferenceViewHolder;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.settingslib.widget.flags.Flags;
 import com.android.settingslib.widget.preference.illustration.R;
 
 import com.airbnb.lottie.LottieAnimationView;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -51,9 +57,13 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 
+import java.io.ByteArrayInputStream;
+
 
 @RunWith(RobolectricTestRunner.class)
 public class IllustrationPreferenceTest {
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
     private ViewGroup mRootView;
@@ -66,6 +76,7 @@ public class IllustrationPreferenceTest {
     private final Context mContext = ApplicationProvider.getApplicationContext();
     private IllustrationPreference.OnBindListener mOnBindListener;
     private LottieAnimationView mOnBindListenerAnimationView;
+    private FrameLayout mIllustrationFrame;
 
     @Before
     public void setUp() {
@@ -75,14 +86,14 @@ public class IllustrationPreferenceTest {
         mBackgroundView = new ImageView(mContext);
         mAnimationView = spy(new LottieAnimationView(mContext));
         mMiddleGroundLayout = new FrameLayout(mContext);
-        final FrameLayout illustrationFrame = new FrameLayout(mContext);
-        illustrationFrame.setLayoutParams(
+        mIllustrationFrame = new FrameLayout(mContext);
+        mIllustrationFrame.setLayoutParams(
                 new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT));
         doReturn(mMiddleGroundLayout).when(mRootView).findViewById(R.id.middleground_layout);
         doReturn(mBackgroundView).when(mRootView).findViewById(R.id.background_view);
         doReturn(mAnimationView).when(mRootView).findViewById(R.id.lottie_view);
-        doReturn(illustrationFrame).when(mRootView).findViewById(R.id.illustration_frame);
+        doReturn(mIllustrationFrame).when(mRootView).findViewById(R.id.illustration_frame);
         mViewHolder = spy(PreferenceViewHolder.createInstanceForTests(mRootView));
 
         final AttributeSet attributeSet = Robolectric.buildAttributeSet().build();
@@ -158,16 +169,62 @@ public class IllustrationPreferenceTest {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_AUTO_HIDE_EMPTY_LOTTIE_RES)
     public void playLottieAnimationWithResource_verifyFailureListener() {
         // fake the valid lottie image
         final int fakeValidResId = 111;
         doNothing().when(mAnimationView).setImageResource(fakeValidResId);
         doReturn(null).when(mAnimationView).getDrawable();
+        doNothing().when(mAnimationView).setAnimation(fakeValidResId);
 
         mPreference.setLottieAnimationResId(fakeValidResId);
         mPreference.onBindViewHolder(mViewHolder);
 
         verify(mAnimationView).setFailureListener(any());
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_AUTO_HIDE_EMPTY_LOTTIE_RES)
+    public void handleImageWithAnimation_emptyInputStreamDisabledFlag_verifyContainerVisible() {
+        doNothing().when(mAnimationView).setImageResource(111);
+        doReturn(null).when(mAnimationView).getDrawable();
+
+        mPreference.setLottieAnimationResId(111);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mAnimationView.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mIllustrationFrame.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_AUTO_HIDE_EMPTY_LOTTIE_RES)
+    public void handleImageWithAnimation_emptyInputStreamEnabledFlag_verifyContainerHidden() {
+        Resources res = spy(mContext.getResources());
+        doReturn(res).when(mAnimationView).getResources();
+        doReturn(new ByteArrayInputStream(new byte[] {})).when(res).openRawResource(111);
+
+        mPreference.setLottieAnimationResId(111);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mAnimationView.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mIllustrationFrame.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_AUTO_HIDE_EMPTY_LOTTIE_RES)
+    public void handleImageWithAnimation_nonEmptyInputStreamEnabledFlag_verifyContainerVisible() {
+        Resources res = spy(mContext.getResources());
+        doReturn(res).when(mAnimationView).getResources();
+        doReturn(new ByteArrayInputStream(new byte[] { 1, 2, 3 })).when(res).openRawResource(111);
+        doNothing().when(mAnimationView).setImageResource(111);
+        doNothing().when(mAnimationView).setAnimation(111);
+        doReturn(null).when(mAnimationView).getDrawable();
+
+        mPreference.setLottieAnimationResId(111);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mAnimationView.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mIllustrationFrame.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
