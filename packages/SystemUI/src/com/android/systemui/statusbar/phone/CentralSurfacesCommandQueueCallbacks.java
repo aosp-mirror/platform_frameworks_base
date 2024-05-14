@@ -59,6 +59,7 @@ import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeHeaderController;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -82,6 +83,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final com.android.systemui.shade.ShadeController mShadeController;
     private final CommandQueue mCommandQueue;
     private final PanelExpansionInteractor mPanelExpansionInteractor;
+    private final Lazy<ShadeInteractor> mShadeInteractorLazy;
     private final ShadeHeaderController mShadeHeaderController;
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MetricsLogger mMetricsLogger;
@@ -121,6 +123,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             ShadeController shadeController,
             CommandQueue commandQueue,
             PanelExpansionInteractor panelExpansionInteractor,
+            Lazy<ShadeInteractor> shadeInteractorLazy,
             ShadeHeaderController shadeHeaderController,
             RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,
             MetricsLogger metricsLogger,
@@ -148,6 +151,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mShadeController = shadeController;
         mCommandQueue = commandQueue;
         mPanelExpansionInteractor = panelExpansionInteractor;
+        mShadeInteractorLazy = shadeInteractorLazy;
         mShadeHeaderController = shadeHeaderController;
         mRemoteInputQuickSettingsDisabler = remoteInputQuickSettingsDisabler;
         mMetricsLogger = metricsLogger;
@@ -487,11 +491,20 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     }
 
     @Override
-    public void togglePanel() {
-        if (mPanelExpansionInteractor.isPanelExpanded()) {
+    public void toggleNotificationsPanel() {
+        if (mShadeInteractorLazy.get().isAnyExpanded().getValue()) {
             mShadeController.animateCollapseShade();
         } else {
             mShadeController.animateExpandShade();
+        }
+    }
+
+    @Override
+    public void toggleQuickSettingsPanel() {
+        if (mShadeInteractorLazy.get().isQsExpanded().getValue()) {
+            mShadeController.animateCollapseShade();
+        } else {
+            mShadeController.animateExpandQs();
         }
     }
 

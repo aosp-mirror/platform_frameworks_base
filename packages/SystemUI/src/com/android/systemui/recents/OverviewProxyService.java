@@ -117,6 +117,8 @@ import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInterface;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -127,8 +129,6 @@ import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import dagger.Lazy;
 
 /**
  * Class to send information from overview to launcher with a binder.
@@ -414,7 +414,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void toggleNotificationPanel() {
             verifyCallerAndClearCallingIdentityPostMain("toggleNotificationPanel", () ->
-                    mCommandQueue.togglePanel());
+                    mCommandQueue.toggleNotificationsPanel());
+        }
+
+        @Override
+        public void toggleQuickSettingsPanel() {
+            verifyCallerAndClearCallingIdentityPostMain("toggleQuickSettingsPanel", () ->
+                    mCommandQueue.toggleQuickSettingsPanel());
         }
 
         private boolean verifyCaller(String reason) {
