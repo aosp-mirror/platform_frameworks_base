@@ -92,7 +92,6 @@ public class MusicFxHelper {
      *    observer will also be removed, and observer token reset to null
      */
     private class MySparseArray extends SparseArray<PackageSessions> {
-        private final String mMusicFxPackageName = "com.android.musicfx";
 
         @RequiresPermission(anyOf = {
                 android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
@@ -235,6 +234,10 @@ public class MusicFxHelper {
         if (ril != null && ril.size() != 0) {
             ResolveInfo ri = ril.get(0);
             final String senderPackageName = intent.getStringExtra(AudioEffect.EXTRA_PACKAGE_NAME);
+            if (senderPackageName == null) {
+                Log.w(TAG, "Intent package name must not be null");
+                return;
+            }
             try {
                 if (ri != null && ri.activityInfo != null && ri.activityInfo.packageName != null) {
                     final int senderUid = pm.getPackageUidAsUser(senderPackageName,
@@ -271,7 +274,7 @@ public class MusicFxHelper {
                         + senderUid + ", package: " + senderPackageName + ", abort");
                 return false;
             }
-            if (pkgSessions.mPackageName != senderPackageName) {
+            if (!pkgSessions.mPackageName.equals(senderPackageName)) {
                 Log.w(TAG, "Inconsistency package names for UID open: " + senderUid + " prev: "
                         + pkgSessions.mPackageName + ", now: " + senderPackageName);
                 return false;
@@ -303,7 +306,7 @@ public class MusicFxHelper {
             Log.e(TAG, senderPackageName + " UID " + senderUid + " does not exist in map, abort");
             return false;
         }
-        if (pkgSessions.mPackageName != senderPackageName) {
+        if (!pkgSessions.mPackageName.equals(senderPackageName)) {
             Log.w(TAG, "Inconsistency package names for UID " + senderUid + " close, prev: "
                     + pkgSessions.mPackageName + ", now: " + senderPackageName);
             return false;
