@@ -75,7 +75,7 @@ constructor(
                 scope = bgScope,
                 // Start this eagerly since the value can be accessed synchronously.
                 started = SharingStarted.Eagerly,
-                initialValue = CommunalWidgetCategories().categories
+                initialValue = CommunalWidgetCategories.defaultCategories
             )
 
     private val workProfileUserInfoCallbackFlow: Flow<UserInfo?> = conflatedCallbackFlow {

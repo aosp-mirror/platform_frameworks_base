@@ -62,3 +62,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+  name: "allow_all_widgets_on_lockscreen_by_default"
+  namespace: "systemui"
+  description: "Allow all widgets on the lock screen by default."
+  bug: "328261690"
+}
