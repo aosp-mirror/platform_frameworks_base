@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.telephony.SmsApplication;
@@ -52,13 +53,22 @@ public class PowerAllowlistBackend {
 
     private static PowerAllowlistBackend sInstance;
 
+    private final Object mAllowlistedAppsLock = new Object();
+    private final Object mSysAllowlistedAppsLock = new Object();
+    private final Object mDefaultActiveAppsLock = new Object();
+
     private final Context mAppContext;
     private final IDeviceIdleController mDeviceIdleService;
+
+    @GuardedBy("mAllowlistedAppsLock")
     private final ArraySet<String> mAllowlistedApps = new ArraySet<>();
+    @GuardedBy("mSysAllowlistedAppsLock")
     private final ArraySet<String> mSysAllowlistedApps = new ArraySet<>();
+    @GuardedBy("mDefaultActiveAppsLock")
     private final ArraySet<String> mDefaultActiveApps = new ArraySet<>();
 
-    public PowerAllowlistBackend(Context context) {
+    @VisibleForTesting
+    PowerAllowlistBackend(Context context) {
         this(context, IDeviceIdleController.Stub.asInterface(
                 ServiceManager.getService(DEVICE_IDLE_SERVICE)));
     }
@@ -71,22 +81,28 @@ public class PowerAllowlistBackend {
     }
 
     public int getAllowlistSize() {
-        return mAllowlistedApps.size();
+        synchronized (mAllowlistedAppsLock) {
+            return mAllowlistedApps.size();
+        }
     }
 
     /**
     * Check if target package is in System allow list
     */
     public boolean isSysAllowlisted(String pkg) {
-        return mSysAllowlistedApps.contains(pkg);
+        synchronized (mSysAllowlistedAppsLock) {
+            return mSysAllowlistedApps.contains(pkg);
+        }
     }
 
     /**
      * Check if target package is in allow list
      */
     public boolean isAllowlisted(String pkg, int uid) {
-        if (mAllowlistedApps.contains(pkg)) {
-            return true;
+        synchronized (mAllowlistedAppsLock) {
+            if (mAllowlistedApps.contains(pkg)) {
+                return true;
+            }
         }
 
         if (isDefaultActiveApp(pkg, uid)) {
@@ -103,9 +119,10 @@ public class PowerAllowlistBackend {
         // Additionally, check if pkg is default dialer/sms. They are considered essential apps and
         // should be automatically allowlisted (otherwise user may be able to set restriction on
         // them, leading to bad device behavior.)
-
-        if (mDefaultActiveApps.contains(pkg)) {
-            return true;
+        synchronized (mDefaultActiveAppsLock) {
+            if (mDefaultActiveApps.contains(pkg)) {
+                return true;
+            }
         }
 
         final DevicePolicyManager devicePolicyManager = mAppContext.getSystemService(
@@ -165,10 +182,12 @@ public class PowerAllowlistBackend {
      * Add app into power save allow list.
      * @param pkg packageName
      */
-    public void addApp(String pkg) {
+    public synchronized void addApp(String pkg) {
         try {
             mDeviceIdleService.addPowerSaveWhitelistApp(pkg);
-            mAllowlistedApps.add(pkg);
+            synchronized (mAllowlistedAppsLock) {
+                mAllowlistedApps.add(pkg);
+            }
         } catch (RemoteException e) {
             Log.w(TAG, "Unable to reach IDeviceIdleController", e);
         }
@@ -178,10 +197,12 @@ public class PowerAllowlistBackend {
      * Remove package from power save allow list.
      * @param pkg
      */
-    public void removeApp(String pkg) {
+    public synchronized void removeApp(String pkg) {
         try {
             mDeviceIdleService.removePowerSaveWhitelistApp(pkg);
-            mAllowlistedApps.remove(pkg);
+            synchronized (mAllowlistedAppsLock) {
+                mAllowlistedApps.remove(pkg);
+            }
         } catch (RemoteException e) {
             Log.w(TAG, "Unable to reach IDeviceIdleController", e);
         }
@@ -191,21 +212,31 @@ public class PowerAllowlistBackend {
      * Refresh all of lists
      */
     @VisibleForTesting
-    public void refreshList() {
-        mSysAllowlistedApps.clear();
-        mAllowlistedApps.clear();
-        mDefaultActiveApps.clear();
+    public synchronized void refreshList() {
+        synchronized (mSysAllowlistedAppsLock) {
+            mSysAllowlistedApps.clear();
+        }
+        synchronized (mAllowlistedAppsLock) {
+            mAllowlistedApps.clear();
+        }
+        synchronized (mDefaultActiveAppsLock) {
+            mDefaultActiveApps.clear();
+        }
         if (mDeviceIdleService == null) {
             return;
         }
         try {
             final String[] allowlistedApps = mDeviceIdleService.getFullPowerWhitelist();
-            for (String app : allowlistedApps) {
-                mAllowlistedApps.add(app);
+            synchronized (mAllowlistedAppsLock) {
+                for (String app : allowlistedApps) {
+                    mAllowlistedApps.add(app);
+                }
             }
             final String[] sysAllowlistedApps = mDeviceIdleService.getSystemPowerWhitelist();
-            for (String app : sysAllowlistedApps) {
-                mSysAllowlistedApps.add(app);
+            synchronized (mSysAllowlistedAppsLock) {
+                for (String app : sysAllowlistedApps) {
+                    mSysAllowlistedApps.add(app);
+                }
             }
             final boolean hasTelephony = mAppContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TELEPHONY);
@@ -216,14 +247,18 @@ public class PowerAllowlistBackend {
 
             if (hasTelephony) {
                 if (defaultSms != null) {
-                    mDefaultActiveApps.add(defaultSms.getPackageName());
+                    synchronized (mDefaultActiveAppsLock) {
+                        mDefaultActiveApps.add(defaultSms.getPackageName());
+                    }
                 }
                 if (!TextUtils.isEmpty(defaultDialer)) {
-                    mDefaultActiveApps.add(defaultDialer);
+                    synchronized (mDefaultActiveAppsLock) {
+                        mDefaultActiveApps.add(defaultDialer);
+                    }
                 }
             }
-        } catch (RemoteException e) {
-            Log.w(TAG, "Unable to reach IDeviceIdleController", e);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to invoke refreshList()", e);
         }
     }
 
@@ -232,10 +267,11 @@ public class PowerAllowlistBackend {
      * @return a PowerAllowlistBackend object
      */
     public static PowerAllowlistBackend getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new PowerAllowlistBackend(context);
+        synchronized (PowerAllowlistBackend.class) {
+            if (sInstance == null) {
+                sInstance = new PowerAllowlistBackend(context);
+            }
+            return sInstance;
         }
-        return sInstance;
     }
-
 }
