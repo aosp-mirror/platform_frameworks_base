@@ -21,6 +21,11 @@ import static android.content.pm.PackageManager.GET_CONFIGURATIONS;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.os.Binder.getCallingUid;
 
+import static com.android.internal.R.array.config_companionDeviceCerts;
+import static com.android.internal.R.array.config_companionDevicePackages;
+import static com.android.internal.R.array.config_companionPermSyncEnabledCerts;
+import static com.android.internal.R.array.config_companionPermSyncEnabledPackages;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -185,15 +190,30 @@ public final class PackageUtils {
      */
     public static boolean isPackageAllowlisted(Context context,
             PackageManagerInternal packageManagerInternal, @NonNull String packageName) {
-        final String[] allowlistedPackages = context.getResources()
-                .getStringArray(com.android.internal.R.array.config_companionDevicePackages);
+        return isPackageAllowlisted(context, packageManagerInternal, packageName,
+                config_companionDevicePackages, config_companionDeviceCerts);
+    }
+
+    /**
+     * Check if perm sync is allowlisted and auto-enabled for the package.
+     */
+    public static boolean isPermSyncAutoEnabled(Context context,
+            PackageManagerInternal packageManagerInternal, String packageName) {
+        return isPackageAllowlisted(context, packageManagerInternal, packageName,
+                config_companionPermSyncEnabledPackages, config_companionPermSyncEnabledCerts);
+    }
+
+    private static boolean isPackageAllowlisted(Context context,
+            PackageManagerInternal packageManagerInternal, String packageName,
+            int packagesConfig, int certsConfig) {
+        final String[] allowlistedPackages = context.getResources().getStringArray(packagesConfig);
         if (!ArrayUtils.contains(allowlistedPackages, packageName)) {
             Slog.d(TAG, packageName + " is not allowlisted.");
             return false;
         }
 
         final String[] allowlistedPackagesSignatureDigests = context.getResources()
-                .getStringArray(com.android.internal.R.array.config_companionDeviceCerts);
+                .getStringArray(certsConfig);
         final Set<String> allowlistedSignatureDigestsForRequestingPackage = new HashSet<>();
         for (int i = 0; i < allowlistedPackages.length; i++) {
             if (allowlistedPackages[i].equals(packageName)) {

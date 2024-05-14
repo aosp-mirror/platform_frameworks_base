@@ -4652,6 +4652,19 @@
      -->
     <string-array name="config_companionDeviceCerts" translatable="false"></string-array>
 
+    <!-- A list of packages that auto-enable permissions sync feature.
+         Note that config_companionPermSyncEnabledPackages and config_companionPermSyncEnabledCerts
+         are parallel arrays.
+     -->
+    <string-array name="config_companionPermSyncEnabledPackages" translatable="false"></string-array>
+
+    <!-- A list of SHA256 Certificates corresponding to config_companionPermSyncEnabledPackages.
+         Note that config_companionPermSyncEnabledPackages and config_companionPermSyncEnabledCerts
+         are parallel arrays.
+         Example: "1A:2B:3C:4D"
+     -->
+    <string-array name="config_companionPermSyncEnabledCerts" translatable="false"></string-array>
+
     <!-- The package name for the default wellbeing app.
          This package must be trusted, as it has the permissions to control other applications
          on the device.

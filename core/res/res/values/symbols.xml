@@ -675,6 +675,8 @@
   <java-symbol type="string" name="config_companionDeviceManagerPackage" />
   <java-symbol type="array" name="config_companionDevicePackages" />
   <java-symbol type="array" name="config_companionDeviceCerts" />
+  <java-symbol type="array" name="config_companionPermSyncEnabledPackages" />
+  <java-symbol type="array" name="config_companionPermSyncEnabledCerts" />
   <java-symbol type="string" name="config_default_dns_server" />
   <java-symbol type="string" name="config_ethernet_iface_regex" />
   <java-symbol type="string" name="not_checked" />
