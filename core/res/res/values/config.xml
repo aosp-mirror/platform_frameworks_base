@@ -4717,6 +4717,13 @@
     <!-- The component name for the default system on-device sandboxed inference service. -->
     <string name="config_defaultOnDeviceSandboxedInferenceService" translatable="false"></string>
 
+    <!-- The broadcast intent name for notifying when the on-device model is loading  -->
+    <string name="config_onDeviceIntelligenceModelLoadedBroadcastKey" translatable="false"></string>
+
+    <!-- The broadcast intent name for notifying when the on-device model has been unloaded  -->
+    <string name="config_onDeviceIntelligenceModelUnloadedBroadcastKey" translatable="false"></string>
+
+
     <!-- Component name that accepts ACTION_SEND intents for requesting ambient context consent for
          wearable sensing. -->
     <string translatable="false" name="config_defaultWearableSensingConsentComponent"></string>
