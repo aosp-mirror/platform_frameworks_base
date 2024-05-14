@@ -423,7 +423,6 @@ class BackNavigationController {
         // Searching previous
         final ActivityRecord prevActivity = currentTask.getActivity((below) -> !below.finishing,
                 currentActivity, false /*includeBoundary*/, true /*traverseTopToBottom*/);
-
         final TaskFragment currTF = currentActivity.getTaskFragment();
         if (currTF != null && currTF.asTask() == null) {
             // The currentActivity is embedded, search for the candidate previous activities.
@@ -432,13 +431,34 @@ class BackNavigationController {
                 outPrevActivities.add(prevActivity);
                 return true;
             }
-            if (currTF.getAdjacentTaskFragment() != null) {
-                // The two TFs are adjacent (visually displayed side-by-side), search if any
-                // activity below the lowest one
-                // If companion, those two TF will be closed together.
-                if (currTF.getCompanionTaskFragment() != null) {
+            if (currTF.getAdjacentTaskFragment() == null) {
+                final TaskFragment nextTF = findNextTaskFragment(currentTask, currTF);
+                if (isSecondCompanionToFirst(currTF, nextTF)) {
+                    // TF is isStacked, search bottom activity from companion TF.
+                    //
+                    // Sample hierarchy: search for underPrevious if any.
+                    //     Current TF
+                    //     Companion TF (bottomActivityInCompanion)
+                    //     Bottom Activity not inside companion TF (underPrevious)
+                    // find bottom activity in Companion TF.
+                    final ActivityRecord bottomActivityInCompanion = nextTF.getActivity(
+                            (below) -> !below.finishing, false /* traverseTopToBottom */);
+                    final ActivityRecord underPrevious = currentTask.getActivity(
+                            (below) -> !below.finishing, bottomActivityInCompanion,
+                            false /*includeBoundary*/, true /*traverseTopToBottom*/);
+                    if (underPrevious != null) {
+                        outPrevActivities.add(underPrevious);
+                        addPreviousAdjacentActivityIfExist(underPrevious, outPrevActivities);
+                    }
+                    return true;
+                }
+            } else {
+                // If adjacent TF has companion to current TF, those two TF will be closed together.
+                final TaskFragment adjacentTF = currTF.getAdjacentTaskFragment();
+                if (isSecondCompanionToFirst(currTF, adjacentTF)) {
+                    // The two TFs are adjacent (visually displayed side-by-side), search if any
+                    // activity below the lowest one.
                     final WindowContainer commonParent = currTF.getParent();
-                    final TaskFragment adjacentTF = currTF.getAdjacentTaskFragment();
                     final TaskFragment lowerTF = commonParent.mChildren.indexOf(currTF)
                             < commonParent.mChildren.indexOf(adjacentTF)
                             ? currTF : adjacentTF;
@@ -452,25 +472,6 @@ class BackNavigationController {
                 // Unable to predict if no companion, it can only close current activity and make
                 // prev Activity full screened.
                 return false;
-            } else if (currTF.getCompanionTaskFragment() != null) {
-                // TF is isStacked, search bottom activity from companion TF.
-                //
-                // Sample hierarchy: search for underPrevious if any.
-                //     Current TF
-                //     Companion TF (bottomActivityInCompanion)
-                //     Bottom Activity not inside companion TF (underPrevious)
-                final TaskFragment companionTF = currTF.getCompanionTaskFragment();
-                // find bottom activity in Companion TF.
-                final ActivityRecord bottomActivityInCompanion = companionTF.getActivity(
-                        (below) -> !below.finishing, false /* traverseTopToBottom */);
-                final ActivityRecord underPrevious = currentTask.getActivity(
-                        (below) -> !below.finishing, bottomActivityInCompanion,
-                        false /*includeBoundary*/, true /*traverseTopToBottom*/);
-                if (underPrevious != null) {
-                    outPrevActivities.add(underPrevious);
-                    addPreviousAdjacentActivityIfExist(underPrevious, outPrevActivities);
-                }
-                return true;
             }
         }
 
@@ -483,6 +484,24 @@ class BackNavigationController {
         addPreviousAdjacentActivityIfExist(prevActivity, outPrevActivities);
         outPrevActivities.add(prevActivity);
         return true;
+    }
+
+    private static TaskFragment findNextTaskFragment(@NonNull Task currentTask,
+            @NonNull TaskFragment topTF) {
+        final int topIndex = currentTask.mChildren.indexOf(topTF);
+        if (topIndex <= 0) {
+            return null;
+        }
+        final WindowContainer next = currentTask.mChildren.get(topIndex - 1);
+        return next.asTaskFragment();
+    }
+
+    /**
+     * Whether the second TF has set companion to first TF.
+     * When set, the second TF will be removed by organizer if the first TF is removed.
+     */
+    private static boolean isSecondCompanionToFirst(TaskFragment first, TaskFragment second) {
+        return second != null && second.getCompanionTaskFragment() == first;
     }
 
     private static void addPreviousAdjacentActivityIfExist(@NonNull ActivityRecord prevActivity,

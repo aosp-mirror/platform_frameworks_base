@@ -970,6 +970,10 @@ final class LetterboxUiController {
         }
     }
 
+    boolean isLetterboxEducationEnabled() {
+        return mLetterboxConfiguration.getIsEducationEnabled();
+    }
+
     /**
      * Whether we use split screen aspect ratio for the activity when camera compat treatment
      * is active because the corresponding config is enabled and activity supports resizing.
@@ -1373,7 +1377,8 @@ final class LetterboxUiController {
         }
 
         final boolean shouldShowLetterboxUi =
-                (mActivityRecord.isInLetterboxAnimation() || isSurfaceVisible(mainWindow))
+                (mActivityRecord.isInLetterboxAnimation() || mActivityRecord.isVisible()
+                        || mActivityRecord.isVisibleRequested())
                 && mainWindow.areAppWindowBoundsLetterboxed()
                 // Check for FLAG_SHOW_WALLPAPER explicitly instead of using
                 // WindowContainer#showWallpaper because the later will return true when this
@@ -1383,12 +1388,6 @@ final class LetterboxUiController {
         mLastShouldShowLetterboxUi = shouldShowLetterboxUi;
 
         return shouldShowLetterboxUi;
-    }
-
-    @VisibleForTesting
-    boolean isSurfaceVisible(WindowState mainWindow) {
-        return mainWindow.isOnScreen() && (mActivityRecord.isVisible()
-                || mActivityRecord.isVisibleRequested());
     }
 
     private Color getLetterboxBackgroundColor() {

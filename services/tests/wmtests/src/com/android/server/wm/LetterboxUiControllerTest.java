@@ -609,7 +609,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         doReturn(false).when(mActivity).isInLetterboxAnimation();
         assertEquals(expectedRadius, mController.getRoundedCornersRadius(mainWindow));
 
-        doReturn(false).when(mainWindow).isOnScreen();
+        doReturn(false).when(mActivity).isVisibleRequested();
+        doReturn(false).when(mActivity).isVisible();
         assertEquals(0, mController.getRoundedCornersRadius(mainWindow));
 
         doReturn(true).when(mActivity).isInLetterboxAnimation();
@@ -1579,6 +1580,12 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         assertTrue(mController.allowVerticalReachabilityForThinLetterbox());
         doReturn(false).when(mController).isHorizontalThinLetterboxed();
         assertTrue(mController.allowHorizontalReachabilityForThinLetterbox());
+    }
+
+    @Test
+    public void testIsLetterboxEducationEnabled() {
+        mController.isLetterboxEducationEnabled();
+        verify(mLetterboxConfiguration).getIsEducationEnabled();
     }
 
     private void mockThatProperty(String propertyName, boolean value) throws Exception {
