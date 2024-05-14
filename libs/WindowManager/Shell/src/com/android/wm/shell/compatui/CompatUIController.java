@@ -188,6 +188,11 @@ public class CompatUIController implements OnDisplaysChangedListener,
      */
     private boolean mHasShownUserAspectRatioSettingsButton = false;
 
+    /**
+     * This is true when the rechability education is displayed for the first time.
+     */
+    private boolean mIsFirstReachabilityEducationRunning;
+
     public CompatUIController(@NonNull Context context,
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
@@ -252,9 +257,35 @@ public class CompatUIController implements OnDisplaysChangedListener,
             removeLayouts(taskInfo.taskId);
             return;
         }
-
+        // We're showing the first reachability education so we ignore incoming TaskInfo
+        // until the education flow has completed or we double tap.
+        if (mIsFirstReachabilityEducationRunning) {
+            return;
+        }
+        if (taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed) {
+            if (taskInfo.appCompatTaskInfo.isLetterboxEducationEnabled) {
+                createOrUpdateLetterboxEduLayout(taskInfo, taskListener);
+            } else if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap) {
+                // In this case the app is letterboxed and the letterbox education
+                // is disabled. In this case we need to understand if it's the first
+                // time we show the reachability education. When this is happening
+                // we need to ignore all the incoming TaskInfo until the education
+                // completes. If we come from a double tap we follow the normal flow.
+                final boolean topActivityPillarboxed =
+                        taskInfo.appCompatTaskInfo.isTopActivityPillarboxed();
+                final boolean isFirstTimeHorizontalReachabilityEdu = topActivityPillarboxed
+                        && !mCompatUIConfiguration.hasSeenHorizontalReachabilityEducation(taskInfo);
+                final boolean isFirstTimeVerticalReachabilityEdu = !topActivityPillarboxed
+                        && !mCompatUIConfiguration.hasSeenVerticalReachabilityEducation(taskInfo);
+                if (isFirstTimeHorizontalReachabilityEdu || isFirstTimeVerticalReachabilityEdu) {
+                    mIsFirstReachabilityEducationRunning = true;
+                    mCompatUIConfiguration.setSeenLetterboxEducation(taskInfo.userId);
+                    createOrUpdateReachabilityEduLayout(taskInfo, taskListener);
+                    return;
+                }
+            }
+        }
         createOrUpdateCompatLayout(taskInfo, taskListener);
-        createOrUpdateLetterboxEduLayout(taskInfo, taskListener);
         createOrUpdateRestartDialogLayout(taskInfo, taskListener);
         if (mCompatUIConfiguration.getHasSeenLetterboxEducation(taskInfo.userId)) {
             createOrUpdateReachabilityEduLayout(taskInfo, taskListener);
@@ -589,6 +620,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private void onInitialReachabilityEduDismissed(@NonNull TaskInfo taskInfo,
             @NonNull ShellTaskOrganizer.TaskListener taskListener) {
         // We need to update the UI otherwise it will not be shown until the user relaunches the app
+        mIsFirstReachabilityEducationRunning = false;
         createOrUpdateUserAspectRatioSettingsLayout(taskInfo, taskListener);
     }
 
