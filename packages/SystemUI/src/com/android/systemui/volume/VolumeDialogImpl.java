@@ -282,7 +282,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     @GuardedBy("mSafetyWarningLock")
     private CsdWarningDialog mCsdDialog;
     private boolean mHovering = false;
-    private final boolean mShowActiveStreamOnly;
+    private final boolean mIsTv;
     private boolean mConfigChanged = false;
     private boolean mIsAnimatingDismiss = false;
     private boolean mHasSeenODICaptionsTooltip;
@@ -343,7 +343,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mConfigurationController = configurationController;
         mMediaOutputDialogManager = mediaOutputDialogManager;
         mCsdWarningDialogFactory = csdWarningDialogFactory;
-        mShowActiveStreamOnly = showActiveStreamOnly();
+        mIsTv = isTv();
         mHasSeenODICaptionsTooltip =
                 Prefs.getBoolean(context, Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, false);
         mShowLowMediaVolumeIcon =
@@ -1632,7 +1632,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         Trace.endSection();
     }
 
-    private boolean showActiveStreamOnly() {
+    private boolean isTv() {
         return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)
                 || mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEVISION);
     }
@@ -1644,7 +1644,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             return true;
         }
 
-        if (!mShowActiveStreamOnly) {
+        if (!mIsTv) {
             if (row.stream == AudioSystem.STREAM_ACCESSIBILITY) {
                 return mShowA11yStream;
             }
@@ -2089,6 +2089,11 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         }
         final int newProgress = getProgressFromVolume(row.ss, row.slider, vlevel);
         if (progress != newProgress) {
+            if (mIsTv) {
+                // don't animate slider on TVs
+                row.slider.setProgress(newProgress, false);
+                return;
+            }
             if (mShowing && rowVisible) {
                 // animate!
                 if (row.anim != null && row.anim.isRunning()
