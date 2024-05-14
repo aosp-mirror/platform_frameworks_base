@@ -34,6 +34,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -603,7 +604,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             mPromptInfo.setIsForLegacyFingerprintManager(sensorId);
             return this;
         }
-        // LINT.ThenChange(frameworks/base/core/java/android/hardware/biometrics/PromptInfo.java)
 
         /**
          * Set if emergency call button should show, for example if biometrics are
@@ -613,10 +613,31 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @hide
          */
         @NonNull
+        @RequiresPermission(anyOf = {TEST_BIOMETRIC, USE_BIOMETRIC_INTERNAL})
         public Builder setShowEmergencyCallButton(boolean showEmergencyCallButton) {
             mPromptInfo.setShowEmergencyCallButton(showEmergencyCallButton);
             return this;
         }
+
+        /**
+         * Set caller's component name for getting logo icon/description. This should only be used
+         * by ConfirmDeviceCredentialActivity, see b/337082634 for more context.
+         *
+         * @param componentNameForConfirmDeviceCredentialActivity set the component name for
+         *                                                        ConfirmDeviceCredentialActivity.
+         * @return This builder.
+         * @hide
+         */
+        @NonNull
+        @RequiresPermission(anyOf = {TEST_BIOMETRIC, USE_BIOMETRIC_INTERNAL})
+        public Builder setComponentNameForConfirmDeviceCredentialActivity(
+                ComponentName componentNameForConfirmDeviceCredentialActivity) {
+            mPromptInfo.setComponentNameForConfirmDeviceCredentialActivity(
+                    componentNameForConfirmDeviceCredentialActivity);
+            return this;
+        }
+
+        // LINT.ThenChange(frameworks/base/core/java/android/hardware/biometrics/PromptInfo.java)
 
         /**
          * Creates a {@link BiometricPrompt}.
