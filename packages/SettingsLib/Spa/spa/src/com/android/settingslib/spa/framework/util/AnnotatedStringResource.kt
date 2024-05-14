@@ -27,13 +27,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-
-const val URL_SPAN_TAG = "URL_SPAN_TAG"
 
 @Composable
 fun annotatedStringResource(@StringRes id: Int): AnnotatedString {
@@ -97,12 +96,9 @@ private fun AnnotatedString.Builder.addUrlSpan(
     start: Int,
     end: Int,
 ) {
-    addStyle(
-        SpanStyle(color = urlSpanColor, textDecoration = TextDecoration.Underline),
-        start,
-        end,
+    val url = LinkAnnotation.Url(
+        url = urlSpan.url,
+        style = SpanStyle(color = urlSpanColor, textDecoration = TextDecoration.Underline),
     )
-    if (!urlSpan.url.isNullOrEmpty()) {
-        addStringAnnotation(URL_SPAN_TAG, urlSpan.url, start, end)
-    }
+    addLink(url, start, end)
 }
