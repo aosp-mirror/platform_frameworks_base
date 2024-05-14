@@ -19,6 +19,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.fail;
 
+import com.android.hoststubgen.test.tinyframework.R.Nested;
 import com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses.SubClass;
 
 import org.junit.Rule;
@@ -327,5 +328,10 @@ public class TinyFrameworkClassTest {
     public void testAidlHeuristics() {
         assertThat(IPretendingAidl.Stub.addOne(1)).isEqualTo(2);
         assertThat(IPretendingAidl.Stub.Proxy.addTwo(1)).isEqualTo(3);
+    }
+
+    @Test
+    public void testRFileHeuristics() {
+        assertThat(Nested.ARRAY.length).isEqualTo(1);
     }
 }
