@@ -166,12 +166,12 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     @Test
     fun testOnMediaDataRemoved_unregistersPlaybackListener() {
         mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
-        mediaTimeoutListener.onMediaDataRemoved(KEY)
+        mediaTimeoutListener.onMediaDataRemoved(KEY, false)
         verify(mediaController).unregisterCallback(anyObject())
 
         // Ignores duplicate requests
         clearInvocations(mediaController)
-        mediaTimeoutListener.onMediaDataRemoved(KEY)
+        mediaTimeoutListener.onMediaDataRemoved(KEY, false)
         verify(mediaController, never()).unregisterCallback(anyObject())
     }
 
@@ -181,7 +181,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
         assertThat(executor.numPending()).isEqualTo(1)
         // WHEN the media is removed
-        mediaTimeoutListener.onMediaDataRemoved(KEY)
+        mediaTimeoutListener.onMediaDataRemoved(KEY, false)
         // THEN the timeout runnable is cancelled
         assertThat(executor.numPending()).isEqualTo(0)
     }
@@ -398,7 +398,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         // WHEN we have a resume control
         testOnMediaDataLoaded_resumption_registersTimeout()
         // AND the media is removed
-        mediaTimeoutListener.onMediaDataRemoved(PACKAGE)
+        mediaTimeoutListener.onMediaDataRemoved(PACKAGE, false)
 
         // THEN the timeout runnable is cancelled
         assertThat(executor.numPending()).isEqualTo(0)

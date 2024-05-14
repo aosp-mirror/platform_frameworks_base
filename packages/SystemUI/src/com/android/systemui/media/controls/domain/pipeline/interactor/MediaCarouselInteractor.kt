@@ -205,12 +205,12 @@ constructor(
         )
     }
 
-    override fun dismissMediaData(key: String, delay: Long): Boolean {
-        return mediaDataProcessor.dismissMediaData(key, delay)
+    override fun dismissMediaData(key: String, delay: Long, userInitiated: Boolean): Boolean {
+        return mediaDataProcessor.dismissMediaData(key, delay, userInitiated)
     }
 
     fun removeMediaControl(instanceId: InstanceId, delay: Long) {
-        mediaDataProcessor.dismissMediaData(instanceId, delay)
+        mediaDataProcessor.dismissMediaData(instanceId, delay, userInitiated = false)
     }
 
     override fun dismissSmartspaceRecommendation(key: String, delay: Long) {
