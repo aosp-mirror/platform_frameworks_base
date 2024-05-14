@@ -2352,10 +2352,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     @Override
-    public void onLayoutSizeChanging(SplitLayout layout, int offsetX, int offsetY) {
+    public void onLayoutSizeChanging(SplitLayout layout, int offsetX, int offsetY,
+            boolean shouldUseParallaxEffect) {
         final SurfaceControl.Transaction t = mTransactionPool.acquire();
         t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
-        updateSurfaceBounds(layout, t, true /* applyResizingOffset */);
+        updateSurfaceBounds(layout, t, shouldUseParallaxEffect);
         getMainStageBounds(mTempRect1);
         getSideStageBounds(mTempRect2);
         mMainStage.onResizing(mTempRect1, mTempRect2, t, offsetX, offsetY, mShowDecorImmediately);
