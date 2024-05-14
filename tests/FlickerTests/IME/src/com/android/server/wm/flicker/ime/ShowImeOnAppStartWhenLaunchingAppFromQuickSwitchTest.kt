@@ -35,8 +35,8 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test IME windows switching with 2-Buttons or gestural navigation.
- * To run this test: `atest FlickerTestsIme2:ShowImeOnAppStartWhenLaunchingAppFromQuickSwitchTest`
+ * Test IME windows switching with 2-Buttons or gestural navigation. To run this test: `atest
+ * FlickerTests:SwitchImeWindowsFromGestureNavTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)

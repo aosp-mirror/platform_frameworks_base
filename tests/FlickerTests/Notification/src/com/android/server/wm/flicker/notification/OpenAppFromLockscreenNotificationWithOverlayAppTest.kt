@@ -40,8 +40,7 @@ import org.junit.runners.Parameterized
  *
  * This test assumes the device doesn't have AOD enabled
  *
- * To run this test:
- * `atest FlickerTestsNotification:OpenAppFromLockscreenNotificationWithOverlayAppTest`
+ * To run this test: `atest FlickerTests:OpenAppFromLockNotificationWithLockOverlayApp`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

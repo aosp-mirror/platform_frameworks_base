@@ -125,7 +125,7 @@ public class BubbleHelper {
                 .setContentTitle("BubbleChat")
                 .setContentIntent(PendingIntent.getActivity(mContext, 0,
                         new Intent(mContext, LaunchBubbleActivity.class),
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE))
+                        PendingIntent.FLAG_UPDATE_CURRENT))
                 .setStyle(new Notification.MessagingStyle(chatBot)
                         .setConversationTitle("BubbleChat")
                         .addMessage("BubbleChat",
@@ -140,7 +140,7 @@ public class BubbleHelper {
         Intent target = new Intent(mContext, BubbleActivity.class);
         target.putExtra(EXTRA_BUBBLE_NOTIF_ID, info.id);
         PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, info.id, target,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+                PendingIntent.FLAG_UPDATE_CURRENT);
 
         return new Notification.BubbleMetadata.Builder()
                 .setIntent(bubbleIntent)

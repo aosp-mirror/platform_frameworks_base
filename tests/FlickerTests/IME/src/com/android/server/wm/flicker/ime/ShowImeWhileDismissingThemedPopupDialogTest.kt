@@ -41,7 +41,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test IME snapshot mechanism won't apply when transitioning from non-IME focused dialog activity.
- * To run this test: `atest FlickerTestsIme2:ShowImeWhileDismissingThemedPopupDialogTest`
+ * To run this test: `atest FlickerTests:LaunchAppShowImeAndDialogThemeAppTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)

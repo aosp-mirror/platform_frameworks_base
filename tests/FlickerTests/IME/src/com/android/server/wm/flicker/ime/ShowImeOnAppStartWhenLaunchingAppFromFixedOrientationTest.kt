@@ -38,9 +38,8 @@ import org.junit.runners.Parameterized
 
 /**
  * Test IME window layer will become visible when switching from the fixed orientation activity
- * (e.g. Launcher activity).
- * To run this test:
- * `atest FlickerTestsIme2:ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest`
+ * (e.g. Launcher activity). To run this test: `atest
+ * FlickerTests:ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)

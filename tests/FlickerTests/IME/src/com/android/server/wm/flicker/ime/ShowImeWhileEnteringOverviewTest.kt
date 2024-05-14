@@ -37,8 +37,8 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test IME window layer will be associated with the app task when going to the overview screen.
- * To run this test: `atest FlickerTestsIme2:ShowImeWhileEnteringOverviewTest`
+ * Test IME window layer will be associated with the app task when going to the overview screen. To
+ * run this test: `atest FlickerTests:OpenImeWindowToOverViewTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
