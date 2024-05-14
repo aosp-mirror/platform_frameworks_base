@@ -93,3 +93,11 @@ flag {
     description: "Enable NFC OEM extension support"
     bug: "331206243"
 }
+
+flag {
+    name: "nfc_state_change"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable nfc state change API"
+    bug: "319934052"
+}
