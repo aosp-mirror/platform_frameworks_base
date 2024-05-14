@@ -1015,13 +1015,27 @@ public final class SatelliteManager {
      * @hide
      */
     public static final int DATAGRAM_TYPE_KEEP_ALIVE = 3;
+    /**
+     * Datagram type indicating that the datagram to be sent or received is of type SOS message and
+     * is the last message to emergency service provider indicating still needs help.
+     * @hide
+     */
+    public static final int DATAGRAM_TYPE_LAST_SOS_MESSAGE_STILL_NEED_HELP = 4;
+    /**
+     * Datagram type indicating that the datagram to be sent or received is of type SOS message and
+     * is the last message to emergency service provider indicating no more help is needed.
+     * @hide
+     */
+    public static final int DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED = 5;
 
     /** @hide */
     @IntDef(prefix = "DATAGRAM_TYPE_", value = {
             DATAGRAM_TYPE_UNKNOWN,
             DATAGRAM_TYPE_SOS_MESSAGE,
             DATAGRAM_TYPE_LOCATION_SHARING,
-            DATAGRAM_TYPE_KEEP_ALIVE
+            DATAGRAM_TYPE_KEEP_ALIVE,
+            DATAGRAM_TYPE_LAST_SOS_MESSAGE_STILL_NEED_HELP,
+            DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DatagramType {}
