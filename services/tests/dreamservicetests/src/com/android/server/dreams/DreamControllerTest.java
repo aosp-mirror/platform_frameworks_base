@@ -273,28 +273,36 @@ public class DreamControllerTest {
     }
 
     @Test
-    public void setDreamHasFocus_true_dreamHasFocus() {
+    public void setDreamIsObscured_true_dreamIsNotFrontmost() {
         mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
                 0 /*userId*/, null /*wakeLock*/, mOverlayName, "test" /*reason*/);
 
-        mDreamController.setDreamHasFocus(true);
-        assertTrue(mDreamController.dreamHasFocus());
+        mDreamController.setDreamIsObscured(true);
+        assertFalse(mDreamController.dreamIsFrontmost());
     }
 
     @Test
-    public void setDreamHasFocus_false_dreamDoesNotHaveFocus() {
+    public void setDreamIsObscured_false_dreamIsFrontmost() {
         mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
                 0 /*userId*/, null /*wakeLock*/, mOverlayName, "test" /*reason*/);
 
-        mDreamController.setDreamHasFocus(false);
-        assertFalse(mDreamController.dreamHasFocus());
+        mDreamController.setDreamIsObscured(false);
+        assertTrue(mDreamController.dreamIsFrontmost());
     }
 
     @Test
-    public void setDreamHasFocus_notDreaming_dreamDoesNotHaveFocus() {
-        mDreamController.setDreamHasFocus(true);
-        // Dream still doesn't have focus because it was never started.
-        assertFalse(mDreamController.dreamHasFocus());
+    public void setDreamIsObscured_notDreaming_dreamIsNotFrontmost() {
+        mDreamController.setDreamIsObscured(true);
+        // Dream still isn't frontmost because it was never started.
+        assertFalse(mDreamController.dreamIsFrontmost());
+    }
+
+    @Test
+    public void startDream_dreamIsFrontmost() {
+        mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
+                0 /*userId*/, null /*wakeLock*/, mOverlayName, "test" /*reason*/);
+
+        assertTrue(mDreamController.dreamIsFrontmost());
     }
 
     private ServiceConnection captureServiceConnection() {

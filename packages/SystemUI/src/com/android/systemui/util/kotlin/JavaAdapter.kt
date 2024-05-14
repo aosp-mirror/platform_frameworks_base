@@ -97,3 +97,12 @@ fun <T> collectFlow(
 fun <A, B, R> combineFlows(flow1: Flow<A>, flow2: Flow<B>, bifunction: (A, B) -> R): Flow<R> {
     return combine(flow1, flow2, bifunction)
 }
+
+fun <A, B, C, R> combineFlows(
+    flow1: Flow<A>,
+    flow2: Flow<B>,
+    flow3: Flow<C>,
+    trifunction: (A, B, C) -> R
+): Flow<R> {
+    return combine(flow1, flow2, flow3, trifunction)
+}
