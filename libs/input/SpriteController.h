@@ -174,7 +174,7 @@ private:
         int32_t layer{0};
         float alpha{1.0f};
         SpriteTransformationMatrix transformationMatrix;
-        ui::LogicalDisplayId displayId{ui::ADISPLAY_ID_DEFAULT};
+        ui::LogicalDisplayId displayId{ui::LogicalDisplayId::DEFAULT};
 
         sp<SurfaceControl> surfaceControl;
         int32_t surfaceWidth{0};
