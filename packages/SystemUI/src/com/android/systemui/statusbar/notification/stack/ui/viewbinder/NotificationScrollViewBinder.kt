@@ -79,8 +79,6 @@ constructor(
         }
 
         launch { viewModel.maxAlpha.collect { view.setMaxAlpha(it) } }
-        launch { viewModel.stackTop.collect { view.setStackTop(it) } }
-        launch { viewModel.stackBottom.collect { view.setStackBottom(it) } }
         launch { viewModel.scrolledToTop.collect { view.setScrolledToTop(it) } }
         launch { viewModel.headsUpTop.collect { view.setHeadsUpTop(it) } }
         launch { viewModel.expandFraction.collect { view.setExpandFraction(it.coerceIn(0f, 1f)) } }

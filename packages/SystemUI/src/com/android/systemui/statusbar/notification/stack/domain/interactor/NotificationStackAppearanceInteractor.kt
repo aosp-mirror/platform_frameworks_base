@@ -72,12 +72,6 @@ constructor(
     val alphaForBrightnessMirror: StateFlow<Float> =
         placeholderRepository.alphaForBrightnessMirror.asStateFlow()
 
-    /** The y-coordinate in px of top of the contents of the notification stack. */
-    val stackTop: StateFlow<Float> = placeholderRepository.stackTop.asStateFlow()
-
-    /** The y-coordinate in px of bottom of the contents of the notification stack. */
-    val stackBottom: StateFlow<Float> = placeholderRepository.stackBottom.asStateFlow()
-
     /** The height of the keyguard's available space bounds */
     val constrainedAvailableSpace: StateFlow<Int> =
         placeholderRepository.constrainedAvailableSpace.asStateFlow()
@@ -119,16 +113,6 @@ constructor(
     /** Sets the height of heads up notification. */
     fun setHeadsUpHeight(height: Float) {
         viewHeightRepository.headsUpHeight.value = height
-    }
-
-    /** Sets the y-coord in px of the top of the contents of the notification stack. */
-    fun setStackTop(stackTop: Float) {
-        placeholderRepository.stackTop.value = stackTop
-    }
-
-    /** Sets the y-coord in px of the bottom of the contents of the notification stack. */
-    fun setStackBottom(stackBottom: Float) {
-        placeholderRepository.stackBottom.value = stackBottom
     }
 
     /** Sets whether the notification stack is scrolled to the top. */

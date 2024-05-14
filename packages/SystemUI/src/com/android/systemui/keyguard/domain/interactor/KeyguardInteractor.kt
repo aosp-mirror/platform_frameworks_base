@@ -97,6 +97,7 @@ constructor(
 
     /** Bounds of the notification container. */
     val notificationContainerBounds: StateFlow<NotificationContainerBounds> by lazy {
+        SceneContainerFlag.assertInLegacyMode()
         combine(
                 _notificationPlaceholderBounds,
                 sharedNotificationContainerInteractor.get().configurationBasedDimensions,
@@ -115,6 +116,7 @@ constructor(
     }
 
     fun setNotificationContainerBounds(position: NotificationContainerBounds) {
+        SceneContainerFlag.assertInLegacyMode()
         _notificationPlaceholderBounds.value = position
     }
 
