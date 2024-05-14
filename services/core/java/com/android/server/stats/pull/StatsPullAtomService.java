@@ -61,7 +61,6 @@ import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STA
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__UNKNOWN;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.stats.Flags.addMobileBytesTransferByProcStatePuller;
-import static com.android.server.stats.Flags.statsPullNetworkStatsManagerInitOrderFix;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.getProcessCmdlines;
@@ -430,12 +429,6 @@ public class StatsPullAtomService extends SystemService {
      */
     public static final boolean ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER =
                 addMobileBytesTransferByProcStatePuller();
-
-    /**
-     * Whether or not to enable the mNetworkStatsManager initialization order fix
-     */
-    private static final boolean ENABLE_NETWORK_STATS_MANAGER_INIT_ORDER_FIX =
-                statsPullNetworkStatsManagerInitOrderFix();
 
     // Puller locks
     private final Object mDataBytesTransferLock = new Object();
@@ -840,7 +833,7 @@ public class StatsPullAtomService extends SystemService {
                 registerEventListeners();
             });
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
-            if (ENABLE_NETWORK_STATS_MANAGER_INIT_ORDER_FIX) {
+            if (true) {
                 initNetworkStatsManager();
             }
             BackgroundThread.getHandler().post(() -> {
@@ -863,7 +856,7 @@ public class StatsPullAtomService extends SystemService {
                 mContext.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
         mStatsSubscriptionsListener = new StatsSubscriptionsListener(mSubscriptionManager);
         mStorageManager = (StorageManager) mContext.getSystemService(StorageManager.class);
-        if (!ENABLE_NETWORK_STATS_MANAGER_INIT_ORDER_FIX) {
+        if (false) {
             initNetworkStatsManager();
         }
 
@@ -1047,7 +1040,7 @@ public class StatsPullAtomService extends SystemService {
      */
     @NonNull
     private NetworkStatsManager getNetworkStatsManager() {
-        if (ENABLE_NETWORK_STATS_MANAGER_INIT_ORDER_FIX) {
+        if (true) {
             if (mNetworkStatsManager == null) {
                 throw new IllegalStateException("NetworkStatsManager is not ready");
             }
