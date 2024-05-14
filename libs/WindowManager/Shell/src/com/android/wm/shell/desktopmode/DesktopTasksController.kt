@@ -929,7 +929,8 @@ class DesktopTasksController(
                     task.taskId
             )
             return WindowContainerTransaction().also { wct ->
-                addMoveToFullscreenChanges(wct, task)
+                bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
+                wct.reorder(task.token, true)
             }
         }
         // Desktop Mode is showing and we're launching a new Task - we might need to minimize

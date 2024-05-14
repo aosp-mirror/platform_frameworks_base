@@ -946,7 +946,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    fun handleRequest_freeformTask_freeformNotVisible_returnSwitchToFullscreenWCT() {
+    fun handleRequest_freeformTask_freeformNotVisible_reorderedToTop() {
         assumeTrue(ENABLE_SHELL_TRANSITIONS)
 
         val freeformTask1 = setUpFreeformTask()
@@ -958,30 +958,32 @@ class DesktopTasksControllerTest : ShellTestCase() {
                 Binder(),
                 createTransition(freeformTask2, type = TRANSIT_TO_FRONT)
             )
-        assertThat(result?.changes?.get(freeformTask2.token.asBinder())?.windowingMode)
-            .isEqualTo(WINDOWING_MODE_UNDEFINED) // inherited FULLSCREEN
+
+        assertThat(result?.hierarchyOps?.size).isEqualTo(2)
+        result!!.assertReorderAt(1, freeformTask2, toTop = true)
     }
 
     @Test
-    fun handleRequest_freeformTask_noOtherTasks_returnSwitchToFullscreenWCT() {
+    fun handleRequest_freeformTask_noOtherTasks_reorderedToTop() {
         assumeTrue(ENABLE_SHELL_TRANSITIONS)
 
         val task = createFreeformTask()
         val result = controller.handleRequest(Binder(), createTransition(task))
-        assertThat(result?.changes?.get(task.token.asBinder())?.windowingMode)
-            .isEqualTo(WINDOWING_MODE_UNDEFINED) // inherited FULLSCREEN
+
+        assertThat(result?.hierarchyOps?.size).isEqualTo(1)
+        result!!.assertReorderAt(0, task, toTop = true)
     }
 
     @Test
-    fun handleRequest_freeformTask_freeformOnOtherDisplayOnly_returnSwitchToFullscreenWCT() {
+    fun handleRequest_freeformTask_freeformOnOtherDisplayOnly_reorderedToTop() {
         assumeTrue(ENABLE_SHELL_TRANSITIONS)
 
         val taskDefaultDisplay = createFreeformTask(displayId = DEFAULT_DISPLAY)
-        createFreeformTask(displayId = SECOND_DISPLAY)
+        val taskSecondDisplay = createFreeformTask(displayId = SECOND_DISPLAY)
 
         val result = controller.handleRequest(Binder(), createTransition(taskDefaultDisplay))
-        assertThat(result?.changes?.get(taskDefaultDisplay.token.asBinder())?.windowingMode)
-            .isEqualTo(WINDOWING_MODE_UNDEFINED) // inherited FULLSCREEN
+        assertThat(result?.hierarchyOps?.size).isEqualTo(1)
+        result!!.assertReorderAt(0, taskDefaultDisplay, toTop = true)
     }
 
     @Test
