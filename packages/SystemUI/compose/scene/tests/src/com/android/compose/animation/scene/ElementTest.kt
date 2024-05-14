@@ -610,14 +610,16 @@ class ElementTest {
     // TODO(b/341072461): Remove this test.
     fun layoutGetsCurrentTransitionStateFromComposition() {
         val state =
-            MutableSceneTransitionLayoutStateImpl(
-                SceneA,
-                transitions {
-                    from(SceneA, to = SceneB) {
-                        scaleSize(TestElements.Foo, width = 2f, height = 2f)
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateImpl(
+                    SceneA,
+                    transitions {
+                        from(SceneA, to = SceneB) {
+                            scaleSize(TestElements.Foo, width = 2f, height = 2f)
+                        }
                     }
-                }
-            )
+                )
+            }
 
         rule.setContent {
             SceneTransitionLayout(state) {
@@ -630,10 +632,12 @@ class ElementTest {
         rule.mainClock.autoAdvance = false
 
         // Change the current transition.
-        state.startTransition(
-            transition(from = SceneA, to = SceneB, progress = { 0.5f }),
-            transitionKey = null,
-        )
+        rule.runOnUiThread {
+            state.startTransition(
+                transition(from = SceneA, to = SceneB, progress = { 0.5f }),
+                transitionKey = null,
+            )
+        }
 
         // The size of Foo should still be 20dp given that the new state was not composed yet.
         rule.onNode(isElement(TestElements.Foo)).assertSizeIsEqualTo(20.dp, 20.dp)
@@ -652,11 +656,13 @@ class ElementTest {
         var touchSlop = 0f
 
         val state =
-            MutableSceneTransitionLayoutState(
-                initialScene = SceneA,
-                transitions = transitions(sceneTransitions),
-            )
-                as MutableSceneTransitionLayoutStateImpl
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    initialScene = SceneA,
+                    transitions = transitions(sceneTransitions),
+                )
+                    as MutableSceneTransitionLayoutStateImpl
+            }
 
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
@@ -762,16 +768,18 @@ class ElementTest {
         val layoutHeight = 400.dp
 
         val state =
-            MutableSceneTransitionLayoutState(
-                initialScene = SceneB,
-                transitions =
-                    transitions {
-                        overscroll(SceneB, Orientation.Vertical) {
-                            translate(TestElements.Foo, y = overscrollTranslateY)
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    initialScene = SceneB,
+                    transitions =
+                        transitions {
+                            overscroll(SceneB, Orientation.Vertical) {
+                                translate(TestElements.Foo, y = overscrollTranslateY)
+                            }
                         }
-                    }
-            )
-                as MutableSceneTransitionLayoutStateImpl
+                )
+                    as MutableSceneTransitionLayoutStateImpl
+            }
 
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
@@ -938,32 +946,36 @@ class ElementTest {
         val duration = 4 * 16
 
         val state =
-            MutableSceneTransitionLayoutState(
-                SceneA,
-                transitions {
-                    // Foo is at the top left corner of scene A. We make it disappear during A => B
-                    // to the right edge so it translates to the right.
-                    from(SceneA, to = SceneB) {
-                        spec = tween(duration, easing = LinearEasing)
-                        translate(
-                            TestElements.Foo,
-                            edge = Edge.Right,
-                            startsOutsideLayoutBounds = false,
-                        )
-                    }
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    SceneA,
+                    transitions {
+                        // Foo is at the top left corner of scene A. We make it disappear during A
+                        // => B
+                        // to the right edge so it translates to the right.
+                        from(SceneA, to = SceneB) {
+                            spec = tween(duration, easing = LinearEasing)
+                            translate(
+                                TestElements.Foo,
+                                edge = Edge.Right,
+                                startsOutsideLayoutBounds = false,
+                            )
+                        }
 
-                    // Bar is at the top right corner of scene C. We make it appear during B => C
-                    // from the left edge so it translates to the right at same time as Foo.
-                    from(SceneB, to = SceneC) {
-                        spec = tween(duration, easing = LinearEasing)
-                        translate(
-                            TestElements.Bar,
-                            edge = Edge.Left,
-                            startsOutsideLayoutBounds = false,
-                        )
+                        // Bar is at the top right corner of scene C. We make it appear during B =>
+                        // C
+                        // from the left edge so it translates to the right at same time as Foo.
+                        from(SceneB, to = SceneC) {
+                            spec = tween(duration, easing = LinearEasing)
+                            translate(
+                                TestElements.Bar,
+                                edge = Edge.Left,
+                                startsOutsideLayoutBounds = false,
+                            )
+                        }
                     }
-                }
-            )
+                )
+            }
 
         val layoutSize = 150.dp
         val elemSize = 50.dp
@@ -1059,14 +1071,16 @@ class ElementTest {
         val duration = 4 * 16
 
         val state =
-            MutableSceneTransitionLayoutStateImpl(
-                SceneA,
-                transitions {
-                    from(SceneA, to = SceneB) { spec = tween(duration, easing = LinearEasing) }
-                    from(SceneB, to = SceneC) { spec = tween(duration, easing = LinearEasing) }
-                },
-                enableInterruptions = false,
-            )
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateImpl(
+                    SceneA,
+                    transitions {
+                        from(SceneA, to = SceneB) { spec = tween(duration, easing = LinearEasing) }
+                        from(SceneB, to = SceneC) { spec = tween(duration, easing = LinearEasing) }
+                    },
+                    enableInterruptions = false,
+                )
+            }
 
         val layoutSize = DpSize(200.dp, 100.dp)
         val fooSize = DpSize(20.dp, 10.dp)
@@ -1177,8 +1191,10 @@ class ElementTest {
             .assertPositionInRootIsEqualTo(offsetInC.x, offsetInC.y)
 
         // Manually finish the transition.
-        state.finishTransition(aToB, SceneB)
-        state.finishTransition(bToC, SceneC)
+        rule.runOnUiThread {
+            state.finishTransition(aToB, SceneB)
+            state.finishTransition(bToC, SceneC)
+        }
         rule.waitForIdle()
         assertThat(state.transitionState).isIdle()
 

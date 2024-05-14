@@ -376,6 +376,8 @@ internal abstract class BaseSceneTransitionLayoutState(
     // TODO(b/290930950): Remove this flag.
     internal var enableInterruptions: Boolean,
 ) : SceneTransitionLayoutState {
+    private val creationThread: Thread = Thread.currentThread()
+
     /**
      * The current [TransitionState]. This list will either be:
      * 1. A list with a single [TransitionState.Idle] element, when we are idle.
@@ -420,6 +422,20 @@ internal abstract class BaseSceneTransitionLayoutState(
      */
     internal abstract fun CoroutineScope.onChangeScene(scene: SceneKey)
 
+    internal fun checkThread() {
+        val current = Thread.currentThread()
+        if (current !== creationThread) {
+            error(
+                """
+                    Only the original thread that created a SceneTransitionLayoutState can mutate it
+                      Expected: ${creationThread.name}
+                      Current: ${current.name}
+                """
+                    .trimIndent()
+            )
+        }
+    }
+
     override fun isTransitioning(from: SceneKey?, to: SceneKey?): Boolean {
         val transition = currentTransition ?: return false
         return transition.isTransitioning(from, to)
@@ -444,6 +460,8 @@ internal abstract class BaseSceneTransitionLayoutState(
         transitionKey: TransitionKey?,
         chain: Boolean = true,
     ) {
+        checkThread()
+
         // Compute the [TransformationSpec] when the transition starts.
         val fromScene = transition.fromScene
         val toScene = transition.toScene
@@ -564,6 +582,8 @@ internal abstract class BaseSceneTransitionLayoutState(
      * nothing if [transition] was interrupted since it was started.
      */
     internal fun finishTransition(transition: TransitionState.Transition, idleScene: SceneKey) {
+        checkThread()
+
         val existingIdleScene = finishedTransitions[transition]
         if (existingIdleScene != null) {
             // This transition was already finished.
@@ -617,6 +637,8 @@ internal abstract class BaseSceneTransitionLayoutState(
     }
 
     fun snapToScene(scene: SceneKey) {
+        checkThread()
+
         // Force finish all transitions.
         while (currentTransitions.isNotEmpty()) {
             val transition = transitionStates[0] as TransitionState.Transition
@@ -755,6 +777,8 @@ internal class MutableSceneTransitionLayoutStateImpl(
         coroutineScope: CoroutineScope,
         transitionKey: TransitionKey?,
     ): TransitionState.Transition? {
+        checkThread()
+
         return coroutineScope.animateToScene(
             layoutState = this@MutableSceneTransitionLayoutStateImpl,
             target = targetScene,
