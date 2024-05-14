@@ -21,13 +21,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.modifiers.height
 import com.android.compose.modifiers.width
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
@@ -40,13 +40,13 @@ fun BrightnessMirror(
     qsSceneAdapter: QSSceneAdapter,
     modifier: Modifier = Modifier,
 ) {
-    val isShowing by viewModel.isShowing.collectAsState()
+    val isShowing by viewModel.isShowing.collectAsStateWithLifecycle()
     val mirrorAlpha by
         animateFloatAsState(
             targetValue = if (isShowing) 1f else 0f,
             label = "alphaAnimationBrightnessMirrorShowing",
         )
-    val mirrorOffsetAndSize by viewModel.locationAndSize.collectAsState()
+    val mirrorOffsetAndSize by viewModel.locationAndSize.collectAsStateWithLifecycle()
     val offset = IntOffset(0, mirrorOffsetAndSize.yOffset)
 
     Box(modifier = modifier.fillMaxSize().graphicsLayer { alpha = mirrorAlpha }) {

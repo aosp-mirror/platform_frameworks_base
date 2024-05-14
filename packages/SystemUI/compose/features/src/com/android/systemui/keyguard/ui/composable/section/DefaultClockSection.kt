@@ -25,13 +25,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.contains
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
 import com.android.systemui.customization.R
@@ -59,9 +59,11 @@ constructor(
         onTopChanged: (top: Float?) -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        val currentClock by viewModel.currentClock.collectAsState()
+        val currentClock by viewModel.currentClock.collectAsStateWithLifecycle()
         val smallTopMargin by
-            viewModel.smallClockTopMargin.collectAsState(viewModel.getSmallClockTopMargin())
+            viewModel.smallClockTopMargin.collectAsStateWithLifecycle(
+                viewModel.getSmallClockTopMargin()
+            )
         if (currentClock?.smallClock?.view == null) {
             return
         }
@@ -89,7 +91,7 @@ constructor(
 
     @Composable
     fun SceneScope.LargeClock(burnInParams: BurnInParameters, modifier: Modifier = Modifier) {
-        val currentClock by viewModel.currentClock.collectAsState()
+        val currentClock by viewModel.currentClock.collectAsStateWithLifecycle()
         if (currentClock?.largeClock?.view == null) {
             return
         }

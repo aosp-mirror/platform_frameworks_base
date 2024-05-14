@@ -26,7 +26,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +43,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.res.R
 import com.android.systemui.volume.panel.component.anc.ui.viewmodel.AncViewModel
 import com.android.systemui.volume.panel.component.popup.ui.composable.VolumePanelPopup
@@ -60,7 +60,7 @@ constructor(
 
     @Composable
     override fun VolumePanelComposeScope.Content(modifier: Modifier) {
-        val slice by viewModel.buttonSlice.collectAsState()
+        val slice by viewModel.buttonSlice.collectAsStateWithLifecycle()
         val label = stringResource(R.string.volume_panel_noise_control_title)
         val screenWidth: Float =
             with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp.dp.toPx() }

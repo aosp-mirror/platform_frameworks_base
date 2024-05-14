@@ -6,13 +6,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
@@ -85,8 +85,9 @@ fun CommunalContainer(
     content: CommunalContent,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val currentSceneKey: SceneKey by viewModel.currentScene.collectAsState(CommunalScenes.Blank)
-    val touchesAllowed by viewModel.touchesAllowed.collectAsState(initial = false)
+    val currentSceneKey: SceneKey by
+        viewModel.currentScene.collectAsStateWithLifecycle(CommunalScenes.Blank)
+    val touchesAllowed by viewModel.touchesAllowed.collectAsStateWithLifecycle(initialValue = false)
     val state: MutableSceneTransitionLayoutState = remember {
         MutableSceneTransitionLayoutState(
             initialScene = currentSceneKey,
@@ -149,7 +150,8 @@ private fun SceneScope.CommunalScene(
     content: CommunalContent,
     modifier: Modifier = Modifier,
 ) {
-    val backgroundColor by colors.backgroundColor.collectAsState()
+    val backgroundColor by colors.backgroundColor.collectAsStateWithLifecycle()
+
     Box(
         modifier =
             Modifier.element(Communal.Elements.Scrim)
