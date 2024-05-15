@@ -52,7 +52,7 @@ import java.lang.annotation.RetentionPolicy;
  * Canvas and Drawables</a> developer guide.</p></div>
  */
 public class Canvas extends BaseCanvas {
-    private static int sCompatiblityVersion = 0;
+    private static int sCompatibilityVersion = 0;
     private static boolean sCompatibilityRestore = false;
     private static boolean sCompatibilitySetBitmap = false;
 
@@ -71,7 +71,7 @@ public class Canvas extends BaseCanvas {
 
     // Maximum bitmap size as defined in Skia's native code
     // (see SkCanvas.cpp, SkDraw.cpp)
-    private static final int MAXMIMUM_BITMAP_SIZE = 32766;
+    private static final int MAXIMUM_BITMAP_SIZE = 32766;
 
     // Use a Holder to allow static initialization of Canvas in the boot image.
     private static class NoImagePreloadHolder {
@@ -316,7 +316,7 @@ public class Canvas extends BaseCanvas {
      * @see #getMaximumBitmapHeight()
      */
     public int getMaximumBitmapWidth() {
-        return MAXMIMUM_BITMAP_SIZE;
+        return MAXIMUM_BITMAP_SIZE;
     }
 
     /**
@@ -327,7 +327,7 @@ public class Canvas extends BaseCanvas {
      * @see #getMaximumBitmapWidth()
      */
     public int getMaximumBitmapHeight() {
-        return MAXMIMUM_BITMAP_SIZE;
+        return MAXIMUM_BITMAP_SIZE;
     }
 
     // the SAVE_FLAG constants must match their native equivalents
@@ -408,7 +408,7 @@ public class Canvas extends BaseCanvas {
     public static final int ALL_SAVE_FLAG = 0x1F;
 
     private static void checkValidSaveFlags(int saveFlags) {
-        if (sCompatiblityVersion >= Build.VERSION_CODES.P
+        if (sCompatibilityVersion >= Build.VERSION_CODES.P
                 && saveFlags != ALL_SAVE_FLAG) {
             throw new IllegalArgumentException(
                     "Invalid Layer Save Flag - only ALL_SAVE_FLAGS is allowed");
@@ -817,7 +817,7 @@ public class Canvas extends BaseCanvas {
     }
 
     private static void checkValidClipOp(@NonNull Region.Op op) {
-        if (sCompatiblityVersion >= Build.VERSION_CODES.P
+        if (sCompatibilityVersion >= Build.VERSION_CODES.P
                 && op != Region.Op.INTERSECT && op != Region.Op.DIFFERENCE) {
             throw new IllegalArgumentException(
                     "Invalid Region.Op - only INTERSECT and DIFFERENCE are allowed");
@@ -1383,7 +1383,7 @@ public class Canvas extends BaseCanvas {
     }
 
     /*package*/ static void setCompatibilityVersion(int apiLevel) {
-        sCompatiblityVersion = apiLevel;
+        sCompatibilityVersion = apiLevel;
         sCompatibilityRestore = apiLevel < Build.VERSION_CODES.M;
         sCompatibilitySetBitmap = apiLevel < Build.VERSION_CODES.O;
         nSetCompatibilityVersion(apiLevel);
