@@ -77,6 +77,7 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
     private ActivityEmbeddingController mActivityEmbeddingController;
 
     abstract static class MixedTransition {
+        /** Entering Pip from split, breaks split. */
         static final int TYPE_ENTER_PIP_FROM_SPLIT = 1;
 
         /** Both the display and split-state (enter/exit) is changing */
@@ -102,6 +103,9 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
 
         /** Enter pip from one of the Activity Embedding windows. */
         static final int TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING = 9;
+
+        /** Entering Pip from split, but replace the Pip stage instead of breaking split. */
+        static final int TYPE_ENTER_PIP_REPLACE_FROM_SPLIT = 10;
 
         /** The default animation for this mixed transition. */
         static final int ANIM_TYPE_DEFAULT = 0;
@@ -484,9 +488,11 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
     // TODO(b/287704263): Remove when split/mixed are reversed.
     public boolean animatePendingEnterPipFromSplit(IBinder transition, TransitionInfo info,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            Transitions.TransitionFinishCallback finishCallback) {
-        final MixedTransition mixed = createDefaultMixedTransition(
-                MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT, transition);
+            Transitions.TransitionFinishCallback finishCallback, boolean replacingPip) {
+        int type = replacingPip
+                ? MixedTransition.TYPE_ENTER_PIP_REPLACE_FROM_SPLIT
+                : MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT;
+        final MixedTransition mixed = createDefaultMixedTransition(type, transition);
         mActiveTransitions.add(mixed);
         Transitions.TransitionFinishCallback callback = wct -> {
             mActiveTransitions.remove(mixed);
