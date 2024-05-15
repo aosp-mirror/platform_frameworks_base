@@ -206,18 +206,9 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
             mInsetsController.setPredictiveBackImeHideAnimInProgress(true);
             notifyHideIme();
         }
-        if (mStartRootScrollY != 0) {
-            // RootView is panned, ensure that it is scrolled back to the intended scroll position
-            if (triggerBack) {
-                // requesting ime as invisible
-                mInsetsController.setRequestedVisibleTypes(0, ime());
-                // changes the animation state and notifies RootView of changed insets, which
-                // causes it to reset its scrollY to 0f (animated)
-                mInsetsController.onAnimationStateChanged(ime(), /*running*/ true);
-            } else {
-                // This causes RootView to update its scroll back to the panned position
-                mInsetsController.getHost().notifyInsetsChanged();
-            }
+        if (mStartRootScrollY != 0 && !triggerBack) {
+            // This causes RootView to update its scroll back to the panned position
+            mInsetsController.getHost().notifyInsetsChanged();
         }
     }
 
@@ -233,6 +224,12 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
         // the IME away
         mInsetsController.getHost().getInputMethodManager()
                 .notifyImeHidden(mInsetsController.getHost().getWindowToken(), statsToken);
+
+        // requesting IME as invisible during post-commit
+        mInsetsController.setRequestedVisibleTypes(0, ime());
+        // Changes the animation state. This also notifies RootView of changed insets, which causes
+        // it to reset its scrollY to 0f (animated) if it was panned
+        mInsetsController.onAnimationStateChanged(ime(), /*running*/ true);
     }
 
     private void reset() {

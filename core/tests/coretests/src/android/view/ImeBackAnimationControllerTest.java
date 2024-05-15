@@ -37,6 +37,7 @@ import static org.testng.Assert.assertEquals;
 import android.content.Context;
 import android.graphics.Insets;
 import android.platform.test.annotations.Presubmit;
+import android.util.SparseArray;
 import android.view.animation.BackGestureInterpolator;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
@@ -53,6 +54,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import java.lang.reflect.Field;
 
 /**
  * Tests for {@link ImeBackAnimationController}.
@@ -104,6 +107,13 @@ public class ImeBackAnimationControllerTest {
             when(mInsetsController.getHost()).thenReturn(mViewRootInsetsControllerHost);
             when(mViewRootInsetsControllerHost.getInputMethodManager()).thenReturn(
                     inputMethodManager);
+            try {
+                Field field = InsetsController.class.getDeclaredField("mSourceConsumers");
+                field.setAccessible(true);
+                field.set(mInsetsController, new SparseArray<InsetsSourceConsumer>());
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException("Unable to set mSourceConsumers", e);
+            }
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
