@@ -55,6 +55,7 @@ import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -225,7 +226,19 @@ constructor(
     @JvmField val primaryBouncerShowing: Flow<Boolean> = bouncerRepository.primaryBouncerShow
 
     /** Whether the alternate bouncer is showing or not. */
-    val alternateBouncerShowing: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
+    val alternateBouncerShowing: Flow<Boolean> =
+        bouncerRepository.alternateBouncerVisible.sample(isAbleToDream) {
+            alternateBouncerVisible,
+            isAbleToDream ->
+            if (isAbleToDream) {
+                // If the alternate bouncer will show over a dream, it is likely that the dream has
+                // requested a dismissal, which will stop the dream. By delaying this slightly, the
+                // DREAMING->LOCKSCREEN transition will now happen first, followed by
+                // LOCKSCREEN->ALTERNATE_BOUNCER.
+                delay(600L)
+            }
+            alternateBouncerVisible
+        }
 
     /** Observable for the [StatusBarState] */
     val statusBarState: Flow<StatusBarState> = repository.statusBarState
