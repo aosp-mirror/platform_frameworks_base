@@ -42,6 +42,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -72,6 +73,10 @@ constructor(
     @Main private val mainDispatcher: CoroutineDispatcher,
 ) : CoreStartable {
     private var screenTimeout: Int = DEFAULT_SCREEN_TIMEOUT
+
+    private var timeoutJob: Job? = null
+
+    private var isDreaming: Boolean = false
 
     override fun start() {
         // Handle automatically switching based on keyguard state.
@@ -112,31 +117,35 @@ constructor(
             }
             .launchIn(bgScope)
 
-        // Handle timing out back to the dream.
+        // The hub mode timeout should start as soon as the user enters hub mode. At the end of the
+        // timer, if the device is dreaming, hub mode should closed and reveal the dream. If the
+        // dream is not running, nothing will happen. However if the dream starts again underneath
+        // hub mode after the initial timeout expires, such as if the device is docked or the dream
+        // app is updated by the Play store, a new timeout should be started.
         bgScope.launch {
             combine(
                     communalInteractor.desiredScene,
                     // Emit a value on start so the combine starts.
                     communalInteractor.userActivity.emitOnStart()
                 ) { scene, _ ->
-                    // Time out should run whenever we're dreaming and the hub is open, even if not
-                    // docked.
+                    // Only timeout if we're on the hub is open.
                     scene == CommunalScenes.Communal
                 }
-                // mapLatest cancels the previous action block when new values arrive, so any
-                // already running timeout gets cancelled when conditions change or user interaction
-                // is detected.
-                .mapLatest { shouldTimeout ->
-                    if (!shouldTimeout) {
-                        return@mapLatest false
+                .collectLatest { shouldTimeout ->
+                    cancelHubTimeout()
+                    if (shouldTimeout) {
+                        startHubTimeout()
                     }
-
-                    delay(screenTimeout.milliseconds)
-                    true
                 }
-                .sample(keyguardInteractor.isDreaming, ::Pair)
-                .collect { (shouldTimeout, isDreaming) ->
-                    if (isDreaming && shouldTimeout) {
+        }
+        bgScope.launch {
+            keyguardInteractor.isDreaming
+                .sample(communalInteractor.desiredScene, ::Pair)
+                .collectLatest { (isDreaming, scene) ->
+                    this@CommunalSceneStartable.isDreaming = isDreaming
+                    if (scene == CommunalScenes.Communal && isDreaming && timeoutJob == null) {
+                        // If dreaming starts after timeout has expired, ex. if dream restarts under
+                        // the hub, just close the hub immediately.
                         communalInteractor.changeScene(CommunalScenes.Blank)
                     }
                 }
@@ -148,6 +157,24 @@ constructor(
                     notificationShadeWindowController.setGlanceableHubShowing(it)
                 }
             }
+        }
+    }
+
+    private fun cancelHubTimeout() {
+        timeoutJob?.cancel()
+        timeoutJob = null
+    }
+
+    private fun startHubTimeout() {
+        if (timeoutJob == null) {
+            timeoutJob =
+                bgScope.launch {
+                    delay(screenTimeout.milliseconds)
+                    if (isDreaming) {
+                        communalInteractor.changeScene(CommunalScenes.Blank)
+                    }
+                    timeoutJob = null
+                }
         }
     }
 
