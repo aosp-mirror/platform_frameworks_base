@@ -22,11 +22,11 @@ import static android.content.pm.ActivityInfo.CONFIG_ASSETS_PATHS;
 import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitScreenUtils.getResizingBackgroundColor;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_BOTTOM;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_LEFT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
@@ -41,7 +41,6 @@ import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -278,7 +277,7 @@ public class DragLayout extends LinearLayout
                 final int activityType = taskInfo1.getActivityType();
                 if (activityType == ACTIVITY_TYPE_STANDARD) {
                     Drawable icon1 = mIconProvider.getIcon(taskInfo1.topActivityInfo);
-                    int bgColor1 = getResizingBackgroundColor(taskInfo1);
+                    int bgColor1 = getResizingBackgroundColor(taskInfo1).toArgb();
                     mDropZoneView1.setAppInfo(bgColor1, icon1);
                     mDropZoneView2.setAppInfo(bgColor1, icon1);
                     updateDropZoneSizes(null, null); // passing null splits the views evenly
@@ -298,10 +297,10 @@ public class DragLayout extends LinearLayout
                     mSplitScreenController.getTaskInfo(SPLIT_POSITION_BOTTOM_OR_RIGHT);
             if (topOrLeftTask != null && bottomOrRightTask != null) {
                 Drawable topOrLeftIcon = mIconProvider.getIcon(topOrLeftTask.topActivityInfo);
-                int topOrLeftColor = getResizingBackgroundColor(topOrLeftTask);
+                int topOrLeftColor = getResizingBackgroundColor(topOrLeftTask).toArgb();
                 Drawable bottomOrRightIcon = mIconProvider.getIcon(
                         bottomOrRightTask.topActivityInfo);
-                int bottomOrRightColor = getResizingBackgroundColor(bottomOrRightTask);
+                int bottomOrRightColor = getResizingBackgroundColor(bottomOrRightTask).toArgb();
                 mDropZoneView1.setAppInfo(topOrLeftColor, topOrLeftIcon);
                 mDropZoneView2.setAppInfo(bottomOrRightColor, bottomOrRightIcon);
             }
@@ -554,11 +553,6 @@ public class DragLayout extends LinearLayout
             mDropZoneView1.setShowingHighlight(false);
             mDropZoneView2.setShowingHighlight(true);
         }
-    }
-
-    private static int getResizingBackgroundColor(ActivityManager.RunningTaskInfo taskInfo) {
-        final int taskBgColor = taskInfo.taskDescription.getBackgroundColor();
-        return Color.valueOf(taskBgColor == -1 ? Color.WHITE : taskBgColor).toArgb();
     }
 
     /**
