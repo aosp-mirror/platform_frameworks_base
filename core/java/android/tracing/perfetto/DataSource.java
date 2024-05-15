@@ -130,7 +130,8 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
      * @param params Params to initialize the datasource with.
      */
     public void register(DataSourceParams params) {
-        nativeRegisterDataSource(this.mNativeObj, params.bufferExhaustedPolicy);
+        nativeRegisterDataSource(this.mNativeObj, params.bufferExhaustedPolicy,
+                params.willNotifyOnStop, params.noFlush);
     }
 
     /**
@@ -163,8 +164,8 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
         return this.createInstance(inputStream, instanceIndex);
     }
 
-    private static native void nativeRegisterDataSource(
-            long dataSourcePtr, int bufferExhaustedPolicy);
+    private static native void nativeRegisterDataSource(long dataSourcePtr,
+            int bufferExhaustedPolicy, boolean willNotifyOnStop, boolean noFlush);
 
     private static native long nativeCreate(DataSource thiz, String name);
     private static native void nativeFlushAll(long nativeDataSourcePointer);
