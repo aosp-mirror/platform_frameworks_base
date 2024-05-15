@@ -5832,7 +5832,16 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public ComponentName getEffectsSuppressor() {
-            return !mEffectsSuppressors.isEmpty() ? mEffectsSuppressors.get(0) : null;
+            ComponentName suppressor = !mEffectsSuppressors.isEmpty()
+                    ? mEffectsSuppressors.get(0)
+                    : null;
+            if (isCallerSystemOrSystemUiOrShell() || suppressor == null
+                    || mPackageManagerInternal.isSameApp(suppressor.getPackageName(),
+                    Binder.getCallingUid(), UserHandle.getUserId(Binder.getCallingUid()))) {
+                return suppressor;
+            }
+
+            return null;
         }
 
         @Override
