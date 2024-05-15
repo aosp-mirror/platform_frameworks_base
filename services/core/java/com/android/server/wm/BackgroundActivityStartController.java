@@ -1695,6 +1695,7 @@ public class BackgroundActivityStartController {
             return false;
         }
         if (state.mBalAllowedByPiSender.allowsBackgroundActivityStarts()
+                && state.mResultForRealCaller != null
                 && state.mResultForRealCaller.getRawCode() == BAL_ALLOW_VISIBLE_WINDOW) {
             return false;
         }
