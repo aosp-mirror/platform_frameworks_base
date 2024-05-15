@@ -274,6 +274,9 @@ public class SecureSettings {
         Settings.Secure.SCREEN_RESOLUTION_MODE,
         Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS,
         Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL,
-        Settings.Secure.CHARGE_OPTIMIZATION_MODE
+        Settings.Secure.CHARGE_OPTIMIZATION_MODE,
+        Settings.Secure.ON_DEVICE_INTELLIGENCE_UNBIND_TIMEOUT_MS,
+        Settings.Secure.ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS,
+        Settings.Secure.ON_DEVICE_INTELLIGENCE_IDLE_TIMEOUT_MS,
     };
 }

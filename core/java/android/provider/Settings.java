@@ -11173,6 +11173,35 @@ public final class Settings {
                 "visual_query_accessibility_detection_enabled";
 
         /**
+         * Timeout to be used for unbinding to the configured remote
+         * {@link android.service.ondeviceintelligence.OnDeviceIntelligenceService} if there are no
+         * requests in the queue. A value of -1 represents to never unbind.
+         *
+         * @hide
+         */
+        public static final String ON_DEVICE_INTELLIGENCE_UNBIND_TIMEOUT_MS =
+                "on_device_intelligence_unbind_timeout_ms";
+
+
+        /**
+         * Timeout that represents maximum idle time before which a callback should be populated.
+         *
+         * @hide
+         */
+        public static final String ON_DEVICE_INTELLIGENCE_IDLE_TIMEOUT_MS =
+                "on_device_intelligence_idle_timeout_ms";
+
+        /**
+         * Timeout to be used for unbinding to the configured remote
+         * {@link android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService} if there
+         * are no requests in the queue. A value of -1 represents to never unbind.
+         *
+         * @hide
+         */
+        public static final String ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS =
+                "on_device_inference_unbind_timeout_ms";
+
+        /**
          * Control whether Night display is currently activated.
          * @hide
          */

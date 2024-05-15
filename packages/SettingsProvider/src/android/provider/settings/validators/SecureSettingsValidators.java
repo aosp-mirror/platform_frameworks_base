@@ -18,6 +18,7 @@ package android.provider.settings.validators;
 
 import static android.provider.settings.validators.SettingsValidators.ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_INTEGER_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.ANY_LONG_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.AUTOFILL_SERVICE_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
@@ -433,5 +434,8 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL,
                 new InclusiveIntegerRangeValidator(0, 10));
         VALIDATORS.put(Secure.CHARGE_OPTIMIZATION_MODE, new InclusiveIntegerRangeValidator(0, 10));
+        VALIDATORS.put(Secure.ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS, ANY_LONG_VALIDATOR);
+        VALIDATORS.put(Secure.ON_DEVICE_INTELLIGENCE_UNBIND_TIMEOUT_MS, ANY_LONG_VALIDATOR);
+        VALIDATORS.put(Secure.ON_DEVICE_INTELLIGENCE_IDLE_TIMEOUT_MS, NONE_NEGATIVE_LONG_VALIDATOR);
     }
 }
