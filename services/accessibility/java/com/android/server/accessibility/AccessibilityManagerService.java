@@ -1803,6 +1803,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     /**
+     * Called by the MagnificationController when the magnification systemui connection changes.
+     *
+     * @param connected Whether the connection is ready.
+     */
+    public void notifyMagnificationSystemUIConnectionChanged(boolean connected) {
+        synchronized (mLock) {
+            notifyMagnificationSystemUIConnectionChangedLocked(connected);
+        }
+    }
+
+    /**
      * Called by the MagnificationController when the state of display
      * magnification changes.
      *
@@ -2232,6 +2243,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         mProxyManager.clearCacheLocked();
+    }
+
+    private void notifyMagnificationSystemUIConnectionChangedLocked(boolean connected) {
+        final AccessibilityUserState state = getCurrentUserStateLocked();
+        for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
+            final AccessibilityServiceConnection service = state.mBoundServices.get(i);
+            service.notifyMagnificationSystemUIConnectionChangedLocked(connected);
+        }
     }
 
     private void notifyMagnificationChangedLocked(int displayId, @NonNull Region region,
