@@ -227,7 +227,7 @@ class DesktopTasksController(
         bringDesktopAppsToFront(displayId, wct)
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            // TODO(b/255649902): ensure remote transition is supplied once state is introduced
+            // TODO(b/309014605): ensure remote transition is supplied once state is introduced
             val transitionType = if (remoteTransition == null) TRANSIT_NONE else TRANSIT_TO_FRONT
             val handler = remoteTransition?.let {
                 OneShotRemoteHandler(transitions.mainExecutor, remoteTransition)
