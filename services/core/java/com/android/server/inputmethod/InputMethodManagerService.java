@@ -3712,7 +3712,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     null, null, null, null, -1, false);
         }
 
-        mImeBindingState = new ImeBindingState(windowToken, softInputMode, cs, editorInfo);
+        mImeBindingState = new ImeBindingState(userData.mUserId, windowToken, softInputMode, cs,
+                editorInfo);
         mFocusedWindowPerceptible.put(windowToken, true);
 
         // We want to start input before showing the IME, but after closing
