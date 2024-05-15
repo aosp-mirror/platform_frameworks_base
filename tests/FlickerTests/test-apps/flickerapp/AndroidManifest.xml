@@ -18,7 +18,10 @@
           package="com.android.server.wm.flicker.testapp">
 
     <uses-sdk android:minSdkVersion="29"
-              android:targetSdkVersion="29"/>
+              android:targetSdkVersion="35"/>
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application android:allowBackup="false"
                  android:supportsRtl="true">
         <uses-library android:name="androidx.window.extensions" android:required="false"/>
@@ -107,7 +110,7 @@
                   android:immersive="true"
                   android:resizeableActivity="true"
                   android:screenOrientation="portrait"
-                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:theme="@style/OptOutEdgeToEdge.NoTitleBar"
                   android:configChanges="screenSize"
                   android:label="PortraitImmersiveActivity"
                   android:exported="true">
@@ -119,7 +122,7 @@
         <activity android:name=".LaunchTransparentActivity"
                   android:resizeableActivity="false"
                   android:screenOrientation="portrait"
-                  android:theme="@android:style/Theme"
+                  android:theme="@style/OptOutEdgeToEdge"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.LaunchTransparentActivity"
                   android:label="LaunchTransparentActivity"
                   android:exported="true">
@@ -273,7 +276,7 @@
                   android:exported="true"
                   android:label="MailActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.MailActivity"
-                  android:theme="@style/Theme.AppCompat.Light">
+                  android:theme="@style/OptOutEdgeToEdge.AppCompatTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -282,7 +285,7 @@
         <activity android:name=".GameActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.GameActivity"
                   android:immersive="true"
-                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:theme="@style/OptOutEdgeToEdge.NoTitleBar"
                   android:configChanges="screenSize"
                   android:label="GameActivity"
                   android:exported="true">
