@@ -26,14 +26,6 @@ flag {
 }
 
 flag {
-
-    name: "notification_heads_up_cycling"
-    namespace: "systemui"
-    description: "Heads-up notification cycling animation for the Notification Avalanche feature."
-    bug: "316404716"
-}
-
-flag {
    name: "priority_people_section"
    namespace: "systemui"
    description: "Add a new section for priority people (aka important conversations)."
