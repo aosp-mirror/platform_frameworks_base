@@ -17,6 +17,7 @@
 package com.android.systemui.screenshot.ui.viewmodel
 
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.util.Log
 import android.view.accessibility.AccessibilityManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +26,8 @@ import kotlinx.coroutines.flow.StateFlow
 class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager) {
     private val _preview = MutableStateFlow<Bitmap?>(null)
     val preview: StateFlow<Bitmap?> = _preview
+    private val _badge = MutableStateFlow<Drawable?>(null)
+    val badge: StateFlow<Drawable?> = _badge
     private val _previewAction = MutableStateFlow<(() -> Unit)?>(null)
     val previewAction: StateFlow<(() -> Unit)?> = _previewAction
     private val _actions = MutableStateFlow(emptyList<ActionButtonViewModel>())
@@ -37,6 +40,10 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
 
     fun setScreenshotBitmap(bitmap: Bitmap?) {
         _preview.value = bitmap
+    }
+
+    fun setScreenshotBadge(badge: Drawable?) {
+        _badge.value = badge
     }
 
     fun setPreviewAction(onClick: () -> Unit) {
@@ -109,6 +116,7 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
 
     fun reset() {
         _preview.value = null
+        _badge.value = null
         _previewAction.value = null
         _actions.value = listOf()
         _animationState.value = AnimationState.NOT_STARTED
