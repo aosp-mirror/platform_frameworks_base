@@ -633,7 +633,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
             // GIVEN a prior transition has run to DREAMING
             keyguardRepository.setDreamingWithOverlay(true)
             runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.DREAMING)
-            runCurrent()
+            advanceTimeBy(60L)
 
             // WHEN the device wakes up without a keyguard
             keyguardRepository.setKeyguardShowing(false)

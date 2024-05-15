@@ -182,7 +182,11 @@ constructor(
             }
             .sample(powerInteractor.isAwake) { isAbleToDream, isAwake -> isAbleToDream && isAwake }
             .debounce(50L)
-            .distinctUntilChanged()
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     /** Whether the keyguard is showing or not. */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState")
@@ -314,10 +318,12 @@ constructor(
                     shadeRepository.legacyShadeExpansion.onStart { emit(0f) },
                     keyguardTransitionInteractor.transitionValue(GONE).onStart { emit(0f) },
                 ) { legacyShadeExpansion, goneValue ->
-                    if (goneValue == 1f || (goneValue == 0f && legacyShadeExpansion == 0f)) {
+                    val isLegacyShadeInResetPosition =
+                        legacyShadeExpansion == 0f || legacyShadeExpansion == 1f
+                    if (goneValue == 1f || (goneValue == 0f && isLegacyShadeInResetPosition)) {
                         // Reset the translation value
                         emit(0f)
-                    } else if (legacyShadeExpansion > 0f && legacyShadeExpansion < 1f) {
+                    } else if (!isLegacyShadeInResetPosition) {
                         // On swipe up, translate the keyguard to reveal the bouncer, OR a GONE
                         // transition is running, which means this is a swipe to dismiss. Values of
                         // 0f and 1f need to be ignored in the legacy shade expansion. These can
