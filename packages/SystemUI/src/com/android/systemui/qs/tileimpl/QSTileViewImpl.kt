@@ -148,7 +148,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
      */
     protected var showRippleEffect = true
 
-    private lateinit var qsTileBackground: LayerDrawable
+    private lateinit var qsTileBackground: RippleDrawable
+    private lateinit var qsTileFocusBackground: Drawable
     private lateinit var backgroundDrawable: LayerDrawable
     private lateinit var backgroundBaseDrawable: Drawable
     private lateinit var backgroundOverlayDrawable: Drawable
@@ -313,10 +314,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     private fun createTileBackground(): Drawable {
         qsTileBackground = if (Flags.qsTileFocusState()) {
-            mContext.getDrawable(R.drawable.qs_tile_background_flagged) as LayerDrawable
+            mContext.getDrawable(R.drawable.qs_tile_background_flagged) as RippleDrawable
         } else {
             mContext.getDrawable(R.drawable.qs_tile_background) as RippleDrawable
         }
+        qsTileFocusBackground = mContext.getDrawable(R.drawable.qs_tile_focused_background)!!
         backgroundDrawable =
             qsTileBackground.findDrawableByLayerId(R.id.background) as LayerDrawable
         backgroundBaseDrawable =
@@ -332,6 +334,17 @@ open class QSTileViewImpl @JvmOverloads constructor(
         updateHeight()
     }
 
+    override fun onFocusChanged(gainFocus: Boolean, direction: Int, previouslyFocusedRect: Rect?) {
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect)
+        if (Flags.qsTileFocusState()) {
+            if (gainFocus) {
+                qsTileFocusBackground.setBounds(0, 0, width, height)
+                overlay.add(qsTileFocusBackground)
+            } else {
+                overlay.clear()
+            }
+        }
+    }
     private fun updateHeight() {
         // TODO(b/332900989): Find a more robust way of resetting the tile if not reset by the
         //  launch animation.
