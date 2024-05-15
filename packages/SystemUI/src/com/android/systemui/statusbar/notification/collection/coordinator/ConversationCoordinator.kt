@@ -31,8 +31,10 @@ import com.android.systemui.statusbar.notification.dagger.PeopleHeader
 import com.android.systemui.statusbar.notification.icon.ConversationIconManager
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.PeopleNotificationType
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_IMPORTANT_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_NON_PERSON
 import com.android.systemui.statusbar.notification.stack.BUCKET_PEOPLE
+import com.android.systemui.statusbar.notification.stack.BUCKET_PRIORITY_PEOPLE
 import javax.inject.Inject
 
 /**
@@ -80,6 +82,13 @@ class ConversationCoordinator @Inject constructor(
             return shouldPromote
         }
     }
+
+    val priorityPeopleSectioner =
+            object : NotifSectioner("Priority People", BUCKET_PRIORITY_PEOPLE) {
+                override fun isInSection(entry: ListEntry): Boolean {
+                    return getPeopleType(entry) == TYPE_IMPORTANT_PERSON
+                }
+            }
 
     // TODO(b/330193582): Rename to just "People"
     val peopleAlertingSectioner = object : NotifSectioner("People(alerting)", BUCKET_PEOPLE) {

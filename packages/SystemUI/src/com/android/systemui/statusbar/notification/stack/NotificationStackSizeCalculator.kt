@@ -388,7 +388,8 @@ constructor(
                         null,
                         BUCKET_MEDIA_CONTROLS,
                         BUCKET_HEADS_UP,
-                        BUCKET_FOREGROUND_SERVICE -> false
+                        BUCKET_FOREGROUND_SERVICE,
+                        BUCKET_PRIORITY_PEOPLE -> false
                         else -> true
                     }
             }
