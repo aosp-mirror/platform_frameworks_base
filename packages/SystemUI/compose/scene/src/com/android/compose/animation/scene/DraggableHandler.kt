@@ -33,6 +33,7 @@ import com.android.compose.animation.scene.TransitionState.HasOverscrollProperti
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -684,7 +685,11 @@ private class SwipeTransition(
             val isTargetGreater = targetOffset > animatable.value
             val job =
                 coroutineScope
-                    .launch {
+                    // Important: We start atomically to make sure that we start the coroutine even
+                    // if it is cancelled right after it is launched, so that snapToScene() is
+                    // correctly called. Otherwise, this transition will never be stopped and we
+                    // will never settle to Idle.
+                    .launch(start = CoroutineStart.ATOMIC) {
                         // TODO(b/327249191): Refactor the code so that we don't even launch a
                         // coroutine if we don't need to animate.
                         if (skipAnimation) {
@@ -726,18 +731,15 @@ private class SwipeTransition(
                             }
                         } finally {
                             bouncingScene = null
+                            snapToScene(targetScene)
                         }
                     }
-                    // Make sure that we settle to target scene at the end of the animation or if
-                    // the animation is cancelled.
-                    .apply { invokeOnCompletion { snapToScene(targetScene) } }
 
             OffsetAnimation(animatable, job)
         }
     }
 
     fun snapToScene(scene: SceneKey) {
-        if (layoutState.transitionState != this) return
         cancelOffsetAnimation()
         layoutState.finishTransition(this, idleScene = scene)
     }

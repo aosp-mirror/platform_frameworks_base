@@ -497,11 +497,9 @@ internal abstract class BaseSceneTransitionLayoutState(
                 transitionStates = listOf(transition)
             }
             is TransitionState.Transition -> {
-                // Force the current transition to finish to currentScene.
-                currentState.finish().invokeOnCompletion {
-                    // Make sure [finishTransition] is called at the end of the transition.
-                    finishTransition(currentState, currentState.currentScene)
-                }
+                // Force the current transition to finish to currentScene. The transition will call
+                // [finishTransition] once it's finished.
+                currentState.finish()
 
                 val tooManyTransitions = transitionStates.size >= MAX_CONCURRENT_TRANSITIONS
                 val clearCurrentTransitions = !chain || tooManyTransitions
