@@ -4,6 +4,13 @@ container: "system"
 # NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
 
 flag {
+    name: "create_windowless_window_magnifier"
+    namespace: "accessibility"
+    description: "Uses SurfaceControlViewHost to create the magnifier for window magnification."
+    bug: "280992417"
+}
+
+flag {
     name: "delay_show_magnification_button"
     namespace: "accessibility"
     description: "Delays the showing of magnification mode switch button."
@@ -63,11 +70,4 @@ flag {
     namespace: "accessibility"
     description: "Animates the floating menu's transition between curved and jagged edges."
     bug: "281140482"
-}
-
-flag {
-    name: "create_windowless_window_magnifier"
-    namespace: "accessibility"
-    description: "Uses SurfaceControlViewHost to create the magnifier for window magnification."
-    bug: "280992417"
 }
