@@ -118,6 +118,8 @@ public class OneTouchPlayActionTest {
         mHdmiControlService.setHdmiCecConfig(mHdmiCecConfig);
         setHdmiControlEnabled(hdmiControlEnabled);
         mNativeWrapper = new FakeNativeWrapper();
+        mPhysicalAddress = 0x2000;
+        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
@@ -127,8 +129,6 @@ public class OneTouchPlayActionTest {
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);
-        mPhysicalAddress = 0x2000;
-        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mTestLooper.dispatchAll();
         mNativeWrapper.clearResultMessages();
     }

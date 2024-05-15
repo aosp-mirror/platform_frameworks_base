@@ -1567,7 +1567,7 @@ public class HdmiControlService extends SystemService {
      * Returns physical address of the device.
      */
     int getPhysicalAddress() {
-        return mCecController.getPhysicalAddress();
+        return mHdmiCecNetwork.getPhysicalAddress();
     }
 
     /**
