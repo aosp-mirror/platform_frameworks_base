@@ -855,6 +855,9 @@ flag {
     namespace: "systemui"
     description: "Enforce BaseUserRestriction for DISALLOW_CONFIG_BRIGHTNESS."
     bug: "329205638"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
