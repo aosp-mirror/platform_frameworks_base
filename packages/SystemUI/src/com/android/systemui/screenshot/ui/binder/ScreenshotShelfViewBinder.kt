@@ -68,6 +68,7 @@ object ScreenshotShelfViewBinder {
         dismissButton.setOnClickListener {
             onDismissalRequested(ScreenshotEvent.SCREENSHOT_EXPLICIT_DISMISSAL, null)
         }
+        val badgeView = view.requireViewById<ImageView>(R.id.screenshot_badge)
 
         // use immediate dispatcher to ensure screenshot bitmap is set before animation
         view.repeatWhenAttached(Dispatchers.Main.immediate) {
@@ -84,6 +85,12 @@ object ScreenshotShelfViewBinder {
                                 previewView.visibility = View.GONE
                                 previewBorder.visibility = View.GONE
                             }
+                        }
+                    }
+                    launch {
+                        viewModel.badge.collect { badge ->
+                            badgeView.setImageDrawable(badge)
+                            badgeView.visibility = if (badge != null) View.VISIBLE else View.GONE
                         }
                     }
                     launch {

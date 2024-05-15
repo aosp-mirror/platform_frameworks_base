@@ -31,6 +31,7 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import com.android.internal.logging.UiEventLogger
@@ -69,7 +70,17 @@ constructor(
     override var callbacks: ScreenshotView.ScreenshotViewCallback? = null
     override var screenshot: ScreenshotData? = null
         set(value) {
-            viewModel.setScreenshotBitmap(value?.bitmap)
+            value?.let {
+                viewModel.setScreenshotBitmap(it.bitmap)
+                val badgeBg =
+                    AppCompatResources.getDrawable(context, R.drawable.overlay_badge_background)
+                val user = it.userHandle
+                if (badgeBg != null && user != null) {
+                    viewModel.setScreenshotBadge(
+                        context.packageManager.getUserBadgedIcon(badgeBg, user)
+                    )
+                }
+            }
             field = value
         }
 
