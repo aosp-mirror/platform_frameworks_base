@@ -131,7 +131,7 @@ constructor(
         val newTransition =
             TransitionInfo(
                 ownerName = this::class.java.simpleName,
-                from = transitionInteractor.getStartedState(),
+                from = transitionInteractor.currentTransitionInfo.value.to,
                 to = state,
                 animator = null,
                 modeOnCanceled = TransitionModeOnCanceled.REVERSE
@@ -150,7 +150,7 @@ constructor(
     private suspend fun handleTransition(transition: ObservableTransitionState.Transition) {
         if (transition.fromScene == Scenes.Lockscreen) {
             if (currentTransitionId != null) {
-                val currentToState = transitionInteractor.getStartedState()
+                val currentToState = transitionInteractor.currentTransitionInfo.value.to
                 if (currentToState == UNDEFINED) {
                     transitionKtfTo(transitionInteractor.getStartedFromState())
                 }
@@ -169,6 +169,8 @@ constructor(
     }
 
     private suspend fun transitionKtfTo(state: KeyguardState) {
+        // TODO(b/330311871): This is based on a sharedFlow and thus might not be up-to-date and
+        //  cause a race condition. (There is no known scenario that is currently affected.)
         val currentTransition = transitionInteractor.transitionState.value
         if (currentTransition.isFinishedIn(state)) {
             // This is already the state we want to be in
@@ -199,7 +201,7 @@ constructor(
     }
 
     private suspend fun startTransitionFromLockscreen() {
-        val currentState = transitionInteractor.getStartedState()
+        val currentState = transitionInteractor.currentTransitionInfo.value.to
         val newTransition =
             TransitionInfo(
                 ownerName = this::class.java.simpleName,
