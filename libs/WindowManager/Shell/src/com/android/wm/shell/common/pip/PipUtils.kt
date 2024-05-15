@@ -152,7 +152,8 @@ object PipUtils {
                 "org.chromium.arc", 0)
             val isTv = AppGlobals.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK, 0)
-            isPip2ExperimentEnabled = SystemProperties.getBoolean("wm_shell.pip2", false) ||
+            isPip2ExperimentEnabled = SystemProperties.getBoolean(
+                    "persist.wm_shell.pip2", false) ||
                     (Flags.enablePip2Implementation() && !isArc && !isTv)
         }
         return isPip2ExperimentEnabled as Boolean
