@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.EMBED_ANY_APP_IN_UNTRUSTED_MODE;
 import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
@@ -959,6 +960,22 @@ public class TaskFragmentTest extends WindowTestsBase {
         // Ensure the focused app is updated when the left activity resumed.
         taskFragmentLeft.setResumedActivity(appLeftTop, "test");
         assertEquals(appLeftTop, task.getDisplayContent().mFocusedApp);
+    }
+
+    @Test
+    public void testShouldBeVisible_invisibleForEmptyTaskFragment() {
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN).build();
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .build();
+
+        // Empty taskFragment should be invisible
+        assertFalse(taskFragment.shouldBeVisible(null));
+
+        // Should be invisible even if it is ACTIVITY_TYPE_HOME.
+        when(taskFragment.getActivityType()).thenReturn(ACTIVITY_TYPE_HOME);
+        assertFalse(taskFragment.shouldBeVisible(null));
     }
 
     private WindowState createAppWindow(ActivityRecord app, String name) {
