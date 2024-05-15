@@ -233,6 +233,7 @@ public class SettingsBackupTest {
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,
                     Settings.Global.ENABLE_16K_PAGES, // Added for 16K developer option
                     Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
+                    Settings.Global.ERROR_KERNEL_LOG_PREFIX,
                     Settings.Global.ERROR_LOGCAT_PREFIX,
                     Settings.Global.EUICC_PROVISIONED,
                     Settings.Global.EUICC_SUPPORTED_COUNTRIES,
