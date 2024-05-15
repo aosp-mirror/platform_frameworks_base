@@ -35,10 +35,13 @@ import com.android.systemui.screenshot.ui.viewmodel.ActionButtonViewModel
 import com.android.systemui.screenshot.ui.viewmodel.AnimationState
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import com.android.systemui.util.children
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-object ScreenshotShelfViewBinder {
+class ScreenshotShelfViewBinder
+@Inject
+constructor(private val buttonViewBinder: ActionButtonViewBinder) {
     fun bind(
         view: ScreenshotShelfView,
         viewModel: ScreenshotViewModel,
@@ -158,14 +161,14 @@ object ScreenshotShelfViewBinder {
             val currentView: View? = actionsContainer.getChildAt(index)
             if (action.id == currentView?.tag) {
                 // Same ID, update the display
-                ActionButtonViewBinder.bind(currentView, action)
+                buttonViewBinder.bind(currentView, action)
             } else {
                 // Different ID. Removals have already happened so this must
                 // mean that the new action must be inserted here.
                 val actionButton =
                     layoutInflater.inflate(R.layout.shelf_action_chip, actionsContainer, false)
                 actionsContainer.addView(actionButton, index)
-                ActionButtonViewBinder.bind(actionButton, action)
+                buttonViewBinder.bind(actionButton, action)
             }
         }
     }
