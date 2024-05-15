@@ -75,4 +75,28 @@ final class InputMethodMap {
     int size() {
         return mMap.size();
     }
+
+    @AnyThread
+    @NonNull
+    public InputMethodMap applyAdditionalSubtypes(
+            @NonNull AdditionalSubtypeMap additionalSubtypeMap) {
+        if (additionalSubtypeMap.isEmpty()) {
+            return this;
+        }
+        final int size = size();
+        final ArrayMap<String, InputMethodInfo> newMethodMap = new ArrayMap<>(size);
+        boolean updated = false;
+        for (int i = 0; i < size; ++i) {
+            final var imi = valueAt(i);
+            final var imeId = imi.getId();
+            final var newAdditionalSubtypes = additionalSubtypeMap.get(imeId);
+            if (newAdditionalSubtypes == null || newAdditionalSubtypes.isEmpty()) {
+                newMethodMap.put(imi.getId(), imi);
+            } else {
+                newMethodMap.put(imi.getId(), new InputMethodInfo(imi, newAdditionalSubtypes));
+                updated = true;
+            }
+        }
+        return updated ? InputMethodMap.of(newMethodMap) : this;
+    }
 }
