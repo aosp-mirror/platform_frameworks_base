@@ -2389,8 +2389,12 @@ public class SettingsProvider extends ContentProvider {
                 == PackageManager.PERMISSION_GRANTED;
         boolean isRoot = Binder.getCallingUid() == Process.ROOT_UID;
 
-        if (isRoot || hasWritePermission) {
+        if (isRoot) {
             return;
+        }
+
+        if (hasWritePermission) {
+            assertCallingUserDenyList(flags);
         } else if (hasAllowlistPermission) {
             for (String flag : flags) {
                 boolean namespaceAllowed = false;
@@ -2407,9 +2411,46 @@ public class SettingsProvider extends ContentProvider {
                         + "'; allowlist permission granted, but must add flag to the allowlist.");
                 }
             }
+            assertCallingUserDenyList(flags);
         } else {
             throw new SecurityException("Permission denial to mutate flag, must have root, "
                 + "WRITE_DEVICE_CONFIG, or WRITE_ALLOWLISTED_DEVICE_CONFIG");
+        }
+    }
+
+    // The check is added mainly for auto devices. On auto devices, it is possible that
+    // multiple users are visible simultaneously using visible background users.
+    // In such cases, it is desired that Non-current user (ex. visible background users) can
+    // only change settings for certain namespaces.
+    private void assertCallingUserDenyList(@NonNull Set<String> flags) {
+        if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+            // enforce the deny list only on devices supporting visible background user.
+            return;
+        }
+
+        int callingUser = UserHandle.getCallingUserId();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            int currentUser = ActivityManager.getCurrentUser();
+            if (callingUser == currentUser) {
+                // enforce the deny list only if the caller is not current user. Currently only auto
+                // uses background visible user, and auto doesn't support profiles so profiles of
+                // current users is not checked here.
+                return;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        for (String flag : flags) {
+            for (String denylistedPrefix :
+                    NonWritableNamespacesForBackgroundUserPrefixes.DENYLIST) {
+                if (flag.startsWith(denylistedPrefix)) {
+                    throw new SecurityException("Permission denial for flag '" + flag
+                            + "' for background user " + callingUser + ". Namespace is added to "
+                            + "denylist.");
+                }
+            }
         }
     }
 
