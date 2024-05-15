@@ -340,7 +340,8 @@ public final class NfcAdapter {
     public static final int FLAG_READER_NFC_BARCODE = 0x10;
 
     /** @hide */
-    @IntDef(flag = true, prefix = {"FLAG_READER_"}, value = {
+    @IntDef(flag = true, value = {
+        FLAG_SET_DEFAULT_TECH,
         FLAG_READER_KEEP,
         FLAG_READER_DISABLE,
         FLAG_READER_NFC_A,
@@ -438,7 +439,8 @@ public final class NfcAdapter {
     public static final int FLAG_USE_ALL_TECH = 0xff;
 
     /** @hide */
-    @IntDef(flag = true, prefix = {"FLAG_LISTEN_"}, value = {
+    @IntDef(flag = true, value = {
+        FLAG_SET_DEFAULT_TECH,
         FLAG_LISTEN_KEEP,
         FLAG_LISTEN_DISABLE,
         FLAG_LISTEN_NFC_PASSIVE_A,
@@ -447,6 +449,18 @@ public final class NfcAdapter {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ListenTechnology {}
+
+    /**
+     * Flag used in {@link #setDiscoveryTechnology(Activity, int, int)}.
+     * <p>
+     * Setting this flag changes the default listen or poll tech.
+     * Only available to privileged apps.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_SET_DEFAULT_DISC_TECH)
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public static final int FLAG_SET_DEFAULT_TECH = 0x40000000;
 
     /**
      * @hide
@@ -1874,14 +1888,6 @@ public final class NfcAdapter {
     public void setDiscoveryTechnology(@NonNull Activity activity,
             @PollTechnology int pollTechnology, @ListenTechnology int listenTechnology) {
 
-        // A special treatment of the _KEEP flags
-        if ((listenTechnology & FLAG_LISTEN_KEEP) != 0) {
-            listenTechnology = -1;
-        }
-        if ((pollTechnology & FLAG_READER_KEEP) != 0) {
-            pollTechnology = -1;
-        }
-
         if (listenTechnology == FLAG_LISTEN_DISABLE) {
             synchronized (sLock) {
                 if (!sHasNfcFeature) {
@@ -1901,7 +1907,25 @@ public final class NfcAdapter {
                 }
             }
         }
-        mNfcActivityManager.setDiscoveryTech(activity, pollTechnology, listenTechnology);
+    /*
+     * Privileged FLAG to set technology mask for all data processed by NFC controller
+     * Note: Use with caution! The app is responsible for ensuring that the discovery
+     * technology mask is returned to default.
+     * Note: FLAG_USE_ALL_TECH used with _KEEP flags will reset the technolody to android default
+     */
+        if (Flags.nfcSetDefaultDiscTech()
+                && ((pollTechnology & FLAG_SET_DEFAULT_TECH) == FLAG_SET_DEFAULT_TECH
+                || (listenTechnology & FLAG_SET_DEFAULT_TECH) == FLAG_SET_DEFAULT_TECH)) {
+            Binder token = new Binder();
+            try {
+                NfcAdapter.sService.updateDiscoveryTechnology(token,
+                        pollTechnology, listenTechnology);
+            } catch (RemoteException e) {
+                attemptDeadServiceRecovery(e);
+            }
+        } else {
+            mNfcActivityManager.setDiscoveryTech(activity, pollTechnology, listenTechnology);
+        }
     }
 
     /**
