@@ -1251,7 +1251,8 @@ public final class DisplayPowerControllerTest {
                 /* ambientLightHorizonLong= */ anyInt(),
                 eq(lux),
                 eq(nits),
-                any(BrightnessClamperController.class)
+                any(BrightnessClamperController.class),
+                any(DisplayManagerFlags.class)
         );
     }
 
@@ -2247,7 +2248,8 @@ public final class DisplayPowerControllerTest {
                 BrightnessRangeController brightnessRangeController,
                 BrightnessThrottler brightnessThrottler, int ambientLightHorizonShort,
                 int ambientLightHorizonLong, float userLux, float userNits,
-                BrightnessClamperController brightnessClamperController) {
+                BrightnessClamperController brightnessClamperController,
+                DisplayManagerFlags displayManagerFlags) {
             return mAutomaticBrightnessController;
         }
 

@@ -1115,7 +1115,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     screenBrightnessThresholdsIdle, mContext, mBrightnessRangeController,
                     mBrightnessThrottler, mDisplayDeviceConfig.getAmbientHorizonShort(),
                     mDisplayDeviceConfig.getAmbientHorizonLong(), userLux, userNits,
-                    mBrightnessClamperController);
+                    mBrightnessClamperController, mFlags);
             mDisplayBrightnessController.setUpAutoBrightness(
                     mAutomaticBrightnessController, mSensorManager, mDisplayDeviceConfig, mHandler,
                     defaultModeBrightnessMapper, mIsEnabled, mLeadDisplayId);
@@ -3158,7 +3158,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 BrightnessRangeController brightnessModeController,
                 BrightnessThrottler brightnessThrottler, int ambientLightHorizonShort,
                 int ambientLightHorizonLong, float userLux, float userNits,
-                BrightnessClamperController brightnessClamperController) {
+                BrightnessClamperController brightnessClamperController,
+                DisplayManagerFlags displayManagerFlags) {
 
             return new AutomaticBrightnessController(callbacks, looper, sensorManager, lightSensor,
                     brightnessMappingStrategyMap, lightSensorWarmUpTime, brightnessMin,
@@ -3169,7 +3170,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     screenBrightnessThresholds, ambientBrightnessThresholdsIdle,
                     screenBrightnessThresholdsIdle, context, brightnessModeController,
                     brightnessThrottler, ambientLightHorizonShort, ambientLightHorizonLong, userLux,
-                    userNits, brightnessClamperController);
+                    userNits, brightnessClamperController, displayManagerFlags);
         }
 
         BrightnessMappingStrategy getDefaultModeBrightnessMapper(Context context,

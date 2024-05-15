@@ -56,10 +56,12 @@ import com.android.server.EventLogTags;
 import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.clamper.BrightnessClamperController;
 import com.android.server.display.config.HysteresisLevels;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Manages the associated display brightness when in auto-brightness mode. This is also
@@ -277,6 +279,8 @@ public class AutomaticBrightnessController {
     private Clock mClock;
     private final Injector mInjector;
 
+    private final DisplayManagerFlags mDisplayManagerFlags;
+
     AutomaticBrightnessController(Callbacks callbacks, Looper looper,
             SensorManager sensorManager, Sensor lightSensor,
             SparseArray<BrightnessMappingStrategy> brightnessMappingStrategyMap,
@@ -291,7 +295,8 @@ public class AutomaticBrightnessController {
             BrightnessRangeController brightnessModeController,
             BrightnessThrottler brightnessThrottler, int ambientLightHorizonShort,
             int ambientLightHorizonLong, float userLux, float userNits,
-            BrightnessClamperController brightnessClamperController) {
+            BrightnessClamperController brightnessClamperController,
+            DisplayManagerFlags displayManagerFlags) {
         this(new Injector(), callbacks, looper, sensorManager, lightSensor,
                 brightnessMappingStrategyMap, lightSensorWarmUpTime, brightnessMin, brightnessMax,
                 dozeScaleFactor, lightSensorRate, initialLightSensorRate,
@@ -301,7 +306,7 @@ public class AutomaticBrightnessController {
                 screenBrightnessThresholds, ambientBrightnessThresholdsIdle,
                 screenBrightnessThresholdsIdle, context, brightnessModeController,
                 brightnessThrottler, ambientLightHorizonShort, ambientLightHorizonLong, userLux,
-                userNits, brightnessClamperController
+                userNits, brightnessClamperController, displayManagerFlags
         );
     }
 
@@ -320,9 +325,10 @@ public class AutomaticBrightnessController {
             BrightnessRangeController brightnessRangeController,
             BrightnessThrottler brightnessThrottler, int ambientLightHorizonShort,
             int ambientLightHorizonLong, float userLux, float userNits,
-            BrightnessClamperController brightnessClamperController) {
+            BrightnessClamperController brightnessClamperController,
+            DisplayManagerFlags displayManagerFlags) {
         mInjector = injector;
-        mClock = injector.createClock();
+        mClock = injector.createClock(displayManagerFlags.offloadControlsDozeAutoBrightness());
         mContext = context;
         mCallbacks = callbacks;
         mSensorManager = sensorManager;
@@ -367,6 +373,7 @@ public class AutomaticBrightnessController {
         mBrightnessClamperController = brightnessClamperController;
         mBrightnessThrottler = brightnessThrottler;
         mBrightnessMappingStrategyMap = brightnessMappingStrategyMap;
+        mDisplayManagerFlags = displayManagerFlags;
 
         // Use the given short-term model
         if (userNits != BrightnessMappingStrategy.INVALID_NITS) {
@@ -719,7 +726,6 @@ public class AutomaticBrightnessController {
         mRecentLightSamples++;
         mAmbientLightRingBuffer.prune(time - mAmbientLightHorizonLong);
         mAmbientLightRingBuffer.push(time, lux);
-
         // Remember this sample value.
         mLastObservedLux = lux;
         mLastObservedLuxTime = time;
@@ -863,7 +869,7 @@ public class AutomaticBrightnessController {
     }
 
     private void updateAmbientLux() {
-        long time = mClock.uptimeMillis();
+        long time = mClock.getSensorEventScaleTime();
         mAmbientLightRingBuffer.prune(time - mAmbientLightHorizonLong);
         updateAmbientLux(time);
     }
@@ -940,7 +946,16 @@ public class AutomaticBrightnessController {
             Slog.d(TAG, "updateAmbientLux: Scheduling ambient lux update for " +
                     nextTransitionTime + TimeUtils.formatUptime(nextTransitionTime));
         }
-        mHandler.sendEmptyMessageAtTime(MSG_UPDATE_AMBIENT_LUX, nextTransitionTime);
+
+        // The nextTransitionTime is computed as elapsedTime(Which also accounts for the time when
+        // android was sleeping) as the main reference. However, handlers work on the uptime(Not
+        // accounting for the time when android was sleeping)
+        mHandler.sendEmptyMessageAtTime(MSG_UPDATE_AMBIENT_LUX,
+                convertToUptime(nextTransitionTime));
+    }
+
+    private long convertToUptime(long time) {
+        return time - mClock.getSensorEventScaleTime() + mClock.uptimeMillis();
     }
 
     private void updateAutoBrightness(boolean sendUpdate, boolean isManuallySet) {
@@ -1366,7 +1381,9 @@ public class AutomaticBrightnessController {
         @Override
         public void onSensorChanged(SensorEvent event) {
             if (mLightSensorEnabled) {
-                final long time = mClock.uptimeMillis();
+                // The time received from the sensor is in nano seconds, hence changing it to ms
+                final long time = (mDisplayManagerFlags.offloadControlsDozeAutoBrightness())
+                        ? TimeUnit.NANOSECONDS.toMillis(event.timestamp) : mClock.uptimeMillis();
                 final float lux = event.values[0];
                 handleLightSensorEvent(time, lux);
             }
@@ -1399,6 +1416,12 @@ public class AutomaticBrightnessController {
          * Returns current time in milliseconds since boot, not counting time spent in deep sleep.
          */
         long uptimeMillis();
+
+        /**
+         * Gets the time on either the elapsedTime or the uptime scale, depending on how we
+         * processing the events from the sensor
+         */
+        long getSensorEventScaleTime();
     }
 
     /**
@@ -1546,7 +1569,8 @@ public class AutomaticBrightnessController {
             StringBuilder buf = new StringBuilder();
             buf.append('[');
             for (int i = 0; i < mCount; i++) {
-                final long next = i + 1 < mCount ? getTime(i + 1) : mClock.uptimeMillis();
+                final long next = i + 1 < mCount ? getTime(i + 1)
+                        : mClock.getSensorEventScaleTime();
                 if (i != 0) {
                     buf.append(", ");
                 }
@@ -1571,13 +1595,31 @@ public class AutomaticBrightnessController {
         }
     }
 
+    private static class RealClock implements Clock {
+        private final boolean mOffloadControlsDozeBrightness;
+
+        RealClock(boolean offloadControlsDozeBrightness) {
+            mOffloadControlsDozeBrightness = offloadControlsDozeBrightness;
+        }
+
+        @Override
+        public long uptimeMillis() {
+            return SystemClock.uptimeMillis();
+        }
+
+        public long getSensorEventScaleTime() {
+            return (mOffloadControlsDozeBrightness)
+                    ? SystemClock.elapsedRealtime() : uptimeMillis();
+        }
+    }
+
     public static class Injector {
         public Handler getBackgroundThreadHandler() {
             return BackgroundThread.getHandler();
         }
 
-        Clock createClock() {
-            return SystemClock::uptimeMillis;
+        Clock createClock(boolean offloadControlsDozeBrightness) {
+            return new RealClock(offloadControlsDozeBrightness);
         }
     }
 }

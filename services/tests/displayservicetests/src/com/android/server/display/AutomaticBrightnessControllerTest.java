@@ -54,6 +54,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.display.brightness.clamper.BrightnessClamperController;
 import com.android.server.display.config.HysteresisLevels;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.testutils.OffsettableClock;
 
 import org.junit.After;
@@ -68,6 +69,8 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class AutomaticBrightnessControllerTest {
+    private static final int ANDROID_SLEEP_TIME = 1000;
+    private static final int NANO_SECONDS_MULTIPLIER = 1000000;
     private static final float BRIGHTNESS_MIN_FLOAT = 0.0f;
     private static final float BRIGHTNESS_MAX_FLOAT = 1.0f;
     private static final int LIGHT_SENSOR_RATE = 20;
@@ -100,6 +103,8 @@ public class AutomaticBrightnessControllerTest {
     @Mock BrightnessRangeController mBrightnessRangeController;
     @Mock
     BrightnessClamperController mBrightnessClamperController;
+    @Mock
+    DisplayManagerFlags mDisplayManagerFlags;
     @Mock BrightnessThrottler mBrightnessThrottler;
 
     @Before
@@ -148,8 +153,18 @@ public class AutomaticBrightnessControllerTest {
                     }
 
                     @Override
-                    AutomaticBrightnessController.Clock createClock() {
-                        return mClock::now;
+                    AutomaticBrightnessController.Clock createClock(boolean isEnabled) {
+                        return new AutomaticBrightnessController.Clock() {
+                            @Override
+                            public long uptimeMillis() {
+                                return mClock.now();
+                            }
+
+                            @Override
+                            public long getSensorEventScaleTime() {
+                                return mClock.now() + ANDROID_SLEEP_TIME;
+                            }
+                        };
                     }
 
                 }, // pass in test looper instead, pass in offsettable clock
@@ -166,7 +181,7 @@ public class AutomaticBrightnessControllerTest {
                 mContext, mBrightnessRangeController, mBrightnessThrottler,
                 useHorizon ? AMBIENT_LIGHT_HORIZON_SHORT : 1,
                 useHorizon ? AMBIENT_LIGHT_HORIZON_LONG : 10000, userLux, userNits,
-                mBrightnessClamperController
+                mBrightnessClamperController, mDisplayManagerFlags
         );
 
         when(mBrightnessRangeController.getCurrentBrightnessMax()).thenReturn(
@@ -797,6 +812,43 @@ public class AutomaticBrightnessControllerTest {
         }
         assertEquals(lux, sensorValues[0], EPSILON);
         assertEquals(mClock.now() - AMBIENT_LIGHT_HORIZON_LONG, sensorTimestamps[0]);
+    }
+
+    @Test
+    public void testAmbientLuxBuffers_prunedBeyondLongHorizonExceptLatestValue() throws Exception {
+        when(mDisplayManagerFlags.offloadControlsDozeAutoBrightness()).thenReturn(true);
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Choose values such that the ring buffer's capacity is extended and the buffer is pruned
+        int increment = 11;
+        int lux = 5000;
+        for (int i = 0; i < 1000; i++) {
+            lux += increment;
+            mClock.fastForward(increment);
+            listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, lux,
+                    (mClock.now() + ANDROID_SLEEP_TIME) * NANO_SECONDS_MULTIPLIER));
+        }
+        mClock.fastForward(AMBIENT_LIGHT_HORIZON_LONG + 10);
+        int newLux = 2000;
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, newLux,
+                (mClock.now() + ANDROID_SLEEP_TIME) * NANO_SECONDS_MULTIPLIER));
+
+        float[] sensorValues = mController.getLastSensorValues();
+        long[] sensorTimestamps = mController.getLastSensorTimestamps();
+        // Only the values within the horizon should be kept
+        assertEquals(2, sensorValues.length);
+        assertEquals(2, sensorTimestamps.length);
+
+        assertEquals(lux, sensorValues[0], EPSILON);
+        assertEquals(newLux, sensorValues[1], EPSILON);
+        assertEquals(mClock.now() + ANDROID_SLEEP_TIME - AMBIENT_LIGHT_HORIZON_LONG,
+                sensorTimestamps[0]);
+        assertEquals(mClock.now() + ANDROID_SLEEP_TIME,
+                sensorTimestamps[1]);
     }
 
     @Test
