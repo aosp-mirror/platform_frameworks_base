@@ -412,10 +412,15 @@ import java.util.concurrent.atomic.AtomicInteger;
     /* package */
     synchronized void addTransaction(
             ContextHubServiceTransaction transaction) throws IllegalStateException {
+        if (transaction == null) {
+            return;
+        }
+
         if (mTransactionQueue.size() == MAX_PENDING_REQUESTS) {
             throw new IllegalStateException("Transaction queue is full (capacity = "
                     + MAX_PENDING_REQUESTS + ")");
         }
+
         mTransactionQueue.add(transaction);
         mTransactionRecordDeque.add(new TransactionRecord(transaction.toString()));
 
