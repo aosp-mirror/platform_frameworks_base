@@ -283,16 +283,17 @@ class MediaControlViewModel(
         )
     }
 
-    private fun toActionViewModels(model: MediaControlModel): List<MediaActionViewModel?> {
+    private fun toActionViewModels(model: MediaControlModel): List<MediaActionViewModel> {
         val semanticActionButtons =
             model.semanticActionButtons?.let { mediaButton ->
-                with(mediaButton) {
-                    val isScrubbingTimeEnabled = canShowScrubbingTimeViews(mediaButton)
-                    SEMANTIC_ACTIONS_ALL.map { buttonId ->
-                        getActionById(buttonId)?.let {
-                            toSemanticActionViewModel(model, it, buttonId, isScrubbingTimeEnabled)
-                        }
-                    }
+                val isScrubbingTimeEnabled = canShowScrubbingTimeViews(mediaButton)
+                SEMANTIC_ACTIONS_ALL.map { buttonId ->
+                    toSemanticActionViewModel(
+                        model,
+                        mediaButton.getActionById(buttonId),
+                        buttonId,
+                        isScrubbingTimeEnabled
+                    )
                 }
             }
         val notifActionButtons =
@@ -304,7 +305,7 @@ class MediaControlViewModel(
 
     private fun toSemanticActionViewModel(
         model: MediaControlModel,
-        mediaAction: MediaAction,
+        mediaAction: MediaAction?,
         buttonId: Int,
         canShowScrubbingTimeViews: Boolean
     ): MediaActionViewModel {
@@ -312,9 +313,9 @@ class MediaControlViewModel(
         val hideWhenScrubbing = SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.contains(buttonId)
         val shouldHideWhenScrubbing = canShowScrubbingTimeViews && hideWhenScrubbing
         return MediaActionViewModel(
-            icon = mediaAction.icon,
-            contentDescription = mediaAction.contentDescription,
-            background = mediaAction.background,
+            icon = mediaAction?.icon,
+            contentDescription = mediaAction?.contentDescription,
+            background = mediaAction?.background,
             isVisibleWhenScrubbing = !shouldHideWhenScrubbing,
             notVisibleValue =
                 if (
@@ -326,11 +327,11 @@ class MediaControlViewModel(
                     ConstraintSet.GONE
                 },
             showInCollapsed = showInCollapsed,
-            rebindId = mediaAction.rebindId,
+            rebindId = mediaAction?.rebindId,
             buttonId = buttonId,
-            isEnabled = mediaAction.action != null,
+            isEnabled = mediaAction?.action != null,
             onClicked = { id ->
-                mediaAction.action?.let {
+                mediaAction?.action?.let {
                     onButtonClicked(id, model.uid, model.packageName, model.instanceId, it)
                 }
             },

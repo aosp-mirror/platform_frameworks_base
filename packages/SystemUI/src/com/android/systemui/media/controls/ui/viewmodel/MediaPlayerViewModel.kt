@@ -35,7 +35,7 @@ data class MediaPlayerViewModel(
     val canShowTime: Boolean,
     val playTurbulenceNoise: Boolean,
     val useSemanticActions: Boolean,
-    val actionButtons: List<MediaActionViewModel?>,
+    val actionButtons: List<MediaActionViewModel>,
     val outputSwitcher: MediaOutputSwitcherViewModel,
     val gutsMenu: GutsViewModel,
     val onClicked: (Expandable) -> Unit,
