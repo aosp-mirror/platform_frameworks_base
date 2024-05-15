@@ -21,6 +21,7 @@ import static android.app.ActivityManager.UID_OBSERVER_GONE;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.flags.Flags.pinWebview;
+import static com.android.server.flags.Flags.skipHomeArtPins;
 
 import android.annotation.EnforcePermission;
 import android.annotation.IntDef;
@@ -851,6 +852,9 @@ public final class PinnerService extends SystemService {
         }
 
         int apkPinSizeLimit = pinSizeLimit;
+
+        boolean shouldSkipArtPins = key == KEY_HOME && skipHomeArtPins();
+
         for (String apk: apks) {
             if (apkPinSizeLimit <= 0) {
                 Slog.w(TAG, "Reached to the pin size limit. Skipping: " + apk);
@@ -874,8 +878,8 @@ public final class PinnerService extends SystemService {
             }
 
             apkPinSizeLimit -= pf.bytesPinned;
-            if (apk.equals(appInfo.sourceDir)) {
-                pinOptimizedDexDependencies(pf, apkPinSizeLimit, appInfo);
+            if (apk.equals(appInfo.sourceDir) && !shouldSkipArtPins) {
+                pinOptimizedDexDependencies(pf, Integer.MAX_VALUE, appInfo);
             }
         }
     }
@@ -921,8 +925,8 @@ public final class PinnerService extends SystemService {
         }
         pf.groupName = groupName != null ? groupName : "";
 
-        maxBytesToPin -= bytesPinned;
         bytesPinned += pf.bytesPinned;
+        maxBytesToPin -= bytesPinned;
 
         synchronized (this) {
             mPinnedFiles.put(pf.fileName, pf);
@@ -970,7 +974,7 @@ public final class PinnerService extends SystemService {
                 // Unpin if it was already pinned prior to re-pinning.
                 unpinFile(file);
 
-                PinnedFile df = mInjector.pinFileInternal(file, Integer.MAX_VALUE,
+                PinnedFile df = mInjector.pinFileInternal(file, maxBytesToPin,
                         /*attemptPinIntrospection=*/false);
                 if (df == null) {
                     Slog.i(TAG, "Failed to pin ART file = " + file);
