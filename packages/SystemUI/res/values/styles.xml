@@ -375,6 +375,12 @@
         <item name="android:textColor">?androidprv:attr/materialColorPrimary</item>
     </style>
 
+    <style name="AuthCredentialNegativeButtonStyle" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+        <item name="android:background">@color/transparent</item>
+        <item name="android:textColor">?androidprv:attr/materialColorPrimary</item>
+    </style>
+
     <style name="DeviceManagementDialogTitle">
         <item name="android:gravity">center</item>
         <item name="android:textAppearance">@style/TextAppearance.Dialog.Title</item>

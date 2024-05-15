@@ -23,7 +23,7 @@
     <!-- Negative Button, reserved for app -->
     <Button
         android:id="@+id/button_negative"
-        style="@style/Widget.Dialog.Button.BorderButton"
+        style="@style/AuthCredentialNegativeButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -37,7 +37,7 @@
     <!-- Cancel Button, replaces negative button when biometric is accepted -->
     <Button
         android:id="@+id/button_cancel"
-        style="@style/Widget.Dialog.Button.BorderButton"
+        style="@style/AuthCredentialNegativeButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -50,7 +50,7 @@
     <!-- "Use Credential" Button, replaces if device credential is allowed -->
     <Button
         android:id="@+id/button_use_credential"
-        style="@style/Widget.Dialog.Button.BorderButton"
+        style="@style/AuthCredentialNegativeButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
