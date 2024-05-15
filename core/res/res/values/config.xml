@@ -1193,13 +1193,14 @@
     <!-- Allows activities to be launched on a long press on power during device setup. -->
     <bool name="config_allowStartActivityForLongPressOnPowerInSetup">false</bool>
 
-    <!-- Control the behavior when the user short presses the settings button.
-            0 - Nothing
+    <!-- Control the behavior when the user presses the settings button.
+            0 - Launch Settings activity
             1 - Launch notification panel
+            2 - Nothing
          This needs to match the constants in
          com/android/server/policy/PhoneWindowManager.java
     -->
-    <integer name="config_shortPressOnSettingsBehavior">0</integer>
+    <integer name="config_settingsKeyBehavior">0</integer>
 
     <!-- Control the behavior when the user short presses the power button.
             0 - Nothing
