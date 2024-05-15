@@ -21,6 +21,7 @@ import android.tools.flicker.assertors.assertions.AppLayerIsInvisibleAtEnd
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAlways
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAtStart
 import android.tools.flicker.assertors.assertions.AppWindowHasDesktopModeInitialBoundsAtTheEnd
+import android.tools.flicker.assertors.assertions.AppWindowIsVisibleAlways
 import android.tools.flicker.assertors.assertions.AppWindowOnTopAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowOnTopAtStart
 import android.tools.flicker.assertors.assertions.AppWindowRemainInsideDisplayBounds
@@ -133,9 +134,8 @@ class DesktopModeFlickerScenarios {
                     }
                 ),
                 assertions =
-                AssertionTemplates.COMMON_ASSERTIONS +
                         listOf(
-                            AppLayerIsVisibleAlways(Components.DESKTOP_MODE_APP),
+                            AppWindowIsVisibleAlways(Components.DESKTOP_MODE_APP),
                             AppWindowOnTopAtEnd(Components.DESKTOP_MODE_APP),
                             AppWindowRemainInsideDisplayBounds(Components.DESKTOP_MODE_APP),
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
