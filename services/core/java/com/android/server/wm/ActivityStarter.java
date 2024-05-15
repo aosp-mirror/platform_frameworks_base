@@ -1768,6 +1768,7 @@ class ActivityStarter {
             if (!avoidMoveToFront() && (mService.mHomeProcess == null
                     || mService.mHomeProcess.mUid != realCallingUid)
                     && (prevTopTask != null && prevTopTask.isActivityTypeHomeOrRecents())
+                    && !targetTask.isActivityTypeHomeOrRecents()
                     && r.mTransitionController.isTransientHide(targetTask)) {
                 mCanMoveToFrontCode = MOVE_TO_FRONT_AVOID_LEGACY;
             }
@@ -2167,7 +2168,7 @@ class ActivityStarter {
             // We don't need to start a new activity, and the client said not to do anything
             // if that is the case, so this is it!  And for paranoia, make sure we have
             // correctly resumed the top activity.
-            if (!mMovedToFront && mDoResume) {
+            if (!mMovedToFront && mDoResume && !avoidMoveToFront()) {
                 ProtoLog.d(WM_DEBUG_TASKS, "Bring to front target: %s from %s", mTargetRootTask,
                         targetTaskTop);
                 mTargetRootTask.moveToFront("intentActivityFound");
@@ -2196,7 +2197,7 @@ class ActivityStarter {
         if (mMovedToFront) {
             // We moved the task to front, use starting window to hide initial drawn delay.
             targetTaskTop.showStartingWindow(true /* taskSwitch */);
-        } else if (mDoResume) {
+        } else if (mDoResume && !avoidMoveToFront()) {
             // Make sure the root task and its belonging display are moved to topmost.
             mTargetRootTask.moveToFront("intentActivityFound");
         }
