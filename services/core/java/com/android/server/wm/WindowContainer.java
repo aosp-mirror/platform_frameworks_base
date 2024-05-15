@@ -116,6 +116,7 @@ import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
+import com.android.server.wm.utils.AlwaysTruePredicate;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -2019,29 +2020,34 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 callback, boundary, includeBoundary, traverseTopToBottom, boundaryFound);
     }
 
+    @SuppressWarnings("unchecked")
+    static <T> Predicate<T> alwaysTruePredicate() {
+        return (Predicate<T>) AlwaysTruePredicate.INSTANCE;
+    }
+
     ActivityRecord getActivityAbove(ActivityRecord r) {
-        return getActivity((above) -> true, r,
+        return getActivity(alwaysTruePredicate(), r /* boundary */,
                 false /*includeBoundary*/, false /*traverseTopToBottom*/);
     }
 
     ActivityRecord getActivityBelow(ActivityRecord r) {
-        return getActivity((below) -> true, r,
+        return getActivity(alwaysTruePredicate(), r /* boundary */,
                 false /*includeBoundary*/, true /*traverseTopToBottom*/);
     }
 
     ActivityRecord getBottomMostActivity() {
-        return getActivity((r) -> true, false /*traverseTopToBottom*/);
+        return getActivity(alwaysTruePredicate(), false /* traverseTopToBottom */);
     }
 
     ActivityRecord getTopMostActivity() {
-        return getActivity((r) -> true, true /*traverseTopToBottom*/);
+        return getActivity(alwaysTruePredicate(), true /* traverseTopToBottom */);
     }
 
     ActivityRecord getTopActivity(boolean includeFinishing, boolean includeOverlays) {
         // Break down into 4 calls to avoid object creation due to capturing input params.
         if (includeFinishing) {
             if (includeOverlays) {
-                return getActivity((r) -> true);
+                return getActivity(alwaysTruePredicate());
             }
             return getActivity((r) -> !r.isTaskOverlay());
         } else if (includeOverlays) {
@@ -2220,21 +2226,17 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    Task getTaskAbove(Task t) {
-        return getTask(
-                (above) -> true, t, false /*includeBoundary*/, false /*traverseTopToBottom*/);
-    }
-
     Task getTaskBelow(Task t) {
-        return getTask((below) -> true, t, false /*includeBoundary*/, true /*traverseTopToBottom*/);
+        return getTask(alwaysTruePredicate(), t /* boundary */,
+                false /* includeBoundary */, true /* traverseTopToBottom */);
     }
 
     Task getBottomMostTask() {
-        return getTask((t) -> true, false /*traverseTopToBottom*/);
+        return getTask(alwaysTruePredicate(), false /* traverseTopToBottom */);
     }
 
     Task getTopMostTask() {
-        return getTask((t) -> true, true /*traverseTopToBottom*/);
+        return getTask(alwaysTruePredicate(), true /* traverseTopToBottom */);
     }
 
     Task getTask(Predicate<Task> callback) {

@@ -2755,7 +2755,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Nullable
     Task getTopRootTask() {
-        return getRootTask(t -> true);
+        return getRootTask(alwaysTruePredicate());
     }
 
     /**
