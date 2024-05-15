@@ -46,7 +46,7 @@ constructor(
     displayStateInteractor: DisplayStateInteractor,
     udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) {
-    val propertiesInitialized: StateFlow<Boolean> = repository.propertiesInitialized
+    val propertiesInitialized: Flow<Boolean> = repository.propertiesInitialized
     val isUdfps: StateFlow<Boolean> =
         repository.sensorType
             .map { it.isUdfps() }
