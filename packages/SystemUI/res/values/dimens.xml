@@ -1713,12 +1713,12 @@
     <dimen name="wallet_button_horizontal_padding">24dp</dimen>
     <dimen name="wallet_button_vertical_padding">8dp</dimen>
 
-    <!-- Ongoing call chip -->
-    <dimen name="ongoing_call_chip_side_padding">12dp</dimen>
-    <dimen name="ongoing_call_chip_icon_size">16dp</dimen>
+    <!-- Ongoing activity chip -->
+    <dimen name="ongoing_activity_chip_side_padding">12dp</dimen>
+    <dimen name="ongoing_activity_chip_icon_size">16dp</dimen>
     <!-- The padding between the icon and the text. -->
-    <dimen name="ongoing_call_chip_icon_text_padding">4dp</dimen>
-    <dimen name="ongoing_call_chip_corner_radius">28dp</dimen>
+    <dimen name="ongoing_activity_chip_icon_text_padding">4dp</dimen>
+    <dimen name="ongoing_activity_chip_corner_radius">28dp</dimen>
 
     <!-- Status bar user chip -->
     <dimen name="status_bar_user_chip_avatar_size">16dp</dimen>
