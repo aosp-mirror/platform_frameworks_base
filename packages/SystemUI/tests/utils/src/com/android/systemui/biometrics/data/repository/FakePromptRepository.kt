@@ -17,6 +17,9 @@ class FakePromptRepository : PromptRepository {
     private val _userId = MutableStateFlow<Int?>(null)
     override val userId = _userId.asStateFlow()
 
+    private val _requestId = MutableStateFlow<Long?>(null)
+    override val requestId = _requestId.asStateFlow()
+
     private var _challenge = MutableStateFlow<Long?>(null)
     override val challenge = _challenge.asStateFlow()
 
@@ -32,6 +35,7 @@ class FakePromptRepository : PromptRepository {
     override fun setPrompt(
         promptInfo: PromptInfo,
         userId: Int,
+        requestId: Long,
         gatekeeperChallenge: Long?,
         kind: PromptKind,
         opPackageName: String,
@@ -39,6 +43,7 @@ class FakePromptRepository : PromptRepository {
         setPrompt(
             promptInfo,
             userId,
+            requestId,
             gatekeeperChallenge,
             kind,
             forceConfirmation = false,
@@ -48,6 +53,7 @@ class FakePromptRepository : PromptRepository {
     fun setPrompt(
         promptInfo: PromptInfo,
         userId: Int,
+        requestId: Long,
         gatekeeperChallenge: Long?,
         kind: PromptKind,
         forceConfirmation: Boolean = false,
@@ -55,15 +61,17 @@ class FakePromptRepository : PromptRepository {
     ) {
         _promptInfo.value = promptInfo
         _userId.value = userId
+        _requestId.value = requestId
         _challenge.value = gatekeeperChallenge
         _promptKind.value = kind
         _isConfirmationRequired.value = promptInfo.isConfirmationRequested || forceConfirmation
         _opPackageName.value = opPackageName
     }
 
-    override fun unsetPrompt() {
+    override fun unsetPrompt(requestId: Long) {
         _promptInfo.value = null
         _userId.value = null
+        _requestId.value = null
         _challenge.value = null
         _promptKind.value = PromptKind.None
         _opPackageName.value = null

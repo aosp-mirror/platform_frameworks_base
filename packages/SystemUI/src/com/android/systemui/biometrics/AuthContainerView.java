@@ -362,7 +362,7 @@ public class AuthContainerView extends LinearLayout
 
         mPromptSelectorInteractorProvider = promptSelectorInteractorProvider;
         mPromptSelectorInteractorProvider.get().setPrompt(mConfig.mPromptInfo, mEffectiveUserId,
-                biometricModalities, mConfig.mOperationId, mConfig.mOpPackageName,
+                getRequestId(), biometricModalities, mConfig.mOperationId, mConfig.mOpPackageName,
                 false /*onSwitchToCredential*/);
 
         final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
@@ -436,7 +436,7 @@ public class AuthContainerView extends LinearLayout
                 addCredentialView(true, false);
             }
         } else {
-            mPromptSelectorInteractorProvider.get().resetPrompt();
+            mPromptSelectorInteractorProvider.get().resetPrompt(getRequestId());
         }
     }
 
@@ -884,7 +884,8 @@ public class AuthContainerView extends LinearLayout
         final Runnable endActionRunnable = () -> {
             setVisibility(View.INVISIBLE);
             if (Flags.customBiometricPrompt() && constraintBp()) {
-                mPromptSelectorInteractorProvider.get().resetPrompt();
+                // TODO(b/288175645): resetPrompt calls should be lifecycle aware
+                mPromptSelectorInteractorProvider.get().resetPrompt(getRequestId());
             }
             removeWindowIfAttached();
         };

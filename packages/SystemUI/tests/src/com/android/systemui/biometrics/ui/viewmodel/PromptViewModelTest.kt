@@ -95,6 +95,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 
 private const val USER_ID = 4
+private const val REQUEST_ID = 4L
 private const val CHALLENGE = 2L
 private const val DELAY = 1000L
 private const val OP_PACKAGE_NAME = "biometric.testapp"
@@ -1469,7 +1470,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         whenever(activityTaskManager.getTasks(1)).thenReturn(listOf(runningTaskInfo))
         selector =
             PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
-        selector.resetPrompt()
+        selector.resetPrompt(REQUEST_ID)
 
         viewModel =
             PromptViewModel(
@@ -1700,6 +1701,7 @@ private fun PromptSelectorInteractor.initializePrompt(
     setPrompt(
         info,
         USER_ID,
+        REQUEST_ID,
         BiometricModalities(fingerprintProperties = fingerprint, faceProperties = face),
         CHALLENGE,
         packageName,

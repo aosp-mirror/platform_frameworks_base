@@ -86,6 +86,7 @@ interface PromptSelectorInteractor {
     fun setPrompt(
         promptInfo: PromptInfo,
         effectiveUserId: Int,
+        requestId: Long,
         modalities: BiometricModalities,
         challenge: Long,
         opPackageName: String,
@@ -93,7 +94,7 @@ interface PromptSelectorInteractor {
     )
 
     /** Unset the current authentication request. */
-    fun resetPrompt()
+    fun resetPrompt(requestId: Long)
 }
 
 @SysUISingleton
@@ -161,6 +162,7 @@ constructor(
         setPrompt(
             promptRepository.promptInfo.value!!,
             promptRepository.userId.value!!,
+            promptRepository.requestId.value!!,
             modalities,
             promptRepository.challenge.value!!,
             promptRepository.opPackageName.value!!,
@@ -171,6 +173,7 @@ constructor(
     override fun setPrompt(
         promptInfo: PromptInfo,
         effectiveUserId: Int,
+        requestId: Long,
         modalities: BiometricModalities,
         challenge: Long,
         opPackageName: String,
@@ -198,13 +201,14 @@ constructor(
         promptRepository.setPrompt(
             promptInfo = promptInfo,
             userId = effectiveUserId,
+            requestId = requestId,
             gatekeeperChallenge = challenge,
             kind = kind,
             opPackageName = opPackageName,
         )
     }
 
-    override fun resetPrompt() {
-        promptRepository.unsetPrompt()
+    override fun resetPrompt(requestId: Long) {
+        promptRepository.unsetPrompt(requestId)
     }
 }
