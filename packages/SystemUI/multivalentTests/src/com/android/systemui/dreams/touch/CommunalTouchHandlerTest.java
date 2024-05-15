@@ -108,7 +108,7 @@ public class CommunalTouchHandlerTest extends SysuiTestCase {
         mTouchHandler.onSessionStart(mTouchSession);
         verify(mTouchSession).registerInputListener(inputEventListenerArgumentCaptor.capture());
         inputEventListenerArgumentCaptor.getValue().onInputEvent(motionEvent);
-        verify(mCentralSurfaces).handleExternalShadeWindowTouch(motionEvent);
+        verify(mCentralSurfaces).handleDreamTouch(motionEvent);
     }
 
     @Test

@@ -2932,8 +2932,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     };
 
     @Override
-    public void handleExternalShadeWindowTouch(MotionEvent event) {
-        getNotificationShadeWindowViewController().handleExternalTouch(event);
+    public void handleDreamTouch(MotionEvent event) {
+        getNotificationShadeWindowViewController().handleDreamTouch(event);
     }
 
     @Override
