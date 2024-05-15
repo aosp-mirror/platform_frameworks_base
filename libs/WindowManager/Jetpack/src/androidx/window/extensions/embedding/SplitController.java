@@ -2756,6 +2756,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     TaskFragmentContainer createOrUpdateOverlayTaskFragmentIfNeeded(
             @NonNull WindowContainerTransaction wct, @NonNull Bundle options,
             @NonNull Intent intent, @NonNull Activity launchActivity) {
+        if (isActivityFromSplit(launchActivity)) {
+            // We restrict to launch the overlay from split. Fallback to treat it as normal
+            // launch.
+            return null;
+        }
+
         final List<TaskFragmentContainer> overlayContainers =
                 getAllNonFinishingOverlayContainers();
         final String overlayTag = Objects.requireNonNull(options.getString(KEY_OVERLAY_TAG));
@@ -2866,6 +2872,15 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         // Launch the overlay container to the task with taskId.
         return createEmptyContainer(wct, intent, taskId, attrs, launchActivity, overlayTag,
                 options, associateLaunchingActivity);
+    }
+
+    @GuardedBy("mLock")
+    private boolean isActivityFromSplit(@NonNull Activity activity) {
+        final TaskFragmentContainer container = getContainerWithActivity(activity);
+        if (container == null) {
+            return false;
+        }
+        return getActiveSplitForContainer(container) != null;
     }
 
     private final class LifecycleCallbacks extends EmptyLifecycleCallbacksAdapter {
