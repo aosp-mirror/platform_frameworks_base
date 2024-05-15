@@ -348,6 +348,14 @@ flag {
 }
 
 flag {
+    name: "status_bar_screen_sharing_chips"
+    namespace: "systemui"
+    description: "Show chips on the left side of the status bar when a user is screen sharing, "
+        "recording, or casting"
+    bug: "332662551"
+}
+
+flag {
     name: "compose_bouncer"
     namespace: "systemui"
     description: "Use the new compose bouncer in SystemUI"
