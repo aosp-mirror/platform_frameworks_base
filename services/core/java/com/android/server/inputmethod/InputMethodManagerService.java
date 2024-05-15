@@ -1024,8 +1024,16 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
 
         private void onFinishPackageChangesInternal() {
+            final int userId = getChangingUserId();
+
+            // Instantiating InputMethodInfo requires disk I/O.
+            // Do them before acquiring the lock to minimize the chances of ANR (b/340221861).
+            final var newMethodMapWithoutAdditionalSubtypes =
+                    queryInputMethodServicesInternal(mContext, userId,
+                            AdditionalSubtypeMap.EMPTY_MAP, DirectBootAwareness.AUTO)
+                            .getMethodMap();
+
             synchronized (ImfLock.class) {
-                final int userId = getChangingUserId();
                 final boolean isCurrentUser = (userId == mCurrentUserId);
                 final AdditionalSubtypeMap additionalSubtypeMap =
                         AdditionalSubtypeMapRepository.get(userId);
@@ -1077,9 +1085,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         && !(additionalSubtypeChanged || shouldRebuildInputMethodListLocked())) {
                     return;
                 }
-
-                final InputMethodSettings newSettings = queryInputMethodServicesInternal(mContext,
-                        userId, newAdditionalSubtypeMap, DirectBootAwareness.AUTO);
+                final var newMethodMap = newMethodMapWithoutAdditionalSubtypes
+                        .applyAdditionalSubtypes(newAdditionalSubtypeMap);
+                final InputMethodSettings newSettings =
+                        InputMethodSettings.create(newMethodMap, userId);
                 InputMethodSettingsRepository.put(userId, newSettings);
                 if (!isCurrentUser) {
                     return;
