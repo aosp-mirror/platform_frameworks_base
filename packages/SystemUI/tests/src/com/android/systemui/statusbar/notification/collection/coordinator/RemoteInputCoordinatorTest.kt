@@ -23,8 +23,8 @@ import android.os.Handler
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.service.notification.StatusBarNotification
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -54,7 +54,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations.initMocks
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class RemoteInputCoordinatorTest : SysuiTestCase() {
     private lateinit var coordinator: RemoteInputCoordinator

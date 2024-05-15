@@ -22,7 +22,7 @@ import android.media.projection.MediaProjectionManager
 import android.os.Handler
 import android.platform.test.annotations.DisableFlags
 import android.telephony.TelephonyManager
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.server.notification.Flags
 import com.android.systemui.SysuiTestCase
@@ -38,7 +38,7 @@ import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @DisableFlags(Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING)
 class SensitiveNotificationProtectionControllerFlagDisabledTest : SysuiTestCase() {
     private val logger = SensitiveNotificationProtectionControllerLogger(logcatLogBuffer())

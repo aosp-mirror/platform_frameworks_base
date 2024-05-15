@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification.interruption
 
 import android.platform.test.annotations.DisableFlags
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision
@@ -34,7 +34,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @DisableFlags(VisualInterruptionRefactor.FLAG_NAME)
 class NotificationInterruptStateProviderWrapperTest : VisualInterruptionDecisionProviderTestBase() {
     override val provider by lazy {

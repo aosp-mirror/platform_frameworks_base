@@ -39,10 +39,10 @@ import static java.util.Objects.requireNonNull;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.annotation.NonNull;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -88,7 +88,7 @@ import java.util.List;
 import java.util.Map;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class PreparationCoordinatorTest extends SysuiTestCase {
     private NotifCollectionListener mCollectionListener;

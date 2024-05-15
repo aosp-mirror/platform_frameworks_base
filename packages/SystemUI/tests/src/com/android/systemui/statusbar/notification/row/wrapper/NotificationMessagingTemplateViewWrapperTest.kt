@@ -17,8 +17,8 @@
 package com.android.systemui.statusbar.notification.row.wrapper
 
 import android.graphics.drawable.AnimatedImageDrawable
-import android.testing.AndroidTestingRunner
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.MessagingGroup
 import com.android.internal.widget.MessagingImageMessage
@@ -36,7 +36,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class NotificationMessagingTemplateViewWrapperTest : SysuiTestCase() {
 
     private lateinit var mRow: ExpandableNotificationRow

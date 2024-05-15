@@ -17,11 +17,11 @@
 package com.android.systemui.statusbar
 
 import android.os.IBinder
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Choreographer
 import android.view.View
 import android.view.ViewRootImpl
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
@@ -59,7 +59,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 @SmallTest
 class NotificationShadeDepthControllerTest : SysuiTestCase() {

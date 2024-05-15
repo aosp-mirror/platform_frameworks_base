@@ -20,7 +20,7 @@ import android.app.Notification.CATEGORY_EVENT
 import android.app.Notification.CATEGORY_REMINDER
 import android.app.NotificationManager
 import android.platform.test.annotations.EnableFlags
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.BUBBLE
@@ -30,7 +30,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @EnableFlags(VisualInterruptionRefactor.FLAG_NAME)
 class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionProviderTestBase() {
     override val provider by lazy {
