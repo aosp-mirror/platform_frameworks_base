@@ -590,7 +590,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mMenuRow.setAppName(mAppName);
         }
         if (mIsSummaryWithChildren) {
-            if (!AsyncGroupHeaderViewInflation.isEnabled()) {
+            if (AsyncGroupHeaderViewInflation.isEnabled()) {
+                mChildrenContainer.updateGroupHeaderExpandState();
+            } else {
                 // We create the header from the background thread instead
                 mChildrenContainer.recreateNotificationHeader(mExpandClickListener,
                         isConversation());
