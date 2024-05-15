@@ -20,6 +20,7 @@ import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyResources.Strings.SystemUi.SCREENSHOT_BLOCKED_BY_ADMIN
 import android.app.admin.DevicePolicyResourcesManager
 import android.content.ComponentName
+import android.hardware.display.DisplayManager
 import android.os.UserHandle
 import android.os.UserManager
 import android.testing.AndroidTestingRunner
@@ -38,6 +39,7 @@ import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import java.util.function.Consumer
 import org.junit.Assert.assertEquals
@@ -68,6 +70,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
     private val notificationsControllerFactory = mock<ScreenshotNotificationsController.Factory>()
     private val notificationsController = mock<ScreenshotNotificationsController>()
     private val callback = mock<RequestCallback>()
+    private val displayManager = mock<DisplayManager>()
 
     private val eventLogger = UiEventLoggerFake()
     private val flags = FakeFeatureFlags()
@@ -87,7 +90,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
             )
             .thenReturn(false)
         whenever(userManager.isUserUnlocked).thenReturn(true)
-        whenever(controllerFactory.create(any(), any())).thenReturn(controller)
+        whenever(controllerFactory.create(nullable<Display>(), any())).thenReturn(controller)
         whenever(notificationsControllerFactory.create(any())).thenReturn(notificationsController)
 
         // Stub request processor as a synchronous no-op for tests with the flag enabled
@@ -331,6 +334,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
                 flags,
                 requestProcessor,
                 { takeScreenshotExecutor },
+                displayManager,
             )
         service.attach(
             mContext,

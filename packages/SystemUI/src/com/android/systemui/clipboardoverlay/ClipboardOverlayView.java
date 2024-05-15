@@ -66,10 +66,10 @@ import com.android.systemui.screenshot.ui.binder.ActionButtonViewBinder;
 import com.android.systemui.screenshot.ui.viewmodel.ActionButtonAppearance;
 import com.android.systemui.screenshot.ui.viewmodel.ActionButtonViewModel;
 
-import java.util.ArrayList;
-
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
+
+import java.util.ArrayList;
 
 /**
  * Handles the visual elements and animations for the clipboard overlay.
@@ -109,6 +109,7 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
     private View mDismissButton;
     private LinearLayout mActionContainer;
     private ClipboardOverlayCallbacks mClipboardCallbacks;
+    private ActionButtonViewBinder mActionButtonViewBinder = new ActionButtonViewBinder();
 
     public ClipboardOverlayView(Context context) {
         this(context, null);
@@ -152,14 +153,15 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
 
     private void bindDefaultActionChips() {
         if (screenshotShelfUi2()) {
-            ActionButtonViewBinder.INSTANCE.bind(mRemoteCopyChip,
+            mActionButtonViewBinder.bind(mRemoteCopyChip,
                     ActionButtonViewModel.Companion.withNextId(
                             new ActionButtonAppearance(
                                     Icon.createWithResource(mContext,
                                             R.drawable.ic_baseline_devices_24).loadDrawable(
                                             mContext),
                                     null,
-                                    mContext.getString(R.string.clipboard_send_nearby_description)),
+                                    mContext.getString(R.string.clipboard_send_nearby_description),
+                                    true),
                             new Function0<>() {
                                 @Override
                                 public Unit invoke() {
@@ -169,12 +171,14 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
                                     return null;
                                 }
                             }));
-            ActionButtonViewBinder.INSTANCE.bind(mShareChip,
+            mActionButtonViewBinder.bind(mShareChip,
                     ActionButtonViewModel.Companion.withNextId(
                             new ActionButtonAppearance(
                                     Icon.createWithResource(mContext,
                                             R.drawable.ic_screenshot_share).loadDrawable(mContext),
-                                    null, mContext.getString(com.android.internal.R.string.share)),
+                                    null,
+                                    mContext.getString(com.android.internal.R.string.share),
+                                    true),
                             new Function0<>() {
                                 @Override
                                 public Unit invoke() {
@@ -512,9 +516,9 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
     private View constructShelfActionChip(RemoteAction action, Runnable onFinish) {
         View chip = LayoutInflater.from(mContext).inflate(
                 R.layout.shelf_action_chip, mActionContainer, false);
-        ActionButtonViewBinder.INSTANCE.bind(chip, ActionButtonViewModel.Companion.withNextId(
+        mActionButtonViewBinder.bind(chip, ActionButtonViewModel.Companion.withNextId(
                 new ActionButtonAppearance(action.getIcon().loadDrawable(mContext),
-                        action.getTitle(), action.getTitle()), new Function0<>() {
+                        action.getTitle(), action.getTitle(), false), new Function0<>() {
                     @Override
                     public Unit invoke() {
                         try {

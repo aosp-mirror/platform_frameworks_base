@@ -37,6 +37,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
@@ -116,7 +117,8 @@ public class TakeScreenshotService extends Service {
             UiEventLogger uiEventLogger,
             ScreenshotNotificationsController.Factory notificationsControllerFactory,
             Context context, @Background Executor bgExecutor, FeatureFlags featureFlags,
-            RequestProcessor processor, Provider<TakeScreenshotExecutor> takeScreenshotExecutor) {
+            RequestProcessor processor, Provider<TakeScreenshotExecutor> takeScreenshotExecutor,
+            DisplayManager displayManager) {
         if (DEBUG_SERVICE) {
             Log.d(TAG, "new " + this);
         }
@@ -134,7 +136,8 @@ public class TakeScreenshotService extends Service {
             mScreenshot = null;
         } else {
             mScreenshot = screenshotControllerFactory.create(
-                    Display.DEFAULT_DISPLAY, /* showUIOnExternalDisplay= */ false);
+                    displayManager.getDisplay(
+                            Display.DEFAULT_DISPLAY), /* showUIOnExternalDisplay= */ false);
         }
     }
 

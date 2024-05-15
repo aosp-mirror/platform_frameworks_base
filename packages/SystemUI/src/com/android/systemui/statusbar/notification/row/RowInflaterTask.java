@@ -60,9 +60,8 @@ public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInf
             mInflateOrigin = new Throwable("inflate requested here");
         }
         mListener = listener;
-        AsyncLayoutInflater inflater = com.android.systemui.Flags.notificationRowUserContext()
-                ? new AsyncLayoutInflater(context, new RowAsyncLayoutInflater(entry))
-                : new AsyncLayoutInflater(context);
+        AsyncLayoutInflater inflater = new AsyncLayoutInflater(context,
+                new RowAsyncLayoutInflater(entry));
         mEntry = entry;
         entry.setInflationTask(this);
         inflater.inflate(R.layout.status_bar_notification_row, parent, this);
