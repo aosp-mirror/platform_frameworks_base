@@ -398,6 +398,16 @@ flag {
 }
 
 flag {
+  name: "fix_image_wallpaper_crash_surface_already_released"
+  namespace: "systemui"
+  description: "Make sure ImageWallpaper doesn't return from OnSurfaceDestroyed until any drawing is finished"
+  bug: "337287154"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
    name: "activity_transition_use_largest_window"
    namespace: "systemui"
    description: "Target largest opening window during activity transitions."
