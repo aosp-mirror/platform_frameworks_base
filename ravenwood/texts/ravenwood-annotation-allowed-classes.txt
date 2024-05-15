@@ -1,5 +1,7 @@
 # Only classes listed here can use the Ravenwood annotations.
 
+com.android.internal.ravenwood.*
+
 com.android.internal.display.BrightnessSynchronizer
 com.android.internal.util.ArrayUtils
 com.android.internal.logging.MetricsLogger
