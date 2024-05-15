@@ -1364,6 +1364,9 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @GuardedBy("this")
     private void packageRemovedLocked(int uid, String packageName) {
+        mHandler.post(PooledLambda.obtainRunnable(HistoricalRegistry::clearHistory,
+                mHistoricalRegistry, uid, packageName));
+
         UidState uidState = mUidStates.get(uid);
         if (uidState == null) {
             return;
@@ -1398,9 +1401,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
         }
-
-        mHandler.post(PooledLambda.obtainRunnable(HistoricalRegistry::clearHistory,
-                    mHistoricalRegistry, uid, packageName));
     }
 
     public void uidRemoved(int uid) {
