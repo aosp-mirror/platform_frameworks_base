@@ -59,6 +59,7 @@ constructor(
     private val logger: UiEventLogger,
     private val viewModel: ScreenshotViewModel,
     private val windowManager: WindowManager,
+    shelfViewBinder: ScreenshotShelfViewBinder,
     private val thumbnailObserver: ThumbnailObserver,
     @Assisted private val context: Context,
     @Assisted private val displayId: Int
@@ -92,7 +93,7 @@ constructor(
     private val animationController = ScreenshotAnimationController(view)
 
     init {
-        ScreenshotShelfViewBinder.bind(
+        shelfViewBinder.bind(
             view,
             viewModel,
             LayoutInflater.from(context),
