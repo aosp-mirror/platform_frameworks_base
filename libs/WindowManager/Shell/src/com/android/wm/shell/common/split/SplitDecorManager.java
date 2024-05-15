@@ -31,7 +31,6 @@ import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -202,7 +201,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
     /** Showing resizing hint. */
     public void onResizing(ActivityManager.RunningTaskInfo resizingTask, Rect newBounds,
             Rect sideBounds, SurfaceControl.Transaction t, int offsetX, int offsetY,
-            boolean immediately) {
+            boolean immediately, float[] veilColor) {
         if (mResizingIconView == null) {
             return;
         }
@@ -235,7 +234,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
         if (mBackgroundLeash == null) {
             mBackgroundLeash = SurfaceUtils.makeColorLayer(mHostLeash,
                     RESIZING_BACKGROUND_SURFACE_NAME, mSurfaceSession);
-            t.setColor(mBackgroundLeash, getResizingBackgroundColor(resizingTask))
+            t.setColor(mBackgroundLeash, veilColor)
                     .setLayer(mBackgroundLeash, Integer.MAX_VALUE - 1);
         }
 
@@ -246,7 +245,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
             mGapBackgroundLeash = SurfaceUtils.makeColorLayer(mHostLeash,
                     GAP_BACKGROUND_SURFACE_NAME, mSurfaceSession);
             // Fill up another side bounds area.
-            t.setColor(mGapBackgroundLeash, getResizingBackgroundColor(resizingTask))
+            t.setColor(mGapBackgroundLeash, veilColor)
                     .setLayer(mGapBackgroundLeash, Integer.MAX_VALUE - 2)
                     .setPosition(mGapBackgroundLeash, left, top)
                     .setWindowCrop(mGapBackgroundLeash, sideBounds.width(), sideBounds.height());
@@ -484,10 +483,5 @@ public class SplitDecorManager extends WindowlessWindowManager {
             t.hide(mIconLeash);
             mIcon = null;
         }
-    }
-
-    private static float[] getResizingBackgroundColor(ActivityManager.RunningTaskInfo taskInfo) {
-        final int taskBgColor = taskInfo.taskDescription.getBackgroundColor();
-        return Color.valueOf(taskBgColor == -1 ? Color.WHITE : taskBgColor).getComponents();
     }
 }
