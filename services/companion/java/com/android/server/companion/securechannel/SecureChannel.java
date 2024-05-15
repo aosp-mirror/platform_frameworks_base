@@ -23,6 +23,7 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Slog;
 
+import com.google.security.cryptauth.lib.securegcm.ukey2.AlertException;
 import com.google.security.cryptauth.lib.securegcm.ukey2.BadHandleException;
 import com.google.security.cryptauth.lib.securegcm.ukey2.CryptoException;
 import com.google.security.cryptauth.lib.securegcm.ukey2.D2DConnectionContextV1;
@@ -203,7 +204,8 @@ public class SecureChannel {
      *
      * This method must only be called from one of the two participants.
      */
-    public void establishSecureConnection() throws IOException, SecureChannelException {
+    public void establishSecureConnection() throws IOException,
+            SecureChannelException, HandshakeException {
         if (isSecured()) {
             Slog.d(TAG, "Channel is already secure.");
             return;
@@ -334,7 +336,7 @@ public class SecureChannel {
         }
     }
 
-    private void initiateHandshake() throws IOException, BadHandleException {
+    private void initiateHandshake() throws IOException, BadHandleException , HandshakeException {
         if (mConnectionContext != null) {
             Slog.d(TAG, "Ukey2 handshake is already completed.");
             return;
@@ -394,8 +396,8 @@ public class SecureChannel {
         }
     }
 
-    private void exchangeHandshake()
-            throws IOException, HandshakeException, BadHandleException, CryptoException {
+    private void exchangeHandshake() throws IOException, HandshakeException,
+            BadHandleException, CryptoException, AlertException {
         if (mConnectionContext != null) {
             Slog.d(TAG, "Ukey2 handshake is already completed.");
             return;
