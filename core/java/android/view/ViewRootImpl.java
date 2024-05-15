@@ -8609,48 +8609,55 @@ public final class ViewRootImpl implements ViewParent,
 
         private int mPendingKeyMetaState;
 
-        private final GestureDetector mGestureDetector = new GestureDetector(mContext,
-                new GestureDetector.OnGestureListener() {
-                    @Override
-                    public boolean onDown(@NonNull MotionEvent e) {
-                        // This can be ignored since it's not clear what KeyEvent this will
-                        // belong to.
-                        return true;
-                    }
-
-                    @Override
-                    public void onShowPress(@NonNull MotionEvent e) {
-
-                    }
-
-                    @Override
-                    public boolean onSingleTapUp(@NonNull MotionEvent e) {
-                        dispatchTap(e.getEventTime());
-                        return true;
-                    }
-
-                    @Override
-                    public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2,
-                            float distanceX, float distanceY) {
-                        // Scroll doesn't translate to DPAD events so should be ignored.
-                        return true;
-                    }
-
-                    @Override
-                    public void onLongPress(@NonNull MotionEvent e) {
-                        // Long presses don't translate to DPAD events so should be ignored.
-                    }
-
-                    @Override
-                    public boolean onFling(@Nullable MotionEvent e1, @NonNull MotionEvent e2,
-                            float velocityX, float velocityY) {
-                        dispatchFling(velocityX, velocityY, e2.getEventTime());
-                        return true;
-                    }
-                });
+        private final GestureDetector mGestureDetector;
 
         SyntheticTouchNavigationHandler() {
             super(true);
+            int gestureDetectorVelocityStrategy =
+                    android.companion.virtual.flags.Flags
+                            .impulseVelocityStrategyForTouchNavigation()
+                    ? VelocityTracker.VELOCITY_TRACKER_STRATEGY_IMPULSE
+                    : VelocityTracker.VELOCITY_TRACKER_STRATEGY_DEFAULT;
+            mGestureDetector = new GestureDetector(mContext,
+                    new GestureDetector.OnGestureListener() {
+                        @Override
+                        public boolean onDown(@NonNull MotionEvent e) {
+                            // This can be ignored since it's not clear what KeyEvent this will
+                            // belong to.
+                            return true;
+                        }
+
+                        @Override
+                        public void onShowPress(@NonNull MotionEvent e) {
+                        }
+
+                        @Override
+                        public boolean onSingleTapUp(@NonNull MotionEvent e) {
+                            dispatchTap(e.getEventTime());
+                            return true;
+                        }
+
+                        @Override
+                        public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2,
+                                float distanceX, float distanceY) {
+                            // Scroll doesn't translate to DPAD events so should be ignored.
+                            return true;
+                        }
+
+                        @Override
+                        public void onLongPress(@NonNull MotionEvent e) {
+                            // Long presses don't translate to DPAD events so should be ignored.
+                        }
+
+                        @Override
+                        public boolean onFling(@Nullable MotionEvent e1, @NonNull MotionEvent e2,
+                                float velocityX, float velocityY) {
+                            dispatchFling(velocityX, velocityY, e2.getEventTime());
+                            return true;
+                        }
+                    },
+                    /* handler= */ null,
+                    gestureDetectorVelocityStrategy);
         }
 
         public void process(MotionEvent event) {

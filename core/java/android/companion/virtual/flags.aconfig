@@ -128,3 +128,14 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "impulse_velocity_strategy_for_touch_navigation"
+  is_exported: true
+  namespace: "virtual_devices"
+  description: "Use impulse velocity strategy during conversion of touch navigation flings into Dpad events"
+  bug: "338426241"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
