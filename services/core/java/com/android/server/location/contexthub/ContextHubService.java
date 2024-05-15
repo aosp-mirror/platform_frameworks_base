@@ -296,7 +296,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         public boolean isExpired() {
-            return mTimestamp + ContextHubTransactionManager.RELIABLE_MESSAGE_TIMEOUT_NS
+            return mTimestamp + ContextHubTransactionManager.RELIABLE_MESSAGE_TIMEOUT.toNanos()
                     < SystemClock.elapsedRealtimeNanos();
         }
     }

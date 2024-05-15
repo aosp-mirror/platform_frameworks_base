@@ -161,7 +161,7 @@ abstract class ContextHubServiceTransaction {
             case ContextHubTransaction.TYPE_LOAD_NANOAPP:
                 return unit.convert(30L, TimeUnit.SECONDS);
             case ContextHubTransaction.TYPE_RELIABLE_MESSAGE:
-                return unit.convert(ContextHubTransactionManager.RELIABLE_MESSAGE_TIMEOUT_NS,
+                return unit.convert(ContextHubTransactionManager.RELIABLE_MESSAGE_TIMEOUT.toNanos(),
                         TimeUnit.NANOSECONDS);
             case ContextHubTransaction.TYPE_UNLOAD_NANOAPP:
             case ContextHubTransaction.TYPE_ENABLE_NANOAPP:
