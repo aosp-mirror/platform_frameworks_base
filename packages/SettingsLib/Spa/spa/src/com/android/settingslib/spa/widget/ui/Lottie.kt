@@ -58,6 +58,7 @@ object LottieColorUtils {
         ".green400" to R.color.settingslib_color_green600,
         ".green200" to R.color.settingslib_color_green500,
         ".red200" to R.color.settingslib_color_red500,
+        ".cream" to R.color.settingslib_color_charcoal
     )
 
     @Composable
