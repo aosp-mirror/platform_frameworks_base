@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -57,6 +59,7 @@ fun SettingsScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = { SettingsTopAppBar(title, scrollBehavior, actions) },
         containerColor = MaterialTheme.colorScheme.settingsBackground,
+        contentWindowInsets = WindowInsets.safeDrawing,
     ) { paddingValues ->
         Box(Modifier.padding(paddingValues.horizontalValues())) {
             content(paddingValues.verticalValues())

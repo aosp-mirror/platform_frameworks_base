@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
@@ -42,11 +43,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableFloatStateOf
@@ -79,7 +80,12 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
+private val windowInsets: WindowInsets
+    @Composable
+    @NonRestartableComposable
+    get() = WindowInsets.safeDrawing
+        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+
 @Composable
 internal fun CustomizedTopAppBar(
     title: @Composable () -> Unit,
@@ -91,7 +97,7 @@ internal fun CustomizedTopAppBar(
         titleTextStyle = MaterialTheme.typography.titleMedium,
         navigationIcon = navigationIcon,
         actions = actions,
-        windowInsets = TopAppBarDefaults.windowInsets,
+        windowInsets = windowInsets,
         colors = topAppBarColors(),
     )
 }
@@ -118,7 +124,7 @@ internal fun CustomizedLargeTopAppBar(
         navigationIcon = navigationIcon,
         actions = actions,
         colors = topAppBarColors(),
-        windowInsets = TopAppBarDefaults.windowInsets,
+        windowInsets = windowInsets,
         pinnedHeight = ContainerHeight,
         scrollBehavior = scrollBehavior,
     )
@@ -336,7 +342,7 @@ private fun TwoRowsTopAppBar(
         Modifier.draggable(
             orientation = Orientation.Vertical,
             state = rememberDraggableState { delta ->
-                scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffset + delta
+                scrollBehavior.state.heightOffset += delta
             },
             onDragStopped = { velocity ->
                 settleAppBar(
@@ -411,6 +417,7 @@ private fun TwoRowsTopAppBar(
  * (leading icon), a title (header), and action icons (trailing icons). Note that the navigation and
  * the actions are optional.
  *
+ * @param modifier a [Modifier]
  * @param heightPx the total height this layout is capped to
  * @param navigationIconContentColor the content color that will be applied via a
  * [LocalContentColor] when composing the navigation icon
