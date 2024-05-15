@@ -35,7 +35,7 @@ import org.junit.runners.Parameterized
 /**
  * Test launching a new activity from bubble.
  *
- * To run this test: `atest WMShellFlickerTests:DismissBubbleScreen`
+ * To run this test: `atest WMShellFlickerTestsBubbles:DragToDismissBubbleScreenTest`
  *
  * Actions:
  * ```
