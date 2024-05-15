@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.wm.shell.back
 
 import android.animation.Animator
@@ -34,6 +35,7 @@ import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.Interpolator
+import android.view.animation.Transformation
 import android.window.BackEvent
 import android.window.BackMotionEvent
 import android.window.BackNavigationInfo
@@ -46,52 +48,45 @@ import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.animation.Interpolators
 import com.android.wm.shell.protolog.ShellProtoLogGroup
-import com.android.wm.shell.shared.annotations.ShellMainThread
-import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-/** Class that defines cross-activity animation.  */
-@ShellMainThread
-class CrossActivityBackAnimation @Inject constructor(
+abstract class CrossActivityBackAnimation(
     private val context: Context,
     private val background: BackAnimationBackground,
-    private val rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
+    private val rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
+    protected val transaction: SurfaceControl.Transaction,
+    private val choreographer: Choreographer
 ) : ShellBackAnimation() {
 
-    private val startClosingRect = RectF()
-    private val targetClosingRect = RectF()
-    private val currentClosingRect = RectF()
+    protected val startClosingRect = RectF()
+    protected val targetClosingRect = RectF()
+    protected val currentClosingRect = RectF()
 
-    private val startEnteringRect = RectF()
-    private val targetEnteringRect = RectF()
-    private val currentEnteringRect = RectF()
+    protected val startEnteringRect = RectF()
+    protected val targetEnteringRect = RectF()
+    protected val currentEnteringRect = RectF()
 
-    private val backAnimRect = Rect()
+    protected val backAnimRect = Rect()
     private val cropRect = Rect()
 
     private var cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
 
-    private val backAnimationRunner = BackAnimationRunner(
-        Callback(), Runner(), context, Cuj.CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY
-    )
+    private val backAnimationRunner =
+        BackAnimationRunner(Callback(), Runner(), context, Cuj.CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY)
     private val initialTouchPos = PointF()
     private val transformMatrix = Matrix()
     private val tmpFloat9 = FloatArray(9)
-    private var enteringTarget: RemoteAnimationTarget? = null
-    private var closingTarget: RemoteAnimationTarget? = null
-    private val transaction = SurfaceControl.Transaction()
+    protected var enteringTarget: RemoteAnimationTarget? = null
+    protected var closingTarget: RemoteAnimationTarget? = null
     private var triggerBack = false
     private var finishCallback: IRemoteAnimationFinishedCallback? = null
     private val progressAnimator = BackProgressAnimator()
     private val displayBoundsMargin =
         context.resources.getDimension(R.dimen.cross_task_back_vertical_margin)
-    private val enteringStartOffset =
-        context.resources.getDimension(R.dimen.cross_activity_back_entering_start_offset)
 
     private val gestureInterpolator = Interpolators.BACK_GESTURE
-    private val postCommitInterpolator = Interpolators.FAST_OUT_SLOW_IN
     private val verticalMoveInterpolator: Interpolator = DecelerateInterpolator()
 
     private var scrimLayer: SurfaceControl? = null
@@ -103,13 +98,42 @@ class CrossActivityBackAnimation @Inject constructor(
     private var rightLetterboxLayer: SurfaceControl? = null
     private var letterboxColor: Int = 0
 
+    /** Background color to be used during the animation, also see [getBackgroundColor] */
+    protected var customizedBackgroundColor = 0
+
+    /**
+     * Whether the entering target should be shifted vertically with the user gesture in pre-commit
+     */
+    abstract val allowEnteringYShift: Boolean
+
+    /**
+     * Subclasses must set the [startEnteringRect] and [targetEnteringRect] to define the movement
+     * of the enteringTarget during pre-commit phase.
+     */
+    abstract fun preparePreCommitEnteringRectMovement()
+
+    /**
+     * Returns a base transformation to apply to the entering target during pre-commit. The system
+     * will apply the default animation on top of it.
+     */
+    protected open fun getPreCommitEnteringBaseTransformation(progress: Float): Transformation? =
+        null
+
     override fun onConfigurationChanged(newConfiguration: Configuration) {
         cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
     }
 
     override fun getRunner() = backAnimationRunner
 
-    private fun startBackAnimation(backMotionEvent: BackMotionEvent) {
+    private fun getBackgroundColor(): Int =
+        when {
+            customizedBackgroundColor != 0 -> customizedBackgroundColor
+            isLetterboxed -> letterboxColor
+            enteringTarget != null -> enteringTarget!!.taskInfo.taskDescription!!.backgroundColor
+            else -> 0
+        }
+
+    protected open fun startBackAnimation(backMotionEvent: BackMotionEvent) {
         if (enteringTarget == null || closingTarget == null) {
             ProtoLog.d(
                 ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW,
@@ -122,8 +146,8 @@ class CrossActivityBackAnimation @Inject constructor(
 
         transaction.setAnimationTransaction()
         isLetterboxed = closingTarget!!.taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed
-        enteringHasSameLetterbox = isLetterboxed &&
-                closingTarget!!.localBounds.equals(enteringTarget!!.localBounds)
+        enteringHasSameLetterbox =
+            isLetterboxed && closingTarget!!.localBounds.equals(enteringTarget!!.localBounds)
 
         if (isLetterboxed && !enteringHasSameLetterbox) {
             // Play animation with letterboxes, if closing and entering target have mismatching
@@ -143,32 +167,27 @@ class CrossActivityBackAnimation @Inject constructor(
         targetClosingRect.scaleCentered(MAX_SCALE)
         if (backMotionEvent.swipeEdge != BackEvent.EDGE_RIGHT) {
             targetClosingRect.offset(
-                startClosingRect.right - targetClosingRect.right - displayBoundsMargin, 0f
+                startClosingRect.right - targetClosingRect.right - displayBoundsMargin,
+                0f
             )
         }
 
-        // the entering target starts 96dp to the left of the screen edge...
-        startEnteringRect.set(startClosingRect)
-        startEnteringRect.offset(-enteringStartOffset, 0f)
+        preparePreCommitEnteringRectMovement()
 
-        // ...and gets scaled in sync with the closing target
-        targetEnteringRect.set(startEnteringRect)
-        targetEnteringRect.scaleCentered(MAX_SCALE)
-
-        // Draw background with task background color (or letterbox color).
-        val backgroundColor = if (isLetterboxed) {
-            letterboxColor
-        } else {
-            enteringTarget!!.taskInfo.taskDescription!!.backgroundColor
-        }
         background.ensureBackground(
-            closingTarget!!.windowConfiguration.bounds, backgroundColor, transaction
+            closingTarget!!.windowConfiguration.bounds,
+            getBackgroundColor(),
+            transaction
         )
         ensureScrimLayer()
         if (isLetterboxed && enteringHasSameLetterbox) {
             // crop left and right letterboxes
-            cropRect.set(closingTarget!!.localBounds.left, 0, closingTarget!!.localBounds.right,
-                    closingTarget!!.windowConfiguration.bounds.height())
+            cropRect.set(
+                closingTarget!!.localBounds.left,
+                0,
+                closingTarget!!.localBounds.right,
+                closingTarget!!.windowConfiguration.bounds.height()
+            )
             // and add fake letterbox square surfaces instead
             ensureLetterboxes()
         } else {
@@ -185,8 +204,14 @@ class CrossActivityBackAnimation @Inject constructor(
         currentClosingRect.offset(0f, yOffset)
         applyTransform(closingTarget?.leash, currentClosingRect, 1f)
         currentEnteringRect.setInterpolatedRectF(startEnteringRect, targetEnteringRect, progress)
-        currentEnteringRect.offset(0f, yOffset)
-        applyTransform(enteringTarget?.leash, currentEnteringRect, 1f)
+        if (allowEnteringYShift) currentEnteringRect.offset(0f, yOffset)
+        val enteringTransformation = getPreCommitEnteringBaseTransformation(progress)
+        applyTransform(
+            enteringTarget?.leash,
+            currentEnteringRect,
+            enteringTransformation?.alpha ?: 1f,
+            enteringTransformation
+        )
         applyTransaction()
     }
 
@@ -199,30 +224,25 @@ class CrossActivityBackAnimation @Inject constructor(
         val deltaYRatio = min(screenHeight / 2f, abs(rawYDelta)) / (screenHeight / 2f)
         val interpolatedYRatio: Float = verticalMoveInterpolator.getInterpolation(deltaYRatio)
         // limit y-shift so surface never passes 8dp screen margin
-        val deltaY = yDirection * interpolatedYRatio * max(
-            0f, (screenHeight - centeredRect.height()) / 2f - displayBoundsMargin
-        )
+        val deltaY =
+            max(0f, (screenHeight - centeredRect.height()) / 2f - displayBoundsMargin) *
+                interpolatedYRatio *
+                yDirection
         return deltaY
     }
 
-    private fun onGestureCommitted() {
-        if (closingTarget?.leash == null || enteringTarget?.leash == null ||
-                !enteringTarget!!.leash.isValid || !closingTarget!!.leash.isValid
+    protected open fun onGestureCommitted() {
+        if (
+            closingTarget?.leash == null ||
+                enteringTarget?.leash == null ||
+                !enteringTarget!!.leash.isValid ||
+                !closingTarget!!.leash.isValid
         ) {
             finishAnimation()
             return
         }
 
-        // We enter phase 2 of the animation, the starting coordinates for phase 2 are the current
-        // coordinate of the gesture driven phase. Let's update the start and target rects and kick
-        // off the animator
-        startClosingRect.set(currentClosingRect)
-        startEnteringRect.set(currentEnteringRect)
-        targetEnteringRect.set(backAnimRect)
-        targetClosingRect.set(backAnimRect)
-        targetClosingRect.offset(currentClosingRect.left + enteringStartOffset, 0f)
-
-        val valueAnimator = ValueAnimator.ofFloat(1f, 0f).setDuration(POST_ANIMATION_DURATION)
+        val valueAnimator = ValueAnimator.ofFloat(1f, 0f).setDuration(POST_COMMIT_DURATION)
         valueAnimator.addUpdateListener { animation: ValueAnimator ->
             val progress = animation.animatedFraction
             onPostCommitProgress(progress)
@@ -230,27 +250,22 @@ class CrossActivityBackAnimation @Inject constructor(
                 background.resetStatusBarCustomization()
             }
         }
-        valueAnimator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                background.resetStatusBarCustomization()
-                finishAnimation()
+        valueAnimator.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    background.resetStatusBarCustomization()
+                    finishAnimation()
+                }
             }
-        })
+        )
         valueAnimator.start()
     }
 
-    private fun onPostCommitProgress(linearProgress: Float) {
-        val closingAlpha = max(1f - linearProgress * 2, 0f)
-        val progress = postCommitInterpolator.getInterpolation(linearProgress)
+    protected open fun onPostCommitProgress(linearProgress: Float) {
         scrimLayer?.let { transaction.setAlpha(it, maxScrimAlpha * (1f - linearProgress)) }
-        currentClosingRect.setInterpolatedRectF(startClosingRect, targetClosingRect, progress)
-        applyTransform(closingTarget?.leash, currentClosingRect, closingAlpha)
-        currentEnteringRect.setInterpolatedRectF(startEnteringRect, targetEnteringRect, progress)
-        applyTransform(enteringTarget?.leash, currentEnteringRect, 1f)
-        applyTransaction()
     }
 
-    private fun finishAnimation() {
+    protected open fun finishAnimation() {
         enteringTarget?.let {
             if (it.leash != null && it.leash.isValid) {
                 transaction.setCornerRadius(it.leash, 0f)
@@ -278,47 +293,56 @@ class CrossActivityBackAnimation @Inject constructor(
         enteringHasSameLetterbox = false
     }
 
-    private fun applyTransform(leash: SurfaceControl?, rect: RectF, alpha: Float) {
+    protected fun applyTransform(
+        leash: SurfaceControl?,
+        rect: RectF,
+        alpha: Float,
+        baseTransformation: Transformation? = null
+    ) {
         if (leash == null || !leash.isValid) return
         val scale = rect.width() / backAnimRect.width()
-        transformMatrix.reset()
-        val scalePivotX = if (isLetterboxed && enteringHasSameLetterbox) {
-            closingTarget!!.localBounds.left.toFloat()
-        } else {
-            0f
-        }
-        transformMatrix.setScale(scale, scale, scalePivotX, 0f)
-        transformMatrix.postTranslate(rect.left, rect.top)
-        transaction.setAlpha(leash, alpha)
-            .setMatrix(leash, transformMatrix, tmpFloat9)
+        val matrix = baseTransformation?.matrix ?: transformMatrix.apply { reset() }
+        val scalePivotX =
+            if (isLetterboxed && enteringHasSameLetterbox) {
+                closingTarget!!.localBounds.left.toFloat()
+            } else {
+                0f
+            }
+        matrix.postScale(scale, scale, scalePivotX, 0f)
+        matrix.postTranslate(rect.left, rect.top)
+        transaction
+            .setAlpha(leash, keepMinimumAlpha(alpha))
+            .setMatrix(leash, matrix, tmpFloat9)
             .setCrop(leash, cropRect)
             .setCornerRadius(leash, cornerRadius)
     }
 
-    private fun applyTransaction() {
-        transaction.setFrameTimelineVsync(Choreographer.getInstance().vsyncId)
+    protected fun applyTransaction() {
+        transaction.setFrameTimelineVsync(choreographer.vsyncId)
         transaction.apply()
     }
 
     private fun ensureScrimLayer() {
         if (scrimLayer != null) return
         val isDarkTheme: Boolean = isDarkMode(context)
-        val scrimBuilder = SurfaceControl.Builder()
-            .setName("Cross-Activity back animation scrim")
-            .setCallsite("CrossActivityBackAnimation")
-            .setColorLayer()
-            .setOpaque(false)
-            .setHidden(false)
+        val scrimBuilder =
+            SurfaceControl.Builder()
+                .setName("Cross-Activity back animation scrim")
+                .setCallsite("CrossActivityBackAnimation")
+                .setColorLayer()
+                .setOpaque(false)
+                .setHidden(false)
 
         rootTaskDisplayAreaOrganizer.attachToDisplayArea(Display.DEFAULT_DISPLAY, scrimBuilder)
         scrimLayer = scrimBuilder.build()
         val colorComponents = floatArrayOf(0f, 0f, 0f)
         maxScrimAlpha = if (isDarkTheme) MAX_SCRIM_ALPHA_DARK else MAX_SCRIM_ALPHA_LIGHT
-        val scrimCrop = if (isLetterboxed) {
-            closingTarget!!.windowConfiguration.bounds
-        } else {
-            closingTarget!!.localBounds
-        }
+        val scrimCrop =
+            if (isLetterboxed) {
+                closingTarget!!.windowConfiguration.bounds
+            } else {
+                closingTarget!!.localBounds
+            }
         transaction
             .setColor(scrimLayer, colorComponents)
             .setAlpha(scrimLayer!!, maxScrimAlpha)
@@ -339,21 +363,34 @@ class CrossActivityBackAnimation @Inject constructor(
     private fun ensureLetterboxes() {
         closingTarget?.let { t ->
             if (t.localBounds.left != 0 && leftLetterboxLayer == null) {
-                val bounds = Rect(0, t.windowConfiguration.bounds.top, t.localBounds.left,
-                        t.windowConfiguration.bounds.bottom)
+                val bounds =
+                    Rect(
+                        0,
+                        t.windowConfiguration.bounds.top,
+                        t.localBounds.left,
+                        t.windowConfiguration.bounds.bottom
+                    )
                 leftLetterboxLayer = ensureLetterbox(bounds)
             }
-            if (t.localBounds.right != t.windowConfiguration.bounds.right &&
-                    rightLetterboxLayer == null) {
-                val bounds = Rect(t.localBounds.right, t.windowConfiguration.bounds.top,
-                        t.windowConfiguration.bounds.right, t.windowConfiguration.bounds.bottom)
+            if (
+                t.localBounds.right != t.windowConfiguration.bounds.right &&
+                    rightLetterboxLayer == null
+            ) {
+                val bounds =
+                    Rect(
+                        t.localBounds.right,
+                        t.windowConfiguration.bounds.top,
+                        t.windowConfiguration.bounds.right,
+                        t.windowConfiguration.bounds.bottom
+                    )
                 rightLetterboxLayer = ensureLetterbox(bounds)
             }
         }
     }
 
     private fun ensureLetterbox(bounds: Rect): SurfaceControl {
-        val letterboxBuilder = SurfaceControl.Builder()
+        val letterboxBuilder =
+            SurfaceControl.Builder()
                 .setName("Cross-Activity back animation letterbox")
                 .setCallsite("CrossActivityBackAnimation")
                 .setColorLayer()
@@ -362,13 +399,17 @@ class CrossActivityBackAnimation @Inject constructor(
 
         rootTaskDisplayAreaOrganizer.attachToDisplayArea(Display.DEFAULT_DISPLAY, letterboxBuilder)
         val layer = letterboxBuilder.build()
-        val colorComponents = floatArrayOf(Color.red(letterboxColor) / 255f,
-                Color.green(letterboxColor) / 255f, Color.blue(letterboxColor) / 255f)
+        val colorComponents =
+            floatArrayOf(
+                Color.red(letterboxColor) / 255f,
+                Color.green(letterboxColor) / 255f,
+                Color.blue(letterboxColor) / 255f
+            )
         transaction
-                .setColor(layer, colorComponents)
-                .setCrop(layer, bounds)
-                .setRelativeLayer(layer, closingTarget!!.leash, 1)
-                .show(layer)
+            .setColor(layer, colorComponents)
+            .setCrop(layer, bounds)
+            .setRelativeLayer(layer, closingTarget!!.leash, 1)
+            .show(layer)
         return layer
     }
 
@@ -389,8 +430,8 @@ class CrossActivityBackAnimation @Inject constructor(
     }
 
     override fun prepareNextAnimation(
-            animationInfo: BackNavigationInfo.CustomAnimationInfo?,
-            letterboxColor: Int
+        animationInfo: BackNavigationInfo.CustomAnimationInfo?,
+        letterboxColor: Int
     ): Boolean {
         this.letterboxColor = letterboxColor
         return false
@@ -415,9 +456,7 @@ class CrossActivityBackAnimation @Inject constructor(
         }
 
         override fun onBackCancelled() {
-            progressAnimator.onBackCancelled {
-                finishAnimation()
-            }
+            progressAnimator.onBackCancelled { finishAnimation() }
         }
 
         override fun onBackInvoked() {
@@ -435,7 +474,8 @@ class CrossActivityBackAnimation @Inject constructor(
             finishedCallback: IRemoteAnimationFinishedCallback
         ) {
             ProtoLog.d(
-                ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW, "Start back to activity animation."
+                ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW,
+                "Start back to activity animation."
             )
             for (a in apps) {
                 when (a.mode) {
@@ -452,23 +492,25 @@ class CrossActivityBackAnimation @Inject constructor(
     }
 
     companion object {
-        /** Max scale of the entering/closing window.*/
-        private const val MAX_SCALE = 0.9f
-
-        /** Duration of post animation after gesture committed.  */
-        private const val POST_ANIMATION_DURATION = 300L
-
+        /** Max scale of the closing window. */
+        internal const val MAX_SCALE = 0.9f
         private const val MAX_SCRIM_ALPHA_DARK = 0.8f
         private const val MAX_SCRIM_ALPHA_LIGHT = 0.2f
+        private const val POST_COMMIT_DURATION = 300L
     }
+}
+
+// The target will loose focus when alpha == 0, so keep a minimum value for it.
+private fun keepMinimumAlpha(transAlpha: Float): Float {
+    return max(transAlpha.toDouble(), 0.005).toFloat()
 }
 
 private fun isDarkMode(context: Context): Boolean {
     return context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
-            Configuration.UI_MODE_NIGHT_YES
+        Configuration.UI_MODE_NIGHT_YES
 }
 
-private fun RectF.setInterpolatedRectF(start: RectF, target: RectF, progress: Float) {
+internal fun RectF.setInterpolatedRectF(start: RectF, target: RectF, progress: Float) {
     require(!(progress < 0 || progress > 1)) { "Progress value must be between 0 and 1" }
     left = start.left + (target.left - start.left) * progress
     top = start.top + (target.top - start.top) * progress
@@ -476,7 +518,7 @@ private fun RectF.setInterpolatedRectF(start: RectF, target: RectF, progress: Fl
     bottom = start.bottom + (target.bottom - start.bottom) * progress
 }
 
-private fun RectF.scaleCentered(
+internal fun RectF.scaleCentered(
     scale: Float,
     pivotX: Float = left + width() / 2,
     pivotY: Float = top + height() / 2
