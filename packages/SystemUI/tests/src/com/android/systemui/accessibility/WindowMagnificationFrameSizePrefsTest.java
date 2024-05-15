@@ -39,9 +39,9 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class WindowMagnificationSizePrefsTest extends SysuiTestCase {
+public class WindowMagnificationFrameSizePrefsTest extends SysuiTestCase {
 
-    WindowMagnificationSizePrefs mWindowMagnificationSizePrefs;
+    WindowMagnificationFrameSizePrefs mWindowMagnificationFrameSizePrefs;
     FakeSharedPreferences mSharedPreferences;
 
     @Before
@@ -51,24 +51,24 @@ public class WindowMagnificationSizePrefsTest extends SysuiTestCase {
         when(mContext.getSharedPreferences(
                 eq("window_magnification_preferences"), anyInt()))
                 .thenReturn(mSharedPreferences);
-        mWindowMagnificationSizePrefs = new WindowMagnificationSizePrefs(mContext);
+        mWindowMagnificationFrameSizePrefs = new WindowMagnificationFrameSizePrefs(mContext);
     }
 
     @Test
     public void saveSizeForCurrentDensity_getExpectedSize() {
         Size testSize = new Size(500, 500);
-        mWindowMagnificationSizePrefs.saveSizeForCurrentDensity(testSize);
+        mWindowMagnificationFrameSizePrefs.saveSizeForCurrentDensity(testSize);
 
-        assertThat(mWindowMagnificationSizePrefs.getSizeForCurrentDensity())
+        assertThat(mWindowMagnificationFrameSizePrefs.getSizeForCurrentDensity())
                 .isEqualTo(testSize);
     }
 
     @Test
     public void saveSizeForCurrentDensity_containsPreferenceForCurrentDensity() {
         Size testSize = new Size(500, 500);
-        mWindowMagnificationSizePrefs.saveSizeForCurrentDensity(testSize);
+        mWindowMagnificationFrameSizePrefs.saveSizeForCurrentDensity(testSize);
 
-        assertThat(mWindowMagnificationSizePrefs.isPreferenceSavedForCurrentDensity())
+        assertThat(mWindowMagnificationFrameSizePrefs.isPreferenceSavedForCurrentDensity())
                 .isTrue();
     }
 }
