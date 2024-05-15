@@ -251,7 +251,7 @@ class NotificationPanelViewControllerWithCoroutinesTest :
 
             // WHEN a pinned heads up is present
             mFakeHeadsUpNotificationRepository.setNotifications(
-                fakeHeadsUpRowRepository("key", isPinned = true)
+                FakeHeadsUpRowRepository("key", isPinned = true)
             )
         }
         advanceUntilIdle()
@@ -274,9 +274,4 @@ class NotificationPanelViewControllerWithCoroutinesTest :
         // THEN the panel should be visible
         assertThat(mNotificationPanelViewController.isExpanded).isTrue()
     }
-
-    private fun fakeHeadsUpRowRepository(key: String, isPinned: Boolean = false) =
-        FakeHeadsUpRowRepository(key = key, elementKey = Any()).apply {
-            this.isPinned.value = isPinned
-        }
 }

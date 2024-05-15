@@ -23,8 +23,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
+import com.android.systemui.statusbar.notification.data.repository.notificationsKeyguardViewStateRepository
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.statusbar.notification.stack.data.repository.setNotifications
@@ -41,9 +47,19 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
 class HeadsUpNotificationInteractorTest : SysuiTestCase() {
-    private val kosmos = testKosmos()
+    private val kosmos =
+        testKosmos().apply {
+            fakeKeyguardTransitionRepository =
+                FakeKeyguardTransitionRepository(initInLockscreen = false)
+        }
     private val testScope = kosmos.testScope
-    private val repository = kosmos.headsUpNotificationRepository
+    private val faceAuthRepository by lazy { kosmos.fakeDeviceEntryFaceAuthRepository }
+    private val headsUpRepository by lazy { kosmos.headsUpNotificationRepository }
+    private val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
+    private val keyguardViewStateRepository by lazy {
+        kosmos.notificationsKeyguardViewStateRepository
+    }
+    private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
 
     private val underTest = kosmos.headsUpNotificationInteractor
 
@@ -60,7 +76,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val hasPinnedRows by collectLastValue(underTest.hasPinnedRows)
             // WHEN no pinned rows are set
-            repository.setNotifications(
+            headsUpRepository.setNotifications(
                 fakeHeadsUpRowRepository("key 0"),
                 fakeHeadsUpRowRepository("key 1"),
                 fakeHeadsUpRowRepository("key 2"),
@@ -76,7 +92,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val hasPinnedRows by collectLastValue(underTest.hasPinnedRows)
             // WHEN a pinned rows is set
-            repository.setNotifications(
+            headsUpRepository.setNotifications(
                 fakeHeadsUpRowRepository("key 0", isPinned = true),
                 fakeHeadsUpRowRepository("key 1"),
                 fakeHeadsUpRowRepository("key 2"),
@@ -98,7 +114,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
                     fakeHeadsUpRowRepository("key 1"),
                     fakeHeadsUpRowRepository("key 2"),
                 )
-            repository.setNotifications(rows)
+            headsUpRepository.setNotifications(rows)
             runCurrent()
 
             // WHEN a row gets pinned
@@ -120,7 +136,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
                     fakeHeadsUpRowRepository("key 1"),
                     fakeHeadsUpRowRepository("key 2"),
                 )
-            repository.setNotifications(rows)
+            headsUpRepository.setNotifications(rows)
             runCurrent()
 
             // THEN that row gets unpinned
@@ -144,7 +160,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val pinnedHeadsUpRows by collectLastValue(underTest.pinnedHeadsUpRows)
             // WHEN no rows are pinned
-            repository.setNotifications(
+            headsUpRepository.setNotifications(
                 fakeHeadsUpRowRepository("key 0"),
                 fakeHeadsUpRowRepository("key 1"),
                 fakeHeadsUpRowRepository("key 2"),
@@ -166,7 +182,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
                     fakeHeadsUpRowRepository("key 1", isPinned = true),
                     fakeHeadsUpRowRepository("key 2"),
                 )
-            repository.setNotifications(rows)
+            headsUpRepository.setNotifications(rows)
             runCurrent()
 
             // THEN the unpinned rows are filtered
@@ -184,7 +200,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
                     fakeHeadsUpRowRepository("key 1", isPinned = true),
                     fakeHeadsUpRowRepository("key 2"),
                 )
-            repository.setNotifications(rows)
+            headsUpRepository.setNotifications(rows)
             runCurrent()
 
             // WHEN all rows gets pinned
@@ -206,7 +222,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
                     fakeHeadsUpRowRepository("key 1", isPinned = true),
                     fakeHeadsUpRowRepository("key 2", isPinned = true),
                 )
-            repository.setNotifications(rows)
+            headsUpRepository.setNotifications(rows)
             runCurrent()
 
             // THEN no rows are filtered
@@ -224,7 +240,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
                     fakeHeadsUpRowRepository("key 1", isPinned = true),
                     fakeHeadsUpRowRepository("key 2", isPinned = true),
                 )
-            repository.setNotifications(rows)
+            headsUpRepository.setNotifications(rows)
             runCurrent()
 
             // WHEN a row gets unpinned
@@ -246,7 +262,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
                     fakeHeadsUpRowRepository("key 1"),
                     fakeHeadsUpRowRepository("key 2"),
                 )
-            repository.setNotifications(rows)
+            headsUpRepository.setNotifications(rows)
             runCurrent()
 
             rows[0].isPinned.value = true
@@ -260,6 +276,96 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
             rows[0].isPinned.value = true
             runCurrent()
             assertThat(pinnedHeadsUpRows).containsExactly(rows[0])
+        }
+
+    @Test
+    fun showHeadsUpStatusBar_true() =
+        testScope.runTest {
+            val showHeadsUpStatusBar by collectLastValue(underTest.showHeadsUpStatusBar)
+
+            // WHEN a row is pinned
+            headsUpRepository.setNotifications(fakeHeadsUpRowRepository("key 0", isPinned = true))
+
+            assertThat(showHeadsUpStatusBar).isTrue()
+        }
+
+    @Test
+    fun showHeadsUpStatusBar_withoutPinnedNotifications_false() =
+        testScope.runTest {
+            val showHeadsUpStatusBar by collectLastValue(underTest.showHeadsUpStatusBar)
+
+            // WHEN no row is pinned
+            headsUpRepository.setNotifications(fakeHeadsUpRowRepository("key 0", isPinned = false))
+
+            assertThat(showHeadsUpStatusBar).isFalse()
+        }
+
+    @Test
+    fun showHeadsUpStatusBar_whenShadeExpanded_false() =
+        testScope.runTest {
+            val showHeadsUpStatusBar by collectLastValue(underTest.showHeadsUpStatusBar)
+
+            // WHEN a row is pinned
+            headsUpRepository.setNotifications(fakeHeadsUpRowRepository("key 0", isPinned = true))
+            // AND the shade is expanded
+            shadeTestUtil.setShadeExpansion(1.0f)
+
+            assertThat(showHeadsUpStatusBar).isFalse()
+        }
+
+    @Test
+    fun showHeadsUpStatusBar_notificationsAreHidden_false() =
+        testScope.runTest {
+            val showHeadsUpStatusBar by collectLastValue(underTest.showHeadsUpStatusBar)
+
+            // WHEN a row is pinned
+            headsUpRepository.setNotifications(fakeHeadsUpRowRepository("key 0", isPinned = true))
+            // AND the notifications are hidden
+            keyguardViewStateRepository.areNotificationsFullyHidden.value = true
+
+            assertThat(showHeadsUpStatusBar).isFalse()
+        }
+
+    @Test
+    fun showHeadsUpStatusBar_onLockScreen_false() =
+        testScope.runTest {
+            val showHeadsUpStatusBar by collectLastValue(underTest.showHeadsUpStatusBar)
+
+            // WHEN a row is pinned
+            headsUpRepository.setNotifications(fakeHeadsUpRowRepository("key 0", isPinned = true))
+            // AND the lock screen is shown
+            keyguardTransitionRepository.emitInitialStepsFromOff(to = KeyguardState.LOCKSCREEN)
+
+            assertThat(showHeadsUpStatusBar).isFalse()
+        }
+
+    @Test
+    fun showHeadsUpStatusBar_onByPassLockScreen_true() =
+        testScope.runTest {
+            val showHeadsUpStatusBar by collectLastValue(underTest.showHeadsUpStatusBar)
+
+            // WHEN a row is pinned
+            headsUpRepository.setNotifications(fakeHeadsUpRowRepository("key 0", isPinned = true))
+            // AND the lock screen is shown
+            keyguardTransitionRepository.emitInitialStepsFromOff(to = KeyguardState.LOCKSCREEN)
+            // AND bypass is enabled
+            faceAuthRepository.isBypassEnabled.value = true
+
+            assertThat(showHeadsUpStatusBar).isTrue()
+        }
+
+    @Test
+    fun showHeadsUpStatusBar_onByPassLockScreen_withoutNotifications_false() =
+        testScope.runTest {
+            val showHeadsUpStatusBar by collectLastValue(underTest.showHeadsUpStatusBar)
+
+            // WHEN no pinned rows
+            // AND the lock screen is shown
+            keyguardTransitionRepository.emitInitialStepsFromOff(to = KeyguardState.LOCKSCREEN)
+            // AND bypass is enabled
+            faceAuthRepository.isBypassEnabled.value = true
+
+            assertThat(showHeadsUpStatusBar).isFalse()
         }
 
     private fun fakeHeadsUpRowRepository(key: String, isPinned: Boolean = false) =

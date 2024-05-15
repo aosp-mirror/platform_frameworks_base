@@ -18,6 +18,10 @@
 
 package com.android.systemui.statusbar.notification.domain.interactor
 
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRepository
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository
 import com.android.systemui.statusbar.notification.shared.HeadsUpRowKey
@@ -29,13 +33,21 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
-class HeadsUpNotificationInteractor @Inject constructor(private val repository: HeadsUpRepository) {
+class HeadsUpNotificationInteractor
+@Inject
+constructor(
+    private val headsUpRepository: HeadsUpRepository,
+    private val faceAuthInteractor: DeviceEntryFaceAuthInteractor,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
+    private val shadeInteractor: ShadeInteractor,
+) {
 
-    val topHeadsUpRow: Flow<HeadsUpRowKey?> = repository.topHeadsUpRow
+    val topHeadsUpRow: Flow<HeadsUpRowKey?> = headsUpRepository.topHeadsUpRow
 
     /** Set of currently pinned top-level heads up rows to be displayed. */
     val pinnedHeadsUpRows: Flow<Set<HeadsUpRowKey>> =
-        repository.activeHeadsUpRows.flatMapLatest { repositories ->
+        headsUpRepository.activeHeadsUpRows.flatMapLatest { repositories ->
             if (repositories.isNotEmpty()) {
                 val toCombine: List<Flow<Pair<HeadsUpRowRepository, Boolean>>> =
                     repositories.map { repo -> repo.isPinned.map { isPinned -> repo to isPinned } }
@@ -50,7 +62,7 @@ class HeadsUpNotificationInteractor @Inject constructor(private val repository: 
 
     /** Are there any pinned heads up rows to display? */
     val hasPinnedRows: Flow<Boolean> =
-        repository.activeHeadsUpRows.flatMapLatest { rows ->
+        headsUpRepository.activeHeadsUpRows.flatMapLatest { rows ->
             if (rows.isNotEmpty()) {
                 combine(rows.map { it.isPinned }) { pins -> pins.any { it } }
             } else {
@@ -60,15 +72,38 @@ class HeadsUpNotificationInteractor @Inject constructor(private val repository: 
         }
 
     val isHeadsUpOrAnimatingAway: Flow<Boolean> =
-        combine(hasPinnedRows, repository.isHeadsUpAnimatingAway) { hasPinnedRows, animatingAway ->
+        combine(hasPinnedRows, headsUpRepository.isHeadsUpAnimatingAway) {
+            hasPinnedRows,
+            animatingAway ->
             hasPinnedRows || animatingAway
+        }
+
+    private val canShowHeadsUp: Flow<Boolean> =
+        combine(
+            faceAuthInteractor.isBypassEnabled,
+            shadeInteractor.isShadeFullyCollapsed,
+            keyguardTransitionInteractor.currentKeyguardState,
+            notificationsKeyguardInteractor.areNotificationsFullyHidden,
+        ) { isBypassEnabled, isShadeCollapsed, keyguardState, areNotificationsHidden ->
+            val isOnLockScreen = keyguardState == KeyguardState.LOCKSCREEN
+            when {
+                areNotificationsHidden -> false // don't show when notification are hidden
+                !isShadeCollapsed -> false // don't show when the shade is expanded
+                isOnLockScreen -> isBypassEnabled // on the lock screen only show for bypass
+                else -> true // show otherwise
+            }
+        }
+
+    val showHeadsUpStatusBar: Flow<Boolean> =
+        combine(hasPinnedRows, canShowHeadsUp) { hasPinnedRows, canShowHeadsUp ->
+            hasPinnedRows && canShowHeadsUp
         }
 
     fun headsUpRow(key: HeadsUpRowKey): HeadsUpRowInteractor =
         HeadsUpRowInteractor(key as HeadsUpRowRepository)
     fun elementKeyFor(key: HeadsUpRowKey) = (key as HeadsUpRowRepository).elementKey
     fun setHeadsUpAnimatingAway(animatingAway: Boolean) {
-        repository.setHeadsUpAnimatingAway(animatingAway)
+        headsUpRepository.setHeadsUpAnimatingAway(animatingAway)
     }
 }
 

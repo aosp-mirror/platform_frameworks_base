@@ -22,6 +22,7 @@ import com.android.systemui.deviceentry.shared.model.FaceDetectionStatus
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * Implementation of the interactor that noops all face auth operations.
@@ -35,6 +36,7 @@ class NoopDeviceEntryFaceAuthInteractor @Inject constructor() : DeviceEntryFaceA
     override val detectionStatus: Flow<FaceDetectionStatus> = emptyFlow()
     override val lockedOut: Flow<Boolean> = emptyFlow()
     override val authenticated: Flow<Boolean> = emptyFlow()
+    override val isBypassEnabled: Flow<Boolean> = flowOf(false)
 
     override fun canFaceAuthRun(): Boolean = false
 
