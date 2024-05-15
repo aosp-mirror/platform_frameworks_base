@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import org.mockito.Mockito.`when` as whenever
 
 /** Creates a mock display. */
+@JvmOverloads
 fun display(
     type: Int,
     flags: Int = 0,

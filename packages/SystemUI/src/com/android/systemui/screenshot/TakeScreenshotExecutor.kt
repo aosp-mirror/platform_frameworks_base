@@ -52,11 +52,13 @@ constructor(
         onSaved: (Uri?) -> Unit,
         requestCallback: RequestCallback
     ) {
-        val displayIds = getDisplaysToScreenshot(screenshotRequest.type)
+        val displays = getDisplaysToScreenshot(screenshotRequest.type)
         val resultCallbackWrapper = MultiResultCallbackWrapper(requestCallback)
-        displayIds.forEach { displayId: Int ->
+        displays.forEach { display: Display ->
+            val displayId = display.displayId
             Log.d(TAG, "Executing screenshot for display $displayId")
             dispatchToController(
+                display,
                 rawScreenshotData = ScreenshotData.fromRequest(screenshotRequest, displayId),
                 onSaved =
                     if (displayId == Display.DEFAULT_DISPLAY) {
@@ -69,6 +71,7 @@ constructor(
 
     /** All logging should be triggered only by this method. */
     private suspend fun dispatchToController(
+        display: Display,
         rawScreenshotData: ScreenshotData,
         onSaved: (Uri?) -> Unit,
         callback: RequestCallback
@@ -88,8 +91,7 @@ constructor(
         logScreenshotRequested(screenshotData)
         Log.d(TAG, "Screenshot request: $screenshotData")
         try {
-            getScreenshotController(screenshotData.displayId)
-                .handleScreenshot(screenshotData, onSaved, callback)
+            getScreenshotController(display).handleScreenshot(screenshotData, onSaved, callback)
         } catch (e: IllegalStateException) {
             Log.e(TAG, "Error while ScreenshotController was handling ScreenshotData!", e)
             onFailedScreenshotRequest(screenshotData, callback)
@@ -119,12 +121,13 @@ constructor(
         callback.reportError()
     }
 
-    private suspend fun getDisplaysToScreenshot(requestType: Int): List<Int> {
+    private suspend fun getDisplaysToScreenshot(requestType: Int): List<Display> {
+        val allDisplays = displays.first()
         return if (requestType == TAKE_SCREENSHOT_PROVIDED_IMAGE) {
             // If this is a provided image, let's show the UI on the default display only.
-            listOf(Display.DEFAULT_DISPLAY)
+            allDisplays.filter { it.displayId == Display.DEFAULT_DISPLAY }
         } else {
-            displays.first().filter { it.type in ALLOWED_DISPLAY_TYPES }.map { it.displayId }
+            allDisplays.filter { it.type in ALLOWED_DISPLAY_TYPES }
         }
     }
 
@@ -158,9 +161,9 @@ constructor(
         screenshotControllers.clear()
     }
 
-    private fun getScreenshotController(id: Int): ScreenshotController {
-        return screenshotControllers.computeIfAbsent(id) {
-            screenshotControllerFactory.create(id, /* showUIOnExternalDisplay= */ false)
+    private fun getScreenshotController(display: Display): ScreenshotController {
+        return screenshotControllers.computeIfAbsent(display.displayId) {
+            screenshotControllerFactory.create(display, /* showUIOnExternalDisplay= */ false)
         }
     }
 
