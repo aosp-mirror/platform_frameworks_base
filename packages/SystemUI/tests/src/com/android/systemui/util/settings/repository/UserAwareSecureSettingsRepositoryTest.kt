@@ -17,6 +17,7 @@
 package com.android.systemui.util.settings.repository
 
 import android.content.pm.UserInfo
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -33,11 +34,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class UserAwareSecureSettingsRepositoryTest : SysuiTestCase() {
 
     private val dispatcher = StandardTestDispatcher()
@@ -48,11 +48,12 @@ class UserAwareSecureSettingsRepositoryTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        repository = UserAwareSecureSettingsRepositoryImpl(
-            secureSettings,
-            userRepository,
-            dispatcher,
-        )
+        repository =
+            UserAwareSecureSettingsRepositoryImpl(
+                secureSettings,
+                userRepository,
+                dispatcher,
+            )
         userRepository.setUserInfos(USER_INFOS)
         setSettingValueForUser(enabled = true, userInfo = SETTING_ENABLED_USER)
         setSettingValueForUser(enabled = false, userInfo = SETTING_DISABLED_USER)
