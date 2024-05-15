@@ -24,6 +24,7 @@
     <style name="Theme.SelectPrinterActivity"
            parent="android:style/Theme.DeviceDefault">
         <item name="android:textAppearanceListItemSecondary">@style/ListItemSecondary</item>
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
     <style name="Theme.PrintActivity" parent="@android:style/Theme.DeviceDefault">
