@@ -1189,6 +1189,10 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
 
     /**
      * Get statically configured sensor properties.
+     * @deprecated Generally unsafe to use, use
+     * {@link FingerprintManager#addAuthenticatorsRegisteredCallback} API instead.
+     * In most cases this method will work as expected, but during early boot up, it will be
+     * null/empty and there is no way for the caller to know when it's actual value is ready.
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
