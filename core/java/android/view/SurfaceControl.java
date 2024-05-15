@@ -302,6 +302,7 @@ public final class SurfaceControl implements Parcelable {
                                                                 long desiredPresentTimeNanos);
     private static native void nativeSetFrameTimeline(long transactionObj,
                                                            long vsyncId);
+    private static native void nativeNotifyShutdown();
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -4765,4 +4766,11 @@ public final class SurfaceControl implements Parcelable {
         return nativeGetStalledTransactionInfo(pid);
     }
 
+    /**
+     * Notify the SurfaceFlinger to capture transaction traces when shutdown.
+     * @hide
+     */
+    public static void notifyShutdown() {
+        nativeNotifyShutdown();
+    }
 }

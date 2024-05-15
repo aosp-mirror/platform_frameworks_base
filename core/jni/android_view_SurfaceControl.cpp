@@ -2201,6 +2201,10 @@ static jobject nativeGetStalledTransactionInfo(JNIEnv* env, jclass clazz, jint p
     return jStalledTransactionInfo;
 }
 
+static void nativeNotifyShutdown() {
+    SurfaceComposerClient::notifyShutdown();
+}
+
 // ----------------------------------------------------------------------------
 
 SurfaceControl* android_view_SurfaceControl_getNativeSurfaceControl(JNIEnv* env,
@@ -2476,6 +2480,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*) nativeGetStalledTransactionInfo },
     {"nativeSetDesiredPresentTimeNanos", "(JJ)V",
             (void*) nativeSetDesiredPresentTimeNanos },
+    {"nativeNotifyShutdown", "()V",
+            (void*)nativeNotifyShutdown },
         // clang-format on
 };
 

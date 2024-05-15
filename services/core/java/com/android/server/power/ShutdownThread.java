@@ -54,6 +54,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TimingsTraceLog;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -458,6 +459,10 @@ public final class ShutdownThread extends Thread {
         shutdownTimingLog.traceBegin("SystemServerShutdown");
         metricShutdownStart();
         metricStarted(METRIC_SYSTEM_SERVER);
+
+        // Notify SurfaceFlinger that the device is shutting down.
+        // Transaction traces should be captured at this stage.
+        SurfaceControl.notifyShutdown();
 
         // Start dumping check points for this shutdown in a separate thread.
         Thread dumpCheckPointsThread = ShutdownCheckPoints.newDumpThread(
