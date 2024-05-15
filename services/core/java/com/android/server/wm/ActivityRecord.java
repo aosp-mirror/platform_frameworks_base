@@ -11109,7 +11109,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Otherwise, return the creation time of the top window.
      */
     long getLastWindowCreateTime() {
-        final WindowState window = getWindow(win -> true);
+        final WindowState window = getWindow(alwaysTruePredicate());
         return window != null && window.mAttrs.type != TYPE_BASE_APPLICATION
                 ? window.getCreateTime()
                 : createTime;
