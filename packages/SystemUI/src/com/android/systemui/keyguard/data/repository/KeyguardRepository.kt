@@ -109,6 +109,19 @@ interface KeyguardRepository {
     )
     val isKeyguardGoingAway: Flow<Boolean>
 
+    /**
+     * Whether the keyguard is enabled, per [KeyguardService]. If the keyguard is not enabled, the
+     * lockscreen cannot be shown and the device will go from AOD/DOZING directly to GONE.
+     *
+     * Keyguard can be disabled by selecting Security: "None" in settings, or by apps that hold
+     * permission to do so (such as Phone).
+     *
+     * If the keyguard is disabled while we're locked, we will transition to GONE unless we're in
+     * lockdown mode. If the keyguard is re-enabled, we'll transition back to LOCKSCREEN if we were
+     * locked when it was disabled.
+     */
+    val isKeyguardEnabled: StateFlow<Boolean>
+
     /** Is the always-on display available to be used? */
     val isAodAvailable: StateFlow<Boolean>
 
@@ -269,6 +282,9 @@ interface KeyguardRepository {
             "'keyguardDoneAnimationsFinished' is when the GONE transition is finished."
     )
     fun keyguardDoneAnimationsFinished()
+
+    /** Sets whether the keyguard is enabled (see [isKeyguardEnabled]). */
+    fun setKeyguardEnabled(enabled: Boolean)
 }
 
 /** Encapsulates application state for the keyguard. */
@@ -438,6 +454,9 @@ constructor(
 
         awaitClose { keyguardStateController.removeCallback(callback) }
     }
+
+    private val _isKeyguardEnabled = MutableStateFlow(true)
+    override val isKeyguardEnabled: StateFlow<Boolean> = _isKeyguardEnabled.asStateFlow()
 
     private val _isDozing = MutableStateFlow(statusBarStateController.isDozing)
     override val isDozing: StateFlow<Boolean> = _isDozing.asStateFlow()
@@ -662,6 +681,10 @@ constructor(
 
     override fun setClockShouldBeCentered(shouldBeCentered: Boolean) {
         _clockShouldBeCentered.value = shouldBeCentered
+    }
+
+    override fun setKeyguardEnabled(enabled: Boolean) {
+        _isKeyguardEnabled.value = enabled
     }
 
     private fun statusBarStateIntToObject(value: Int): StatusBarState {
