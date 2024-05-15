@@ -320,10 +320,10 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private final Handler mHandler;
 
-    @GuardedBy("mServiceLock")
+    @GuardedBy("itself")
     private final ArrayList<ShortcutChangeListener> mListeners = new ArrayList<>(1);
 
-    @GuardedBy("mServiceLock")
+    @GuardedBy("itself")
     private final ArrayList<LauncherApps.ShortcutChangeCallback> mShortcutChangeCallbacks =
             new ArrayList<>(1);
 
@@ -1847,7 +1847,9 @@ public class ShortcutService extends IShortcutService.Stub {
                         return;
                     }
 
-                    copy = new ArrayList<>(mListeners);
+                    synchronized (mListeners) {
+                        copy = new ArrayList<>(mListeners);
+                    }
                 }
                 // Note onShortcutChanged() needs to be called with the system service permissions.
                 for (int i = copy.size() - 1; i >= 0; i--) {
@@ -1872,8 +1874,9 @@ public class ShortcutService extends IShortcutService.Stub {
                     if (!isUserUnlockedL(userId)) {
                         return;
                     }
-
-                    copy = new ArrayList<>(mShortcutChangeCallbacks);
+                    synchronized (mShortcutChangeCallbacks) {
+                        copy = new ArrayList<>(mShortcutChangeCallbacks);
+                    }
                 }
                 for (int i = copy.size() - 1; i >= 0; i--) {
                     if (!CollectionUtils.isEmpty(changedList)) {
@@ -3425,7 +3428,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         @Override
         public void addListener(@NonNull ShortcutChangeListener listener) {
-            synchronized (mServiceLock) {
+            synchronized (mListeners) {
                 mListeners.add(Objects.requireNonNull(listener));
             }
         }
@@ -3433,7 +3436,7 @@ public class ShortcutService extends IShortcutService.Stub {
         @Override
         public void addShortcutChangeCallback(
                 @NonNull LauncherApps.ShortcutChangeCallback callback) {
-            synchronized (mServiceLock) {
+            synchronized (mShortcutChangeCallbacks) {
                 mShortcutChangeCallbacks.add(Objects.requireNonNull(callback));
             }
         }
