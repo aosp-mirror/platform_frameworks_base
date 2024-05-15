@@ -251,10 +251,11 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
 
     private boolean isBackAnimationAllowed() {
         // back animation is allowed in all cases except when softInputMode is adjust_resize AND
-        // there is no app-registered WindowInsetsAnimationCallback.
+        // there is no app-registered WindowInsetsAnimationCallback AND edge-to-edge is not enabled.
         return (mViewRoot.mWindowAttributes.softInputMode & SOFT_INPUT_MASK_ADJUST)
                 != SOFT_INPUT_ADJUST_RESIZE
-                || (mViewRoot.mView != null && mViewRoot.mView.hasWindowInsetsAnimationCallback());
+                || (mViewRoot.mView != null && mViewRoot.mView.hasWindowInsetsAnimationCallback())
+                || mViewRoot.mAttachInfo.mContentOnApplyWindowInsetsListener == null;
     }
 
     private boolean isAdjustPan() {
