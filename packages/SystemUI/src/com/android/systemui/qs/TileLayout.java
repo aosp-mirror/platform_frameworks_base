@@ -12,6 +12,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.FontSizeUtils;
@@ -97,10 +98,22 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         return false;
     }
 
+    @VisibleForTesting
+    @Override
+    public int getMinRows() {
+        return mMinRows;
+    }
+
     @Override
     public boolean setMaxColumns(int maxColumns) {
         mMaxColumns = maxColumns;
         return updateColumns();
+    }
+
+    @VisibleForTesting
+    @Override
+    public int getMaxColumns() {
+        return mMaxColumns;
     }
 
     public void addTile(TileRecord tile) {

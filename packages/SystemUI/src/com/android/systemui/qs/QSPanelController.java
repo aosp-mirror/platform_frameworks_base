@@ -30,6 +30,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.haptics.qs.QSLongPressEffect;
+import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor;
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
 import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.media.controls.ui.view.MediaHostState;
@@ -46,9 +47,12 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.tuner.TunerService;
 
+import kotlinx.coroutines.flow.StateFlow;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
+
 
 /**
  * Controller for {@link QSPanel}.
@@ -72,6 +76,8 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     private final BrightnessSliderController.Factory mBrightnessSliderControllerFactory;
     private final BrightnessController.Factory mBrightnessControllerFactory;
 
+    protected final MediaCarouselInteractor mMediaCarouselInteractor;
+
     private View.OnTouchListener mTileLayoutTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
@@ -94,7 +100,8 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             FalsingManager falsingManager,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             SplitShadeStateController splitShadeStateController,
-            Provider<QSLongPressEffect> longPRessEffectProvider) {
+            Provider<QSLongPressEffect> longPRessEffectProvider,
+            MediaCarouselInteractor mediaCarouselInteractor) {
         super(view, qsHost, qsCustomizerController, usingMediaPlayer, mediaHost,
                 metricsLogger, uiEventLogger, qsLogger, dumpManager, splitShadeStateController,
                 longPRessEffectProvider);
@@ -113,6 +120,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mLastDensity = view.getResources().getConfiguration().densityDpi;
         mSceneContainerEnabled = SceneContainerFlag.isEnabled();
+        mMediaCarouselInteractor = mediaCarouselInteractor;
     }
 
     @Override
@@ -123,6 +131,11 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
         mQsCustomizerController.init();
         mBrightnessSliderController.init();
+    }
+
+    @Override
+    StateFlow<Boolean> getMediaVisibleFlow() {
+        return mMediaCarouselInteractor.getHasAnyMediaOrRecommendation();
     }
 
     @Override

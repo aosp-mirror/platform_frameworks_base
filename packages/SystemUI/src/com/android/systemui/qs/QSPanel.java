@@ -42,6 +42,7 @@ import com.android.internal.widget.RemeasuringLinearLayout;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -441,7 +442,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     }
 
     private boolean needsDynamicRowsAndColumns() {
-        return true;
+        return !SceneContainerFlag.isEnabled();
     }
 
     private void switchAllContentToParent(ViewGroup parent, QSTileLayout newLayout) {
@@ -634,14 +635,18 @@ public class QSPanel extends LinearLayout implements Tunable {
             switchAllContentToParent(newParent, mTileLayout);
             reAttachMediaHost(mediaHostView, horizontal);
             if (needsDynamicRowsAndColumns()) {
-                mTileLayout.setMinRows(horizontal ? 2 : 1);
-                mTileLayout.setMaxColumns(horizontal ? 2 : 4);
+                setColumnRowLayout(horizontal);
             }
             updateMargins(mediaHostView);
             if (mHorizontalLinearLayout != null) {
                 mHorizontalLinearLayout.setVisibility(horizontal ? View.VISIBLE : View.GONE);
             }
         }
+    }
+
+    void setColumnRowLayout(boolean withMedia) {
+        mTileLayout.setMinRows(withMedia ? 2 : 1);
+        mTileLayout.setMaxColumns(withMedia ? 2 : 4);
     }
 
     private void updateMargins(ViewGroup mediaHostView) {
@@ -736,6 +741,8 @@ public class QSPanel extends LinearLayout implements Tunable {
             return false;
         }
 
+        int getMinRows();
+
         /**
          * Sets the max number of columns to show
          *
@@ -746,6 +753,8 @@ public class QSPanel extends LinearLayout implements Tunable {
         default boolean setMaxColumns(int maxColumns) {
             return false;
         }
+
+        int getMaxColumns();
 
         /**
          * Sets the expansion value and proposedTranslation to panel.

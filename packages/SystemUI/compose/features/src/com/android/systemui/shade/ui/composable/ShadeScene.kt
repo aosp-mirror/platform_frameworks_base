@@ -25,6 +25,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.clipScrollableContainer
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -42,6 +43,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -67,6 +69,7 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
+import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
@@ -235,6 +238,10 @@ private fun SceneScope.SingleShade(
     val shouldPunchHoleBehindScrim =
         layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade) ||
             layoutState.isTransitioningBetween(Scenes.Lockscreen, Scenes.Shade)
+    // Media is visible and we are in landscape on a small height screen
+    val mediaInRow =
+        isMediaVisible &&
+            LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Compact
 
     Box(
         modifier =
@@ -274,22 +281,39 @@ private fun SceneScope.SingleShade(
                                 createBatteryMeterViewController = createBatteryMeterViewController,
                                 statusBarIconController = statusBarIconController,
                             )
-                            Box(Modifier.element(QuickSettings.Elements.QuickQuickSettings)) {
-                                QuickSettings(
-                                    viewModel.qsSceneAdapter,
-                                    { viewModel.qsSceneAdapter.qqsHeight },
-                                    isSplitShade = false,
-                                    squishiness = { tileSquishiness },
+
+                            val content: @Composable (Modifier) -> Unit = { modifier ->
+                                Box(
+                                    Modifier.element(QuickSettings.Elements.QuickQuickSettings)
+                                        .then(modifier)
+                                ) {
+                                    QuickSettings(
+                                        viewModel.qsSceneAdapter,
+                                        { viewModel.qsSceneAdapter.qqsHeight },
+                                        isSplitShade = false,
+                                        squishiness = { tileSquishiness },
+                                    )
+                                }
+
+                                MediaCarousel(
+                                    isVisible = isMediaVisible,
+                                    mediaHost = mediaHost,
+                                    modifier = Modifier.fillMaxWidth().then(modifier),
+                                    carouselController = mediaCarouselController,
                                 )
                             }
 
-                            MediaCarousel(
-                                isVisible = isMediaVisible,
-                                mediaHost = mediaHost,
-                                modifier = Modifier.fillMaxWidth(),
-                                carouselController = mediaCarouselController,
-                            )
-
+                            if (!mediaInRow) {
+                                content(Modifier)
+                            } else {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = spacedBy(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    content(Modifier.weight(1f))
+                                }
+                            }
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                     },
