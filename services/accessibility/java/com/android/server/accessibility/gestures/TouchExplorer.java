@@ -974,6 +974,10 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 clear(event, policyFlags);
                 return;
             case ACTION_POINTER_DOWN:
+                if (mDraggingPointerId != INVALID_POINTER_ID) {
+                    mDispatcher.sendMotionEvent(
+                            event, ACTION_UP, rawEvent, pointerIdBits, policyFlags);
+                }
                 if (mState.isServiceDetectingGestures()) {
                     mAms.sendMotionEventToListeningServices(rawEvent);
                     return;
@@ -981,10 +985,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 // We are in dragging state so we have two pointers and another one
                 // goes down => delegate the three pointers to the view hierarchy
                 mState.startDelegating();
-                if (mDraggingPointerId != INVALID_POINTER_ID) {
-                    mDispatcher.sendMotionEvent(
-                            event, ACTION_UP, rawEvent, pointerIdBits, policyFlags);
-                }
                 mDispatcher.sendDownForAllNotInjectedPointers(event, policyFlags);
                 break;
             case ACTION_MOVE:
