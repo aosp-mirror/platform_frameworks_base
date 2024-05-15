@@ -31,10 +31,6 @@ import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -52,6 +48,10 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
+import org.mockito.kotlin.capture
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.whenever
 
 private const val KEY = "KEY"
 private const val PACKAGE = "PKG"
