@@ -38,6 +38,8 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
+import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -63,6 +65,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     public static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
     private final DelayableExecutor mDelayableExecutor;
     private final HeadsUpManager mHeadsUpManager;
+    private final SeenNotificationsInteractor mSeenNotificationsInteractor;
     private final ShadeAnimationInteractor mShadeAnimationInteractor;
     private final StatusBarStateController mStatusBarStateController;
     private final JavaAdapter mJavaAdapter;
@@ -101,6 +104,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
             HeadsUpManager headsUpManager,
             ShadeAnimationInteractor shadeAnimationInteractor,
             JavaAdapter javaAdapter,
+            SeenNotificationsInteractor seenNotificationsInteractor,
             StatusBarStateController statusBarStateController,
             VisibilityLocationProvider visibilityLocationProvider,
             VisualStabilityProvider visualStabilityProvider,
@@ -109,6 +113,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
         mHeadsUpManager = headsUpManager;
         mShadeAnimationInteractor = shadeAnimationInteractor;
         mJavaAdapter = javaAdapter;
+        mSeenNotificationsInteractor = seenNotificationsInteractor;
         mVisibilityLocationProvider = visibilityLocationProvider;
         mVisualStabilityProvider = visualStabilityProvider;
         mWakefulnessLifecycle = wakefulnessLifecycle;
@@ -142,8 +147,15 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     private final NotifStabilityManager mNotifStabilityManager =
             new NotifStabilityManager("VisualStabilityCoordinator") {
                 private boolean canMoveForHeadsUp(NotificationEntry entry) {
-                    return entry != null && mHeadsUpManager.isHeadsUpEntry(entry.getKey())
-                            && !mVisibilityLocationProvider.isInVisibleLocation(entry);
+                    if (entry == null) {
+                        return false;
+                    }
+                    boolean isTopUnseen = NotificationMinimalismPrototype.V2.isEnabled()
+                            && mSeenNotificationsInteractor.isTopUnseenNotification(entry);
+                    if (isTopUnseen || mHeadsUpManager.isHeadsUpEntry(entry.getKey())) {
+                        return !mVisibilityLocationProvider.isInVisibleLocation(entry);
+                    }
+                    return false;
                 }
 
                 @Override
