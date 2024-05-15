@@ -824,12 +824,10 @@ public class PipTransition extends PipTransitionController {
             @NonNull Transitions.TransitionFinishCallback finishCallback,
             @NonNull TaskInfo taskInfo) {
         startTransaction.apply();
-        if (info.getChanges().isEmpty()) {
+        final TransitionInfo.Change pipChange = findCurrentPipTaskChange(info);
+        if (pipChange == null) {
             ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "removePipImmediately is called with empty changes");
-        } else {
-            finishTransaction.setWindowCrop(info.getChanges().get(0).getLeash(),
-                    mPipDisplayLayoutState.getDisplayBounds());
+                    "removePipImmediately is called without pip change");
         }
         mPipOrganizer.onExitPipFinished(taskInfo);
         finishCallback.onTransitionFinished(null);
