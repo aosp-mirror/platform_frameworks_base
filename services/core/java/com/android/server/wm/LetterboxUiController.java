@@ -1131,6 +1131,17 @@ final class LetterboxUiController {
     }
 
     boolean shouldApplyUserFullscreenOverride() {
+        // Do not override orientation to fullscreen for camera activities.
+        // Fixed-orientation activities are rarely tested in other orientations, and it often
+        // results in sideways or stretched previews. As the camera compat treatment targets
+        // fixed-orientation activities, overriding the orientation disables the treatment.
+        final DisplayContent displayContent = mActivityRecord.mDisplayContent;
+        if (displayContent != null && displayContent.mDisplayRotationCompatPolicy != null
+                && displayContent.mDisplayRotationCompatPolicy
+                .isCameraActive(mActivityRecord, /* mustBeFullscreen= */ true)) {
+            return false;
+        }
+
         if (isUserFullscreenOverrideEnabled()) {
             mUserAspectRatio = getUserMinAspectRatioOverrideCode();
 
