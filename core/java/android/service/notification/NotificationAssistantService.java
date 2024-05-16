@@ -37,9 +37,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
-
 import com.android.internal.os.SomeArgs;
-
 import java.lang.annotation.Retention;
 import java.util.List;
 
