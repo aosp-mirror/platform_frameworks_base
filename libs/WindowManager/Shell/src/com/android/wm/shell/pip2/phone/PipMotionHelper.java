@@ -58,7 +58,8 @@ import java.util.function.Consumer;
  * A helper to animate and manipulate the PiP.
  */
 public class PipMotionHelper implements PipAppOpsListener.Callback,
-        FloatingContentCoordinator.FloatingContent {
+        FloatingContentCoordinator.FloatingContent,
+        PipTransitionState.PipTransitionStateChangedListener {
     private static final String TAG = "PipMotionHelper";
     private static final String FLING_BOUNDS_CHANGE = "fling_bounds_change";
     private static final boolean DEBUG = false;
@@ -181,7 +182,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             }
         };
         mPipTransitionState = pipTransitionState;
-        mPipTransitionState.addPipTransitionStateChangedListener(this::onPipTransitionStateChanged);
+        mPipTransitionState.addPipTransitionStateChangedListener(this);
     }
 
     void init() {
@@ -687,7 +688,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         // setAnimatingToBounds(toBounds);
     }
 
-    private void onPipTransitionStateChanged(@PipTransitionState.TransitionState int oldState,
+    @Override
+    public void onPipTransitionStateChanged(@PipTransitionState.TransitionState int oldState,
             @PipTransitionState.TransitionState int newState,
             @Nullable Bundle extra) {
         switch (newState) {

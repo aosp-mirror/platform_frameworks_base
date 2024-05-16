@@ -73,7 +73,7 @@ import java.util.Optional;
  * Manages all the touch handling for PIP on the Phone, including moving, dismissing and expanding
  * the PIP.
  */
-public class PipTouchHandler {
+public class PipTouchHandler implements PipTransitionState.PipTransitionStateChangedListener {
 
     private static final String TAG = "PipTouchHandler";
     private static final float DEFAULT_STASH_VELOCITY_THRESHOLD = 18000.f;
@@ -84,6 +84,7 @@ public class PipTouchHandler {
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     @NonNull private final PipBoundsState mPipBoundsState;
     @NonNull private final PipTransitionState mPipTransitionState;
+    @NonNull private final PipScheduler mPipScheduler;
     @NonNull private final SizeSpecSource mSizeSpecSource;
     private final PipUiEventLogger mPipUiEventLogger;
     private final PipDismissTargetHandler mPipDismissTargetHandler;
@@ -173,6 +174,7 @@ public class PipTouchHandler {
             PipBoundsAlgorithm pipBoundsAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
             @NonNull PipTransitionState pipTransitionState,
+            @NonNull PipScheduler pipScheduler,
             @NonNull SizeSpecSource sizeSpecSource,
             PipMotionHelper pipMotionHelper,
             FloatingContentCoordinator floatingContentCoordinator,
@@ -188,6 +190,7 @@ public class PipTouchHandler {
 
         mPipTransitionState = pipTransitionState;
         mPipTransitionState.addPipTransitionStateChangedListener(this::onPipTransitionStateChanged);
+        mPipScheduler = pipScheduler;
         mSizeSpecSource = sizeSpecSource;
         mMenuController = menuController;
         mPipUiEventLogger = pipUiEventLogger;
@@ -213,10 +216,10 @@ public class PipTouchHandler {
                 },
                 menuController::hideMenu,
                 mainExecutor);
-        mPipResizeGestureHandler =
-                new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
-                        mTouchState, this::updateMovementBounds, pipUiEventLogger,
-                        menuController, mainExecutor, mPipPerfHintController);
+        mPipResizeGestureHandler = new PipResizeGestureHandler(context, pipBoundsAlgorithm,
+                pipBoundsState, mTouchState, mPipScheduler, mPipTransitionState,
+                this::updateMovementBounds, pipUiEventLogger, menuController, mainExecutor,
+                mPipPerfHintController);
         mPipBoundsState.addOnAspectRatioChangedCallback(this::updateMinMaxSize);
 
         if (PipUtils.isPip2ExperimentEnabled()) {
@@ -1075,7 +1078,8 @@ public class PipTouchHandler {
         mPipResizeGestureHandler.setOhmOffset(offset);
     }
 
-    private void onPipTransitionStateChanged(@PipTransitionState.TransitionState int oldState,
+    @Override
+    public void onPipTransitionStateChanged(@PipTransitionState.TransitionState int oldState,
             @PipTransitionState.TransitionState int newState,
             @Nullable Bundle extra) {
         switch (newState) {
