@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,6 +46,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.view.InputChannel;
 import android.view.inputmethod.EditorInfo;
 import android.window.ImeOnBackInvokedDispatcher;
 
@@ -53,6 +55,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.IInputMethodClient;
+import com.android.internal.inputmethod.IInputMethodSession;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputBindResult;
@@ -104,6 +107,7 @@ public class InputMethodManagerServiceTestBase {
     @Mock protected UserManagerInternal mMockUserManagerInternal;
     @Mock protected InputMethodBindingController mMockInputMethodBindingController;
     @Mock protected IInputMethodClient mMockInputMethodClient;
+    @Mock protected IInputMethodSession mMockInputMethodSession;
     @Mock protected IBinder mWindowToken;
     @Mock protected IRemoteInputConnection mMockRemoteInputConnection;
     @Mock protected IRemoteAccessibilityInputConnection mMockRemoteAccessibilityInputConnection;
@@ -246,6 +250,7 @@ public class InputMethodManagerServiceTestBase {
 
         // Call InputMethodManagerService#addClient() as a preparation to start interacting with it.
         mInputMethodManagerService.addClient(mMockInputMethodClient, mMockRemoteInputConnection, 0);
+        createSessionForClient(mMockInputMethodClient);
     }
 
     @After
@@ -294,5 +299,14 @@ public class InputMethodManagerServiceTestBase {
         verify(mMockInputMethod, times(hideSoftInput ? 1 : 0))
                 .hideSoftInput(any() /* hideInputToken */, notNull() /* statsToken */,
                         anyInt() /* flags */, any() /* resultReceiver */);
+    }
+
+    protected void createSessionForClient(IInputMethodClient client) {
+        synchronized (ImfLock.class) {
+            ClientState cs = mInputMethodManagerService.getClientStateLocked(client);
+            cs.mCurSession = new InputMethodManagerService.SessionState(cs,
+                    mMockInputMethodInvoker, mMockInputMethodSession, mock(
+                    InputChannel.class));
+        }
     }
 }
