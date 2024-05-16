@@ -206,6 +206,10 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         launchDeviceDiscovery();
         startQueuedActions();
         if (!mDelayedMessageBuffer.isBuffered(Constants.MESSAGE_ACTIVE_SOURCE)) {
+            if (hasAction(RequestActiveSourceAction.class)) {
+                Slog.i(TAG, "RequestActiveSourceAction is in progress. Restarting.");
+                removeAction(RequestActiveSourceAction.class);
+            }
             addAndStartAction(new RequestActiveSourceAction(this, new IHdmiControlCallback.Stub() {
                 @Override
                 public void onComplete(int result) {
@@ -1308,6 +1312,8 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 mService.sendCecCommand(
                         HdmiCecMessageBuilder.buildActiveSource(
                                 getDeviceInfo().getLogicalAddress(), activePath));
+                updateActiveSource(getDeviceInfo().getLogicalAddress(), activePath,
+                        "HdmiCecLocalDeviceTv#launchRoutingControl()");
             }
         }
     }

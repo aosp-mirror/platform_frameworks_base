@@ -1646,6 +1646,13 @@ public class HdmiControlService extends SystemService {
             case Constants.MESSAGE_ROUTING_CHANGE:
             case Constants.MESSAGE_SET_STREAM_PATH:
             case Constants.MESSAGE_TEXT_VIEW_ON:
+                // RequestActiveSourceAction is started after the TV finished logical address
+                // allocation. This action is used by the TV to get the active source from the CEC
+                // network. If the TV sent a source changing CEC message, this action does not have
+                // to continue anymore.
+                if (isTvDevice()) {
+                    tv().removeAction(RequestActiveSourceAction.class);
+                }
                 sendCecCommandWithRetries(command, callback);
                 break;
             default:
