@@ -31,7 +31,6 @@ import static android.view.WindowManager.fixScale;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
-import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
@@ -559,15 +558,15 @@ public class Transitions implements RemoteCallable<Transitions>,
         final int mode = change.getMode();
         // Put all the OPEN/SHOW on top
         if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
-            if (isOpening
-                    // This is for when an activity launches while a different transition is
-                    // collecting.
-                    || change.hasFlags(FLAG_MOVED_TO_TOP)) {
+            if (isOpening) {
                 // put on top
                 return zSplitLine + numChanges - i;
-            } else {
+            } else if (isClosing) {
                 // put on bottom
                 return zSplitLine - i;
+            } else {
+                // maintain relative ordering (put all changes in the animating layer)
+                return zSplitLine + numChanges - i;
             }
         } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
             if (isOpening) {
