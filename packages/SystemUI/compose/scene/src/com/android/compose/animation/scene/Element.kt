@@ -127,7 +127,14 @@ internal fun Modifier.element(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     key: ElementKey,
-): Modifier = this.then(ElementModifier(layoutImpl, scene, key)).testTag(key.testTag)
+): Modifier {
+    // Make sure that we read the current transitions during composition and not during
+    // layout/drawing.
+    // TODO(b/341072461): Revert this and read the current transitions in ElementNode directly once
+    // we can ensure that SceneTransitionLayoutImpl will compose new scenes first.
+    val currentTransitions = layoutImpl.state.currentTransitions
+    return then(ElementModifier(layoutImpl, currentTransitions, scene, key)).testTag(key.testTag)
+}
 
 /**
  * An element associated to [ElementNode]. Note that this element does not support updates as its
@@ -135,18 +142,20 @@ internal fun Modifier.element(
  */
 private data class ElementModifier(
     private val layoutImpl: SceneTransitionLayoutImpl,
+    private val currentTransitions: List<TransitionState.Transition>,
     private val scene: Scene,
     private val key: ElementKey,
 ) : ModifierNodeElement<ElementNode>() {
-    override fun create(): ElementNode = ElementNode(layoutImpl, scene, key)
+    override fun create(): ElementNode = ElementNode(layoutImpl, currentTransitions, scene, key)
 
     override fun update(node: ElementNode) {
-        node.update(layoutImpl, scene, key)
+        node.update(layoutImpl, currentTransitions, scene, key)
     }
 }
 
 internal class ElementNode(
     private var layoutImpl: SceneTransitionLayoutImpl,
+    private var currentTransitions: List<TransitionState.Transition>,
     private var scene: Scene,
     private var key: ElementKey,
 ) : Modifier.Node(), DrawModifierNode, ApproachLayoutModifierNode {
@@ -202,10 +211,13 @@ internal class ElementNode(
 
     fun update(
         layoutImpl: SceneTransitionLayoutImpl,
+        currentTransitions: List<TransitionState.Transition>,
         scene: Scene,
         key: ElementKey,
     ) {
         check(layoutImpl == this.layoutImpl && scene == this.scene)
+        this.currentTransitions = currentTransitions
+
         removeNodeFromSceneState()
 
         val prevElement = this.element
@@ -236,7 +248,7 @@ internal class ElementNode(
         measurable: Measurable,
         constraints: Constraints,
     ): MeasureResult {
-        val transitions = layoutImpl.state.currentTransitions
+        val transitions = currentTransitions
         val transition = elementTransition(element, transitions)
 
         // If this element is not supposed to be laid out now, either because it is not part of any
@@ -270,7 +282,7 @@ internal class ElementNode(
     }
 
     override fun ContentDrawScope.draw() {
-        val transition = elementTransition(element, layoutImpl.state.currentTransitions)
+        val transition = elementTransition(element, currentTransitions)
         val drawScale = getDrawScale(layoutImpl, scene, element, transition, sceneState)
         if (drawScale == Scale.Default) {
             drawContent()
@@ -615,7 +627,6 @@ private fun interruptedAlpha(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 private fun ApproachMeasureScope.measure(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,

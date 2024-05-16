@@ -63,11 +63,13 @@ import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.subjects.assertThat
+import com.android.compose.test.assertSizeIsEqualTo
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -237,9 +239,9 @@ class ElementTest {
                 changeScene(SceneC)
             }
 
-            at(2 * frameDuration) { onElement(TestElements.Bar).assertIsNotDisplayed() }
+            at(3 * frameDuration) { onElement(TestElements.Bar).assertIsNotDisplayed() }
 
-            at(3 * frameDuration) { onElement(TestElements.Bar).assertDoesNotExist() }
+            at(4 * frameDuration) { onElement(TestElements.Bar).assertDoesNotExist() }
         }
     }
 
@@ -578,6 +580,7 @@ class ElementTest {
     }
 
     @Test
+    @Ignore("b/341072461")
     fun existingElementsDontRecomposeWhenTransitionStateChanges() {
         var fooCompositions = 0
 
@@ -601,6 +604,39 @@ class ElementTest {
             at(48) { assertThat(fooCompositions).isEqualTo(1) }
             after { assertThat(fooCompositions).isEqualTo(1) }
         }
+    }
+
+    @Test
+    // TODO(b/341072461): Remove this test.
+    fun layoutGetsCurrentTransitionStateFromComposition() {
+        val state =
+            MutableSceneTransitionLayoutStateImpl(
+                SceneA,
+                transitions {
+                    from(SceneA, to = SceneB) {
+                        scaleSize(TestElements.Foo, width = 2f, height = 2f)
+                    }
+                }
+            )
+
+        rule.setContent {
+            SceneTransitionLayout(state) {
+                scene(SceneA) { Box(Modifier.element(TestElements.Foo).size(20.dp)) }
+                scene(SceneB) {}
+            }
+        }
+
+        // Pause the clock to block recompositions.
+        rule.mainClock.autoAdvance = false
+
+        // Change the current transition.
+        state.startTransition(
+            transition(from = SceneA, to = SceneB, progress = { 0.5f }),
+            transitionKey = null,
+        )
+
+        // The size of Foo should still be 20dp given that the new state was not composed yet.
+        rule.onNode(isElement(TestElements.Foo)).assertSizeIsEqualTo(20.dp, 20.dp)
     }
 
     private fun setupOverscrollScenario(

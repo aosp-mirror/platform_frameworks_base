@@ -26,8 +26,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastForEach
@@ -380,8 +382,9 @@ internal abstract class BaseSceneTransitionLayoutState(
      * 2. A list with one or more [TransitionState.Transition], when we are transitioning.
      */
     @VisibleForTesting
-    internal val transitionStates: MutableList<TransitionState> =
-        SnapshotStateList<TransitionState>().apply { add(TransitionState.Idle(initialScene)) }
+    internal var transitionStates: List<TransitionState> by
+        mutableStateOf(listOf(TransitionState.Idle(initialScene)))
+        private set
 
     override val transitionState: TransitionState
         get() = transitionStates.last()
@@ -465,7 +468,7 @@ internal abstract class BaseSceneTransitionLayoutState(
         if (!enableInterruptions) {
             // Set the current transition.
             check(transitionStates.size == 1)
-            transitionStates[0] = transition
+            transitionStates = listOf(transition)
             return
         }
 
@@ -473,7 +476,7 @@ internal abstract class BaseSceneTransitionLayoutState(
             is TransitionState.Idle -> {
                 // Replace [Idle] by [transition].
                 check(transitionStates.size == 1)
-                transitionStates[0] = transition
+                transitionStates = listOf(transition)
             }
             is TransitionState.Transition -> {
                 // Force the current transition to finish to currentScene.
@@ -497,11 +500,11 @@ internal abstract class BaseSceneTransitionLayoutState(
                     // we end up only with the new transition after appending it.
                     check(transitionStates.size == 1)
                     check(transitionStates[0] is TransitionState.Idle)
-                    transitionStates.clear()
+                    transitionStates = listOf(transition)
+                } else {
+                    // Append the new transition.
+                    transitionStates = transitionStates + transition
                 }
-
-                // Append the new transition.
-                transitionStates.add(transition)
             }
         }
     }
@@ -571,6 +574,7 @@ internal abstract class BaseSceneTransitionLayoutState(
             return
         }
 
+        val transitionStates = this.transitionStates
         if (!transitionStates.contains(transition)) {
             // This transition was already removed from transitionStates.
             return
@@ -589,23 +593,38 @@ internal abstract class BaseSceneTransitionLayoutState(
         var lastRemovedIdleScene: SceneKey? = null
 
         // Remove all first n finished transitions.
-        while (transitionStates.isNotEmpty()) {
-            val firstTransition = transitionStates[0]
-            if (!finishedTransitions.contains(firstTransition)) {
+        var i = 0
+        val nStates = transitionStates.size
+        while (i < nStates) {
+            val t = transitionStates[i]
+            if (!finishedTransitions.contains(t)) {
                 // Stop here.
                 break
             }
 
-            // Remove the transition from the list and from the set of finished transitions.
-            transitionStates.removeAt(0)
-            lastRemovedIdleScene = finishedTransitions.remove(firstTransition)
+            // Remove the transition from the set of finished transitions.
+            lastRemovedIdleScene = finishedTransitions.remove(t)
+            i++
         }
 
         // If all transitions are finished, we are idle.
-        if (transitionStates.isEmpty()) {
+        if (i == nStates) {
             check(finishedTransitions.isEmpty())
-            transitionStates.add(TransitionState.Idle(checkNotNull(lastRemovedIdleScene)))
+            this.transitionStates = listOf(TransitionState.Idle(checkNotNull(lastRemovedIdleScene)))
+        } else if (i > 0) {
+            this.transitionStates = transitionStates.subList(fromIndex = i, toIndex = nStates)
         }
+    }
+
+    fun snapToScene(scene: SceneKey) {
+        // Force finish all transitions.
+        while (currentTransitions.isNotEmpty()) {
+            val transition = transitionStates[0] as TransitionState.Transition
+            finishTransition(transition, transition.currentScene)
+        }
+
+        check(transitionStates.size == 1)
+        transitionStates = listOf(TransitionState.Idle(scene))
     }
 
     private fun finishActiveTransitionLinks(idleScene: SceneKey) {
@@ -747,17 +766,6 @@ internal class MutableSceneTransitionLayoutStateImpl(
 
     override fun CoroutineScope.onChangeScene(scene: SceneKey) {
         setTargetScene(scene, coroutineScope = this)
-    }
-
-    override fun snapToScene(scene: SceneKey) {
-        // Force finish all transitions.
-        while (currentTransitions.isNotEmpty()) {
-            val transition = transitionStates[0] as TransitionState.Transition
-            finishTransition(transition, transition.currentScene)
-        }
-
-        check(transitionStates.size == 1)
-        transitionStates[0] = TransitionState.Idle(scene)
     }
 }
 
