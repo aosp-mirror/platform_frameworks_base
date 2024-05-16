@@ -52,7 +52,7 @@ class ActivityTaskManagerThumbnailLoaderTest : SysuiTestCase() {
             val taskId = 123
             val isLowResolution = false
             val snapshot = createTaskSnapshot()
-            val thumbnailData = ThumbnailData(snapshot)
+            val thumbnailData = ThumbnailData.fromSnapshot(snapshot)
             whenever(activityManager.getTaskThumbnail(taskId, isLowResolution))
                 .thenReturn(thumbnailData)
 
@@ -74,7 +74,7 @@ class ActivityTaskManagerThumbnailLoaderTest : SysuiTestCase() {
     fun captureThumbnail_thumbnailAvailable_returnsThumbnailData() =
         testScope.runTest {
             val taskId = 321
-            val thumbnailData = ThumbnailData(createTaskSnapshot())
+            val thumbnailData = ThumbnailData.fromSnapshot(createTaskSnapshot())
 
             whenever(activityManager.takeTaskThumbnail(taskId)).thenReturn(thumbnailData)
 
