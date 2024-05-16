@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.desktopmode;
+package com.android.wm.shell.shared;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -127,7 +127,7 @@ public class DesktopModeStatus {
     /**
      * Return the maximum limit on the number of Tasks to show in Desktop Mode at any one time.
      */
-    static int getMaxTaskLimit() {
+    public static int getMaxTaskLimit() {
         return MAX_TASK_LIMIT;
     }
 
