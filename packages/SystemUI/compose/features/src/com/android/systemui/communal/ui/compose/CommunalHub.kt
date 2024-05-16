@@ -48,6 +48,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -87,8 +88,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -120,9 +119,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.times
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
-import androidx.core.view.setPadding
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.android.compose.modifiers.thenIf
@@ -427,8 +427,8 @@ private fun BoxScope.CommunalHubLazyGrid(
         state = gridState,
         rows = GridCells.Fixed(CommunalContentSize.FULL.span),
         contentPadding = contentPadding,
-        horizontalArrangement = Arrangement.spacedBy(32.dp),
-        verticalArrangement = Arrangement.spacedBy(32.dp),
+        horizontalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
+        verticalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
     ) {
         items(
             count = list.size,
@@ -441,7 +441,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                     Dimensions.CardWidth.value,
                     list[index].size.dp().value,
                 )
-            val cardModifier = Modifier.size(width = size.width.dp, height = size.height.dp)
+            val cardModifier = Modifier.requiredSize(width = size.width.dp, height = size.height.dp)
             if (viewModel.isEditMode && dragDropState != null) {
                 val selected by
                     remember(index) { derivedStateOf { list[index].key == selectedKey.value } }
@@ -795,12 +795,10 @@ private fun CtaTileInViewModeContent(
                 containerColor = colors.primary,
                 contentColor = colors.onPrimary,
             ),
-        shape = RoundedCornerShape(80.dp, 40.dp, 80.dp, 40.dp)
+        shape = RoundedCornerShape(68.dp, 34.dp, 68.dp, 34.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 82.dp),
-            verticalArrangement =
-                Arrangement.spacedBy(Dimensions.Spacing, Alignment.CenterVertically),
+            modifier = Modifier.fillMaxSize().padding(vertical = 38.dp, horizontal = 70.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
@@ -808,11 +806,13 @@ private fun CtaTileInViewModeContent(
                 contentDescription = stringResource(R.string.cta_label_to_open_widget_picker),
                 modifier = Modifier.size(Dimensions.IconSize),
             )
+            Spacer(modifier = Modifier.size(6.dp))
             Text(
                 text = stringResource(R.string.cta_label_to_edit_widget),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
             )
+            Spacer(modifier = Modifier.size(20.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -828,9 +828,10 @@ private fun CtaTileInViewModeContent(
                 ) {
                     Text(
                         text = stringResource(R.string.cta_tile_button_to_dismiss),
+                        fontSize = 12.sp,
                     )
                 }
-                Spacer(modifier = Modifier.size(Dimensions.Spacing))
+                Spacer(modifier = Modifier.size(14.dp))
                 Button(
                     colors =
                         ButtonDefaults.buttonColors(
@@ -842,6 +843,7 @@ private fun CtaTileInViewModeContent(
                 ) {
                     Text(
                         text = stringResource(R.string.cta_tile_button_to_open_widget_editor),
+                        fontSize = 12.sp,
                     )
                 }
             }
@@ -927,10 +929,14 @@ private fun WidgetContent(
                 model.appWidgetHost
                     .createViewForCommunal(context, model.appWidgetId, model.providerInfo)
                     .apply {
-                        updateAppWidgetSize(Bundle.EMPTY, listOf(size))
-                        // Remove the extra padding applied to AppWidgetHostView to allow widgets to
-                        // occupy the entire box.
-                        setPadding(0)
+                        updateAppWidgetSize(
+                            /* newOptions = */ Bundle(),
+                            /* minWidth = */ size.width.toInt(),
+                            /* minHeight = */ size.height.toInt(),
+                            /* maxWidth = */ size.width.toInt(),
+                            /* maxHeight = */ size.height.toInt(),
+                            /* ignorePadding = */ true
+                        )
                         accessibilityDelegate = viewModel.widgetAccessibilityDelegate
                     }
             },
@@ -1153,7 +1159,11 @@ fun AccessibilityContainer(viewModel: BaseCommunalViewModel, content: @Composabl
 @Composable
 private fun gridContentPadding(isEditMode: Boolean, toolbarSize: IntSize?): PaddingValues {
     if (!isEditMode || toolbarSize == null) {
-        return PaddingValues(start = 48.dp, end = 48.dp, top = Dimensions.GridTopSpacing)
+        return PaddingValues(
+            start = Dimensions.ItemSpacing,
+            end = Dimensions.ItemSpacing,
+            top = Dimensions.GridTopSpacing,
+        )
     }
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -1216,18 +1226,19 @@ data class ContentPaddingInPx(val start: Float, val top: Float) {
 }
 
 object Dimensions {
-    val CardWidth = 424.dp
-    val CardHeightFull = 596.dp
-    val CardHeightHalf = 282.dp
-    val CardHeightThird = 177.33.dp
-    val CardOutlineWidth = 3.dp
-    val GridTopSpacing = 64.dp
+    val CardHeightFull = 530.dp
+    val GridTopSpacing = 114.dp
     val GridHeight = CardHeightFull + GridTopSpacing
-    val Spacing = 16.dp
+    val ItemSpacing = 50.dp
+    val CardHeightHalf = (CardHeightFull - ItemSpacing) / 2
+    val CardHeightThird = (CardHeightFull - (2 * ItemSpacing)) / 3
+    val CardWidth = 360.dp
+    val CardOutlineWidth = 3.dp
+    val Spacing = ItemSpacing / 2
 
     // The sizing/padding of the toolbar in glanceable hub edit mode
     val ToolbarPaddingTop = 27.dp
-    val ToolbarPaddingHorizontal = 16.dp
+    val ToolbarPaddingHorizontal = ItemSpacing
     val ToolbarButtonPaddingHorizontal = 24.dp
     val ToolbarButtonPaddingVertical = 16.dp
     val ButtonPadding =
@@ -1235,10 +1246,7 @@ object Dimensions {
             vertical = ToolbarButtonPaddingVertical,
             horizontal = ToolbarButtonPaddingHorizontal,
         )
-    val IconSize = 48.dp
-
-    val LockIconSize = 52.dp
-    val LockIconBottomPadding = 70.dp
+    val IconSize = 40.dp
 }
 
 private object Colors {
