@@ -97,8 +97,10 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
     @Test
     fun transitionCollectorsReceivesOnlyAppropriateEvents() =
         testScope.runTest {
-            val lockscreenToAodSteps by collectValues(underTest.transition(LOCKSCREEN, AOD))
-            val aodToLockscreenSteps by collectValues(underTest.transition(AOD, LOCKSCREEN))
+            val lockscreenToAodSteps by
+                collectValues(underTest.transition(Edge.create(LOCKSCREEN, AOD)))
+            val aodToLockscreenSteps by
+                collectValues(underTest.transition(Edge.create(AOD, LOCKSCREEN)))
 
             val steps = mutableListOf<TransitionStep>()
             steps.add(TransitionStep(AOD, GONE, 0f, STARTED))
@@ -1447,10 +1449,10 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
-    fun getOrCreateFlow_no_conversion_with_flag_off() =
+    fun transition_no_conversion_with_flag_off() =
         testScope.runTest {
             val currentStates by
-                collectValues(underTest.getOrCreateFlow(Edge(PRIMARY_BOUNCER, GONE)))
+                collectValues(underTest.transition(Edge.create(PRIMARY_BOUNCER, GONE)))
 
             val sendStep1 = TransitionStep(PRIMARY_BOUNCER, GONE, 0f, STARTED)
             sendSteps(sendStep1)
@@ -1460,10 +1462,10 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableSceneContainer
-    fun getOrCreateFlow_conversion_with_flag_on() =
+    fun transition_conversion_with_flag_on() =
         testScope.runTest {
             val currentStates by
-                collectValues(underTest.getOrCreateFlow(Edge(PRIMARY_BOUNCER, GONE)))
+                collectValues(underTest.transition(Edge.create(PRIMARY_BOUNCER, GONE)))
 
             val sendStep1 = TransitionStep(PRIMARY_BOUNCER, GONE, 0f, STARTED)
             sendSteps(sendStep1)
@@ -1473,11 +1475,11 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableSceneContainer
-    fun getOrCreateFlow_conversion_emits_values_with_sceneContainer_in_correct_state() =
+    fun transition_conversion_emits_values_with_sceneContainer_in_correct_state() =
         testScope.runTest {
-            val currentStates by collectValues(underTest.getOrCreateFlow(Edge(LOCKSCREEN, GONE)))
+            val currentStates by collectValues(underTest.transition(Edge.create(LOCKSCREEN, GONE)))
             val currentStatesConverted by
-                collectValues(underTest.getOrCreateFlow(Edge(LOCKSCREEN, UNDEFINED)))
+                collectValues(underTest.transition(Edge.create(LOCKSCREEN, UNDEFINED)))
 
             sceneTransitions.value = lsToGone
             val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
@@ -1491,9 +1493,9 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableSceneContainer
-    fun getOrCreateFlow_conversion_emits_nothing_with_sceneContainer_in_wrong_state() =
+    fun transition_conversion_emits_nothing_with_sceneContainer_in_wrong_state() =
         testScope.runTest {
-            val currentStates by collectValues(underTest.getOrCreateFlow(Edge(LOCKSCREEN, GONE)))
+            val currentStates by collectValues(underTest.transition(Edge.create(LOCKSCREEN, GONE)))
 
             sceneTransitions.value = goneToLs
             val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
@@ -1506,9 +1508,10 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableSceneContainer
-    fun getOrCreateFlow_conversion_emits_values_when_edge_within_lockscreen_scene() =
+    fun transition_conversion_emits_values_when_edge_within_lockscreen_scene() =
         testScope.runTest {
-            val currentStates by collectValues(underTest.getOrCreateFlow(Edge(LOCKSCREEN, DOZING)))
+            val currentStates by
+                collectValues(underTest.transition(Edge.create(LOCKSCREEN, DOZING)))
 
             sceneTransitions.value = goneToLs
             val sendStep1 = TransitionStep(LOCKSCREEN, DOZING, 0f, STARTED)
@@ -1521,11 +1524,11 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableSceneContainer
-    fun getOrCreateFlow_conversion_emits_values_with_null_edge_within_lockscreen_scene() =
+    fun transition_conversion_emits_values_with_null_edge_within_lockscreen_scene() =
         testScope.runTest {
-            val currentStates by collectValues(underTest.getOrCreateFlow(Edge(LOCKSCREEN, null)))
+            val currentStates by collectValues(underTest.transition(Edge.create(LOCKSCREEN, null)))
             val currentStatesReversed by
-                collectValues(underTest.getOrCreateFlow(Edge(null, LOCKSCREEN)))
+                collectValues(underTest.transition(Edge.create(null, LOCKSCREEN)))
 
             sceneTransitions.value = goneToLs
             val sendStep1 = TransitionStep(LOCKSCREEN, DOZING, 0f, STARTED)
@@ -1540,10 +1543,10 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableSceneContainer
-    fun getOrCreateFlow_conversion_emits_values_with_null_edge_out_of_lockscreen_scene() =
+    fun transition_conversion_emits_values_with_null_edge_out_of_lockscreen_scene() =
         testScope.runTest {
-            val currentStates by collectValues(underTest.getOrCreateFlow(Edge(null, UNDEFINED)))
-            val currentStatesMapped by collectValues(underTest.getOrCreateFlow(Edge(null, GONE)))
+            val currentStates by collectValues(underTest.transition(Edge.create(null, UNDEFINED)))
+            val currentStatesMapped by collectValues(underTest.transition(Edge.create(null, GONE)))
 
             sceneTransitions.value = lsToGone
             val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
@@ -1558,9 +1561,9 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableSceneContainer
-    fun getOrCreateFlow_conversion_does_not_emit_with_null_edge_with_wrong_stl_state() =
+    fun transition_conversion_does_not_emit_with_null_edge_with_wrong_stl_state() =
         testScope.runTest {
-            val currentStatesMapped by collectValues(underTest.getOrCreateFlow(Edge(null, GONE)))
+            val currentStatesMapped by collectValues(underTest.transition(Edge.create(null, GONE)))
 
             sceneTransitions.value = goneToLs
             val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
@@ -1574,10 +1577,10 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableSceneContainer
-    fun getOrCreateFlow_null_edges_throw() =
+    fun transition_null_edges_throw() =
         testScope.runTest {
             assertThrows(IllegalStateException::class.java) {
-                underTest.getOrCreateFlow(Edge(null, null))
+                underTest.transition(Edge.create(null, null))
             }
         }
 

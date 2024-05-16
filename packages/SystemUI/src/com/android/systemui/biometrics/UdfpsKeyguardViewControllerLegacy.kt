@@ -32,11 +32,18 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
+import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.StatusBarState
@@ -131,6 +138,7 @@ open class UdfpsKeyguardViewControllerLegacy(
             override fun onUnlockedChanged() {
                 updatePauseAuth()
             }
+
             override fun onLaunchTransitionFadingAwayChanged() {
                 launchTransitionFadingAway = keyguardStateController.isLaunchTransitionFadingAway
                 updatePauseAuth()
@@ -211,7 +219,10 @@ open class UdfpsKeyguardViewControllerLegacy(
     suspend fun listenForPrimaryBouncerToAodTransitions(scope: CoroutineScope): Job {
         return scope.launch {
             transitionInteractor
-                .transition(KeyguardState.PRIMARY_BOUNCER, KeyguardState.AOD)
+                .transition(
+                    edge = Edge.create(Scenes.Bouncer, AOD),
+                    edgeWithoutSceneContainer = Edge.create(PRIMARY_BOUNCER, AOD)
+                )
                 .collect { transitionStep ->
                     view.onDozeAmountChanged(
                         transitionStep.value,
@@ -225,8 +236,7 @@ open class UdfpsKeyguardViewControllerLegacy(
     @VisibleForTesting
     suspend fun listenForDreamingToAodTransitions(scope: CoroutineScope): Job {
         return scope.launch {
-            transitionInteractor.transition(KeyguardState.DREAMING, KeyguardState.AOD).collect {
-                transitionStep ->
+            transitionInteractor.transition(Edge.create(DREAMING, AOD)).collect { transitionStep ->
                 view.onDozeAmountChanged(
                     transitionStep.value,
                     transitionStep.value,
@@ -239,23 +249,21 @@ open class UdfpsKeyguardViewControllerLegacy(
     @VisibleForTesting
     suspend fun listenForAlternateBouncerToAodTransitions(scope: CoroutineScope): Job {
         return scope.launch {
-            transitionInteractor
-                .transition(KeyguardState.ALTERNATE_BOUNCER, KeyguardState.AOD)
-                .collect { transitionStep ->
-                    view.onDozeAmountChanged(
-                        transitionStep.value,
-                        transitionStep.value,
-                        UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN,
-                    )
-                }
+            transitionInteractor.transition(Edge.create(ALTERNATE_BOUNCER, AOD)).collect {
+                transitionStep ->
+                view.onDozeAmountChanged(
+                    transitionStep.value,
+                    transitionStep.value,
+                    UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN,
+                )
+            }
         }
     }
 
     @VisibleForTesting
     suspend fun listenForAodToOccludedTransitions(scope: CoroutineScope): Job {
         return scope.launch {
-            transitionInteractor.transition(KeyguardState.AOD, KeyguardState.OCCLUDED).collect {
-                transitionStep ->
+            transitionInteractor.transition(Edge.create(AOD, OCCLUDED)).collect { transitionStep ->
                 view.onDozeAmountChanged(
                     1f - transitionStep.value,
                     1f - transitionStep.value,
@@ -268,8 +276,7 @@ open class UdfpsKeyguardViewControllerLegacy(
     @VisibleForTesting
     suspend fun listenForOccludedToAodTransition(scope: CoroutineScope): Job {
         return scope.launch {
-            transitionInteractor.transition(KeyguardState.OCCLUDED, KeyguardState.AOD).collect {
-                transitionStep ->
+            transitionInteractor.transition(Edge.create(OCCLUDED, AOD)).collect { transitionStep ->
                 view.onDozeAmountChanged(
                     transitionStep.value,
                     transitionStep.value,
@@ -282,14 +289,18 @@ open class UdfpsKeyguardViewControllerLegacy(
     @VisibleForTesting
     suspend fun listenForGoneToAodTransition(scope: CoroutineScope): Job {
         return scope.launch {
-            transitionInteractor.transition(KeyguardState.GONE, KeyguardState.AOD).collect {
-                transitionStep ->
-                view.onDozeAmountChanged(
-                    transitionStep.value,
-                    transitionStep.value,
-                    ANIMATE_APPEAR_ON_SCREEN_OFF,
+            transitionInteractor
+                .transition(
+                    edge = Edge.create(Scenes.Gone, AOD),
+                    edgeWithoutSceneContainer = Edge.create(GONE, AOD)
                 )
-            }
+                .collect { transitionStep ->
+                    view.onDozeAmountChanged(
+                        transitionStep.value,
+                        transitionStep.value,
+                        ANIMATE_APPEAR_ON_SCREEN_OFF,
+                    )
+                }
         }
     }
 
@@ -298,13 +309,10 @@ open class UdfpsKeyguardViewControllerLegacy(
         return scope.launch {
             transitionInteractor.dozeAmountTransition.collect { transitionStep ->
                 if (
-                    transitionStep.from == KeyguardState.AOD &&
+                    transitionStep.from == AOD &&
                         transitionStep.transitionState == TransitionState.CANCELED
                 ) {
-                    if (
-                        transitionInteractor.startedKeyguardTransitionStep.first().to !=
-                            KeyguardState.AOD
-                    ) {
+                    if (transitionInteractor.startedKeyguardTransitionStep.first().to != AOD) {
                         // If the next started transition isn't transitioning back to AOD, force
                         // doze amount to be 0f (as if the transition to the lockscreen completed).
                         view.onDozeAmountChanged(
@@ -557,6 +565,7 @@ open class UdfpsKeyguardViewControllerLegacy(
     private fun updateScaleFactor() {
         udfpsController.mOverlayParams?.scaleFactor?.let { view.setScaleFactor(it) }
     }
+
     companion object {
         const val TAG = "UdfpsKeyguardViewController"
     }

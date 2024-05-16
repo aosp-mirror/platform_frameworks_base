@@ -19,7 +19,9 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromOccludedTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
@@ -41,8 +43,7 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = FromOccludedTransitionInteractor.TO_AOD_DURATION,
-            from = KeyguardState.OCCLUDED,
-            to = KeyguardState.AOD,
+            edge = Edge.create(from = OCCLUDED, to = AOD),
         )
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =

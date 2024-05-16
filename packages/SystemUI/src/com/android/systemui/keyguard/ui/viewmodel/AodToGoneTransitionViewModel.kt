@@ -19,9 +19,12 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromAodTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,11 +40,14 @@ constructor(
 ) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = FromAodTransitionInteractor.TO_GONE_DURATION,
-            from = KeyguardState.AOD,
-            to = KeyguardState.GONE,
-        )
+        animationFlow
+            .setup(
+                duration = FromAodTransitionInteractor.TO_GONE_DURATION,
+                edge = Edge.create(from = AOD, to = Scenes.Gone),
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = AOD, to = GONE),
+            )
 
     /**
      * AOD -> GONE should fade out the lockscreen contents. This transition plays both during wake

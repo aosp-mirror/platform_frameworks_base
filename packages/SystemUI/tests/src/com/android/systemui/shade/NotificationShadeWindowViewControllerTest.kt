@@ -46,6 +46,7 @@ import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -173,7 +174,7 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
                 .thenReturn(keyguardBouncerComponent)
         whenever(keyguardBouncerComponent.securityContainerController)
                 .thenReturn(keyguardSecurityContainerController)
-        whenever(keyguardTransitionInteractor.transition(LOCKSCREEN, DREAMING))
+        whenever(keyguardTransitionInteractor.transition(Edge.create(LOCKSCREEN, DREAMING)))
                 .thenReturn(emptyFlow<TransitionStep>())
 
         featureFlagsClassic = FakeFeatureFlagsClassic()

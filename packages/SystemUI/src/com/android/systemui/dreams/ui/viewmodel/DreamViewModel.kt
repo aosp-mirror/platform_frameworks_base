@@ -23,6 +23,7 @@ import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToGlanceableHubTransitionViewModel
@@ -97,7 +98,7 @@ constructor(
             .distinctUntilChanged()
 
     val transitionEnded =
-        keyguardTransitionInteractor.transition(from = DREAMING).filter { step ->
+        keyguardTransitionInteractor.transition(Edge.create(from = DREAMING)).filter { step ->
             step.transitionState == TransitionState.FINISHED ||
                 step.transitionState == TransitionState.CANCELED
         }

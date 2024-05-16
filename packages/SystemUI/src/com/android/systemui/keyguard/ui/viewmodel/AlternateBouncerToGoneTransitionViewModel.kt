@@ -19,11 +19,13 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromAlternateBouncerTransitionInteractor.Companion.TO_GONE_DURATION
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -44,11 +46,14 @@ constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = TO_GONE_DURATION,
-            from = ALTERNATE_BOUNCER,
-            to = KeyguardState.GONE,
-        )
+        animationFlow
+            .setup(
+                duration = TO_GONE_DURATION,
+                edge = Edge.create(from = ALTERNATE_BOUNCER, to = Scenes.Gone),
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = ALTERNATE_BOUNCER, to = GONE),
+            )
 
     fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
         var startAlpha = 1f

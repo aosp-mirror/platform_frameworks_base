@@ -19,11 +19,13 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import dagger.Lazy
@@ -73,8 +75,12 @@ constructor(
         return animationFlow
             .setup(
                 duration = duration,
-                from = from,
-                to = GONE,
+                // TODO(b/330311871): from can be PRIMARY_BOUNCER which would be a scene -> scene
+                //  transition
+                edge = Edge.create(from = from, to = Scenes.Gone)
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = from, to = GONE),
             )
             .sharedFlow(
                 duration = duration,
@@ -96,11 +102,16 @@ constructor(
         var leaveShadeOpen: Boolean = false
         var willRunDismissFromKeyguard: Boolean = false
         val transitionAnimation =
-            animationFlow.setup(
-                duration = duration,
-                from = fromState,
-                to = GONE,
-            )
+            animationFlow
+                .setup(
+                    duration = duration,
+                    // TODO(b/330311871): from can be PRIMARY_BOUNCER which would be a scene ->
+                    //  scene transition
+                    edge = Edge.create(from = fromState, to = Scenes.Gone),
+                )
+                .setupWithoutSceneContainer(
+                    edge = Edge.create(from = fromState, to = GONE),
+                )
 
         return shadeInteractor.anyExpansion
             .map { it > 0f }

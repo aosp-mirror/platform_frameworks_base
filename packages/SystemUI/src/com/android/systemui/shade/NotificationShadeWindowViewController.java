@@ -49,6 +49,7 @@ import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.res.R;
@@ -225,7 +226,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mDisableSubpixelTextTransitionListener = new DisableSubpixelTextTransitionListener(mView);
         bouncerViewBinder.bind(mView.findViewById(R.id.keyguard_bouncer_container));
 
-        collectFlow(mView, keyguardTransitionInteractor.transition(LOCKSCREEN, DREAMING),
+        collectFlow(mView, keyguardTransitionInteractor.transition(
+                Edge.Companion.create(LOCKSCREEN, DREAMING)),
                 mLockscreenToDreamingTransition);
         collectFlow(
                 mView,

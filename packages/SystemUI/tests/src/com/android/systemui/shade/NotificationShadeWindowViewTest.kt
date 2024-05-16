@@ -36,6 +36,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.res.R
@@ -151,7 +152,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         whenever(statusBarStateController.isDozing).thenReturn(false)
         mDependency.injectTestDependency(ShadeController::class.java, shadeController)
         whenever(dockManager.isDocked).thenReturn(false)
-        whenever(keyguardTransitionInteractor.transition(LOCKSCREEN, DREAMING))
+        whenever(keyguardTransitionInteractor.transition(Edge.create(LOCKSCREEN, DREAMING)))
             .thenReturn(emptyFlow())
 
         val featureFlags = FakeFeatureFlags()
