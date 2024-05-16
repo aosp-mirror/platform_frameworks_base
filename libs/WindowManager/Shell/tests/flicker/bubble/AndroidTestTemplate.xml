@@ -91,6 +91,7 @@
                 value="trace_config.textproto"
         />
         <option name="instrumentation-arg" key="per_run" value="true"/>
+        <option name="instrumentation-arg" key="perfetto_persist_pid_track" value="true"/>
     </test>
     <!-- Needed for pulling the collected trace config on to the host -->
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
