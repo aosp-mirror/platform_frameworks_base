@@ -199,29 +199,32 @@ object BiometricViewSizeBinder {
                                     iconParams.leftMargin = position.left
                                     mediumConstraintSet.clear(
                                         R.id.biometric_icon,
-                                        ConstraintSet.END
+                                        ConstraintSet.RIGHT
                                     )
                                     mediumConstraintSet.connect(
                                         R.id.biometric_icon,
-                                        ConstraintSet.START,
+                                        ConstraintSet.LEFT,
                                         ConstraintSet.PARENT_ID,
-                                        ConstraintSet.START
+                                        ConstraintSet.LEFT
                                     )
                                     mediumConstraintSet.setMargin(
                                         R.id.biometric_icon,
-                                        ConstraintSet.START,
+                                        ConstraintSet.LEFT,
                                         position.left
                                     )
-                                    smallConstraintSet.clear(R.id.biometric_icon, ConstraintSet.END)
+                                    smallConstraintSet.clear(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.RIGHT
+                                    )
                                     smallConstraintSet.connect(
                                         R.id.biometric_icon,
-                                        ConstraintSet.START,
+                                        ConstraintSet.LEFT,
                                         ConstraintSet.PARENT_ID,
-                                        ConstraintSet.START
+                                        ConstraintSet.LEFT
                                     )
                                     smallConstraintSet.setMargin(
                                         R.id.biometric_icon,
-                                        ConstraintSet.START,
+                                        ConstraintSet.LEFT,
                                         position.left
                                     )
                                 }
@@ -252,32 +255,32 @@ object BiometricViewSizeBinder {
                                     iconParams.rightMargin = position.right
                                     mediumConstraintSet.clear(
                                         R.id.biometric_icon,
-                                        ConstraintSet.START
+                                        ConstraintSet.LEFT
                                     )
                                     mediumConstraintSet.connect(
                                         R.id.biometric_icon,
-                                        ConstraintSet.END,
+                                        ConstraintSet.RIGHT,
                                         ConstraintSet.PARENT_ID,
-                                        ConstraintSet.END
+                                        ConstraintSet.RIGHT
                                     )
                                     mediumConstraintSet.setMargin(
                                         R.id.biometric_icon,
-                                        ConstraintSet.END,
+                                        ConstraintSet.RIGHT,
                                         position.right
                                     )
                                     smallConstraintSet.clear(
                                         R.id.biometric_icon,
-                                        ConstraintSet.START
+                                        ConstraintSet.LEFT
                                     )
                                     smallConstraintSet.connect(
                                         R.id.biometric_icon,
-                                        ConstraintSet.END,
+                                        ConstraintSet.RIGHT,
                                         ConstraintSet.PARENT_ID,
-                                        ConstraintSet.END
+                                        ConstraintSet.RIGHT
                                     )
                                     smallConstraintSet.setMargin(
                                         R.id.biometric_icon,
-                                        ConstraintSet.END,
+                                        ConstraintSet.RIGHT,
                                         position.right
                                     )
                                 }
@@ -383,15 +386,15 @@ object BiometricViewSizeBinder {
                                 // Move all content to other panel
                                 flipConstraintSet.connect(
                                     R.id.scrollView,
-                                    ConstraintSet.START,
+                                    ConstraintSet.LEFT,
                                     R.id.midGuideline,
-                                    ConstraintSet.START
+                                    ConstraintSet.LEFT
                                 )
                                 flipConstraintSet.connect(
                                     R.id.scrollView,
-                                    ConstraintSet.END,
+                                    ConstraintSet.RIGHT,
                                     R.id.rightGuideline,
-                                    ConstraintSet.END
+                                    ConstraintSet.RIGHT
                                 )
                             }
 
