@@ -2493,7 +2493,11 @@ public abstract class ColorSpace {
             return mNativePtr;
         }
 
-        /** Need a nested class due to b/337329128. */
+        /**
+         * These methods can't be put in the Rgb class directly, because ColorSpace's
+         * static initializer instantiates Rgb, whose constructor needs them, which is a variation
+         * of b/337329128.
+         */
         static class Native {
             static native long nativeGetNativeFinalizer();
             static native long nativeCreate(float a, float b, float c, float d,
