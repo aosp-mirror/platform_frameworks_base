@@ -237,7 +237,10 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
      */
     void scheduleShowImePostLayout(@NonNull InsetsControlTarget imeTarget,
             @NonNull ImeTracker.Token statsToken) {
-        if (mImeRequester != null) {
+        if (mImeRequester == null) {
+            // Start tracing only on initial scheduled show IME request, to record end-to-end time.
+            Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.showImePostLayout", 0);
+        } else {
             // We already have a scheduled show IME request, cancel the previous statsToken and
             // continue with the new one.
             logIsScheduledAndReadyToShowIme(false /* aborted */);

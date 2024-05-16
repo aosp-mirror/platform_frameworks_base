@@ -8302,7 +8302,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 ImeTracker.forLogging().onProgress(statsToken,
                         ImeTracker.PHASE_WM_HAS_IME_INSETS_CONTROL_TARGET);
 
-                Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.showImePostLayout", 0);
                 final InsetsControlTarget controlTarget = imeTarget.getImeControlTarget();
                 imeTarget = controlTarget.getWindow();
                 // If InsetsControlTarget doesn't have a window, it's using remoteControlTarget
