@@ -29,6 +29,8 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.util.proto.ProtoInputStream;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -383,10 +385,10 @@ public class SettingsToPropertiesMapper {
 
     /**
      * apply flag local override in aconfig new storage
-     * @param props
-     * @return aconfigd socket return
+     * @param requests: request proto output stream
+     * @return aconfigd socket return as proto input stream
      */
-    public static StorageReturnMessages sendAconfigdRequests(StorageRequestMessages requests) {
+    static ProtoInputStream sendAconfigdRequests(ProtoOutputStream requests) {
         // connect to aconfigd socket
         LocalSocket client = new LocalSocket();
         try{
@@ -410,37 +412,87 @@ public class SettingsToPropertiesMapper {
 
         // send requests
         try {
-            byte[] requests_bytes = requests.toByteArray();
+            byte[] requests_bytes = requests.getBytes();
             outputStream.writeInt(requests_bytes.length);
             outputStream.write(requests_bytes, 0, requests_bytes.length);
-            log(requests.getMsgsCount() + " flag override requests sent to aconfigd");
+            log("flag override requests sent to aconfigd");
         } catch (IOException ioe) {
             log("failed to send requests to aconfigd", ioe);
             return null;
         }
 
         // read return
-        StorageReturnMessages return_msgs = null;
         try {
             int num_bytes = inputStream.readInt();
-            byte[] buffer = new byte[num_bytes];
-            inputStream.read(buffer, 0, num_bytes);
-            return_msgs = StorageReturnMessages.parseFrom(buffer);
-            log(return_msgs.getMsgsCount() + " acknowledgement received from aconfigd");
+            ProtoInputStream returns = new ProtoInputStream(inputStream);
+            log("received " + num_bytes + " bytes back from aconfigd");
+            return returns;
         } catch (IOException ioe) {
             log("failed to read requests return from aconfigd", ioe);
             return null;
         }
+    }
 
-        return return_msgs;
+    /**
+     * serialize a flag override request
+     * @param proto
+     */
+    static void writeFlagOverrideRequest(
+        ProtoOutputStream proto, String packageName, String flagName, String flagValue,
+        boolean isLocal) {
+      long msgsToken = proto.start(StorageRequestMessages.MSGS);
+      long msgToken = proto.start(StorageRequestMessage.FLAG_OVERRIDE_MESSAGE);
+      proto.write(StorageRequestMessage.FlagOverrideMessage.PACKAGE_NAME, packageName);
+      proto.write(StorageRequestMessage.FlagOverrideMessage.FLAG_NAME, flagName);
+      proto.write(StorageRequestMessage.FlagOverrideMessage.FLAG_VALUE, flagValue);
+      proto.write(StorageRequestMessage.FlagOverrideMessage.IS_LOCAL, isLocal);
+      proto.end(msgToken);
+      proto.end(msgsToken);
+    }
+
+    /**
+     * deserialize a flag input proto stream and log
+     * @param proto
+     */
+    static void parseAndLogAconfigdReturn(ProtoInputStream proto) throws IOException {
+        while (true) {
+          switch (proto.nextField()) {
+            case (int) StorageReturnMessages.MSGS:
+              long msgsToken = proto.start(StorageReturnMessages.MSGS);
+              switch (proto.nextField()) {
+                case (int) StorageReturnMessage.FLAG_OVERRIDE_MESSAGE:
+                  log("successfully handled override requests");
+                  long msgToken = proto.start(StorageReturnMessage.FLAG_OVERRIDE_MESSAGE);
+                  proto.end(msgToken);
+                  break;
+                case (int) StorageReturnMessage.ERROR_MESSAGE:
+                  String errmsg = proto.readString(StorageReturnMessage.ERROR_MESSAGE);
+                  log("override request failed: " + errmsg);
+                  break;
+                case ProtoInputStream.NO_MORE_FIELDS:
+                  break;
+                default:
+                  log("invalid message type, expecting only flag override return or error message");
+                  break;
+              }
+              proto.end(msgsToken);
+              break;
+            case ProtoInputStream.NO_MORE_FIELDS:
+              return;
+            default:
+              log("invalid message type, expect storage return message");
+              break;
+          }
+        }
     }
 
     /**
      * apply flag local override in aconfig new storage
      * @param props
      */
-    public static void setLocalOverridesInNewStorage(DeviceConfig.Properties props) {
-        StorageRequestMessages.Builder requests_builder = StorageRequestMessages.newBuilder();
+    static void setLocalOverridesInNewStorage(DeviceConfig.Properties props) {
+        int num_requests = 0;
+        ProtoOutputStream requests = new ProtoOutputStream();
         for (String flagName : props.getKeyset()) {
             String flagValue = props.getString(flagName, null);
             if (flagName == null || flagValue == null) {
@@ -461,20 +513,23 @@ public class SettingsToPropertiesMapper {
             }
             String packageName = fullFlagName.substring(0, idx);
             String realFlagName = fullFlagName.substring(idx+1);
-
-            StorageRequestMessage.FlagOverrideMessage.Builder override_msg_builder =
-                StorageRequestMessage.FlagOverrideMessage.newBuilder();
-            override_msg_builder.setPackageName(packageName);
-            override_msg_builder.setFlagName(realFlagName);
-            override_msg_builder.setFlagValue(flagValue);
-            override_msg_builder.setIsLocal(true);
-
-            StorageRequestMessage.Builder request_builder = StorageRequestMessage.newBuilder();
-            request_builder.setFlagOverrideMessage(override_msg_builder.build());
-            requests_builder.addMsgs(request_builder.build());
+            writeFlagOverrideRequest(requests, packageName, realFlagName, flagValue, true);
+            ++num_requests;
         }
-        StorageRequestMessages requests = requests_builder.build();
-        StorageReturnMessages acks = sendAconfigdRequests(requests);
+
+        if (num_requests == 0) {
+          return;
+        }
+
+        // send requests to aconfigd and obtain the return byte buffer
+        ProtoInputStream returns = sendAconfigdRequests(requests);
+
+        // deserialize back using proto input stream
+        try {
+          parseAndLogAconfigdReturn(returns);
+        } catch (IOException ioe) {
+            log("failed to parse aconfigd return", ioe);
+        }
     }
 
     public static SettingsToPropertiesMapper start(ContentResolver contentResolver) {
@@ -545,14 +600,16 @@ public class SettingsToPropertiesMapper {
         return propertyName;
     }
 
+
     /**
      * stage flags in aconfig new storage
      * @param propsToStage
      */
     @VisibleForTesting
     static void stageFlagsInNewStorage(HashMap<String, HashMap<String, String>> propsToStage) {
-        // create storage request proto
-        StorageRequestMessages.Builder requests_builder = StorageRequestMessages.newBuilder();
+        // write aconfigd requests proto to proto output stream
+        int num_requests = 0;
+        ProtoOutputStream requests = new ProtoOutputStream();
         for (HashMap.Entry<String, HashMap<String, String>> entry : propsToStage.entrySet()) {
             String actualNamespace = entry.getKey();
             HashMap<String, String> flagValuesToStage = entry.getValue();
@@ -565,21 +622,24 @@ public class SettingsToPropertiesMapper {
                 }
                 String packageName = fullFlagName.substring(0, idx);
                 String flagName = fullFlagName.substring(idx+1);
-
-                StorageRequestMessage.FlagOverrideMessage.Builder override_msg_builder =
-                    StorageRequestMessage.FlagOverrideMessage.newBuilder();
-                override_msg_builder.setPackageName(packageName);
-                override_msg_builder.setFlagName(flagName);
-                override_msg_builder.setFlagValue(stagedValue);
-                override_msg_builder.setIsLocal(false);
-
-                StorageRequestMessage.Builder request_builder = StorageRequestMessage.newBuilder();
-                request_builder.setFlagOverrideMessage(override_msg_builder.build());
-                requests_builder.addMsgs(request_builder.build());
+                writeFlagOverrideRequest(requests, packageName, flagName, stagedValue, false);
+                ++num_requests;
             }
         }
-        StorageRequestMessages requests = requests_builder.build();
-        StorageReturnMessages acks = sendAconfigdRequests(requests);
+
+        if (num_requests == 0) {
+          return;
+        }
+
+        // send requests to aconfigd and obtain the return
+        ProtoInputStream returns = sendAconfigdRequests(requests);
+
+        // deserialize back using proto input stream
+        try {
+          parseAndLogAconfigdReturn(returns);
+        } catch (IOException ioe) {
+            log("failed to parse aconfigd return", ioe);
+        }
     }
 
     /**
