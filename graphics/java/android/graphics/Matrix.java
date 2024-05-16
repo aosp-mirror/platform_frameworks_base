@@ -562,7 +562,7 @@ public class Matrix {
 
     /**
      * Set the matrix to the scale and translate values that map the source rectangle to the
-     * destination rectangle, returning true if the the result can be represented.
+     * destination rectangle, returning true if the result can be represented.
      *
      * @param src the source rectangle to map from.
      * @param dst the destination rectangle to map to.
