@@ -20,6 +20,7 @@ package com.android.systemui.biometrics.ui.binder
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
@@ -91,6 +92,13 @@ constructor(
                                     showIndicatorForDeviceEntry,
                                     progressBarIsVisible) =
                                     combinedFlows
+                                Log.d(
+                                    TAG,
+                                    "systemServerAuthReason = $systemServerAuthReason, " +
+                                        "showIndicatorForDeviceEntry = " +
+                                        "$showIndicatorForDeviceEntry, " +
+                                        "progressBarIsVisible = $progressBarIsVisible"
+                                )
                                 if (!isInRearDisplayMode) {
                                     if (progressBarIsVisible) {
                                         hide()
@@ -114,6 +122,10 @@ constructor(
     /** Show the side fingerprint sensor indicator */
     private fun show() {
         if (overlayView?.isAttachedToWindow == true) {
+            Log.d(
+                TAG,
+                "show(): overlayView $overlayView isAttachedToWindow already, ignoring show request"
+            )
             return
         }
 
@@ -128,6 +140,7 @@ constructor(
             )
         bind(overlayView!!, overlayViewModel, fpsUnlockTracker.get(), windowManager.get())
         overlayView!!.visibility = View.INVISIBLE
+        Log.d(TAG, "show(): adding overlayView $overlayView")
         windowManager.get().addView(overlayView, overlayViewModel.defaultOverlayViewParams)
     }
 
@@ -137,6 +150,7 @@ constructor(
             val lottie = overlayView!!.requireViewById<LottieAnimationView>(R.id.sidefps_animation)
             lottie.pauseAnimation()
             lottie.removeAllLottieOnCompositionLoadedListener()
+            Log.d(TAG, "hide(): removing overlayView $overlayView, setting to null")
             windowManager.get().removeView(overlayView)
             overlayView = null
         }
