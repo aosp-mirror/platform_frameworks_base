@@ -16,7 +16,11 @@
 
 package com.android.systemui.screenshot.ui.binder
 
+import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.Matrix
+import android.graphics.Rect
+import android.util.LayoutDirection
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +33,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.screenshot.ScreenshotEvent
+import com.android.systemui.screenshot.ui.ScreenshotAnimationController
 import com.android.systemui.screenshot.ui.ScreenshotShelfView
 import com.android.systemui.screenshot.ui.SwipeGestureListener
 import com.android.systemui.screenshot.ui.viewmodel.ActionButtonViewModel
@@ -45,9 +50,9 @@ constructor(private val buttonViewBinder: ActionButtonViewBinder) {
     fun bind(
         view: ScreenshotShelfView,
         viewModel: ScreenshotViewModel,
+        animationController: ScreenshotAnimationController,
         layoutInflater: LayoutInflater,
         onDismissalRequested: (event: ScreenshotEvent, velocity: Float?) -> Unit,
-        onDismissalCancelled: () -> Unit,
         onUserInteraction: () -> Unit
     ) {
         val swipeGestureListener =
@@ -56,7 +61,7 @@ constructor(private val buttonViewBinder: ActionButtonViewBinder) {
                 onDismiss = {
                     onDismissalRequested(ScreenshotEvent.SCREENSHOT_SWIPE_DISMISSED, it)
                 },
-                onCancel = onDismissalCancelled
+                onCancel = { animationController.getSwipeReturnAnimation().start() }
             )
         view.onTouchInterceptListener = { swipeGestureListener.onMotionEvent(it) }
         view.userInteractionCallback = onUserInteraction
@@ -66,11 +71,14 @@ constructor(private val buttonViewBinder: ActionButtonViewBinder) {
         val previewBorder = view.requireViewById<View>(R.id.screenshot_preview_border)
         previewView.clipToOutline = true
         previewViewBlur.clipToOutline = true
+        val actionsContainer: LinearLayout = view.requireViewById(R.id.screenshot_actions)
         val dismissButton = view.requireViewById<View>(R.id.screenshot_dismiss_button)
         dismissButton.visibility = if (viewModel.showDismissButton) View.VISIBLE else View.GONE
         dismissButton.setOnClickListener {
             onDismissalRequested(ScreenshotEvent.SCREENSHOT_EXPLICIT_DISMISSAL, null)
         }
+        val scrollingScrim: ImageView = view.requireViewById(R.id.screenshot_scrolling_scrim)
+        val scrollablePreview: ImageView = view.requireViewById(R.id.screenshot_scrollable_preview)
         val badgeView = view.requireViewById<ImageView>(R.id.screenshot_badge)
 
         // use immediate dispatcher to ensure screenshot bitmap is set before animation
@@ -91,6 +99,29 @@ constructor(private val buttonViewBinder: ActionButtonViewBinder) {
                         }
                     }
                     launch {
+                        viewModel.scrollingScrim.collect { bitmap ->
+                            if (bitmap != null) {
+                                scrollingScrim.setImageBitmap(bitmap)
+                                scrollingScrim.visibility = View.VISIBLE
+                            } else {
+                                scrollingScrim.visibility = View.GONE
+                            }
+                        }
+                    }
+                    launch {
+                        viewModel.scrollableRect.collect { rect ->
+                            if (rect != null) {
+                                setScrollablePreview(
+                                    scrollablePreview,
+                                    viewModel.preview.value,
+                                    rect
+                                )
+                            } else {
+                                scrollablePreview.visibility = View.GONE
+                            }
+                        }
+                    }
+                    launch {
                         viewModel.badge.collect { badge ->
                             badgeView.setImageDrawable(badge)
                             badgeView.visibility = if (badge != null) View.VISIBLE else View.GONE
@@ -99,6 +130,14 @@ constructor(private val buttonViewBinder: ActionButtonViewBinder) {
                     launch {
                         viewModel.previewAction.collect { onClick ->
                             previewView.setOnClickListener { onClick?.invoke() }
+                        }
+                    }
+                    launch {
+                        viewModel.isAnimating.collect { isAnimating ->
+                            previewView.isClickable = !isAnimating
+                            for (child in actionsContainer.children) {
+                                child.isClickable = !isAnimating
+                            }
                         }
                     }
                     launch {
@@ -190,5 +229,36 @@ constructor(private val buttonViewBinder: ActionButtonViewBinder) {
 
         screenshotPreview.layoutParams = params
         screenshotPreview.requestLayout()
+    }
+
+    private fun setScrollablePreview(
+        scrollablePreview: ImageView,
+        bitmap: Bitmap?,
+        scrollableRect: Rect
+    ) {
+        if (bitmap == null) {
+            return
+        }
+        val fixedSize = scrollablePreview.resources.getDimensionPixelSize(R.dimen.overlay_x_scale)
+        val inPortrait =
+            scrollablePreview.resources.configuration.orientation ==
+                Configuration.ORIENTATION_PORTRAIT
+        val scale: Float = fixedSize / ((if (inPortrait) bitmap.width else bitmap.height).toFloat())
+        val params = scrollablePreview.layoutParams
+
+        params.width = (scale * scrollableRect.width()).toInt()
+        params.height = (scale * scrollableRect.height()).toInt()
+        val matrix = Matrix()
+        matrix.setScale(scale, scale)
+        matrix.postTranslate(-scrollableRect.left * scale, -scrollableRect.top * scale)
+
+        scrollablePreview.translationX =
+            (scale *
+                if (scrollablePreview.layoutDirection == LayoutDirection.LTR) scrollableRect.left
+                else scrollableRect.right - (scrollablePreview.parent as View).width)
+        scrollablePreview.translationY = scale * scrollableRect.top
+        scrollablePreview.setImageMatrix(matrix)
+        scrollablePreview.setImageBitmap(bitmap)
+        scrollablePreview.setVisibility(View.VISIBLE)
     }
 }
