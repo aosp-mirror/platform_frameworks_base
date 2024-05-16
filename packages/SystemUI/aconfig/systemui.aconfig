@@ -413,6 +413,13 @@ flag {
 }
 
 flag {
+   name: "confine_notification_touch_to_view_width"
+   namespace: "systemui"
+   description: "Use notification view width when detecting gestures."
+   bug: "335828150"
+}
+
+flag {
   name: "fix_image_wallpaper_crash_surface_already_released"
   namespace: "systemui"
   description: "Make sure ImageWallpaper doesn't return from OnSurfaceDestroyed until any drawing is finished"
