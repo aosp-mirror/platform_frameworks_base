@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Network
@@ -26,8 +27,10 @@ import android.net.NetworkCapabilities.TRANSPORT_ETHERNET
 import android.net.NetworkCapabilities.TRANSPORT_WIFI
 import android.net.vcn.VcnTransportInfo
 import android.net.wifi.WifiInfo
+import android.os.Bundle
 import android.os.ParcelUuid
 import android.telephony.CarrierConfigManager
+import android.telephony.ServiceState
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
@@ -50,6 +53,7 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ServiceStateModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
@@ -570,6 +574,51 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             mobileRepo = underTest.getRepoForSubId(SUB_1_ID)
             assertThat(carrierMergedRepo.getIsCarrierMerged()).isTrue()
             assertThat(mobileRepo.getIsCarrierMerged()).isFalse()
+        }
+
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
+    @Test
+    fun testDeviceServiceStateFromBroadcast_eagerlyWatchesBroadcast() =
+        testScope.runTest {
+            // Value starts out empty (null)
+            assertThat(underTest.deviceServiceState.value).isNull()
+
+            // WHEN an appropriate intent gets sent out
+            val intent = serviceStateIntent(subId = -1, emergencyOnly = false)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                intent,
+            )
+            runCurrent()
+
+            // THEN the repo's state is updated
+            val expected = ServiceStateModel(isEmergencyOnly = false)
+            assertThat(underTest.deviceServiceState.value).isEqualTo(expected)
+        }
+
+    @Test
+    fun testDeviceServiceStateFromBroadcast_followsSubIdNegativeOne() =
+        testScope.runTest {
+            // device based state tracks -1
+            val intent = serviceStateIntent(subId = -1, emergencyOnly = false)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                intent,
+            )
+            runCurrent()
+
+            val deviceBasedState = ServiceStateModel(isEmergencyOnly = false)
+            assertThat(underTest.deviceServiceState.value).isEqualTo(deviceBasedState)
+
+            // ... and ignores any other subId
+            val intent2 = serviceStateIntent(subId = 1, emergencyOnly = true)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                intent2,
+            )
+            runCurrent()
+
+            assertThat(underTest.deviceServiceState.value).isEqualTo(deviceBasedState)
         }
 
     @Test
@@ -1402,5 +1451,24 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 whenever(it.transportInfo).thenReturn(WIFI_INFO_ACTIVE)
                 whenever(it.hasCapability(NET_CAPABILITY_VALIDATED)).thenReturn(true)
             }
+
+        /**
+         * To properly mimic telephony manager, create a service state, and then turn it into an
+         * intent
+         */
+        private fun serviceStateIntent(
+            subId: Int,
+            emergencyOnly: Boolean = false,
+        ): Intent {
+            val serviceState = ServiceState().apply { isEmergencyOnly = emergencyOnly }
+
+            val bundle = Bundle()
+            serviceState.fillInNotifierBundle(bundle)
+
+            return Intent(Intent.ACTION_SERVICE_STATE).apply {
+                putExtras(bundle)
+                putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId)
+            }
+        }
     }
 }
