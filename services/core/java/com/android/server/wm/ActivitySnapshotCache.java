@@ -30,10 +30,12 @@ class ActivitySnapshotCache extends SnapshotCache<ActivityRecord> {
     @Override
     void putSnapshot(ActivityRecord ar, TaskSnapshot snapshot) {
         final int hasCode = System.identityHashCode(ar);
+        snapshot.addReference(TaskSnapshot.REFERENCE_CACHE);
         synchronized (mLock) {
             final CacheEntry entry = mRunningCache.get(hasCode);
             if (entry != null) {
                 mAppIdMap.remove(entry.topApp);
+                entry.snapshot.removeReference(TaskSnapshot.REFERENCE_CACHE);
             }
             mAppIdMap.put(ar, hasCode);
             mRunningCache.put(hasCode, new CacheEntry(snapshot, ar));

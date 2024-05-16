@@ -247,6 +247,7 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_TASK_SNAPSHOT_CHANGED_LISTENERS_MSG:
                     forAllRemoteListeners(mNotifyTaskSnapshotChanged, msg);
+                    ((TaskSnapshot) msg.obj).removeReference(TaskSnapshot.REFERENCE_BROADCAST);
                     break;
                 case NOTIFY_BACK_PRESSED_ON_TASK_ROOT:
                     forAllRemoteListeners(mNotifyBackPressedOnTaskRoot, msg);
@@ -485,6 +486,7 @@ class TaskChangeNotificationController {
      * Notify listeners that the snapshot of a task has changed.
      */
     void notifyTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) {
+        snapshot.addReference(TaskSnapshot.REFERENCE_BROADCAST);
         final Message msg = mHandler.obtainMessage(NOTIFY_TASK_SNAPSHOT_CHANGED_LISTENERS_MSG,
                 taskId, 0, snapshot);
         forAllLocalListeners(mNotifyTaskSnapshotChanged, msg);

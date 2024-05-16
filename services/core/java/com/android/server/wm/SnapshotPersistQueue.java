@@ -253,6 +253,7 @@ class SnapshotPersistQueue {
                 PersistInfoProvider provider) {
             super(provider, userId);
             mId = id;
+            snapshot.addReference(TaskSnapshot.REFERENCE_PERSIST);
             mSnapshot = snapshot;
         }
 
@@ -289,6 +290,7 @@ class SnapshotPersistQueue {
             if (failed) {
                 deleteSnapshot(mId, mUserId, mPersistInfoProvider);
             }
+            mSnapshot.removeReference(TaskSnapshot.REFERENCE_PERSIST);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
