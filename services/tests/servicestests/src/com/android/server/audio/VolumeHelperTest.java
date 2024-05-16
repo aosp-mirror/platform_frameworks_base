@@ -40,6 +40,7 @@ import static android.view.KeyEvent.ACTION_DOWN;
 import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
 
 import static com.android.media.audio.Flags.FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME;
+import static com.android.media.audio.Flags.FLAG_ABS_VOLUME_INDEX_FIX;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -552,7 +553,7 @@ public class VolumeHelperTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME)
+    @RequiresFlagsDisabled({FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME, FLAG_ABS_VOLUME_INDEX_FIX})
     public void configurablePreScaleAbsoluteVolume_checkIndex() throws Exception {
         final int minIndex = mAm.getStreamMinVolume(STREAM_MUSIC);
         final int maxIndex = mAm.getStreamMaxVolume(STREAM_MUSIC);
@@ -607,6 +608,7 @@ public class VolumeHelperTest {
 
     @Test
     @RequiresFlagsEnabled(FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME)
+    @RequiresFlagsDisabled(FLAG_ABS_VOLUME_INDEX_FIX)
     public void disablePreScaleAbsoluteVolume_checkIndex() throws Exception {
         final int minIndex = mAm.getStreamMinVolume(STREAM_MUSIC);
         final int maxIndex = mAm.getStreamMaxVolume(STREAM_MUSIC);
