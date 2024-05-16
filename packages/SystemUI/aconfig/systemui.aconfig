@@ -923,3 +923,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "validate_keyboard_shortcut_helper_icon_uri"
+  namespace: "systemui"
+  description: "Adds a check that the caller can access the content URI of an icon in the shortcut helper."
+  bug: "331180422"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
