@@ -124,6 +124,7 @@ constructor(
     private var overlayView: View? = null
         set(value) {
             field?.let { oldView ->
+                Log.d(TAG, "overlayView updated: removing existing view $oldView")
                 val lottie = oldView.requireViewById(R.id.sidefps_animation) as LottieAnimationView
                 lottie.pauseAnimation()
                 lottie.removeAllLottieOnCompositionLoadedListener()
@@ -135,6 +136,7 @@ constructor(
 
             field = value
             field?.let { newView ->
+                Log.d(TAG, "overlayView updated: adding new view $newView")
                 if (requests.contains(SideFpsUiRequestSource.PRIMARY_BOUNCER)) {
                     newView.alpha = 0f
                     overlayShowAnimator =
@@ -223,11 +225,20 @@ constructor(
                     traceSection(
                         "SideFpsController#show(request=${request.name}, reason=$reason)"
                     ) {
+                        Log.d(
+                            TAG,
+                            "show(request=${request.name}, reason=$reason): " +
+                                "overlayView == null, adding request"
+                        )
                         requests.add(request)
                         createOverlayForDisplay(reason)
                     }
                 } else {
-                    Log.v(TAG, "overlay already shown")
+                    Log.d(
+                        TAG,
+                        "show(request=${request.name}, reason=$reason): " +
+                            "overlay already shown, ignoring request"
+                    )
                 }
             }
         }
@@ -236,10 +247,18 @@ constructor(
     /** Hides the fps overlay if shown. */
     fun hide(request: SideFpsUiRequestSource) {
         SideFpsControllerRefactor.assertInLegacyMode()
+        Log.d(TAG, "hide(request=${request.name}): removing request")
         requests.remove(request)
         mainExecutor.execute {
             if (requests.isEmpty()) {
-                traceSection("SideFpsController#hide(${request.name})") { overlayView = null }
+                traceSection("SideFpsController#hide(${request.name})") {
+                    Log.d(
+                        TAG,
+                        "hide(request=${request.name}): requests.isEmpty(), " +
+                            "setting overlayView = null"
+                    )
+                    overlayView = null
+                }
             }
         }
     }
