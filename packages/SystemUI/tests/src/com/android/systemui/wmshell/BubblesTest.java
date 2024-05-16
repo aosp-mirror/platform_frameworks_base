@@ -27,6 +27,7 @@ import static android.service.notification.NotificationListenerService.REASON_GR
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING;
+import static com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_BAR;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -2139,6 +2140,112 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController.collapseStack();
 
         assertThat(mBubbleController.getLayerView().isExpanded()).isFalse();
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void dragBubbleBarBubble_selectedBubble_expandedViewCollapsesDuringDrag() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        // Add 2 bubbles
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryAdded(mRow2);
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleController.updateBubble(mBubbleEntry2);
+
+        // Select first bubble
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), new Rect());
+        assertThat(mBubbleData.getSelectedBubbleKey()).isEqualTo(mBubbleEntry.getKey());
+        assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
+
+        // Drag first bubble, bubble should collapse
+        mBubbleController.startBubbleDrag(mBubbleEntry.getKey());
+        assertThat(mBubbleController.getLayerView().isExpanded()).isFalse();
+
+        // Stop dragging, first bubble should be expanded
+        mBubbleController.stopBubbleDrag(BubbleBarLocation.LEFT);
+        assertThat(mBubbleData.getSelectedBubbleKey()).isEqualTo(mBubbleEntry.getKey());
+        assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void dragBubbleBarBubble_unselectedBubble_expandedViewCollapsesDuringDrag() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        // Add 2 bubbles
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryAdded(mRow2);
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleController.updateBubble(mBubbleEntry2);
+
+        // Select first bubble
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), new Rect());
+        assertThat(mBubbleData.getSelectedBubbleKey()).isEqualTo(mBubbleEntry.getKey());
+        assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
+
+        // Drag second bubble, bubble should collapse
+        mBubbleController.startBubbleDrag(mBubbleEntry2.getKey());
+        assertThat(mBubbleController.getLayerView().isExpanded()).isFalse();
+
+        // Stop dragging, first bubble should be expanded
+        mBubbleController.stopBubbleDrag(BubbleBarLocation.LEFT);
+        assertThat(mBubbleData.getSelectedBubbleKey()).isEqualTo(mBubbleEntry.getKey());
+        assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void dismissBubbleBarBubble_selected_selectsAndExpandsNext() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        // Add 2 bubbles
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryAdded(mRow2);
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleController.updateBubble(mBubbleEntry2);
+
+        // Select first bubble
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), new Rect());
+        // Drag first bubble to dismiss
+        mBubbleController.startBubbleDrag(mBubbleEntry.getKey());
+        mBubbleController.dragBubbleToDismiss(mBubbleEntry.getKey());
+        // Second bubble is selected and expanded
+        assertThat(mBubbleData.getSelectedBubbleKey()).isEqualTo(mBubbleEntry2.getKey());
+        assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void dismissBubbleBarBubble_unselected_selectionDoesNotChange() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        // Add 2 bubbles
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryAdded(mRow2);
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleController.updateBubble(mBubbleEntry2);
+
+        // Select first bubble
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), new Rect());
+        // Drag second bubble to dismiss
+        mBubbleController.startBubbleDrag(mBubbleEntry2.getKey());
+        mBubbleController.dragBubbleToDismiss(mBubbleEntry2.getKey());
+        // First bubble remains selected and expanded
+        assertThat(mBubbleData.getSelectedBubbleKey()).isEqualTo(mBubbleEntry.getKey());
+        assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
     }
 
     @DisableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)

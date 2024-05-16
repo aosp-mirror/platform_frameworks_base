@@ -1170,7 +1170,9 @@ public class BubbleController implements ConfigurationChangeListener,
      * @param bubbleKey key of the bubble being dragged
      */
     public void startBubbleDrag(String bubbleKey) {
-        onBubbleDrag(bubbleKey, true /* isBeingDragged */);
+        if (mBubbleData.getSelectedBubble() != null) {
+            mBubbleBarViewCallback.expansionChanged(/* isExpanded = */ false);
+        }
         if (mBubbleStateListener != null) {
             boolean overflow = BubbleOverflow.KEY.equals(bubbleKey);
             Rect rect = new Rect();
@@ -1183,23 +1185,29 @@ public class BubbleController implements ConfigurationChangeListener,
     }
 
     /**
-     * A bubble is no longer being dragged in Launcher. As was released in given location.
+     * A bubble is no longer being dragged in Launcher. And was released in given location.
      * Will be called only when bubble bar is expanded.
      *
-     * @param bubbleKey key of the bubble being dragged
      * @param location  location where bubble was released
      */
-    public void stopBubbleDrag(String bubbleKey, BubbleBarLocation location) {
+    public void stopBubbleDrag(BubbleBarLocation location) {
         mBubblePositioner.setBubbleBarLocation(location);
-        onBubbleDrag(bubbleKey, false /* isBeingDragged */);
+        if (mBubbleData.getSelectedBubble() != null) {
+            mBubbleBarViewCallback.expansionChanged(/* isExpanded = */ true);
+        }
     }
 
-    private void onBubbleDrag(String bubbleKey, boolean isBeingDragged) {
-        // TODO(b/330585402): collapse stack if any bubble is dragged
-        if (mBubbleData.getSelectedBubble() != null
-                && mBubbleData.getSelectedBubble().getKey().equals(bubbleKey)) {
-            // Should collapse/expand only if equals to selected bubble.
-            mBubbleBarViewCallback.expansionChanged(/* isExpanded = */ !isBeingDragged);
+    /**
+     * A bubble was dragged and is released in dismiss target in Launcher.
+     *
+     * @param bubbleKey key of the bubble being dragged to dismiss target
+     */
+    public void dragBubbleToDismiss(String bubbleKey) {
+        String selectedBubbleKey = mBubbleData.getSelectedBubbleKey();
+        removeBubble(bubbleKey, Bubbles.DISMISS_USER_GESTURE);
+        if (selectedBubbleKey != null && !selectedBubbleKey.equals(bubbleKey)) {
+            // We did not remove the selected bubble. Expand it again
+            mBubbleBarViewCallback.expansionChanged(/* isExpanded = */ true);
         }
     }
 
@@ -2358,12 +2366,6 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         @Override
-        public void removeBubble(String key) {
-            mMainExecutor.execute(
-                    () -> mController.removeBubble(key, Bubbles.DISMISS_USER_GESTURE));
-        }
-
-        @Override
         public void removeAllBubbles() {
             mMainExecutor.execute(() -> mController.removeAllBubbles(Bubbles.DISMISS_USER_GESTURE));
         }
@@ -2379,8 +2381,13 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         @Override
-        public void stopBubbleDrag(String bubbleKey, BubbleBarLocation location) {
-            mMainExecutor.execute(() -> mController.stopBubbleDrag(bubbleKey, location));
+        public void stopBubbleDrag(BubbleBarLocation location) {
+            mMainExecutor.execute(() -> mController.stopBubbleDrag(location));
+        }
+
+        @Override
+        public void dragBubbleToDismiss(String key) {
+            mMainExecutor.execute(() -> mController.dragBubbleToDismiss(key));
         }
 
         @Override
