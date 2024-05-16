@@ -35,6 +35,7 @@ public interface KeyguardTransitions {
      */
     default void register(
             @NonNull IRemoteTransition unlockTransition,
+            @NonNull IRemoteTransition appearTransition,
             @NonNull IRemoteTransition occludeTransition,
             @NonNull IRemoteTransition occludeByDreamTransition,
             @NonNull IRemoteTransition unoccludeTransition) {}
