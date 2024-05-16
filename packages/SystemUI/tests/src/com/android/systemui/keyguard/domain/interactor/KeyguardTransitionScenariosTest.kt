@@ -91,33 +91,40 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
         }
     private val testScope = kosmos.testScope
 
-    private val keyguardRepository = kosmos.fakeKeyguardRepository
-    private val bouncerRepository = kosmos.fakeKeyguardBouncerRepository
+    private val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
+    private val bouncerRepository by lazy { kosmos.fakeKeyguardBouncerRepository }
     private var commandQueue = kosmos.fakeCommandQueue
     private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
-    private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val transitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
     private lateinit var featureFlags: FakeFeatureFlags
 
     // Used to verify transition requests for test output
     @Mock private lateinit var keyguardSecurityModel: KeyguardSecurityModel
 
-    private val fromLockscreenTransitionInteractor = kosmos.fromLockscreenTransitionInteractor
-    private val fromDreamingTransitionInteractor = kosmos.fromDreamingTransitionInteractor
-    private val fromDozingTransitionInteractor = kosmos.fromDozingTransitionInteractor
-    private val fromOccludedTransitionInteractor = kosmos.fromOccludedTransitionInteractor
-    private val fromGoneTransitionInteractor = kosmos.fromGoneTransitionInteractor
-    private val fromAodTransitionInteractor = kosmos.fromAodTransitionInteractor
-    private val fromAlternateBouncerTransitionInteractor =
+    private val fromLockscreenTransitionInteractor by lazy {
+        kosmos.fromLockscreenTransitionInteractor
+    }
+    private val fromDreamingTransitionInteractor by lazy { kosmos.fromDreamingTransitionInteractor }
+    private val fromDozingTransitionInteractor by lazy { kosmos.fromDozingTransitionInteractor }
+    private val fromOccludedTransitionInteractor by lazy { kosmos.fromOccludedTransitionInteractor }
+    private val fromGoneTransitionInteractor by lazy { kosmos.fromGoneTransitionInteractor }
+    private val fromAodTransitionInteractor by lazy { kosmos.fromAodTransitionInteractor }
+    private val fromAlternateBouncerTransitionInteractor by lazy {
         kosmos.fromAlternateBouncerTransitionInteractor
-    private val fromPrimaryBouncerTransitionInteractor =
+    }
+    private val fromPrimaryBouncerTransitionInteractor by lazy {
         kosmos.fromPrimaryBouncerTransitionInteractor
-    private val fromDreamingLockscreenHostedTransitionInteractor =
+    }
+    private val fromDreamingLockscreenHostedTransitionInteractor by lazy {
         kosmos.fromDreamingLockscreenHostedTransitionInteractor
-    private val fromGlanceableHubTransitionInteractor = kosmos.fromGlanceableHubTransitionInteractor
+    }
+    private val fromGlanceableHubTransitionInteractor by lazy {
+        kosmos.fromGlanceableHubTransitionInteractor
+    }
 
-    private val powerInteractor = kosmos.powerInteractor
-    private val communalInteractor = kosmos.communalInteractor
-    private val dockManager = kosmos.fakeDockManager
+    private val powerInteractor by lazy { kosmos.powerInteractor }
+    private val communalInteractor by lazy { kosmos.communalInteractor }
+    private val dockManager by lazy { kosmos.fakeDockManager }
 
     companion object {
         @JvmStatic

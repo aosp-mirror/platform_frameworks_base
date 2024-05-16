@@ -1,5 +1,6 @@
 package com.android.systemui.statusbar.notification.stack
 
+import android.platform.test.annotations.DisableFlags
 import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
@@ -69,8 +70,8 @@ open class NotificationShelfTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(NotificationIconContainerRefactor.FLAG_NAME)
     fun testShadeWidth_BasedOnFractionToShade() {
-        mSetFlagsRule.disableFlags(NotificationIconContainerRefactor.FLAG_NAME)
         setFractionToShade(0f)
         setOnLockscreen(true)
 
@@ -85,8 +86,8 @@ open class NotificationShelfTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(NotificationIconContainerRefactor.FLAG_NAME)
     fun testShelfIsLong_WhenNotOnLockscreen() {
-        mSetFlagsRule.disableFlags(NotificationIconContainerRefactor.FLAG_NAME)
         setFractionToShade(0f)
         setOnLockscreen(false)
 
