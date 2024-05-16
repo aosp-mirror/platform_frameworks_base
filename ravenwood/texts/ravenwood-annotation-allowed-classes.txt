@@ -239,6 +239,8 @@ android.text.TextUtils$SimpleStringSplitter
 android.accounts.Account
 
 android.graphics.Bitmap$Config
+android.graphics.Color
+android.graphics.ColorSpace
 android.graphics.Insets
 android.graphics.Interpolator
 android.graphics.Matrix
