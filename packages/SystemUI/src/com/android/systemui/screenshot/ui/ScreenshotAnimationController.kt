@@ -20,6 +20,10 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
+import android.content.res.ColorStateList
+import android.graphics.BlendMode
+import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.PointF
 import android.graphics.Rect
 import android.util.MathUtils
@@ -29,13 +33,21 @@ import android.widget.ImageView
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import com.android.systemui.res.R
+import com.android.systemui.screenshot.scroll.ScrollCaptureController
+import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.sign
 
-class ScreenshotAnimationController(private val view: ScreenshotShelfView) {
+class ScreenshotAnimationController(
+    private val view: ScreenshotShelfView,
+    private val viewModel: ScreenshotViewModel
+) {
     private var animator: Animator? = null
     private val screenshotPreview = view.requireViewById<ImageView>(R.id.screenshot_preview)
+    private val scrollingScrim = view.requireViewById<ImageView>((R.id.screenshot_scrolling_scrim))
+    private val scrollTransitionPreview =
+        view.requireViewById<ImageView>(R.id.screenshot_scrollable_preview)
     private val flashView = view.requireViewById<View>(R.id.screenshot_flash)
     private val actionContainer = view.requireViewById<View>(R.id.actions_container_background)
     private val fastOutSlowIn =
@@ -45,6 +57,14 @@ class ScreenshotAnimationController(private val view: ScreenshotShelfView) {
             view.requireViewById(R.id.screenshot_preview_border),
             view.requireViewById(R.id.screenshot_badge),
             view.requireViewById(R.id.screenshot_dismiss_button)
+        )
+    private val fadeUI =
+        listOf<View>(
+            view.requireViewById(R.id.screenshot_preview_border),
+            view.requireViewById(R.id.actions_container_background),
+            view.requireViewById(R.id.screenshot_badge),
+            view.requireViewById(R.id.screenshot_dismiss_button),
+            view.requireViewById(R.id.screenshot_message_container),
         )
 
     fun getEntranceAnimation(
@@ -96,13 +116,106 @@ class ScreenshotAnimationController(private val view: ScreenshotShelfView) {
         }
         entranceAnimation.play(fadeInAnimator).after(previewAnimator)
         entranceAnimation.doOnStart {
+            viewModel.setIsAnimating(true)
             for (child in staticUI) {
                 child.alpha = 0f
             }
         }
+        entranceAnimation.doOnEnd { viewModel.setIsAnimating(false) }
 
         this.animator = entranceAnimation
         return entranceAnimation
+    }
+
+    fun fadeForSharedTransition() {
+        animator?.cancel()
+        val fadeAnimator = ValueAnimator.ofFloat(1f, 0f)
+        fadeAnimator.addUpdateListener {
+            for (view in fadeUI) {
+                view.alpha = it.animatedValue as Float
+            }
+        }
+        animator = fadeAnimator
+        fadeAnimator.start()
+    }
+
+    fun runLongScreenshotTransition(
+        destRect: Rect,
+        longScreenshot: ScrollCaptureController.LongScreenshot,
+        onTransitionEnd: Runnable
+    ): Animator {
+        val animSet = AnimatorSet()
+
+        val scrimAnim = ValueAnimator.ofFloat(0f, 1f)
+        scrimAnim.addUpdateListener { animation: ValueAnimator ->
+            scrollingScrim.setAlpha(1 - animation.animatedFraction)
+        }
+        scrollTransitionPreview.visibility = View.VISIBLE
+        if (true) {
+            scrollTransitionPreview.setImageBitmap(longScreenshot.toBitmap())
+            val startX: Float = scrollTransitionPreview.x
+            val startY: Float = scrollTransitionPreview.y
+            val locInScreen: IntArray = scrollTransitionPreview.getLocationOnScreen()
+            destRect.offset(startX.toInt() - locInScreen[0], startY.toInt() - locInScreen[1])
+            scrollTransitionPreview.pivotX = 0f
+            scrollTransitionPreview.pivotY = 0f
+            scrollTransitionPreview.setAlpha(1f)
+            val currentScale: Float = scrollTransitionPreview.width / longScreenshot.width.toFloat()
+            val matrix = Matrix()
+            matrix.setScale(currentScale, currentScale)
+            matrix.postTranslate(
+                longScreenshot.left * currentScale,
+                longScreenshot.top * currentScale
+            )
+            scrollTransitionPreview.setImageMatrix(matrix)
+            val destinationScale: Float = destRect.width() / scrollTransitionPreview.width.toFloat()
+            val previewAnim = ValueAnimator.ofFloat(0f, 1f)
+            previewAnim.addUpdateListener { animation: ValueAnimator ->
+                val t = animation.animatedFraction
+                val currScale = MathUtils.lerp(1f, destinationScale, t)
+                scrollTransitionPreview.scaleX = currScale
+                scrollTransitionPreview.scaleY = currScale
+                scrollTransitionPreview.x = MathUtils.lerp(startX, destRect.left.toFloat(), t)
+                scrollTransitionPreview.y = MathUtils.lerp(startY, destRect.top.toFloat(), t)
+            }
+            val previewFadeAnim = ValueAnimator.ofFloat(1f, 0f)
+            previewFadeAnim.addUpdateListener { animation: ValueAnimator ->
+                scrollTransitionPreview.setAlpha(1 - animation.animatedFraction)
+            }
+            previewAnim.doOnEnd { onTransitionEnd.run() }
+            animSet.play(previewAnim).with(scrimAnim).before(previewFadeAnim)
+        } else {
+            // if we switched orientations between the original screenshot and the long screenshot
+            // capture, just fade out the scrim instead of running the preview animation
+            scrimAnim.doOnEnd { onTransitionEnd.run() }
+            animSet.play(scrimAnim)
+        }
+        animator = animSet
+        return animSet
+    }
+
+    fun fadeForLongScreenshotTransition() {
+        scrollingScrim.imageTintBlendMode = BlendMode.SRC_ATOP
+        val anim = ValueAnimator.ofFloat(0f, .3f)
+        anim.addUpdateListener {
+            scrollingScrim.setImageTintList(
+                ColorStateList.valueOf(Color.argb(it.animatedValue as Float, 0f, 0f, 0f))
+            )
+        }
+        for (view in fadeUI) {
+            view.alpha = 0f
+        }
+        screenshotPreview.alpha = 0f
+        anim.setDuration(200)
+        anim.start()
+    }
+
+    fun restoreUI() {
+        animator?.cancel()
+        for (view in fadeUI) {
+            view.alpha = 1f
+        }
+        screenshotPreview.alpha = 1f
     }
 
     fun getSwipeReturnAnimation(): Animator {
@@ -114,6 +227,7 @@ class ScreenshotAnimationController(private val view: ScreenshotShelfView) {
     }
 
     fun getSwipeDismissAnimation(requestedVelocity: Float?): Animator {
+        animator?.cancel()
         val velocity = getAdjustedVelocity(requestedVelocity)
         val screenWidth = view.resources.displayMetrics.widthPixels
         // translation at which point the visible UI is fully off the screen (in the direction
@@ -131,6 +245,8 @@ class ScreenshotAnimationController(private val view: ScreenshotShelfView) {
             view.alpha = 1f - it.animatedFraction
         }
         animator.duration = ((abs(distance / velocity))).toLong()
+        animator.doOnStart { viewModel.setIsAnimating(true) }
+        animator.doOnEnd { viewModel.setIsAnimating(false) }
 
         this.animator = animator
         return animator

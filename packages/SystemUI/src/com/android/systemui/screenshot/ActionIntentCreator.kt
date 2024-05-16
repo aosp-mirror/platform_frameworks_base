@@ -97,6 +97,7 @@ object ActionIntentCreator {
             .putExtra(LongScreenshotActivity.EXTRA_SCREENSHOT_USER_HANDLE, owner)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
     }
 
     private const val EXTRA_EDIT_SOURCE = "edit_source"

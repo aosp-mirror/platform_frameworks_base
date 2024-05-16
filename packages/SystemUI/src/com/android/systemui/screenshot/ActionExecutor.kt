@@ -25,7 +25,6 @@ import android.content.Intent
 import android.os.UserHandle
 import android.util.Log
 import android.util.Pair
-import android.view.View
 import android.view.Window
 import com.android.app.tracing.coroutines.launch
 import com.android.internal.app.ChooserActivity
@@ -41,8 +40,8 @@ constructor(
     private val intentExecutor: ActionIntentExecutor,
     @Application private val applicationScope: CoroutineScope,
     @Assisted val window: Window,
-    @Assisted val transitionView: View,
-    @Assisted val onDismiss: (() -> Unit)
+    @Assisted val viewProxy: ScreenshotViewProxy,
+    @Assisted val finishDismiss: () -> Unit,
 ) {
 
     var isPendingSharedTransition = false
@@ -50,6 +49,7 @@ constructor(
 
     fun startSharedTransition(intent: Intent, user: UserHandle, overrideTransition: Boolean) {
         isPendingSharedTransition = true
+        viewProxy.fadeForSharedTransition()
         val windowTransition = createWindowTransition()
         applicationScope.launch("$TAG#launchIntentAsync") {
             intentExecutor.launchIntent(
@@ -70,7 +70,7 @@ constructor(
                 ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
             )
             pendingIntent.send(options.toBundle())
-            onDismiss.invoke()
+            viewProxy.requestDismissal(null)
         } catch (e: PendingIntent.CanceledException) {
             Log.e(TAG, "Intent cancelled", e)
         }
@@ -89,7 +89,7 @@ constructor(
 
                 override fun hideSharedElements() {
                     isPendingSharedTransition = false
-                    onDismiss.invoke()
+                    finishDismiss.invoke()
                 }
 
                 override fun onFinish() {}
@@ -98,13 +98,20 @@ constructor(
             window,
             callbacks,
             null,
-            Pair.create(transitionView, ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME)
+            Pair.create(
+                viewProxy.screenshotPreview,
+                ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME
+            )
         )
     }
 
     @AssistedFactory
     interface Factory {
-        fun create(window: Window, transitionView: View, onDismiss: (() -> Unit)): ActionExecutor
+        fun create(
+            window: Window,
+            viewProxy: ScreenshotViewProxy,
+            finishDismiss: (() -> Unit)
+        ): ActionExecutor
     }
 
     companion object {

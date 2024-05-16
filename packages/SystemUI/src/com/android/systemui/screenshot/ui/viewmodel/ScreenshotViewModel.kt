@@ -17,6 +17,7 @@
 package com.android.systemui.screenshot.ui.viewmodel
 
 import android.graphics.Bitmap
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.util.Log
 import android.view.accessibility.AccessibilityManager
@@ -26,6 +27,8 @@ import kotlinx.coroutines.flow.StateFlow
 class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager) {
     private val _preview = MutableStateFlow<Bitmap?>(null)
     val preview: StateFlow<Bitmap?> = _preview
+    private val _scrollingScrim = MutableStateFlow<Bitmap?>(null)
+    val scrollingScrim: StateFlow<Bitmap?> = _scrollingScrim
     private val _badge = MutableStateFlow<Drawable?>(null)
     val badge: StateFlow<Drawable?> = _badge
     private val _previewAction = MutableStateFlow<(() -> Unit)?>(null)
@@ -35,11 +38,19 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
     private val _animationState = MutableStateFlow(AnimationState.NOT_STARTED)
     val animationState: StateFlow<AnimationState> = _animationState
 
+    private val _isAnimating = MutableStateFlow(false)
+    val isAnimating: StateFlow<Boolean> = _isAnimating
+    private val _scrollableRect = MutableStateFlow<Rect?>(null)
+    val scrollableRect: StateFlow<Rect?> = _scrollableRect
     val showDismissButton: Boolean
         get() = accessibilityManager.isEnabled
 
     fun setScreenshotBitmap(bitmap: Bitmap?) {
         _preview.value = bitmap
+    }
+
+    fun setScrollingScrimBitmap(bitmap: Bitmap?) {
+        _scrollingScrim.value = bitmap
     }
 
     fun setScreenshotBadge(badge: Drawable?) {
@@ -114,12 +125,23 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
         _animationState.value = state
     }
 
+    fun setIsAnimating(isAnimating: Boolean) {
+        _isAnimating.value = isAnimating
+    }
+
+    fun setScrollableRect(rect: Rect?) {
+        _scrollableRect.value = rect
+    }
+
     fun reset() {
         _preview.value = null
+        _scrollingScrim.value = null
         _badge.value = null
         _previewAction.value = null
         _actions.value = listOf()
         _animationState.value = AnimationState.NOT_STARTED
+        _isAnimating.value = false
+        _scrollableRect.value = null
     }
 
     companion object {
