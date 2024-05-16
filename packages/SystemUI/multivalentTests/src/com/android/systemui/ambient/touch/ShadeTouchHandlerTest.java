@@ -18,10 +18,8 @@ package com.android.systemui.ambient.touch;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -30,6 +28,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
@@ -37,7 +36,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -51,89 +49,66 @@ public class ShadeTouchHandlerTest extends SysuiTestCase {
     CentralSurfaces mCentralSurfaces;
 
     @Mock
+    ShadeViewController mShadeViewController;
+
+    @Mock
     TouchHandler.TouchSession mTouchSession;
 
     ShadeTouchHandler mTouchHandler;
-
-    @Captor
-    ArgumentCaptor<GestureDetector.OnGestureListener> mGestureListenerCaptor;
-    @Captor
-    ArgumentCaptor<InputChannelCompat.InputEventListener> mInputListenerCaptor;
 
     private static final int TOUCH_HEIGHT = 20;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-
-        mTouchHandler = new ShadeTouchHandler(Optional.of(mCentralSurfaces), TOUCH_HEIGHT);
-    }
-
-    // Verifies that a swipe down in the gesture region is captured by the shade touch handler.
-    @Test
-    public void testSwipeDown_captured() {
-        final boolean captured = swipe(Direction.DOWN);
-
-        assertThat(captured).isTrue();
-    }
-
-    // Verifies that a swipe in the upward direction is not catpured.
-    @Test
-    public void testSwipeUp_notCaptured() {
-        final boolean captured = swipe(Direction.UP);
-
-        // Motion events not captured as the swipe is going in the wrong direction.
-        assertThat(captured).isFalse();
-    }
-
-    // Verifies that a swipe down forwards captured touches to the shade window for handling.
-    @Test
-    public void testSwipeDown_sentToShadeWindow() {
-        swipe(Direction.DOWN);
-
-        // Both motion events are sent for the shade window to process.
-        verify(mCentralSurfaces, times(2)).handleExternalShadeWindowTouch(any());
-    }
-
-    // Verifies that a swipe down is not forwarded to the shade window.
-    @Test
-    public void testSwipeUp_touchesNotSent() {
-        swipe(Direction.UP);
-
-        // Motion events are not sent for the shade window to process as the swipe is going in the
-        // wrong direction.
-        verify(mCentralSurfaces, never()).handleExternalShadeWindowTouch(any());
+        mTouchHandler = new ShadeTouchHandler(Optional.of(mCentralSurfaces), mShadeViewController,
+                TOUCH_HEIGHT);
     }
 
     /**
-     * Simulates a swipe in the given direction and returns true if the touch was intercepted by the
-     * touch handler's gesture listener.
-     * <p>
-     * Swipe down starts from a Y coordinate of 0 and goes downward. Swipe up starts from the edge
-     * of the gesture region, {@link #TOUCH_HEIGHT}, and goes upward to 0.
+     * Verify that touches aren't handled when the bouncer is showing.
      */
-    private boolean swipe(Direction direction) {
-        Mockito.clearInvocations(mTouchSession);
+    @Test
+    public void testInactiveOnBouncer() {
+        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
         mTouchHandler.onSessionStart(mTouchSession);
-
-        verify(mTouchSession).registerGestureListener(mGestureListenerCaptor.capture());
-        verify(mTouchSession).registerInputListener(mInputListenerCaptor.capture());
-
-        final float startY = direction == Direction.UP ? TOUCH_HEIGHT : 0;
-        final float endY = direction == Direction.UP ? 0 : TOUCH_HEIGHT;
-
-        // Send touches to the input and gesture listener.
-        final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, startY, 0);
-        final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, endY, 0);
-        mInputListenerCaptor.getValue().onInputEvent(event1);
-        mInputListenerCaptor.getValue().onInputEvent(event2);
-        final boolean captured = mGestureListenerCaptor.getValue().onScroll(event1, event2, 0,
-                startY - endY);
-
-        return captured;
+        verify(mTouchSession).pop();
     }
 
-    private enum Direction {
-        DOWN, UP,
+    /**
+     * Make sure {@link ShadeTouchHandler}
+     */
+    @Test
+    public void testTouchPilferingOnScroll() {
+        final MotionEvent motionEvent1 = Mockito.mock(MotionEvent.class);
+        final MotionEvent motionEvent2 = Mockito.mock(MotionEvent.class);
+
+        final ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerArgumentCaptor =
+                ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
+
+        mTouchHandler.onSessionStart(mTouchSession);
+        verify(mTouchSession).registerGestureListener(gestureListenerArgumentCaptor.capture());
+
+        assertThat(gestureListenerArgumentCaptor.getValue()
+                .onScroll(motionEvent1, motionEvent2, 1, 1))
+                .isTrue();
     }
+
+    /**
+     * Ensure touches are propagated to the {@link ShadeViewController}.
+     */
+    @Test
+    public void testEventPropagation() {
+        final MotionEvent motionEvent = Mockito.mock(MotionEvent.class);
+
+        final ArgumentCaptor<InputChannelCompat.InputEventListener>
+                inputEventListenerArgumentCaptor =
+                    ArgumentCaptor.forClass(InputChannelCompat.InputEventListener.class);
+
+        mTouchHandler.onSessionStart(mTouchSession);
+        verify(mTouchSession).registerInputListener(inputEventListenerArgumentCaptor.capture());
+        inputEventListenerArgumentCaptor.getValue().onInputEvent(motionEvent);
+        verify(mShadeViewController).handleExternalTouch(motionEvent);
+    }
+
 }

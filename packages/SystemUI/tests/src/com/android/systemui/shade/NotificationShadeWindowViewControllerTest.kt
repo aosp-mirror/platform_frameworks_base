@@ -519,46 +519,6 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
     }
 
     @Test
-    fun handleExternalTouch_intercepted_sendsOnTouch() {
-        // Accept dispatch and also intercept.
-        whenever(view.dispatchTouchEvent(any())).thenReturn(true)
-        whenever(view.onInterceptTouchEvent(any())).thenReturn(true)
-
-        underTest.handleExternalTouch(DOWN_EVENT)
-        underTest.handleExternalTouch(MOVE_EVENT)
-
-        // Once intercepted, both events are sent to the view.
-        verify(view).onTouchEvent(DOWN_EVENT)
-        verify(view).onTouchEvent(MOVE_EVENT)
-    }
-
-    @Test
-    fun handleExternalTouch_notDispatched_interceptNotCalled() {
-        // Don't accept dispatch
-        whenever(view.dispatchTouchEvent(any())).thenReturn(false)
-
-        underTest.handleExternalTouch(DOWN_EVENT)
-
-        // Interception is not offered.
-        verify(view, never()).onInterceptTouchEvent(any())
-    }
-
-    @Test
-    fun handleExternalTouch_notIntercepted_onTouchNotSent() {
-        // Accept dispatch, but don't dispatch
-        whenever(view.dispatchTouchEvent(any())).thenReturn(true)
-        whenever(view.onInterceptTouchEvent(any())).thenReturn(false)
-
-        underTest.handleExternalTouch(DOWN_EVENT)
-        underTest.handleExternalTouch(MOVE_EVENT)
-
-        // Interception offered for both events, but onTouchEvent is never called.
-        verify(view).onInterceptTouchEvent(DOWN_EVENT)
-        verify(view).onInterceptTouchEvent(MOVE_EVENT)
-        verify(view, never()).onTouchEvent(any())
-    }
-
-    @Test
     fun testGetKeyguardMessageArea() =
         testScope.runTest {
             underTest.keyguardMessageArea
