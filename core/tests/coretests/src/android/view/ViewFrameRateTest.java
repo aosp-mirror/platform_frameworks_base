@@ -623,6 +623,28 @@ public class ViewFrameRateTest {
         assertEquals(FRAME_RATE_CATEGORY_HIGH_HINT, mViewRoot.getLastPreferredFrameRateCategory());
     }
 
+    @Test
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY
+    })
+    public void idleDetected() throws Throwable {
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_HIGH);
+            mMovingView.setFrameContentVelocity(Float.MAX_VALUE);
+            mMovingView.invalidate();
+            runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_HIGH,
+                    mViewRoot.getLastPreferredFrameRateCategory()));
+        });
+        waitForAfterDraw();
+
+        // Wait for idle timeout
+        Thread.sleep(1000);
+        assertEquals(0f, mViewRoot.getLastPreferredFrameRate());
+        assertEquals(FRAME_RATE_CATEGORY_NO_PREFERENCE,
+                mViewRoot.getLastPreferredFrameRateCategory());
+    }
+
     private void runAfterDraw(@NonNull Runnable runnable) {
         Handler handler = new Handler(Looper.getMainLooper());
         mAfterDrawLatch = new CountDownLatch(1);
