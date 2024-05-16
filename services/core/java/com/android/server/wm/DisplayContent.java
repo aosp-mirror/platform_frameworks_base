@@ -5009,7 +5009,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         // This should be called after the insets have been dispatched to clients and we have
         // committed finish drawing windows.
-        mInsetsStateController.getImeSourceProvider().checkShowImePostLayout();
+        mInsetsStateController.getImeSourceProvider().checkAndStartShowImePostLayout();
 
         mLastHasContent = mTmpApplySurfaceChangesTransactionState.displayHasContent;
         if (!inTransition() && !mDisplayRotation.isRotatingSeamlessly()) {

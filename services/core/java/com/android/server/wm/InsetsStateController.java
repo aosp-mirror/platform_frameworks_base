@@ -389,7 +389,7 @@ class InsetsStateController {
             newControlTargets.clear();
             // Check for and try to run the scheduled show IME request (if it exists), as we
             // now applied the surface transaction and notified the target of the new control.
-            getImeSourceProvider().checkShowImePostLayout();
+            getImeSourceProvider().checkAndStartShowImePostLayout();
         });
     }
 
