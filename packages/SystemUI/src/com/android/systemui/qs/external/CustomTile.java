@@ -42,6 +42,7 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
+import android.widget.Button;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
@@ -502,6 +503,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener,
         if (state instanceof BooleanState) {
             state.expandedAccessibilityClassName = Switch.class.getName();
             ((BooleanState) state).value = (state.state == Tile.STATE_ACTIVE);
+        } else {
+            state.expandedAccessibilityClassName = Button.class.getName();
         }
 
     }
