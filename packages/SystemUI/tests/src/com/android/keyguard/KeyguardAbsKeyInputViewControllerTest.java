@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.os.SystemClock;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.KeyEvent;
@@ -125,8 +126,8 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_REVAMPED_BOUNCER_MESSAGES)
     public void withFeatureFlagOn_oldMessage_isHidden() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_REVAMPED_BOUNCER_MESSAGES);
         KeyguardAbsKeyInputViewController underTest = createTestObject();
 
         underTest.init();

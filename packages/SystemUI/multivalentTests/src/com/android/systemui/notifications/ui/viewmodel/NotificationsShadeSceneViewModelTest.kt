@@ -51,8 +51,8 @@ class NotificationsShadeSceneViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val sceneInteractor = kosmos.sceneInteractor
-    private val deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val deviceUnlockedInteractor by lazy { kosmos.deviceUnlockedInteractor }
 
     private val underTest = kosmos.notificationsShadeSceneViewModel
 

@@ -37,6 +37,7 @@ import android.hardware.biometrics.PromptVerticalListContentView
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
+import android.platform.test.annotations.EnableFlags
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import androidx.test.filters.SmallTest
@@ -1272,8 +1273,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
+    @EnableFlags(FLAG_BP_TALKBACK)
     fun hint_for_talkback_guidance() = runGenericTest {
-        mSetFlagsRule.enableFlags(FLAG_BP_TALKBACK)
         val hint by collectLastValue(viewModel.accessibilityHint)
 
         // Touches should fall outside of sensor area
@@ -1295,10 +1296,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun descriptionOverriddenByVerticalListContentView() =
         runGenericTest(contentView = promptContentView, description = "test description") {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val contentView by collectLastValue(viewModel.contentView)
             val description by collectLastValue(viewModel.description)
 
@@ -1307,13 +1307,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun descriptionOverriddenByContentViewWithMoreOptionsButton() =
         runGenericTest(
             contentView = promptContentViewWithMoreOptionsButton,
             description = "test description"
         ) {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val contentView by collectLastValue(viewModel.contentView)
             val description by collectLastValue(viewModel.description)
 
@@ -1322,10 +1321,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun descriptionWithoutContentView() =
         runGenericTest(description = "test description") {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val contentView by collectLastValue(viewModel.contentView)
             val description by collectLastValue(viewModel.description)
 
@@ -1334,19 +1332,17 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logo_nullIfPkgNameNotFound() =
         runGenericTest(packageName = OP_PACKAGE_NAME_CAN_NOT_BE_FOUND) {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val logo by collectLastValue(viewModel.logo)
             assertThat(logo).isNull()
         }
 
     @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logo_defaultWithOverrides() =
         runGenericTest(packageName = packageNameForLogoWithOverrides) {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val logo by collectLastValue(viewModel.logo)
 
             // 1. PM.getApplicationInfo(packageNameForLogoWithOverrides) is set to return
@@ -1357,71 +1353,63 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logo_defaultIsNull() =
         runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val logo by collectLastValue(viewModel.logo)
             assertThat(logo).isNull()
         }
 
     @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logo_default() = runGenericTest {
-        mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-        mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
         val logo by collectLastValue(viewModel.logo)
         assertThat(logo).isEqualTo(defaultLogoIcon)
     }
 
     @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logo_resSetByApp() =
         runGenericTest(logoRes = logoResFromApp) {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val logo by collectLastValue(viewModel.logo)
             assertThat(logo).isEqualTo(logoFromApp)
         }
 
     @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logo_bitmapSetByApp() =
         runGenericTest(logoBitmap = logoBitmapFromApp) {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val logo by collectLastValue(viewModel.logo)
             assertThat((logo as BitmapDrawable).bitmap).isEqualTo(logoBitmapFromApp)
         }
 
     @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logoDescription_emptyIfPkgNameNotFound() =
         runGenericTest(packageName = OP_PACKAGE_NAME_CAN_NOT_BE_FOUND) {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val logoDescription by collectLastValue(viewModel.logoDescription)
             assertThat(logoDescription).isEqualTo("")
         }
 
     @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logoDescription_defaultIsEmpty() =
         runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val logoDescription by collectLastValue(viewModel.logoDescription)
             assertThat(logoDescription).isEqualTo("")
         }
 
     @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logoDescription_default() = runGenericTest {
-        mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-        mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
         val logoDescription by collectLastValue(viewModel.logoDescription)
         assertThat(logoDescription).isEqualTo(defaultLogoDescription)
     }
 
     @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logoDescription_setByApp() =
         runGenericTest(logoDescription = logoDescriptionFromApp) {
-            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
             val logoDescription by collectLastValue(viewModel.logoDescription)
             assertThat(logoDescription).isEqualTo(logoDescriptionFromApp)
         }

@@ -66,15 +66,12 @@ class BouncerViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
-    private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
-    private val sceneContainerStartable = kosmos.sceneContainerStartable
 
     private lateinit var underTest: BouncerViewModel
 
     @Before
     fun setUp() {
-        sceneContainerStartable.start()
+        kosmos.sceneContainerStartable.start()
         underTest = kosmos.bouncerViewModel
     }
 
@@ -164,11 +161,11 @@ class BouncerViewModelTest : SysuiTestCase() {
             assertThat(isInputEnabled).isTrue()
 
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
-                bouncerInteractor.authenticate(WRONG_PIN)
+                kosmos.bouncerInteractor.authenticate(WRONG_PIN)
             }
             assertThat(isInputEnabled).isFalse()
 
-            val lockoutEndMs = authenticationInteractor.lockoutEndTimestamp ?: 0
+            val lockoutEndMs = kosmos.authenticationInteractor.lockoutEndTimestamp ?: 0
             advanceTimeBy(lockoutEndMs - testScope.currentTime)
             assertThat(isInputEnabled).isTrue()
         }

@@ -94,6 +94,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
@@ -1576,17 +1578,19 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags({
+        android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS,
+        android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL
+    })
     public void testUpdateGeneratedPreview_flagDisabled() {
-        mSetFlagsRule.disableFlags(android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS);
-        mSetFlagsRule.disableFlags(android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL);
         mManager.updateGeneratedPreviewForUser(mUserTracker.getUserHandle());
         verify(mAppWidgetManager, times(0)).setWidgetPreview(any(), anyInt(), any());
     }
 
     @Test
+    @EnableFlags(android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS)
+    @DisableFlags(android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL)
     public void testUpdateGeneratedPreview_userLocked() {
-        mSetFlagsRule.enableFlags(android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS);
-        mSetFlagsRule.disableFlags(android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL);
         when(mUserManager.isUserUnlocked(mUserTracker.getUserHandle())).thenReturn(false);
 
         mManager.updateGeneratedPreviewForUser(mUserTracker.getUserHandle());
@@ -1594,9 +1598,9 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS)
+    @DisableFlags(android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL)
     public void testUpdateGeneratedPreview_userUnlocked() {
-        mSetFlagsRule.enableFlags(android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS);
-        mSetFlagsRule.disableFlags(android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL);
         when(mUserManager.isUserUnlocked(mUserTracker.getUserHandle())).thenReturn(true);
         when(mAppWidgetManager.setWidgetPreview(any(), anyInt(), any())).thenReturn(true);
 
@@ -1605,9 +1609,9 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS)
+    @DisableFlags(android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL)
     public void testUpdateGeneratedPreview_doesNotSetTwice() {
-        mSetFlagsRule.enableFlags(android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS);
-        mSetFlagsRule.disableFlags(android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL);
         when(mUserManager.isUserUnlocked(mUserTracker.getUserHandle())).thenReturn(true);
         when(mAppWidgetManager.setWidgetPreview(any(), anyInt(), any())).thenReturn(true);
 
@@ -1617,9 +1621,11 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags({
+        android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS,
+        android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL
+    })
     public void testUpdateGeneratedPreviewWithDataParcel_userLocked() throws InterruptedException {
-        mSetFlagsRule.enableFlags(android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS);
-        mSetFlagsRule.enableFlags(android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL);
         when(mUserManager.isUserUnlocked(mUserTracker.getUserHandle())).thenReturn(false);
 
         mManager.updateGeneratedPreviewForUser(mUserTracker.getUserHandle());
@@ -1628,10 +1634,12 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags({
+        android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS,
+        android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL
+    })
     public void testUpdateGeneratedPreviewWithDataParcel_userUnlocked()
             throws InterruptedException {
-        mSetFlagsRule.enableFlags(android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS);
-        mSetFlagsRule.enableFlags(android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL);
         when(mUserManager.isUserUnlocked(mUserTracker.getUserHandle())).thenReturn(true);
         when(mAppWidgetManager.setWidgetPreview(any(), anyInt(), any())).thenReturn(true);
 
@@ -1641,10 +1649,12 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags({
+        android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS,
+        android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL
+    })
     public void testUpdateGeneratedPreviewWithDataParcel_doesNotSetTwice()
             throws InterruptedException {
-        mSetFlagsRule.enableFlags(android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS);
-        mSetFlagsRule.enableFlags(android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL);
         when(mUserManager.isUserUnlocked(mUserTracker.getUserHandle())).thenReturn(true);
         when(mAppWidgetManager.setWidgetPreview(any(), anyInt(), any())).thenReturn(true);
 
