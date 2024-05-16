@@ -20,7 +20,6 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepository
 import com.android.systemui.qs.panels.data.repository.IconTilesRepository
 import com.android.systemui.qs.panels.data.repository.gridLayoutTypeRepository
 import com.android.systemui.qs.panels.data.repository.iconTilesRepository
@@ -48,9 +47,6 @@ class GridConsistencyInteractorTest : SysuiTestCase() {
 
     data object TestGridLayoutType : GridLayoutType
 
-    private val gridLayout: MutableStateFlow<GridLayoutType> =
-        MutableStateFlow(InfiniteGridLayoutType)
-
     private val iconOnlyTiles =
         MutableStateFlow(
             setOf(
@@ -74,17 +70,13 @@ class GridConsistencyInteractorTest : SysuiTestCase() {
                     Pair(InfiniteGridLayoutType, infiniteGridConsistencyInteractor),
                     Pair(TestGridLayoutType, noopGridConsistencyInteractor)
                 )
-            gridLayoutTypeRepository =
-                object : GridLayoutTypeRepository {
-                    override val layout: StateFlow<GridLayoutType> = gridLayout.asStateFlow()
-                }
         }
 
     private val underTest = with(kosmos) { gridConsistencyInteractor }
 
     @Before
     fun setUp() {
-        gridLayout.value = InfiniteGridLayoutType
+        with(kosmos) { gridLayoutTypeRepository.setLayout(InfiniteGridLayoutType) }
         underTest.start()
     }
 
@@ -94,7 +86,7 @@ class GridConsistencyInteractorTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 // Using the no-op grid consistency interactor
-                gridLayout.value = TestGridLayoutType
+                gridLayoutTypeRepository.setLayout(TestGridLayoutType)
 
                 // Setting an invalid layout with holes
                 // [ Large A ] [ sa ]

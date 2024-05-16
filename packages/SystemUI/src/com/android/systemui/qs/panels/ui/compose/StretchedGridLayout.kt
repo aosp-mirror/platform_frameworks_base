@@ -22,12 +22,15 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.panels.domain.interactor.IconTilesInteractor
 import com.android.systemui.qs.panels.domain.interactor.InfiniteGridSizeInteractor
+import com.android.systemui.qs.panels.shared.model.SizedTile
+import com.android.systemui.qs.panels.shared.model.TileRow
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
@@ -35,11 +38,11 @@ import com.android.systemui.res.R
 import javax.inject.Inject
 
 @SysUISingleton
-class InfiniteGridLayout
+class StretchedGridLayout
 @Inject
 constructor(
     private val iconTilesInteractor: IconTilesInteractor,
-    private val gridSizeInteractor: InfiniteGridSizeInteractor
+    private val gridSizeInteractor: InfiniteGridSizeInteractor,
 ) : GridLayout {
 
     @Composable
@@ -52,24 +55,33 @@ constructor(
             tiles.forEach { it.startListening(token) }
             onDispose { tiles.forEach { it.stopListening(token) } }
         }
-        val iconTilesSpecs by iconTilesInteractor.iconTilesSpecs.collectAsStateWithLifecycle()
-        val columns by gridSizeInteractor.columns.collectAsStateWithLifecycle()
 
-        TileLazyGrid(modifier = modifier, columns = GridCells.Fixed(columns)) {
-            items(
-                tiles.size,
-                span = { index ->
-                    val iconOnly = iconTilesSpecs.contains(tiles[index].spec)
-                    if (iconOnly) {
-                        GridItemSpan(1)
-                    } else {
-                        GridItemSpan(2)
+        // Tile widths [normal|stretched]
+        // Icon [3 | 4]
+        // Large [6 | 8]
+        val columns = 12
+        val iconTilesSpecs by iconTilesInteractor.iconTilesSpecs.collectAsStateWithLifecycle()
+        val stretchedTiles =
+            remember(tiles) {
+                val sizedTiles =
+                    tiles.map {
+                        SizedTile(
+                            it,
+                            if (iconTilesSpecs.contains(it.spec)) {
+                                3
+                            } else {
+                                6
+                            }
+                        )
                     }
-                }
-            ) { index ->
+                splitInRows(sizedTiles, columns)
+            }
+
+        TileLazyGrid(columns = GridCells.Fixed(columns), modifier = modifier) {
+            items(stretchedTiles.size, span = { GridItemSpan(stretchedTiles[it].width) }) { index ->
                 Tile(
-                    tiles[index],
-                    iconTilesSpecs.contains(tiles[index].spec),
+                    stretchedTiles[index].tile,
+                    iconTilesSpecs.contains(stretchedTiles[index].tile.spec),
                     Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
                 )
             }
@@ -81,7 +93,7 @@ constructor(
         tiles: List<EditTileViewModel>,
         modifier: Modifier,
         onAddTile: (TileSpec, Int) -> Unit,
-        onRemoveTile: (TileSpec) -> Unit,
+        onRemoveTile: (TileSpec) -> Unit
     ) {
         val iconOnlySpecs by iconTilesInteractor.iconTilesSpecs.collectAsStateWithLifecycle()
         val columns by gridSizeInteractor.columns.collectAsStateWithLifecycle()
@@ -94,5 +106,34 @@ constructor(
             onAddTile = onAddTile,
             onRemoveTile = onRemoveTile,
         )
+    }
+
+    private fun splitInRows(
+        tiles: List<SizedTile<TileViewModel>>,
+        columns: Int
+    ): List<SizedTile<TileViewModel>> {
+        val row = TileRow<TileViewModel>(columns)
+
+        return buildList {
+            for (tile in tiles) {
+                if (row.maybeAddTile(tile)) {
+                    if (row.isFull()) {
+                        // Row is full, no need to stretch tiles
+                        addAll(row.tiles)
+                        row.clear()
+                    }
+                } else {
+                    if (row.isFull()) {
+                        addAll(row.tiles)
+                    } else {
+                        // Stretching tiles when row isn't full
+                        addAll(row.tiles.map { it.copy(width = it.width + (it.width / 3)) })
+                    }
+                    row.clear()
+                    row.maybeAddTile(tile)
+                }
+            }
+            addAll(row.tiles)
+        }
     }
 }

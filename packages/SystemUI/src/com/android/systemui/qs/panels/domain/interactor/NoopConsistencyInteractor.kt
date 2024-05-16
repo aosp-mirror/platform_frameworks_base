@@ -17,16 +17,10 @@
 package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepository
-import com.android.systemui.qs.panels.shared.model.GridLayoutType
+import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
 
 @SysUISingleton
-class GridLayoutTypeInteractor @Inject constructor(private val repo: GridLayoutTypeRepository) {
-    val layout: StateFlow<GridLayoutType> = repo.layout
-
-    fun setLayoutType(type: GridLayoutType) {
-        repo.setLayout(type)
-    }
+class NoopConsistencyInteractor @Inject constructor() : GridTypeConsistencyInteractor {
+    override fun reconcileTiles(tiles: List<TileSpec>): List<TileSpec> = tiles
 }

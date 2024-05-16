@@ -18,6 +18,8 @@ package com.android.systemui.qs.panels.domain.interactor
 
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.panels.shared.model.SizedTile
+import com.android.systemui.qs.panels.shared.model.TileRow
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
 
@@ -35,7 +37,7 @@ constructor(
      */
     override fun reconcileTiles(tiles: List<TileSpec>): List<TileSpec> {
         val newTiles: MutableList<TileSpec> = mutableListOf()
-        val row = TileRow(columns = gridSizeInteractor.columns.value)
+        val row = TileRow<TileSpec>(columns = gridSizeInteractor.columns.value)
         val iconTilesSet = iconTilesInteractor.iconTilesSpecs.value
         val tilesQueue =
             ArrayDeque(
@@ -54,7 +56,7 @@ constructor(
 
         while (tilesQueue.isNotEmpty()) {
             if (row.isFull()) {
-                newTiles.addAll(row.tileSpecs())
+                newTiles.addAll(row.tiles.map { it.tile })
                 row.clear()
             }
 
@@ -66,13 +68,13 @@ constructor(
                 // We'll try to either add an icon tile from the queue to complete the row, or
                 // remove an icon tile from the current row to free up space.
 
-                val iconTile: SizedTile? = tilesQueue.firstOrNull { it.width == 1 }
+                val iconTile: SizedTile<TileSpec>? = tilesQueue.firstOrNull { it.width == 1 }
                 if (iconTile != null) {
                     tilesQueue.remove(iconTile)
                     tilesQueue.addFirst(tile)
                     row.maybeAddTile(iconTile)
                 } else {
-                    val tileToRemove: SizedTile? = row.findLastIconTile()
+                    val tileToRemove: SizedTile<TileSpec>? = row.findLastIconTile()
                     if (tileToRemove != null) {
                         row.removeTile(tileToRemove)
                         row.maybeAddTile(tile)
@@ -84,7 +86,7 @@ constructor(
                         // If the row does not have an icon tile, add the incomplete row.
                         // Note: this shouldn't happen because an icon tile is guaranteed to be in a
                         // row that doesn't have enough space for a large tile.
-                        val tileSpecs = row.tileSpecs()
+                        val tileSpecs = row.tiles.map { it.tile }
                         Log.wtf(TAG, "Uneven row does not have an icon tile to remove: $tileSpecs")
                         newTiles.addAll(tileSpecs)
                         row.clear()
@@ -95,46 +97,9 @@ constructor(
         }
 
         // Add last row that might be incomplete
-        newTiles.addAll(row.tileSpecs())
+        newTiles.addAll(row.tiles.map { it.tile })
 
         return newTiles.toList()
-    }
-
-    /** Tile with a width representing the number of columns it should take. */
-    private data class SizedTile(val spec: TileSpec, val width: Int)
-
-    private class TileRow(private val columns: Int) {
-        private var availableColumns = columns
-        private val tiles: MutableList<SizedTile> = mutableListOf()
-
-        fun tileSpecs(): List<TileSpec> {
-            return tiles.map { it.spec }
-        }
-
-        fun maybeAddTile(tile: SizedTile): Boolean {
-            if (availableColumns - tile.width >= 0) {
-                tiles.add(tile)
-                availableColumns -= tile.width
-                return true
-            }
-            return false
-        }
-
-        fun findLastIconTile(): SizedTile? {
-            return tiles.findLast { it.width == 1 }
-        }
-
-        fun removeTile(tile: SizedTile) {
-            tiles.remove(tile)
-            availableColumns += tile.width
-        }
-
-        fun clear() {
-            tiles.clear()
-            availableColumns = columns
-        }
-
-        fun isFull(): Boolean = availableColumns == 0
     }
 
     private companion object {
