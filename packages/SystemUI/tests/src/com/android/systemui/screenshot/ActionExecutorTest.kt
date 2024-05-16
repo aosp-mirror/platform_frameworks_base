@@ -21,7 +21,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.UserHandle
 import android.testing.AndroidTestingRunner
-import android.view.View
 import android.view.Window
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -50,7 +49,7 @@ class ActionExecutorTest : SysuiTestCase() {
 
     private val intentExecutor = mock<ActionIntentExecutor>()
     private val window = mock<Window>()
-    private val view = mock<View>()
+    private val viewProxy = mock<ScreenshotShelfViewProxy>()
     private val onDismiss = mock<(() -> Unit)>()
     private val pendingIntent = mock<PendingIntent>()
 
@@ -72,16 +71,16 @@ class ActionExecutorTest : SysuiTestCase() {
     }
 
     @Test
-    fun sendPendingIntent_dismisses() = runTest {
+    fun sendPendingIntent_requestsDismissal() = runTest {
         actionExecutor = createActionExecutor()
 
         actionExecutor.sendPendingIntent(pendingIntent)
 
         verify(pendingIntent).send(any(Bundle::class.java))
-        verify(onDismiss).invoke()
+        verify(viewProxy).requestDismissal(null)
     }
 
     private fun createActionExecutor(): ActionExecutor {
-        return ActionExecutor(intentExecutor, testScope, window, view, onDismiss)
+        return ActionExecutor(intentExecutor, testScope, window, viewProxy, onDismiss)
     }
 }

@@ -317,9 +317,9 @@ public class ScreenshotController {
         mConfigChanges.applyNewConfig(context.getResources());
         reloadAssets();
 
-        mActionExecutor = actionExecutorFactory.create(mWindow, mViewProxy.getScreenshotPreview(),
+        mActionExecutor = actionExecutorFactory.create(mWindow, mViewProxy,
                 () -> {
-                    requestDismissal(null);
+                    finishDismiss();
                     return Unit.INSTANCE;
                 });
 
@@ -623,9 +623,11 @@ public class ScreenshotController {
                 (response) -> {
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_IMPRESSION,
                             0, response.getPackageName());
-                    if (screenshotShelfUi2() && mActionsProvider != null) {
-                        mActionsProvider.onScrollChipReady(
-                                () -> onScrollButtonClicked(owner, response));
+                    if (screenshotShelfUi2()) {
+                        if (mActionsProvider != null) {
+                            mActionsProvider.onScrollChipReady(
+                                    () -> onScrollButtonClicked(owner, response));
+                        }
                     } else {
                         mViewProxy.showScrollChip(response.getPackageName(),
                                 () -> onScrollButtonClicked(owner, response));
@@ -657,9 +659,7 @@ public class ScreenshotController {
                 () -> {
                     final Intent intent = ActionIntentCreator.INSTANCE.createLongScreenshotIntent(
                             owner, mContext);
-                    mActionIntentExecutor.launchIntentAsync(intent, owner, true,
-                            ActivityOptions.makeCustomAnimation(mContext, 0, 0), null);
-
+                    mActionIntentExecutor.launchIntentAsync(intent, owner, true, null, null);
                 },
                 mViewProxy::restoreNonScrollingUi,
                 mViewProxy::startLongScreenshotTransition);
