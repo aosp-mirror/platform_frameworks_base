@@ -198,7 +198,7 @@ public class PipActivity extends Activity {
         filter.addAction(ACTION_SET_REQUESTED_ORIENTATION);
         filter.addAction(ACTION_ENTER_PIP);
         filter.addAction(ACTION_ASPECT_RATIO);
-        registerReceiver(mBroadcastReceiver, filter);
+        registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_EXPORTED);
 
         handleIntentExtra(getIntent());
     }
@@ -222,8 +222,8 @@ public class PipActivity extends Activity {
 
     private RemoteAction buildRemoteAction(Icon icon, String label, String action) {
         final Intent intent = new Intent(action);
-        final PendingIntent pendingIntent =
-                PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        final PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         return new RemoteAction(icon, label, label, pendingIntent);
     }
 
