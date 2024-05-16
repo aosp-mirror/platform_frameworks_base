@@ -504,6 +504,15 @@ flag {
     }
 }
 
+flag {
+    name: "screenshot_scroll_crop_view_crash_fix"
+    namespace: "systemui"
+    description: "Mitigate crash on invalid computed range in CropView"
+    bug: "232633995"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
 
 flag {
     name: "screenshot_private_profile_behavior_fix"
