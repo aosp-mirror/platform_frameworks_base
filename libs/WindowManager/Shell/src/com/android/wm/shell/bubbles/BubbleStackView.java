@@ -3473,7 +3473,7 @@ public class BubbleStackView extends FrameLayout
      */
     int getBubbleIndex(@Nullable BubbleViewProvider provider) {
         if (provider == null) {
-            return 0;
+            return -1;
         }
         return mBubbleContainer.indexOfChild(provider.getIconView());
     }
