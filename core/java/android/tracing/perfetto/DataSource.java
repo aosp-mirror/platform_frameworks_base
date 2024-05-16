@@ -85,7 +85,7 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
                         new TracingContext<>(this, instanceIndex);
                 fun.trace(ctx);
 
-                ctx.flush();
+                nativeWritePackets(mNativeObj, ctx.getAndClearAllPendingTracePackets());
             } while (nativePerfettoDsTraceIterateNext(mNativeObj));
         } finally {
             nativePerfettoDsTraceIterateBreak(mNativeObj);
@@ -180,4 +180,6 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
     private static native boolean nativePerfettoDsTraceIterateNext(long dataSourcePtr);
     private static native void nativePerfettoDsTraceIterateBreak(long dataSourcePtr);
     private static native int nativeGetPerfettoDsInstanceIndex(long dataSourcePtr);
+
+    private static native void nativeWritePackets(long dataSourcePtr, byte[][] packetData);
 }

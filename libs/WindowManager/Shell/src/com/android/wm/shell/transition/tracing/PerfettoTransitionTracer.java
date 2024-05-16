@@ -218,8 +218,6 @@ public class PerfettoTransitionTracer implements TransitionTracer {
 
             }
             os.end(mappingsToken);
-
-            ctx.flush();
         });
     }
 }

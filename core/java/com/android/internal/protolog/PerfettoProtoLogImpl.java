@@ -191,8 +191,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 }
 
                 os.end(outProtologViewerConfigToken);
-
-                ctx.flush();
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Failed to read ProtoLog viewer config to dump on tracing end", e);
             }
