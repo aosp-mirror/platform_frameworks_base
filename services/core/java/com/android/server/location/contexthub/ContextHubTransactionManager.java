@@ -522,7 +522,10 @@ import java.util.concurrent.atomic.AtomicInteger;
      * the caller has obtained a lock on this ContextHubTransactionManager object.
      */
     private void removeTransactionAndStartNext() {
-        mTimeoutFuture.cancel(false /* mayInterruptIfRunning */);
+        if (mTimeoutFuture != null) {
+            mTimeoutFuture.cancel(/* mayInterruptIfRunning= */ false);
+            mTimeoutFuture = null;
+        }
 
         ContextHubServiceTransaction transaction = mTransactionQueue.remove();
         transaction.setComplete();
