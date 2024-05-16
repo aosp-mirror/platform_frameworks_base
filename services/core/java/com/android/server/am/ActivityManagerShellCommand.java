@@ -130,6 +130,7 @@ import com.android.server.am.nano.Capabilities;
 import com.android.server.am.nano.Capability;
 import com.android.server.am.nano.FrameworkCapability;
 import com.android.server.am.nano.VMCapability;
+import com.android.server.am.nano.VMInfo;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.Slogf;
@@ -460,6 +461,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return -1;
             }
         }
+        String vmName = System.getProperty("java.vm.name", "?");
+        String vmVersion = System.getProperty("java.vm.version", "?");
 
         if (outputAsProtobuf) {
             Capabilities capabilities = new Capabilities();
@@ -486,6 +489,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 capabilities.frameworkCapabilities[i] = cap;
             }
 
+            VMInfo vmInfo = new VMInfo();
+            vmInfo.name = vmName;
+            vmInfo.version = vmVersion;
+            capabilities.vmInfo = vmInfo;
+
             try {
                 getRawOutputStream().write(Capabilities.toByteArray(capabilities));
             } catch (IOException e) {
@@ -505,6 +513,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             for (String capability : Debug.getFeatureList()) {
                 pw.println("framework:" + capability);
             }
+            pw.println("vm_name:" + vmName);
+            pw.println("vm_version:" + vmVersion);
         }
         return 0;
     }
