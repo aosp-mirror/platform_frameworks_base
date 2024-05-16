@@ -41,6 +41,9 @@ public class LottieColorUtils {
     static {
         HashMap<String, Integer> map = new HashMap<>();
         map.put(
+                ".grey200",
+                R.color.settingslib_color_grey800);
+        map.put(
                 ".grey600",
                 R.color.settingslib_color_grey400);
         map.put(
