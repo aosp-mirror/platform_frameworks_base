@@ -55,6 +55,7 @@ import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -181,7 +182,11 @@ constructor(
             }
             .sample(powerInteractor.isAwake) { isAbleToDream, isAwake -> isAbleToDream && isAwake }
             .debounce(50L)
-            .distinctUntilChanged()
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     /** Whether the keyguard is showing or not. */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState")
@@ -225,7 +230,19 @@ constructor(
     @JvmField val primaryBouncerShowing: Flow<Boolean> = bouncerRepository.primaryBouncerShow
 
     /** Whether the alternate bouncer is showing or not. */
-    val alternateBouncerShowing: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
+    val alternateBouncerShowing: Flow<Boolean> =
+        bouncerRepository.alternateBouncerVisible.sample(isAbleToDream) {
+            alternateBouncerVisible,
+            isAbleToDream ->
+            if (isAbleToDream) {
+                // If the alternate bouncer will show over a dream, it is likely that the dream has
+                // requested a dismissal, which will stop the dream. By delaying this slightly, the
+                // DREAMING->LOCKSCREEN transition will now happen first, followed by
+                // LOCKSCREEN->ALTERNATE_BOUNCER.
+                delay(600L)
+            }
+            alternateBouncerVisible
+        }
 
     /** Observable for the [StatusBarState] */
     val statusBarState: Flow<StatusBarState> = repository.statusBarState
@@ -301,10 +318,12 @@ constructor(
                     shadeRepository.legacyShadeExpansion.onStart { emit(0f) },
                     keyguardTransitionInteractor.transitionValue(GONE).onStart { emit(0f) },
                 ) { legacyShadeExpansion, goneValue ->
-                    if (goneValue == 1f || (goneValue == 0f && legacyShadeExpansion == 0f)) {
+                    val isLegacyShadeInResetPosition =
+                        legacyShadeExpansion == 0f || legacyShadeExpansion == 1f
+                    if (goneValue == 1f || (goneValue == 0f && isLegacyShadeInResetPosition)) {
                         // Reset the translation value
                         emit(0f)
-                    } else if (legacyShadeExpansion > 0f && legacyShadeExpansion < 1f) {
+                    } else if (!isLegacyShadeInResetPosition) {
                         // On swipe up, translate the keyguard to reveal the bouncer, OR a GONE
                         // transition is running, which means this is a swipe to dismiss. Values of
                         // 0f and 1f need to be ignored in the legacy shade expansion. These can

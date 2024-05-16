@@ -275,6 +275,28 @@ class KeyguardInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun keyguardTranslationY_whenNotGoneAndShadeIsReesetEmitsZero() =
+        testScope.runTest {
+            val keyguardTranslationY by collectLastValue(underTest.keyguardTranslationY)
+
+            configRepository.setDimensionPixelSize(
+                R.dimen.keyguard_translate_distance_on_swipe_up,
+                100
+            )
+            configRepository.onAnyConfigurationChange()
+
+            shadeRepository.setLegacyShadeExpansion(1f)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.LOCKSCREEN,
+                testScope,
+            )
+
+            assertThat(keyguardTranslationY).isEqualTo(0f)
+        }
+
+    @Test
     fun keyguardTranslationY_whenTransitioningToGoneAndShadeIsExpandingEmitsNonZero() =
         testScope.runTest {
             val keyguardTranslationY by collectLastValue(underTest.keyguardTranslationY)

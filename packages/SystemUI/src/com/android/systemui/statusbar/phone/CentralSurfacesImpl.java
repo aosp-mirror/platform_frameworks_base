@@ -2805,7 +2805,16 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mScrimController.setExpansionAffectsAlpha(!unlocking);
 
         if (mAlternateBouncerInteractor.isVisibleState()) {
-            if (!DeviceEntryUdfpsRefactor.isEnabled()) {
+            if (DeviceEntryUdfpsRefactor.isEnabled()) {
+                if ((!mKeyguardStateController.isOccluded() || mShadeSurface.isPanelExpanded())
+                        && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
+                        || mTransitionToFullShadeProgress > 0f)) {
+                    // Assume scrim state for shade is already correct and do nothing
+                } else {
+                    // Safeguard which prevents the scrim from being stuck in the wrong state
+                    mScrimController.transitionTo(ScrimState.KEYGUARD);
+                }
+            } else {
                 if ((!mKeyguardStateController.isOccluded() || mShadeSurface.isPanelExpanded())
                         && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
                         || mTransitionToFullShadeProgress > 0f)) {
@@ -2814,7 +2823,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);
                 }
             }
-
             // This will cancel the keyguardFadingAway animation if it is running. We need to do
             // this as otherwise it can remain pending and leave keyguard in a weird state.
             mUnlockScrimCallback.onCancelled();

@@ -21,6 +21,7 @@ import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED;
 import static android.provider.Settings.Global.HEADS_UP_ON;
 
+import static com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR;
 import static com.android.systemui.Flags.FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE;
 import static com.android.systemui.Flags.FLAG_LIGHT_REVEAL_MIGRATION;
 import static com.android.systemui.flags.Flags.SHORTCUT_LIST_SEARCH_LAYOUT;
@@ -70,6 +71,8 @@ import android.os.IThermalService;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.service.dreams.IDreamManager;
 import android.support.test.metricshelper.MetricsAsserts;
 import android.testing.AndroidTestingRunner;
@@ -366,9 +369,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // Turn AOD on and toggle feature flag for jank fixes
         mFeatureFlags.set(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD, true);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
-        if (!SceneContainerFlag.isEnabled()) {
-            mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
-        }
 
         IThermalService thermalService = mock(IThermalService.class);
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,
@@ -837,6 +837,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
     public void testSetDozingNotUnlocking_transitionToAuthScrimmed_cancelKeyguardFadingAway() {
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
         when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(true);
@@ -848,7 +849,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOccludingQSNotExpanded_transitionToAuthScrimmed() {
+    @DisableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+    public void testOccludingQSNotExpanded_flagOff_transitionToAuthScrimmed() {
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
 
         // GIVEN device occluded and panel is NOT expanded
@@ -862,6 +864,39 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+    public void testNotOccluding_QSNotExpanded_flagOn_doesNotTransitionScrimState() {
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // GIVEN device occluded and panel is NOT expanded
+        mCentralSurfaces.setBarStateForTest(SHADE);
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(false);
+
+        mCentralSurfaces.updateScrimController();
+
+        // Tests the safeguard to reset the scrimstate
+        verify(mScrimController, never()).transitionTo(any());
+    }
+
+    @Test
+    @EnableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+    public void testNotOccluding_QSExpanded_flagOn_doesTransitionScrimStateToKeyguard() {
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // GIVEN device occluded and panel is NOT expanded
+        mCentralSurfaces.setBarStateForTest(SHADE);
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(true);
+
+        mCentralSurfaces.updateScrimController();
+
+        // Tests the safeguard to reset the scrimstate
+        verify(mScrimController, never()).transitionTo(eq(ScrimState.KEYGUARD));
+    }
+
+    @Test
+    @DisableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
     public void testOccludingQSExpanded_transitionToAuthScrimmedShade() {
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
 
