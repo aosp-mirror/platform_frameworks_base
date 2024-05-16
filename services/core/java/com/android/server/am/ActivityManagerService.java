@@ -40,6 +40,8 @@ import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_FORCE_STOPPED;
 import static android.app.ActivityManager.RESTRICTION_REASON_DEFAULT;
 import static android.app.ActivityManager.RESTRICTION_REASON_USAGE;
+import static android.app.ActivityManager.RESTRICTION_SOURCE_SYSTEM;
+import static android.app.ActivityManager.RESTRICTION_SOURCE_USER;
 import static android.app.ActivityManager.StopUserOnSwitch;
 import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_FROZEN;
 import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_UNFROZEN;
@@ -5146,7 +5148,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (android.app.Flags.appRestrictionsApi() && wasForceStopped) {
             noteAppRestrictionEnabled(app.info.packageName, app.uid,
                     RESTRICTION_LEVEL_FORCE_STOPPED, false,
-                    RESTRICTION_REASON_USAGE, "unknown", 0L);
+                    RESTRICTION_REASON_USAGE, "unknown", RESTRICTION_SOURCE_USER, 0L);
         }
 
         if (!sendBroadcast) {
@@ -14392,7 +14394,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (wasStopped) {
                         noteAppRestrictionEnabled(app.packageName, app.uid,
                                 RESTRICTION_LEVEL_FORCE_STOPPED, false,
-                                RESTRICTION_REASON_DEFAULT, "restore", 0L);
+                                RESTRICTION_REASON_DEFAULT, "restore",
+                                RESTRICTION_SOURCE_SYSTEM, 0L);
                     }
                 } catch (NameNotFoundException e) {
                     Slog.w(TAG, "No such package", e);
@@ -20277,12 +20280,14 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Log the reason for changing an app restriction. Purely used for logging purposes and does not
      * cause any change to app state.
      *
-     * @see ActivityManager#noteAppRestrictionEnabled(String, int, int, boolean, int, String, long)
+     * @see ActivityManager#noteAppRestrictionEnabled(String, int, int, boolean, int,
+     *          String, int, long)
      */
     @Override
     public void noteAppRestrictionEnabled(String packageName, int uid,
             @RestrictionLevel int restrictionType, boolean enabled,
-            @ActivityManager.RestrictionReason int reason, String subReason, long threshold) {
+            @ActivityManager.RestrictionReason int reason, String subReason,
+            @ActivityManager.RestrictionSource int source, long threshold) {
         if (!android.app.Flags.appRestrictionsApi()) return;
 
         enforceCallingPermission(android.Manifest.permission.DEVICE_POWER,
@@ -20295,7 +20300,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 uid = mPackageManagerInt.getPackageUid(packageName, 0, userId);
             }
             mAppRestrictionController.noteAppRestrictionEnabled(packageName, uid, restrictionType,
-                    enabled, reason, subReason, threshold);
+                    enabled, reason, subReason, source, threshold);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
