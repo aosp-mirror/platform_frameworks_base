@@ -529,7 +529,6 @@ public final class OnDeviceIntelligenceManager {
      * {@link Bundle}s annotated with this type will be validated that they are in-effect read-only
      * when passed via Binder IPC. Following restrictions apply :
      * <ul>
-     * <li> No Nested Bundles are allowed.</li>
      * <li> {@link PersistableBundle}s are allowed.</li>
      * <li> Any primitive types or their collections can be added as usual.</li>
      * <li>IBinder objects should *not* be added.</li>
