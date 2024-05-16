@@ -35,7 +35,7 @@ import androidx.compose.ui.platform.PlatformTextInputMethodRequest
  * ```
  * @Composable
  * fun YourFunction(viewModel: YourViewModel) {
- *     val selectedUserId by viewModel.selectedUserId.collectAsState()
+ *     val selectedUserId by viewModel.selectedUserId.collectAsStateWithLifecycle()
  *
  *     SelectedUserAwareInputConnection(selectedUserId) {
  *         TextField(...)

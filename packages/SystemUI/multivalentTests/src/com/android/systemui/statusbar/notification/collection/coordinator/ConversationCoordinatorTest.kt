@@ -23,9 +23,8 @@ import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.NotificationManager.IMPORTANCE_LOW
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.collection.GroupEntry
@@ -44,25 +43,29 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.collection.render.NodeController
 import com.android.systemui.statusbar.notification.icon.ConversationIconManager
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.PeopleNotificationType
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_FULL_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_IMPORTANT_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_NON_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_PERSON
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifierImpl
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.mock
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class ConversationCoordinatorTest : SysuiTestCase() {
     // captured listeners and pluggables:
@@ -72,22 +75,20 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     private lateinit var peopleComparator: NotifComparator
     private lateinit var beforeRenderListListener: OnBeforeRenderListListener
 
+    private lateinit var peopleNotificationIdentifier: PeopleNotificationIdentifier
+    private lateinit var peopleAlertingSection: NotifSection
+
     @Mock private lateinit var pipeline: NotifPipeline
     @Mock private lateinit var conversationIconManager: ConversationIconManager
-    @Mock private lateinit var peopleNotificationIdentifier: PeopleNotificationIdentifier
-    @Mock private lateinit var channel: NotificationChannel
     @Mock private lateinit var headerController: NodeController
-    private lateinit var entry: NotificationEntry
-    private lateinit var entryA: NotificationEntry
-    private lateinit var entryB: NotificationEntry
 
     private lateinit var coordinator: ConversationCoordinator
-
-    @Rule @JvmField public val setFlagsRule = SetFlagsRule()
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        peopleNotificationIdentifier =
+            PeopleNotificationIdentifierImpl(mock(), GroupMembershipManagerImpl())
         coordinator =
             ConversationCoordinator(
                 peopleNotificationIdentifier,
@@ -95,7 +96,6 @@ class ConversationCoordinatorTest : SysuiTestCase() {
                 HighPriorityProvider(peopleNotificationIdentifier, GroupMembershipManagerImpl()),
                 headerController
             )
-        whenever(channel.isImportantConversation).thenReturn(true)
 
         coordinator.attach(pipeline)
 
@@ -110,49 +110,65 @@ class ConversationCoordinatorTest : SysuiTestCase() {
         if (!SortBySectionTimeFlag.isEnabled)
             peopleComparator = peopleAlertingSectioner.comparator!!
 
-        entry = NotificationEntryBuilder().setChannel(channel).build()
+        peopleAlertingSection = NotifSection(peopleAlertingSectioner, 0)
+    }
 
-        val section = NotifSection(peopleAlertingSectioner, 0)
-        entryA =
-            NotificationEntryBuilder().setChannel(channel).setSection(section).setTag("A").build()
-        entryB =
-            NotificationEntryBuilder().setChannel(channel).setSection(section).setTag("B").build()
+    @Test
+    fun priorityPeopleSectionerClaimsOnlyImportantConversations() {
+        val sectioner = coordinator.priorityPeopleSectioner
+        assertTrue(sectioner.isInSection(makeEntryOfPeopleType(TYPE_IMPORTANT_PERSON)))
+        assertFalse(sectioner.isInSection(makeEntryOfPeopleType(TYPE_FULL_PERSON)))
+        assertFalse(sectioner.isInSection(makeEntryOfPeopleType(TYPE_PERSON)))
+        assertFalse(sectioner.isInSection(makeEntryOfPeopleType(TYPE_NON_PERSON)))
+        assertFalse(sectioner.isInSection(NotificationEntryBuilder().build()))
     }
 
     @Test
     fun testPromotesImportantConversations() {
-        // only promote important conversations
-        assertTrue(promoter.shouldPromoteToTopLevel(entry))
+        assertTrue(promoter.shouldPromoteToTopLevel(makeEntryOfPeopleType(TYPE_IMPORTANT_PERSON)))
+        assertFalse(promoter.shouldPromoteToTopLevel(makeEntryOfPeopleType(TYPE_FULL_PERSON)))
+        assertFalse(promoter.shouldPromoteToTopLevel(makeEntryOfPeopleType(TYPE_PERSON)))
+        assertFalse(promoter.shouldPromoteToTopLevel(makeEntryOfPeopleType(TYPE_NON_PERSON)))
         assertFalse(promoter.shouldPromoteToTopLevel(NotificationEntryBuilder().build()))
     }
 
     @Test
     fun testPromotedImportantConversationsMakesSummaryUnimportant() {
-        val altChildA = NotificationEntryBuilder().setTag("A").build()
-        val altChildB = NotificationEntryBuilder().setTag("B").build()
-        val summary = NotificationEntryBuilder().setId(2).setChannel(channel).build()
+        val importantChannel =
+            mock<NotificationChannel>().also {
+                whenever(it.isImportantConversation).thenReturn(true)
+            }
+        val otherChannel =
+            mock<NotificationChannel>().also {
+                whenever(it.isImportantConversation).thenReturn(false)
+            }
+        val importantChild =
+            makeEntryOfPeopleType(TYPE_IMPORTANT_PERSON) { setChannel(importantChannel) }
+        val altChildA =
+            makeEntryOfPeopleType(TYPE_FULL_PERSON) { setChannel(otherChannel).setTag("A") }
+        val altChildB =
+            makeEntryOfPeopleType(TYPE_FULL_PERSON) { setChannel(otherChannel).setTag("B") }
+        val summary =
+            makeEntryOfPeopleType(TYPE_IMPORTANT_PERSON) { setChannel(importantChannel).setId(2) }
         val groupEntry =
             GroupEntryBuilder()
                 .setParent(GroupEntry.ROOT_ENTRY)
                 .setSummary(summary)
-                .setChildren(listOf(entry, altChildA, altChildB))
+                .setChildren(listOf(importantChild, altChildA, altChildB))
                 .build()
-        assertTrue(promoter.shouldPromoteToTopLevel(entry))
+        assertTrue(promoter.shouldPromoteToTopLevel(importantChild))
         assertFalse(promoter.shouldPromoteToTopLevel(altChildA))
         assertFalse(promoter.shouldPromoteToTopLevel(altChildB))
-        NotificationEntryBuilder.setNewParent(entry, GroupEntry.ROOT_ENTRY)
-        GroupEntryBuilder.getRawChildren(groupEntry).remove(entry)
-        beforeRenderListListener.onBeforeRenderList(listOf(entry, groupEntry))
+        NotificationEntryBuilder.setNewParent(importantChild, GroupEntry.ROOT_ENTRY)
+        GroupEntryBuilder.getRawChildren(groupEntry).remove(importantChild)
+        beforeRenderListListener.onBeforeRenderList(listOf(importantChild, groupEntry))
         verify(conversationIconManager).setUnimportantConversations(eq(listOf(summary.key)))
     }
 
     @Test
     fun testInAlertingPeopleSectionWhenTheImportanceIsAtLeastDefault() {
         // GIVEN
-        val alertingEntry =
-            NotificationEntryBuilder().setChannel(channel).setImportance(IMPORTANCE_DEFAULT).build()
-        whenever(peopleNotificationIdentifier.getPeopleNotificationType(alertingEntry))
-            .thenReturn(TYPE_PERSON)
+        val alertingEntry = makeEntryOfPeopleType(TYPE_PERSON) { setImportance(IMPORTANCE_DEFAULT) }
 
         // put alerting people notifications in this section
         assertThat(peopleAlertingSectioner.isInSection(alertingEntry)).isTrue()
@@ -162,10 +178,7 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_SORT_SECTION_BY_TIME)
     fun testInAlertingPeopleSectionWhenTheImportanceIsLowerThanDefault() {
         // GIVEN
-        val silentEntry =
-                NotificationEntryBuilder().setChannel(channel).setImportance(IMPORTANCE_LOW).build()
-        whenever(peopleNotificationIdentifier.getPeopleNotificationType(silentEntry))
-                .thenReturn(TYPE_PERSON)
+        val silentEntry = makeEntryOfPeopleType(TYPE_PERSON) { setImportance(IMPORTANCE_LOW) }
 
         // THEN put silent people notifications in alerting section
         assertThat(peopleAlertingSectioner.isInSection(silentEntry)).isTrue()
@@ -175,10 +188,7 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     @DisableFlags(Flags.FLAG_SORT_SECTION_BY_TIME)
     fun testInSilentPeopleSectionWhenTheImportanceIsLowerThanDefault() {
         // GIVEN
-        val silentEntry =
-            NotificationEntryBuilder().setChannel(channel).setImportance(IMPORTANCE_LOW).build()
-        whenever(peopleNotificationIdentifier.getPeopleNotificationType(silentEntry))
-            .thenReturn(TYPE_PERSON)
+        val silentEntry = makeEntryOfPeopleType(TYPE_PERSON) { setImportance(IMPORTANCE_LOW) }
 
         // THEN put silent people notifications in this section
         assertThat(peopleSilentSectioner.isInSection(silentEntry)).isTrue()
@@ -191,18 +201,14 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     @Test
     fun testNotInPeopleSection() {
         // GIVEN
-        val entry =
-            NotificationEntryBuilder().setChannel(channel).setImportance(IMPORTANCE_LOW).build()
+        val entry = makeEntryOfPeopleType(TYPE_NON_PERSON) { setImportance(IMPORTANCE_LOW) }
         val importantEntry =
-            NotificationEntryBuilder().setChannel(channel).setImportance(IMPORTANCE_HIGH).build()
-        whenever(peopleNotificationIdentifier.getPeopleNotificationType(entry))
-            .thenReturn(TYPE_NON_PERSON)
-        whenever(peopleNotificationIdentifier.getPeopleNotificationType(importantEntry))
-            .thenReturn(TYPE_NON_PERSON)
+            makeEntryOfPeopleType(TYPE_NON_PERSON) { setImportance(IMPORTANCE_HIGH) }
 
         // THEN - only put people notification either silent or alerting
-        if (!SortBySectionTimeFlag.isEnabled)
+        if (!SortBySectionTimeFlag.isEnabled) {
             assertThat(peopleSilentSectioner.isInSection(entry)).isFalse()
+        }
         assertThat(peopleAlertingSectioner.isInSection(importantEntry)).isFalse()
     }
 
@@ -210,22 +216,16 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     fun testInAlertingPeopleSectionWhenThereIsAnImportantChild() {
         // GIVEN
         val altChildA =
-            NotificationEntryBuilder().setTag("A").setImportance(IMPORTANCE_DEFAULT).build()
-        val altChildB = NotificationEntryBuilder().setTag("B").setImportance(IMPORTANCE_LOW).build()
-        val summary =
-            NotificationEntryBuilder()
-                .setId(2)
-                .setImportance(IMPORTANCE_LOW)
-                .setChannel(channel)
-                .build()
+            makeEntryOfPeopleType(TYPE_NON_PERSON) { setTag("A").setImportance(IMPORTANCE_DEFAULT) }
+        val altChildB =
+            makeEntryOfPeopleType(TYPE_NON_PERSON) { setTag("B").setImportance(IMPORTANCE_LOW) }
+        val summary = makeEntryOfPeopleType(TYPE_PERSON) { setId(2).setImportance(IMPORTANCE_LOW) }
         val groupEntry =
             GroupEntryBuilder()
                 .setParent(GroupEntry.ROOT_ENTRY)
                 .setSummary(summary)
                 .setChildren(listOf(altChildA, altChildB))
                 .build()
-        whenever(peopleNotificationIdentifier.getPeopleNotificationType(summary))
-            .thenReturn(TYPE_PERSON)
         // THEN
         assertThat(peopleAlertingSectioner.isInSection(groupEntry)).isTrue()
     }
@@ -233,10 +233,12 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     @Test
     @DisableFlags(Flags.FLAG_SORT_SECTION_BY_TIME)
     fun testComparatorPutsImportantPeopleFirst() {
-        whenever(peopleNotificationIdentifier.getPeopleNotificationType(entryA))
-            .thenReturn(TYPE_IMPORTANT_PERSON)
-        whenever(peopleNotificationIdentifier.getPeopleNotificationType(entryB))
-            .thenReturn(TYPE_PERSON)
+        val entryA =
+            makeEntryOfPeopleType(TYPE_IMPORTANT_PERSON) {
+                setSection(peopleAlertingSection).setTag("A")
+            }
+        val entryB =
+            makeEntryOfPeopleType(TYPE_PERSON) { setSection(peopleAlertingSection).setTag("B") }
 
         // only put people notifications in this section
         assertThat(peopleComparator.compare(entryA, entryB)).isEqualTo(-1)
@@ -245,10 +247,10 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     @Test
     @DisableFlags(Flags.FLAG_SORT_SECTION_BY_TIME)
     fun testComparatorEquatesPeopleWithSameType() {
-        whenever(peopleNotificationIdentifier.getPeopleNotificationType(entryA))
-            .thenReturn(TYPE_PERSON)
-        whenever(peopleNotificationIdentifier.getPeopleNotificationType(entryB))
-            .thenReturn(TYPE_PERSON)
+        val entryA =
+            makeEntryOfPeopleType(TYPE_PERSON) { setSection(peopleAlertingSection).setTag("A") }
+        val entryB =
+            makeEntryOfPeopleType(TYPE_PERSON) { setSection(peopleAlertingSection).setTag("B") }
 
         // only put people notifications in this section
         assertThat(peopleComparator.compare(entryA, entryB)).isEqualTo(0)
@@ -258,5 +260,24 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_SORT_SECTION_BY_TIME)
     fun testNoSecondarySortForConversations() {
         assertThat(peopleAlertingSectioner.comparator).isNull()
+    }
+
+    private fun makeEntryOfPeopleType(
+        @PeopleNotificationType type: Int,
+        buildBlock: NotificationEntryBuilder.() -> Unit = {}
+    ): NotificationEntry {
+        val channel: NotificationChannel = mock()
+        whenever(channel.isImportantConversation).thenReturn(type == TYPE_IMPORTANT_PERSON)
+        val entry =
+            NotificationEntryBuilder()
+                .updateRanking {
+                    it.setIsConversation(type != TYPE_NON_PERSON)
+                    it.setShortcutInfo(if (type >= TYPE_FULL_PERSON) mock() else null)
+                    it.setChannel(channel)
+                }
+                .also(buildBlock)
+                .build()
+        assertEquals(type, peopleNotificationIdentifier.getPeopleNotificationType(entry))
+        return entry
     }
 }

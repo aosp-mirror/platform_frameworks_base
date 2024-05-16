@@ -44,7 +44,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,6 +68,7 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.animation.Expandable
 import com.android.compose.animation.scene.SceneScope
@@ -132,8 +132,8 @@ fun FooterActions(
     val context = LocalContext.current
 
     // Collect alphas as soon as we are composed, even when not visible.
-    val alpha by viewModel.alpha.collectAsState()
-    val backgroundAlpha = viewModel.backgroundAlpha.collectAsState()
+    val alpha by viewModel.alpha.collectAsStateWithLifecycle()
+    val backgroundAlpha = viewModel.backgroundAlpha.collectAsStateWithLifecycle()
 
     var security by remember { mutableStateOf<FooterActionsSecurityButtonViewModel?>(null) }
     var foregroundServices by remember {
@@ -181,7 +181,6 @@ fun FooterActions(
     val horizontalPadding = dimensionResource(R.dimen.qs_content_horizontal_padding)
     Row(
         modifier
-            .sysuiResTag("qs_footer_actions")
             .fillMaxWidth()
             .graphicsLayer { this.alpha = alpha }
             .then(backgroundModifier)

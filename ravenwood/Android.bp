@@ -221,7 +221,9 @@ sh_test_host {
     data: [
         ":framework-minus-apex.ravenwood.stats",
         ":framework-minus-apex.ravenwood.apis",
+        ":framework-minus-apex.ravenwood.keep_all",
         ":services.core.ravenwood.stats",
         ":services.core.ravenwood.apis",
+        ":services.core.ravenwood.keep_all",
     ],
 }

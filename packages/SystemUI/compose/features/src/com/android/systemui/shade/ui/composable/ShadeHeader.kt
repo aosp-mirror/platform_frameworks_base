@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -52,6 +51,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
@@ -118,7 +118,7 @@ fun SceneScope.CollapsedShadeHeader(
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
-    val isDisabled by viewModel.isDisabled.collectAsState()
+    val isDisabled by viewModel.isDisabled.collectAsStateWithLifecycle()
     if (isDisabled) {
         return
     }
@@ -138,7 +138,7 @@ fun SceneScope.CollapsedShadeHeader(
             }
         }
 
-    val isPrivacyChipVisible by viewModel.isPrivacyChipVisible.collectAsState()
+    val isPrivacyChipVisible by viewModel.isPrivacyChipVisible.collectAsStateWithLifecycle()
 
     // This layout assumes it is globally positioned at (0, 0) and is the
     // same size as the screen.
@@ -271,7 +271,7 @@ fun SceneScope.ExpandedShadeHeader(
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
-    val isDisabled by viewModel.isDisabled.collectAsState()
+    val isDisabled by viewModel.isDisabled.collectAsStateWithLifecycle()
     if (isDisabled) {
         return
     }
@@ -280,7 +280,7 @@ fun SceneScope.ExpandedShadeHeader(
         derivedStateOf { shouldUseExpandedFormat(layoutState.transitionState) }
     }
 
-    val isPrivacyChipVisible by viewModel.isPrivacyChipVisible.collectAsState()
+    val isPrivacyChipVisible by viewModel.isPrivacyChipVisible.collectAsStateWithLifecycle()
 
     Box(modifier = modifier.sysuiResTag(ShadeHeader.TestTags.Root)) {
         if (isPrivacyChipVisible) {
@@ -435,7 +435,7 @@ private fun ShadeCarrierGroup(
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier) {
-        val subIds by viewModel.mobileSubIds.collectAsState()
+        val subIds by viewModel.mobileSubIds.collectAsStateWithLifecycle()
 
         for (subId in subIds) {
             Spacer(modifier = Modifier.width(5.dp))
@@ -472,10 +472,12 @@ private fun SceneScope.StatusIcons(
     val micSlot = stringResource(id = com.android.internal.R.string.status_bar_microphone)
     val locationSlot = stringResource(id = com.android.internal.R.string.status_bar_location)
 
-    val isSingleCarrier by viewModel.isSingleCarrier.collectAsState()
-    val isPrivacyChipEnabled by viewModel.isPrivacyChipEnabled.collectAsState()
-    val isMicCameraIndicationEnabled by viewModel.isMicCameraIndicationEnabled.collectAsState()
-    val isLocationIndicationEnabled by viewModel.isLocationIndicationEnabled.collectAsState()
+    val isSingleCarrier by viewModel.isSingleCarrier.collectAsStateWithLifecycle()
+    val isPrivacyChipEnabled by viewModel.isPrivacyChipEnabled.collectAsStateWithLifecycle()
+    val isMicCameraIndicationEnabled by
+        viewModel.isMicCameraIndicationEnabled.collectAsStateWithLifecycle()
+    val isLocationIndicationEnabled by
+        viewModel.isLocationIndicationEnabled.collectAsStateWithLifecycle()
 
     AndroidView(
         factory = { context ->
@@ -544,7 +546,7 @@ private fun SceneScope.PrivacyChip(
     viewModel: ShadeHeaderViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val privacyList by viewModel.privacyItems.collectAsState()
+    val privacyList by viewModel.privacyItems.collectAsStateWithLifecycle()
 
     AndroidView(
         factory = { context ->

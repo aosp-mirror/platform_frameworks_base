@@ -32,6 +32,7 @@ import com.android.server.display.brightness.strategy.AutomaticBrightnessStrateg
 import com.android.server.display.brightness.strategy.BoostBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DozeBrightnessStrategy;
+import com.android.server.display.brightness.strategy.FallbackBrightnessStrategy;
 import com.android.server.display.brightness.strategy.FollowerBrightnessStrategy;
 import com.android.server.display.brightness.strategy.InvalidBrightnessStrategy;
 import com.android.server.display.brightness.strategy.OffloadBrightnessStrategy;
@@ -85,6 +86,9 @@ public class DisplayBrightnessStrategySelector {
     @Nullable
     private final AutoBrightnessFallbackStrategy mAutoBrightnessFallbackStrategy;
 
+    @Nullable
+    private final FallbackBrightnessStrategy mFallbackBrightnessStrategy;
+
     // A collective representation of all the strategies that the selector is aware of. This is
     // non null, but the strategies this is tracking can be null
     @NonNull
@@ -118,7 +122,8 @@ public class DisplayBrightnessStrategySelector {
         mInvalidBrightnessStrategy = injector.getInvalidBrightnessStrategy();
         mAutomaticBrightnessStrategy1 =
                 (!mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()) ? null
-                        : injector.getAutomaticBrightnessStrategy1(context, displayId);
+                        : injector.getAutomaticBrightnessStrategy1(context, displayId,
+                                mDisplayManagerFlags);
         mAutomaticBrightnessStrategy2 =
                 (mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()) ? null
                         : injector.getAutomaticBrightnessStrategy2(context, displayId);
@@ -134,11 +139,14 @@ public class DisplayBrightnessStrategySelector {
         } else {
             mOffloadBrightnessStrategy = null;
         }
+        mFallbackBrightnessStrategy = (mDisplayManagerFlags
+                .isRefactorDisplayPowerControllerEnabled())
+                ? injector.getFallbackBrightnessStrategy() : null;
         mDisplayBrightnessStrategies = new DisplayBrightnessStrategy[]{mInvalidBrightnessStrategy,
                 mScreenOffBrightnessStrategy, mDozeBrightnessStrategy, mFollowerBrightnessStrategy,
                 mBoostBrightnessStrategy, mOverrideBrightnessStrategy, mTemporaryBrightnessStrategy,
                 mAutomaticBrightnessStrategy1, mOffloadBrightnessStrategy,
-                mAutoBrightnessFallbackStrategy};
+                mAutoBrightnessFallbackStrategy, mFallbackBrightnessStrategy};
         mAllowAutoBrightnessWhileDozingConfig = context.getResources().getBoolean(
                 R.bool.config_allowAutoBrightnessWhileDozing);
         mOldBrightnessStrategyName = mInvalidBrightnessStrategy.getName();
@@ -179,6 +187,12 @@ public class DisplayBrightnessStrategySelector {
             displayBrightnessStrategy = mOffloadBrightnessStrategy;
         } else if (isAutoBrightnessFallbackStrategyValid()) {
             displayBrightnessStrategy = mAutoBrightnessFallbackStrategy;
+        } else {
+            // This will become the ultimate fallback strategy once the flag has been fully rolled
+            // out
+            if (mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()) {
+                displayBrightnessStrategy = mFallbackBrightnessStrategy;
+            }
         }
 
         if (mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()) {
@@ -330,8 +344,8 @@ public class DisplayBrightnessStrategySelector {
         }
 
         AutomaticBrightnessStrategy getAutomaticBrightnessStrategy1(Context context,
-                int displayId) {
-            return new AutomaticBrightnessStrategy(context, displayId);
+                int displayId, DisplayManagerFlags displayManagerFlags) {
+            return new AutomaticBrightnessStrategy(context, displayId, displayManagerFlags);
         }
 
         AutomaticBrightnessStrategy2 getAutomaticBrightnessStrategy2(Context context,
@@ -346,6 +360,10 @@ public class DisplayBrightnessStrategySelector {
 
         AutoBrightnessFallbackStrategy getAutoBrightnessFallbackStrategy() {
             return new AutoBrightnessFallbackStrategy(/* injector= */ null);
+        }
+
+        FallbackBrightnessStrategy getFallbackBrightnessStrategy() {
+            return new FallbackBrightnessStrategy();
         }
     }
 }

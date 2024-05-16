@@ -41,7 +41,10 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
 
+import com.android.internal.infra.AndroidFuture;
+
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Util methods for ensuring the Bundle passed in various methods are read-only and restricted to
@@ -183,7 +186,8 @@ public class BundleUtil {
 
     public static IStreamingResponseCallback wrapWithValidation(
             IStreamingResponseCallback streamingResponseCallback,
-            Executor resourceClosingExecutor) {
+            Executor resourceClosingExecutor,
+            AndroidFuture future) {
         return new IStreamingResponseCallback.Stub() {
             @Override
             public void onNewContent(Bundle processedResult) throws RemoteException {
@@ -203,6 +207,7 @@ public class BundleUtil {
                     streamingResponseCallback.onSuccess(resultBundle);
                 } finally {
                     resourceClosingExecutor.execute(() -> tryCloseResource(resultBundle));
+                    future.complete(null);
                 }
             }
 
@@ -210,6 +215,7 @@ public class BundleUtil {
             public void onFailure(int errorCode, String errorMessage,
                     PersistableBundle errorParams) throws RemoteException {
                 streamingResponseCallback.onFailure(errorCode, errorMessage, errorParams);
+                future.completeExceptionally(new TimeoutException());
             }
 
             @Override
@@ -237,7 +243,8 @@ public class BundleUtil {
     }
 
     public static IResponseCallback wrapWithValidation(IResponseCallback responseCallback,
-            Executor resourceClosingExecutor) {
+            Executor resourceClosingExecutor,
+            AndroidFuture future) {
         return new IResponseCallback.Stub() {
             @Override
             public void onSuccess(Bundle resultBundle)
@@ -247,6 +254,7 @@ public class BundleUtil {
                     responseCallback.onSuccess(resultBundle);
                 } finally {
                     resourceClosingExecutor.execute(() -> tryCloseResource(resultBundle));
+                    future.complete(null);
                 }
             }
 
@@ -254,6 +262,7 @@ public class BundleUtil {
             public void onFailure(int errorCode, String errorMessage,
                     PersistableBundle errorParams) throws RemoteException {
                 responseCallback.onFailure(errorCode, errorMessage, errorParams);
+                future.completeExceptionally(new TimeoutException());
             }
 
             @Override
@@ -280,17 +289,20 @@ public class BundleUtil {
     }
 
 
-    public static ITokenInfoCallback wrapWithValidation(ITokenInfoCallback responseCallback) {
+    public static ITokenInfoCallback wrapWithValidation(ITokenInfoCallback responseCallback,
+            AndroidFuture future) {
         return new ITokenInfoCallback.Stub() {
             @Override
             public void onSuccess(TokenInfo tokenInfo) throws RemoteException {
                 responseCallback.onSuccess(tokenInfo);
+                future.complete(null);
             }
 
             @Override
             public void onFailure(int errorCode, String errorMessage, PersistableBundle errorParams)
                     throws RemoteException {
                 responseCallback.onFailure(errorCode, errorMessage, errorParams);
+                future.completeExceptionally(new TimeoutException());
             }
         };
     }

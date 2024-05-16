@@ -53,7 +53,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,6 +71,7 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Expandable
 import com.android.compose.theme.colorAttr
 import com.android.systemui.common.shared.model.Icon
@@ -116,8 +116,8 @@ constructor(
             tiles.forEach { it.startListening(token) }
             onDispose { tiles.forEach { it.stopListening(token) } }
         }
-        val iconTilesSpecs by iconTilesInteractor.iconTilesSpecs.collectAsState()
-        val columns by gridSizeInteractor.columns.collectAsState()
+        val iconTilesSpecs by iconTilesInteractor.iconTilesSpecs.collectAsStateWithLifecycle()
+        val columns by gridSizeInteractor.columns.collectAsStateWithLifecycle()
 
         TileLazyGrid(modifier = modifier, columns = GridCells.Fixed(columns)) {
             items(
@@ -150,7 +150,7 @@ constructor(
         val state: TileUiState by
             tile.state
                 .mapLatest { it.toUiState() }
-                .collectAsState(initial = tile.currentState.toUiState())
+                .collectAsStateWithLifecycle(initialValue = tile.currentState.toUiState())
         val context = LocalContext.current
 
         Expandable(
@@ -201,10 +201,13 @@ constructor(
         val addTileToEnd: (TileSpec) -> Unit by rememberUpdatedState {
             onAddTile(it, POSITION_AT_END)
         }
-        val iconOnlySpecs by iconTilesInteractor.iconTilesSpecs.collectAsState(initial = emptySet())
+        val iconOnlySpecs by
+            iconTilesInteractor.iconTilesSpecs.collectAsStateWithLifecycle(
+                initialValue = emptySet()
+            )
         val isIconOnly: (TileSpec) -> Boolean =
             remember(iconOnlySpecs) { { tileSpec: TileSpec -> tileSpec in iconOnlySpecs } }
-        val columns by gridSizeInteractor.columns.collectAsState()
+        val columns by gridSizeInteractor.columns.collectAsStateWithLifecycle()
 
         TileLazyGrid(modifier = modifier, columns = GridCells.Fixed(columns)) {
             // These Text are just placeholders to see the different sections. Not final UI.

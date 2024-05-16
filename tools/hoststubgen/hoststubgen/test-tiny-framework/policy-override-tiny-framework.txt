@@ -19,6 +19,9 @@ class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	~com
 # Heuristics rule: Stub all the AIDL classes.
 class :aidl stubclass
 
+# Heuristics rule: Stub all the R classes.
+class :r stubclass
+
 # Default is "remove", so let's put all the base classes / interfaces in the stub first.
 class com.android.hoststubgen.test.tinyframework.subclasstest.C1 stub
 class com.android.hoststubgen.test.tinyframework.subclasstest.C2 stub

@@ -600,8 +600,11 @@ public class UserManagerService extends IUserManager.Stub {
         public void onReceive(Context context, Intent intent) {
             if (isAutoLockForPrivateSpaceEnabled()) {
                 if (ACTION_SCREEN_OFF.equals(intent.getAction())) {
+                    Slog.d(LOG_TAG, "SCREEN_OFF broadcast received");
                     maybeScheduleMessageToAutoLockPrivateSpace();
                 } else if (ACTION_SCREEN_ON.equals(intent.getAction())) {
+                    Slog.d(LOG_TAG, "SCREEN_ON broadcast received, "
+                            + "removing queued message to auto-lock private space");
                     // Remove any queued messages since the device is interactive again
                     mHandler.removeCallbacksAndMessages(PRIVATE_SPACE_AUTO_LOCK_MESSAGE_TOKEN);
                 }
@@ -619,6 +622,8 @@ public class UserManagerService extends IUserManager.Stub {
                         getMainUserIdUnchecked());
         if (privateSpaceAutoLockPreference
                 != Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_AFTER_INACTIVITY) {
+            Slogf.d(LOG_TAG, "Not scheduling auto-lock on inactivity,"
+                    + "preference is set to %d", privateSpaceAutoLockPreference);
             return;
         }
         int privateProfileUserId = getPrivateProfileUserId();
@@ -632,6 +637,7 @@ public class UserManagerService extends IUserManager.Stub {
     @VisibleForTesting
     void scheduleMessageToAutoLockPrivateSpace(int userId, Object token,
             long delayInMillis) {
+        Slog.i(LOG_TAG, "Scheduling auto-lock message");
         mHandler.postDelayed(() -> {
             final PowerManager powerManager = mContext.getSystemService(PowerManager.class);
             if (powerManager != null && !powerManager.isInteractive()) {
@@ -1060,8 +1066,6 @@ public class UserManagerService extends IUserManager.Stub {
         if (isAutoLockingPrivateSpaceOnRestartsEnabled()) {
             autoLockPrivateSpace();
         }
-
-        markEphemeralUsersForRemoval();
     }
 
     private boolean isAutoLockingPrivateSpaceOnRestartsEnabled() {
@@ -1095,21 +1099,6 @@ public class UserManagerService extends IUserManager.Stub {
             }
         } else {
             Slogf.w(LOG_TAG, "Cannot start Communal Profile because there isn't one");
-        }
-    }
-
-    /** Marks all ephemeral users as slated for deletion. **/
-    private void markEphemeralUsersForRemoval() {
-        synchronized (mUsersLock) {
-            final int userSize = mUsers.size();
-            for (int i = 0; i < userSize; i++) {
-                final UserInfo ui = mUsers.valueAt(i).info;
-                if (ui.isEphemeral() && !ui.preCreated && ui.id != UserHandle.USER_SYSTEM) {
-                    addRemovingUserIdLocked(ui.id);
-                    ui.partial = true;
-                    ui.flags |= UserInfo.FLAG_DISABLED;
-                }
-            }
         }
     }
 
@@ -4222,6 +4211,13 @@ public class UserManagerService extends IUserManager.Stub {
                                     if (mNextSerialNumber < 0
                                             || mNextSerialNumber <= userData.info.id) {
                                         mNextSerialNumber = userData.info.id + 1;
+                                    }
+                                    if (userData.info.isEphemeral() && !userData.info.preCreated
+                                            && userData.info.id != UserHandle.USER_SYSTEM) {
+                                        // Mark ephemeral user as slated for deletion.
+                                        addRemovingUserIdLocked(userData.info.id);
+                                        userData.info.partial = true;
+                                        userData.info.flags |= UserInfo.FLAG_DISABLED;
                                     }
                                 }
                             }

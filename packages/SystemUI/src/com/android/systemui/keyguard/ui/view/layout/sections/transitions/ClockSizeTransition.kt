@@ -57,9 +57,9 @@ class ClockSizeTransition(
         addTransition(SmartspaceMoveTransition(config, clockViewModel))
     }
 
-    open class VisibilityBoundsTransition() : Transition() {
-        var captureSmartspace: Boolean = false
-
+    abstract class VisibilityBoundsTransition() : Transition() {
+        abstract val captureSmartspace: Boolean
+        protected val TAG = this::class.simpleName!!
         override fun captureEndValues(transition: TransitionValues) = captureValues(transition)
         override fun captureStartValues(transition: TransitionValues) = captureValues(transition)
         override fun getTransitionProperties(): Array<String> = TRANSITION_PROPERTIES
@@ -76,7 +76,7 @@ class ClockSizeTransition(
                 parent.findViewById<View>(sharedR.id.bc_smartspace_view)
                     ?: parent.findViewById<View>(R.id.keyguard_slice_view)
             if (targetSSView == null) {
-                Log.e(TAG, "Failed to find smartspace equivalent target for animation")
+                Log.e(TAG, "Failed to find smartspace equivalent target under $parent")
                 return
             }
             transition.values[SMARTSPACE_BOUNDS] = targetSSView.getRect()
@@ -109,14 +109,12 @@ class ClockSizeTransition(
             var fromIsVis = fromVis == View.VISIBLE
             var fromAlpha = startValues.values[PROP_ALPHA] as Float
             val fromBounds = startValues.values[PROP_BOUNDS] as Rect
-            val fromSSBounds =
-                if (captureSmartspace) startValues.values[SMARTSPACE_BOUNDS] as Rect else null
+            val fromSSBounds = startValues.values[SMARTSPACE_BOUNDS] as Rect?
 
             val toView = endValues.view
             val toVis = endValues.values[PROP_VISIBILITY] as Int
             val toBounds = endValues.values[PROP_BOUNDS] as Rect
-            val toSSBounds =
-                if (captureSmartspace) endValues.values[SMARTSPACE_BOUNDS] as Rect else null
+            val toSSBounds = endValues.values[SMARTSPACE_BOUNDS] as Rect?
             val toIsVis = toVis == View.VISIBLE
             val toAlpha = if (toIsVis) 1f else 0f
 
@@ -221,9 +219,6 @@ class ClockSizeTransition(
             private const val SMARTSPACE_BOUNDS = "ClockSizeTransition:SSBounds"
             private val TRANSITION_PROPERTIES =
                 arrayOf(PROP_VISIBILITY, PROP_ALPHA, PROP_BOUNDS, SMARTSPACE_BOUNDS)
-
-            private val DEBUG = false
-            private val TAG = VisibilityBoundsTransition::class.simpleName!!
         }
     }
 
@@ -232,18 +227,24 @@ class ClockSizeTransition(
         val viewModel: KeyguardClockViewModel,
         val smartspaceViewModel: KeyguardSmartspaceViewModel,
     ) : VisibilityBoundsTransition() {
+        override val captureSmartspace = !viewModel.isLargeClockVisible.value
+
         init {
             duration = CLOCK_IN_MILLIS
             startDelay = CLOCK_IN_START_DELAY_MILLIS
             interpolator = CLOCK_IN_INTERPOLATOR
-            captureSmartspace =
-                !viewModel.isLargeClockVisible.value && smartspaceViewModel.isSmartspaceEnabled
 
             if (viewModel.isLargeClockVisible.value) {
                 viewModel.currentClock.value?.let {
+                    if (DEBUG) Log.i(TAG, "Large Clock In: ${it.largeClock.layout.views}")
                     it.largeClock.layout.views.forEach { addTarget(it) }
                 }
+                    ?: run {
+                        Log.e(TAG, "No large clock set, falling back")
+                        addTarget(R.id.lockscreen_clock_view_large)
+                    }
             } else {
+                if (DEBUG) Log.i(TAG, "Small Clock In")
                 addTarget(R.id.lockscreen_clock_view)
             }
         }
@@ -282,7 +283,6 @@ class ClockSizeTransition(
             val CLOCK_IN_INTERPOLATOR = Interpolators.LINEAR_OUT_SLOW_IN
             const val SMALL_CLOCK_IN_MOVE_SCALE =
                 CLOCK_IN_MILLIS / SmartspaceMoveTransition.STATUS_AREA_MOVE_DOWN_MILLIS.toFloat()
-            private val TAG = ClockFaceInTransition::class.simpleName!!
         }
     }
 
@@ -291,18 +291,24 @@ class ClockSizeTransition(
         val viewModel: KeyguardClockViewModel,
         val smartspaceViewModel: KeyguardSmartspaceViewModel,
     ) : VisibilityBoundsTransition() {
+        override val captureSmartspace = viewModel.isLargeClockVisible.value
+
         init {
             duration = CLOCK_OUT_MILLIS
             interpolator = CLOCK_OUT_INTERPOLATOR
-            captureSmartspace =
-                viewModel.isLargeClockVisible.value && smartspaceViewModel.isSmartspaceEnabled
 
             if (viewModel.isLargeClockVisible.value) {
+                if (DEBUG) Log.i(TAG, "Small Clock Out")
                 addTarget(R.id.lockscreen_clock_view)
             } else {
                 viewModel.currentClock.value?.let {
+                    if (DEBUG) Log.i(TAG, "Large Clock Out: ${it.largeClock.layout.views}")
                     it.largeClock.layout.views.forEach { addTarget(it) }
                 }
+                    ?: run {
+                        Log.e(TAG, "No large clock set, falling back")
+                        addTarget(R.id.lockscreen_clock_view_large)
+                    }
             }
         }
 
@@ -339,7 +345,6 @@ class ClockSizeTransition(
             val CLOCK_OUT_INTERPOLATOR = Interpolators.LINEAR
             const val SMALL_CLOCK_OUT_MOVE_SCALE =
                 CLOCK_OUT_MILLIS / SmartspaceMoveTransition.STATUS_AREA_MOVE_UP_MILLIS.toFloat()
-            private val TAG = ClockFaceOutTransition::class.simpleName!!
         }
     }
 
@@ -348,6 +353,8 @@ class ClockSizeTransition(
         val config: IntraBlueprintTransition.Config,
         viewModel: KeyguardClockViewModel,
     ) : VisibilityBoundsTransition() {
+        override val captureSmartspace = false
+
         init {
             duration =
                 if (viewModel.isLargeClockVisible.value) STATUS_AREA_MOVE_UP_MILLIS
@@ -366,5 +373,9 @@ class ClockSizeTransition(
             const val STATUS_AREA_MOVE_UP_MILLIS = 967L
             const val STATUS_AREA_MOVE_DOWN_MILLIS = 467L
         }
+    }
+
+    companion object {
+        val DEBUG = true
     }
 }

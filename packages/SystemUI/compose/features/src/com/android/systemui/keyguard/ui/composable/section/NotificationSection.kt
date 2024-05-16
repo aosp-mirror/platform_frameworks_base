@@ -20,13 +20,13 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.Flags
@@ -91,9 +91,9 @@ constructor(
     @Composable
     fun SceneScope.Notifications(burnInParams: BurnInParameters?, modifier: Modifier = Modifier) {
         val shouldUseSplitNotificationShade by
-            lockscreenContentViewModel.shouldUseSplitNotificationShade.collectAsState()
+            lockscreenContentViewModel.shouldUseSplitNotificationShade.collectAsStateWithLifecycle()
         val areNotificationsVisible by
-            lockscreenContentViewModel.areNotificationsVisible.collectAsState()
+            lockscreenContentViewModel.areNotificationsVisible.collectAsStateWithLifecycle()
         val splitShadeTopMargin: Dp =
             if (Flags.centralizedStatusBarHeightFix()) {
                 LargeScreenHeaderHelper.getLargeScreenHeaderHeight(LocalContext.current).dp

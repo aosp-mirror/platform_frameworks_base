@@ -18,9 +18,9 @@ package com.android.systemui.volume.panel.component.volume.ui.composable
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.PlatformSliderDefaults
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.SliderViewModel
 import com.android.systemui.volume.panel.component.volume.ui.viewmodel.AudioVolumeComponentViewModel
@@ -38,7 +38,8 @@ constructor(
 
     @Composable
     override fun VolumePanelComposeScope.Content(modifier: Modifier) {
-        val sliderViewModels: List<SliderViewModel> by viewModel.sliderViewModels.collectAsState()
+        val sliderViewModels: List<SliderViewModel> by
+            viewModel.sliderViewModels.collectAsStateWithLifecycle()
         if (sliderViewModels.isEmpty()) {
             return
         }
@@ -52,7 +53,7 @@ constructor(
             val expandableViewModel: SlidersExpandableViewModel by
                 viewModel
                     .isExpandable(isPortrait)
-                    .collectAsState(SlidersExpandableViewModel.Unavailable)
+                    .collectAsStateWithLifecycle(SlidersExpandableViewModel.Unavailable)
             if (expandableViewModel is SlidersExpandableViewModel.Unavailable) {
                 return
             }

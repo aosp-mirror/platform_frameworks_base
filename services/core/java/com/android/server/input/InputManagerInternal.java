@@ -218,4 +218,13 @@ public abstract class InputManagerInternal {
      * display, external peripherals, fingerprint sensor, etc.
      */
     public abstract void notifyUserActivity();
+
+    /**
+     * Get the device ID of the {@link InputDevice} that used most recently.
+     *
+     * @return the last used input device ID, or
+     *     {@link android.os.IInputConstants#INVALID_INPUT_DEVICE_ID} if no device has been used
+     *     since boot.
+     */
+    public abstract int getLastUsedInputDeviceId();
 }

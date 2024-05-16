@@ -870,6 +870,7 @@ public final class PinnerService extends SystemService {
             }
             synchronized (this) {
                 pinnedApp.mFiles.add(pf);
+                mPinnedFiles.put(pf.fileName, pf);
             }
 
             apkPinSizeLimit -= pf.bytesPinned;
@@ -1341,18 +1342,6 @@ public final class PinnerService extends SystemService {
 
     public List<PinnedFileStat> getPinnerStats() {
         ArrayList<PinnedFileStat> stats = new ArrayList<>();
-        Collection<PinnedApp> pinnedApps;
-        synchronized(this) {
-            pinnedApps = mPinnedApps.values();
-        }
-        for (PinnedApp pinnedApp : pinnedApps) {
-            for (PinnedFile pf : pinnedApp.mFiles) {
-                PinnedFileStat stat =
-                        new PinnedFileStat(pf.fileName, pf.bytesPinned, pf.groupName);
-                stats.add(stat);
-            }
-        }
-
         Collection<PinnedFile> pinnedFiles;
         synchronized(this) {
             pinnedFiles = mPinnedFiles.values();

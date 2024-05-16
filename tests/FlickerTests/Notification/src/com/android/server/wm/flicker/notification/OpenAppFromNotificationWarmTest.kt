@@ -47,7 +47,7 @@ import org.junit.runners.Parameterized
 /**
  * Test cold launching an app from a notification.
  *
- * To run this test: `atest FlickerTests:OpenAppFromNotificationWarm`
+ * To run this test: `atest FlickerTestsNotification:OpenAppFromNotificationWarmTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)

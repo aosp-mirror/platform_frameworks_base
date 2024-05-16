@@ -423,7 +423,7 @@ private:
         std::set<int32_t> disabledInputDevices{};
 
         // Associated Pointer controller display.
-        ui::LogicalDisplayId pointerDisplayId{ui::ADISPLAY_ID_DEFAULT};
+        ui::LogicalDisplayId pointerDisplayId{ui::LogicalDisplayId::DEFAULT};
 
         // True if stylus button reporting through motion events is enabled.
         bool stylusButtonMotionEventsEnabled{true};
@@ -1886,7 +1886,7 @@ static jobject nativeCreateInputMonitor(JNIEnv* env, jobject nativeImplObj, jint
                                         jstring nameObj, jint pid) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
-    if (displayId == ui::ADISPLAY_ID_NONE.val()) {
+    if (ui::LogicalDisplayId{displayId} == ui::LogicalDisplayId::INVALID) {
         std::string message = "InputChannel used as a monitor must be associated with a display";
         jniThrowRuntimeException(env, message.c_str());
         return nullptr;
@@ -2727,6 +2727,11 @@ static void nativeSetInputMethodConnectionIsActive(JNIEnv* env, jobject nativeIm
     im->setInputMethodConnectionIsActive(isActive);
 }
 
+static jint nativeGetLastUsedInputDeviceId(JNIEnv* env, jobject nativeImplObj) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    return static_cast<jint>(im->getInputManager()->getReader().getLastUsedInputDeviceId());
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2835,6 +2840,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setAccessibilityStickyKeysEnabled", "(Z)V",
          (void*)nativeSetAccessibilityStickyKeysEnabled},
         {"setInputMethodConnectionIsActive", "(Z)V", (void*)nativeSetInputMethodConnectionIsActive},
+        {"getLastUsedInputDeviceId", "()I", (void*)nativeGetLastUsedInputDeviceId},
 };
 
 #define FIND_CLASS(var, className) \

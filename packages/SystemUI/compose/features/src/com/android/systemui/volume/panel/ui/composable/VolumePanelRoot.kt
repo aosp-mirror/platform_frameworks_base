@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.res.R
 import com.android.systemui.volume.panel.ui.layout.ComponentsLayout
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelState
@@ -54,8 +54,8 @@ fun VolumePanelRoot(
     }
 
     val accessibilityTitle = stringResource(R.string.accessibility_volume_settings)
-    val state: VolumePanelState by viewModel.volumePanelState.collectAsState()
-    val components by viewModel.componentsLayout.collectAsState(null)
+    val state: VolumePanelState by viewModel.volumePanelState.collectAsStateWithLifecycle()
+    val components by viewModel.componentsLayout.collectAsStateWithLifecycle(null)
 
     with(VolumePanelComposeScope(state)) {
         components?.let { componentsState ->

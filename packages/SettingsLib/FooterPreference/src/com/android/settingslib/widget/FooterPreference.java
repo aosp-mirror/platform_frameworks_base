@@ -80,14 +80,15 @@ public class FooterPreference extends Preference {
                 continue;
             }
             final URLSpan urlSpan = (URLSpan) clickable;
-            if (!urlSpan.getURL().startsWith(INTENT_URL_PREFIX)) {
+            final String url = urlSpan.getURL();
+            if (url == null || !url.startsWith(INTENT_URL_PREFIX)) {
                 continue;
             }
             final int start = spannable.getSpanStart(urlSpan);
             final int end = spannable.getSpanEnd(urlSpan);
             spannable.removeSpan(urlSpan);
             try {
-                final Intent intent = Intent.parseUri(urlSpan.getURL(), Intent.URI_INTENT_SCHEME);
+                final Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
                 final ClickableSpan clickableSpan =
                         new ClickableSpan() {
                             @Override
@@ -98,7 +99,7 @@ public class FooterPreference extends Preference {
                         };
                 spannable.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             } catch (URISyntaxException e) {
-                Log.e(TAG, "Invalid URI " + urlSpan.getURL(), e);
+                Log.e(TAG, "Invalid URI " + url, e);
             }
         }
         title.setText(spannable);

@@ -56,7 +56,6 @@ import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,6 +76,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.PlatformButton
 import com.android.compose.animation.Easings
 import com.android.compose.animation.scene.ElementKey
@@ -111,7 +111,7 @@ fun BouncerContent(
     dialogFactory: BouncerDialogFactory,
     modifier: Modifier = Modifier,
 ) {
-    val isSideBySideSupported by viewModel.isSideBySideSupported.collectAsState()
+    val isSideBySideSupported by viewModel.isSideBySideSupported.collectAsStateWithLifecycle()
     val layout = calculateLayout(isSideBySideSupported = isSideBySideSupported)
 
     Box(
@@ -220,7 +220,7 @@ private fun SplitLayout(
     viewModel: BouncerViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val authMethod by viewModel.authMethodViewModel.collectAsState()
+    val authMethod by viewModel.authMethodViewModel.collectAsStateWithLifecycle()
 
     Row(
         modifier =
@@ -316,7 +316,7 @@ private fun BesideUserSwitcherLayout(
     val (isSwapped, setSwapped) = rememberSaveable(isLeftToRight) { mutableStateOf(!isLeftToRight) }
     val isHeightExpanded =
         LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Expanded
-    val authMethod by viewModel.authMethodViewModel.collectAsState()
+    val authMethod by viewModel.authMethodViewModel.collectAsStateWithLifecycle()
 
     Row(
         modifier =
@@ -480,7 +480,7 @@ private fun FoldAware(
     modifier: Modifier = Modifier,
 ) {
     val foldPosture: FoldPosture by foldPosture()
-    val isSplitAroundTheFoldRequired by viewModel.isFoldSplitRequired.collectAsState()
+    val isSplitAroundTheFoldRequired by viewModel.isFoldSplitRequired.collectAsStateWithLifecycle()
     val isSplitAroundTheFold = foldPosture == FoldPosture.Tabletop && isSplitAroundTheFoldRequired
     val currentSceneKey =
         if (isSplitAroundTheFold) SceneKeys.SplitSceneKey else SceneKeys.ContiguousSceneKey
@@ -562,7 +562,7 @@ private fun StatusMessage(
     viewModel: BouncerMessageViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val message: MessageViewModel? by viewModel.message.collectAsState()
+    val message: MessageViewModel? by viewModel.message.collectAsStateWithLifecycle()
 
     DisposableEffect(Unit) {
         viewModel.onShown()
@@ -612,7 +612,7 @@ private fun OutputArea(
     modifier: Modifier = Modifier,
 ) {
     val authMethodViewModel: AuthMethodBouncerViewModel? by
-        viewModel.authMethodViewModel.collectAsState()
+        viewModel.authMethodViewModel.collectAsStateWithLifecycle()
 
     when (val nonNullViewModel = authMethodViewModel) {
         is PinBouncerViewModel ->
@@ -642,7 +642,7 @@ private fun InputArea(
     modifier: Modifier = Modifier,
 ) {
     val authMethodViewModel: AuthMethodBouncerViewModel? by
-        viewModel.authMethodViewModel.collectAsState()
+        viewModel.authMethodViewModel.collectAsStateWithLifecycle()
 
     when (val nonNullViewModel = authMethodViewModel) {
         is PinBouncerViewModel -> {
@@ -668,7 +668,8 @@ private fun ActionArea(
     viewModel: BouncerViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val actionButton: BouncerActionButtonModel? by viewModel.actionButton.collectAsState()
+    val actionButton: BouncerActionButtonModel? by
+        viewModel.actionButton.collectAsStateWithLifecycle()
     val appearFadeInAnimatable = remember { Animatable(0f) }
     val appearMoveAnimatable = remember { Animatable(0f) }
     val appearAnimationInitialOffset = with(LocalDensity.current) { 80.dp.toPx() }
@@ -735,7 +736,7 @@ private fun Dialog(
     bouncerViewModel: BouncerViewModel,
     dialogFactory: BouncerDialogFactory,
 ) {
-    val dialogViewModel by bouncerViewModel.dialogViewModel.collectAsState()
+    val dialogViewModel by bouncerViewModel.dialogViewModel.collectAsStateWithLifecycle()
     var dialog: AlertDialog? by remember { mutableStateOf(null) }
 
     dialogViewModel?.let { viewModel ->
@@ -772,8 +773,8 @@ private fun UserSwitcher(
         return
     }
 
-    val selectedUserImage by viewModel.selectedUserImage.collectAsState(null)
-    val dropdownItems by viewModel.userSwitcherDropdown.collectAsState(emptyList())
+    val selectedUserImage by viewModel.selectedUserImage.collectAsStateWithLifecycle(null)
+    val dropdownItems by viewModel.userSwitcherDropdown.collectAsStateWithLifecycle(emptyList())
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,

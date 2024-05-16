@@ -40,7 +40,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.runner.RunWith
 
 @SmallTest
@@ -1149,7 +1148,6 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
      *
      * In STL there is no guarantee that transitions settle in Idle before continuing.
      */
-    @Ignore("Suffers from a race condition that will be fixed in followup CL")
     @Test
     fun transition_from_ls_scene_interrupted_by_other_from_ls_transition() =
         testScope.runTest {

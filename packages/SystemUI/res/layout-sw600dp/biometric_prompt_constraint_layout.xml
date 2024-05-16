@@ -229,6 +229,7 @@
         android:layout_gravity="center"
         android:contentDescription="@null"
         android:scaleType="fitXY"
+        android:importantForAccessibility="no"
         app:layout_constraintBottom_toBottomOf="@+id/biometric_icon"
         app:layout_constraintEnd_toEndOf="@+id/biometric_icon"
         app:layout_constraintStart_toStartOf="@+id/biometric_icon"

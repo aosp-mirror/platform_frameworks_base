@@ -1189,7 +1189,11 @@ public class AutomaticBrightnessController {
         update();
     }
 
-    void switchMode(@AutomaticBrightnessMode int mode) {
+    /**
+     * Responsible for switching the AutomaticBrightnessMode of the associated display. Also takes
+     * care of resetting the short term model wherever required
+     */
+    public void switchMode(@AutomaticBrightnessMode int mode) {
         if (!mBrightnessMappingStrategyMap.contains(mode)) {
             return;
         }

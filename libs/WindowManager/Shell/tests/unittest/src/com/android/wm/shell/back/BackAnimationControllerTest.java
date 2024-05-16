@@ -120,7 +120,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
     private TestableContentResolver mContentResolver;
     private TestableLooper mTestableLooper;
 
-    private CrossActivityBackAnimation mCrossActivityBackAnimation;
+    private DefaultCrossActivityBackAnimation mDefaultCrossActivityBackAnimation;
     private CrossTaskBackAnimation mCrossTaskBackAnimation;
     private ShellBackAnimationRegistry mShellBackAnimationRegistry;
 
@@ -135,13 +135,14 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 ANIMATION_ENABLED);
         mTestableLooper = TestableLooper.get(this);
         mShellInit = spy(new ShellInit(mShellExecutor));
-        mCrossActivityBackAnimation = new CrossActivityBackAnimation(mContext, mAnimationBackground,
-                mRootTaskDisplayAreaOrganizer);
+        mDefaultCrossActivityBackAnimation = new DefaultCrossActivityBackAnimation(mContext,
+                mAnimationBackground, mRootTaskDisplayAreaOrganizer);
         mCrossTaskBackAnimation = new CrossTaskBackAnimation(mContext, mAnimationBackground);
         mShellBackAnimationRegistry =
-                new ShellBackAnimationRegistry(mCrossActivityBackAnimation, mCrossTaskBackAnimation,
-                        /* dialogCloseAnimation= */ null,
-                        new CustomizeActivityAnimation(mContext, mAnimationBackground),
+                new ShellBackAnimationRegistry(mDefaultCrossActivityBackAnimation,
+                        mCrossTaskBackAnimation, /* dialogCloseAnimation= */ null,
+                        new CustomCrossActivityBackAnimation(mContext, mAnimationBackground,
+                                mRootTaskDisplayAreaOrganizer),
                         /* defaultBackToHomeAnimation= */ null);
         mController =
                 new BackAnimationController(
@@ -582,7 +583,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
     @Test
     public void testBackToActivity() throws RemoteException {
         verifySystemBackBehavior(BackNavigationInfo.TYPE_CROSS_ACTIVITY,
-                mCrossActivityBackAnimation.getRunner());
+                mDefaultCrossActivityBackAnimation.getRunner());
     }
 
     @Test

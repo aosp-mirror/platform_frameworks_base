@@ -467,10 +467,10 @@ void MouseCursorController::startAnimationLocked() REQUIRES(mLock) {
 
     std::function<bool(nsecs_t)> func = std::bind(&MouseCursorController::doAnimations, this, _1);
     /*
-     * Using ui::ADISPLAY_ID_NONE for displayId here to avoid removing the callback
+     * Using ui::LogicalDisplayId::INVALID for displayId here to avoid removing the callback
      * if a TouchSpotController with the same display is removed.
      */
-    mContext.addAnimationCallback(ui::ADISPLAY_ID_NONE, func);
+    mContext.addAnimationCallback(ui::LogicalDisplayId::INVALID, func);
 }
 
 } // namespace android

@@ -22,13 +22,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.IntRect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
 import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
@@ -70,8 +70,8 @@ constructor(
     override fun SceneScope.Content(modifier: Modifier) {
         val isUdfpsVisible = viewModel.isUdfpsVisible
         val shouldUseSplitNotificationShade by
-            viewModel.shouldUseSplitNotificationShade.collectAsState()
-        val unfoldTranslations by viewModel.unfoldTranslations.collectAsState()
+            viewModel.shouldUseSplitNotificationShade.collectAsStateWithLifecycle()
+        val unfoldTranslations by viewModel.unfoldTranslations.collectAsStateWithLifecycle()
 
         LockscreenLongPress(
             viewModel = viewModel.longPress,

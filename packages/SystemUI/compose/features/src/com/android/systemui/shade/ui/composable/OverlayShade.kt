@@ -30,13 +30,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
@@ -51,7 +51,7 @@ fun SceneScope.OverlayShade(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    val backgroundScene by viewModel.backgroundScene.collectAsState()
+    val backgroundScene by viewModel.backgroundScene.collectAsStateWithLifecycle()
 
     Box(modifier) {
         if (backgroundScene == Scenes.Lockscreen) {

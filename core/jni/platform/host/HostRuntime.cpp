@@ -330,7 +330,7 @@ static void init_keyboard(JNIEnv* env, const vector<string>& keyboardPaths) {
         InputDeviceInfo info = InputDeviceInfo();
         info.initialize(keyboardId, 0, 0, InputDeviceIdentifier(),
                         "keyboard " + std::to_string(keyboardId), true, false,
-                        ui::ADISPLAY_ID_DEFAULT);
+                        ui::LogicalDisplayId::DEFAULT);
         info.setKeyboardType(AINPUT_KEYBOARD_TYPE_ALPHABETIC);
         info.setKeyCharacterMap(*charMap);
 
