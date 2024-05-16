@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone.ongoingcall
+package com.android.systemui.statusbar.chips.ui.view
 
 import android.content.Context
 import android.util.AttributeSet
 import com.android.systemui.animation.view.LaunchableLinearLayout
 
 /**
- * A container view for the ongoing call chip background. Needed so that we can limit the height of
- * the background when the font size is very large (200%), in which case the background would go
+ * A container view for the ongoing activity chip background. Needed so that we can limit the height
+ * of the background when the font size is very large (200%), in which case the background would go
  * past the bounds of the status bar.
  */
-class OngoingCallBackgroundContainer(context: Context, attrs: AttributeSet) :
+class ChipBackgroundContainer(context: Context, attrs: AttributeSet) :
     LaunchableLinearLayout(context, attrs) {
 
     /** Sets where this view should fetch its max height from. */

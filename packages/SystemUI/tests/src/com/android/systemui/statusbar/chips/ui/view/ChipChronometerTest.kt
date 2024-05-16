@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone.ongoingcall
+package com.android.systemui.statusbar.chips.ui.view
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
 import android.view.View
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.res.R
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -38,17 +38,18 @@ private const val XL_TEXT = "00:0000"
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
-class OngoingCallChronometerTest : SysuiTestCase() {
+class ChipChronometerTest : SysuiTestCase() {
 
-    private lateinit var textView: OngoingCallChronometer
+    private lateinit var textView: ChipChronometer
     private lateinit var doesNotFitText: String
 
     @Before
     fun setUp() {
         allowTestableLooperAsMainThread()
         TestableLooper.get(this).runWithLooper {
-            val chipView = LayoutInflater.from(mContext).inflate(R.layout.ongoing_call_chip, null)
-            textView = chipView.findViewById(R.id.ongoing_call_chip_time)!!
+            val chipView =
+                LayoutInflater.from(mContext).inflate(R.layout.ongoing_activity_chip, null)
+            textView = chipView.findViewById(R.id.ongoing_activity_chip_time)!!
             measureTextView()
             calculateDoesNotFixText()
         }
@@ -159,8 +160,8 @@ class OngoingCallChronometerTest : SysuiTestCase() {
 
     private fun measureTextView() {
         textView.measure(
-                View.MeasureSpec.makeMeasureSpec(TEXT_VIEW_MAX_WIDTH, View.MeasureSpec.AT_MOST),
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            View.MeasureSpec.makeMeasureSpec(TEXT_VIEW_MAX_WIDTH, View.MeasureSpec.AT_MOST),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
     }
 

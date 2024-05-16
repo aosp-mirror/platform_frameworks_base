@@ -36,6 +36,8 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.statusbar.chips.ui.view.ChipChronometer
+import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -145,8 +147,8 @@ class OngoingCallController @Inject constructor(
     fun setChipView(chipView: View) {
         tearDownChipView()
         this.chipView = chipView
-        val backgroundView: OngoingCallBackgroundContainer? =
-            chipView.findViewById(R.id.ongoing_call_chip_background)
+        val backgroundView: ChipBackgroundContainer? =
+            chipView.findViewById(R.id.ongoing_activity_chip_background)
         backgroundView?.maxHeightFetcher = { statusBarWindowController.statusBarHeight }
         if (hasOngoingCall()) {
             updateChip()
@@ -226,7 +228,7 @@ class OngoingCallController @Inject constructor(
         if (callNotificationInfo == null) { return }
         val currentChipView = chipView
         val backgroundView =
-            currentChipView?.findViewById<View>(R.id.ongoing_call_chip_background)
+            currentChipView?.findViewById<View>(R.id.ongoing_activity_chip_background)
         val intent = callNotificationInfo?.intent
         if (currentChipView != null && backgroundView != null && intent != null) {
             currentChipView.setOnClickListener {
@@ -271,8 +273,8 @@ class OngoingCallController @Inject constructor(
     @VisibleForTesting
     fun tearDownChipView() = chipView?.getTimeView()?.stop()
 
-    private fun View.getTimeView(): OngoingCallChronometer? {
-        return this.findViewById(R.id.ongoing_call_chip_time)
+    private fun View.getTimeView(): ChipChronometer? {
+        return this.findViewById(R.id.ongoing_activity_chip_time)
     }
 
     /**
