@@ -392,6 +392,14 @@
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
             "name": "CtsAppOpsTestCases"
+        },
+        {
+            "file_patterns": [
+                "(/|^)Activity.*.java",
+                "(/|^)PendingIntent.java",
+                "(/|^)ComtextImpl.java"
+            ],
+            "name": "CtsWindowManagerBackgroundActivityTestCases"
         }
     ]
 }
