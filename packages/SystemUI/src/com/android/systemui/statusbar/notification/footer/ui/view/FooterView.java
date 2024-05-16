@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification.footer.ui.view;
 
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 
-import static com.android.systemui.Flags.notificationBackgroundTintOptimization;
+import static com.android.systemui.Flags.notificationFooterBackgroundTintOptimization;
 import static com.android.systemui.util.ColorUtilKt.hexColorString;
 
 import android.annotation.ColorInt;
@@ -407,7 +407,7 @@ public class FooterView extends StackScrollerDecorView {
         final Drawable clearAllBg = theme.getDrawable(R.drawable.notif_footer_btn_background);
         final Drawable manageBg = theme.getDrawable(R.drawable.notif_footer_btn_background);
         final @ColorInt int scHigh;
-        if (!notificationBackgroundTintOptimization()) {
+        if (!notificationFooterBackgroundTintOptimization()) {
             scHigh = Utils.getColorAttrDefaultColor(mContext,
                     com.android.internal.R.attr.materialColorSurfaceContainerHigh);
             if (scHigh != 0) {
