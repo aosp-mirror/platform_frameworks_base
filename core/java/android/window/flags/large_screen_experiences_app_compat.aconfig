@@ -8,6 +8,16 @@ flag {
 }
 
 flag {
+  name: "disable_thin_letterboxing_policy"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether reachability is disabled in case of thin letterboxing"
+  bug: "341027847"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "allows_screen_size_decoupled_from_status_bar_and_cutout"
   namespace: "large_screen_experiences_app_compat"
   description: "When necessary, configuration decoupled from status bar and display cutout"
