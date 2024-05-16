@@ -631,15 +631,8 @@ public class DividerPresenterTest {
         assertEquals(defaultColor,
                 DividerPresenter.getContainerBackgroundColor(container, defaultColor));
 
-        // When the top non-finishing activity is not resumed, the default color should be returned.
+        // When the top non-finishing activity is non-null, its background color should be returned.
         when(container.getTopNonFinishingActivity()).thenReturn(activity);
-        when(activity.isResumed()).thenReturn(false);
-        assertEquals(defaultColor,
-                DividerPresenter.getContainerBackgroundColor(container, defaultColor));
-
-        // When the top non-finishing activity is resumed, its background color should be returned.
-        when(container.getTopNonFinishingActivity()).thenReturn(activity);
-        when(activity.isResumed()).thenReturn(true);
         assertEquals(activityBackgroundColor,
                 DividerPresenter.getContainerBackgroundColor(container, defaultColor));
     }
