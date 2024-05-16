@@ -28,10 +28,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Maintains multidimensional multi-state stats.  States could be something like on-battery (0,1),
@@ -287,6 +285,14 @@ public class MultiStateStats {
         mCounter = new LongArrayMultiStateCounter(factory.mSerialStateCount, dimensionCount);
     }
 
+    public int getDimensionCount() {
+        return mFactory.mDimensionCount;
+    }
+
+    public States[] getStates() {
+        return mFactory.mStates;
+    }
+
     /**
      * Copies time-in-state and timestamps from the supplied prototype. Does not
      * copy accumulated counts.
@@ -341,11 +347,6 @@ public class MultiStateStats {
     public void reset() {
         mCounter.reset();
         mTracking = false;
-    }
-
-    @Override
-    public String toString() {
-        return mCounter.toString();
     }
 
     /**
@@ -451,10 +452,9 @@ public class MultiStateStats {
         return true;
     }
 
-    /**
-     * Prints the accumulated stats, one line of every combination of states that has data.
-     */
-    public void dump(PrintWriter pw, Function<long[], String> statsFormatter) {
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
         long[] values = new long[mCounter.getArrayLength()];
         States.forEachTrackedStateCombination(mFactory.mStates, states -> {
             mCounter.getCounts(values, mFactory.getSerialState(states));
@@ -469,18 +469,24 @@ public class MultiStateStats {
                 return;
             }
 
-            StringBuilder sb = new StringBuilder();
+            if (!sb.isEmpty()) {
+                sb.append("\n");
+            }
+
+            sb.append("(");
+            boolean first = true;
             for (int i = 0; i < states.length; i++) {
                 if (mFactory.mStates[i].mTracked) {
-                    if (sb.length() != 0) {
+                    if (!first) {
                         sb.append(" ");
                     }
+                    first = false;
                     sb.append(mFactory.mStates[i].mLabels[states[i]]);
                 }
             }
-            sb.append(" ");
-            sb.append(statsFormatter.apply(values));
-            pw.println(sb);
+            sb.append(") ");
+            sb.append(Arrays.toString(values));
         });
+        return sb.toString();
     }
 }

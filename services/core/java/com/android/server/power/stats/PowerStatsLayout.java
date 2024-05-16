@@ -33,12 +33,19 @@ public class PowerStatsLayout {
     private static final String EXTRA_DEVICE_ENERGY_CONSUMERS_COUNT = "dec";
     private static final String EXTRA_UID_POWER_POSITION = "up";
 
-    protected static final double MILLI_TO_NANO_MULTIPLIER = 1000000.0;
     protected static final int UNSUPPORTED = -1;
+    protected static final double MILLI_TO_NANO_MULTIPLIER = 1000000.0;
+    protected static final int FLAG_OPTIONAL = 1;
+    protected static final int FLAG_HIDDEN = 2;
+    protected static final int FLAG_FORMAT_AS_POWER = 4;
 
     private int mDeviceStatsArrayLength;
     private int mStateStatsArrayLength;
     private int mUidStatsArrayLength;
+
+    private StringBuilder mDeviceFormat = new StringBuilder();
+    private StringBuilder mStateFormat = new StringBuilder();
+    private StringBuilder mUidFormat = new StringBuilder();
 
     protected int mDeviceDurationPosition = UNSUPPORTED;
     private int mDeviceEnergyConsumerPosition;
@@ -65,29 +72,71 @@ public class PowerStatsLayout {
         return mUidStatsArrayLength;
     }
 
-    protected int addDeviceSection(int length) {
+    /**
+     * @param label should not contain either spaces or colons
+     */
+    private void appendFormat(StringBuilder sb, int position, int length, String label,
+            int flags) {
+        if ((flags & FLAG_HIDDEN) != 0) {
+            return;
+        }
+
+        if (!sb.isEmpty()) {
+            sb.append(' ');
+        }
+
+        sb.append(label).append(':');
+        sb.append(position);
+        if (length != 1) {
+            sb.append('[').append(length).append(']');
+        }
+        if ((flags & FLAG_FORMAT_AS_POWER) != 0) {
+            sb.append('p');
+        }
+        if ((flags & FLAG_OPTIONAL) != 0) {
+            sb.append('?');
+        }
+    }
+
+    protected int addDeviceSection(int length, String label, int flags) {
         int position = mDeviceStatsArrayLength;
         mDeviceStatsArrayLength += length;
+        appendFormat(mDeviceFormat, position, length, label, flags);
         return position;
     }
 
-    protected int addStateSection(int length) {
+    protected int addDeviceSection(int length, String label) {
+        return addDeviceSection(length, label, 0);
+    }
+
+    protected int addStateSection(int length, String label, int flags) {
         int position = mStateStatsArrayLength;
         mStateStatsArrayLength += length;
+        appendFormat(mStateFormat, position, length, label, flags);
         return position;
     }
 
-    protected int addUidSection(int length) {
+    protected int addStateSection(int length, String label) {
+        return addStateSection(length, label, 0);
+    }
+
+
+    protected int addUidSection(int length, String label, int flags) {
         int position = mUidStatsArrayLength;
         mUidStatsArrayLength += length;
+        appendFormat(mUidFormat, position, length, label, flags);
         return position;
+    }
+
+    protected int addUidSection(int length, String label) {
+        return addUidSection(length, label, 0);
     }
 
     /**
      * Declare that the stats array has a section capturing usage duration
      */
     public void addDeviceSectionUsageDuration() {
-        mDeviceDurationPosition = addDeviceSection(1);
+        mDeviceDurationPosition = addDeviceSection(1, "usage", FLAG_OPTIONAL);
     }
 
     /**
@@ -109,7 +158,7 @@ public class PowerStatsLayout {
      * PowerStatsService.
      */
     public void addDeviceSectionEnergyConsumers(int energyConsumerCount) {
-        mDeviceEnergyConsumerPosition = addDeviceSection(energyConsumerCount);
+        mDeviceEnergyConsumerPosition = addDeviceSection(energyConsumerCount, "energy");
         mDeviceEnergyConsumerCount = energyConsumerCount;
     }
 
@@ -137,7 +186,8 @@ public class PowerStatsLayout {
      * Declare that the stats array has a section capturing a power estimate
      */
     public void addDeviceSectionPowerEstimate() {
-        mDevicePowerEstimatePosition = addDeviceSection(1);
+        mDevicePowerEstimatePosition = addDeviceSection(1, "power",
+                FLAG_FORMAT_AS_POWER | FLAG_OPTIONAL);
     }
 
     /**
@@ -159,7 +209,7 @@ public class PowerStatsLayout {
      * Declare that the UID stats array has a section capturing a power estimate
      */
     public void addUidSectionPowerEstimate() {
-        mUidPowerEstimatePosition = addUidSection(1);
+        mUidPowerEstimatePosition = addUidSection(1, "power", FLAG_FORMAT_AS_POWER | FLAG_OPTIONAL);
     }
 
     /**
@@ -195,6 +245,9 @@ public class PowerStatsLayout {
                 mDeviceEnergyConsumerCount);
         extras.putInt(EXTRA_DEVICE_POWER_POSITION, mDevicePowerEstimatePosition);
         extras.putInt(EXTRA_UID_POWER_POSITION, mUidPowerEstimatePosition);
+        extras.putString(PowerStats.Descriptor.EXTRA_DEVICE_STATS_FORMAT, mDeviceFormat.toString());
+        extras.putString(PowerStats.Descriptor.EXTRA_STATE_STATS_FORMAT, mStateFormat.toString());
+        extras.putString(PowerStats.Descriptor.EXTRA_UID_STATS_FORMAT, mUidFormat.toString());
     }
 
     /**

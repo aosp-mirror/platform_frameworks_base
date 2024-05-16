@@ -19,8 +19,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.Log;
 
-import com.android.internal.os.PowerStats;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,12 +44,6 @@ abstract class PowerStatsProcessor {
     private static final double MILLIAMPHOUR_PER_MICROCOULOMB = 1.0 / 1000.0 / 60.0 / 60.0;
 
     abstract void finish(PowerComponentAggregatedPowerStats stats);
-
-    abstract String deviceStatsToString(PowerStats.Descriptor descriptor, long[] stats);
-
-    abstract String stateStatsToString(PowerStats.Descriptor descriptor, int key, long[] stats);
-
-    abstract String uidStatsToString(PowerStats.Descriptor descriptor, long[] stats);
 
     protected static class PowerEstimationPlan {
         private final AggregatedPowerStatsConfig.PowerComponent mConfig;
