@@ -207,6 +207,11 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
 
     /** Indicates QS is at its max height */
     private boolean mFullyExpanded;
+    /**
+     * Indicates QS is at its maximum height, AND takes up the whole screen (i.e. not in split
+     * shade).
+     */
+    private boolean mFullScreen;
     private boolean mExpandedWhenExpandingStarted;
     private boolean mAnimatingHiddenFromCollapsed;
     private boolean mVisible;
@@ -967,27 +972,35 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     }
 
     private void setQsFullScreen(boolean qsFullScreen) {
+        if (mFullScreen == qsFullScreen) {
+            return; // no change
+        }
+        mFullScreen = qsFullScreen;
+
         mShadeRepository.setLegacyQsFullscreen(qsFullScreen);
         mNotificationStackScrollLayoutController.setQsFullScreen(qsFullScreen);
-        if (!SceneContainerFlag.isEnabled()) {
-            mNotificationStackScrollLayoutController.setScrollingEnabled(
-                    mBarState != KEYGUARD && (!qsFullScreen || mExpansionFromOverscroll));
-        }
     }
 
     void updateQsState() {
+        boolean qsExpanded = getExpanded();
+
         if (!FooterViewRefactor.isEnabled()) {
             // Update full screen state; note that this will be true if the QS panel is only
             // partially expanded, and that is fixed with the footer view refactor.
-            setQsFullScreen(/* qsFullScreen = */ getExpanded() && !mSplitShadeEnabled);
+            setQsFullScreen(/* qsFullScreen = */ qsExpanded && !mSplitShadeEnabled);
+        }
+
+        if (!SceneContainerFlag.isEnabled()) {
+            mNotificationStackScrollLayoutController.setScrollingEnabled(
+                    mBarState != KEYGUARD && (!mFullScreen || mExpansionFromOverscroll));
         }
 
         if (mQsStateUpdateListener != null) {
-            mQsStateUpdateListener.onQsStateUpdated(getExpanded(), mStackScrollerOverscrolling);
+            mQsStateUpdateListener.onQsStateUpdated(qsExpanded, mStackScrollerOverscrolling);
         }
 
         if (mQs == null) return;
-        mQs.setExpanded(getExpanded());
+        mQs.setExpanded(qsExpanded);
     }
 
     /** update expanded state of QS */
