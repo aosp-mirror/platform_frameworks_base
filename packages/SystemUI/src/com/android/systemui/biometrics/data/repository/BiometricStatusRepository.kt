@@ -25,6 +25,7 @@ import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_SETTING
 import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_ENROLLING
 import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_FIND_SENSOR
 import android.hardware.biometrics.BiometricSourceType
+import android.util.Log
 import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.AuthenticationReason.SettingsOperations
 import com.android.systemui.biometrics.shared.model.AuthenticationState
@@ -42,6 +43,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 
 /** A repository for the state of biometric authentication. */
@@ -67,6 +69,7 @@ constructor(
     private val authenticationState: Flow<AuthenticationState> =
         conflatedCallbackFlow {
                 val updateAuthenticationState = { state: AuthenticationState ->
+                    Log.d(TAG, "authenticationState updated: $state")
                     trySendWithFailureLogging(state, TAG, "Error sending AuthenticationState state")
                 }
 
@@ -121,7 +124,9 @@ constructor(
             .shareIn(applicationScope, started = SharingStarted.Eagerly, replay = 1)
 
     override val fingerprintAuthenticationReason: Flow<AuthenticationReason> =
-        authenticationState.map { it.requestReason }
+        authenticationState
+            .map { it.requestReason }
+            .onEach { Log.d(TAG, "fingerprintAuthenticationReason updated: $it") }
 
     override val fingerprintAcquiredStatus: Flow<FingerprintAuthenticationStatus> =
         authenticationState
