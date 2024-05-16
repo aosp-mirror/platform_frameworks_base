@@ -7418,7 +7418,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     FEATURE_LEANBACK);
             final boolean isArc = arcFeature != null && arcFeature.version >= 0;
             final boolean isTv = tvFeature != null && tvFeature.version >= 0;
-            sIsPip2ExperimentEnabled = SystemProperties.getBoolean("wm_shell.pip2", false)
+            sIsPip2ExperimentEnabled = SystemProperties.getBoolean(
+                    "persist.wm_shell.pip2", false)
                     || (Flags.enablePip2Implementation() && !isArc && !isTv);
         }
         return sIsPip2ExperimentEnabled;
