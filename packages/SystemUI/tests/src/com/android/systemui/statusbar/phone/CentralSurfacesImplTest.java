@@ -57,6 +57,7 @@ import android.app.WallpaperManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.devicestate.DeviceState;
@@ -339,6 +340,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
     @Mock private KeyboardShortcuts mKeyboardShortcuts;
     @Mock private KeyboardShortcutListSearch mKeyboardShortcutListSearch;
+    @Mock private PackageManager mPackageManager;
 
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
@@ -392,7 +394,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mock(UiEventLogger.class),
                         mUserTracker,
                         mAvalancheProvider,
-                        mSystemSettings);
+                        mSystemSettings,
+                        mPackageManager);
         mVisualInterruptionDecisionProvider.start();
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));

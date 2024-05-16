@@ -467,7 +467,8 @@ public class BubblesTest extends SysuiTestCase {
                         mock(UiEventLogger.class),
                         mock(UserTracker.class),
                         mock(AvalancheProvider.class),
-                        mock(SystemSettings.class)
+                        mock(SystemSettings.class),
+                        mock(PackageManager.class)
                         );
         interruptionDecisionProvider.start();
 

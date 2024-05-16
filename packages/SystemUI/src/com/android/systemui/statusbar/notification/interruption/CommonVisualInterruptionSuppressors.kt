@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.interruption
 
+import android.Manifest.permission.RECEIVE_EMERGENCY_BROADCAST
 import android.app.Notification
 import android.app.Notification.BubbleMetadata
 import android.app.Notification.CATEGORY_EVENT
@@ -23,6 +24,8 @@ import android.app.Notification.CATEGORY_REMINDER
 import android.app.Notification.VISIBILITY_PRIVATE
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
+import android.content.pm.PackageManager
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.database.ContentObserver
 import android.hardware.display.AmbientDisplayConfiguration
 import android.os.Handler
@@ -234,6 +237,7 @@ class AvalancheSuppressor(
     private val avalancheProvider: AvalancheProvider,
     private val systemClock: SystemClock,
     private val systemSettings: SystemSettings,
+    private val packageManager: PackageManager,
 ) :
     VisualInterruptionFilter(
         types = setOf(PEEK, PULSE),
@@ -249,6 +253,7 @@ class AvalancheSuppressor(
         ALLOW_CATEGORY_EVENT,
         ALLOW_FSI_WITH_PERMISSION_ON,
         ALLOW_COLORIZED,
+        ALLOW_EMERGENCY,
         SUPPRESS
     }
 
@@ -299,13 +304,20 @@ class AvalancheSuppressor(
         if (entry.sbn.notification.isColorized) {
             return State.ALLOW_COLORIZED
         }
+        if (entry.sbn.notification.isColorized) {
+            return State.ALLOW_COLORIZED
+        }
+        if (
+            packageManager.checkPermission(RECEIVE_EMERGENCY_BROADCAST, entry.sbn.packageName) ==
+                PERMISSION_GRANTED
+        ) {
+            return State.ALLOW_EMERGENCY
+        }
         return State.SUPPRESS
     }
 
     private fun isCooldownEnabled(): Boolean {
-        return systemSettings.getInt(
-            Settings.System.NOTIFICATION_COOLDOWN_ENABLED,
-            /* def */ 1
-        ) == 1
+        return systemSettings.getInt(Settings.System.NOTIFICATION_COOLDOWN_ENABLED, /* def */ 1) ==
+            1
     }
 }
