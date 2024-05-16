@@ -19,12 +19,10 @@ package com.android.systemui.volume.panel.component.mediaoutput.domain.interacto
 import android.content.pm.PackageManager
 import android.media.VolumeProvider
 import android.media.session.MediaController
-import android.os.Handler
 import android.util.Log
 import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.volume.data.repository.LocalMediaRepository
 import com.android.settingslib.volume.data.repository.MediaControllerRepository
-import com.android.settingslib.volume.data.repository.stateChanges
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactory
 import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSessions
@@ -61,7 +59,7 @@ constructor(
     @VolumePanelScope private val coroutineScope: CoroutineScope,
     @Background private val backgroundCoroutineContext: CoroutineContext,
     mediaControllerRepository: MediaControllerRepository,
-    @Background private val backgroundHandler: Handler,
+    private val mediaControllerInteractor: MediaControllerInteractor,
 ) {
 
     private val activeMediaControllers: Flow<MediaControllers> =
@@ -194,7 +192,10 @@ constructor(
             return flowOf(null)
         }
 
-        return stateChanges(backgroundHandler).map { this }.onStart { emit(this@stateChanges) }
+        return mediaControllerInteractor
+            .stateChanges(this)
+            .map { this }
+            .onStart { emit(this@stateChanges) }
     }
 
     private data class MediaControllers(
