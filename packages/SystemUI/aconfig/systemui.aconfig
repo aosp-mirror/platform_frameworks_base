@@ -975,3 +975,13 @@ flag {
   description: "Shows a vertical bar at the right edge to indicate the user can swipe to open the glanceable hub"
   bug: "339667383"
 }
+
+flag {
+   name: "register_wallpaper_notifier_background"
+   namespace: "systemui"
+   description: "Decide whether to register wallpaper change broadcast receiver on background executor."
+   bug: "327315860"
+   metadata {
+     purpose: PURPOSE_BUGFIX
+   }
+}
