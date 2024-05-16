@@ -5672,6 +5672,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 } else if (mTransitionController.inFinishingTransition(this)) {
                     mTransitionChangeFlags |= FLAGS_IS_OCCLUDED_NO_ANIMATION;
                 }
+            } else {
+                mTransitionChangeFlags &= ~FLAG_IS_OCCLUDED;
             }
             return;
         }
