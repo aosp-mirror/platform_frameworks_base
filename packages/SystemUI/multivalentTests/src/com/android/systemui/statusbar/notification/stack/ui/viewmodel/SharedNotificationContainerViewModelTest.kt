@@ -30,6 +30,7 @@ import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
@@ -107,18 +108,25 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     val testScope = kosmos.testScope
     val configurationRepository
         get() = kosmos.fakeConfigurationRepository
+
     val keyguardRepository
         get() = kosmos.fakeKeyguardRepository
+
     val keyguardInteractor
         get() = kosmos.keyguardInteractor
+
     val keyguardRootViewModel
         get() = kosmos.keyguardRootViewModel
+
     val keyguardTransitionRepository
         get() = kosmos.fakeKeyguardTransitionRepository
+
     val shadeTestUtil
         get() = kosmos.shadeTestUtil
+
     val sharedNotificationContainerInteractor
         get() = kosmos.sharedNotificationContainerInteractor
+
     val largeScreenHeaderHelper
         get() = kosmos.mockLargeScreenHeaderHelper
 
@@ -814,6 +822,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         }
 
     @Test
+    @BrokenWithSceneContainer(330311871)
     fun alphaDoesNotUpdateWhileGoneTransitionIsRunning() =
         testScope.runTest {
             val viewState = ViewStateAccessor()

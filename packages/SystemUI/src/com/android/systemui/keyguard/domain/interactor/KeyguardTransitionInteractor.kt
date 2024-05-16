@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.annotation.FloatRange
 import android.annotation.SuppressLint
 import android.util.Log
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
@@ -31,10 +32,13 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
+import com.android.systemui.keyguard.shared.model.KeyguardState.UNDEFINED
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.util.kotlin.pairwise
 import java.util.UUID
 import javax.inject.Inject
@@ -71,6 +75,7 @@ constructor(
     private val fromAlternateBouncerTransitionInteractor:
         dagger.Lazy<FromAlternateBouncerTransitionInteractor>,
     private val fromDozingTransitionInteractor: dagger.Lazy<FromDozingTransitionInteractor>,
+    private val sceneInteractor: dagger.Lazy<SceneInteractor>,
 ) {
     private val transitionMap = mutableMapOf<Edge, MutableSharedFlow<TransitionStep>>()
 
@@ -152,16 +157,72 @@ constructor(
         }
     }
 
-    /** Given an [edge], return a SharedFlow to collect only relevant [TransitionStep]. */
+    /** Given an [edge], return a Flow to collect only relevant [TransitionStep]s. */
     @SuppressLint("SharedFlowCreation")
-    fun getOrCreateFlow(edge: Edge): MutableSharedFlow<TransitionStep> {
-        return transitionMap.getOrPut(edge) {
-            MutableSharedFlow(
-                extraBufferCapacity = 10,
-                onBufferOverflow = BufferOverflow.DROP_OLDEST
-            )
+    fun getOrCreateFlow(edge: Edge): Flow<TransitionStep> {
+        check(!(edge.from == null && edge.to == null)) { "to and from can't both be null" }
+        val mappedEdge = getMappedEdge(edge)
+
+        val flow: Flow<TransitionStep> =
+            transitionMap.getOrPut(mappedEdge) {
+                MutableSharedFlow(
+                    extraBufferCapacity = 10,
+                    onBufferOverflow = BufferOverflow.DROP_OLDEST
+                )
+            }
+
+        return if (SceneContainerFlag.isEnabled) {
+            flow.filter {
+                val fromScene = edge.from?.mapToSceneContainerScene()
+                val toScene = edge.to?.mapToSceneContainerScene()
+
+                fun SceneKey?.isLockscreenOrNull() = this == Scenes.Lockscreen || this == null
+
+                return@filter (fromScene.isLockscreenOrNull() && toScene.isLockscreenOrNull()) ||
+                    sceneInteractor.get().transitionState.value.isTransitioning(fromScene, toScene)
+            }
+        } else {
+            flow
         }
     }
+
+    /**
+     * Converts old KTF states to UNDEFINED when [SceneContainerFlag] is enabled.
+     *
+     * Does nothing otherwise.
+     *
+     * This method should eventually be removed when new code is only written for scene container.
+     * Even when all edges are ported today, there is still development on going in production that
+     * might utilize old states.
+     */
+    private fun getMappedEdge(edge: Edge): Edge {
+        if (!SceneContainerFlag.isEnabled) return edge
+
+        val newEdge =
+            Edge(
+                from = edge.from?.mapToSceneContainerState(),
+                to = edge.to?.mapToSceneContainerState()
+            )
+        if (newEdge.from == UNDEFINED && newEdge.to == UNDEFINED) {
+            Log.e(
+                TAG,
+                "The edge ${edge.from?.name} => ${edge.to?.name} was automatically " +
+                        "converted to ${newEdge.from.name} => ${newEdge.to.name} but does not " +
+                        "exist anymore in KTF. Please remove or port this edge to scene " +
+                        "container."
+            )
+        } else if (newEdge.from != edge.from || newEdge.to != edge.to) {
+            Log.w(
+                TAG,
+                "The edge ${edge.from?.name} => ${edge.to?.name} was automatically " +
+                        "converted to ${newEdge.from?.name} => ${newEdge.to?.name} (+ Scene " +
+                        "filter). This should work but should eventually be ported to " +
+                        "define the correct transition explicitly."
+            )
+        }
+        return newEdge
+    }
+
 
     /**
      * Receive all [TransitionStep] matching a filter of [from]->[to]. Allow nulls in order to match
@@ -536,6 +597,6 @@ constructor(
     ) = repository.updateTransition(transitionId, value, state)
 
     companion object {
-        private const val TAG = "KeyguardTransitionInteractor"
+        private val TAG = KeyguardTransitionInteractor::class.simpleName
     }
 }

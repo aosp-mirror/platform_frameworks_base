@@ -15,6 +15,9 @@
  */
 package com.android.systemui.keyguard.shared.model
 
+import com.android.compose.animation.scene.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
+
 /** List of all possible states to transition to/from */
 enum class KeyguardState {
     /**
@@ -83,6 +86,40 @@ enum class KeyguardState {
     UNDEFINED,
     /** An activity is displaying over the keyguard. */
     OCCLUDED;
+
+    fun mapToSceneContainerState(): KeyguardState {
+        return when (this) {
+            OFF,
+            DOZING,
+            DREAMING,
+            DREAMING_LOCKSCREEN_HOSTED,
+            AOD,
+            ALTERNATE_BOUNCER,
+            OCCLUDED,
+            LOCKSCREEN -> this
+            GLANCEABLE_HUB,
+            PRIMARY_BOUNCER,
+            GONE,
+            UNDEFINED -> UNDEFINED
+        }
+    }
+
+    fun mapToSceneContainerScene(): SceneKey? {
+        return when (this) {
+            OFF,
+            DOZING,
+            DREAMING,
+            DREAMING_LOCKSCREEN_HOSTED,
+            AOD,
+            ALTERNATE_BOUNCER,
+            OCCLUDED,
+            LOCKSCREEN -> Scenes.Lockscreen
+            GLANCEABLE_HUB -> Scenes.Communal
+            PRIMARY_BOUNCER -> Scenes.Bouncer
+            GONE -> Scenes.Gone
+            UNDEFINED -> null
+        }
+    }
 
     companion object {
 

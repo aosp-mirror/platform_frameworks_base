@@ -20,6 +20,7 @@ import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 
 val Kosmos.keyguardTransitionInteractor: KeyguardTransitionInteractor by
     Kosmos.Fixture {
@@ -32,5 +33,6 @@ val Kosmos.keyguardTransitionInteractor: KeyguardTransitionInteractor by
             fromAodTransitionInteractor = { fromAodTransitionInteractor },
             fromAlternateBouncerTransitionInteractor = { fromAlternateBouncerTransitionInteractor },
             fromDozingTransitionInteractor = { fromDozingTransitionInteractor },
+            sceneInteractor = { sceneInteractor }
         )
     }
