@@ -21,6 +21,7 @@ import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_FRONT;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_DIM_ON_TASK;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ISOLATED_NAVIGATION;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_PINNED;
 
 import static androidx.window.extensions.embedding.SplitContainer.getFinishPrimaryWithSecondaryBehavior;
 import static androidx.window.extensions.embedding.SplitContainer.getFinishSecondaryWithPrimaryBehavior;
@@ -355,6 +356,13 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
             @NonNull IBinder fragmentToken, boolean isolatedNav) {
         final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
                 OP_TYPE_SET_ISOLATED_NAVIGATION).setBooleanValue(isolatedNav).build();
+        wct.addTaskFragmentOperation(fragmentToken, operation);
+    }
+
+    void setTaskFragmentPinned(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder fragmentToken, boolean pinned) {
+        final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_SET_PINNED).setBooleanValue(pinned).build();
         wct.addTaskFragmentOperation(fragmentToken, operation);
     }
 

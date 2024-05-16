@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_PINNED;
 
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.DEFAULT_FINISH_PRIMARY_WITH_SECONDARY;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.DEFAULT_FINISH_SECONDARY_WITH_PRIMARY;
@@ -280,6 +281,28 @@ public class SplitPresenterTest {
         clearInvocations(mTransaction);
         mPresenter.updateAnimationParams(mTransaction, container.getTaskFragmentToken(),
                 animationParams);
+
+        verify(mTransaction, never()).addTaskFragmentOperation(any(), any());
+    }
+
+    @Test
+    public void testSetTaskFragmentPinned() {
+        final TaskFragmentContainer container = mController.newContainer(mActivity, TASK_ID);
+
+        // Verify the default.
+        assertFalse(container.isPinned());
+
+        mPresenter.setTaskFragmentPinned(mTransaction, container, true);
+
+        final TaskFragmentOperation expectedOperation = new TaskFragmentOperation.Builder(
+                OP_TYPE_SET_PINNED).setBooleanValue(true).build();
+        verify(mTransaction).addTaskFragmentOperation(container.getTaskFragmentToken(),
+                expectedOperation);
+        assertTrue(container.isPinned());
+
+        // No request to set the same animation params.
+        clearInvocations(mTransaction);
+        mPresenter.setTaskFragmentPinned(mTransaction, container, true);
 
         verify(mTransaction, never()).addTaskFragmentOperation(any(), any());
     }
