@@ -28,7 +28,6 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.ravenwood.example.BlueManager;
 import android.ravenwood.example.RedManager;
-import android.test.mock.MockContext;
 import android.util.ArrayMap;
 import android.util.Singleton;
 
@@ -36,7 +35,7 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
-public class RavenwoodContext extends MockContext {
+public class RavenwoodContext extends RavenwoodBaseContext {
     private final String mPackageName;
     private final HandlerThread mMainThread;
 
