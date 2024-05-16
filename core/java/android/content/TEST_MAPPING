@@ -63,5 +63,11 @@
       "name": "CtsContentTestCasesRavenwood",
       "host": true
     }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsWindowManagerBackgroundActivityTestCases",
+      "file_patterns": ["(/|^)IntentSender.java"]
+    }
   ]
 }

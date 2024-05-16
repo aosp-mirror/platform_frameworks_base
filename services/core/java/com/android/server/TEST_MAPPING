@@ -187,6 +187,20 @@
         },
         {
             "name": "SelinuxFrameworksTests"
+        },
+        {
+            "name": "CtsWindowManagerBackgroundActivityTestCases",
+            "file_patterns": [
+                "Background.*\\.java",
+                "Activity.*\\.java"
+            ]
+        },
+        {
+            "name": "WmTests",
+            "file_patterns": [
+                "Background.*\\.java",
+                "Activity.*\\.java"
+            ]
         }
     ]
 }
