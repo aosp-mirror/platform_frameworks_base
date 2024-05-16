@@ -14,27 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.domain.interactor
+package com.android.systemui.volume.panel.component.captioning.ui.viewmodel
 
-import com.android.systemui.bluetooth.bluetoothAdapter
-import com.android.systemui.bluetooth.localBluetoothManager
+import android.content.applicationContext
+import com.android.internal.logging.uiEventLogger
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.volume.data.repository.audioRepository
-import com.android.systemui.volume.data.repository.audioSharingRepository
-import com.android.systemui.volume.mediaOutputInteractor
+import com.android.systemui.view.accessibility.data.repository.captioningInteractor
 
-val Kosmos.audioOutputInteractor by
+val Kosmos.captioningViewModel by
     Kosmos.Fixture {
-        AudioOutputInteractor(
-            audioRepository,
-            audioModeInteractor,
+        CaptioningViewModel(
+            applicationContext,
+            captioningInteractor,
             testScope.backgroundScope,
-            testScope.testScheduler,
-            localBluetoothManager,
-            bluetoothAdapter,
-            deviceIconInteractor,
-            mediaOutputInteractor,
-            audioSharingRepository,
+            uiEventLogger,
         )
     }

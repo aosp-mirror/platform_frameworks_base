@@ -14,27 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.domain.interactor
+package com.android.systemui.volume.panel.component.spatial.domain.interactor
 
-import com.android.systemui.bluetooth.bluetoothAdapter
-import com.android.systemui.bluetooth.localBluetoothManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.volume.data.repository.audioRepository
-import com.android.systemui.volume.data.repository.audioSharingRepository
-import com.android.systemui.volume.mediaOutputInteractor
+import com.android.systemui.media.spatializerInteractor
+import com.android.systemui.volume.domain.interactor.audioOutputInteractor
 
-val Kosmos.audioOutputInteractor by
+val Kosmos.spatialAudioComponentInteractor by
     Kosmos.Fixture {
-        AudioOutputInteractor(
-            audioRepository,
-            audioModeInteractor,
+        SpatialAudioComponentInteractor(
+            audioOutputInteractor,
+            spatializerInteractor,
             testScope.backgroundScope,
-            testScope.testScheduler,
-            localBluetoothManager,
-            bluetoothAdapter,
-            deviceIconInteractor,
-            mediaOutputInteractor,
-            audioSharingRepository,
         )
     }

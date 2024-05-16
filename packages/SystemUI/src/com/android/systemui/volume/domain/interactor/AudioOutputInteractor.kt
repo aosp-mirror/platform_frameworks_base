@@ -30,7 +30,6 @@ import com.android.settingslib.volume.data.repository.AudioSharingRepository
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.volume.domain.model.AudioOutputDevice
-import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactory
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import javax.inject.Inject
@@ -58,8 +57,7 @@ constructor(
     private val bluetoothAdapter: BluetoothAdapter?,
     private val deviceIconInteractor: DeviceIconInteractor,
     private val mediaOutputInteractor: MediaOutputInteractor,
-    private val localMediaRepositoryFactory: LocalMediaRepositoryFactory,
-    private val audioSharingRepository: AudioSharingRepository,
+    audioSharingRepository: AudioSharingRepository,
 ) {
 
     val currentAudioDevice: Flow<AudioOutputDevice> =
