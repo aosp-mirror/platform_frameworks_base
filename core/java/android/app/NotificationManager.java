@@ -2972,6 +2972,7 @@ public class NotificationManager {
         android.Manifest.permission.INTERACT_ACROSS_USERS,
         android.Manifest.permission.ACCESS_NOTIFICATIONS})
     @FlaggedApi(android.service.notification.Flags.FLAG_CALLSTYLE_CALLBACK_API)
+    @SuppressLint("UserHandle")
     public void registerCallNotificationEventListener(@NonNull String packageName,
             @NonNull UserHandle userHandle, @NonNull @CallbackExecutor Executor executor,
             @NonNull CallNotificationEventListener listener) {
