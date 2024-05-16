@@ -147,7 +147,6 @@ import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
 import com.android.internal.inputmethod.IBooleanListener;
 import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IImeTracker;
-import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.IInputMethodClient;
@@ -157,6 +156,7 @@ import com.android.internal.inputmethod.IInputMethodSessionCallback;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.ImeTracing;
+import com.android.internal.inputmethod.InlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.InputMethodDebug;
@@ -5486,7 +5486,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         @Override
         public void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
-                InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback cb) {
+                InlineSuggestionsRequestInfo requestInfo, InlineSuggestionsRequestCallback cb) {
             // Get the device global touch exploration state before lock to avoid deadlock.
             final boolean touchExplorationEnabled = AccessibilityManagerInternal.get()
                     .isTouchExplorationEnabled(userId);
