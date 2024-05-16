@@ -572,6 +572,9 @@ public final class JobStatus {
     /** The reason a job most recently went from ready to not ready. */
     private int mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
 
+    /** The system trace tag for this job. */
+    private String mSystemTraceTag;
+
     /**
      * Core constructor for JobStatus instances.  All other ctors funnel down to this one.
      *
@@ -1056,6 +1059,38 @@ public final class JobStatus {
     @Nullable
     public String getAppTraceTag() {
         return job.getTraceTag();
+    }
+
+    /** Returns a trace tag using debug information provided by job scheduler service. */
+    @NonNull
+    public String computeSystemTraceTag() {
+        // Guarded by JobSchedulerService.mLock, no need for synchronization.
+        if (mSystemTraceTag != null) {
+            return mSystemTraceTag;
+        }
+
+        mSystemTraceTag = computeSystemTraceTagInner();
+        return mSystemTraceTag;
+    }
+
+    @NonNull
+    private String computeSystemTraceTagInner() {
+        final String componentPackage = getServiceComponent().getPackageName();
+        StringBuilder traceTag = new StringBuilder(128);
+        traceTag.append("*job*<").append(sourceUid).append(">").append(sourcePackageName);
+        if (!sourcePackageName.equals(componentPackage)) {
+            traceTag.append(":").append(componentPackage);
+        }
+        traceTag.append("/").append(getServiceComponent().getShortClassName());
+        if (!componentPackage.equals(serviceProcessName)) {
+            traceTag.append("$").append(serviceProcessName);
+        }
+        if (mNamespace != null && !mNamespace.trim().isEmpty()) {
+            traceTag.append("@").append(mNamespace);
+        }
+        traceTag.append("#").append(getJobId());
+
+        return traceTag.toString();
     }
 
     /** Returns whether this job was scheduled by one app on behalf of another. */
