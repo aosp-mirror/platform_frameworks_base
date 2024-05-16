@@ -15,8 +15,6 @@
  */
 package com.android.systemui;
 
-import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
-
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -99,8 +97,21 @@ public abstract class SysuiTestCase {
             .setProvideMainThread(true)
             .build();
 
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+    @ClassRule
+    public static final SetFlagsRule.ClassRule mSetFlagsClassRule =
+            new SetFlagsRule.ClassRule(
+                    android.app.Flags.class,
+                    android.hardware.biometrics.Flags.class,
+                    android.multiuser.Flags.class,
+                    android.net.platform.flags.Flags.class,
+                    android.os.Flags.class,
+                    android.service.controls.flags.Flags.class,
+                    com.android.server.notification.Flags.class,
+                    com.android.systemui.Flags.class);
+
+    // TODO(b/339471826): Fix Robolectric to execute the @ClassRule correctly
+    @Rule public final SetFlagsRule mSetFlagsRule =
+            isRobolectricTest() ? new SetFlagsRule() : mSetFlagsClassRule.createSetFlagsRule();
 
     @Rule(order = 10)
     public final SceneContainerRule mSceneContainerRule = new SceneContainerRule();
