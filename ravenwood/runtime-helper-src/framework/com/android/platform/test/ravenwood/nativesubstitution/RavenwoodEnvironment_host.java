@@ -19,6 +19,7 @@ import android.platform.test.ravenwood.RavenwoodSystemProperties;
 import android.util.Log;
 
 import com.android.internal.ravenwood.RavenwoodEnvironment;
+import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 public class RavenwoodEnvironment_host {
     private static final String TAG = RavenwoodEnvironment.TAG;
@@ -39,7 +40,7 @@ public class RavenwoodEnvironment_host {
             if (sInitialized) {
                 return;
             }
-            Log.w(TAG, "Initializing Ravenwood environment");
+            Log.i(TAG, "Initializing Ravenwood environment");
 
             // Set the default values.
             var sysProps = RavenwoodSystemProperties.DEFAULT_VALUES;
