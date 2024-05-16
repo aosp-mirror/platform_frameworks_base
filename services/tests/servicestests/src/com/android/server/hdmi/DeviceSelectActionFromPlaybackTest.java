@@ -30,7 +30,9 @@ import static com.android.server.hdmi.DeviceSelectActionFromPlayback.STATE_WAIT_
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -122,6 +124,11 @@ public class DeviceSelectActionFromPlaybackTest {
                     @Override
                     boolean isPowerStandby() {
                         return false;
+                    }
+
+                    @Override
+                    protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                        // do nothing
                     }
                 };
 

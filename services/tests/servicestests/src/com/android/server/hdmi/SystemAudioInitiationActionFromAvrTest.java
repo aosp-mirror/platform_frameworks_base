@@ -23,7 +23,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Looper;
@@ -142,6 +144,11 @@ public class SystemAudioInitiationActionFromAvrTest {
                     @Override
                     protected boolean isStandbyMessageReceived() {
                         return mStandbyMessageReceived;
+                    }
+
+                    @Override
+                    protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                        // do nothing
                     }
                 };
 
