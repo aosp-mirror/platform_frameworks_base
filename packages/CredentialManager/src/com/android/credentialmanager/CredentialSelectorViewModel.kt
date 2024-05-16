@@ -174,11 +174,8 @@ class CredentialSelectorViewModel(
                 onUserCancel()
             } else {
                 Log.d(Constants.LOG_TAG, "The provider activity was cancelled," +
-                    " re-displaying our UI.")
-                uiState = uiState.copy(
-                    selectedEntry = null,
-                    providerActivityState = ProviderActivityState.NOT_APPLICABLE,
-                )
+                            " re-displaying our UI.")
+                resetUiStateForReLaunch()
             }
         } else {
             if (entry != null) {
@@ -200,6 +197,15 @@ class CredentialSelectorViewModel(
                 onInternalError()
             }
         }
+    }
+
+    // Resets UI states for any situation that re-launches the UI
+    private fun resetUiStateForReLaunch() {
+        onBiometricPromptStateChange(BiometricPromptState.INACTIVE)
+        uiState = uiState.copy(
+            selectedEntry = null,
+            providerActivityState = ProviderActivityState.NOT_APPLICABLE,
+        )
     }
 
     fun onLastLockedAuthEntryNotFoundError() {
