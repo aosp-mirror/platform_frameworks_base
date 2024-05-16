@@ -322,7 +322,11 @@ constructor(
                     }
                 }
             }
-            .distinctUntilChanged()
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = 0f,
+            )
 
     val clockShouldBeCentered: Flow<Boolean> = repository.clockShouldBeCentered
 
