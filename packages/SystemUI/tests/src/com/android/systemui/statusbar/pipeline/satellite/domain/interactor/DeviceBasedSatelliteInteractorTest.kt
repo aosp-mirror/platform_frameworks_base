@@ -22,6 +22,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.telephony.flags.Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.log.core.FakeLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.FakeDeviceBasedSatelliteRepository
@@ -71,6 +72,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                 deviceProvisioningInteractor,
                 wifiInteractor,
                 testScope.backgroundScope,
+                FakeLogBuffer.Factory.create(),
             )
     }
 
@@ -114,6 +116,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     deviceProvisioningInteractor,
                     wifiInteractor,
                     testScope.backgroundScope,
+                    FakeLogBuffer.Factory.create(),
                 )
 
             val latest by collectLastValue(underTest.isSatelliteAllowed)
@@ -162,6 +165,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     deviceProvisioningInteractor,
                     wifiInteractor,
                     testScope.backgroundScope,
+                    FakeLogBuffer.Factory.create(),
                 )
 
             val latest by collectLastValue(underTest.connectionState)
@@ -218,6 +222,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     deviceProvisioningInteractor,
                     wifiInteractor,
                     testScope.backgroundScope,
+                    FakeLogBuffer.Factory.create(),
                 )
 
             val latest by collectLastValue(underTest.signalStrength)
@@ -238,11 +243,14 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    fun areAllConnectionsOutOfService_noConnections_yes() =
+    fun areAllConnectionsOutOfService_noConnections_noDeviceEmergencyCalls_yes() =
         testScope.runTest {
             val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
 
             // GIVEN, 0 connections
+
+            // GIVEN, device is not in emergency calls only mode
+            iconsInteractor.isDeviceInEmergencyCallsOnlyMode.value = false
 
             // THEN the value is propagated to this interactor
             assertThat(latest).isTrue()
@@ -250,13 +258,82 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    fun areAllConnectionsOutOfService_twoConnectionsOos_nonNtn_yes() =
+    fun areAllConnectionsOutOfService_noConnections_deviceEmergencyCalls_yes() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
+
+            // GIVEN, 0 connections
+
+            // GIVEN, device is in emergency calls only mode
+            iconsInteractor.isDeviceInEmergencyCallsOnlyMode.value = true
+
+            // THEN the value is propagated to this interactor
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    fun areAllConnectionsOutOfService_oneConnectionInService_thenLost_noDeviceEmergencyCalls_yes() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
+
+            // GIVEN, 1 connections
+            val i1 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
+            // GIVEN, no device-based emergency calls
+            iconsInteractor.isDeviceInEmergencyCallsOnlyMode.value = false
+
+            // WHEN connection is in service
+            i1.isInService.value = true
+            i1.isEmergencyOnly.value = false
+            i1.isNonTerrestrial.value = false
+
+            // THEN we are considered NOT to be OOS
+            assertThat(latest).isFalse()
+
+            // WHEN the connection disappears
+            iconsInteractor.icons.value = listOf()
+
+            // THEN we are back to OOS
+            assertThat(latest).isTrue()
+        }
+
+    @Test
+    @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    fun areAllConnectionsOutOfService_oneConnectionInService_thenLost_deviceEmergencyCalls_no() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
+
+            // GIVEN, 1 connections
+            val i1 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
+            // GIVEN, device-based emergency calls
+            iconsInteractor.isDeviceInEmergencyCallsOnlyMode.value = true
+
+            // WHEN one connection is in service
+            i1.isInService.value = true
+            i1.isEmergencyOnly.value = false
+            i1.isNonTerrestrial.value = false
+
+            // THEN we are considered NOT to be OOS
+            assertThat(latest).isFalse()
+
+            // WHEN the connection disappears
+            iconsInteractor.icons.value = listOf()
+
+            // THEN we are still NOT in OOS, due to device-based emergency calls
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    fun areAllConnectionsOutOfService_twoConnectionsOos_nonNtn_noDeviceEmergencyCalls_yes() =
         testScope.runTest {
             val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
 
             // GIVEN, 2 connections
             val i1 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
             val i2 = iconsInteractor.getMobileConnectionInteractorForSubId(2)
+            // GIVEN, no device-based emergency calls
+            iconsInteractor.isDeviceInEmergencyCallsOnlyMode.value = false
 
             // WHEN all of the connections are OOS and none are NTN
             i1.isInService.value = false
@@ -272,13 +349,39 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    fun areAllConnectionsOutOfService_twoConnectionsOos_oneNtn_no() =
+    fun areAllConnectionsOutOfService_twoConnectionsOos_nonNtn_deviceEmergencyCalls_no() =
         testScope.runTest {
             val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
 
             // GIVEN, 2 connections
             val i1 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
             val i2 = iconsInteractor.getMobileConnectionInteractorForSubId(2)
+            // GIVEN, device-based emergency calls
+            iconsInteractor.isDeviceInEmergencyCallsOnlyMode.value = true
+
+            // WHEN all of the connections are OOS and none are NTN
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+            i1.isNonTerrestrial.value = false
+            i2.isInService.value = false
+            i2.isEmergencyOnly.value = false
+            i2.isNonTerrestrial.value = false
+
+            // THEN we are not considered OOS due to device based emergency calling
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    fun areAllConnectionsOutOfService_twoConnectionsOos_noDeviceEmergencyCalls_oneNtn_no() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
+
+            // GIVEN, 2 connections
+            val i1 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
+            val i2 = iconsInteractor.getMobileConnectionInteractorForSubId(2)
+            // GIVEN, no device-based emergency calls
+            iconsInteractor.isDeviceInEmergencyCallsOnlyMode.value = false
 
             // WHEN all of the connections are OOS and one is NTN
             i1.isInService.value = false
@@ -296,12 +399,14 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    fun areAllConnectionsOutOfService_oneConnectionOos_nonNtn_yes() =
+    fun areAllConnectionsOutOfService_oneConnectionOos_noDeviceEmergencyCalls_nonNtn_yes() =
         testScope.runTest {
             val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
 
             // GIVEN, 1 connection
             val i1 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
+            // GIVEN, no device-based emergency calls
+            iconsInteractor.isDeviceInEmergencyCallsOnlyMode.value = false
 
             // WHEN all of the connections are OOS
             i1.isInService.value = false
@@ -314,7 +419,27 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    fun areAllConnectionsOutOfService_oneConnectionOos_ntn_yes() =
+    fun areAllConnectionsOutOfService_oneConnectionOos_nonNtn_no() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
+
+            // GIVEN, 1 connection
+            val i1 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
+            // GIVEN, device-based emergency calls
+            iconsInteractor.isDeviceInEmergencyCallsOnlyMode.value = true
+
+            // WHEN all of the connections are OOS
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+            i1.isNonTerrestrial.value = false
+
+            // THEN the value is propagated to this interactor
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    fun areAllConnectionsOutOfService_oneConnectionOos_ntn_no() =
         testScope.runTest {
             val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
 
@@ -416,6 +541,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     deviceProvisioningInteractor,
                     wifiInteractor,
                     testScope.backgroundScope,
+                    FakeLogBuffer.Factory.create(),
                 )
 
             val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
