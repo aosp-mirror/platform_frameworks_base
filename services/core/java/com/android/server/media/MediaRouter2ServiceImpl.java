@@ -2800,6 +2800,10 @@ class MediaRouter2ServiceImpl {
             final String providerId = route.getProviderId();
             final MediaRoute2Provider provider = findProvider(providerId);
             if (provider == null) {
+                Slog.w(
+                        TAG,
+                        "Ignoring transferToRoute due to lack of matching provider for target: "
+                                + route);
                 return;
             }
             provider.transferToRoute(
