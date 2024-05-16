@@ -12334,8 +12334,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessList.SYSTEM_ADJ, ProcessList.PERSISTENT_PROC_ADJ,
             ProcessList.PERSISTENT_SERVICE_ADJ, ProcessList.FOREGROUND_APP_ADJ,
             ProcessList.VISIBLE_APP_ADJ,
-            ProcessList.PERCEPTIBLE_APP_ADJ, ProcessList.PERCEPTIBLE_LOW_APP_ADJ,
-            ProcessList.PERCEPTIBLE_MEDIUM_APP_ADJ,
+            ProcessList.PERCEPTIBLE_APP_ADJ,
+            ProcessList.PERCEPTIBLE_MEDIUM_APP_ADJ, ProcessList.PERCEPTIBLE_LOW_APP_ADJ,
             ProcessList.BACKUP_APP_ADJ, ProcessList.HEAVY_WEIGHT_APP_ADJ,
             ProcessList.SERVICE_ADJ, ProcessList.HOME_APP_ADJ,
             ProcessList.PREVIOUS_APP_ADJ, ProcessList.SERVICE_B_ADJ, ProcessList.CACHED_APP_MIN_ADJ
@@ -12343,7 +12343,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String[] DUMP_MEM_OOM_LABEL = new String[] {
             "Native",
             "System", "Persistent", "Persistent Service", "Foreground",
-            "Visible", "Perceptible", "Perceptible Low", "Perceptible Medium",
+            "Visible", "Perceptible", "Perceptible Medium", "Perceptible Low",
             "Backup", "Heavy Weight",
             "A Services", "Home",
             "Previous", "B Services", "Cached"
@@ -12351,7 +12351,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String[] DUMP_MEM_OOM_COMPACT_LABEL = new String[] {
             "native",
             "sys", "pers", "persvc", "fore",
-            "vis", "percept", "perceptl", "perceptm",
+            "vis", "percept", "perceptm", "perceptl",
             "backup", "heavy",
             "servicea", "home",
             "prev", "serviceb", "cached"
