@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -65,6 +66,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.concurrent.RejectedExecutionException;
 import java.util.function.BiConsumer;
 
 /**
@@ -220,5 +222,18 @@ public class ClientTransactionListenerControllerTest {
         inOrder.verify(windowTokenClient).onConfigurationChangedInner(context, mConfiguration,
                 123 /* newDisplayId */, true /* shouldReportConfigChange*/);
         inOrder.verify(mController).onContextConfigurationPostChanged(context);
+    }
+
+    @Test
+    public void testDisplayListenerHandlerClosed() {
+        doReturn(123).when(mActivity).getDisplayId();
+        doThrow(new RejectedExecutionException()).when(mController).onDisplayChanged(123);
+
+        mController.onContextConfigurationPreChanged(mActivity);
+        mConfiguration.windowConfiguration.setMaxBounds(new Rect(0, 0, 100, 200));
+        mController.onContextConfigurationPostChanged(mActivity);
+
+        // No crash
+        verify(mController).onDisplayChanged(123);
     }
 }
