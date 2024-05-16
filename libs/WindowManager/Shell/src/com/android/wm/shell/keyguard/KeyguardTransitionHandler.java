@@ -143,6 +143,10 @@ public class KeyguardTransitionHandler
     }
 
     public static boolean handles(TransitionInfo info) {
+        // There is no animation for screen-wake unless we are immediately unlocking.
+        if (info.getType() == WindowManager.TRANSIT_WAKE && !info.isKeyguardGoingAway()) {
+            return false;
+        }
         return (info.getFlags() & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0;
     }
 
