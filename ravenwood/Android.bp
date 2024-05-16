@@ -56,10 +56,23 @@ java_library {
     visibility: ["//visibility:public"],
 }
 
+java_library {
+    name: "ravenwood-runtime-common",
+    host_supported: true,
+    sdk_version: "core_current",
+    srcs: [
+        "runtime-common-src/**/*.java",
+    ],
+    visibility: ["//visibility:private"],
+}
+
 java_library_host {
     name: "ravenwood-helper-libcore-runtime.host",
     srcs: [
         "runtime-helper-src/libcore-fake/**/*.java",
+    ],
+    static_libs: [
+        "ravenwood-runtime-common",
     ],
     visibility: ["//visibility:private"],
 }
@@ -76,6 +89,9 @@ java_library {
     name: "ravenwood-helper-framework-runtime",
     srcs: [
         "runtime-helper-src/framework/**/*.java",
+    ],
+    static_libs: [
+        "ravenwood-runtime-common",
     ],
     libs: [
         "framework-minus-apex.ravenwood",
@@ -105,6 +121,7 @@ java_library {
     ],
     static_libs: [
         "androidx.test.monitor-for-device",
+        "ravenwood-runtime-common",
     ],
     libs: [
         "android.test.mock",
@@ -145,6 +162,9 @@ java_library {
         "junit-flag-src/**/*.java",
     ],
     sdk_version: "test_current",
+    static_libs: [
+        "ravenwood-runtime-common",
+    ],
     libs: [
         "junit",
         "flag-junit",
@@ -199,7 +219,7 @@ cc_library_shared {
     ],
 
     srcs: [
-        "runtime-helper-src/jni/*.cpp",
+        "runtime-jni/*.cpp",
     ],
 
     shared_libs: [
