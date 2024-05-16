@@ -30,9 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.motionEventSpy
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
@@ -94,21 +91,7 @@ fun SceneContainer(
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        SceneTransitionLayout(
-            state = state,
-            modifier =
-                modifier
-                    .fillMaxSize()
-                    .motionEventSpy { event -> viewModel.onMotionEvent(event) }
-                    .pointerInput(Unit) {
-                        awaitPointerEventScope {
-                            while (true) {
-                                awaitPointerEvent(PointerEventPass.Final)
-                                viewModel.onMotionEventComplete()
-                            }
-                        }
-                    }
-        ) {
+        SceneTransitionLayout(state = state, modifier = modifier.fillMaxSize()) {
             sceneByKey.forEach { (sceneKey, composableScene) ->
                 scene(
                     key = sceneKey,
