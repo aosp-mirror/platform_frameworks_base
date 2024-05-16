@@ -17,6 +17,7 @@
 package com.android.systemui.volume.data.repository
 
 import android.media.AudioDeviceInfo
+import android.media.AudioManager
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
@@ -29,10 +30,10 @@ import kotlinx.coroutines.flow.update
 
 class FakeAudioRepository : AudioRepository {
 
-    private val mutableMode = MutableStateFlow(0)
+    private val mutableMode = MutableStateFlow(AudioManager.MODE_NORMAL)
     override val mode: StateFlow<Int> = mutableMode.asStateFlow()
 
-    private val mutableRingerMode = MutableStateFlow(RingerMode(0))
+    private val mutableRingerMode = MutableStateFlow(RingerMode(AudioManager.RINGER_MODE_NORMAL))
     override val ringerMode: StateFlow<RingerMode> = mutableRingerMode.asStateFlow()
 
     private val mutableCommunicationDevice = MutableStateFlow<AudioDeviceInfo?>(null)
@@ -53,7 +54,7 @@ class FakeAudioRepository : AudioRepository {
                     audioStream = audioStream,
                     volume = 0,
                     minVolume = 0,
-                    maxVolume = 0,
+                    maxVolume = 10,
                     isAffectedByRingerMode = false,
                     isMuted = false,
                 )
@@ -67,8 +68,14 @@ class FakeAudioRepository : AudioRepository {
         getAudioStreamModelState(audioStream).update { it.copy(volume = volume) }
     }
 
-    override suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean) {
-        getAudioStreamModelState(audioStream).update { it.copy(isMuted = isMuted) }
+    override suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean): Boolean {
+        val modelState = getAudioStreamModelState(audioStream)
+        return if (modelState.value.isMuted == isMuted) {
+            false
+        } else {
+            modelState.update { it.copy(isMuted = isMuted) }
+            true
+        }
     }
 
     override suspend fun getLastAudibleVolume(audioStream: AudioStream): Int =
