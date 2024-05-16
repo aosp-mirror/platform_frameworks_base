@@ -564,7 +564,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     void setResumedActivity(ActivityRecord r, String reason) {
-        warnForNonLeafTaskFragment("setResumedActivity");
         if (mResumedActivity == r) {
             return;
         }
@@ -850,15 +849,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return parentTaskFragment != null ? parentTaskFragment.getOrganizedTaskFragment() : null;
     }
 
-    /**
-     * Simply check and give warning logs if this is not operated on leaf {@link TaskFragment}.
-     */
-    private void warnForNonLeafTaskFragment(String func) {
-        if (!isLeafTaskFragment()) {
-            Slog.w(TAG, func + " on non-leaf task fragment " + this);
-        }
-    }
-
     boolean hasDirectChildActivities() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             if (mChildren.get(i).asActivityRecord() != null) {
@@ -935,7 +925,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     void onActivityStateChanged(ActivityRecord record, ActivityRecord.State state,
             String reason) {
-        warnForNonLeafTaskFragment("onActivityStateChanged");
         if (record == mResumedActivity && state != RESUMED) {
             setResumedActivity(null, reason + " - onActivityStateChanged");
         }
@@ -965,7 +954,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * @return {@code true} if the process of the pausing activity is died.
      */
     boolean handleAppDied(WindowProcessController app) {
-        warnForNonLeafTaskFragment("handleAppDied");
         boolean isPausingDied = false;
         if (mPausingActivity != null && mPausingActivity.app == app) {
             ProtoLog.v(WM_DEBUG_STATES, "App died while pausing: %s",
