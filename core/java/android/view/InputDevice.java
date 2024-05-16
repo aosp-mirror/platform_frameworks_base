@@ -78,6 +78,7 @@ public final class InputDevice implements Parcelable {
     private final InputDeviceIdentifier mIdentifier;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private final boolean mIsExternal;
+    @Source
     private final int mSources;
     private final int mKeyboardType;
     private final KeyCharacterMap mKeyCharacterMap;
@@ -358,6 +359,28 @@ public final class InputDevice implements Parcelable {
      * to match devices that provide any type of input source.
      */
     public static final int SOURCE_ANY = 0xffffff00;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "SOURCE_" }, value = {
+            SOURCE_UNKNOWN,
+            SOURCE_KEYBOARD,
+            SOURCE_DPAD,
+            SOURCE_GAMEPAD,
+            SOURCE_TOUCHSCREEN,
+            SOURCE_MOUSE,
+            SOURCE_STYLUS,
+            SOURCE_BLUETOOTH_STYLUS,
+            SOURCE_TRACKBALL,
+            SOURCE_MOUSE_RELATIVE,
+            SOURCE_TOUCHPAD,
+            SOURCE_TOUCH_NAVIGATION,
+            SOURCE_ROTARY_ENCODER,
+            SOURCE_JOYSTICK,
+            SOURCE_HDMI,
+            SOURCE_SENSOR,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Source {}
 
     /**
      * Constant for retrieving the range of values for {@link MotionEvent#AXIS_X}.
