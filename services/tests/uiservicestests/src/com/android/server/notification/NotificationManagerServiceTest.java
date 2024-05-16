@@ -87,7 +87,6 @@ import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
 import static android.os.UserManager.USER_TYPE_PROFILE_PRIVATE;
-import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
 import static android.service.notification.Adjustment.KEY_CONTEXTUAL_ACTIONS;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
@@ -832,13 +831,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Pretend the shortcut exists
         List<ShortcutInfo> shortcutInfos = new ArrayList<>();
-        ShortcutInfo info = mock(ShortcutInfo.class);
-        when(info.getPackage()).thenReturn(mPkg);
-        when(info.getId()).thenReturn(VALID_CONVO_SHORTCUT_ID);
-        when(info.getUserId()).thenReturn(USER_SYSTEM);
-        when(info.isLongLived()).thenReturn(true);
-        when(info.isEnabled()).thenReturn(true);
-        shortcutInfos.add(info);
+        shortcutInfos.add(createMockConvoShortcut());
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcutInfos);
         when(mShortcutServiceInternal.isSharingShortcut(anyInt(), anyString(), anyString(),
                 anyString(), anyInt(), any())).thenReturn(true);
@@ -10771,8 +10764,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 BUBBLE_PREFERENCE_ALL /* app */,
                 true /* channel */);
 
-        ArgumentCaptor<LauncherApps.Callback> launcherAppsCallback =
-                ArgumentCaptor.forClass(LauncherApps.Callback.class);
+        ArgumentCaptor<LauncherApps.ShortcutChangeCallback> shortcutChangeCallback =
+                ArgumentCaptor.forClass(LauncherApps.ShortcutChangeCallback.class);
 
         // Messaging notification with shortcut info
         Notification.BubbleMetadata metadata =
@@ -10793,7 +10786,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Verify:
 
         // Make sure we register the callback for shortcut changes
-        verify(mLauncherApps, times(1)).registerCallback(launcherAppsCallback.capture(), any());
+        verify(mShortcutServiceInternal, times(1)).addShortcutChangeCallback(
+                shortcutChangeCallback.capture());
 
         // yes allowed, yes messaging w/shortcut, yes bubble
         Notification notif = mService.getNotificationRecord(nr.getSbn().getKey()).getNotification();
@@ -10806,14 +10800,17 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Test: Remove the shortcut
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(null);
-        launcherAppsCallback.getValue().onShortcutsChanged(mPkg, emptyList(),
+        ArrayList<ShortcutInfo> removedShortcuts = new ArrayList<>();
+        removedShortcuts.add(createMockConvoShortcut());
+        shortcutChangeCallback.getValue().onShortcutsRemoved(mPkg, removedShortcuts,
                 UserHandle.getUserHandleForUid(mUid));
         waitForIdle();
 
         // Verify:
 
         // Make sure callback is unregistered
-        verify(mLauncherApps, times(1)).unregisterCallback(launcherAppsCallback.getValue());
+        verify(mShortcutServiceInternal, times(1)).removeShortcutChangeCallback(
+                shortcutChangeCallback.getValue());
 
         // We're no longer a bubble
         NotificationRecord notif2 = mService.getNotificationRecord(
@@ -10831,8 +10828,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 BUBBLE_PREFERENCE_ALL /* app */,
                 true /* channel */);
 
-        ArgumentCaptor<LauncherApps.Callback> launcherAppsCallback =
-                ArgumentCaptor.forClass(LauncherApps.Callback.class);
+        ArgumentCaptor<LauncherApps.ShortcutChangeCallback> shortcutChangeCallback =
+                ArgumentCaptor.forClass(LauncherApps.ShortcutChangeCallback.class);
 
         // Messaging notification with shortcut info
         Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
@@ -10866,7 +10863,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Verify:
 
         // Make sure we register the callback for shortcut changes
-        verify(mLauncherApps, times(1)).registerCallback(launcherAppsCallback.capture(), any());
+        verify(mShortcutServiceInternal, times(1)).addShortcutChangeCallback(
+                shortcutChangeCallback.capture());
 
         // yes allowed, yes messaging w/shortcut, yes bubble
         Notification notif = mService.getNotificationRecord(nr.getSbn().getKey()).getNotification();
@@ -10885,7 +10883,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Verify:
 
         // Make sure callback is unregistered
-        verify(mLauncherApps, times(1)).unregisterCallback(launcherAppsCallback.getValue());
+        verify(mShortcutServiceInternal, times(1)).removeShortcutChangeCallback(
+                shortcutChangeCallback.getValue());
     }
 
     @Test
@@ -15803,5 +15802,15 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         r.applyAdjustments();
 
         assertThat(r.getChannel().getId()).isEqualTo(NEWS_ID);
+    }
+
+    private ShortcutInfo createMockConvoShortcut() {
+        ShortcutInfo info = mock(ShortcutInfo.class);
+        when(info.getPackage()).thenReturn(mPkg);
+        when(info.getId()).thenReturn(VALID_CONVO_SHORTCUT_ID);
+        when(info.getUserId()).thenReturn(USER_SYSTEM);
+        when(info.isLongLived()).thenReturn(true);
+        when(info.isEnabled()).thenReturn(true);
+        return info;
     }
 }
