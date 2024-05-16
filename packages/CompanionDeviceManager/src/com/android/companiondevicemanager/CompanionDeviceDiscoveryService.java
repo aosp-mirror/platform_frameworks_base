@@ -60,6 +60,8 @@ import android.util.Slog;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -88,6 +90,9 @@ public class CompanionDeviceDiscoveryService extends Service {
             new MutableLiveData<>(Collections.emptyList());
     private static MutableLiveData<DiscoveryState> sStateLiveData =
             new MutableLiveData<>(DiscoveryState.NOT_STARTED);
+    private static final Object LOCK = new Object();
+    @GuardedBy("LOCK")
+    private static boolean sDiscoveryStarted = false;
 
     private BluetoothManager mBtManager;
     private BluetoothAdapter mBtAdapter;
@@ -98,8 +103,6 @@ public class CompanionDeviceDiscoveryService extends Service {
     private BluetoothBroadcastReceiver mBtReceiver;
     private WifiBroadcastReceiver mWifiReceiver;
 
-    private boolean mDiscoveryStarted = false;
-    private boolean mDiscoveryStopped = false;
     private final List<DeviceFilterPair<?>> mDevicesFound = new ArrayList<>();
 
     private final Runnable mTimeoutRunnable = this::timeout;
@@ -111,22 +114,27 @@ public class CompanionDeviceDiscoveryService extends Service {
      */
     enum DiscoveryState {
         NOT_STARTED,
-        STARTING,
-        DISCOVERY_IN_PROGRESS,
+        IN_PROGRESS,
         FINISHED_STOPPED,
         FINISHED_TIMEOUT
     }
 
-    static void startForRequest(
+    static boolean startForRequest(
             @NonNull Context context, @NonNull AssociationRequest associationRequest) {
+        synchronized (LOCK) {
+            if (sDiscoveryStarted) {
+                Slog.e(TAG, "Discovery is already started. Ignoring this request...");
+                return false;
+            }
+        }
         requireNonNull(associationRequest);
         final Intent intent = new Intent(context, CompanionDeviceDiscoveryService.class);
         intent.setAction(ACTION_START_DISCOVERY);
         intent.putExtra(EXTRA_ASSOCIATION_REQUEST, associationRequest);
-        sStateLiveData.setValue(DiscoveryState.STARTING);
-        sScanResultsLiveData.setValue(Collections.emptyList());
 
         context.startService(intent);
+
+        return true;
     }
 
     static void stop(@NonNull Context context) {
@@ -176,10 +184,16 @@ public class CompanionDeviceDiscoveryService extends Service {
         Slog.d(TAG, "startDiscovery() request=" + request);
         requireNonNull(request);
 
-        if (mDiscoveryStarted) throw new RuntimeException("Discovery in progress.");
+        synchronized (LOCK) {
+            if (sDiscoveryStarted) {
+                Slog.e(TAG, "Discovery is already started. Returning...");
+                return;
+            }
+            sDiscoveryStarted = true;
+        }
         mStopAfterFirstMatch = request.isSingleDevice();
-        mDiscoveryStarted = true;
-        sStateLiveData.setValue(DiscoveryState.DISCOVERY_IN_PROGRESS);
+        sScanResultsLiveData.setValue(Collections.emptyList());
+        sStateLiveData.setValue(DiscoveryState.IN_PROGRESS);
 
         final List<DeviceFilter<?>> allFilters = request.getDeviceFilters();
         final List<BluetoothDeviceFilter> btFilters =
@@ -211,13 +225,12 @@ public class CompanionDeviceDiscoveryService extends Service {
     private void stopDiscoveryAndFinish(boolean timeout) {
         Slog.d(TAG, "stopDiscoveryAndFinish(" + timeout + ")");
 
-        if (!mDiscoveryStarted) {
-            stopSelf();
-            return;
+        synchronized (LOCK) {
+            if (!sDiscoveryStarted) {
+                stopSelf();
+                return;
+            }
         }
-
-        if (mDiscoveryStopped) return;
-        mDiscoveryStopped = true;
 
         // Stop BT discovery.
         if (mBtReceiver != null) {
@@ -247,6 +260,10 @@ public class CompanionDeviceDiscoveryService extends Service {
             sStateLiveData.setValue(DiscoveryState.FINISHED_TIMEOUT);
         } else {
             sStateLiveData.setValue(DiscoveryState.FINISHED_STOPPED);
+        }
+
+        synchronized (LOCK) {
+            sDiscoveryStarted = false;
         }
 
         // "Finish".
@@ -340,7 +357,9 @@ public class CompanionDeviceDiscoveryService extends Service {
 
     private void onDeviceFound(@NonNull DeviceFilterPair<?> device) {
         runOnMainThread(() -> {
-            if (mDiscoveryStopped) return;
+            synchronized (LOCK) {
+                if (!sDiscoveryStarted) return;
+            }
             if (mDevicesFound.contains(device)) {
                 // TODO: update the device instead of ignoring (new found device may contain
                 //  additional/updated info, eg. name of the device).
