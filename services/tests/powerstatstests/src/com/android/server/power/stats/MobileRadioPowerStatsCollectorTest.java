@@ -123,6 +123,11 @@ public class MobileRadioPowerStatsCollectorTest {
         }
 
         @Override
+        public long getPowerStatsCollectionThrottlePeriod(String powerComponentName) {
+            return 0;
+        }
+
+        @Override
         public PackageManager getPackageManager() {
             return mPackageManager;
         }
@@ -348,7 +353,7 @@ public class MobileRadioPowerStatsCollectorTest {
     }
 
     private PowerStats collectPowerStats(boolean perNetworkTypeData) throws Throwable {
-        MobileRadioPowerStatsCollector collector = new MobileRadioPowerStatsCollector(mInjector, 0);
+        MobileRadioPowerStatsCollector collector = new MobileRadioPowerStatsCollector(mInjector);
         collector.setEnabled(true);
 
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(

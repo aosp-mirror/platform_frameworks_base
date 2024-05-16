@@ -129,6 +129,11 @@ public class CpuPowerStatsCollectorTest {
         }
 
         @Override
+        public long getPowerStatsCollectionThrottlePeriod(String powerComponentName) {
+            return 0;
+        }
+
+        @Override
         public int getDefaultCpuPowerBrackets() {
             return mDefaultCpuPowerBrackets;
         }
@@ -418,8 +423,8 @@ public class CpuPowerStatsCollectorTest {
     private CpuPowerStatsCollector createCollector(int defaultCpuPowerBrackets,
             int defaultCpuPowerBracketsPerEnergyConsumer) {
         CpuPowerStatsCollector collector = new CpuPowerStatsCollector(
-                new TestInjector(defaultCpuPowerBrackets, defaultCpuPowerBracketsPerEnergyConsumer),
-                0);
+                new TestInjector(defaultCpuPowerBrackets, defaultCpuPowerBracketsPerEnergyConsumer)
+        );
         collector.addConsumer(stats -> mCollectedStats = stats);
         collector.setEnabled(true);
         return collector;

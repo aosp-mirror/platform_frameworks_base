@@ -73,6 +73,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
         Handler getHandler();
         Clock getClock();
         PowerStatsUidResolver getUidResolver();
+        long getPowerStatsCollectionThrottlePeriod(String powerComponentName);
         PackageManager getPackageManager();
         ConsumedEnergyRetriever getConsumedEnergyRetriever();
         IntSupplier getVoltageSupplier();
@@ -104,8 +105,11 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
     private long mLastCallDuration;
     private long mLastScanDuration;
 
-    public MobileRadioPowerStatsCollector(Injector injector, long throttlePeriodMs) {
-        super(injector.getHandler(), throttlePeriodMs, injector.getUidResolver(),
+    MobileRadioPowerStatsCollector(Injector injector) {
+        super(injector.getHandler(), injector.getPowerStatsCollectionThrottlePeriod(
+                        BatteryConsumer.powerComponentIdToString(
+                                BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)),
+                injector.getUidResolver(),
                 injector.getClock());
         mInjector = injector;
     }

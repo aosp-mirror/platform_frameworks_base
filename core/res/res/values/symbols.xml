@@ -5243,9 +5243,7 @@
 
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugHighBatteryLevel" />
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugAfterSignificantCharge" />
-  <java-symbol type="integer" name="config_defaultPowerStatsThrottlePeriodCpu" />
-  <java-symbol type="integer" name="config_defaultPowerStatsThrottlePeriodMobileRadio" />
-  <java-symbol type="integer" name="config_defaultPowerStatsThrottlePeriodWifi" />
+  <java-symbol type="string" name="config_powerStatsThrottlePeriods" />
   <java-symbol type="integer" name="config_powerStatsAggregationPeriod" />
   <java-symbol type="integer" name="config_aggregatedPowerStatsSpanDuration" />
 

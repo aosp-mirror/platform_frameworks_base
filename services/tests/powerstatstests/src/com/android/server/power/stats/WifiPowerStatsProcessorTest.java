@@ -142,6 +142,11 @@ public class WifiPowerStatsProcessorTest {
                 }
 
                 @Override
+                public long getPowerStatsCollectionThrottlePeriod(String powerComponentName) {
+                    return 0;
+                }
+
+                @Override
                 public PackageManager getPackageManager() {
                     return mPackageManager;
                 }
@@ -195,7 +200,7 @@ public class WifiPowerStatsProcessorTest {
 
         PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(processor);
 
-        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector, 0);
+        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector);
         collector.setEnabled(true);
 
         // Initial empty WifiActivityEnergyInfo.
@@ -307,7 +312,7 @@ public class WifiPowerStatsProcessorTest {
 
         PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(processor);
 
-        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector, 0);
+        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector);
         collector.setEnabled(true);
 
         // Initial empty WifiActivityEnergyInfo.
@@ -420,7 +425,7 @@ public class WifiPowerStatsProcessorTest {
 
         PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(processor);
 
-        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector, 0);
+        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector);
         collector.setEnabled(true);
 
         // Establish a baseline
