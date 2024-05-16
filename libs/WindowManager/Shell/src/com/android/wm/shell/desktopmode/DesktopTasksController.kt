@@ -1375,16 +1375,6 @@ class DesktopTasksController(
                     l -> l.onTasksVisibilityChanged(displayId, visibleTasksCount)
                 }
             }
-
-            override fun onStashedChanged(displayId: Int, stashed: Boolean) {
-                KtProtoLog.v(
-                        WM_SHELL_DESKTOP_MODE,
-                        "IDesktopModeImpl: onStashedChanged display=%d stashed=%b",
-                        displayId,
-                        stashed
-                )
-                remoteListener.call { l -> l.onStashedChanged(displayId, stashed) }
-            }
         }
 
         init {

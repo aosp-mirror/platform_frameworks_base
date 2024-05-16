@@ -446,11 +446,6 @@ class DesktopModeTaskRepository {
          * Called when the desktop changes the number of visible freeform tasks.
          */
         fun onTasksVisibilityChanged(displayId: Int, visibleTasksCount: Int) {}
-
-        /**
-         * Called when the desktop stashed status changes.
-         */
-        fun onStashedChanged(displayId: Int, stashed: Boolean) {}
     }
 }
 
