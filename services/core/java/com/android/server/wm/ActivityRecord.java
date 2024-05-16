@@ -3272,8 +3272,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mOccludesParent = occludesParent;
         setMainWindowOpaque(occludesParent);
 
-        if (changed && task != null && !occludesParent) {
-            getRootTask().convertActivityToTranslucent(this);
+        if (changed && task != null) {
+            if (!occludesParent) {
+                getRootTask().convertActivityToTranslucent(this);
+            } else {
+                getRootTask().convertActivityFromTranslucent(this);
+            }
         }
         // Always ensure visibility if this activity doesn't occlude parent, so the
         // {@link #returningOptions} of the activity under this one can be applied in
@@ -4265,6 +4269,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void cleanUp(boolean cleanServices, boolean setState) {
         getTaskFragment().cleanUpActivityReferences(this);
         clearLastParentBeforePip();
+
+        // Abort and reset state if the scence transition is playing.
+        final Task rootTask = getRootTask();
+        if (rootTask != null) {
+            rootTask.abortTranslucentActivityWaiting(this);
+        }
 
         // Clean up the splash screen if it was still displayed.
         cleanUpSplashScreen();

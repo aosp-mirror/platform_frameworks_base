@@ -297,6 +297,10 @@ class Task extends TaskFragment {
     ActivityRecord mTranslucentActivityWaiting = null;
     ArrayList<ActivityRecord> mUndrawnActivitiesBelowTopTranslucent = new ArrayList<>();
 
+    // The topmost Activity that was converted to translucent for scene transition, which should
+    // be converted from translucent once the transition is completed, or the app died.
+    private ActivityRecord mPendingConvertFromTranslucentActivity = null;
+
     /**
      * Set when we know we are going to be calling updateConfiguration()
      * soon, so want to skip intermediate config checks.
@@ -4988,6 +4992,27 @@ class Task extends TaskFragment {
         }
     }
 
+    void abortTranslucentActivityWaiting(@NonNull ActivityRecord r) {
+        if (r != mTranslucentActivityWaiting && r != mPendingConvertFromTranslucentActivity) {
+            return;
+        }
+
+        if (mTranslucentActivityWaiting != null) {
+            if (!mTranslucentActivityWaiting.finishing) {
+                mTranslucentActivityWaiting.setOccludesParent(true);
+            }
+            mTranslucentActivityWaiting = null;
+        }
+        if (mPendingConvertFromTranslucentActivity != null) {
+            if (!mPendingConvertFromTranslucentActivity.finishing) {
+                mPendingConvertFromTranslucentActivity.setOccludesParent(true);
+            }
+            mPendingConvertFromTranslucentActivity = null;
+        }
+        mUndrawnActivitiesBelowTopTranslucent.clear();
+        mHandler.removeMessages(TRANSLUCENT_TIMEOUT_MSG);
+    }
+
     void checkTranslucentActivityWaiting(ActivityRecord top) {
         if (mTranslucentActivityWaiting != top) {
             mUndrawnActivitiesBelowTopTranslucent.clear();
@@ -5002,8 +5027,17 @@ class Task extends TaskFragment {
 
     void convertActivityToTranslucent(ActivityRecord r) {
         mTranslucentActivityWaiting = r;
+        mPendingConvertFromTranslucentActivity = r;
         mUndrawnActivitiesBelowTopTranslucent.clear();
         mHandler.sendEmptyMessageDelayed(TRANSLUCENT_TIMEOUT_MSG, TRANSLUCENT_CONVERSION_TIMEOUT);
+    }
+
+    void convertActivityFromTranslucent(ActivityRecord r) {
+        if (r != mPendingConvertFromTranslucentActivity) {
+            Slog.e(TAG, "convertFromTranslucent expects " + mPendingConvertFromTranslucentActivity
+                    + " but is " + r);
+        }
+        mPendingConvertFromTranslucentActivity = null;
     }
 
     /**
