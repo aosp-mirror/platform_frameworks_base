@@ -8,11 +8,3 @@ flag {
     bug: "309512867"
     is_fixed_read_only: true
 }
-
-flag {
-    name: "stats_pull_network_stats_manager_init_order_fix"
-    namespace: "statsd"
-    description: "Fix the mNetworkStatsManager initialization order"
-    bug: "331989853"
-    is_fixed_read_only: true
-}
