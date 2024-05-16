@@ -326,7 +326,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             }
 
             if (KeyguardWmStateRefactor.isEnabled()) {
-                mKeyguardTransitionInteractor.startDismissKeyguardTransition();
+                mKeyguardTransitionInteractor.startDismissKeyguardTransition(
+                        "KeyguardSecurityContainerController#finish");
             }
         }
 

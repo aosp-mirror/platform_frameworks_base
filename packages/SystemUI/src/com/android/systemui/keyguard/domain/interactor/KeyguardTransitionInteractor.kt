@@ -377,22 +377,27 @@ constructor(
     /**
      * Called to start a transition that will ultimately dismiss the keyguard from the current
      * state.
+     *
+     * This is called exclusively by sources that can authoritatively say we should be unlocked,
+     * including KeyguardSecurityContainerController and WindowManager.
      */
-    fun startDismissKeyguardTransition() {
+    fun startDismissKeyguardTransition(reason: String = "") {
         // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
-        when (val startedState = startedKeyguardState.replayCache.last()) {
+        Log.d(TAG, "#startDismissKeyguardTransition(reason=$reason)")
+        when (val startedState = currentTransitionInfoInternal.value.to) {
             LOCKSCREEN -> fromLockscreenTransitionInteractor.get().dismissKeyguard()
             PRIMARY_BOUNCER -> fromPrimaryBouncerTransitionInteractor.get().dismissPrimaryBouncer()
             ALTERNATE_BOUNCER ->
                 fromAlternateBouncerTransitionInteractor.get().dismissAlternateBouncer()
             AOD -> fromAodTransitionInteractor.get().dismissAod()
             DOZING -> fromDozingTransitionInteractor.get().dismissFromDozing()
-            else ->
-                Log.e(
-                    "KeyguardTransitionInteractor",
-                    "We don't know how to dismiss keyguard from state $startedState."
+            KeyguardState.GONE ->
+                Log.i(
+                    TAG,
+                    "Already transitioning to GONE; ignoring startDismissKeyguardTransition."
                 )
+            else -> Log.e(TAG, "We don't know how to dismiss keyguard from state $startedState.")
         }
     }
 
@@ -529,4 +534,8 @@ constructor(
         @FloatRange(from = 0.0, to = 1.0) value: Float,
         state: TransitionState
     ) = repository.updateTransition(transitionId, value, state)
+
+    companion object {
+        private const val TAG = "KeyguardTransitionInteractor"
+    }
 }

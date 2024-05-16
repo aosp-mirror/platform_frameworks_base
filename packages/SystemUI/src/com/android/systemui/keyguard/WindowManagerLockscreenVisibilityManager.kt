@@ -23,6 +23,7 @@ import android.view.RemoteAnimationTarget
 import android.view.WindowManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.util.concurrent.Executor
@@ -40,6 +41,7 @@ constructor(
     private val activityTaskManagerService: IActivityTaskManager,
     private val keyguardStateController: KeyguardStateController,
     private val keyguardSurfaceBehindAnimator: KeyguardSurfaceBehindParamsApplier,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) {
 
     /**
@@ -141,6 +143,14 @@ constructor(
         finishedCallback: IRemoteAnimationFinishedCallback
     ) {
         if (apps.isNotEmpty()) {
+            // Ensure that we've started a dismiss keyguard transition. WindowManager can start the
+            // going away animation on its own, if an activity launches and then requests dismissing
+            // the keyguard. In this case, this is the first and only signal we'll receive to start
+            // a transition to GONE.
+            keyguardTransitionInteractor.startDismissKeyguardTransition(
+                reason = "Going away remote animation started"
+            )
+
             goingAwayRemoteAnimationFinishedCallback = finishedCallback
             keyguardSurfaceBehindAnimator.applyParamsToSurface(apps[0])
         } else {
