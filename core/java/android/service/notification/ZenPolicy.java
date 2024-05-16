@@ -1007,6 +1007,7 @@ public final class ZenPolicy implements Parcelable {
         /**
          * Set whether priority channels are permitted to break through DND.
          */
+        @SuppressLint("BuilderSetStyle")
         @FlaggedApi(Flags.FLAG_MODES_API)
         public @NonNull Builder allowPriorityChannels(boolean allow) {
             mZenPolicy.mAllowChannels = allow ? CHANNEL_POLICY_PRIORITY : CHANNEL_POLICY_NONE;
