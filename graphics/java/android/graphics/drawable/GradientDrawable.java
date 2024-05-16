@@ -936,7 +936,7 @@ public class GradientDrawable extends Drawable {
     }
 
     /**
-     * Retrn the inner radius of the ring
+     * Return the inner radius of the ring
      *
      * @see #setInnerRadius(int)
      * @attr ref android.R.styleable#GradientDrawable_innerRadius

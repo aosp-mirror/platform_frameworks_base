@@ -765,12 +765,12 @@ public final class RenderNode {
      * Default value is false. See
      * {@link #setProjectBackwards(boolean)} for a description of what this entails.
      *
-     * @param shouldRecieve True if this RenderNode is a projection receiver, false otherwise.
+     * @param shouldReceive True if this RenderNode is a projection receiver, false otherwise.
      *                      Default is false.
      * @return True if the value changed, false if the new value was the same as the previous value.
      */
-    public boolean setProjectionReceiver(boolean shouldRecieve) {
-        return nSetProjectionReceiver(mNativeRenderNode, shouldRecieve);
+    public boolean setProjectionReceiver(boolean shouldReceive) {
+        return nSetProjectionReceiver(mNativeRenderNode, shouldReceive);
     }
 
     /**
@@ -1799,7 +1799,7 @@ public final class RenderNode {
     private static native boolean nSetProjectBackwards(long renderNode, boolean shouldProject);
 
     @CriticalNative
-    private static native boolean nSetProjectionReceiver(long renderNode, boolean shouldRecieve);
+    private static native boolean nSetProjectionReceiver(long renderNode, boolean shouldReceive);
 
     @CriticalNative
     private static native boolean nSetOutlineRoundRect(long renderNode, int left, int top,
