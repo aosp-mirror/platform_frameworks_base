@@ -18,6 +18,8 @@ package com.android.systemui.brightness.data.repository
 
 import android.content.Context
 import android.os.UserManager
+import com.android.settingslib.RestrictedLockUtils
+import com.android.systemui.Flags.enforceBrightnessBaseUserRestriction
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -66,7 +68,18 @@ constructor(
                         user.id
                     )
                     ?.let { PolicyRestriction.Restricted(it) }
-                    ?: PolicyRestriction.NoRestriction
+                    ?: if (
+                        enforceBrightnessBaseUserRestriction() &&
+                            userRestrictionChecker.hasBaseUserRestriction(
+                                applicationContext,
+                                UserManager.DISALLOW_CONFIG_BRIGHTNESS,
+                                user.id
+                            )
+                    ) {
+                        PolicyRestriction.Restricted(RestrictedLockUtils.EnforcedAdmin())
+                    } else {
+                        PolicyRestriction.NoRestriction
+                    }
             }
             .flowOn(backgroundDispatcher)
 }
