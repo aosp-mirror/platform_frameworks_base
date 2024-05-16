@@ -262,6 +262,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
     private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
     private static final String HANDLER_THREAD_NAME = "android.imms";
+    private static final String PACKAGE_MONITOR_THREAD_NAME = "android.imms2";
 
     /**
      * When set, {@link #startInputUncheckedLocked} will return
@@ -284,6 +285,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     final Context mContext;
     final Resources mRes;
     private final Handler mHandler;
+
+    @NonNull
+    private final Handler mPackageMonitorHandler;
 
     @MultiUserUnawareField
     @UserIdInt
@@ -1288,13 +1292,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     public InputMethodManagerService(Context context) {
-        this(context, null, null);
+        this(context, null, null, null);
     }
 
     @VisibleForTesting
     InputMethodManagerService(
             Context context,
             @Nullable ServiceThread serviceThreadForTesting,
+            @Nullable ServiceThread packageMonitorThreadForTesting,
             @Nullable IntFunction<InputMethodBindingController> bindingControllerForTesting) {
         synchronized (ImfLock.class) {
             mContext = context;
@@ -1312,6 +1317,17 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                                     true /* allowIo */);
             thread.start();
             mHandler = Handler.createAsync(thread.getLooper(), this);
+            {
+                final ServiceThread packageMonitorThread =
+                        packageMonitorThreadForTesting != null
+                                ? packageMonitorThreadForTesting
+                                : new ServiceThread(
+                                        PACKAGE_MONITOR_THREAD_NAME,
+                                        Process.THREAD_PRIORITY_FOREGROUND,
+                                        true /* allowIo */);
+                packageMonitorThread.start();
+                mPackageMonitorHandler = Handler.createAsync(packageMonitorThread.getLooper());
+            }
             SystemLocaleWrapper.onStart(context, this::onActionLocaleChanged, mHandler);
             mImeTrackerService = new ImeTrackerService(serviceThreadForTesting != null
                     ? serviceThreadForTesting.getLooper() : Looper.getMainLooper());
@@ -1585,7 +1601,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     }
                 }, "Lazily initialize IMMS#mImeDrawsImeNavBarRes");
 
-                mMyPackageMonitor.register(mContext, UserHandle.ALL, mHandler);
+                mMyPackageMonitor.register(mContext, UserHandle.ALL, mPackageMonitorHandler);
                 mSettingsObserver.registerContentObserverLocked(currentUserId);
 
                 final IntentFilter broadcastFilterForAllUsers = new IntentFilter();

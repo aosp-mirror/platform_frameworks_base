@@ -127,6 +127,7 @@ public class InputMethodManagerServiceTestBase {
     protected IInputMethodInvoker mMockInputMethodInvoker;
     protected InputMethodManagerService mInputMethodManagerService;
     protected ServiceThread mServiceThread;
+    protected ServiceThread mPackageMonitorThread;
     protected boolean mIsLargeScreen;
     private InputManagerGlobal.TestSession mInputManagerGlobalSession;
 
@@ -222,11 +223,16 @@ public class InputMethodManagerServiceTestBase {
 
         mServiceThread =
                 new ServiceThread(
-                        "TestServiceThread",
-                        Process.THREAD_PRIORITY_FOREGROUND, /* allowIo */
-                        false);
+                        "immstest1",
+                        Process.THREAD_PRIORITY_FOREGROUND,
+                        true /* allowIo */);
+        mPackageMonitorThread =
+                new ServiceThread(
+                        "immstest2",
+                        Process.THREAD_PRIORITY_FOREGROUND,
+                        true /* allowIo */);
         mInputMethodManagerService = new InputMethodManagerService(mContext, mServiceThread,
-                unusedUserId -> mMockInputMethodBindingController);
+                mPackageMonitorThread, unusedUserId -> mMockInputMethodBindingController);
         spyOn(mInputMethodManagerService);
 
         // Start a InputMethodManagerService.Lifecycle to publish and manage the lifecycle of
@@ -257,6 +263,10 @@ public class InputMethodManagerServiceTestBase {
     public void tearDown() {
         if (mInputMethodManagerService != null) {
             mInputMethodManagerService.mInputMethodDeviceConfigs.destroy();
+        }
+
+        if (mPackageMonitorThread != null) {
+            mPackageMonitorThread.quitSafely();
         }
 
         if (mServiceThread != null) {
