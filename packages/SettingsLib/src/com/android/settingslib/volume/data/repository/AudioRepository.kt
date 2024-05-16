@@ -72,7 +72,11 @@ interface AudioRepository {
 
     suspend fun setVolume(audioStream: AudioStream, volume: Int)
 
-    suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean)
+    /**
+     * Mutes and un-mutes [audioStream]. Returns true when the state changes and false the
+     * otherwise.
+     */
+    suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean): Boolean
 
     suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode)
 
@@ -164,14 +168,20 @@ class AudioRepositoryImpl(
             audioManager.setStreamVolume(audioStream.value, volume, 0)
         }
 
-    override suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean) =
-        withContext(backgroundCoroutineContext) {
-            audioManager.adjustStreamVolume(
-                audioStream.value,
-                if (isMuted) AudioManager.ADJUST_MUTE else AudioManager.ADJUST_UNMUTE,
-                0,
-            )
+    override suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean): Boolean {
+        return withContext(backgroundCoroutineContext) {
+            if (isMuted == audioManager.isStreamMute(audioStream.value)) {
+                false
+            } else {
+                audioManager.adjustStreamVolume(
+                    audioStream.value,
+                    if (isMuted) AudioManager.ADJUST_MUTE else AudioManager.ADJUST_UNMUTE,
+                    0,
+                )
+                true
+            }
         }
+    }
 
     override suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode) {
         withContext(backgroundCoroutineContext) { audioManager.ringerMode = mode.value }

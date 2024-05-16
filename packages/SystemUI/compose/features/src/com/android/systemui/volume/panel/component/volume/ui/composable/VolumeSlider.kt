@@ -78,12 +78,7 @@ fun VolumeSlider(
                     }
 
                     state.a11yStateDescription?.let { stateDescription = it }
-                        ?: run {
-                            // provide a not animated value to the a11y because it fails to announce
-                            // the settled value when it changes rapidly.
-                            progressBarRangeInfo =
-                                ProgressBarRangeInfo(state.value, state.valueRange)
-                        }
+                    progressBarRangeInfo = ProgressBarRangeInfo(state.value, state.valueRange)
                 } else {
                     disabled()
                     contentDescription =
