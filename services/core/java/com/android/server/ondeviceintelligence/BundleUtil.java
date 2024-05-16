@@ -82,8 +82,9 @@ public class BundleUtil {
             if (canMarshall(obj) || obj instanceof CursorWindow) {
                 continue;
             }
-
-            if (obj instanceof ParcelFileDescriptor) {
+            if (obj instanceof Bundle) {
+              sanitizeInferenceParams((Bundle) obj);
+            } else if (obj instanceof ParcelFileDescriptor) {
                 validatePfdReadOnly((ParcelFileDescriptor) obj);
             } else if (obj instanceof SharedMemory) {
                 ((SharedMemory) obj).setProtect(PROT_READ);
@@ -128,7 +129,9 @@ public class BundleUtil {
                 continue;
             }
 
-            if (obj instanceof ParcelFileDescriptor) {
+            if (obj instanceof Bundle) {
+                sanitizeResponseParams((Bundle) obj);
+            } else if (obj instanceof ParcelFileDescriptor) {
                 validatePfdReadOnly((ParcelFileDescriptor) obj);
             } else if (obj instanceof Bitmap) {
                 validateBitmap((Bitmap) obj);
