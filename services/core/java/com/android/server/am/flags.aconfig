@@ -134,3 +134,11 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "batching_oom_adj"
+    namespace: "backstage_power"
+    description: "Batch OOM adjustment calls to LMKD"
+    bug: "244232958"
+    is_fixed_read_only: true
+}
