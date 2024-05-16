@@ -15638,4 +15638,39 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(mService.checkDisqualifyingFeatures(mUserId, mUid, 0, null, r, false, false))
                 .isTrue();
     }
+
+    @Test
+    public void testClearUIJFromUninstallingPackage() throws Exception {
+        NotificationRecord r =
+                generateNotificationRecord(mTestNotificationChannel, 0, mUserId, "bar");
+        mService.addNotification(r);
+
+        when(mPackageManagerClient.getPackageUidAsUser(anyString(), anyInt()))
+                .thenThrow(PackageManager.NameNotFoundException.class);
+        when(mPackageManagerInternal.isSameApp(anyString(), anyInt(), anyInt())).thenReturn(false);
+
+        mInternalService.cancelNotification(mPkg, mPkg, mUid, 0, r.getSbn().getTag(),
+                r.getSbn().getId(), mUserId);
+
+        // no exception
+    }
+
+    @Test
+    public void testPostFromMissingPackage_throws() throws Exception {
+        NotificationRecord r =
+                generateNotificationRecord(mTestNotificationChannel, 0, mUserId, "bar");
+
+        when(mPackageManagerClient.getPackageUidAsUser(anyString(), anyInt()))
+                .thenThrow(PackageManager.NameNotFoundException.class);
+        when(mPackageManagerInternal.isSameApp(anyString(), anyInt(), anyInt())).thenReturn(false);
+
+        try {
+            mBinderService.enqueueNotificationWithTag(mPkg, mPkg, r.getSbn().getTag(),
+                    r.getSbn().getId(), r.getSbn().getNotification(),
+                    r.getSbn().getUserId());
+            fail("Allowed to post a notification for an absent package");
+        } catch (SecurityException e) {
+            // yay
+        }
+    }
 }
