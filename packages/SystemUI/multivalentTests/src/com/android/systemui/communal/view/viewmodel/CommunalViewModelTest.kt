@@ -51,6 +51,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
@@ -141,6 +142,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 testScope,
                 context.resources,
                 kosmos.keyguardTransitionInteractor,
+                kosmos.keyguardInteractor,
                 kosmos.communalInteractor,
                 kosmos.communalTutorialInteractor,
                 kosmos.shadeInteractor,
