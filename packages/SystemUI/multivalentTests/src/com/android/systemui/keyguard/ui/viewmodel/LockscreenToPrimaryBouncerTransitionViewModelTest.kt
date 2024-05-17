@@ -18,8 +18,10 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -30,11 +32,16 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.data.repository.sceneContainerRepository
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -58,6 +65,11 @@ class LockscreenToPrimaryBouncerTransitionViewModelTest(flags: FlagsParameteriza
     private val keyguardRepository = kosmos.fakeKeyguardRepository
     private lateinit var underTest: LockscreenToPrimaryBouncerTransitionViewModel
 
+    private val transitionState =
+        MutableStateFlow<ObservableTransitionState>(
+            ObservableTransitionState.Idle(Scenes.Lockscreen)
+        )
+
     companion object {
         @JvmStatic
         @Parameters(name = "{0}")
@@ -76,6 +88,7 @@ class LockscreenToPrimaryBouncerTransitionViewModelTest(flags: FlagsParameteriza
     }
 
     @Test
+    @BrokenWithSceneContainer(330311871)
     fun deviceEntryParentViewAlpha_shadeExpanded() =
         testScope.runTest {
             val actual by collectLastValue(underTest.deviceEntryParentViewAlpha)
@@ -107,6 +120,17 @@ class LockscreenToPrimaryBouncerTransitionViewModelTest(flags: FlagsParameteriza
             shadeExpanded(false)
             runCurrent()
 
+            kosmos.sceneContainerRepository.setTransitionState(transitionState)
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Lockscreen,
+                    toScene = Scenes.Bouncer,
+                    emptyFlow(),
+                    emptyFlow(),
+                    false,
+                    emptyFlow()
+                )
+            runCurrent()
             // fade out
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
             runCurrent()
@@ -132,7 +156,9 @@ class LockscreenToPrimaryBouncerTransitionViewModelTest(flags: FlagsParameteriza
     ): TransitionStep {
         return TransitionStep(
             from = KeyguardState.LOCKSCREEN,
-            to = KeyguardState.PRIMARY_BOUNCER,
+            to =
+                if (SceneContainerFlag.isEnabled) KeyguardState.UNDEFINED
+                else KeyguardState.PRIMARY_BOUNCER,
             value = value,
             transitionState = state,
             ownerName = "LockscreenToPrimaryBouncerTransitionViewModelTest"

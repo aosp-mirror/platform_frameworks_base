@@ -63,12 +63,13 @@ constructor(
         setUpSheetDismissListener()
         setUpDismissOnTouchOutside()
         observeFinishRequired()
+        viewModel.onViewOpened()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (isFinishing) {
-            viewModel.onUserLeave()
+            viewModel.onViewClosed()
         }
     }
 

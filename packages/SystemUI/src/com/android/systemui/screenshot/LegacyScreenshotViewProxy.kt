@@ -157,6 +157,8 @@ constructor(
 
     override fun restoreNonScrollingUi() = view.restoreNonScrollingUi()
 
+    override fun fadeForSharedTransition() {} // unused
+
     override fun stopInputListening() = view.stopInputListening()
 
     override fun requestFocus() {

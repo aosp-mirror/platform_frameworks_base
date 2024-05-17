@@ -128,7 +128,7 @@ public class RecentAppOpsAccess {
         final long now = mClock.millis();
         final UserManager um = mContext.getSystemService(UserManager.class);
         final List<UserHandle> profiles = um.getUserProfiles();
-        ArrayMap<UserHandle, Boolean> shouldIncludeAppsByUsers = new ArrayMap<>();
+        ArrayMap<UserHandle, Boolean> shouldHideAppsByUsers = new ArrayMap<>();
 
         for (int i = 0; i < appOpsCount; ++i) {
             AppOpsManager.PackageOps ops = appOps.get(i);
@@ -136,13 +136,13 @@ public class RecentAppOpsAccess {
             int uid = ops.getUid();
             UserHandle user = UserHandle.getUserHandleForUid(uid);
 
-            if (!shouldIncludeAppsByUsers.containsKey(user)) {
-                shouldIncludeAppsByUsers.put(user, shouldHideUser(um, user));
+            if (!shouldHideAppsByUsers.containsKey(user)) {
+                shouldHideAppsByUsers.put(user, shouldHideUser(um, user));
             }
 
             // Don't show apps belonging to background users except for profiles that shouldn't
             // be shown in quiet mode.
-            if (!profiles.contains(user) || !shouldIncludeAppsByUsers.get(user)) {
+            if (!profiles.contains(user) || shouldHideAppsByUsers.get(user)) {
                 continue;
             }
 

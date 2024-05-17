@@ -33,6 +33,8 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -54,6 +56,10 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.res.R
+import com.android.systemui.scene.data.repository.Idle
+import com.android.systemui.scene.data.repository.setSceneTransition
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -152,29 +158,30 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         testDispatcher = UnconfinedTestDispatcher()
         mediaCarouselController =
             MediaCarouselController(
-                context,
-                mediaControlPanelFactory,
-                visualStabilityProvider,
-                mediaHostStatesManager,
-                activityStarter,
-                clock,
-                kosmos.testDispatcher,
-                executor,
-                bgExecutor,
-                testDispatcher,
-                mediaDataManager,
-                configurationController,
-                falsingManager,
-                dumpManager,
-                logger,
-                debugLogger,
-                mediaFlags,
-                keyguardUpdateMonitor,
-                kosmos.keyguardTransitionInteractor,
-                globalSettings,
-                secureSettings,
-                kosmos.mediaCarouselViewModel,
-                mediaViewControllerFactory,
+                context = context,
+                mediaControlPanelFactory = mediaControlPanelFactory,
+                visualStabilityProvider = visualStabilityProvider,
+                mediaHostStatesManager = mediaHostStatesManager,
+                activityStarter = activityStarter,
+                systemClock = clock,
+                mainDispatcher = kosmos.testDispatcher,
+                executor = executor,
+                bgExecutor = bgExecutor,
+                backgroundDispatcher = testDispatcher,
+                mediaManager = mediaDataManager,
+                configurationController = configurationController,
+                falsingManager = falsingManager,
+                dumpManager = dumpManager,
+                logger = logger,
+                debugLogger = debugLogger,
+                mediaFlags = mediaFlags,
+                keyguardUpdateMonitor = keyguardUpdateMonitor,
+                keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
+                globalSettings = globalSettings,
+                secureSettings = secureSettings,
+                mediaCarouselViewModel = kosmos.mediaCarouselViewModel,
+                mediaViewControllerFactory = mediaViewControllerFactory,
+                sceneInteractor = kosmos.sceneInteractor,
             )
         verify(configurationController).addCallback(capture(configListener))
         verify(mediaDataManager).addListener(capture(listener))
@@ -834,6 +841,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(mediaCarousel).visibility = View.VISIBLE
     }
 
+    @DisableSceneContainer
     @ExperimentalCoroutinesApi
     @Test
     fun testKeyguardGone_showMediaCarousel() =
@@ -853,6 +861,25 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             verify(mediaCarousel).visibility = View.VISIBLE
             assertEquals(true, updatedVisibility)
             assertEquals(false, mediaCarouselController.isLockedAndHidden())
+
+            job.cancel()
+        }
+
+    @EnableSceneContainer
+    @ExperimentalCoroutinesApi
+    @Test
+    fun testKeyguardGone_showMediaCarousel_scene_container() =
+        kosmos.testScope.runTest {
+            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
+            var updatedVisibility = false
+            mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
+            mediaCarouselController.mediaCarousel = mediaCarousel
+
+            val job = mediaCarouselController.listenForAnyStateToGoneKeyguardTransition(this)
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
+
+            verify(mediaCarousel).visibility = View.VISIBLE
+            assertEquals(true, updatedVisibility)
 
             job.cancel()
         }

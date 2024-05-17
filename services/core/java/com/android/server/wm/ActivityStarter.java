@@ -1768,6 +1768,7 @@ class ActivityStarter {
             if (!avoidMoveToFront() && (mService.mHomeProcess == null
                     || mService.mHomeProcess.mUid != realCallingUid)
                     && (prevTopTask != null && prevTopTask.isActivityTypeHomeOrRecents())
+                    && !targetTask.isActivityTypeHomeOrRecents()
                     && r.mTransitionController.isTransientHide(targetTask)) {
                 mCanMoveToFrontCode = MOVE_TO_FRONT_AVOID_LEGACY;
             }
@@ -2113,7 +2114,6 @@ class ActivityStarter {
         if (hostTask == null || targetTask != hostTask) {
             return EMBEDDING_DISALLOWED_NEW_TASK;
         }
-
         return taskFragment.isAllowedToEmbedActivity(starting);
     }
 
@@ -2167,7 +2167,7 @@ class ActivityStarter {
             // We don't need to start a new activity, and the client said not to do anything
             // if that is the case, so this is it!  And for paranoia, make sure we have
             // correctly resumed the top activity.
-            if (!mMovedToFront && mDoResume) {
+            if (!mMovedToFront && mDoResume && !avoidMoveToFront()) {
                 ProtoLog.d(WM_DEBUG_TASKS, "Bring to front target: %s from %s", mTargetRootTask,
                         targetTaskTop);
                 mTargetRootTask.moveToFront("intentActivityFound");
@@ -2196,7 +2196,7 @@ class ActivityStarter {
         if (mMovedToFront) {
             // We moved the task to front, use starting window to hide initial drawn delay.
             targetTaskTop.showStartingWindow(true /* taskSwitch */);
-        } else if (mDoResume) {
+        } else if (mDoResume && !avoidMoveToFront()) {
             // Make sure the root task and its belonging display are moved to topmost.
             mTargetRootTask.moveToFront("intentActivityFound");
         }
@@ -2961,23 +2961,9 @@ class ActivityStarter {
                 sendCanNotEmbedActivityError(mInTaskFragment, embeddingCheckResult);
             }
         } else {
-            TaskFragment candidateTf = mAddingToTaskFragment != null ? mAddingToTaskFragment : null;
+            TaskFragment candidateTf = mAddingToTaskFragment;
             if (candidateTf == null) {
-                // Puts the activity on the top-most non-isolated navigation TF, unless the
-                // activity is launched from the same TF.
-                final TaskFragment sourceTaskFragment =
-                        mSourceRecord != null ? mSourceRecord.getTaskFragment() : null;
-                final ActivityRecord top = task.getActivity(r -> {
-                    if (!r.canBeTopRunning()) {
-                        return false;
-                    }
-                    final TaskFragment taskFragment = r.getTaskFragment();
-                    return !taskFragment.isIsolatedNav() || (sourceTaskFragment != null
-                            && sourceTaskFragment == taskFragment);
-                });
-                if (top != null) {
-                    candidateTf = top.getTaskFragment();
-                }
+                candidateTf = findCandidateTaskFragment(task);
             }
             if (candidateTf != null && candidateTf.isEmbedded()
                     && canEmbedActivity(candidateTf, mStartActivity, task) == EMBEDDING_ALLOWED) {
@@ -2992,6 +2978,50 @@ class ActivityStarter {
         } else {
             mStartActivity.reparent(newParent, newParent.getChildCount() /* top */, reason);
         }
+    }
+
+    /**
+     * Finds a candidate TaskFragment in {@code task} to launch activity, or returns {@code null}
+     * if there's no such a TaskFragment.
+     */
+    @Nullable
+    private TaskFragment findCandidateTaskFragment(@NonNull Task task) {
+        final TaskFragment sourceTaskFragment =
+                mSourceRecord != null ? mSourceRecord.getTaskFragment() : null;
+        for (int i = task.getChildCount() - 1; i >= 0; --i) {
+            final WindowContainer<?> wc = task.getChildAt(i);
+            final ActivityRecord activity = wc.asActivityRecord();
+            if (activity != null) {
+                if (activity.finishing) {
+                    continue;
+                }
+                // Early return if the top child is an Activity.
+                return null;
+            }
+            final TaskFragment taskFragment = wc.asTaskFragment();
+            if (taskFragment == null || taskFragment.isRemovalRequested()) {
+                // Skip if the TaskFragment is going to be finished.
+                continue;
+            }
+            if (taskFragment.getActivity(ActivityRecord::canBeTopRunning) == null) {
+                // Skip if there's no activity in this TF can be top running.
+                continue;
+            }
+            if (taskFragment.isIsolatedNav()) {
+                // Stop here if we reach an isolated navigated TF.
+                return null;
+            }
+            if (sourceTaskFragment != null && sourceTaskFragment == taskFragment) {
+                // Choose the taskFragment launched from even if it's pinned.
+                return taskFragment;
+            }
+            if (taskFragment.isPinned()) {
+                // Skip the pinned TaskFragment.
+                continue;
+            }
+            return taskFragment;
+        }
+        return null;
     }
 
     /**

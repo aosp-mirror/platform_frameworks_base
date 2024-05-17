@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.media.session.MediaController
 import android.media.session.MediaSession.Token
+import android.media.session.PlaybackState
 import android.text.TextUtils
 import android.util.Log
 import androidx.constraintlayout.widget.ConstraintSet
@@ -40,16 +41,14 @@ import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.monet.Style
 import com.android.systemui.res.R
-import com.android.systemui.util.kotlin.sample
 import java.util.concurrent.Executor
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 
 /** Models UI state and handles user input for a media control. */
 class MediaControlViewModel(
@@ -60,30 +59,19 @@ class MediaControlViewModel(
     private val logger: MediaUiEventLogger,
 ) {
 
-    private val isAnyButtonClicked: MutableStateFlow<Boolean> = MutableStateFlow(false)
-
-    private val playTurbulenceNoise: Flow<Boolean> =
-        interactor.mediaControl.sample(
-            combine(isAnyButtonClicked, interactor.isStartedPlaying) {
-                    isButtonClicked,
-                    isStartedPlaying ->
-                    isButtonClicked && isStartedPlaying
-                }
-                .distinctUntilChanged()
-        )
-
     @OptIn(ExperimentalCoroutinesApi::class)
     val player: Flow<MediaPlayerViewModel?> =
         interactor.onAnyMediaConfigurationChange
             .flatMapLatest {
-                combine(playTurbulenceNoise, interactor.mediaControl) {
-                    playTurbulenceNoise,
-                    mediaControl ->
-                    mediaControl?.let { toViewModel(it, playTurbulenceNoise) }
+                interactor.mediaControl.map { mediaControl ->
+                    mediaControl?.let { toViewModel(it) }
                 }
             }
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
+
+    private var isPlaying = false
+    private var isAnyButtonClicked = false
 
     private fun onDismissMediaData(
         token: Token?,
@@ -95,10 +83,8 @@ class MediaControlViewModel(
         interactor.removeMediaControl(token, instanceId, MEDIA_PLAYER_ANIMATION_DELAY)
     }
 
-    private suspend fun toViewModel(
-        model: MediaControlModel,
-        playTurbulenceNoise: Boolean
-    ): MediaPlayerViewModel? {
+    private suspend fun toViewModel(model: MediaControlModel): MediaPlayerViewModel? {
+        val mediaController = model.token?.let { MediaController(applicationContext, it) }
         val wallpaperColors =
             MediaArtworkHelper.getWallpaperColor(
                 applicationContext,
@@ -118,8 +104,14 @@ class MediaControlViewModel(
 
         val gutsViewModel = toGutsViewModel(model, scheme)
 
+        // Set playing state
+        val wasPlaying = isPlaying
+        isPlaying =
+            mediaController?.playbackState?.let { it.state == PlaybackState.STATE_PLAYING } ?: false
+
         // Resetting button clicks state.
-        isAnyButtonClicked.value = false
+        val wasButtonClicked = isAnyButtonClicked
+        isAnyButtonClicked = false
 
         return MediaPlayerViewModel(
             contentDescription = { gutsVisible ->
@@ -144,7 +136,7 @@ class MediaControlViewModel(
             shouldAddGradient = wallpaperColors != null,
             colorScheme = scheme,
             canShowTime = canShowScrubbingTimeViews(model.semanticActionButtons),
-            playTurbulenceNoise = playTurbulenceNoise,
+            playTurbulenceNoise = isPlaying && !wasPlaying && wasButtonClicked,
             useSemanticActions = model.semanticActionButtons != null,
             actionButtons = toActionViewModels(model),
             outputSwitcher = toOutputSwitcherViewModel(model),
@@ -168,9 +160,7 @@ class MediaControlViewModel(
                     seekBarViewModel.updateStaticProgress(model.resumeProgress)
                 } else {
                     backgroundExecutor.execute {
-                        seekBarViewModel.updateController(
-                            model.token?.let { MediaController(applicationContext, it) }
-                        )
+                        seekBarViewModel.updateController(mediaController)
                     }
                 }
             }
@@ -283,16 +273,17 @@ class MediaControlViewModel(
         )
     }
 
-    private fun toActionViewModels(model: MediaControlModel): List<MediaActionViewModel?> {
+    private fun toActionViewModels(model: MediaControlModel): List<MediaActionViewModel> {
         val semanticActionButtons =
             model.semanticActionButtons?.let { mediaButton ->
-                with(mediaButton) {
-                    val isScrubbingTimeEnabled = canShowScrubbingTimeViews(mediaButton)
-                    SEMANTIC_ACTIONS_ALL.map { buttonId ->
-                        getActionById(buttonId)?.let {
-                            toSemanticActionViewModel(model, it, buttonId, isScrubbingTimeEnabled)
-                        }
-                    }
+                val isScrubbingTimeEnabled = canShowScrubbingTimeViews(mediaButton)
+                SEMANTIC_ACTIONS_ALL.map { buttonId ->
+                    toSemanticActionViewModel(
+                        model,
+                        mediaButton.getActionById(buttonId),
+                        buttonId,
+                        isScrubbingTimeEnabled
+                    )
                 }
             }
         val notifActionButtons =
@@ -304,7 +295,7 @@ class MediaControlViewModel(
 
     private fun toSemanticActionViewModel(
         model: MediaControlModel,
-        mediaAction: MediaAction,
+        mediaAction: MediaAction?,
         buttonId: Int,
         canShowScrubbingTimeViews: Boolean
     ): MediaActionViewModel {
@@ -312,9 +303,9 @@ class MediaControlViewModel(
         val hideWhenScrubbing = SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.contains(buttonId)
         val shouldHideWhenScrubbing = canShowScrubbingTimeViews && hideWhenScrubbing
         return MediaActionViewModel(
-            icon = mediaAction.icon,
-            contentDescription = mediaAction.contentDescription,
-            background = mediaAction.background,
+            icon = mediaAction?.icon,
+            contentDescription = mediaAction?.contentDescription,
+            background = mediaAction?.background,
             isVisibleWhenScrubbing = !shouldHideWhenScrubbing,
             notVisibleValue =
                 if (
@@ -326,11 +317,11 @@ class MediaControlViewModel(
                     ConstraintSet.GONE
                 },
             showInCollapsed = showInCollapsed,
-            rebindId = mediaAction.rebindId,
+            rebindId = mediaAction?.rebindId,
             buttonId = buttonId,
-            isEnabled = mediaAction.action != null,
+            isEnabled = mediaAction?.action != null,
             onClicked = { id ->
-                mediaAction.action?.let {
+                mediaAction?.action?.let {
                     onButtonClicked(id, model.uid, model.packageName, model.instanceId, it)
                 }
             },
@@ -366,7 +357,7 @@ class MediaControlViewModel(
     ) {
         logger.logTapAction(id, uid, packageName, instanceId)
         // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_CLICK_EVENT)
-        isAnyButtonClicked.value = true
+        isAnyButtonClicked = true
         action.run()
     }
 

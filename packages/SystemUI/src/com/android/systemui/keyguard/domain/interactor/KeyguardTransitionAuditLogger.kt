@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.keyguard.logging.KeyguardLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.log.core.LogLevel.VERBOSE
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -26,6 +27,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 private val TAG = KeyguardTransitionAuditLogger::class.simpleName!!
@@ -41,6 +43,7 @@ constructor(
     private val logger: KeyguardLogger,
     private val powerInteractor: PowerInteractor,
     private val sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
+    private val keyguardRootViewModel: KeyguardRootViewModel,
     private val shadeInteractor: ShadeInteractor,
     private val keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
 ) {
@@ -72,8 +75,8 @@ constructor(
 
         if (!SceneContainerFlag.isEnabled) {
             scope.launch {
-                sharedNotificationContainerViewModel.bounds.collect {
-                    logger.log(TAG, VERBOSE, "Notif: bounds", it)
+                sharedNotificationContainerViewModel.bounds.debounce(20L).collect {
+                    logger.log(TAG, VERBOSE, "Notif: bounds (debounced)", it)
                 }
             }
         }
@@ -109,6 +112,18 @@ constructor(
         scope.launch {
             keyguardInteractor.isKeyguardOccluded.collect {
                 logger.log(TAG, VERBOSE, "isOccluded", it)
+            }
+        }
+
+        scope.launch {
+            keyguardInteractor.keyguardTranslationY.collect {
+                logger.log(TAG, VERBOSE, "keyguardTranslationY", it)
+            }
+        }
+
+        scope.launch {
+            keyguardRootViewModel.burnInModel.debounce(20L).collect {
+                logger.log(TAG, VERBOSE, "BurnInModel (debounced)", it)
             }
         }
 

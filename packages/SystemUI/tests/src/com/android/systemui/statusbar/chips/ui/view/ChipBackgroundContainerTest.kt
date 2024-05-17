@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone.ongoingcall
+package com.android.systemui.statusbar.chips.ui.view
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
 import android.view.View
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.res.R
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -31,16 +31,17 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
-class OngoingCallBackgroundContainerTest : SysuiTestCase() {
+class ChipBackgroundContainerTest : SysuiTestCase() {
 
-    private lateinit var underTest: OngoingCallBackgroundContainer
+    private lateinit var underTest: ChipBackgroundContainer
 
     @Before
     fun setUp() {
         allowTestableLooperAsMainThread()
         TestableLooper.get(this).runWithLooper {
-            val chipView = LayoutInflater.from(context).inflate(R.layout.ongoing_call_chip, null)
-            underTest = chipView.requireViewById(R.id.ongoing_call_chip_background)
+            val chipView =
+                LayoutInflater.from(context).inflate(R.layout.ongoing_activity_chip, null)
+            underTest = chipView.requireViewById(R.id.ongoing_activity_chip_background)
         }
     }
 

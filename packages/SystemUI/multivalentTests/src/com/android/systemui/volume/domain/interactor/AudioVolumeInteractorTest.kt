@@ -36,7 +36,6 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -47,19 +46,8 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
 
-    private lateinit var underTest: AudioVolumeInteractor
-
-    @Before
-    fun setup() {
-        with(kosmos) {
-            underTest = AudioVolumeInteractor(audioRepository, notificationsSoundPolicyInteractor)
-
-            audioRepository.setRingerMode(RingerMode(AudioManager.RINGER_MODE_NORMAL))
-
-            notificationsSoundPolicyRepository.updateNotificationPolicy()
-            notificationsSoundPolicyRepository.updateZenMode(ZenMode(Settings.Global.ZEN_MODE_OFF))
-        }
-    }
+    private val underTest: AudioVolumeInteractor =
+        with(kosmos) { AudioVolumeInteractor(audioRepository, notificationsSoundPolicyInteractor) }
 
     @Test
     fun setMuted_mutesStream() {
@@ -235,6 +223,55 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
             }
         }
     }
+
+    @Test
+    fun testReducingVolumeToMin_mutes() =
+        with(kosmos) {
+            testScope.runTest {
+                val audioStreamModel by
+                    collectLastValue(audioRepository.getAudioStream(audioStream))
+                runCurrent()
+
+                underTest.setVolume(audioStream, audioStreamModel!!.minVolume)
+                runCurrent()
+
+                assertThat(audioStreamModel!!.isMuted).isTrue()
+            }
+        }
+
+    @Test
+    fun testIncreasingVolumeFromMin_unmutes() =
+        with(kosmos) {
+            testScope.runTest {
+                val audioStreamModel by
+                    collectLastValue(audioRepository.getAudioStream(audioStream))
+                audioRepository.setMuted(audioStream, true)
+                audioRepository.setVolume(audioStream, audioStreamModel!!.minVolume)
+                runCurrent()
+
+                underTest.setVolume(audioStream, audioStreamModel!!.maxVolume)
+                runCurrent()
+
+                assertThat(audioStreamModel!!.isMuted).isFalse()
+            }
+        }
+
+    @Test
+    fun testUnmutingMinVolume_increasesVolume() =
+        with(kosmos) {
+            testScope.runTest {
+                val audioStreamModel by
+                    collectLastValue(audioRepository.getAudioStream(audioStream))
+                audioRepository.setMuted(audioStream, true)
+                audioRepository.setVolume(audioStream, audioStreamModel!!.minVolume)
+                runCurrent()
+
+                underTest.setMuted(audioStream, false)
+                runCurrent()
+
+                assertThat(audioStreamModel!!.volume).isGreaterThan(audioStreamModel!!.minVolume)
+            }
+        }
 
     private companion object {
         val audioStream = AudioStream(AudioManager.STREAM_SYSTEM)

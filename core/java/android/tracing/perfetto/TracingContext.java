@@ -59,19 +59,6 @@ public class TracingContext<DataSourceInstanceType extends DataSourceInstance, T
     }
 
     /**
-     * Forces a commit of the thread-local tracing data written so far to the
-     * service. This is almost never required (tracing data is periodically
-     * committed as trace pages are filled up) and has a non-negligible
-     * performance hit (requires an IPC + refresh of the current thread-local
-     * chunk). The only case when this should be used is when handling OnStop()
-     * asynchronously, to ensure sure that the data is committed before the
-     * Stop timeout expires.
-     */
-    public void flush() {
-        nativeFlush(mDataSource.mNativeObj, getAndClearAllPendingTracePackets());
-    }
-
-    /**
      * Can optionally be used to store custom per-sequence
      * session data, which is not reset when incremental state is cleared
      * (e.g. configuration options).
@@ -109,7 +96,7 @@ public class TracingContext<DataSourceInstanceType extends DataSourceInstance, T
         return incrementalState;
     }
 
-    private byte[][] getAndClearAllPendingTracePackets() {
+    protected byte[][] getAndClearAllPendingTracePackets() {
         byte[][] res = new byte[mTracePackets.size()][];
         for (int i = 0; i < mTracePackets.size(); i++) {
             ProtoOutputStream tracePacket = mTracePackets.get(i);
@@ -119,8 +106,6 @@ public class TracingContext<DataSourceInstanceType extends DataSourceInstance, T
         mTracePackets.clear();
         return res;
     }
-
-    private static native void nativeFlush(long dataSourcePtr, byte[][] packetData);
 
     private static native Object nativeGetCustomTls(long nativeDsPtr);
     private static native void nativeSetCustomTls(long nativeDsPtr, Object tlsState);

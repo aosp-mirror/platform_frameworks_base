@@ -407,7 +407,8 @@ public class DisplayObserverTest {
             assertThat(mObserver).isNull();
             mObserver = invocation.getArgument(0);
             return null;
-        }).when(mInjector).registerDisplayListener(any(), any());
+        }).when(mInjector).registerDisplayListener(
+                any(DisplayModeDirector.DisplayObserver.class), any());
 
         doAnswer(c -> {
             DisplayInfo info = c.getArgument(1);

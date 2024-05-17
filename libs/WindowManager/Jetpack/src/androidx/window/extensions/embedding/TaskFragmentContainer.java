@@ -184,6 +184,11 @@ class TaskFragmentContainer {
     private boolean mIsIsolatedNavigationEnabled;
 
     /**
+     * Whether this TaskFragment is pinned.
+     */
+    private boolean mIsPinned;
+
+    /**
      * Whether to apply dimming on the parent Task that was requested last.
      */
     private boolean mLastDimOnTask;
@@ -891,6 +896,34 @@ class TaskFragmentContainer {
     /** Sets whether to enable isolated navigation or not. */
     void setIsolatedNavigationEnabled(boolean isolatedNavigationEnabled) {
         mIsIsolatedNavigationEnabled = isolatedNavigationEnabled;
+    }
+
+    /**
+     * Returns whether this container is pinned.
+     *
+     * @see android.window.TaskFragmentOperation#OP_TYPE_SET_PINNED
+     */
+    boolean isPinned() {
+        return mIsPinned;
+    }
+
+    /**
+     * Sets whether to pin this container or not.
+     *
+     * @see #isPinned()
+     */
+    void setPinned(boolean pinned) {
+        mIsPinned = pinned;
+    }
+
+    /**
+     * Indicates to skip activity resolving if the activity is from this container.
+     *
+     * @see #isIsolatedNavigationEnabled()
+     * @see #isPinned()
+     */
+    boolean shouldSkipActivityResolving() {
+        return isIsolatedNavigationEnabled() || isPinned();
     }
 
     /** Sets whether to apply dim on the parent Task. */

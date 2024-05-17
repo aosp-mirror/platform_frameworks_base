@@ -18,11 +18,9 @@ package com.android.systemui.volume.panel.component.mediaoutput.domain.interacto
 
 import android.media.session.MediaController
 import android.media.session.PlaybackState
-import android.os.Handler
-import com.android.settingslib.volume.data.repository.MediaControllerChange
 import com.android.settingslib.volume.data.repository.MediaControllerRepository
-import com.android.settingslib.volume.data.repository.stateChanges
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaControllerChangeModel
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import javax.inject.Inject
@@ -45,38 +43,39 @@ class MediaDeviceSessionInteractor
 @Inject
 constructor(
     @Background private val backgroundCoroutineContext: CoroutineContext,
-    @Background private val backgroundHandler: Handler,
+    private val mediaControllerInteractor: MediaControllerInteractor,
     private val mediaControllerRepository: MediaControllerRepository,
 ) {
 
     /** [PlaybackState] changes for the [MediaDeviceSession]. */
     fun playbackState(session: MediaDeviceSession): Flow<PlaybackState?> {
         return stateChanges(session) {
-                emit(MediaControllerChange.PlaybackStateChanged(it.playbackState))
+                emit(MediaControllerChangeModel.PlaybackStateChanged(it.playbackState))
             }
-            .filterIsInstance(MediaControllerChange.PlaybackStateChanged::class)
+            .filterIsInstance(MediaControllerChangeModel.PlaybackStateChanged::class)
             .map { it.state }
     }
 
     /** [MediaController.PlaybackInfo] changes for the [MediaDeviceSession]. */
     fun playbackInfo(session: MediaDeviceSession): Flow<MediaController.PlaybackInfo?> {
         return stateChanges(session) {
-                emit(MediaControllerChange.AudioInfoChanged(it.playbackInfo))
+                emit(MediaControllerChangeModel.AudioInfoChanged(it.playbackInfo))
             }
-            .filterIsInstance(MediaControllerChange.AudioInfoChanged::class)
+            .filterIsInstance(MediaControllerChangeModel.AudioInfoChanged::class)
             .map { it.info }
     }
 
     private fun stateChanges(
         session: MediaDeviceSession,
-        onStart: suspend FlowCollector<MediaControllerChange>.(controller: MediaController) -> Unit,
-    ): Flow<MediaControllerChange?> =
+        onStart:
+            suspend FlowCollector<MediaControllerChangeModel>.(controller: MediaController) -> Unit,
+    ): Flow<MediaControllerChangeModel?> =
         mediaControllerRepository.activeSessions
             .flatMapLatest { controllers ->
                 val controller: MediaController =
                     findControllerForSession(controllers, session)
                         ?: return@flatMapLatest flowOf(null)
-                controller.stateChanges(backgroundHandler).onStart { onStart(controller) }
+                mediaControllerInteractor.stateChanges(controller).onStart { onStart(controller) }
             }
             .flowOn(backgroundCoroutineContext)
 

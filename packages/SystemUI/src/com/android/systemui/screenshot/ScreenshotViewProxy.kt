@@ -63,6 +63,7 @@ interface ScreenshotViewProxy {
         longScreenshot: ScrollCaptureController.LongScreenshot
     )
     fun restoreNonScrollingUi()
+    fun fadeForSharedTransition()
 
     fun stopInputListening()
     fun requestFocus()

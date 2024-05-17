@@ -32,6 +32,7 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
+import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.transition.TransitionInfoBuilder
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.util.StubTransaction

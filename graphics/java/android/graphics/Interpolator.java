@@ -28,13 +28,13 @@ public class Interpolator {
         mFrameCount = 2;
         native_instance = nativeConstructor(valueCount, 2);
     }
-    
+
     public Interpolator(int valueCount, int frameCount) {
         mValueCount = valueCount;
         mFrameCount = frameCount;
         native_instance = nativeConstructor(valueCount, frameCount);
     }
-    
+
     /**
      * Reset the Interpolator to have the specified number of values and an
      * implicit keyFrame count of 2 (just a start and end). After this call the
@@ -43,7 +43,7 @@ public class Interpolator {
     public void reset(int valueCount) {
         reset(valueCount, 2);
     }
-    
+
     /**
      * Reset the Interpolator to have the specified number of values and
      * keyFrames. After this call the values for each keyFrame must be assigned
@@ -54,20 +54,20 @@ public class Interpolator {
         mFrameCount = frameCount;
         nativeReset(native_instance, valueCount, frameCount);
     }
-    
+
     public final int getKeyFrameCount() {
         return mFrameCount;
     }
-    
+
     public final int getValueCount() {
         return mValueCount;
     }
-    
+
     /**
      * Assign the keyFrame (specified by index) a time value and an array of key
-     * values (with an implicity blend array of [0, 0, 1, 1] giving linear
+     * values (with an implicitly blend array of [0, 0, 1, 1] giving linear
      * transition to the next set of key values).
-     * 
+     *
      * @param index The index of the key frame to assign
      * @param msec The time (in mililiseconds) for this key frame. Based on the
      *        SystemClock.uptimeMillis() clock
@@ -80,7 +80,7 @@ public class Interpolator {
     /**
      * Assign the keyFrame (specified by index) a time value and an array of key
      * values and blend array.
-     * 
+     *
      * @param index The index of the key frame to assign
      * @param msec The time (in mililiseconds) for this key frame. Based on the
      *        SystemClock.uptimeMillis() clock
@@ -99,7 +99,7 @@ public class Interpolator {
         }
         nativeSetKeyFrame(native_instance, index, msec, values, blend);
     }
-    
+
     /**
      * Set a repeat count (which may be fractional) for the interpolator, and
      * whether the interpolator should mirror its repeats. The default settings
@@ -110,7 +110,7 @@ public class Interpolator {
             nativeSetRepeatMirror(native_instance, repeatCount, mirror);
         }
     }
-    
+
     public enum Result {
         NORMAL,
         FREEZE_START,
@@ -130,7 +130,7 @@ public class Interpolator {
      * return whether the specified time was within the range of key times
      * (NORMAL), was before the first key time (FREEZE_START) or after the last
      * key time (FREEZE_END). In any event, computed values are always returned.
-     * 
+     *
      * @param msec The time (in milliseconds) used to sample into the
      *        Interpolator. Based on the SystemClock.uptimeMillis() clock
      * @param values Where to write the computed values (may be NULL).
@@ -146,13 +146,13 @@ public class Interpolator {
             default: return Result.FREEZE_END;
         }
     }
-    
+
     @Override
     protected void finalize() throws Throwable {
         nativeDestructor(native_instance);
         native_instance = 0;  // Other finalizers can still call us.
     }
-    
+
     private int mValueCount;
     private int mFrameCount;
     private long native_instance;

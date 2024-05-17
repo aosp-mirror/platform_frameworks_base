@@ -355,6 +355,14 @@ flag {
 }
 
 flag {
+    name: "status_bar_screen_sharing_chips"
+    namespace: "systemui"
+    description: "Show chips on the left side of the status bar when a user is screen sharing, "
+        "recording, or casting"
+    bug: "332662551"
+}
+
+flag {
     name: "compose_bouncer"
     namespace: "systemui"
     description: "Use the new compose bouncer in SystemUI"
@@ -402,6 +410,16 @@ flag {
    namespace: "systemui"
    description: "Faster wallpaper unlock transition"
    bug: "298186160"
+}
+
+flag {
+  name: "fix_image_wallpaper_crash_surface_already_released"
+  namespace: "systemui"
+  description: "Make sure ImageWallpaper doesn't return from OnSurfaceDestroyed until any drawing is finished"
+  bug: "337287154"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -862,6 +880,9 @@ flag {
     namespace: "systemui"
     description: "Enforce BaseUserRestriction for DISALLOW_CONFIG_BRIGHTNESS."
     bug: "329205638"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -919,4 +940,21 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "validate_keyboard_shortcut_helper_icon_uri"
+  namespace: "systemui"
+  description: "Adds a check that the caller can access the content URI of an icon in the shortcut helper."
+  bug: "331180422"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "glanceable_hub_gesture_handle"
+  namespace: "systemui"
+  description: "Shows a vertical bar at the right edge to indicate the user can swipe to open the glanceable hub"
+  bug: "339667383"
 }

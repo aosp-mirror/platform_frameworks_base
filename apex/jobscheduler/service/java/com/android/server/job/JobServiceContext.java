@@ -535,29 +535,17 @@ public final class JobServiceContext implements ServiceConnection {
             sEnqueuedJwiAtJobStart.logSampleWithUid(job.getUid(), job.getWorkCount());
             final String sourcePackage = job.getSourcePackageName();
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
-                final String componentPackage = job.getServiceComponent().getPackageName();
-                String traceTag = "*job*<" + job.getSourceUid() + ">" + sourcePackage;
-                if (!sourcePackage.equals(componentPackage)) {
-                    traceTag += ":" + componentPackage;
-                }
-                traceTag += "/" + job.getServiceComponent().getShortClassName();
-                if (!componentPackage.equals(job.serviceProcessName)) {
-                    traceTag += "$" + job.serviceProcessName;
-                }
-                if (job.getNamespace() != null) {
-                    traceTag += "@" + job.getNamespace();
-                }
-                traceTag += "#" + job.getJobId();
-
                 // Use the context's ID to distinguish traces since there'll only be one job
                 // running per context.
-                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
-                        traceTag, getId());
+                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
+                        JobSchedulerService.TRACE_TRACK_NAME, job.computeSystemTraceTag(),
+                        getId());
             }
             if (job.getAppTraceTag() != null) {
                 // Use the job's ID to distinguish traces since the ID will be unique per app.
-                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, "JobScheduler",
-                        job.getAppTraceTag(), job.getJobId());
+                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP,
+                        JobSchedulerService.TRACE_TRACK_NAME, job.getAppTraceTag(),
+                        job.getJobId());
             }
             try {
                 mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
@@ -1605,12 +1593,12 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.getFilteredTraceTag(),
                 completedJob.getFilteredDebugTags());
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
-            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
-                    getId());
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER,
+                    JobSchedulerService.TRACE_TRACK_NAME, getId());
         }
         if (completedJob.getAppTraceTag() != null) {
-            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, "JobScheduler",
-                    completedJob.getJobId());
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP,
+                    JobSchedulerService.TRACE_TRACK_NAME, completedJob.getJobId());
         }
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(), mRunningJob.getSourceUid(),

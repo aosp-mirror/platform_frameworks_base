@@ -85,7 +85,7 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
                         new TracingContext<>(this, instanceIndex);
                 fun.trace(ctx);
 
-                ctx.flush();
+                nativeWritePackets(mNativeObj, ctx.getAndClearAllPendingTracePackets());
             } while (nativePerfettoDsTraceIterateNext(mNativeObj));
         } finally {
             nativePerfettoDsTraceIterateBreak(mNativeObj);
@@ -130,7 +130,8 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
      * @param params Params to initialize the datasource with.
      */
     public void register(DataSourceParams params) {
-        nativeRegisterDataSource(this.mNativeObj, params.bufferExhaustedPolicy);
+        nativeRegisterDataSource(this.mNativeObj, params.bufferExhaustedPolicy,
+                params.willNotifyOnStop, params.noFlush);
     }
 
     /**
@@ -163,8 +164,8 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
         return this.createInstance(inputStream, instanceIndex);
     }
 
-    private static native void nativeRegisterDataSource(
-            long dataSourcePtr, int bufferExhaustedPolicy);
+    private static native void nativeRegisterDataSource(long dataSourcePtr,
+            int bufferExhaustedPolicy, boolean willNotifyOnStop, boolean noFlush);
 
     private static native long nativeCreate(DataSource thiz, String name);
     private static native void nativeFlushAll(long nativeDataSourcePointer);
@@ -179,4 +180,6 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
     private static native boolean nativePerfettoDsTraceIterateNext(long dataSourcePtr);
     private static native void nativePerfettoDsTraceIterateBreak(long dataSourcePtr);
     private static native int nativeGetPerfettoDsInstanceIndex(long dataSourcePtr);
+
+    private static native void nativeWritePackets(long dataSourcePtr, byte[][] packetData);
 }

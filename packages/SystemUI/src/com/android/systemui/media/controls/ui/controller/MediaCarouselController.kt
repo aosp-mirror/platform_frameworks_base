@@ -46,6 +46,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
@@ -73,6 +74,9 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.shared.system.SysUiStatsLog.SMARTSPACE_CARD_REPORTED
 import com.android.systemui.shared.system.SysUiStatsLog.SMART_SPACE_CARD_REPORTED__CARD_TYPE__UNKNOWN_CARD
@@ -142,6 +146,7 @@ constructor(
     private val secureSettings: SecureSettings,
     private val mediaCarouselViewModel: MediaCarouselViewModel,
     private val mediaViewControllerFactory: Provider<MediaViewController>,
+    private val sceneInteractor: SceneInteractor,
 ) : Dumpable {
     /** The current width of the carousel */
     var currentCarouselWidth: Int = 0
@@ -190,6 +195,7 @@ constructor(
     @VisibleForTesting
     lateinit var settingsButton: View
         private set
+
     private val mediaContent: ViewGroup
     @VisibleForTesting var pageIndicator: PageIndicator
     private var needsReordering: Boolean = false
@@ -639,9 +645,13 @@ constructor(
     @VisibleForTesting
     internal fun listenForAnyStateToGoneKeyguardTransition(scope: CoroutineScope): Job {
         return scope.launch {
-            keyguardTransitionInteractor
-                .transition(to = GONE)
-                .filter { it.transitionState == TransitionState.FINISHED }
+            if (SceneContainerFlag.isEnabled) {
+                    sceneInteractor.transitionState.filter { it.isIdle(Scenes.Gone) }
+                } else {
+                    keyguardTransitionInteractor.transition(Edge.create(to = GONE)).filter {
+                        it.transitionState == TransitionState.FINISHED
+                    }
+                }
                 .collect {
                     showMediaCarousel()
                     updateHostVisibility()
@@ -653,7 +663,7 @@ constructor(
     internal fun listenForAnyStateToLockscreenTransition(scope: CoroutineScope): Job {
         return scope.launch {
             keyguardTransitionInteractor
-                .transition(to = LOCKSCREEN)
+                .transition(Edge.create(to = LOCKSCREEN))
                 .filter { it.transitionState == TransitionState.FINISHED }
                 .collect {
                     if (!allowMediaPlayerOnLockScreen) {
@@ -1598,6 +1608,7 @@ internal object MediaPlayerData {
     // Whether should prioritize Smartspace card.
     internal var shouldPrioritizeSs: Boolean = false
         private set
+
     internal var smartspaceMediaData: SmartspaceMediaData? = null
         private set
 

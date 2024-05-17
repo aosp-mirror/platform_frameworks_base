@@ -360,6 +360,7 @@ package com.android.server.display.config {
     method public final java.math.BigInteger getDefaultRefreshRateInHbmHdr();
     method public final java.math.BigInteger getDefaultRefreshRateInHbmSunlight();
     method public final com.android.server.display.config.BlockingZoneConfig getHigherBlockingZoneConfigs();
+    method @Nullable public final com.android.server.display.config.NonNegativeFloatToFloatMap getLowPowerSupportedModes();
     method public final com.android.server.display.config.BlockingZoneConfig getLowerBlockingZoneConfigs();
     method public final com.android.server.display.config.RefreshRateZoneProfiles getRefreshRateZoneProfiles();
     method public final void setDefaultPeakRefreshRate(java.math.BigInteger);
@@ -367,6 +368,7 @@ package com.android.server.display.config {
     method public final void setDefaultRefreshRateInHbmHdr(java.math.BigInteger);
     method public final void setDefaultRefreshRateInHbmSunlight(java.math.BigInteger);
     method public final void setHigherBlockingZoneConfigs(com.android.server.display.config.BlockingZoneConfig);
+    method public final void setLowPowerSupportedModes(@Nullable com.android.server.display.config.NonNegativeFloatToFloatMap);
     method public final void setLowerBlockingZoneConfigs(com.android.server.display.config.BlockingZoneConfig);
     method public final void setRefreshRateZoneProfiles(com.android.server.display.config.RefreshRateZoneProfiles);
   }

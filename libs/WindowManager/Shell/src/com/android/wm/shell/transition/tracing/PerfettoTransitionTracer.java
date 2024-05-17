@@ -49,8 +49,12 @@ public class PerfettoTransitionTracer implements TransitionTracer {
 
     public PerfettoTransitionTracer() {
         Producer.init(InitArguments.DEFAULTS);
-        mDataSource.register(
-                new DataSourceParams(PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_STALL_AND_ABORT));
+        DataSourceParams params =
+                new DataSourceParams.Builder()
+                        .setBufferExhaustedPolicy(
+                                PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_STALL_AND_ABORT)
+                        .build();
+        mDataSource.register(params);
     }
 
     /**
@@ -214,8 +218,6 @@ public class PerfettoTransitionTracer implements TransitionTracer {
 
             }
             os.end(mappingsToken);
-
-            ctx.flush();
         });
     }
 }

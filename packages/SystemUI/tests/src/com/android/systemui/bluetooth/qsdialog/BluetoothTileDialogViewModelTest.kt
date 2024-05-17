@@ -17,6 +17,7 @@
 package com.android.systemui.bluetooth.qsdialog
 
 import android.bluetooth.BluetoothAdapter
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
@@ -63,6 +64,7 @@ import org.mockito.junit.MockitoRule
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
+@EnableFlags(Flags.FLAG_BLUETOOTH_QS_TILE_DIALOG_AUTO_ON_TOGGLE)
 class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
@@ -113,7 +115,6 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_BLUETOOTH_QS_TILE_DIALOG_AUTO_ON_TOGGLE)
         scheduler = TestCoroutineScheduler()
         dispatcher = UnconfinedTestDispatcher(scheduler)
         testScope = TestScope(dispatcher)

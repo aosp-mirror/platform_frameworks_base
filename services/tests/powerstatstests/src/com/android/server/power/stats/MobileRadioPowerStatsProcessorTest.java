@@ -305,7 +305,100 @@ public class MobileRadioPowerStatsProcessorTest {
     }
 
     @Test
-    public void measuredEnergyModel() {
+    public void energyConsumerModel() {
+        PowerComponentAggregatedPowerStats aggregatedStats =
+                prepareAggregatedStats_energyConsumerModel();
+
+        MobileRadioPowerStatsLayout statsLayout =
+                new MobileRadioPowerStatsLayout(
+                        aggregatedStats.getPowerStatsDescriptor());
+
+        // 10_000_000 micro-Coulomb * 1/1000 milli/micro * 1/3600 hour/second = 2.77778 mAh
+        double totalPower = 0;
+        long[] deviceStats = new long[aggregatedStats.getPowerStatsDescriptor().statsArrayLength];
+        aggregatedStats.getDeviceStats(deviceStats, states(POWER_STATE_OTHER, SCREEN_STATE_ON));
+        assertThat(statsLayout.getDevicePowerEstimate(deviceStats))
+                .isWithin(PRECISION).of(0.671837);
+        totalPower += statsLayout.getDevicePowerEstimate(deviceStats);
+        assertThat(statsLayout.getDeviceCallPowerEstimate(deviceStats))
+                .isWithin(PRECISION).of(0.022494);
+        totalPower += statsLayout.getDeviceCallPowerEstimate(deviceStats);
+
+        aggregatedStats.getDeviceStats(deviceStats, states(POWER_STATE_OTHER, SCREEN_STATE_OTHER));
+        assertThat(statsLayout.getDevicePowerEstimate(deviceStats))
+                .isWithin(PRECISION).of(2.01596);
+        totalPower += statsLayout.getDevicePowerEstimate(deviceStats);
+        assertThat(statsLayout.getDeviceCallPowerEstimate(deviceStats))
+                .isWithin(PRECISION).of(0.067484);
+        totalPower += statsLayout.getDeviceCallPowerEstimate(deviceStats);
+
+        // These estimates are supposed to add up to the measured energy, 2.77778 mAh
+        assertThat(totalPower).isWithin(PRECISION).of(2.77778);
+
+        double uidPower1 = 0;
+        long[] uidStats = new long[aggregatedStats.getPowerStatsDescriptor().uidStatsArrayLength];
+        aggregatedStats.getUidStats(uidStats, APP_UID,
+                states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_FOREGROUND));
+        assertThat(statsLayout.getUidPowerEstimate(uidStats))
+                .isWithin(PRECISION).of(0.198236);
+        uidPower1 += statsLayout.getUidPowerEstimate(uidStats);
+
+        aggregatedStats.getUidStats(uidStats, APP_UID,
+                states(POWER_STATE_OTHER, SCREEN_STATE_OTHER, PROCESS_STATE_BACKGROUND));
+        assertThat(statsLayout.getUidPowerEstimate(uidStats))
+                .isWithin(PRECISION).of(0.198236);
+        uidPower1 += statsLayout.getUidPowerEstimate(uidStats);
+
+        aggregatedStats.getUidStats(uidStats, APP_UID,
+                states(POWER_STATE_OTHER, SCREEN_STATE_OTHER, PROCESS_STATE_FOREGROUND_SERVICE));
+        assertThat(statsLayout.getUidPowerEstimate(uidStats))
+                .isWithin(PRECISION).of(0.396473);
+        uidPower1 += statsLayout.getUidPowerEstimate(uidStats);
+
+        double uidPower2 = 0;
+        aggregatedStats.getUidStats(uidStats, APP_UID2,
+                states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_CACHED));
+        assertThat(statsLayout.getUidPowerEstimate(uidStats))
+                .isWithin(PRECISION).of(0.066078);
+        uidPower2 += statsLayout.getUidPowerEstimate(uidStats);
+
+        aggregatedStats.getUidStats(uidStats, APP_UID2,
+                states(POWER_STATE_OTHER, SCREEN_STATE_OTHER, PROCESS_STATE_CACHED));
+        assertThat(statsLayout.getUidPowerEstimate(uidStats))
+                .isWithin(PRECISION).of(0.198236);
+        uidPower2 += statsLayout.getUidPowerEstimate(uidStats);
+
+        // Total power attributed to apps is significantly less than the grand total,
+        // because we only attribute TX/RX to apps but not maintaining a connection with the cell.
+        assertThat(uidPower1 + uidPower2)
+                .isWithin(PRECISION).of(1.057259);
+
+        // 3/4 of total packets were sent by APP_UID so 75% of total RX/TX power is attributed to it
+        assertThat(uidPower1 / (uidPower1 + uidPower2))
+                .isWithin(PRECISION).of(0.75);
+    }
+
+    @Test
+    public void test_toString() {
+        PowerComponentAggregatedPowerStats stats = prepareAggregatedStats_energyConsumerModel();
+        String string = stats.toString();
+        assertThat(string).contains("(pwr-other scr-on)"
+                + " sleep: 500 idle: 750 scan: 1388 call: 50 energy: 2500000 power: 0.672");
+        assertThat(string).contains("(pwr-other scr-other)"
+                + " sleep: 1500 idle: 2250 scan: 4166 call: 150 energy: 7500000 power: 2.02");
+        assertThat(string).contains("(pwr-other scr-on other)"
+                + " rx: 150 tx: [25, 50, 75, 100, 125]");
+        assertThat(string).contains("(pwr-other scr-other other)"
+                + " rx: 450 tx: [75, 150, 225, 300, 375]");
+        assertThat(string).contains("(pwr-other scr-on fg)"
+                + " rx-pkts: 375 rx-B: 2500 tx-pkts: 75 tx-B: 5000 power: 0.198");
+        assertThat(string).contains("(pwr-other scr-other bg)"
+                + " rx-pkts: 375 rx-B: 2500 tx-pkts: 75 tx-B: 5000 power: 0.198");
+        assertThat(string).contains("(pwr-other scr-other fgs)"
+                + " rx-pkts: 750 rx-B: 5000 tx-pkts: 150 tx-B: 10000 power: 0.396");
+    }
+
+    private PowerComponentAggregatedPowerStats prepareAggregatedStats_energyConsumerModel() {
         // PowerStats hardware is available
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.MOBILE_RADIO))
                 .thenReturn(new int[] {MOBILE_RADIO_ENERGY_CONSUMER_ID});
@@ -378,74 +471,7 @@ public class MobileRadioPowerStatsProcessorTest {
         aggregatedStats.addPowerStats(powerStats, 10_000);
 
         processor.finish(aggregatedStats);
-
-        MobileRadioPowerStatsLayout statsLayout =
-                new MobileRadioPowerStatsLayout(
-                        aggregatedStats.getPowerStatsDescriptor());
-
-        // 10_000_000 micro-Coulomb * 1/1000 milli/micro * 1/3600 hour/second = 2.77778 mAh
-        double totalPower = 0;
-        long[] deviceStats = new long[aggregatedStats.getPowerStatsDescriptor().statsArrayLength];
-        aggregatedStats.getDeviceStats(deviceStats, states(POWER_STATE_OTHER, SCREEN_STATE_ON));
-        assertThat(statsLayout.getDevicePowerEstimate(deviceStats))
-                .isWithin(PRECISION).of(0.671837);
-        totalPower += statsLayout.getDevicePowerEstimate(deviceStats);
-        assertThat(statsLayout.getDeviceCallPowerEstimate(deviceStats))
-                .isWithin(PRECISION).of(0.022494);
-        totalPower += statsLayout.getDeviceCallPowerEstimate(deviceStats);
-
-        aggregatedStats.getDeviceStats(deviceStats, states(POWER_STATE_OTHER, SCREEN_STATE_OTHER));
-        assertThat(statsLayout.getDevicePowerEstimate(deviceStats))
-                .isWithin(PRECISION).of(2.01596);
-        totalPower += statsLayout.getDevicePowerEstimate(deviceStats);
-        assertThat(statsLayout.getDeviceCallPowerEstimate(deviceStats))
-                .isWithin(PRECISION).of(0.067484);
-        totalPower += statsLayout.getDeviceCallPowerEstimate(deviceStats);
-
-        // These estimates are supposed to add up to the measured energy, 2.77778 mAh
-        assertThat(totalPower).isWithin(PRECISION).of(2.77778);
-
-        double uidPower1 = 0;
-        long[] uidStats = new long[aggregatedStats.getPowerStatsDescriptor().uidStatsArrayLength];
-        aggregatedStats.getUidStats(uidStats, APP_UID,
-                states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_FOREGROUND));
-        assertThat(statsLayout.getUidPowerEstimate(uidStats))
-                .isWithin(PRECISION).of(0.198236);
-        uidPower1 += statsLayout.getUidPowerEstimate(uidStats);
-
-        aggregatedStats.getUidStats(uidStats, APP_UID,
-                states(POWER_STATE_OTHER, SCREEN_STATE_OTHER, PROCESS_STATE_BACKGROUND));
-        assertThat(statsLayout.getUidPowerEstimate(uidStats))
-                .isWithin(PRECISION).of(0.198236);
-        uidPower1 += statsLayout.getUidPowerEstimate(uidStats);
-
-        aggregatedStats.getUidStats(uidStats, APP_UID,
-                states(POWER_STATE_OTHER, SCREEN_STATE_OTHER, PROCESS_STATE_FOREGROUND_SERVICE));
-        assertThat(statsLayout.getUidPowerEstimate(uidStats))
-                .isWithin(PRECISION).of(0.396473);
-        uidPower1 += statsLayout.getUidPowerEstimate(uidStats);
-
-        double uidPower2 = 0;
-        aggregatedStats.getUidStats(uidStats, APP_UID2,
-                states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_CACHED));
-        assertThat(statsLayout.getUidPowerEstimate(uidStats))
-                .isWithin(PRECISION).of(0.066078);
-        uidPower2 += statsLayout.getUidPowerEstimate(uidStats);
-
-        aggregatedStats.getUidStats(uidStats, APP_UID2,
-                states(POWER_STATE_OTHER, SCREEN_STATE_OTHER, PROCESS_STATE_CACHED));
-        assertThat(statsLayout.getUidPowerEstimate(uidStats))
-                .isWithin(PRECISION).of(0.198236);
-        uidPower2 += statsLayout.getUidPowerEstimate(uidStats);
-
-        // Total power attributed to apps is significantly less than the grand total,
-        // because we only attribute TX/RX to apps but not maintaining a connection with the cell.
-        assertThat(uidPower1 + uidPower2)
-                .isWithin(PRECISION).of(1.057259);
-
-        // 3/4 of total packets were sent by APP_UID so 75% of total RX/TX power is attributed to it
-        assertThat(uidPower1 / (uidPower1 + uidPower2))
-                .isWithin(PRECISION).of(0.75);
+        return aggregatedStats;
     }
 
     private int[] states(int... states) {

@@ -263,7 +263,9 @@ constructor(
     }
 
     fun dismissKeyguard() {
-        scope.launch("$TAG#dismissKeyguard") { startTransitionTo(KeyguardState.GONE) }
+        scope.launch("$TAG#dismissKeyguard") {
+            startTransitionTo(KeyguardState.GONE, ownerReason = "#dismissKeyguard()")
+        }
     }
 
     private fun listenForLockscreenToGone() {

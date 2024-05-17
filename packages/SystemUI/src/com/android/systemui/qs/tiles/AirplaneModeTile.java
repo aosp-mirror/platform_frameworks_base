@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.settingslib.satellite.SatelliteDialogUtils.TYPE_IS_AIRPLANE_MODE;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,9 +34,12 @@ import android.telephony.TelephonyManager;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.telephony.flags.Flags;
+import com.android.settingslib.satellite.SatelliteDialogUtils;
 import com.android.systemui.animation.Expandable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -54,6 +59,8 @@ import com.android.systemui.util.settings.GlobalSettings;
 
 import dagger.Lazy;
 
+import kotlinx.coroutines.Job;
+
 import javax.inject.Inject;
 
 /** Quick settings tile: Airplane mode **/
@@ -66,6 +73,9 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
     private final Lazy<ConnectivityManager> mLazyConnectivityManager;
 
     private boolean mListening;
+    @Nullable
+    @VisibleForTesting
+    Job mClickJob;
 
     @Inject
     public AirplaneModeTile(
@@ -111,6 +121,21 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
                     new Intent(TelephonyManager.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS), 0);
             return;
         }
+
+        if (Flags.oemEnabledSatelliteFlag()) {
+            if (mClickJob != null && !mClickJob.isCompleted()) {
+                return;
+            }
+            mClickJob = SatelliteDialogUtils.mayStartSatelliteWarningDialog(
+                    mContext, this, TYPE_IS_AIRPLANE_MODE, isAllowClick -> {
+                        if (isAllowClick) {
+                            setEnabled(!airplaneModeEnabled);
+                        }
+                        return null;
+                    });
+            return;
+        }
+
         setEnabled(!airplaneModeEnabled);
     }
 

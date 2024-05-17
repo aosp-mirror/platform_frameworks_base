@@ -241,9 +241,6 @@ class AvalancheSuppressor(
     ) {
     val TAG = "AvalancheSuppressor"
 
-    override var reason: String = "avalanche"
-        protected set
-
     enum class State {
         ALLOW_CONVERSATION_AFTER_AVALANCHE,
         ALLOW_HIGH_PRIORITY_CONVERSATION_ANY_TIME,
@@ -257,19 +254,15 @@ class AvalancheSuppressor(
 
     override fun shouldSuppress(entry: NotificationEntry): Boolean {
         if (!isCooldownEnabled()) {
-            reason = "FALSE avalanche cooldown setting DISABLED"
             return false
         }
         val timeSinceAvalancheMs = systemClock.currentTimeMillis() - avalancheProvider.startTime
         val timedOut = timeSinceAvalancheMs >= avalancheProvider.timeoutMs
         if (timedOut) {
-            reason = "FALSE avalanche event TIMED OUT. " +
-                    "${timeSinceAvalancheMs/1000} seconds since last avalanche"
             return false
         }
         val state = calculateState(entry)
         if (state != State.SUPPRESS) {
-            reason = "FALSE avalanche IN ALLOWLIST: $state"
             return false
         }
         return true

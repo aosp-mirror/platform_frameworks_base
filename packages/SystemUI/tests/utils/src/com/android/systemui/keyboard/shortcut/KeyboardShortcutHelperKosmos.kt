@@ -27,6 +27,9 @@ import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.model.sysUiState
+import com.android.systemui.settings.displayTracker
 
 val Kosmos.shortcutHelperRepository by
     Kosmos.Fixture { ShortcutHelperRepository(fakeCommandQueue, broadcastDispatcher) }
@@ -42,7 +45,9 @@ val Kosmos.shortcutHelperTestHelper by
     }
 
 val Kosmos.shortcutHelperInteractor by
-    Kosmos.Fixture { ShortcutHelperInteractor(shortcutHelperRepository) }
+    Kosmos.Fixture {
+        ShortcutHelperInteractor(displayTracker, testScope, sysUiState, shortcutHelperRepository)
+    }
 
 val Kosmos.shortcutHelperViewModel by
     Kosmos.Fixture { ShortcutHelperViewModel(testDispatcher, shortcutHelperInteractor) }

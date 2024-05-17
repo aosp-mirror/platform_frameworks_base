@@ -99,6 +99,7 @@ import static android.service.notification.Flags.FLAG_REDACT_SENSITIVE_NOTIFICAT
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
+import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_LOCKDOWN;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
@@ -15637,5 +15638,83 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         assertThat(mService.checkDisqualifyingFeatures(mUserId, mUid, 0, null, r, false, false))
                 .isTrue();
+    }
+
+    @Test
+    public void testClearUIJFromUninstallingPackage() throws Exception {
+        NotificationRecord r =
+                generateNotificationRecord(mTestNotificationChannel, 0, mUserId, "bar");
+        mService.addNotification(r);
+
+        when(mPackageManagerClient.getPackageUidAsUser(anyString(), anyInt()))
+                .thenThrow(PackageManager.NameNotFoundException.class);
+        when(mPackageManagerInternal.isSameApp(anyString(), anyInt(), anyInt())).thenReturn(false);
+
+        mInternalService.cancelNotification(mPkg, mPkg, mUid, 0, r.getSbn().getTag(),
+                r.getSbn().getId(), mUserId);
+
+        // no exception
+    }
+
+    @Test
+    public void testPostFromMissingPackage_throws() throws Exception {
+        NotificationRecord r =
+                generateNotificationRecord(mTestNotificationChannel, 0, mUserId, "bar");
+
+        when(mPackageManagerClient.getPackageUidAsUser(anyString(), anyInt()))
+                .thenThrow(PackageManager.NameNotFoundException.class);
+        when(mPackageManagerInternal.isSameApp(anyString(), anyInt(), anyInt())).thenReturn(false);
+
+        try {
+            mBinderService.enqueueNotificationWithTag(mPkg, mPkg, r.getSbn().getTag(),
+                    r.getSbn().getId(), r.getSbn().getNotification(),
+                    r.getSbn().getUserId());
+            fail("Allowed to post a notification for an absent package");
+        } catch (SecurityException e) {
+            // yay
+        }
+    }
+
+    @Test
+    public void testGetEffectsSuppressor_noSuppressor() throws Exception {
+        when(mUmInternal.getProfileIds(anyInt(), anyBoolean())).thenReturn(new int[]{mUserId});
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+        when(mPackageManagerInternal.isSameApp(anyString(), anyInt(), anyInt())).thenReturn(true);
+        assertThat(mBinderService.getEffectsSuppressor()).isNull();
+    }
+
+    @Test
+    public void testGetEffectsSuppressor_suppressorSameApp() throws Exception {
+        when(mUmInternal.getProfileIds(anyInt(), anyBoolean())).thenReturn(new int[]{mUserId});
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+        mService.isSystemUid = false;
+        mService.isSystemAppId = false;
+        mBinderService.requestHintsFromListener(mock(INotificationListener.class),
+                HINT_HOST_DISABLE_EFFECTS);
+        when(mPackageManagerInternal.isSameApp(anyString(), anyInt(), anyInt())).thenReturn(true);
+        assertThat(mBinderService.getEffectsSuppressor()).isEqualTo(mListener.component);
+    }
+
+    @Test
+    public void testGetEffectsSuppressor_suppressorDiffApp() throws Exception {
+        when(mUmInternal.getProfileIds(anyInt(), anyBoolean())).thenReturn(new int[]{mUserId});
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+        mService.isSystemUid = false;
+        mService.isSystemAppId = false;
+        mBinderService.requestHintsFromListener(mock(INotificationListener.class),
+                HINT_HOST_DISABLE_EFFECTS);
+        when(mPackageManagerInternal.isSameApp(anyString(), anyInt(), anyInt())).thenReturn(false);
+        assertThat(mBinderService.getEffectsSuppressor()).isEqualTo(null);
+    }
+
+    @Test
+    public void testGetEffectsSuppressor_suppressorDiffAppSystemCaller() throws Exception {
+        when(mUmInternal.getProfileIds(anyInt(), anyBoolean())).thenReturn(new int[]{mUserId});
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+        mService.isSystemUid = true;
+        mBinderService.requestHintsFromListener(mock(INotificationListener.class),
+                HINT_HOST_DISABLE_EFFECTS);
+        when(mPackageManagerInternal.isSameApp(anyString(), anyInt(), anyInt())).thenReturn(false);
+        assertThat(mBinderService.getEffectsSuppressor()).isEqualTo(mListener.component);
     }
 }

@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
@@ -52,20 +53,20 @@ constructor(
     /** Invoke once per transition between FROM->TO states to get access to a shared flow. */
     fun setup(
         duration: Duration,
-        from: KeyguardState?,
-        to: KeyguardState?,
+        edge: Edge,
     ): FlowBuilder {
-        if (from == null && to == null) {
-            throw IllegalArgumentException("from and to are both null")
-        }
-
-        return FlowBuilder(duration, Edge(from, to))
+        return FlowBuilder(duration, edge)
     }
 
     inner class FlowBuilder(
         private val transitionDuration: Duration,
         private val edge: Edge,
     ) {
+        fun setupWithoutSceneContainer(edge: Edge.StateToState): FlowBuilder {
+            if (SceneContainerFlag.isEnabled) return this
+            return setup(this.transitionDuration, edge)
+        }
+
         /**
          * Transitions will occur over a [transitionDuration] with [TransitionStep]s being emitted
          * in the range of [0, 1]. View animations should begin and end within a subset of this
@@ -117,7 +118,7 @@ constructor(
             if (!duration.isPositive()) {
                 throw IllegalArgumentException("duration must be a positive number: $duration")
             }
-            if ((startTime + duration).compareTo(transitionDuration) > 0) {
+            if ((startTime + duration) > transitionDuration) {
                 throw IllegalArgumentException(
                     "startTime($startTime) + duration($duration) must be" +
                         " <= transitionDuration($transitionDuration)"
@@ -153,7 +154,7 @@ constructor(
             }
 
             return transitionInteractor
-                .getOrCreateFlow(edge)
+                .transition(edge)
                 .map { step ->
                     StateToValue(
                             from = step.from,

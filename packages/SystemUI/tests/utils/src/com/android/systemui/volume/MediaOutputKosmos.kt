@@ -18,8 +18,6 @@ package com.android.systemui.volume
 
 import android.content.packageManager
 import android.content.pm.ApplicationInfo
-import android.os.Handler
-import android.os.looper
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.mediaOutputDialogManager
@@ -32,6 +30,7 @@ import com.android.systemui.volume.panel.component.mediaoutput.data.repository.F
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaDeviceSessionInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputActionsInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
+import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.mediaControllerInteractor
 
 val Kosmos.localMediaRepository by Kosmos.Fixture { FakeLocalMediaRepository() }
 val Kosmos.localMediaRepositoryFactory by
@@ -53,7 +52,7 @@ val Kosmos.mediaOutputInteractor by
             testScope.backgroundScope,
             testScope.testScheduler,
             mediaControllerRepository,
-            Handler(looper),
+            mediaControllerInteractor,
         )
     }
 
@@ -61,7 +60,7 @@ val Kosmos.mediaDeviceSessionInteractor by
     Kosmos.Fixture {
         MediaDeviceSessionInteractor(
             testScope.testScheduler,
-            Handler(looper),
+            mediaControllerInteractor,
             mediaControllerRepository,
         )
     }

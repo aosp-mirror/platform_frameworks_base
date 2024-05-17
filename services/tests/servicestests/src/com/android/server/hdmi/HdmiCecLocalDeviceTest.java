@@ -37,7 +37,9 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.tv.cec.V1_0.Result;
@@ -168,6 +170,11 @@ public class HdmiCecLocalDeviceTest {
                     @Override
                     void wakeUp() {
                         mWakeupMessageReceived = true;
+                    }
+
+                    @Override
+                    protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                        // do nothing
                     }
                 };
         mHdmiControlService.setIoLooper(mTestLooper.getLooper());

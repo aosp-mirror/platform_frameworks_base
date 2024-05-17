@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.keyguard.data.repository.keyguardClockRepository
@@ -56,7 +57,7 @@ import platform.test.runner.parameterized.Parameters
 class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
-    val underTest = kosmos.keyguardClockViewModel
+    val underTest by lazy { kosmos.keyguardClockViewModel }
     val res = context.resources
 
     @Mock lateinit var clockController: ClockController
@@ -96,6 +97,7 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun currentClockLayout_splitShadeOn_clockNotCentered_largeClock_splitShadeLargeClock() =
         testScope.runTest {
             val currentClockLayout by collectLastValue(underTest.currentClockLayout)
@@ -110,6 +112,7 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun currentClockLayout_splitShadeOn_clockNotCentered_smallClock_splitShadeSmallClock() =
         testScope.runTest {
             val currentClockLayout by collectLastValue(underTest.currentClockLayout)
@@ -124,6 +127,7 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun currentClockLayout_singleShade_smallClock_smallClock() =
         testScope.runTest {
             val currentClockLayout by collectLastValue(underTest.currentClockLayout)
@@ -193,6 +197,7 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun testClockSize_dynamicClockSize() =
         testScope.runTest {
             with(kosmos) {
@@ -216,6 +221,7 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun isLargeClockVisible_whenSmallClockSize_isFalse() =
         testScope.runTest {
             val value by collectLastValue(underTest.isLargeClockVisible)

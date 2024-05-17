@@ -256,8 +256,10 @@ class DividerPresenter implements View.OnTouchListener {
     static Color getContainerBackgroundColor(
             @NonNull TaskFragmentContainer container, @NonNull Color defaultColor) {
         final Activity activity = container.getTopNonFinishingActivity();
-        if (activity == null || !activity.isResumed()) {
-            // This can happen when the top activity in the container is from a different process.
+        if (activity == null) {
+            // This can happen when the activities in the container are from a different process.
+            // TODO(b/340984203) Report whether the top activity is in the same process. Use default
+            // color if not.
             return defaultColor;
         }
 
@@ -515,8 +517,11 @@ class DividerPresenter implements View.OnTouchListener {
     private void onStartDragging() {
         mRenderer.mIsDragging = true;
         mRenderer.mDragHandle.setPressed(mRenderer.mIsDragging);
+        mRenderer.updateSurface();
+
+        // Veil visibility change should be applied together with the surface boost transaction in
+        // the wct.
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        mRenderer.updateSurface(t);
         mRenderer.showVeils(t);
 
         // Callbacks must be executed on the executor to release mLock and prevent deadlocks.
@@ -532,18 +537,18 @@ class DividerPresenter implements View.OnTouchListener {
 
     @GuardedBy("mLock")
     private void onDrag() {
-        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        mRenderer.updateSurface(t);
-        t.apply();
+        mRenderer.updateSurface();
     }
 
     @GuardedBy("mLock")
     private void onFinishDragging() {
         mDividerPosition = adjustDividerPositionForSnapPoints(mDividerPosition);
         mRenderer.setDividerPosition(mDividerPosition);
+        mRenderer.updateSurface();
 
+        // Veil visibility change should be applied together with the surface boost transaction in
+        // the wct.
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        mRenderer.updateSurface(t);
         mRenderer.hideVeils(t);
 
         // Callbacks must be executed on the executor to release mLock and prevent deadlocks.
@@ -994,6 +999,22 @@ class DividerPresenter implements View.OnTouchListener {
          * Updates the positions and crops of the divider surface and veil surfaces. This method
          * should be called when {@link #mProperties} is changed or while dragging to update the
          * position of the divider surface and the veil surfaces.
+         *
+         * This method applies the changes in a stand-alone surface transaction immediately.
+         */
+        private void updateSurface() {
+            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            updateSurface(t);
+            t.apply();
+        }
+
+        /**
+         * Updates the positions and crops of the divider surface and veil surfaces. This method
+         * should be called when {@link #mProperties} is changed or while dragging to update the
+         * position of the divider surface and the veil surfaces.
+         *
+         * This method applies the changes in the provided surface transaction and can be synced
+         * with other changes.
          */
         private void updateSurface(@NonNull SurfaceControl.Transaction t) {
             final Rect taskBounds = mProperties.mConfiguration.windowConfiguration.getBounds();

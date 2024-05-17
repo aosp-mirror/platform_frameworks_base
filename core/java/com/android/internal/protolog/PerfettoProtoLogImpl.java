@@ -131,8 +131,13 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             Runnable cacheUpdater
     ) {
         Producer.init(InitArguments.DEFAULTS);
-        mDataSource.register(new DataSourceParams(
-                DataSourceParams.PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_STALL_AND_ABORT));
+        DataSourceParams params =
+                new DataSourceParams.Builder()
+                        .setBufferExhaustedPolicy(
+                                DataSourceParams
+                                        .PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_STALL_AND_ABORT)
+                        .build();
+        mDataSource.register(params);
         this.mViewerConfigInputStreamProvider = viewerConfigInputStreamProvider;
         this.mViewerConfigReader = viewerConfigReader;
         this.mLogGroups = logGroups;
@@ -186,8 +191,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 }
 
                 os.end(outProtologViewerConfigToken);
-
-                ctx.flush();
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Failed to read ProtoLog viewer config to dump on tracing end", e);
             }

@@ -350,8 +350,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // Resets the isolated navigation and updates the container.
             final TransactionRecord transactionRecord = mTransactionManager.startNewTransaction();
             final WindowContainerTransaction wct = transactionRecord.getTransaction();
-            mPresenter.setTaskFragmentIsolatedNavigation(wct, containerToUnpin,
-                    false /* isolated */);
+            mPresenter.setTaskFragmentPinned(wct, containerToUnpin, false /* pinned */);
             updateContainer(wct, containerToUnpin);
             transactionRecord.apply(false /* shouldApplyIndependently */);
             updateCallbackIfNecessary();
@@ -1078,8 +1077,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return true;
         }
 
-        // Skip resolving if the activity is on an isolated navigated TaskFragmentContainer.
-        if (container != null && container.isIsolatedNavigationEnabled()) {
+        if (container != null && container.shouldSkipActivityResolving()) {
             return true;
         }
 
@@ -1535,8 +1533,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             final TaskFragmentContainer taskFragmentContainer = getContainerWithActivity(
                     launchingActivity);
             if (taskFragmentContainer != null
-                    && taskFragmentContainer.isIsolatedNavigationEnabled()) {
-                // Skip resolving if started from an isolated navigated TaskFragmentContainer.
+                    && taskFragmentContainer.shouldSkipActivityResolving()) {
                 return null;
             }
             if (isAssociatedWithOverlay(launchingActivity)) {

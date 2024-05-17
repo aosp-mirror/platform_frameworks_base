@@ -33,6 +33,7 @@ import android.graphics.Bitmap;
 import android.os.BadParcelableException;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -81,16 +82,16 @@ public class BundleUtil {
             if (canMarshall(obj) || obj instanceof CursorWindow) {
                 continue;
             }
-
-            if (obj instanceof ParcelFileDescriptor) {
+            if (obj instanceof Bundle) {
+              sanitizeInferenceParams((Bundle) obj);
+            } else if (obj instanceof ParcelFileDescriptor) {
                 validatePfdReadOnly((ParcelFileDescriptor) obj);
             } else if (obj instanceof SharedMemory) {
                 ((SharedMemory) obj).setProtect(PROT_READ);
             } else if (obj instanceof Bitmap) {
-                if (((Bitmap) obj).isMutable()) {
-                    throw new BadParcelableException(
-                            "Encountered a mutable Bitmap in the Bundle at key : " + key);
-                }
+                validateBitmap((Bitmap) obj);
+            } else if (obj instanceof Parcelable[]) {
+                validateParcelableArray((Parcelable[]) obj);
             } else {
                 throw new BadParcelableException(
                         "Unsupported Parcelable type encountered in the Bundle: "
@@ -128,20 +129,20 @@ public class BundleUtil {
                 continue;
             }
 
-            if (obj instanceof ParcelFileDescriptor) {
+            if (obj instanceof Bundle) {
+                sanitizeResponseParams((Bundle) obj);
+            } else if (obj instanceof ParcelFileDescriptor) {
                 validatePfdReadOnly((ParcelFileDescriptor) obj);
             } else if (obj instanceof Bitmap) {
-                if (((Bitmap) obj).isMutable()) {
-                    throw new BadParcelableException(
-                            "Encountered a mutable Bitmap in the Bundle at key : " + key);
-                }
+                validateBitmap((Bitmap) obj);
+            } else if (obj instanceof Parcelable[]) {
+                validateParcelableArray((Parcelable[]) obj);
             } else {
                 throw new BadParcelableException(
                         "Unsupported Parcelable type encountered in the Bundle: "
                                 + obj.getClass().getSimpleName());
             }
         }
-        Log.e(TAG, "validateResponseParams : Finished");
     }
 
     /**
@@ -322,6 +323,26 @@ public class BundleUtil {
         }
     }
 
+    private static void validateParcelableArray(Parcelable[] parcelables) {
+        if (parcelables.length > 0
+                && parcelables[0] instanceof ParcelFileDescriptor) {
+            // Safe to cast
+            validatePfdsReadOnly(parcelables);
+        } else if (parcelables.length > 0
+                && parcelables[0] instanceof Bitmap) {
+            validateBitmapsImmutable(parcelables);
+        } else {
+            throw new BadParcelableException(
+                    "Could not cast to any known parcelable array");
+        }
+    }
+
+    public static void validatePfdsReadOnly(Parcelable[] pfds) {
+        for (Parcelable pfd : pfds) {
+            validatePfdReadOnly((ParcelFileDescriptor) pfd);
+        }
+    }
+
     public static void validatePfdReadOnly(ParcelFileDescriptor pfd) {
         if (pfd == null) {
             return;
@@ -335,6 +356,19 @@ public class BundleUtil {
         } catch (ErrnoException e) {
             throw new BadParcelableException(
                     "Invalid File descriptor passed in the Bundle.", e);
+        }
+    }
+
+    private static void validateBitmap(Bitmap obj) {
+        if (obj.isMutable()) {
+            throw new BadParcelableException(
+                    "Encountered a mutable Bitmap in the Bundle at key : " + obj);
+        }
+    }
+
+    private static void validateBitmapsImmutable(Parcelable[] bitmaps) {
+        for (Parcelable bitmap : bitmaps) {
+            validateBitmap((Bitmap) bitmap);
         }
     }
 

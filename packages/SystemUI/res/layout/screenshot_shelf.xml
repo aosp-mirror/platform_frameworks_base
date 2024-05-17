@@ -135,11 +135,12 @@
             android:id="@+id/screenshot_scrollable_preview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clipToOutline="true"
             android:scaleType="matrix"
             android:visibility="gone"
             app:layout_constraintStart_toStartOf="@id/screenshot_preview"
             app:layout_constraintTop_toTopOf="@id/screenshot_preview"
-            android:elevation="7dp"/>
+            android:elevation="3dp"/>
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
@@ -169,6 +170,13 @@
             <include layout="@layout/screenshot_detection_notice" />
         </FrameLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
+    <ImageView
+        android:id="@+id/screenshot_scrolling_scrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:clickable="true"
+        android:importantForAccessibility="no"/>
     <ImageView
         android:id="@+id/screenshot_flash"
         android:layout_width="match_parent"

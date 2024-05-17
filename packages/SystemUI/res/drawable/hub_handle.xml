@@ -1,5 +1,5 @@
-<!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2024 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,6 +15,6 @@
   -->
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="?android:attr/colorAccent" />
-    <corners android:radius="@dimen/ongoing_call_chip_corner_radius" />
+    <corners android:radius="4dp" />
+    <solid android:color="#FFFFFF" />
 </shape>

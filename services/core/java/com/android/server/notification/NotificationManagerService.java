@@ -5832,7 +5832,16 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public ComponentName getEffectsSuppressor() {
-            return !mEffectsSuppressors.isEmpty() ? mEffectsSuppressors.get(0) : null;
+            ComponentName suppressor = !mEffectsSuppressors.isEmpty()
+                    ? mEffectsSuppressors.get(0)
+                    : null;
+            if (isCallerSystemOrSystemUiOrShell() || suppressor == null
+                    || mPackageManagerInternal.isSameApp(suppressor.getPackageName(),
+                    Binder.getCallingUid(), UserHandle.getUserId(Binder.getCallingUid()))) {
+                return suppressor;
+            }
+
+            return null;
         }
 
         @Override
@@ -7225,7 +7234,15 @@ public class NotificationManagerService extends SystemService {
                 callingUid, userId, true, false, "cancelNotificationWithTag", pkg);
 
         // ensure opPkg is delegate if does not match pkg
-        int uid = resolveNotificationUid(opPkg, pkg, callingUid, userId);
+
+        int uid = INVALID_UID;
+
+        try {
+            uid = resolveNotificationUid(opPkg, pkg, callingUid, userId);
+        } catch (NameNotFoundException e) {
+            // package either never existed so there's no posted notification or it's being
+            // uninstalled so we'll be cleaning it up soon. log and return immediately below.
+        }
 
         if (uid == INVALID_UID) {
             Slog.w(TAG, opPkg + ":" + callingUid + " trying to cancel notification "
@@ -7319,7 +7336,13 @@ public class NotificationManagerService extends SystemService {
 
         // Can throw a SecurityException if the calling uid doesn't have permission to post
         // as "pkg"
-        final int notificationUid = resolveNotificationUid(opPkg, pkg, callingUid, userId);
+        int notificationUid = INVALID_UID;
+
+        try {
+            notificationUid = resolveNotificationUid(opPkg, pkg, callingUid, userId);
+        } catch (NameNotFoundException e) {
+            // not great -  throw immediately below
+        }
 
         if (notificationUid == INVALID_UID) {
             throw new SecurityException("Caller " + opPkg + ":" + callingUid
@@ -7876,7 +7899,8 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    int resolveNotificationUid(String callingPkg, String targetPkg, int callingUid, int userId) {
+    int resolveNotificationUid(String callingPkg, String targetPkg, int callingUid, int userId)
+            throws NameNotFoundException {
         if (userId == USER_ALL) {
             userId = USER_SYSTEM;
         }
@@ -7887,12 +7911,8 @@ public class NotificationManagerService extends SystemService {
             return callingUid;
         }
 
-        int targetUid = INVALID_UID;
-        try {
-            targetUid = mPackageManagerClient.getPackageUidAsUser(targetPkg, userId);
-        } catch (NameNotFoundException e) {
-            /* ignore, handled by caller */
-        }
+        int targetUid = mPackageManagerClient.getPackageUidAsUser(targetPkg, userId);
+
         // posted from app A on behalf of app B
         if (isCallerAndroid(callingPkg, callingUid)
                 || mPreferencesHelper.isDelegateAllowed(

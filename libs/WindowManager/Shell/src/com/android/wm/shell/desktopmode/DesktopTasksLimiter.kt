@@ -25,6 +25,7 @@ import android.window.WindowContainerTransaction
 import androidx.annotation.VisibleForTesting
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup
+import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TransitionObserver
 import com.android.wm.shell.util.KtProtoLog

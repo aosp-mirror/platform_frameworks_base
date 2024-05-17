@@ -26,10 +26,17 @@ import kotlinx.coroutines.flow.asStateFlow
 
 interface GridLayoutTypeRepository {
     val layout: StateFlow<GridLayoutType>
+    fun setLayout(type: GridLayoutType)
 }
 
 @SysUISingleton
 class GridLayoutTypeRepositoryImpl @Inject constructor() : GridLayoutTypeRepository {
     private val _layout: MutableStateFlow<GridLayoutType> = MutableStateFlow(InfiniteGridLayoutType)
     override val layout = _layout.asStateFlow()
+
+    override fun setLayout(type: GridLayoutType) {
+        if (_layout.value != type) {
+            _layout.value = type
+        }
+    }
 }

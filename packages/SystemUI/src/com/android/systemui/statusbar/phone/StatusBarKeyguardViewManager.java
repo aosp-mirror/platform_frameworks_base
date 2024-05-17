@@ -1549,7 +1549,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
 
         if (KeyguardWmStateRefactor.isEnabled()) {
-            mKeyguardTransitionInteractor.startDismissKeyguardTransition();
+            mKeyguardTransitionInteractor.startDismissKeyguardTransition(
+                    "SBKVM#keyguardAuthenticated");
         }
     }
 

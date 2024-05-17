@@ -41,7 +41,9 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -184,17 +186,8 @@ public class HdmiCecLocalDeviceTvTest {
                         return mEarcBlocksArc;
                     }
 
-                    /**
-                     * Override displayOsd to prevent it from broadcasting an intent, which
-                     * can trigger a SecurityException.
-                    */
                     @Override
-                    void displayOsd(int messageId) {
-                        // do nothing
-                    }
-
-                    @Override
-                    void displayOsd(int messageId, int extra) {
+                    protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
                         // do nothing
                     }
                 };

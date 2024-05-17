@@ -2,16 +2,24 @@ package com.android.systemui.communal.ui.compose
 
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
@@ -26,6 +34,7 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
+import com.android.systemui.Flags
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
@@ -88,6 +97,8 @@ fun CommunalContainer(
     val currentSceneKey: SceneKey by
         viewModel.currentScene.collectAsStateWithLifecycle(CommunalScenes.Blank)
     val touchesAllowed by viewModel.touchesAllowed.collectAsStateWithLifecycle(initialValue = false)
+    val showGestureIndicator by
+        viewModel.showGestureIndicator.collectAsStateWithLifecycle(initialValue = false)
     val state: MutableSceneTransitionLayoutState = remember {
         MutableSceneTransitionLayoutState(
             initialScene = currentSceneKey,
@@ -126,7 +137,19 @@ fun CommunalContainer(
                 )
         ) {
             // This scene shows nothing only allowing for transitions to the communal scene.
-            Box(modifier = Modifier.fillMaxSize())
+            // TODO(b/339667383): remove this temporary swipe gesture handle
+            Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.End) {
+                if (showGestureIndicator && Flags.glanceableHubGestureHandle()) {
+                    Box(
+                        modifier =
+                            Modifier.height(220.dp)
+                                .width(4.dp)
+                                .align(Alignment.CenterVertically)
+                                .background(color = Color.White, RoundedCornerShape(4.dp))
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                }
+            }
         }
 
         scene(

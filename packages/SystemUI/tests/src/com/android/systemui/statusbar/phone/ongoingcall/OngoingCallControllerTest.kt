@@ -106,7 +106,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
     fun setUp() {
         allowTestableLooperAsMainThread()
         TestableLooper.get(this).runWithLooper {
-            chipView = LayoutInflater.from(mContext).inflate(R.layout.ongoing_call_chip, null)
+            chipView = LayoutInflater.from(mContext).inflate(R.layout.ongoing_activity_chip, null)
         }
 
         MockitoAnnotations.initMocks(this)
@@ -206,7 +206,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
 
-        assertThat(chipView.findViewById<View>(R.id.ongoing_call_chip_time)?.measuredWidth)
+        assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_time)?.measuredWidth)
                 .isEqualTo(0)
     }
 
@@ -222,7 +222,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
 
-        assertThat(chipView.findViewById<View>(R.id.ongoing_call_chip_time)?.measuredWidth)
+        assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_time)?.measuredWidth)
                 .isGreaterThan(0)
     }
 
@@ -237,7 +237,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
 
-        assertThat(chipView.findViewById<View>(R.id.ongoing_call_chip_time)?.measuredWidth)
+        assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_time)?.measuredWidth)
                 .isGreaterThan(0)
     }
 
@@ -472,7 +472,10 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
         lateinit var newChipView: View
         TestableLooper.get(this).runWithLooper {
-            newChipView = LayoutInflater.from(mContext).inflate(R.layout.ongoing_call_chip, null)
+            newChipView = LayoutInflater.from(mContext).inflate(
+                    R.layout.ongoing_activity_chip,
+                    null
+            )
         }
 
         // Change the chip view associated with the controller.

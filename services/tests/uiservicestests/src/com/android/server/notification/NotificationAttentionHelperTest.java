@@ -67,6 +67,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
@@ -93,6 +94,7 @@ import android.view.accessibility.IAccessibilityManagerClient;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.R;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags;
 import com.android.internal.config.sysui.TestableFlagResolver;
 import com.android.internal.logging.InstanceIdSequence;
@@ -210,6 +212,16 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         verify(mAccessibilityService).addClient(any(IAccessibilityManagerClient.class), anyInt());
         assertTrue(mAccessibilityManager.isEnabled());
 
+        // Enable LED pulse setting by default
+        Settings.System.putInt(getContext().getContentResolver(),
+                Settings.System.NOTIFICATION_LIGHT_PULSE, 1);
+
+        Resources resources = spy(getContext().getResources());
+        when(resources.getBoolean(R.bool.config_useAttentionLight)).thenReturn(true);
+        when(resources.getBoolean(
+                com.android.internal.R.bool.config_intrusiveNotificationLed)).thenReturn(true);
+        when(getContext().getResources()).thenReturn(resources);
+
         // TODO (b/291907312): remove feature flag
         // Disable feature flags by default. Tests should enable as needed.
         mSetFlagsRule.disableFlags(Flags.FLAG_POLITE_NOTIFICATIONS,
@@ -239,7 +251,6 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         mAttentionHelper.setKeyguardManager(mKeyguardManager);
         mAttentionHelper.setScreenOn(false);
         mAttentionHelper.setInCallStateOffHook(false);
-        mAttentionHelper.mNotificationPulseEnabled = true;
 
         if (Flags.crossAppPoliteNotifications()) {
             // Capture BroadcastReceiver for avalanche triggers
@@ -609,6 +620,14 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
 
     private void verifyLights() {
         verify(mLight, times(1)).setFlashing(anyInt(), anyInt(), anyInt(), anyInt());
+    }
+
+    private void verifyAttentionLights() {
+        verify(mLight, times(1)).pulse();
+    }
+
+    private void verifyNeverAttentionLights() {
+        verify(mLight, never()).pulse();
     }
 
     //
@@ -1524,11 +1543,52 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testLightsLightsOffGlobally() {
-        mAttentionHelper.mNotificationPulseEnabled = false;
+        Settings.System.putInt(getContext().getContentResolver(),
+                Settings.System.NOTIFICATION_LIGHT_PULSE, 0);
+        initAttentionHelper(mTestFlagResolver);
+
         NotificationRecord r = getLightsNotification();
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
         verifyNeverLights();
         assertFalse(r.isInterruptive());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testLightsLightsResConfigDisabled() {
+        Resources resources = spy(getContext().getResources());
+        when(resources.getBoolean(
+                com.android.internal.R.bool.config_intrusiveNotificationLed)).thenReturn(false);
+        when(getContext().getResources()).thenReturn(resources);
+        initAttentionHelper(mTestFlagResolver);
+
+        NotificationRecord r = getLightsNotification();
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        verifyNeverLights();
+        assertFalse(r.isInterruptive());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testLightsUseAttentionLight() {
+        NotificationRecord r = getLightsNotification();
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        verifyAttentionLights();
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testLightsUseAttentionLightDisabled() {
+        Resources resources = spy(getContext().getResources());
+        when(resources.getBoolean(R.bool.config_useAttentionLight)).thenReturn(false);
+        when(resources.getBoolean(
+                com.android.internal.R.bool.config_intrusiveNotificationLed)).thenReturn(true);
+        when(getContext().getResources()).thenReturn(resources);
+        initAttentionHelper(mTestFlagResolver);
+
+        NotificationRecord r = getLightsNotification();
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        verifyNeverAttentionLights();
         assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 

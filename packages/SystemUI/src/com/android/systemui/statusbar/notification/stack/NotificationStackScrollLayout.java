@@ -674,7 +674,7 @@ public class NotificationStackScrollLayout
     void setOverExpansion(float margin) {
         mAmbientState.setOverExpansion(margin);
         if (notificationOverExpansionClippingFix() && !SceneContainerFlag.isEnabled()) {
-            setRoundingClippingYTranslation((int) margin);
+            setRoundingClippingYTranslation(mShouldUseSplitNotificationShade ? (int) margin : 0);
         }
         updateStackPosition();
         requestChildrenUpdate();

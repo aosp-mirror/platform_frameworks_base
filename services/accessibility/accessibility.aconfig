@@ -152,6 +152,16 @@ flag {
 }
 
 flag {
+    name: "remove_on_window_infos_changed_handler"
+    namespace: "accessibility"
+    description: "Updates onWindowInfosChanged() to run without posting to a handler."
+    bug: "333834990"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "reset_hover_event_timer_on_action_up"
     namespace: "accessibility"
     description: "Reset the timer for sending hover events on receiving ACTION_UP to guarantee the correct amount of time is available between taps."
@@ -182,4 +192,11 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "enable_color_correction_saturation"
+    namespace: "accessibility"
+    description: "Feature allows users to change color correction saturation for daltonizer."
+    bug: "322829049"
 }

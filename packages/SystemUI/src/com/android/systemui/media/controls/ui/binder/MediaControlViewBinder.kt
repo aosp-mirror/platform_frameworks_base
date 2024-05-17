@@ -260,44 +260,50 @@ object MediaControlViewBinder {
             }
 
             SEMANTIC_ACTIONS_ALL.forEachIndexed { index, id ->
-                val button = viewHolder.getAction(id)
-                val actionViewModel = viewModel.actionButtons[index]
-                if (button.id == R.id.actionPrev) {
-                    actionViewModel?.let {
-                        viewController.setUpPrevButtonInfo(true, it.notVisibleValue)
-                    }
-                } else if (button.id == R.id.actionNext) {
-                    actionViewModel?.let {
-                        viewController.setUpNextButtonInfo(true, it.notVisibleValue)
-                    }
+                val buttonView = viewHolder.getAction(id)
+                val buttonModel = viewModel.actionButtons[index]
+                if (buttonView.id == R.id.actionPrev) {
+                    viewController.setUpPrevButtonInfo(
+                        buttonModel.isEnabled,
+                        buttonModel.notVisibleValue
+                    )
+                } else if (buttonView.id == R.id.actionNext) {
+                    viewController.setUpNextButtonInfo(
+                        buttonModel.isEnabled,
+                        buttonModel.notVisibleValue
+                    )
                 }
-                actionViewModel?.let { action ->
-                    val animHandler = (button.tag ?: AnimationBindHandler()) as AnimationBindHandler
-                    animHandler.tryExecute {
-                        if (animHandler.updateRebindId(action.rebindId)) {
+                val animHandler = (buttonView.tag ?: AnimationBindHandler()) as AnimationBindHandler
+                animHandler.tryExecute {
+                    if (buttonModel.isEnabled) {
+                        if (animHandler.updateRebindId(buttonModel.rebindId)) {
                             animHandler.unregisterAll()
-                            animHandler.tryRegister(action.icon)
-                            animHandler.tryRegister(action.background)
+                            animHandler.tryRegister(buttonModel.icon)
+                            animHandler.tryRegister(buttonModel.background)
                             bindButtonCommon(
-                                button,
+                                buttonView,
                                 viewHolder.multiRippleView,
-                                action,
+                                buttonModel,
                                 viewController,
                                 falsingManager,
                             )
                         }
-                        val visible = action.isVisibleWhenScrubbing || !viewController.isScrubbing
-                        setSemanticButtonVisibleAndAlpha(
-                            viewHolder.getAction(id),
-                            viewController.expandedLayout,
-                            viewController.collapsedLayout,
-                            visible,
-                            action.notVisibleValue,
-                            action.showInCollapsed
-                        )
+                    } else {
+                        animHandler.unregisterAll()
+                        clearButton(buttonView)
                     }
+                    val visible =
+                        buttonModel.isEnabled &&
+                            (buttonModel.isVisibleWhenScrubbing || !viewController.isScrubbing)
+                    setSemanticButtonVisibleAndAlpha(
+                        viewHolder.getAction(id),
+                        viewController.expandedLayout,
+                        viewController.collapsedLayout,
+                        visible,
+                        buttonModel.notVisibleValue,
+                        buttonModel.showInCollapsed
+                    )
                 }
-                    ?: clearButton(button)
             }
         } else {
             // Hide buttons that only appear for semantic actions
@@ -309,22 +315,16 @@ object MediaControlViewBinder {
             // Set all generic buttons
             genericButtons.forEachIndexed { index, button ->
                 if (index < viewModel.actionButtons.size) {
-                    viewModel.actionButtons[index]?.let { action ->
-                        bindButtonCommon(
-                            button,
-                            viewHolder.multiRippleView,
-                            action,
-                            viewController,
-                            falsingManager,
-                        )
-                        setVisibleAndAlpha(expandedSet, button.id, visible = true)
-                        setVisibleAndAlpha(
-                            collapsedSet,
-                            button.id,
-                            visible = action.showInCollapsed
-                        )
-                    }
-                        ?: clearButton(button)
+                    val action = viewModel.actionButtons[index]
+                    bindButtonCommon(
+                        button,
+                        viewHolder.multiRippleView,
+                        action,
+                        viewController,
+                        falsingManager,
+                    )
+                    setVisibleAndAlpha(expandedSet, button.id, visible = true)
+                    setVisibleAndAlpha(collapsedSet, button.id, visible = action.showInCollapsed)
                 } else {
                     // Hide any unused buttons
                     clearButton(button)

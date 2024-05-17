@@ -35,6 +35,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
@@ -46,30 +47,32 @@ class DozeServiceHostCoroutinesTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
-    private val sceneContainerRepository = kosmos.sceneContainerRepository
-    private val keyguardInteractor = kosmos.keyguardInteractor
+    lateinit var underTest: DozeServiceHost
 
-    val underTest =
-        kosmos.dozeServiceHost.apply {
-            initialize(
-                /* centralSurfaces = */ mock(),
-                /* statusBarKeyguardViewManager = */ mock(),
-                /* notificationShadeWindowViewController = */ mock(),
-                /* ambientIndicationContainer = */ mock(),
-            )
-        }
+    @Before
+    fun setup() {
+        underTest =
+            kosmos.dozeServiceHost.apply {
+                initialize(
+                    /* centralSurfaces = */ mock(),
+                    /* statusBarKeyguardViewManager = */ mock(),
+                    /* notificationShadeWindowViewController = */ mock(),
+                    /* ambientIndicationContainer = */ mock(),
+                )
+            }
+    }
 
     @Test
     @EnableSceneContainer
     fun startStopDozing() =
         testScope.runTest {
-            val isDozing by collectLastValue(keyguardInteractor.isDozing)
+            val isDozing by collectLastValue(kosmos.keyguardInteractor.isDozing)
 
             // GIVEN a callback is set
             val callback: DozeHost.Callback = mock()
             underTest.addCallback(callback)
             // AND we are on the lock screen
-            sceneContainerRepository.changeScene(Scenes.Lockscreen)
+            kosmos.sceneContainerRepository.changeScene(Scenes.Lockscreen)
             // AND dozing is not requested yet
             assertThat(underTest.dozingRequested).isFalse()
 

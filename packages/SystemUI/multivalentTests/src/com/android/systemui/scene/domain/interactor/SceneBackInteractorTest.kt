@@ -45,11 +45,11 @@ class SceneBackInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val sceneInteractor = kosmos.sceneInteractor
-    private val sceneContainerStartable = kosmos.sceneContainerStartable
-    private val authenticationInteractor = kosmos.authenticationInteractor
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val sceneContainerStartable by lazy { kosmos.sceneContainerStartable }
+    private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
 
-    private val underTest = kosmos.sceneBackInteractor
+    private val underTest by lazy { kosmos.sceneBackInteractor }
 
     @Test
     @EnableSceneContainer

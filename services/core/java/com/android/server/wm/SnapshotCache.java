@@ -92,6 +92,7 @@ abstract class SnapshotCache<TYPE extends WindowContainer> {
             if (entry != null) {
                 mAppIdMap.remove(entry.topApp);
                 mRunningCache.remove(id);
+                entry.snapshot.removeReference(TaskSnapshot.REFERENCE_CACHE);
             }
         }
     }

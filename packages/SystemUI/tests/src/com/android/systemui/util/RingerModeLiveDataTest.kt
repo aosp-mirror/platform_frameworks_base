@@ -19,12 +19,13 @@ package com.android.systemui.util
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
 import android.os.UserHandle
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.lifecycle.Observer
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
+import java.util.concurrent.Executor
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -38,10 +39,9 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
-import java.util.concurrent.Executor
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class RingerModeLiveDataTest : SysuiTestCase() {
 
@@ -52,16 +52,11 @@ class RingerModeLiveDataTest : SysuiTestCase() {
         private val INTENT = "INTENT"
     }
 
-    @Mock
-    private lateinit var broadcastDispatcher: BroadcastDispatcher
-    @Mock
-    private lateinit var valueSupplier: () -> Int
-    @Mock
-    private lateinit var observer: Observer<Int>
-    @Captor
-    private lateinit var broadcastReceiverCaptor: ArgumentCaptor<BroadcastReceiver>
-    @Captor
-    private lateinit var intentFilterCaptor: ArgumentCaptor<IntentFilter>
+    @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
+    @Mock private lateinit var valueSupplier: () -> Int
+    @Mock private lateinit var observer: Observer<Int>
+    @Captor private lateinit var broadcastReceiverCaptor: ArgumentCaptor<BroadcastReceiver>
+    @Captor private lateinit var intentFilterCaptor: ArgumentCaptor<IntentFilter>
 
     // Run everything immediately
     private val executor = Executor { it.run() }
@@ -88,14 +83,14 @@ class RingerModeLiveDataTest : SysuiTestCase() {
     fun testOnActive_broadcastRegistered() {
         liveData.observeForever(observer)
         verify(broadcastDispatcher)
-                .registerReceiver(any(), any(), eq(executor), eq(UserHandle.ALL), anyInt(), any())
+            .registerReceiver(any(), any(), eq(executor), eq(UserHandle.ALL), anyInt(), any())
     }
 
     @Test
     fun testOnActive_intentFilterHasIntent() {
         liveData.observeForever(observer)
-        verify(broadcastDispatcher).registerReceiver(any(), capture(intentFilterCaptor), any(),
-                any(), anyInt(), any())
+        verify(broadcastDispatcher)
+            .registerReceiver(any(), capture(intentFilterCaptor), any(), any(), anyInt(), any())
         assertTrue(intentFilterCaptor.value.hasAction(INTENT))
     }
 

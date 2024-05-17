@@ -54,7 +54,6 @@ import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.ShadeViewStateProvider;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.disableflags.DisableStateTracker;
@@ -132,9 +131,6 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     private View mSystemIconsContainer;
     private final StatusOverlayHoverListenerFactory mStatusOverlayHoverListenerFactory;
-
-    // TODO(b/273443374): remove
-    private NotificationMediaManager mNotificationMediaManager;
 
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -302,7 +298,6 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             @Main Executor mainExecutor,
             @Background Executor backgroundExecutor,
             KeyguardLogger logger,
-            NotificationMediaManager notificationMediaManager,
             StatusOverlayHoverListenerFactory statusOverlayHoverListenerFactory
     ) {
         super(view);
@@ -357,7 +352,6 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 /* mask2= */ DISABLE2_SYSTEM_ICONS,
                 this::updateViewState
         );
-        mNotificationMediaManager = notificationMediaManager;
         mStatusOverlayHoverListenerFactory = statusOverlayHoverListenerFactory;
     }
 

@@ -19,12 +19,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.BatteryConsumer;
 
-import com.android.internal.os.PowerStats;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -206,25 +203,9 @@ public class AggregatedPowerStatsConfig {
         return mPowerComponents;
     }
 
-    private static final PowerStatsProcessor NO_OP_PROCESSOR =
-            new PowerStatsProcessor() {
-                @Override
-                void finish(PowerComponentAggregatedPowerStats stats) {
-                }
-
-                @Override
-                String deviceStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
-                    return Arrays.toString(stats);
-                }
-
-                @Override
-                String stateStatsToString(PowerStats.Descriptor descriptor, int key, long[] stats) {
-                    return descriptor.getStateLabel(key) + " " + Arrays.toString(stats);
-                }
-
-                @Override
-                String uidStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
-                    return Arrays.toString(stats);
-                }
-            };
+    private static final PowerStatsProcessor NO_OP_PROCESSOR = new PowerStatsProcessor() {
+        @Override
+        void finish(PowerComponentAggregatedPowerStats stats) {
+        }
+    };
 }

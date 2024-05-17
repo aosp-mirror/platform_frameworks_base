@@ -20,6 +20,7 @@ import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityOptions.BackgroundActivityStartMode;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_COMPAT;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -105,6 +106,7 @@ public class BackgroundActivityStartController {
     static final String AUTO_OPT_IN_NOT_PENDING_INTENT = "notPendingIntent";
     static final String AUTO_OPT_IN_CALL_FOR_RESULT = "callForResult";
     static final String AUTO_OPT_IN_SAME_UID = "sameUid";
+    static final String AUTO_OPT_IN_COMPAT = "compatibility";
 
     /** If enabled the creator will not allow BAL on its behalf by default. */
     @ChangeId
@@ -302,6 +304,10 @@ public class BackgroundActivityStartController {
                 mAutoOptInCaller = false;
             } else if (callingUid == realCallingUid && !balRequireOptInSameUid()) {
                 mAutoOptInReason = AUTO_OPT_IN_SAME_UID;
+                mAutoOptInCaller = false;
+            } else if (realCallerBackgroundActivityStartMode
+                    == MODE_BACKGROUND_ACTIVITY_START_COMPAT) {
+                mAutoOptInReason = AUTO_OPT_IN_COMPAT;
                 mAutoOptInCaller = false;
             } else {
                 mAutoOptInReason = null;
@@ -1695,6 +1701,7 @@ public class BackgroundActivityStartController {
             return false;
         }
         if (state.mBalAllowedByPiSender.allowsBackgroundActivityStarts()
+                && state.mResultForRealCaller != null
                 && state.mResultForRealCaller.getRawCode() == BAL_ALLOW_VISIBLE_WINDOW) {
             return false;
         }

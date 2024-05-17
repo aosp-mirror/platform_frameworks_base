@@ -73,6 +73,10 @@ public class SysUiState implements Dumpable {
         return mFlags;
     }
 
+    public boolean isFlagEnabled(@SystemUiStateFlags long flag) {
+        return (mFlags & flag) != 0;
+    }
+
     /** Methods to this call can be chained together before calling {@link #commitUpdate(int)}. */
     public SysUiState setFlag(@SystemUiStateFlags long flag, boolean enabled) {
         final Boolean overrideOrNull = mSceneContainerPlugin.flagValueOverride(flag);

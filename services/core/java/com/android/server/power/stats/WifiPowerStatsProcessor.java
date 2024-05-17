@@ -389,37 +389,4 @@ public class WifiPowerStatsProcessor extends PowerStatsProcessor {
             }
         }
     }
-
-    @Override
-    String deviceStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
-        unpackPowerStatsDescriptor(descriptor);
-        if (mHasWifiPowerController) {
-            return "rx: " + mStatsLayout.getDeviceRxTime(stats)
-                    + " tx: " + mStatsLayout.getDeviceTxTime(stats)
-                    + " scan: " + mStatsLayout.getDeviceScanTime(stats)
-                    + " idle: " + mStatsLayout.getDeviceIdleTime(stats)
-                    + " power: " + mStatsLayout.getDevicePowerEstimate(stats);
-        } else {
-            return "active: " + mStatsLayout.getDeviceActiveTime(stats)
-                    + " scan: " + mStatsLayout.getDeviceBasicScanTime(stats)
-                    + " batched-scan: " + mStatsLayout.getDeviceBatchedScanTime(stats)
-                    + " power: " + mStatsLayout.getDevicePowerEstimate(stats);
-        }
-    }
-
-    @Override
-    String stateStatsToString(PowerStats.Descriptor descriptor, int key, long[] stats) {
-        // Unsupported for this power component
-        return null;
-    }
-
-    @Override
-    String uidStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
-        unpackPowerStatsDescriptor(descriptor);
-        return "rx: " + mStatsLayout.getUidRxPackets(stats)
-                + " tx: " + mStatsLayout.getUidTxPackets(stats)
-                + " scan: " + mStatsLayout.getUidScanTime(stats)
-                + " batched-scan: " + mStatsLayout.getUidBatchedScanTime(stats)
-                + " power: " + mStatsLayout.getUidPowerEstimate(stats);
-    }
 }

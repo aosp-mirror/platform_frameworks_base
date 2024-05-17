@@ -71,7 +71,6 @@ import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeViewStateProvider;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.data.repository.FakeKeyguardStatusBarRepository;
 import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor;
@@ -144,8 +143,6 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Mock private SecureSettings mSecureSettings;
     @Mock private CommandQueue mCommandQueue;
     @Mock private KeyguardLogger mLogger;
-
-    @Mock private NotificationMediaManager mNotificationMediaManager;
     @Mock private StatusOverlayHoverListenerFactory mStatusOverlayHoverListenerFactory;
 
     private TestShadeViewStateProvider mShadeViewStateProvider;
@@ -225,7 +222,6 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mFakeExecutor,
                 mBackgroundExecutor,
                 mLogger,
-                mNotificationMediaManager,
                 mStatusOverlayHoverListenerFactory
         );
     }

@@ -72,6 +72,7 @@ import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
+import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.shared.annotations.ExternalThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -1373,16 +1374,6 @@ class DesktopTasksController(
                 remoteListener.call {
                     l -> l.onTasksVisibilityChanged(displayId, visibleTasksCount)
                 }
-            }
-
-            override fun onStashedChanged(displayId: Int, stashed: Boolean) {
-                KtProtoLog.v(
-                        WM_SHELL_DESKTOP_MODE,
-                        "IDesktopModeImpl: onStashedChanged display=%d stashed=%b",
-                        displayId,
-                        stashed
-                )
-                remoteListener.call { l -> l.onStashedChanged(displayId, stashed) }
             }
         }
 

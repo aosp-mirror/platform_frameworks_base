@@ -20,6 +20,7 @@ import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
 import static android.app.WallpaperManager.SetWallpaperFlags;
 
+import static com.android.systemui.Flags.fixImageWallpaperCrashSurfaceAlreadyReleased;
 import static com.android.window.flags.Flags.offloadColorExtraction;
 
 import android.annotation.Nullable;
@@ -128,7 +129,16 @@ public class ImageWallpaper extends WallpaperService {
          * and if the count is 0, unload the bitmap
          */
         private int mBitmapUsages = 0;
+
+        /**
+         * Main lock for long operations (loading the bitmap or processing colors).
+         */
         private final Object mLock = new Object();
+
+        /**
+         * Lock for SurfaceHolder operations. Should only be acquired after the main lock.
+         */
+        private final Object mSurfaceLock = new Object();
 
         CanvasEngine() {
             super();
@@ -223,6 +233,12 @@ public class ImageWallpaper extends WallpaperService {
             if (DEBUG) {
                 Log.i(TAG, "onSurfaceDestroyed");
             }
+            if (fixImageWallpaperCrashSurfaceAlreadyReleased()) {
+                synchronized (mSurfaceLock) {
+                    mSurfaceHolder = null;
+                }
+                return;
+            }
             mLongExecutor.execute(this::onSurfaceDestroyedSynchronized);
         }
 
@@ -259,7 +275,7 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         private void drawFrameInternal() {
-            if (mSurfaceHolder == null) {
+            if (mSurfaceHolder == null && !fixImageWallpaperCrashSurfaceAlreadyReleased()) {
                 Log.i(TAG, "attempt to draw a frame without a valid surface");
                 return;
             }
@@ -268,6 +284,19 @@ public class ImageWallpaper extends WallpaperService {
             if (!isBitmapLoaded()) {
                 loadWallpaperAndDrawFrameInternal();
             } else {
+                if (fixImageWallpaperCrashSurfaceAlreadyReleased()) {
+                    synchronized (mSurfaceLock) {
+                        if (mSurfaceHolder == null) {
+                            Log.i(TAG, "Surface released before the image could be drawn");
+                            return;
+                        }
+                        mBitmapUsages++;
+                        drawFrameOnCanvas(mBitmap);
+                        reportEngineShown(false);
+                        unloadBitmapIfNotUsedInternal();
+                        return;
+                    }
+                }
                 mBitmapUsages++;
                 drawFrameOnCanvas(mBitmap);
                 reportEngineShown(false);
@@ -328,9 +357,14 @@ public class ImageWallpaper extends WallpaperService {
                 mBitmap.recycle();
             }
             mBitmap = null;
-
-            final Surface surface = getSurfaceHolder().getSurface();
-            surface.hwuiDestroy();
+            if (fixImageWallpaperCrashSurfaceAlreadyReleased()) {
+                synchronized (mSurfaceLock) {
+                    if (mSurfaceHolder != null) mSurfaceHolder.getSurface().hwuiDestroy();
+                }
+            } else {
+                final Surface surface = getSurfaceHolder().getSurface();
+                surface.hwuiDestroy();
+            }
             mWallpaperManager.forgetLoadedWallpaper();
             Trace.endSection();
         }

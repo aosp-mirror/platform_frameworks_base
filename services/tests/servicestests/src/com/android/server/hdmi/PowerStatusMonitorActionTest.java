@@ -25,8 +25,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -76,6 +78,11 @@ public class PowerStatusMonitorActionTest {
 
             @Override
             protected void writeStringSystemProperty(String key, String value) {
+                // do nothing
+            }
+
+            @Override
+            protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
                 // do nothing
             }
         };

@@ -29,7 +29,6 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.sysprop.HdmiProperties;
 import android.util.Slog;
 
@@ -278,8 +277,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     void dismissUiOnActiveSourceStatusRecovered() {
         assertRunOnServiceThread();
         Intent intent = new Intent(HdmiControlManager.ACTION_ON_ACTIVE_SOURCE_RECOVERED_DISMISS_UI);
-        mService.getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
-                HdmiControlService.PERMISSION);
+        mService.sendBroadcastAsUser(intent);
     }
 
     @Override

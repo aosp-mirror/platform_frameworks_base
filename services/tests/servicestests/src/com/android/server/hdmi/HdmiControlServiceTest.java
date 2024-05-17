@@ -52,6 +52,7 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -121,6 +122,8 @@ public class HdmiControlServiceTest {
                 audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()));
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
+        doNothing().when(mHdmiControlServiceSpy)
+                .sendBroadcastAsUser(any(Intent.class));
 
         mMyLooper = mTestLooper.getLooper();
 

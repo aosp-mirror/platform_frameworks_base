@@ -42,6 +42,7 @@ import com.android.systemui.flags.Flags.REGION_SAMPLING
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
@@ -544,10 +545,10 @@ constructor(
     internal fun listenForDozeAmountTransition(scope: CoroutineScope): Job {
         return scope.launch {
             merge(
-                    keyguardTransitionInteractor.transition(AOD, LOCKSCREEN).map { step ->
-                        step.copy(value = 1f - step.value)
+                    keyguardTransitionInteractor.transition(Edge.create(AOD, LOCKSCREEN)).map {
+                        it.copy(value = 1f - it.value)
                     },
-                    keyguardTransitionInteractor.transition(LOCKSCREEN, AOD),
+                    keyguardTransitionInteractor.transition(Edge.create(LOCKSCREEN, AOD)),
                 ).filter {
                     it.transitionState != TransitionState.FINISHED
                 }

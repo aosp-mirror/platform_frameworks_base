@@ -5704,6 +5704,7 @@ public class Notification implements Parcelable
             p.headerless(resId == getBaseLayoutResource()
                     || resId == getHeadsUpBaseLayoutResource()
                     || resId == getCompactHeadsUpBaseLayoutResource()
+                    || resId == getMessagingCompactHeadsUpLayoutResource()
                     || resId == getMessagingLayoutResource()
                     || resId == R.layout.notification_template_material_media);
             RemoteViews contentView = new BuilderRemoteViews(mContext.getApplicationInfo(), resId);
@@ -6491,8 +6492,13 @@ public class Notification implements Parcelable
         // visual regressions.
         @SuppressWarnings("AndroidFrameworkCompatChange")
         private boolean bigContentViewRequired() {
-            if (!Flags.notificationExpansionOptional()
-                    && mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S) {
+            if (Flags.notificationExpansionOptional()) {
+                // Notifications without a bigContentView, style, or actions do not need to expand
+                boolean exempt = mN.bigContentView == null
+                        && mStyle == null && mActions.size() == 0;
+                return !exempt;
+            }
+            if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S) {
                 return true;
             }
             // Notifications with contentView and without a bigContentView, style, or actions would
@@ -7292,6 +7298,10 @@ public class Notification implements Parcelable
 
         private int getCompactHeadsUpBaseLayoutResource() {
             return R.layout.notification_template_material_compact_heads_up_base;
+        }
+
+        private int getMessagingCompactHeadsUpLayoutResource() {
+            return R.layout.notification_template_material_messaging_compact_heads_up;
         }
 
         private int getBigBaseLayoutResource() {
@@ -9166,9 +9176,77 @@ public class Notification implements Parcelable
         @Nullable
         @Override
         public RemoteViews makeCompactHeadsUpContentView() {
-            // TODO(b/336229954): Apply minimal HUN treatment to Messaging Notifications.
-            return makeHeadsUpContentView(false);
+            final boolean isConversationLayout = mConversationType != CONVERSATION_TYPE_LEGACY;
+            Icon conversationIcon = null;
+            Notification.Action remoteInputAction = null;
+            if (isConversationLayout) {
+
+                conversationIcon = mShortcutIcon;
+
+                // conversation icon is m
+                // Extract the conversation icon for one to one conversations from
+                // the latest incoming message since
+                // fixTitleAndTextExtras also uses it as data source for title and text
+                if (conversationIcon == null && !mIsGroupConversation) {
+                    final Message message = findLatestIncomingMessage();
+                    if (message != null) {
+                        final Person sender = message.mSender;
+                        if (sender != null) {
+                            conversationIcon = sender.getIcon();
+                        }
+                    }
+                }
+
+                if (Flags.compactHeadsUpNotificationReply()) {
+                    // Get the first non-contextual inline reply action.
+                    final List<Notification.Action> nonContextualActions =
+                            mBuilder.getNonContextualActions();
+                    for (int i = 0; i < nonContextualActions.size(); i++) {
+                        final Notification.Action action = nonContextualActions.get(i);
+                        if (mBuilder.hasValidRemoteInput(action)) {
+                            remoteInputAction = action;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // This method fills title and text
+            fixTitleAndTextExtras(mBuilder.mN.extras);
+            final StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
+                    .highlightExpander(isConversationLayout)
+                    .fillTextsFrom(mBuilder)
+                    .hideTime(true)
+                    .summaryText("");
+            p.headerTextSecondary(p.mText);
+            TemplateBindResult bindResult = new TemplateBindResult();
+
+            RemoteViews contentView = mBuilder.applyStandardTemplate(
+                    mBuilder.getMessagingCompactHeadsUpLayoutResource(), p, bindResult);
+            if (conversationIcon != null) {
+                contentView.setViewVisibility(R.id.icon, View.GONE);
+                contentView.setViewVisibility(R.id.conversation_icon, View.VISIBLE);
+                contentView.setBoolean(R.id.conversation_icon, "setApplyCircularCrop", true);
+                contentView.setImageViewIcon(R.id.conversation_icon, conversationIcon);
+            }
+
+            if (remoteInputAction != null) {
+                contentView.setViewVisibility(R.id.reply_action_container, View.VISIBLE);
+
+                final RemoteViews inlineReplyButton =
+                        mBuilder.generateActionButton(remoteInputAction, false, p);
+                // Clear the drawable
+                inlineReplyButton.setInt(R.id.action0, "setBackgroundResource", 0);
+                inlineReplyButton.setTextViewText(R.id.action0,
+                        mBuilder.mContext.getString(R.string.notification_compact_heads_up_reply));
+                contentView.addView(R.id.reply_action_container, inlineReplyButton);
+            } else {
+                contentView.setViewVisibility(R.id.reply_action_container, View.GONE);
+            }
+            return contentView;
         }
+
 
         /**
          * @hide

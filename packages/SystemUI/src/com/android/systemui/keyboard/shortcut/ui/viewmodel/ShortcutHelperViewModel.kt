@@ -38,7 +38,11 @@ constructor(
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
 
-    fun onUserLeave() {
-        interactor.onUserLeave()
+    fun onViewClosed() {
+        interactor.onViewClosed()
+    }
+
+    fun onViewOpened() {
+        interactor.onViewOpened()
     }
 }

@@ -26,7 +26,9 @@ import static com.android.server.hdmi.HdmiControlService.STANDBY_SCREEN_OFF;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -113,6 +115,11 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                         default:
                             return defVal;
                     }
+                }
+
+                @Override
+                protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                    // do nothing
                 }
             };
 

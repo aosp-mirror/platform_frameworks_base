@@ -14,36 +14,34 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone.ongoingcall
+package com.android.systemui.statusbar.chips.ui.view
 
 import android.content.Context
 import android.util.AttributeSet
-
 import android.widget.Chronometer
 import androidx.annotation.UiThread
 
 /**
- * A [Chronometer] specifically for the ongoing call chip in the status bar.
+ * A [Chronometer] specifically for chips in the status bar that show ongoing duration of an
+ * activity.
  *
  * This class handles:
- *   1) Setting the text width. If we used a basic WRAP_CONTENT for width, the chip width would
- *      change slightly each second because the width of each number is slightly different.
+ * 1) Setting the text width. If we used a basic WRAP_CONTENT for width, the chip width would change
+ *    slightly each second because the width of each number is slightly different.
  *
- *      Instead, we save the largest number width seen so far and ensure that the chip is at least
- *      that wide. This means the chip may get larger over time (e.g. in the transition from 59:59
- *      to 1:00:00), but never smaller.
- *
- *   2) Hiding the text if the time gets too long for the space available. Once the text has been
- *      hidden, it remains hidden for the duration of the call.
+ *    Instead, we save the largest number width seen so far and ensure that the chip is at least
+ *    that wide. This means the chip may get larger over time (e.g. in the transition from 59:59 to
+ *    1:00:00), but never smaller.
+ * 2) Hiding the text if the time gets too long for the space available. Once the text has been
+ *    hidden, it remains hidden for the duration of the activity.
  *
  * Note that if the text was too big in portrait mode, resulting in the text being hidden, then the
  * text will also be hidden in landscape (even if there is enough space for it in landscape).
  */
-class OngoingCallChronometer @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyle: Int = 0
-) : Chronometer(context, attrs, defStyle) {
+class ChipChronometer
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) :
+    Chronometer(context, attrs, defStyle) {
 
     // Minimum width that the text view can be. Corresponds with the largest number width seen so
     // far.
@@ -53,8 +51,8 @@ class OngoingCallChronometer @JvmOverloads constructor(
     private var shouldHideText: Boolean = false
 
     override fun setBase(base: Long) {
-        // These variables may have changed during the previous call, so re-set them before the new
-        // call starts.
+        // These variables may have changed during the previous activity, so re-set them before the
+        // new activity starts.
         minimumTextWidth = 0
         shouldHideText = false
         visibility = VISIBLE
@@ -75,9 +73,7 @@ class OngoingCallChronometer @JvmOverloads constructor(
         }
 
         // Evaluate how wide the text *wants* to be if it had unlimited space.
-        super.onMeasure(
-                MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
-                heightMeasureSpec)
+        super.onMeasure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), heightMeasureSpec)
         val desiredTextWidth = measuredWidth
 
         // Evaluate how wide the text *can* be based on the enforced constraints

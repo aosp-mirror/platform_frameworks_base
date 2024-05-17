@@ -9,10 +9,11 @@ import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
+import com.android.internal.telephony.flags.Flags
 import com.android.settingslib.Utils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogViewModel
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.plugins.ActivityStarter
@@ -23,13 +24,14 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
-import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogViewModel
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.BluetoothController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.Job
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -37,6 +39,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -54,7 +57,7 @@ class BluetoothTileTest : SysuiTestCase() {
     @Mock private lateinit var uiEventLogger: QsEventLogger
     @Mock private lateinit var featureFlags: FeatureFlagsClassic
     @Mock private lateinit var bluetoothTileDialogViewModel: BluetoothTileDialogViewModel
-
+    @Mock private lateinit var clickJob: Job
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: FakeBluetoothTile
 
@@ -188,6 +191,41 @@ class BluetoothTileTest : SysuiTestCase() {
             )
         verify(bluetoothController, times(1))
             .removeOnMetadataChangedListener(eq(cachedDevice), any())
+    }
+
+    @Test
+    fun handleClick_hasSatelliteFeatureButNoQsTileDialogAndClickIsProcessing_doNothing() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+        `when`(featureFlags.isEnabled(com.android.systemui.flags.Flags.BLUETOOTH_QS_TILE_DIALOG))
+                .thenReturn(false)
+        `when`(clickJob.isCompleted).thenReturn(false)
+        tile.mClickJob = clickJob
+
+        tile.handleClick(null)
+
+        verify(bluetoothController, times(0)).setBluetoothEnabled(any())
+    }
+
+    @Test
+    fun handleClick_noSatelliteFeatureAndNoQsTileDialog_directSetBtEnable() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+        `when`(featureFlags.isEnabled(com.android.systemui.flags.Flags.BLUETOOTH_QS_TILE_DIALOG))
+                .thenReturn(false)
+
+        tile.handleClick(null)
+
+        verify(bluetoothController).setBluetoothEnabled(any())
+    }
+
+    @Test
+    fun handleClick_noSatelliteFeatureButHasQsTileDialog_showDialog() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+        `when`(featureFlags.isEnabled(com.android.systemui.flags.Flags.BLUETOOTH_QS_TILE_DIALOG))
+                .thenReturn(true)
+
+        tile.handleClick(null)
+
+        verify(bluetoothTileDialogViewModel).showDialog(null)
     }
 
     @Test

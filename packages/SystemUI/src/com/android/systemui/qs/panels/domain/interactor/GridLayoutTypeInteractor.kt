@@ -20,9 +20,13 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepository
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 @SysUISingleton
-class GridLayoutTypeInteractor @Inject constructor(repo: GridLayoutTypeRepository) {
-    val layout: Flow<GridLayoutType> = repo.layout
+class GridLayoutTypeInteractor @Inject constructor(private val repo: GridLayoutTypeRepository) {
+    val layout: StateFlow<GridLayoutType> = repo.layout
+
+    fun setLayoutType(type: GridLayoutType) {
+        repo.setLayout(type)
+    }
 }

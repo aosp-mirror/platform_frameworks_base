@@ -244,8 +244,8 @@ static jlong nativeGetFinalizer(JNIEnv* /* env */, jclass /* clazz */) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&nativeDestroy));
 }
 
-void nativeFlush(JNIEnv* env, jclass clazz, jlong ds_ptr, jobjectArray packets) {
-    ALOG(LOG_DEBUG, LOG_TAG, "nativeFlush(%p)", (void*)ds_ptr);
+void nativeWritePackets(JNIEnv* env, jclass clazz, jlong ds_ptr, jobjectArray packets) {
+    ALOG(LOG_DEBUG, LOG_TAG, "nativeWritePackets(%p)", (void*)ds_ptr);
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(ds_ptr);
     datasource->WritePackets(env, packets);
 }
@@ -256,10 +256,12 @@ void nativeFlushAll(JNIEnv* env, jclass clazz, jlong ptr) {
 }
 
 void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
-                              jint buffer_exhausted_policy) {
+                              jint buffer_exhausted_policy, jboolean will_notify_on_stop,
+                              jboolean no_flush) {
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(datasource_ptr);
 
     struct PerfettoDsParams params = PerfettoDsParamsDefault();
+    params.will_notify_on_stop = will_notify_on_stop;
     params.buffer_exhausted_policy = (PerfettoDsBufferExhaustedPolicy)buffer_exhausted_policy;
 
     params.user_arg = reinterpret_cast<void*>(datasource.get());
@@ -325,13 +327,15 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
         datasource_instance->onStart(env);
     };
 
-    params.on_flush_cb = [](struct PerfettoDsImpl*, PerfettoDsInstanceIndex, void*, void* inst_ctx,
-                            struct PerfettoDsOnFlushArgs*) {
-        JNIEnv* env = GetOrAttachJNIEnvironment(gVm, JNI_VERSION_1_6);
+    if (!no_flush) {
+        params.on_flush_cb = [](struct PerfettoDsImpl*, PerfettoDsInstanceIndex, void*,
+                                void* inst_ctx, struct PerfettoDsOnFlushArgs*) {
+            JNIEnv* env = GetOrAttachJNIEnvironment(gVm, JNI_VERSION_1_6);
 
-        auto* datasource_instance = static_cast<PerfettoDataSourceInstance*>(inst_ctx);
-        datasource_instance->onFlush(env);
-    };
+            auto* datasource_instance = static_cast<PerfettoDataSourceInstance*>(inst_ctx);
+            datasource_instance->onFlush(env);
+        };
+    }
 
     params.on_stop_cb = [](struct PerfettoDsImpl*, PerfettoDsInstanceIndex inst_id, void* user_arg,
                            void* inst_ctx, struct PerfettoDsOnStopArgs*) {
@@ -422,7 +426,7 @@ const JNINativeMethod gMethods[] = {
          (void*)nativeCreate},
         {"nativeFlushAll", "(J)V", (void*)nativeFlushAll},
         {"nativeGetFinalizer", "()J", (void*)nativeGetFinalizer},
-        {"nativeRegisterDataSource", "(JI)V", (void*)nativeRegisterDataSource},
+        {"nativeRegisterDataSource", "(JIZZ)V", (void*)nativeRegisterDataSource},
         {"nativeGetPerfettoInstanceLocked", "(JI)Landroid/tracing/perfetto/DataSourceInstance;",
          (void*)nativeGetPerfettoInstanceLocked},
         {"nativeReleasePerfettoInstanceLocked", "(JI)V",
@@ -431,11 +435,12 @@ const JNINativeMethod gMethods[] = {
         {"nativePerfettoDsTraceIterateBegin", "(J)Z", (void*)nativePerfettoDsTraceIterateBegin},
         {"nativePerfettoDsTraceIterateNext", "(J)Z", (void*)nativePerfettoDsTraceIterateNext},
         {"nativePerfettoDsTraceIterateBreak", "(J)V", (void*)nativePerfettoDsTraceIterateBreak},
-        {"nativeGetPerfettoDsInstanceIndex", "(J)I", (void*)nativeGetPerfettoDsInstanceIndex}};
+        {"nativeGetPerfettoDsInstanceIndex", "(J)I", (void*)nativeGetPerfettoDsInstanceIndex},
+
+        {"nativeWritePackets", "(J[[B)V", (void*)nativeWritePackets}};
 
 const JNINativeMethod gMethodsTracingContext[] = {
         /* name, signature, funcPtr */
-        {"nativeFlush", "(J[[B)V", (void*)nativeFlush},
         {"nativeGetCustomTls", "(J)Ljava/lang/Object;", (void*)nativeGetCustomTls},
         {"nativeGetIncrementalState", "(J)Ljava/lang/Object;", (void*)nativeGetIncrementalState},
         {"nativeSetCustomTls", "(JLjava/lang/Object;)V", (void*)nativeSetCustomTls},

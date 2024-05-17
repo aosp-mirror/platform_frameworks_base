@@ -216,7 +216,7 @@ public final class SystemFonts {
                 } else if (defaultFamily != null) {
                     familyListSet.familyList.add(defaultFamily);
                 } else {
-                    // There is no valid for for default fallback. Ignore.
+                    // There is no valid for default fallback. Ignore.
                 }
             }
         }
