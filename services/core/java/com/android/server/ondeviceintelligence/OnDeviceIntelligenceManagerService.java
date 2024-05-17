@@ -16,6 +16,7 @@
 
 package com.android.server.ondeviceintelligence;
 
+import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.DEVICE_CONFIG_UPDATE_BUNDLE_KEY;
 import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.MODEL_LOADED_BUNDLE_KEY;
 import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.MODEL_UNLOADED_BUNDLE_KEY;
 import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.REGISTER_MODEL_UPDATE_CALLBACK_BUNDLE_KEY;
@@ -115,9 +116,10 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
 
     /** Handler message to {@link #resetTemporaryServices()} */
     private static final int MSG_RESET_TEMPORARY_SERVICE = 0;
-
     /** Handler message to clean up temporary broadcast keys. */
     private static final int MSG_RESET_BROADCAST_KEYS = 1;
+    /** Handler message to clean up temporary config namespace. */
+    private static final int MSG_RESET_CONFIG_NAMESPACE = 2;
 
     /** Default value in absence of {@link DeviceConfig} override. */
     private static final boolean DEFAULT_SERVICE_ENABLED = true;
@@ -129,6 +131,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
     private final Executor resourceClosingExecutor = Executors.newCachedThreadPool();
     private final Executor callbackExecutor = Executors.newCachedThreadPool();
     private final Executor broadcastExecutor = Executors.newCachedThreadPool();
+    private final Executor mConfigExecutor = Executors.newCachedThreadPool();
 
 
     private final Context mContext;
@@ -145,6 +148,12 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
     private String[] mTemporaryBroadcastKeys;
     @GuardedBy("mLock")
     private String mBroadcastPackageName;
+    @GuardedBy("mLock")
+    private String mTemporaryConfigNamespace;
+
+    private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
+            this::sendUpdatedConfig;
+
 
     /**
      * Handler used to reset the temporary service names.
@@ -593,12 +602,14 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                                     @NonNull IOnDeviceSandboxedInferenceService service) {
                                 try {
                                     ensureRemoteIntelligenceServiceInitialized();
+                                    service.registerRemoteStorageService(
+                                            getIRemoteStorageService());
                                     mRemoteOnDeviceIntelligenceService.run(
                                             IOnDeviceIntelligenceService::notifyInferenceServiceConnected);
                                     broadcastExecutor.execute(
                                             () -> registerModelLoadingBroadcasts(service));
-                                    service.registerRemoteStorageService(
-                                            getIRemoteStorageService());
+                                    mConfigExecutor.execute(
+                                            () -> registerDeviceConfigChangeListener());
                                 } catch (RemoteException ex) {
                                     Slog.w(TAG, "Failed to send connected event", ex);
                                 }
@@ -656,6 +667,58 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to register model loading callback with status code", e);
         }
+    }
+
+    private void registerDeviceConfigChangeListener() {
+        Log.e(TAG, "registerDeviceConfigChangeListener");
+        String configNamespace = getConfigNamespace();
+        if (configNamespace.isEmpty()) {
+            Slog.e(TAG, "config_defaultOnDeviceIntelligenceDeviceConfigNamespace is empty");
+            return;
+        }
+        DeviceConfig.addOnPropertiesChangedListener(
+                configNamespace,
+                mConfigExecutor,
+                mOnPropertiesChangedListener);
+    }
+
+    private String getConfigNamespace() {
+        synchronized (mLock) {
+            if (mTemporaryConfigNamespace != null) {
+                return mTemporaryConfigNamespace;
+            }
+
+            return mContext.getResources().getString(
+                    R.string.config_defaultOnDeviceIntelligenceDeviceConfigNamespace);
+        }
+    }
+
+    private void sendUpdatedConfig(
+            DeviceConfig.Properties props) {
+        Log.e(TAG, "sendUpdatedConfig");
+
+        PersistableBundle persistableBundle = new PersistableBundle();
+        for (String key : props.getKeyset()) {
+            persistableBundle.putString(key, props.getString(key, ""));
+        }
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(DEVICE_CONFIG_UPDATE_BUNDLE_KEY, persistableBundle);
+        ensureRemoteInferenceServiceInitialized();
+        Log.e(TAG, "sendUpdatedConfig: BUNDLE: " + bundle);
+
+        mRemoteInferenceService.run(service -> service.updateProcessingState(bundle,
+                new IProcessingUpdateStatusCallback.Stub() {
+                    @Override
+                    public void onSuccess(PersistableBundle result) {
+                        Slog.d(TAG, "Config update successful." + result);
+                    }
+
+                    @Override
+                    public void onFailure(int errorCode, String errorMessage) {
+                        Slog.e(TAG, "Config update failed with code ["
+                                + String.valueOf(errorCode) + "] and message = " + errorMessage);
+                    }
+                }));
     }
 
     @NonNull
@@ -849,6 +912,22 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
     }
 
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
+    public void setTemporaryDeviceConfigNamespace(@NonNull String configNamespace,
+            int durationMs) {
+        Objects.requireNonNull(configNamespace);
+        enforceShellOnly(Binder.getCallingUid(), "setTemporaryDeviceConfigNamespace");
+        mContext.enforceCallingPermission(
+                Manifest.permission.USE_ON_DEVICE_INTELLIGENCE, TAG);
+        synchronized (mLock) {
+            mTemporaryConfigNamespace = configNamespace;
+            if (durationMs != -1) {
+                getTemporaryHandler().sendEmptyMessageDelayed(MSG_RESET_CONFIG_NAMESPACE,
+                        durationMs);
+            }
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
     public void resetTemporaryServices() {
         mContext.enforceCallingPermission(
                 Manifest.permission.USE_ON_DEVICE_INTELLIGENCE, TAG);
@@ -936,17 +1015,17 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             mTemporaryHandler = new Handler(Looper.getMainLooper(), null, true) {
                 @Override
                 public void handleMessage(Message msg) {
-                    if (msg.what == MSG_RESET_TEMPORARY_SERVICE) {
-                        synchronized (mLock) {
+                    synchronized (mLock) {
+                        if (msg.what == MSG_RESET_TEMPORARY_SERVICE) {
                             resetTemporaryServices();
-                        }
-                    } else if (msg.what == MSG_RESET_BROADCAST_KEYS) {
-                        synchronized (mLock) {
+                        } else if (msg.what == MSG_RESET_BROADCAST_KEYS) {
                             mTemporaryBroadcastKeys = null;
                             mBroadcastPackageName = SYSTEM_PACKAGE;
+                        } else if (msg.what == MSG_RESET_CONFIG_NAMESPACE) {
+                            mTemporaryConfigNamespace = null;
+                        } else {
+                            Slog.wtf(TAG, "invalid handler msg: " + msg);
                         }
-                    } else {
-                        Slog.wtf(TAG, "invalid handler msg: " + msg);
                     }
                 }
             };

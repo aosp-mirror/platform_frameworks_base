@@ -4723,6 +4723,8 @@
     <!-- The broadcast intent name for notifying when the on-device model has been unloaded  -->
     <string name="config_onDeviceIntelligenceModelUnloadedBroadcastKey" translatable="false"></string>
 
+    <!-- The DeviceConfig namespace for the default system on-device sandboxed inference service. -->
+    <string name="config_defaultOnDeviceIntelligenceDeviceConfigNamespace" translatable="false"></string>
 
     <!-- Component name that accepts ACTION_SEND intents for requesting ambient context consent for
          wearable sensing. -->
