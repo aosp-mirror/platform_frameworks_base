@@ -26,6 +26,7 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_STA
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -115,9 +116,9 @@ public class SplitLayoutTests extends ShellTestCase {
 
     @Test
     public void testUpdateDivideBounds() {
-        mSplitLayout.updateDividerBounds(anyInt());
+        mSplitLayout.updateDividerBounds(anyInt(), anyBoolean());
         verify(mSplitLayoutHandler).onLayoutSizeChanging(any(SplitLayout.class), anyInt(),
-                anyInt());
+                anyInt(), anyBoolean());
     }
 
     @Test
