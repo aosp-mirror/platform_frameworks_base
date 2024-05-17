@@ -39,6 +39,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
+import android.view.Display;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
@@ -78,6 +79,7 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class") @Nullable private IInputMethodInvoker mCurMethod;
     @GuardedBy("ImfLock.class") private int mCurMethodUid = Process.INVALID_UID;
     @GuardedBy("ImfLock.class") @Nullable private IBinder mCurToken;
+    @GuardedBy("ImfLock.class") private int mCurTokenDisplayId = Display.INVALID_DISPLAY;
     @GuardedBy("ImfLock.class") private int mCurSeq;
     @GuardedBy("ImfLock.class") private boolean mVisibleBound;
     @GuardedBy("ImfLock.class") private boolean mSupportsStylusHw;
@@ -190,6 +192,17 @@ final class InputMethodBindingController {
     @Nullable
     IBinder getCurToken() {
         return mCurToken;
+    }
+
+    /**
+     * Returns the displayId associated with {@link #getCurToken()}.
+     *
+     * @return the displayId associated with {@link #getCurToken()}. {@link Display#INVALID_DISPLAY}
+     *         while {@link #getCurToken()} returns {@code null}
+     */
+    @GuardedBy("ImfLock.class")
+    int getCurTokenDisplayId() {
+        return mCurTokenDisplayId;
     }
 
     /**
@@ -412,15 +425,14 @@ final class InputMethodBindingController {
 
     @GuardedBy("ImfLock.class")
     private void removeCurrentToken() {
-        int curTokenDisplayId = mService.getCurTokenDisplayIdLocked();
-
         if (DEBUG) {
             Slog.v(TAG,
-                    "Removing window token: " + mCurToken + " for display: " + curTokenDisplayId);
+                    "Removing window token: " + mCurToken + " for display: " + mCurTokenDisplayId);
         }
         mWindowManagerInternal.removeWindowToken(mCurToken, true /* removeWindows */,
-                false /* animateExit */, curTokenDisplayId);
+                false /* animateExit */, mCurTokenDisplayId);
         mCurToken = null;
+        mCurTokenDisplayId = Display.INVALID_DISPLAY;
     }
 
     @GuardedBy("ImfLock.class")
@@ -445,7 +457,7 @@ final class InputMethodBindingController {
 
             final int displayIdToShowIme = mService.getDisplayIdToShowImeLocked();
             mCurToken = new Binder();
-            mService.setCurTokenDisplayIdLocked(displayIdToShowIme);
+            mCurTokenDisplayId = displayIdToShowIme;
             if (DEBUG) {
                 Slog.v(TAG, "Adding window token: " + mCurToken + " for display: "
                         + displayIdToShowIme);
