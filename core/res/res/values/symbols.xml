@@ -5225,9 +5225,6 @@
   <java-symbol type="bool" name="config_hotspotNetworksEnabledForService"/>
   <java-symbol type="bool" name="config_knownNetworksEnabledForService"/>
 
-  <!-- Whether to show weather on the lockscreen by default. -->
-  <java-symbol type="bool" name="config_lockscreenWeatherEnabledByDefault" />
-
   <!-- For keyboard notification -->
   <java-symbol type="string" name="keyboard_layout_notification_selected_title"/>
   <java-symbol type="string" name="keyboard_layout_notification_one_selected_message"/>

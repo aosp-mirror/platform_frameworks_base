@@ -51,10 +51,6 @@ constructor(
 ) : KeyguardSmartspaceRepository {
     private val _bcSmartspaceVisibility: MutableStateFlow<Int> = MutableStateFlow(View.GONE)
     override val bcSmartspaceVisibility: StateFlow<Int> = _bcSmartspaceVisibility.asStateFlow()
-    val defaultValue =
-        context.resources.getBoolean(
-            com.android.internal.R.bool.config_lockscreenWeatherEnabledByDefault
-        )
     override val isWeatherEnabled: StateFlow<Boolean> =
         secureSettings
             .observerFlow(
@@ -76,7 +72,7 @@ constructor(
     private fun getLockscreenWeatherEnabled(): Boolean {
         return secureSettings.getIntForUser(
             Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED,
-            if (defaultValue) 1 else 0,
+            1,
             userTracker.userId
         ) == 1
     }
