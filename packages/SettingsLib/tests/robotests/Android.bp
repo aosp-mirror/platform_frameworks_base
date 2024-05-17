@@ -41,10 +41,7 @@ android_app {
 //###########################################################
 android_robolectric_test {
     name: "SettingsLibRoboTests",
-    srcs: [
-        "src/**/*.java",
-        "src/**/*.kt",
-    ],
+    srcs: ["src/**/*.java"],
     static_libs: [
         "Settings_robolectric_meta_service_file",
         "Robolectric_shadows_androidx_fragment_upstream",
