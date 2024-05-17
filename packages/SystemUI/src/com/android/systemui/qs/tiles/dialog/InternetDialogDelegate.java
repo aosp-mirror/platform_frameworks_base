@@ -68,12 +68,14 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.wifitrackerlib.WifiEntry;
 
-import java.util.List;
-import java.util.concurrent.Executor;
-
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+
+import kotlinx.coroutines.CoroutineScope;
+
+import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Dialog for showing mobile network, connected Wi-Fi network and Wi-Fi networks.
@@ -165,7 +167,8 @@ public class InternetDialogDelegate implements
         InternetDialogDelegate create(
                 @Assisted(ABOVE_STATUS_BAR) boolean aboveStatusBar,
                 @Assisted(CAN_CONFIG_MOBILE_DATA) boolean canConfigMobileData,
-                @Assisted(CAN_CONFIG_WIFI) boolean canConfigWifi);
+                @Assisted(CAN_CONFIG_WIFI) boolean canConfigWifi,
+                @Assisted CoroutineScope coroutineScope);
     }
 
     @AssistedInject
@@ -176,6 +179,7 @@ public class InternetDialogDelegate implements
             @Assisted(ABOVE_STATUS_BAR) boolean canConfigMobileData,
             @Assisted(CAN_CONFIG_MOBILE_DATA) boolean canConfigWifi,
             @Assisted(CAN_CONFIG_WIFI) boolean aboveStatusBar,
+            @Assisted CoroutineScope coroutineScope,
             UiEventLogger uiEventLogger,
             DialogTransitionAnimator dialogTransitionAnimator,
             @Main Handler handler,
