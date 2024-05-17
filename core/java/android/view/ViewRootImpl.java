@@ -921,15 +921,6 @@ public final class ViewRootImpl implements ViewParent,
     private String mFrameRateCategoryView;
 
     /**
-     * The resolved pointer icon type requested by this window.
-     * A null value indicates the resolved pointer icon has not yet been calculated.
-     */
-    // TODO(b/293587049): Remove pointer icon tracking by type when refactor is complete.
-    @Nullable
-    private Integer mPointerIconType = null;
-    private PointerIcon mCustomPointerIcon = null;
-
-    /**
      * The resolved pointer icon requested by this window.
      * A null value indicates the resolved pointer icon has not yet been calculated.
      */
@@ -6430,7 +6421,6 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_SYNTHESIZE_INPUT_EVENT = 24;
     private static final int MSG_DISPATCH_WINDOW_SHOWN = 25;
     private static final int MSG_REQUEST_KEYBOARD_SHORTCUTS = 26;
-    private static final int MSG_UPDATE_POINTER_ICON = 27;
     private static final int MSG_POINTER_CAPTURE_CHANGED = 28;
     private static final int MSG_INSETS_CONTROL_CHANGED = 29;
     private static final int MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED = 30;
@@ -6495,8 +6485,6 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_SYNTHESIZE_INPUT_EVENT";
                 case MSG_DISPATCH_WINDOW_SHOWN:
                     return "MSG_DISPATCH_WINDOW_SHOWN";
-                case MSG_UPDATE_POINTER_ICON:
-                    return "MSG_UPDATE_POINTER_ICON";
                 case MSG_POINTER_CAPTURE_CHANGED:
                     return "MSG_POINTER_CAPTURE_CHANGED";
                 case MSG_INSETS_CONTROL_CHANGED:
@@ -6746,10 +6734,6 @@ public final class ViewRootImpl implements ViewParent,
                     final IResultReceiver receiver = (IResultReceiver) msg.obj;
                     final int deviceId = msg.arg1;
                     handleRequestKeyboardShortcuts(receiver, deviceId);
-                } break;
-                case MSG_UPDATE_POINTER_ICON: {
-                    MotionEvent event = (MotionEvent) msg.obj;
-                    resetPointerIcon(event);
                 } break;
                 case MSG_POINTER_CAPTURE_CHANGED: {
                     final boolean hasCapture = msg.arg1 != 0;
@@ -7836,14 +7820,12 @@ public final class ViewRootImpl implements ViewParent,
                     || action == MotionEvent.ACTION_HOVER_EXIT) {
                 // Other apps or the window manager may change the icon type outside of
                 // this app, therefore the icon type has to be reset on enter/exit event.
-                mPointerIconType = null;
                 mResolvedPointerIcon = null;
             }
 
             if (action != MotionEvent.ACTION_HOVER_EXIT) {
                 // Resolve the pointer icon
                 if (!updatePointerIcon(event) && action == MotionEvent.ACTION_HOVER_MOVE) {
-                    mPointerIconType = null;
                     mResolvedPointerIcon = null;
                 }
             }
@@ -7904,12 +7886,6 @@ public final class ViewRootImpl implements ViewParent,
      */
     public boolean isHandlingPointerEvent() {
         return mAttachInfo.mHandlingPointerEvent;
-    }
-
-    private void resetPointerIcon(MotionEvent event) {
-        mPointerIconType = null;
-        mResolvedPointerIcon = null;
-        updatePointerIcon(event);
     }
 
 
