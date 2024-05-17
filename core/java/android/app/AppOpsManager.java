@@ -3583,6 +3583,9 @@ public class AppOpsManager {
             return mAttributionTag;
         }
 
+        /**
+         * Persistent device Id of the proxy that noted the op
+         */
         @FlaggedApi(Flags.FLAG_DEVICE_ID_IN_OP_PROXY_INFO_ENABLED)
         public @Nullable String getDeviceId() { return mDeviceId; }
 
