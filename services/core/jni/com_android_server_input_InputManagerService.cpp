@@ -122,7 +122,6 @@ static struct {
     jmethodID interceptMotionBeforeQueueingNonInteractive;
     jmethodID interceptKeyBeforeDispatching;
     jmethodID dispatchUnhandledKey;
-    jmethodID onPointerDisplayIdChanged;
     jmethodID onPointerDownOutsideFocus;
     jmethodID getVirtualKeyQuietTimeMillis;
     jmethodID getExcludedDeviceNames;
@@ -786,12 +785,6 @@ void NativeInputManager::notifyPointerDisplayIdChanged(ui::LogicalDisplayId poin
     } // release lock
     mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::Change::DISPLAY_INFO);
-
-    // Notify the system.
-    JNIEnv* env = jniEnv();
-    env->CallVoidMethod(mServiceObj, gServiceClassInfo.onPointerDisplayIdChanged, pointerDisplayId,
-                        position.x, position.y);
-    checkAndClearExceptionFromCallback(env, "onPointerDisplayIdChanged");
 }
 
 void NativeInputManager::notifyStickyModifierStateChanged(uint32_t modifierState,
@@ -2932,9 +2925,6 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.dispatchUnhandledKey, clazz,
             "dispatchUnhandledKey",
             "(Landroid/os/IBinder;Landroid/view/KeyEvent;I)Landroid/view/KeyEvent;");
-
-    GET_METHOD_ID(gServiceClassInfo.onPointerDisplayIdChanged, clazz, "onPointerDisplayIdChanged",
-                  "(IFF)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyStickyModifierStateChanged, clazz,
                   "notifyStickyModifierStateChanged", "(II)V");
