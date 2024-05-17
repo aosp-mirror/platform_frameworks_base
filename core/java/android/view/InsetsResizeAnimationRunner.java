@@ -94,6 +94,11 @@ public class InsetsResizeAnimationRunner implements InsetsAnimationControlRunner
     }
 
     @Override
+    public SurfaceParamsApplier getSurfaceParamsApplier() {
+        return SurfaceParamsApplier.DEFAULT;
+    }
+
+    @Override
     @Nullable
     public ImeTracker.Token getStatsToken() {
         // Return null as resizing the IME view is not explicitly tracked.
