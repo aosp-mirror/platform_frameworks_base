@@ -24,6 +24,8 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 
@@ -52,6 +54,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.Manifest.permission;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
@@ -190,6 +193,8 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         getContext().addMockSystemService(Vibrator.class, mVibrator);
         getContext().addMockSystemService(PackageManager.class, mPackageManager);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)).thenReturn(false);
+        when(mPackageManager.checkPermission(eq(permission.RECEIVE_EMERGENCY_BROADCAST),
+                anyString())).thenReturn(PERMISSION_DENIED);
 
         when(mAudioManager.isAudioFocusExclusive()).thenReturn(false);
         when(mAudioManager.getRingtonePlayer()).thenReturn(mRingtonePlayer);
@@ -2360,6 +2365,72 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
 
         verify(mAccessibilityService, times(4)).sendAccessibilityEvent(any(), anyInt());
         assertNotEquals(-1, r4.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testBeepVolume_politeNotif_Avalanche_exemptEmergency() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS_ATTN_UPDATE);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
+        initAttentionHelper(flagResolver);
+
+        // Trigger avalanche trigger intent
+        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        intent.putExtra("state", false);
+        mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+
+        NotificationRecord r = getBeepyNotification();
+
+        // Grant RECEIVE_EMERGENCY_BROADCAST to notification's package
+        when(mPackageManager.checkPermission(eq(permission.RECEIVE_EMERGENCY_BROADCAST),
+                eq(r.getSbn().getPackageName()))).thenReturn(PERMISSION_GRANTED);
+
+        // Should beep at 100% volume
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        verifyBeepVolume(1.0f);
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+        verify(mAccessibilityService, times(1)).sendAccessibilityEvent(any(), anyInt());
+    }
+
+    @Test
+    public void testBeepVolume_politeNotif_exemptEmergency() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.disableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS_ATTN_UPDATE);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
+        // NOTIFICATION_COOLDOWN_ALL setting is enabled
+        Settings.System.putInt(getContext().getContentResolver(),
+                Settings.System.NOTIFICATION_COOLDOWN_ALL, 1);
+        initAttentionHelper(flagResolver);
+
+        NotificationRecord r = getBeepyNotification();
+
+        // Grant RECEIVE_EMERGENCY_BROADCAST to notification's package
+        when(mPackageManager.checkPermission(eq(permission.RECEIVE_EMERGENCY_BROADCAST),
+                eq(r.getSbn().getPackageName()))).thenReturn(PERMISSION_GRANTED);
+
+        // set up internal state
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        Mockito.reset(mRingtonePlayer);
+
+        // update should beep at 100% volume
+        NotificationRecord r2 = getBeepyNotification();
+        mAttentionHelper.buzzBeepBlinkLocked(r2, DEFAULT_SIGNALS);
+        assertNotEquals(-1, r2.getLastAudiblyAlertedMs());
+        verifyBeepVolume(1.0f);
+
+        // 2nd update should beep at 100% volume
+        Mockito.reset(mRingtonePlayer);
+        mAttentionHelper.buzzBeepBlinkLocked(r2, DEFAULT_SIGNALS);
+        assertNotEquals(-1, r2.getLastAudiblyAlertedMs());
+        verifyBeepVolume(1.0f);
+
+        verify(mAccessibilityService, times(3)).sendAccessibilityEvent(any(), anyInt());
     }
 
     @Test
