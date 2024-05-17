@@ -6456,8 +6456,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         continue;
                     }
                     // Skip on headless user
-                    if (USER_TYPE_SYSTEM_HEADLESS.equals(
-                            mUserManagerInternal.getUserInfo(userId).userType)) {
+                    final var userInfo = mUserManagerInternal.getUserInfo(userId);
+                    if (userInfo != null && USER_TYPE_SYSTEM_HEADLESS.equals(userInfo.userType)) {
                         continue;
                     }
                     final String nextIme;
