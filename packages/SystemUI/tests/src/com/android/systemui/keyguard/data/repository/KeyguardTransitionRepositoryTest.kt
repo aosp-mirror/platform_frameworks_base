@@ -25,16 +25,19 @@ import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import com.android.app.animation.Interpolators
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.util.KeyguardTransitionRunner
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -45,6 +48,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -370,6 +375,43 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
                 underTest.updateTransition(it, 0.5f, TransitionState.RUNNING)
             }
             assertThat(wtfHandler.failed).isTrue()
+        }
+
+    @Test
+    fun simulateRaceConditionIsProcessedInOrder() =
+        testScope.runTest {
+            val ktr = KeyguardTransitionRepositoryImpl(kosmos.testDispatcher)
+            val steps by collectValues(ktr.transitions.dropWhile { step -> step.from == OFF })
+
+            // Add a delay to the first transition in order to attempt to have the second transition
+            // be processed first
+            val info1 = TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, animator = null)
+            launch {
+                ktr.forceDelayForRaceConditionTest = true
+                ktr.startTransition(info1)
+            }
+            val info2 = TransitionInfo(OWNER_NAME, LOCKSCREEN, OCCLUDED, animator = null)
+            launch {
+                ktr.forceDelayForRaceConditionTest = false
+                ktr.startTransition(info2)
+            }
+
+            runCurrent()
+            assertThat(steps.isEmpty()).isTrue()
+
+            advanceTimeBy(60L)
+            assertThat(steps[0])
+                .isEqualTo(
+                    TransitionStep(info1.from, info1.to, 0f, TransitionState.STARTED, OWNER_NAME)
+                )
+            assertThat(steps[1])
+                .isEqualTo(
+                    TransitionStep(info1.from, info1.to, 0f, TransitionState.CANCELED, OWNER_NAME)
+                )
+            assertThat(steps[2])
+                .isEqualTo(
+                    TransitionStep(info2.from, info2.to, 0f, TransitionState.STARTED, OWNER_NAME)
+                )
         }
 
     private fun listWithStep(

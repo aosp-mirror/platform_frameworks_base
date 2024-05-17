@@ -34,6 +34,7 @@ import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +43,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.sync.Mutex
 
 /**
  * The source of truth for all keyguard transitions.
@@ -129,6 +131,7 @@ constructor(
     private var lastStep: TransitionStep = TransitionStep()
     private var lastAnimator: ValueAnimator? = null
 
+    private val _currentTransitionMutex = Mutex()
     private val _currentTransitionInfo: MutableStateFlow<TransitionInfo> =
         MutableStateFlow(
             TransitionInfo(
@@ -146,6 +149,9 @@ constructor(
      */
     private var updateTransitionId: UUID? = null
 
+    // Only used in a test environment
+    var forceDelayForRaceConditionTest = false
+
     init {
         // Start with a FINISHED transition in OFF. KeyguardBootInteractor will transition from OFF
         // to either GONE or LOCKSCREEN once we're booted up and can determine which state we should
@@ -162,9 +168,21 @@ constructor(
 
     override suspend fun startTransition(info: TransitionInfo): UUID? {
         _currentTransitionInfo.value = info
+        Log.d(TAG, "(Internal) Setting current transition info: $info")
+
+        // There is no fairness guarantee with 'withContext', which means that transitions could
+        // be processed out of order. Use a Mutex to guarantee ordering.
+        _currentTransitionMutex.lock()
+
+        // Only used in a test environment
+        if (forceDelayForRaceConditionTest) {
+            delay(50L)
+        }
 
         // Animators must be started on the main thread.
         return withContext("$TAG#startTransition", mainDispatcher) {
+            _currentTransitionMutex.unlock()
+
             if (lastStep.from == info.from && lastStep.to == info.to) {
                 Log.i(TAG, "Duplicate call to start the transition, rejecting: $info")
                 return@withContext null

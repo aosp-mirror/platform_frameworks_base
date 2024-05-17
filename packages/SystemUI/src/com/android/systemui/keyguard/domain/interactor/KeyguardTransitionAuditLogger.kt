@@ -56,12 +56,6 @@ constructor(
         }
 
         scope.launch {
-            sharedNotificationContainerViewModel
-                .getMaxNotifications { height, useExtraShelfSpace -> height.toInt() }
-                .collect { logger.log(TAG, VERBOSE, "Notif: max height in px", it) }
-        }
-
-        scope.launch {
             sharedNotificationContainerViewModel.isOnLockscreen.collect {
                 logger.log(TAG, VERBOSE, "Notif: isOnLockscreen", it)
             }
