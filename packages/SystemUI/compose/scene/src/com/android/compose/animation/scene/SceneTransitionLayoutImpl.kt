@@ -29,7 +29,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.LookaheadScope
-import androidx.compose.ui.layout.approachLayout
+import androidx.compose.ui.layout.intermediateLayout
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
@@ -150,9 +150,7 @@ internal class SceneTransitionLayoutImpl(
                 .swipeToScene(horizontalGestureHandler)
                 .swipeToScene(verticalGestureHandler)
                 // Animate the size of this layout.
-                .approachLayout(
-                    isMeasurementApproachInProgress = { state.isTransitioning() },
-                ) { measurable, constraints ->
+                .intermediateLayout { measurable, constraints ->
                     // Measure content normally.
                     val placeable = measurable.measure(constraints)
 

@@ -30,7 +30,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.layout.approachLayout
+import androidx.compose.ui.layout.intermediateLayout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.zIndex
@@ -60,9 +60,7 @@ internal class Scene(
         Box(
             modifier
                 .zIndex(zIndex)
-                .approachLayout(
-                    isMeasurementApproachInProgress = { scope.layoutState.isTransitioning() }
-                ) { measurable, constraints ->
+                .intermediateLayout { measurable, constraints ->
                     targetSize = lookaheadSize
                     val placeable = measurable.measure(constraints)
                     layout(placeable.width, placeable.height) { placeable.place(0, 0) }

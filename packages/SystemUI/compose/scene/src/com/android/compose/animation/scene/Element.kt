@@ -32,11 +32,10 @@ import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.layout.ApproachMeasureScope
-import androidx.compose.ui.layout.LookaheadScope
+import androidx.compose.ui.layout.IntermediateMeasureScope
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.Placeable
-import androidx.compose.ui.layout.approachLayout
+import androidx.compose.ui.layout.intermediateLayout
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.testTag
@@ -154,9 +153,7 @@ internal fun Modifier.element(
     return this.then(ElementModifier(layoutImpl, scene, element, sceneValues))
         // TODO(b/311132415): Move this into ElementNode once we can create a delegate
         // IntermediateLayoutModifierNode.
-        .approachLayout(
-            isMeasurementApproachInProgress = { layoutImpl.state.isTransitioning() },
-        ) { measurable, constraints ->
+        .intermediateLayout { measurable, constraints ->
             val placeable =
                 measure(layoutImpl, scene, element, sceneValues, measurable, constraints)
             layout(placeable.width, placeable.height) {
@@ -431,7 +428,7 @@ private fun elementAlpha(
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
-private fun ApproachMeasureScope.measure(
+private fun IntermediateMeasureScope.measure(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     element: Element,
@@ -508,7 +505,7 @@ private fun getDrawScale(
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
-private fun ApproachMeasureScope.place(
+private fun IntermediateMeasureScope.place(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     element: Element,
@@ -516,8 +513,6 @@ private fun ApproachMeasureScope.place(
     placeable: Placeable,
     placementScope: Placeable.PlacementScope,
 ) {
-    this as LookaheadScope
-
     with(placementScope) {
         // Update the offset (relative to the SceneTransitionLayout) this element has in this scene
         // when idle.
