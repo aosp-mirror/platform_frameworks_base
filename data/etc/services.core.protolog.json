@@ -583,6 +583,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "7211222997110112110": {
+      "message": "Refreshing activity for freeform camera compatibility treatment, activityRecord=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/ActivityRefresher.java"
+    },
     "1665699123574159131": {
       "message": "Starting activity when config will change = %b",
       "level": "VERBOSE",
@@ -1769,12 +1775,6 @@
       "message": "Display id=%d is ignoring all orientation requests, camera is active and the top activity is eligible for force rotation, return %s,portrait activity: %b, is natural orientation portrait: %b.",
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
-    },
-    "-7756685416834187936": {
-      "message": "Refreshing activity for camera compatibility treatment, activityRecord=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
     },
     "-5176775281239247368": {
