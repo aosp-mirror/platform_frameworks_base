@@ -18,9 +18,13 @@ package com.android.systemui.brightness.data.repository
 
 import android.content.applicationContext
 import android.os.UserManager
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
+import android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf
 import androidx.test.filters.SmallTest
 import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin
+import com.android.systemui.Flags.FLAG_ENFORCE_BRIGHTNESS_BASE_USER_RESTRICTION
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testDispatcher
@@ -40,14 +44,18 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class BrightnessPolicyRepositoryImplTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class BrightnessPolicyRepositoryImplTest(flags: FlagsParameterization) : SysuiTestCase() {
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     private val kosmos = testKosmos()
-
-    private val fakeUserRepository = kosmos.fakeUserRepository
 
     private val mockUserRestrictionChecker: UserRestrictionChecker = mock {
         whenever(checkIfRestrictionEnforced(any(), anyString(), anyInt())).thenReturn(null)
@@ -130,7 +138,83 @@ class BrightnessPolicyRepositoryImplTest : SysuiTestCase() {
             }
         }
 
-    private companion object {
-        val RESTRICTION = UserManager.DISALLOW_CONFIG_BRIGHTNESS
+    @Test
+    @DisableFlags(FLAG_ENFORCE_BRIGHTNESS_BASE_USER_RESTRICTION)
+    fun brightnessBaseUserRestriction_flagOff_noRestriction() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(
+                        mockUserRestrictionChecker.hasBaseUserRestriction(
+                            any(),
+                            eq(RESTRICTION),
+                            eq(userRepository.getSelectedUserInfo().id)
+                        )
+                    )
+                    .thenReturn(true)
+
+                val restrictions by collectLastValue(underTest.restrictionPolicy)
+
+                assertThat(restrictions).isEqualTo(PolicyRestriction.NoRestriction)
+            }
+        }
+
+    @Test
+    fun bothRestrictions_returnsSetEnforcedAdminFromCheck() =
+        with(kosmos) {
+            testScope.runTest {
+                val enforcedAdmin: EnforcedAdmin =
+                    EnforcedAdmin.createDefaultEnforcedAdminWithRestriction(RESTRICTION)
+
+                whenever(
+                        mockUserRestrictionChecker.checkIfRestrictionEnforced(
+                            any(),
+                            eq(RESTRICTION),
+                            eq(userRepository.getSelectedUserInfo().id)
+                        )
+                    )
+                    .thenReturn(enforcedAdmin)
+
+                whenever(
+                        mockUserRestrictionChecker.hasBaseUserRestriction(
+                            any(),
+                            eq(RESTRICTION),
+                            eq(userRepository.getSelectedUserInfo().id)
+                        )
+                    )
+                    .thenReturn(true)
+
+                val restrictions by collectLastValue(underTest.restrictionPolicy)
+
+                assertThat(restrictions).isEqualTo(PolicyRestriction.Restricted(enforcedAdmin))
+            }
+        }
+
+    @Test
+    @EnableFlags(FLAG_ENFORCE_BRIGHTNESS_BASE_USER_RESTRICTION)
+    fun brightnessBaseUserRestriction_flagOn_emptyRestriction() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(
+                        mockUserRestrictionChecker.hasBaseUserRestriction(
+                            any(),
+                            eq(RESTRICTION),
+                            eq(userRepository.getSelectedUserInfo().id)
+                        )
+                    )
+                    .thenReturn(true)
+
+                val restrictions by collectLastValue(underTest.restrictionPolicy)
+
+                assertThat(restrictions).isEqualTo(PolicyRestriction.Restricted(EnforcedAdmin()))
+            }
+        }
+
+    companion object {
+        private const val RESTRICTION = UserManager.DISALLOW_CONFIG_BRIGHTNESS
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return allCombinationsOf(FLAG_ENFORCE_BRIGHTNESS_BASE_USER_RESTRICTION)
+        }
     }
 }

@@ -48,7 +48,6 @@ class BrightnessPolicyEnforcementInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
 
     private val mockActivityStarter = kosmos.activityStarter
-    private val fakeBrightnessPolicyEnforcementInteractor = kosmos.fakeBrightnessPolicyRepository
 
     private val underTest =
         with(kosmos) {
@@ -70,7 +69,18 @@ class BrightnessPolicyEnforcementInteractorTest : SysuiTestCase() {
 
                 fakeBrightnessPolicyRepository.setCurrentUserRestricted()
 
-                assertThat(restriction).isInstanceOf(PolicyRestriction.Restricted::class.java)
+                assertThat(restriction)
+                    .isEqualTo(
+                        PolicyRestriction.Restricted(
+                            EnforcedAdmin.createDefaultEnforcedAdminWithRestriction(
+                                BrightnessPolicyRepository.RESTRICTION
+                            )
+                        )
+                    )
+
+                fakeBrightnessPolicyRepository.setBaseUserRestriction()
+
+                assertThat(restriction).isEqualTo(PolicyRestriction.Restricted(EnforcedAdmin()))
             }
         }
 

@@ -38,4 +38,8 @@ class FakeBrightnessPolicyRepository : BrightnessPolicyRepository {
                 )
             )
     }
+
+    fun setBaseUserRestriction() {
+        _restrictionPolicy.value = PolicyRestriction.Restricted(RestrictedLockUtils.EnforcedAdmin())
+    }
 }
