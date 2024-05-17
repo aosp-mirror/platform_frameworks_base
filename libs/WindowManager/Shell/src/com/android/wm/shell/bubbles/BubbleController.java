@@ -2404,7 +2404,10 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public void setBubbleBarBounds(Rect bubbleBarBounds) {
-            mMainExecutor.execute(() -> mBubblePositioner.setBubbleBarBounds(bubbleBarBounds));
+            mMainExecutor.execute(() -> {
+                mBubblePositioner.setBubbleBarBounds(bubbleBarBounds);
+                if (mLayerView != null) mLayerView.updateExpandedView();
+            });
         }
     }
 
