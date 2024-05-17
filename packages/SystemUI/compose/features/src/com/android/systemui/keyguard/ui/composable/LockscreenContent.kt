@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
@@ -60,6 +61,6 @@ constructor(
         }
 
         val blueprint = blueprintByBlueprintId[blueprintId] ?: return
-        with(blueprint) { Content(modifier) }
+        with(blueprint) { Content(modifier.sysuiResTag("keyguard_root_view")) }
     }
 }
