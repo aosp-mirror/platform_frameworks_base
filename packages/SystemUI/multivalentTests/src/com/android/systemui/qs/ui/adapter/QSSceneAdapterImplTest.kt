@@ -257,7 +257,7 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             runCurrent()
             clearInvocations(qsImpl!!)
 
-            underTest.setState(QSSceneAdapter.State.UnsquishingQQS(squishiness))
+            underTest.setState(QSSceneAdapter.State.UnsquishingQQS { squishiness })
             with(qsImpl!!) {
                 verify(this).setQsVisible(true)
                 verify(this)
