@@ -1630,8 +1630,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     /**
      * Returns true iff the caller is identified to be the current input method with the token.
-     * @param token The window token given to the input method when it was started.
-     * @return true if and only if non-null valid token is specified.
+     *
+     * @param token the window token given to the input method when it was started
+     * @return true if and only if non-null valid token is specified
      */
     @GuardedBy("ImfLock.class")
     private boolean calledWithValidTokenLocked(@NonNull IBinder token) {
@@ -1787,10 +1788,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     /**
      * Gets enabled subtypes of the specified {@link InputMethodInfo}.
      *
-     * @param imiId if null, returns enabled subtypes for the current {@link InputMethodInfo}.
+     * @param imiId                           if null, returns enabled subtypes for the current
+     *                                        {@link InputMethodInfo}
      * @param allowsImplicitlyEnabledSubtypes {@code true} to return the implicitly enabled
-     *                                         subtypes.
-     * @param userId the user ID to be queried about.
+     *                                        subtypes
+     * @param userId                          the user ID to be queried about
      */
     @Override
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(String imiId,
@@ -1834,10 +1836,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * <p>As a general principle, IPCs from the application process that take
      * {@link IInputMethodClient} will be rejected without this step.</p>
      *
-     * @param client {@link android.os.Binder} proxy that is associated with the singleton instance
-     *               of {@link android.view.inputmethod.InputMethodManager} that runs on the client
-     *               process
-     * @param inputConnection communication channel for the fallback {@link InputConnection}
+     * @param client                {@link android.os.Binder} proxy that is associated with the
+     *                              singleton instance of
+     *                              {@link android.view.inputmethod.InputMethodManager} that runs
+     *                              on the client process
+     * @param inputConnection       communication channel for the fallback {@link InputConnection}
      * @param selfReportedDisplayId self-reported display ID to which the client is associated.
      *                              Whether the client is still allowed to access to this display
      *                              or not needs to be evaluated every time the client interacts
@@ -1862,10 +1865,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
-    // TODO(b/325515685): Move this method to InputMethodBindingController
     /**
      * Hide the IME if the removed user is the current user.
      */
+    // TODO(b/325515685): Move this method to InputMethodBindingController
     @GuardedBy("ImfLock.class")
     private void onClientRemoved(ClientState client) {
         clearClientSessionLocked(client);
@@ -2222,11 +2225,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     /**
      * Update the current deviceId and return the relevant imeId for this device.
-     *   1. If the device changes to virtual and its custom IME is not available, then disable IME.
-     *   2. If the device changes to virtual with valid custom IME, then return the custom IME. If
-     *      the old device was default, then store the current imeId so it can be restored.
-     *   3. If the device changes to default, restore the default device IME.
-     *   4. Otherwise keep the current imeId.
+     *
+     * <p>1. If the device changes to virtual and its custom IME is not available, then disable
+     * IME.</p>
+     * <p>2. If the device changes to virtual with valid custom IME, then return the custom IME. If
+     * the old device was default, then store the current imeId so it can be restored.</p>
+     * <p>3. If the device changes to default, restore the default device IME.</p>
+     * <p>4. Otherwise keep the current imeId.</p>
      */
     @GuardedBy("ImfLock.class")
     private String computeCurrentDeviceMethodIdLocked(String currentMethodId) {
@@ -2370,12 +2375,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     /**
      * Find the display where the IME should be shown.
      *
-     * @param displayId the ID of the display where the IME client target is.
-     * @param checker instance of {@link ImeDisplayValidator} which is used for
-     *                checking display config to adjust the final target display.
-     * @return The ID of the display where the IME should be shown or
-     *         {@link android.view.Display#INVALID_DISPLAY} if the display has an ImePolicy of
-     *         {@link WindowManager#DISPLAY_IME_POLICY_HIDE}.
+     * @param displayId the ID of the display where the IME client target is
+     * @param checker   instance of {@link ImeDisplayValidator} which is used for
+     *                  checking display config to adjust the final target display
+     * @return the ID of the display where the IME should be shown or
+     * {@link android.view.Display#INVALID_DISPLAY} if the display has an ImePolicy of
+     * {@link WindowManager#DISPLAY_IME_POLICY_HIDE}
      */
     static int computeImeDisplayIdForTarget(int displayId, @NonNull ImeDisplayValidator checker) {
         if (displayId == DEFAULT_DISPLAY || displayId == INVALID_DISPLAY) {
@@ -4149,7 +4154,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * This is kept due to {@code @UnsupportedAppUsage} in
      * {@link InputMethodManager#getInputMethodWindowVisibleHeight()} and a dependency in
      * {@link InputMethodService#onCreate()}.
-     *
      * @return {@link WindowManagerInternal#getInputMethodWindowVisibleHeight(int)}
      *
      * @deprecated TODO(b/113914148): Check if we can remove this
@@ -4308,7 +4312,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     /**
      * Helper method to set a stylus idle-timeout after which handwriting {@code InkWindow}
      * will be removed.
-     * @param timeout to set in milliseconds. To reset to default, use a value <= zero.
+     *
+     * @param timeout to set in milliseconds. To reset to default, use a value <= zero
      */
     @BinderThread
     @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
@@ -5200,10 +5205,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     /**
      * Enable or disable the given IME by updating {@link Settings.Secure#ENABLED_INPUT_METHODS}.
      *
-     * @param id ID of the IME is to be manipulated. It is OK to pass IME ID that is currently not
-     *           recognized by the system.
-     * @param enabled {@code true} if {@code id} needs to be enabled.
-     * @return {@code true} if the IME was previously enabled. {@code false} otherwise.
+     * @param id      ID of the IME is to be manipulated. It is OK to pass IME ID that is currently
+     *                not recognized by the system
+     * @param enabled {@code true} if {@code id} needs to be enabled
+     * @return {@code true} if the IME was previously enabled
      */
     @GuardedBy("ImfLock.class")
     private boolean setInputMethodEnabledLocked(String id, boolean enabled) {
@@ -5310,8 +5315,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     /**
      * Gets the current subtype of this input method.
      *
-     * @param userId User ID to be queried about.
-     * @return The current {@link InputMethodSubtype} for the specified user.
+     * @param userId User ID to be queried about
+     * @return the current {@link InputMethodSubtype} for the specified user
      */
     @Nullable
     @Override
@@ -5385,7 +5390,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     /**
      * Returns the default {@link InputMethodInfo} for the specific userId.
-     * @param userId user ID to query.
+     *
+     * @param userId user ID to query
      */
     @GuardedBy("ImfLock.class")
     private InputMethodInfo queryDefaultInputMethodForUserIdLocked(@UserIdInt int userId) {
@@ -5419,11 +5425,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * Filter the access to the input method by rules of the package visibility. Return {@code true}
      * if the given input method is the currently selected one or visible to the caller.
      *
-     * @param targetPkgName The package name of input method to check.
-     * @param callingUid The caller that is going to access the input method.
-     * @param userId The user ID where the input method resides.
-     * @param settings The input method settings under the given user ID.
-     * @return {@code true} if caller is able to access the input method.
+     * @param targetPkgName the package name of input method to check
+     * @param callingUid    the caller that is going to access the input method
+     * @param userId        the user ID where the input method resides
+     * @param settings      the input method settings under the given user ID
+     * @return {@code true} if caller is able to access the input method
      */
     private boolean canCallerAccessInputMethod(@NonNull String targetPkgName, int callingUid,
             @UserIdInt int userId, @NonNull InputMethodSettings settings) {
@@ -6177,8 +6183,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     /**
      * Handles {@code adb shell ime list}.
-     * @param shellCommand {@link ShellCommand} object that is handling this command.
-     * @return Exit code of the command.
+     *
+     * @param shellCommand {@link ShellCommand} object that is handling this command
+     * @return exit code of the command
      */
     @BinderThread
     @ShellCommandResult
@@ -6236,9 +6243,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     /**
      * Handles {@code adb shell ime enable} and {@code adb shell ime disable}.
      *
-     * @param shellCommand {@link ShellCommand} object that is handling this command.
-     * @param enabled      {@code true} if the command was {@code adb shell ime enable}.
-     * @return Exit code of the command.
+     * @param shellCommand {@link ShellCommand} object that is handling this command
+     * @param enabled      {@code true} if the command was {@code adb shell ime enable}
+     * @return exit code of the command
      */
     @BinderThread
     @ShellCommandResult
@@ -6273,8 +6280,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * {@link ShellCommand#getNextArg()} and {@link ShellCommand#getNextArgRequired()} for the
      * main arguments.</p>
      *
-     * @param shellCommand {@link ShellCommand} from which options should be obtained.
-     * @return User ID to be resolved. {@link UserHandle#CURRENT} if not specified.
+     * @param shellCommand {@link ShellCommand} from which options should be obtained
+     * @return user ID to be resolved. {@link UserHandle#CURRENT} if not specified
      */
     @BinderThread
     @UserIdInt
@@ -6296,12 +6303,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     /**
      * Handles core logic of {@code adb shell ime enable} and {@code adb shell ime disable}.
      *
-     * @param userId user ID specified to the command.  Pseudo user IDs are not supported.
-     * @param imeId IME ID specified to the command.
-     * @param enabled {@code true} for {@code adb shell ime enable}. {@code false} otherwise.
-     * @param out {@link PrintWriter} to output standard messages.
-     * @param error {@link PrintWriter} to output error messages.
-     * @return {@code false} if it fails to enable the IME.  {@code false} otherwise.
+     * @param userId  user ID specified to the command (pseudo user IDs are not supported)
+     * @param imeId   IME ID specified to the command
+     * @param enabled {@code true} for {@code adb shell ime enable}
+     * @param out     {@link PrintWriter} to output standard messages
+     * @param error   {@link PrintWriter} to output error messages
+     * @return {@code false} if it fails to enable the IME
      */
     @BinderThread
     @GuardedBy("ImfLock.class")
@@ -6359,7 +6366,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     /**
      * Handles {@code adb shell ime set}.
      *
-     * @param shellCommand {@link ShellCommand} object that is handling this command.
+     * @param shellCommand {@link ShellCommand} object that is handling this command
      * @return Exit code of the command.
      */
     @BinderThread
@@ -6402,7 +6409,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     /**
      * Handles {@code adb shell ime reset-ime}.
-     * @param shellCommand {@link ShellCommand} object that is handling this command.
+     *
+     * @param shellCommand {@link ShellCommand} object that is handling this command
      * @return Exit code of the command.
      */
     @BinderThread
@@ -6483,7 +6491,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     /**
      * Handles {@code adb shell cmd input_method tracing start/stop/save-for-bugreport}.
-     * @param shellCommand {@link ShellCommand} object that is handling this command.
+     *
+     * @param shellCommand {@link ShellCommand} object that is handling this command
      * @return Exit code of the command.
      */
     @BinderThread
@@ -6528,9 +6537,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     /**
      * @param userId the actual user handle obtained by {@link UserHandle#getIdentifier()}
-     * and *not* pseudo ids like {@link UserHandle#USER_ALL etc}.
-     * @return {@code true} if userId has debugging privileges.
-     * i.e. {@link UserManager#DISALLOW_DEBUGGING_FEATURES} is {@code false}.
+     *               and *not* pseudo ids like {@link UserHandle#USER_ALL etc}
+     * @return {@code true} if userId has debugging privileges
+     * i.e. {@link UserManager#DISALLOW_DEBUGGING_FEATURES} is {@code false}
      */
     private boolean userHasDebugPriv(@UserIdInt int userId, ShellCommand shellCommand) {
         if (mUserManagerInternal.hasUserRestriction(
@@ -6551,8 +6560,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     /**
      * Creates an IME request tracking token for the current focused client.
      *
-     * @param show whether this is a show or a hide request.
-     * @param reason the reason why the IME request was created.
+     * @param show   whether this is a show or a hide request
+     * @param reason the reason why the IME request was created
      */
     @NonNull
     private ImeTracker.Token createStatsTokenForFocusedClient(boolean show,
