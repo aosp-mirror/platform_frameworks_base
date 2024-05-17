@@ -23,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.settingslib.spa.framework.util.asyncMapItem
 import com.android.settingslib.spa.framework.util.filterItem
-import com.android.settingslib.spaprivileged.model.app.AppOps
 import com.android.settingslib.spaprivileged.model.app.AppOpsController
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.android.settingslib.spaprivileged.model.app.IAppOpsController
@@ -45,11 +44,11 @@ abstract class AppOpPermissionListModel(
     private val packageManagers: IPackageManagers = PackageManagers,
 ) : TogglePermissionAppListModel<AppOpPermissionRecord> {
 
-    abstract val appOps: AppOps
+    abstract val appOp: Int
     abstract val permission: String
 
     override val enhancedConfirmationKey: String?
-        get() = AppOpsManager.opToPublicName(appOps.op)
+        get() = AppOpsManager.opToPublicName(appOp)
 
     /**
      * When set, specifies the broader permission who trumps the [permission].
@@ -66,12 +65,27 @@ abstract class AppOpPermissionListModel(
      */
     open val permissionHasAppOpFlag: Boolean = true
 
+    open val modeForNotAllowed: Int = AppOpsManager.MODE_ERRORED
+
+    /**
+     * Use AppOpsManager#setUidMode() instead of AppOpsManager#setMode() when set allowed.
+     *
+     * Security or privacy related app-ops should be set with setUidMode() instead of setMode().
+     */
+    open val setModeByUid = false
+
     /** These not changeable packages will also be hidden from app list. */
     private val notChangeablePackages =
         setOf("android", "com.android.systemui", context.packageName)
 
     private fun createAppOpsController(app: ApplicationInfo) =
-        AppOpsController(context, app, appOps)
+        AppOpsController(
+            context = context,
+            app = app,
+            op = appOp,
+            setModeByUid = setModeByUid,
+            modeForNotAllowed = modeForNotAllowed,
+        )
 
     private fun createRecord(
         app: ApplicationInfo,
@@ -152,7 +166,7 @@ internal fun isAllowed(
         return { true }
     }
 
-    val mode = appOpsController.modeFlow.collectAsStateWithLifecycle(initialValue = null)
+    val mode = appOpsController.mode.collectAsStateWithLifecycle(initialValue = null)
     return {
         when (mode.value) {
             null -> null
