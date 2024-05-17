@@ -24,6 +24,7 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
+import android.os.Bundle;
 import android.os.Looper;
 import android.view.BatchedInputEventReceiver;
 import android.view.Choreographer;
@@ -32,6 +33,7 @@ import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InputMonitor;
 import android.view.MotionEvent;
+import android.view.SurfaceControl;
 import android.view.ViewConfiguration;
 
 import androidx.annotation.VisibleForTesting;
@@ -51,16 +53,20 @@ import java.util.function.Consumer;
  * Helper on top of PipTouchHandler that handles inputs OUTSIDE of the PIP window, which is used to
  * trigger dynamic resize.
  */
-public class PipResizeGestureHandler {
+public class PipResizeGestureHandler implements
+        PipTransitionState.PipTransitionStateChangedListener {
 
     private static final String TAG = "PipResizeGestureHandler";
     private static final int PINCH_RESIZE_SNAP_DURATION = 250;
     private static final float PINCH_RESIZE_AUTO_MAX_RATIO = 0.9f;
+    private static final String RESIZE_BOUNDS_CHANGE = "resize_bounds_change";
 
     private final Context mContext;
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     private final PipBoundsState mPipBoundsState;
     private final PipTouchState mPipTouchState;
+    private final PipScheduler mPipScheduler;
+    private final PipTransitionState mPipTransitionState;
     private final PhonePipMenuController mPhonePipMenuController;
     private final PipUiEventLogger mPipUiEventLogger;
     private final PipPinchResizingAlgorithm mPinchResizingAlgorithm;
@@ -88,6 +94,7 @@ public class PipResizeGestureHandler {
     private boolean mIsSysUiStateValid;
     private boolean mThresholdCrossed;
     private boolean mOngoingPinchToResize = false;
+    private boolean mWaitingForBoundsChangeTransition = false;
     private float mAngle = 0;
     int mFirstIndex = -1;
     int mSecondIndex = -1;
@@ -104,11 +111,17 @@ public class PipResizeGestureHandler {
     private int mCtrlType;
     private int mOhmOffset;
 
-    public PipResizeGestureHandler(Context context, PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipBoundsState pipBoundsState, PipTouchState pipTouchState,
+    public PipResizeGestureHandler(Context context,
+            PipBoundsAlgorithm pipBoundsAlgorithm,
+            PipBoundsState pipBoundsState,
+            PipTouchState pipTouchState,
+            PipScheduler pipScheduler,
+            PipTransitionState pipTransitionState,
             Runnable updateMovementBoundsRunnable,
-            PipUiEventLogger pipUiEventLogger, PhonePipMenuController menuActivityController,
-            ShellExecutor mainExecutor, @Nullable PipPerfHintController pipPerfHintController) {
+            PipUiEventLogger pipUiEventLogger,
+            PhonePipMenuController menuActivityController,
+            ShellExecutor mainExecutor,
+            @Nullable PipPerfHintController pipPerfHintController) {
         mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = mainExecutor;
@@ -116,6 +129,11 @@ public class PipResizeGestureHandler {
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipBoundsState = pipBoundsState;
         mPipTouchState = pipTouchState;
+        mPipScheduler = pipScheduler;
+
+        mPipTransitionState = pipTransitionState;
+        mPipTransitionState.addPipTransitionStateChangedListener(this);
+
         mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
         mPhonePipMenuController = menuActivityController;
         mPipUiEventLogger = pipUiEventLogger;
@@ -125,6 +143,7 @@ public class PipResizeGestureHandler {
             mUserResizeBounds.set(rect);
             // mMotionHelper.synchronizePinnedStackBounds();
             mUpdateMovementBoundsRunnable.run();
+            mPipBoundsState.setBounds(rect);
             resetState();
         };
     }
@@ -202,7 +221,7 @@ public class PipResizeGestureHandler {
     @VisibleForTesting
     void onInputEvent(InputEvent ev) {
         if (!mEnablePinchResize) {
-            // No need to handle anything if neither form of resizing is enabled.
+            // No need to handle anything if resizing isn't enabled.
             return;
         }
 
@@ -227,7 +246,7 @@ public class PipResizeGestureHandler {
                 }
             }
 
-            if (mEnablePinchResize && mOngoingPinchToResize) {
+            if (mOngoingPinchToResize) {
                 onPinchResize(mv);
             }
         }
@@ -249,13 +268,11 @@ public class PipResizeGestureHandler {
     }
 
     boolean willStartResizeGesture(MotionEvent ev) {
-        if (isInValidSysUiState()) {
-            if (ev.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN) {
-                if (mEnablePinchResize && ev.getPointerCount() == 2) {
-                    onPinchResize(ev);
-                    mOngoingPinchToResize = mAllowGesture;
-                    return mAllowGesture;
-                }
+        if (ev.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN) {
+            if (mEnablePinchResize && ev.getPointerCount() == 2) {
+                onPinchResize(ev);
+                mOngoingPinchToResize = mAllowGesture;
+                return mAllowGesture;
             }
         }
         return false;
@@ -284,7 +301,6 @@ public class PipResizeGestureHandler {
             mSecondIndex = -1;
             mAllowGesture = false;
             finishResize();
-            cleanUpHighPerfSessionMaybe();
         }
 
         if (ev.getPointerCount() != 2) {
@@ -347,10 +363,7 @@ public class PipResizeGestureHandler {
                         mDownSecondPoint, mLastPoint, mLastSecondPoint, mMinSize, mMaxSize,
                         mDownBounds, mLastResizeBounds);
 
-                /*
-                mPipTaskOrganizer.scheduleUserResizePip(mDownBounds, mLastResizeBounds,
-                        mAngle, null);
-                 */
+                mPipScheduler.scheduleUserResizePip(mLastResizeBounds, mAngle);
                 mPipBoundsState.setHasUserResizedPip(true);
             }
         }
@@ -399,57 +412,43 @@ public class PipResizeGestureHandler {
     }
 
     private void finishResize() {
-        if (!mLastResizeBounds.isEmpty()) {
-            // Pinch-to-resize needs to re-calculate snap fraction and animate to the snapped
-            // position correctly. Drag-resize does not need to move, so just finalize resize.
-            if (mOngoingPinchToResize) {
-                final Rect startBounds = new Rect(mLastResizeBounds);
-                // If user resize is pretty close to max size, just auto resize to max.
-                if (mLastResizeBounds.width() >= PINCH_RESIZE_AUTO_MAX_RATIO * mMaxSize.x
-                        || mLastResizeBounds.height() >= PINCH_RESIZE_AUTO_MAX_RATIO * mMaxSize.y) {
-                    resizeRectAboutCenter(mLastResizeBounds, mMaxSize.x, mMaxSize.y);
-                }
-
-                // If user resize is smaller than min size, auto resize to min
-                if (mLastResizeBounds.width() < mMinSize.x
-                        || mLastResizeBounds.height() < mMinSize.y) {
-                    resizeRectAboutCenter(mLastResizeBounds, mMinSize.x, mMinSize.y);
-                }
-
-                // get the current movement bounds
-                final Rect movementBounds = mPipBoundsAlgorithm
-                        .getMovementBounds(mLastResizeBounds);
-
-                // snap mLastResizeBounds to the correct edge based on movement bounds
-                snapToMovementBoundsEdge(mLastResizeBounds, movementBounds);
-
-                final float snapFraction = mPipBoundsAlgorithm.getSnapFraction(
-                        mLastResizeBounds, movementBounds);
-                mPipBoundsAlgorithm.applySnapFraction(mLastResizeBounds, snapFraction);
-
-                // disable any touch events beyond resizing too
-                mPipTouchState.setAllowInputEvents(false);
-
-                /*
-                mPipTaskOrganizer.scheduleAnimateResizePip(startBounds, mLastResizeBounds,
-                        PINCH_RESIZE_SNAP_DURATION, mAngle, mUpdateResizeBoundsCallback, () -> {
-                            // enable touch events
-                            mPipTouchState.setAllowInputEvents(true);
-                        });
-                 */
-            } else {
-                /*
-                mPipTaskOrganizer.scheduleFinishResizePip(mLastResizeBounds,
-                        TRANSITION_DIRECTION_USER_RESIZE,
-                        mUpdateResizeBoundsCallback);
-                 */
-            }
-            final float magnetRadiusPercent = (float) mLastResizeBounds.width() / mMinSize.x / 2.f;
-            mPipUiEventLogger.log(
-                    PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_RESIZE);
-        } else {
+        if (mLastResizeBounds.isEmpty()) {
             resetState();
         }
+        if (!mOngoingPinchToResize) {
+            return;
+        }
+        final Rect startBounds = new Rect(mLastResizeBounds);
+
+        // If user resize is pretty close to max size, just auto resize to max.
+        if (mLastResizeBounds.width() >= PINCH_RESIZE_AUTO_MAX_RATIO * mMaxSize.x
+                || mLastResizeBounds.height() >= PINCH_RESIZE_AUTO_MAX_RATIO * mMaxSize.y) {
+            resizeRectAboutCenter(mLastResizeBounds, mMaxSize.x, mMaxSize.y);
+        }
+
+        // If user resize is smaller than min size, auto resize to min
+        if (mLastResizeBounds.width() < mMinSize.x
+                || mLastResizeBounds.height() < mMinSize.y) {
+            resizeRectAboutCenter(mLastResizeBounds, mMinSize.x, mMinSize.y);
+        }
+
+        // get the current movement bounds
+        final Rect movementBounds = mPipBoundsAlgorithm
+                .getMovementBounds(mLastResizeBounds);
+
+        // snap mLastResizeBounds to the correct edge based on movement bounds
+        snapToMovementBoundsEdge(mLastResizeBounds, movementBounds);
+
+        final float snapFraction = mPipBoundsAlgorithm.getSnapFraction(
+                mLastResizeBounds, movementBounds);
+        mPipBoundsAlgorithm.applySnapFraction(mLastResizeBounds, snapFraction);
+
+        // Update the transition state to schedule a resize transition.
+        Bundle extra = new Bundle();
+        extra.putBoolean(RESIZE_BOUNDS_CHANGE, true);
+        mPipTransitionState.setState(PipTransitionState.SCHEDULED_BOUNDS_CHANGE, extra);
+
+        mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_RESIZE);
     }
 
     private void resetState() {
@@ -507,6 +506,40 @@ public class PipResizeGestureHandler {
         int t = cy - h / 2;
         int b = t + h;
         rect.set(l, t, r, b);
+    }
+
+    @Override
+    public void onPipTransitionStateChanged(@PipTransitionState.TransitionState int oldState,
+            @PipTransitionState.TransitionState int newState, @Nullable Bundle extra) {
+        switch (newState) {
+            case PipTransitionState.SCHEDULED_BOUNDS_CHANGE:
+                if (!extra.getBoolean(RESIZE_BOUNDS_CHANGE)) break;
+                mWaitingForBoundsChangeTransition = true;
+                mPipScheduler.scheduleAnimateResizePip(mLastResizeBounds);
+                break;
+            case PipTransitionState.CHANGING_PIP_BOUNDS:
+                if (!mWaitingForBoundsChangeTransition) break;
+
+                // If bounds change transition was scheduled from this class, handle leash updates.
+                mWaitingForBoundsChangeTransition = false;
+
+                SurfaceControl.Transaction startTx = extra.getParcelable(
+                        PipTransition.PIP_START_TX, SurfaceControl.Transaction.class);
+                Rect destinationBounds = extra.getParcelable(
+                        PipTransition.PIP_DESTINATION_BOUNDS, Rect.class);
+                startTx.setPosition(mPipTransitionState.mPinnedTaskLeash,
+                        destinationBounds.left, destinationBounds.top);
+                startTx.apply();
+
+                // All motion operations have actually finished, so make bounds cache updates.
+                cleanUpHighPerfSessionMaybe();
+
+                // Setting state to CHANGED_PIP_BOUNDS applies finishTx and notifies Core.
+                mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
+
+                mUpdateResizeBoundsCallback.accept(destinationBounds);
+                break;
+        }
     }
 
     /**

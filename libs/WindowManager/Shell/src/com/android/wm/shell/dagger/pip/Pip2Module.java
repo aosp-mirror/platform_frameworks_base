@@ -133,6 +133,7 @@ public abstract class Pip2Module {
             PipBoundsAlgorithm pipBoundsAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
             @NonNull PipTransitionState pipTransitionState,
+            @NonNull PipScheduler pipScheduler,
             @NonNull SizeSpecSource sizeSpecSource,
             PipMotionHelper pipMotionHelper,
             FloatingContentCoordinator floatingContentCoordinator,
@@ -140,7 +141,7 @@ public abstract class Pip2Module {
             @ShellMainThread ShellExecutor mainExecutor,
             Optional<PipPerfHintController> pipPerfHintControllerOptional) {
         return new PipTouchHandler(context, shellInit, menuPhoneController, pipBoundsAlgorithm,
-                pipBoundsState, pipTransitionState, sizeSpecSource, pipMotionHelper,
+                pipBoundsState, pipTransitionState, pipScheduler, sizeSpecSource, pipMotionHelper,
                 floatingContentCoordinator, pipUiEventLogger, mainExecutor,
                 pipPerfHintControllerOptional);
     }
