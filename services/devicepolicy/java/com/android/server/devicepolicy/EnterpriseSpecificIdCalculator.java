@@ -52,7 +52,18 @@ class EnterpriseSpecificIdCalculator {
     EnterpriseSpecificIdCalculator(Context context) {
         TelephonyManager telephonyService = context.getSystemService(TelephonyManager.class);
         Preconditions.checkState(telephonyService != null, "Unable to access telephony service");
-        mImei = telephonyService.getImei(0);
+
+        String imei;
+        try {
+            imei = telephonyService.getImei(0);
+        } catch (UnsupportedOperationException doesNotSupportGms) {
+            // Instead of catching the exception, we could check for FEATURE_TELEPHONY_GSM.
+            // However that runs the risk of changing a device's existing ESID if on these devices
+            // telephonyService.getImei() actually returns non-null even when the device does not
+            // declare FEATURE_TELEPHONY_GSM.
+            imei = null;
+        }
+        mImei = imei;
         String meid;
         try {
             meid = telephonyService.getMeid(0);
