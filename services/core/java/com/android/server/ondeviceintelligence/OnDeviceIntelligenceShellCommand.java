@@ -17,6 +17,7 @@
 package com.android.server.ondeviceintelligence;
 
 import android.annotation.NonNull;
+import android.os.Binder;
 import android.os.ShellCommand;
 
 import java.io.PrintWriter;
@@ -78,6 +79,8 @@ final class OnDeviceIntelligenceShellCommand extends ShellCommand {
 
         if (getRemainingArgsCount() == 0 && intelligenceServiceName == null
                 && inferenceServiceName == null) {
+            OnDeviceIntelligenceManagerService.enforceShellOnly(Binder.getCallingUid(),
+                    "resetTemporaryServices");
             mService.resetTemporaryServices();
             out.println("OnDeviceIntelligenceManagerService temporary reset. ");
             return 0;

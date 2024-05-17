@@ -850,7 +850,6 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
 
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
     public void resetTemporaryServices() {
-        enforceShellOnly(Binder.getCallingUid(), "resetTemporaryServices");
         mContext.enforceCallingPermission(
                 Manifest.permission.USE_ON_DEVICE_INTELLIGENCE, TAG);
         synchronized (mLock) {
