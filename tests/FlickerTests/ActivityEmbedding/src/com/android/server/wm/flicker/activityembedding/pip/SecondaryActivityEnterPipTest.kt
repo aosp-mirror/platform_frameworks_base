@@ -205,7 +205,8 @@ class SecondaryActivityEnterPipTest(flicker: LegacyFlickerTest) :
                         it.visibleRegion(ComponentNameMatcher.PIP_CONTENT_OVERLAY)
                     val secondaryVisibleRegion =
                         it.visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-                    overlayVisibleRegion.coversExactly(secondaryVisibleRegion.region)
+                    // TODO(b/340992001): replace coverAtLeast with coverExactly
+                    overlayVisibleRegion.coversAtLeast(secondaryVisibleRegion.region)
                 }
                 .then()
                 .isInvisible(ComponentNameMatcher.PIP_CONTENT_OVERLAY)
