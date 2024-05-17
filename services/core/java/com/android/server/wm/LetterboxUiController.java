@@ -1049,7 +1049,7 @@ final class LetterboxUiController {
      * thin letteboxing
      */
     boolean allowVerticalReachabilityForThinLetterbox() {
-        if (!Flags.disableThinLetterboxingReachability()) {
+        if (!Flags.disableThinLetterboxingPolicy()) {
             return true;
         }
         // When the flag is enabled we allow vertical reachability only if the
@@ -1062,7 +1062,7 @@ final class LetterboxUiController {
      * thin letteboxing
      */
     boolean allowHorizontalReachabilityForThinLetterbox() {
-        if (!Flags.disableThinLetterboxingReachability()) {
+        if (!Flags.disableThinLetterboxingPolicy()) {
             return true;
         }
         // When the flag is enabled we allow horizontal reachability only if the
