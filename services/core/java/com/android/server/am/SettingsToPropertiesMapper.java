@@ -157,6 +157,7 @@ public class SettingsToPropertiesMapper {
         "car_telemetry",
         "codec_fwk",
         "companion",
+        "com_android_adbd",
         "content_protection",
         "context_hub",
         "core_experiments_team_internal",
