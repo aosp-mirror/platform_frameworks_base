@@ -26,8 +26,8 @@ android:layout_height="match_parent">
         android:paddingVertical="16dp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/rightGuideline"
-        app:layout_constraintStart_toStartOf="@+id/leftGuideline"
+        app:layout_constraintRight_toLeftOf="@+id/rightGuideline"
+        app:layout_constraintLeft_toLeftOf="@+id/leftGuideline"
         app:layout_constraintTop_toTopOf="@+id/topGuideline" />
 
     <com.android.systemui.biometrics.BiometricPromptLottieViewWrapper
@@ -35,8 +35,8 @@ android:layout_height="match_parent">
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/avatars" />
 
@@ -63,8 +63,8 @@ android:layout_height="match_parent">
         android:paddingTop="24dp"
         android:fadeScrollbars="false"
         app:layout_constraintBottom_toTopOf="@+id/button_bar"
-        app:layout_constraintEnd_toStartOf="@+id/midGuideline"
-        app:layout_constraintStart_toStartOf="@id/leftGuideline"
+        app:layout_constraintRight_toLeftOf="@+id/midGuideline"
+        app:layout_constraintLeft_toLeftOf="@id/leftGuideline"
         app:layout_constraintTop_toTopOf="@+id/topGuideline">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -89,7 +89,7 @@ android:layout_height="match_parent">
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textAlignment="viewStart"
-                android:paddingLeft="16dp"
+                android:paddingStart="16dp"
                 app:layout_constraintBottom_toBottomOf="@+id/logo"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/logo"
@@ -209,6 +209,7 @@ android:layout_height="match_parent">
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        app:guidelineUseRtl="false"
         app:layout_constraintGuide_begin="@dimen/biometric_dialog_border_padding" />
 
     <androidx.constraintlayout.widget.Guideline
@@ -216,6 +217,7 @@ android:layout_height="match_parent">
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        app:guidelineUseRtl="false"
         app:layout_constraintGuide_end="@dimen/biometric_dialog_border_padding" />
 
     <androidx.constraintlayout.widget.Guideline
@@ -223,6 +225,7 @@ android:layout_height="match_parent">
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        app:guidelineUseRtl="false"
         app:layout_constraintGuide_begin="406dp" />
 
     <androidx.constraintlayout.widget.Guideline
