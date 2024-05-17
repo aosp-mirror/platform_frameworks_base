@@ -16,3 +16,11 @@ flag {
     description: "Feature flag for the api to check if a port supports mode change"
     bug: "323470419"
 }
+
+flag {
+    name: "enable_interface_name_device_filter"
+    is_exported: true
+    namespace: "usb"
+    description: "Feature flag to enable interface name as a parameter for device filter"
+    bug: "312828160"
+}
