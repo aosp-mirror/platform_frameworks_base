@@ -50,7 +50,7 @@ non_updatable_exportable_droidstubs {
         },
         api_lint: {
             enabled: true,
-            new_since: ":android.api.public.latest",
+            new_since: ":android.api.combined.public.latest",
             baseline_file: ":non-updatable-lint-baseline.txt",
         },
     },
@@ -130,7 +130,7 @@ non_updatable_exportable_droidstubs {
         },
         api_lint: {
             enabled: true,
-            new_since: ":android.api.system.latest",
+            new_since: ":android.api.combined.system.latest",
             baseline_file: ":non-updatable-system-lint-baseline.txt",
         },
     },
@@ -185,7 +185,7 @@ non_updatable_exportable_droidstubs {
         },
         api_lint: {
             enabled: true,
-            new_since: ":android.api.test.latest",
+            new_since: ":android.api.combined.test.latest",
             baseline_file: ":non-updatable-test-lint-baseline.txt",
         },
     },
@@ -269,7 +269,7 @@ non_updatable_exportable_droidstubs {
         },
         api_lint: {
             enabled: true,
-            new_since: ":android.api.module-lib.latest",
+            new_since: ":android.api.combined.module-lib.latest",
             baseline_file: ":non-updatable-module-lib-lint-baseline.txt",
         },
     },
