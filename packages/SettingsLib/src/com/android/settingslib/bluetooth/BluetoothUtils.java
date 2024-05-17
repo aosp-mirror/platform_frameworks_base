@@ -276,6 +276,14 @@ public class BluetoothUtils {
         if (isUntetheredHeadset(bluetoothDevice)) {
             return true;
         }
+        if (Flags.enableDeterminingAdvancedDetailsHeaderWithMetadata()) {
+            // A FastPair device that use advanced details header must have METADATA_MAIN_ICON
+            if (getUriMetaData(bluetoothDevice, BluetoothDevice.METADATA_MAIN_ICON) != null) {
+                Log.d(TAG, "isAdvancedDetailsHeader is true with main icon uri");
+                return true;
+            }
+            return false;
+        }
         // The metadata is for Android S
         String deviceType =
                 getStringMetaData(bluetoothDevice, BluetoothDevice.METADATA_DEVICE_TYPE);
@@ -302,12 +310,15 @@ public class BluetoothUtils {
         if (isUntetheredHeadset(bluetoothDevice)) {
             return true;
         }
-        // The metadata is for Android S
-        String deviceType =
-                getStringMetaData(bluetoothDevice, BluetoothDevice.METADATA_DEVICE_TYPE);
-        if (TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET)) {
-            Log.d(TAG, "isAdvancedUntetheredDevice: is untethered device ");
-            return true;
+        if (!Flags.enableDeterminingAdvancedDetailsHeaderWithMetadata()) {
+            // The METADATA_IS_UNTETHERED_HEADSET of an untethered FastPair headset is always true,
+            // so there's no need to check the device type.
+            String deviceType =
+                    getStringMetaData(bluetoothDevice, BluetoothDevice.METADATA_DEVICE_TYPE);
+            if (TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET)) {
+                Log.d(TAG, "isAdvancedUntetheredDevice: is untethered device");
+                return true;
+            }
         }
         return false;
     }
