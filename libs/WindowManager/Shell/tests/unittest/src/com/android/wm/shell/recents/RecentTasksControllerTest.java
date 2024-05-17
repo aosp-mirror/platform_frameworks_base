@@ -511,7 +511,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
         mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
         ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
 
-        mRecentTasksControllerReal.onTaskWindowingModeChanged(taskInfo);
+        mRecentTasksControllerReal.onTaskRunningInfoChanged(taskInfo);
 
         verify(mRecentTasksListener).onRunningTaskChanged(taskInfo);
     }
@@ -525,7 +525,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
         mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
         ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
 
-        mRecentTasksControllerReal.onTaskWindowingModeChanged(taskInfo);
+        mRecentTasksControllerReal.onTaskRunningInfoChanged(taskInfo);
 
         verify(mRecentTasksListener, never()).onRunningTaskChanged(any());
     }

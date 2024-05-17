@@ -253,8 +253,12 @@ public class RecentTasksController implements TaskStackListenerCallback,
         notifyRunningTaskVanished(taskInfo);
     }
 
-    /** Notify listeners that the windowing mode of the given Task was updated. */
-    public void onTaskWindowingModeChanged(ActivityManager.RunningTaskInfo taskInfo) {
+    /**
+     * Notify listeners that the running infos related to recent tasks was updated.
+     *
+     * This currently includes windowing mode and visibility.
+     */
+    public void onTaskRunningInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
         notifyRecentTasksChanged();
         notifyRunningTaskChanged(taskInfo);
     }
