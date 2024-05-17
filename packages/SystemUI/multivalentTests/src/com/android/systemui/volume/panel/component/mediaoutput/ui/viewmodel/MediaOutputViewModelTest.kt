@@ -30,6 +30,7 @@ import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.volume.data.repository.audioSharingRepository
 import com.android.systemui.volume.domain.interactor.audioModeInteractor
 import com.android.systemui.volume.domain.interactor.audioOutputInteractor
 import com.android.systemui.volume.localMediaController
@@ -78,6 +79,7 @@ class MediaOutputViewModelTest : SysuiTestCase() {
                     R.string.media_output_title_without_playing,
                     "media_output_title_without_playing"
                 )
+                addOverride(R.string.audio_sharing_description, "audio_sharing")
             }
 
             whenever(localMediaController.packageName).thenReturn("test.pkg")
@@ -121,6 +123,26 @@ class MediaOutputViewModelTest : SysuiTestCase() {
                 assertThat(connectedDeviceViewModel!!.label)
                     .isEqualTo("media_output_title_without_playing")
                 assertThat(connectedDeviceViewModel!!.deviceName).isEqualTo("test_device")
+            }
+        }
+    }
+
+    @Test
+    fun notPlaying_inAudioSharing_deviceNameSetToAudioSharing() {
+        with(kosmos) {
+            testScope.runTest {
+                playbackStateBuilder.setState(PlaybackState.STATE_STOPPED, 0, 0f)
+                localMediaRepository.updateCurrentConnectedDevice(
+                    mock { whenever(name).thenReturn("test_device") }
+                )
+                audioSharingRepository.setInAudioSharing(true)
+
+                val connectedDeviceViewModel by collectLastValue(underTest.connectedDeviceViewModel)
+                runCurrent()
+
+                assertThat(connectedDeviceViewModel!!.label)
+                    .isEqualTo("media_output_title_without_playing")
+                assertThat(connectedDeviceViewModel!!.deviceName).isEqualTo("audio_sharing")
             }
         }
     }
