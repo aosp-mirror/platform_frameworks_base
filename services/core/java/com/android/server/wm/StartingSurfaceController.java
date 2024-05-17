@@ -140,23 +140,15 @@ public class StartingSurfaceController {
     }
 
     StartingSurface createTaskSnapshotSurface(ActivityRecord activity, TaskSnapshot taskSnapshot) {
-        final WindowState topFullscreenOpaqueWindow;
         final Task task = activity.getTask();
         if (task == null) {
             Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find task for activity="
                     + activity);
             return null;
         }
-        final ActivityRecord topFullscreenActivity = task.getTopFullscreenActivity();
-        if (topFullscreenActivity == null) {
-            Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find top fullscreen for task="
-                    + task);
-            return null;
-        }
-        topFullscreenOpaqueWindow = topFullscreenActivity.getTopFullscreenOpaqueWindow();
-        if (topFullscreenOpaqueWindow == null) {
-            Slog.w(TAG, "TaskSnapshotSurface.create: no opaque window in "
-                    + topFullscreenActivity);
+        final WindowState mainWindow = activity.findMainWindow(false);
+        if (mainWindow == null) {
+            Slog.w(TAG, "TaskSnapshotSurface.create: no main window in " + activity);
             return null;
         }
         if (activity.mDisplayContent.getRotation() != taskSnapshot.getRotation()) {

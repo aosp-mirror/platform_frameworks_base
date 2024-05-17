@@ -466,17 +466,17 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
     }
 
     /**
-     * @return The {@link WindowInsetsController.Appearance} flags for the top fullscreen opaque
-     * window in the given {@param TYPE}.
+     * @return The {@link WindowInsetsController.Appearance} flags for the top main app window in
+     * the given {@param TYPE}.
      */
     @WindowInsetsController.Appearance
     private int getAppearance(TYPE source) {
         final ActivityRecord topFullscreenActivity = getTopFullscreenActivity(source);
-        final WindowState topFullscreenOpaqueWindow = topFullscreenActivity != null
-                ? topFullscreenActivity.getTopFullscreenOpaqueWindow()
+        final WindowState topFullscreenWindow = topFullscreenActivity != null
+                ? topFullscreenActivity.findMainWindow()
                 : null;
-        if (topFullscreenOpaqueWindow != null) {
-            return topFullscreenOpaqueWindow.mAttrs.insetsFlags.appearance;
+        if (topFullscreenWindow != null) {
+            return topFullscreenWindow.mAttrs.insetsFlags.appearance;
         }
         return 0;
     }
