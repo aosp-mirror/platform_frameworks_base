@@ -42,6 +42,7 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.common.split.SplitScreenConstants.splitPositionToString;
+import static com.android.wm.shell.common.split.SplitScreenUtils.getResizingBackgroundColor;
 import static com.android.wm.shell.common.split.SplitScreenUtils.reverseSplitPosition;
 import static com.android.wm.shell.common.split.SplitScreenUtils.splitFailureMessage;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
@@ -2352,14 +2353,20 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     @Override
-    public void onLayoutSizeChanging(SplitLayout layout, int offsetX, int offsetY) {
+    public void onLayoutSizeChanging(SplitLayout layout, int offsetX, int offsetY,
+            boolean shouldUseParallaxEffect) {
         final SurfaceControl.Transaction t = mTransactionPool.acquire();
         t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
-        updateSurfaceBounds(layout, t, true /* applyResizingOffset */);
+        updateSurfaceBounds(layout, t, shouldUseParallaxEffect);
         getMainStageBounds(mTempRect1);
         getSideStageBounds(mTempRect2);
-        mMainStage.onResizing(mTempRect1, mTempRect2, t, offsetX, offsetY, mShowDecorImmediately);
-        mSideStage.onResizing(mTempRect2, mTempRect1, t, offsetX, offsetY, mShowDecorImmediately);
+        // TODO (b/307490004): "commonColor" below is a temporary fix to ensure the colors on both
+        //  sides match. When b/307490004 is fixed, this code can be reverted.
+        float[] commonColor = getResizingBackgroundColor(mSideStage.mRootTaskInfo).getComponents();
+        mMainStage.onResizing(
+                mTempRect1, mTempRect2, t, offsetX, offsetY, mShowDecorImmediately, commonColor);
+        mSideStage.onResizing(
+                mTempRect2, mTempRect1, t, offsetX, offsetY, mShowDecorImmediately, commonColor);
         t.apply();
         mTransactionPool.release(t);
     }
