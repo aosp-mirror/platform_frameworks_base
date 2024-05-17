@@ -351,7 +351,7 @@ public class TaskStackChangeListeners {
                     case ON_TASK_SNAPSHOT_CHANGED: {
                         Trace.beginSection("onTaskSnapshotChanged");
                         final TaskSnapshot snapshot = (TaskSnapshot) msg.obj;
-                        final ThumbnailData thumbnail = new ThumbnailData(snapshot);
+                        final ThumbnailData thumbnail = ThumbnailData.fromSnapshot(snapshot);
                         boolean snapshotConsumed = false;
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             boolean consumed = mTaskStackListeners.get(i).onTaskSnapshotChanged(

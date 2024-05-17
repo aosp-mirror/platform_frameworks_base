@@ -42,7 +42,7 @@ public class RecentsAnimationControllerCompat {
         try {
             final TaskSnapshot snapshot = mAnimationController.screenshotTask(taskId);
             if (snapshot != null) {
-                return new ThumbnailData(snapshot);
+                return ThumbnailData.fromSnapshot(snapshot);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to screenshot task", e);
