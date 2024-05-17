@@ -521,9 +521,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         false);
                 final boolean packageRemovedPermanently =
                         (extras == null || !isReplacing || (isReplacing && isArchival));
-
                 if (packageRemovedPermanently) {
                     for (String pkgName : pkgList) {
+                        if (DEBUG) {
+                            Slog.i(TAG, "calling removeHostsAndProvidersForPackageLocked() "
+                                    + "because package removed permanently. extras=" + extras
+                                    + " isReplacing=" + isReplacing + " isArchival=" + isArchival);
+                        }
                         componentsModified |= removeHostsAndProvidersForPackageLocked(
                                 pkgName, userId);
                     }
@@ -2053,6 +2057,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void deleteHostLocked(Host host) {
+        if (DEBUG) {
+            Slog.i(TAG, "deleteHostLocked() " + host);
+        }
         final int N = host.widgets.size();
         for (int i = N - 1; i >= 0; i--) {
             Widget widget = host.widgets.remove(i);
@@ -2065,6 +2072,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void deleteAppWidgetLocked(Widget widget) {
+        if (DEBUG) {
+            Slog.i(TAG, "deleteAppWidgetLocked() " + widget);
+        }
         // We first unbind all services that are bound to this id
         // Check if we need to destroy any services (if no other app widgets are
         // referencing the same service)
@@ -2532,6 +2542,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 return widget;
             }
         }
+        if (DEBUG) {
+            Slog.i(TAG, "cannot find widget for appWidgetId=" + appWidgetId + " uid=" + uid
+                    + " packageName=" + packageName);
+        }
         return null;
     }
 
@@ -2649,6 +2663,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     // Remove widgets for provider that are hosted in userId.
     private void deleteWidgetsLocked(Provider provider, int userId) {
+        if (DEBUG) {
+            Slog.i(TAG, "deleteWidgetsLocked() provider=" + provider + " userId=" + userId);
+        }
         final int N = provider.widgets.size();
         for (int i = N - 1; i >= 0; i--) {
             Widget widget = provider.widgets.get(i);
@@ -3326,6 +3343,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      * Adds the widget to mWidgets and tracks the package name in mWidgetPackages.
      */
     void addWidgetLocked(Widget widget) {
+        if (DEBUG) {
+            Slog.i(TAG, "addWidgetLocked() " + widget);
+        }
         mWidgets.add(widget);
 
         onWidgetProviderAddedOrChangedLocked(widget);
@@ -3362,6 +3382,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      * removes the associated package from the cache.
      */
     void removeWidgetLocked(Widget widget) {
+        if (DEBUG) {
+            Slog.i(TAG, "removeWidgetLocked() " + widget);
+        }
         mWidgets.remove(widget);
         onWidgetRemovedLocked(widget);
         scheduleNotifyAppWidgetRemovedLocked(widget);
@@ -3396,6 +3419,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      * Clears all widgets and associated cache of packages with bound widgets.
      */
     void clearWidgetsLocked() {
+        if (DEBUG) {
+            Slog.i(TAG, "clearWidgetsLocked()");
+        }
         mWidgets.clear();
 
         onWidgetsClearedLocked();
@@ -3757,6 +3783,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     void onUserStopped(int userId) {
+        if (DEBUG) {
+            Slog.i(TAG, "onUserStopped() " + userId);
+        }
         synchronized (mLock) {
             boolean crossProfileWidgetsChanged = false;
 
@@ -3994,6 +4023,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private boolean removeHostsAndProvidersForPackageLocked(String pkgName, int userId) {
+        if (DEBUG) {
+            Slog.i(TAG, "removeHostsAndProvidersForPackageLocked() pkg=" + pkgName
+                    + " userId=" + userId);
+        }
         boolean removed = removeProvidersForPackageLocked(pkgName, userId);
 
         // Delete the hosts for this package too
@@ -4551,6 +4584,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 // Apps that run in the same user as either the host or the provider and
                 // have the bind widget permission have access to the widget.
                 return true;
+            }
+            if (DEBUG) {
+                Slog.i(TAG, "canAccessAppWidget() failed. packageName=" + packageName
+                        + " uid=" + uid + " userId=" + userId + " widget=" + widget);
             }
             return false;
         }
