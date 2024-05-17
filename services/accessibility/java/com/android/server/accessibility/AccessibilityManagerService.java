@@ -4257,7 +4257,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 );
 
         if (!targetWithNoTile.isEmpty()) {
-            throw new IllegalArgumentException(
+            Slog.e(LOG_TAG,
                     "Unable to add/remove Tiles for a11y features: " + targetWithNoTile
                             + "as the Tiles aren't provided");
         }
