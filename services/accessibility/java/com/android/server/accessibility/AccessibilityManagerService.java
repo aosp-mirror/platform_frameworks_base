@@ -65,6 +65,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.PermissionManuallyEnforced;
 import android.annotation.RequiresNoPermission;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
@@ -857,6 +858,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mPackageMonitor = monitor;
     }
 
+    @SuppressLint("MissingPermission")
     private void registerBroadcastReceivers() {
         // package changes
         mPackageMonitor = new ManagerPackageMonitor(this);
@@ -890,33 +892,47 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
                 } else if (Intent.ACTION_SETTING_RESTORED.equals(action)) {
                     final String which = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
-                    if (Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES.equals(which)) {
-                        synchronized (mLock) {
-                            restoreEnabledAccessibilityServicesLocked(
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE),
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE),
-                                    intent.getIntExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT,
-                                            0));
+                    if (which == null) {
+                        return;
+                    }
+                    final String previousValue =
+                            intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE);
+                    final String newValue =
+                            intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE);
+                    final int restoredFromSdk =
+                            intent.getIntExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT, 0);
+                    switch (which) {
+                        case Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES -> {
+                            synchronized (mLock) {
+                                restoreEnabledAccessibilityServicesLocked(
+                                        previousValue, newValue, restoredFromSdk);
+                            }
                         }
-                    } else if (ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED.equals(which)) {
-                        synchronized (mLock) {
-                            restoreLegacyDisplayMagnificationNavBarIfNeededLocked(
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE),
-                                    intent.getIntExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT,
-                                            0));
+                        case ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED -> {
+                            synchronized (mLock) {
+                                restoreLegacyDisplayMagnificationNavBarIfNeededLocked(
+                                        newValue, restoredFromSdk);
+                            }
                         }
-                    } else if (Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS.equals(which)) {
-                        synchronized (mLock) {
-                            restoreAccessibilityButtonTargetsLocked(
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE),
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
+                        case Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS -> {
+                            synchronized (mLock) {
+                                restoreAccessibilityButtonTargetsLocked(
+                                        previousValue, newValue);
+                            }
                         }
-                    } else if (Settings.Secure.ACCESSIBILITY_QS_TARGETS.equals(which)) {
-                        if (!android.view.accessibility.Flags.a11yQsShortcut()) {
-                            return;
+                        case Settings.Secure.ACCESSIBILITY_QS_TARGETS -> {
+                            if (!android.view.accessibility.Flags.a11yQsShortcut()) {
+                                return;
+                            }
+                            restoreAccessibilityQsTargets(newValue);
                         }
-                        restoreAccessibilityQsTargets(
-                                intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
+                        case Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE -> {
+                            if (!android.view.accessibility.Flags
+                                    .restoreA11yShortcutTargetService()) {
+                                return;
+                            }
+                            restoreAccessibilityShortcutTargetService(previousValue, newValue);
+                        }
                     }
                 }
             }
@@ -2079,6 +2095,31 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    /**
+     * Merges the old and restored value of
+     * {@link Settings.Secure#ACCESSIBILITY_SHORTCUT_TARGET_SERVICE}.
+     */
+    private void restoreAccessibilityShortcutTargetService(
+            String oldValue, String restoredValue) {
+        final Set<String> targetsFromSetting = new ArraySet<>();
+        readColonDelimitedStringToSet(oldValue, str -> str,
+                targetsFromSetting, /*doMerge=*/false);
+        readColonDelimitedStringToSet(restoredValue, str -> str,
+                targetsFromSetting, /*doMerge=*/true);
+        synchronized (mLock) {
+            final AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
+            final Set<String> shortcutTargets =
+                    userState.getShortcutTargetsLocked(UserShortcutType.HARDWARE);
+            shortcutTargets.clear();
+            shortcutTargets.addAll(targetsFromSetting);
+            persistColonDelimitedSetToSettingLocked(
+                    Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
+                    UserHandle.USER_SYSTEM, targetsFromSetting, str -> str);
+            scheduleNotifyClientsOfServicesStateChangeLocked(userState);
+            onUserStateChangedLocked(userState);
+        }
+    }
+
     private int getClientStateLocked(AccessibilityUserState userState) {
         return userState.getClientStateLocked(
             mUiAutomationManager.canIntrospect(),
@@ -2605,12 +2646,35 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
             builder.append(str);
         }
+        final String builderValue = builder.toString();
+        final String settingValue = TextUtils.isEmpty(builderValue)
+                ? defaultEmptyString : builderValue;
+        if (android.view.accessibility.Flags.restoreA11yShortcutTargetService()) {
+            final String currentValue = Settings.Secure.getStringForUser(
+                    mContext.getContentResolver(), settingName, userId);
+            if (Objects.equals(settingValue, currentValue)) {
+                // This logic exists to fix a bug where AccessibilityManagerService was writing
+                // `null` to the ACCESSIBILITY_SHORTCUT_TARGET_SERVICE setting during early boot
+                // during setup, due to a race condition in package scanning making A11yMS think
+                // that the default service was not installed.
+                //
+                // Writing `null` was implicitly causing that Setting to have the default
+                // `DEFAULT_OVERRIDEABLE_BY_RESTORE` property, which was preventing B&R for that
+                // Setting altogether.
+                //
+                // The "quick fix" here is to not write `null` if the existing value is already
+                // `null`. The ideal fix would be use the Settings.Secure#putStringForUser overload
+                // that allows override-by-restore, but the full repercussions of using that here
+                // have not yet been evaluated.
+                // TODO: b/333457719 - Evaluate and fix AccessibilityManagerService's usage of
+                //  "overridable by restore" when writing secure settings.
+                return;
+            }
+        }
         final long identity = Binder.clearCallingIdentity();
         try {
-            final String settingValue = builder.toString();
             Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                    settingName,
-                    TextUtils.isEmpty(settingValue) ? defaultEmptyString : settingValue, userId);
+                    settingName, settingValue, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

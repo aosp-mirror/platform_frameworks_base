@@ -26,6 +26,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.provider.SettingsStringUtil;
 
@@ -35,6 +37,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -48,6 +51,10 @@ import java.util.concurrent.ExecutionException;
  */
 @RunWith(AndroidJUnit4.class)
 public class SettingsHelperRestoreTest {
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     private static final float FLOAT_TOLERANCE = 0.01f;
 
     private Context mContext;
@@ -198,6 +205,34 @@ public class SettingsHelperRestoreTest {
         Intent intentReceived = futureIntent.get();
         assertThat(intentReceived.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE))
                 .isEqualTo(restoreSettingValue);
+        assertThat(intentReceived.getIntExtra(
+                Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT, /* defaultValue= */ 0))
+                .isEqualTo(Build.VERSION.SDK_INT);
+    }
+
+    @Test
+    @EnableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SHORTCUT_TARGET_SERVICE)
+    public void restoreAccessibilityShortcutTargetService_broadcastSent()
+            throws ExecutionException, InterruptedException {
+        BroadcastInterceptingContext interceptingContext = new BroadcastInterceptingContext(
+                mContext);
+        final String settingName = Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
+        final String restoredValue = "com.android.a11y/Service";
+        BroadcastInterceptingContext.FutureIntent futureIntent =
+                interceptingContext.nextBroadcastIntent(Intent.ACTION_SETTING_RESTORED);
+
+        mSettingsHelper.restoreValue(
+                interceptingContext,
+                mContentResolver,
+                new ContentValues(2),
+                Settings.Secure.getUriFor(settingName),
+                settingName,
+                restoredValue,
+                Build.VERSION.SDK_INT);
+
+        Intent intentReceived = futureIntent.get();
+        assertThat(intentReceived.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE))
+                .isEqualTo(restoredValue);
         assertThat(intentReceived.getIntExtra(
                 Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT, /* defaultValue= */ 0))
                 .isEqualTo(Build.VERSION.SDK_INT);
