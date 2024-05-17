@@ -419,8 +419,7 @@ internal constructor(
         const val ACTION_PREVIOUSLY_CONNECTED_DEVICE =
             "com.android.settings.PREVIOUSLY_CONNECTED_DEVICE"
         const val ACTION_PAIR_NEW_DEVICE = "android.settings.BLUETOOTH_PAIRING_SETTINGS"
-        const val ACTION_AUDIO_SHARING =
-            "com.google.android.settings.BLUETOOTH_AUDIO_SHARING_SETTINGS"
+        const val ACTION_AUDIO_SHARING = "com.android.settings.BLUETOOTH_AUDIO_SHARING_SETTINGS"
         const val DISABLED_ALPHA = 0.3f
         const val ENABLED_ALPHA = 1f
         const val PROGRESS_BAR_ANIMATION_DURATION_MS = 1500L
