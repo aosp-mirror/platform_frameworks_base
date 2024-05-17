@@ -705,7 +705,6 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
-    @Ignore("b/341163515 - fails to clean up animators correctly")
     public void testSwipeWhileLocked_notifiesKeyguardState() {
         mStatusBarStateController.setState(KEYGUARD);
 
