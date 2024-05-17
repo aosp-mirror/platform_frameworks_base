@@ -24,10 +24,10 @@ import android.app.Notification;
 import android.graphics.drawable.AnimatedImageDrawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
-import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
@@ -40,7 +40,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class NotificationBigPictureTemplateViewWrapperTest extends SysuiTestCase {
 

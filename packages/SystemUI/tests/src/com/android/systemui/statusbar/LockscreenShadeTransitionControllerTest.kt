@@ -1,9 +1,9 @@
 package com.android.systemui.statusbar
 
 import android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.ExpandHelper
 import com.android.systemui.SysUITestModule
@@ -74,7 +74,7 @@ private fun <T> anyObject(): T {
 
 @SmallTest
 @RunWithLooper(setAsMainLooper = true)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
 

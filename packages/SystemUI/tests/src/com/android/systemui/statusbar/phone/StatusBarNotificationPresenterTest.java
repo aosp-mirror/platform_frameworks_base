@@ -34,10 +34,10 @@ import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.InitController;
@@ -85,7 +85,7 @@ import java.util.List;
 import java.util.Set;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper()
 public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     private StatusBarNotificationPresenter mStatusBarNotificationPresenter;

@@ -49,12 +49,12 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.ViewUtils;
 import android.util.MathUtils;
 import android.view.View;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
@@ -107,7 +107,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class ScrimControllerTest extends SysuiTestCase {

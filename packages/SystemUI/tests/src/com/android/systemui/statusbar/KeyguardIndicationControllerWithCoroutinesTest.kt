@@ -16,9 +16,9 @@
 
 package com.android.systemui.statusbar
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +28,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class KeyguardIndicationControllerWithCoroutinesTest : KeyguardIndicationControllerBaseTest() {

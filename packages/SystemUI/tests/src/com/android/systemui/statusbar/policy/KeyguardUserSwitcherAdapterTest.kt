@@ -19,10 +19,10 @@ package com.android.systemui.statusbar.policy
 import android.content.Context
 import android.content.pm.UserInfo
 import android.graphics.Bitmap
-import android.testing.AndroidTestingRunner
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.UserIcons
 import com.android.systemui.res.R
@@ -44,7 +44,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class KeyguardUserSwitcherAdapterTest : SysuiTestCase() {
     @Mock

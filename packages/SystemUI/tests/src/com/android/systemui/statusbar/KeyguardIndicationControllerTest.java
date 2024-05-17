@@ -65,9 +65,9 @@ import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.BatteryManager;
 import android.os.RemoteException;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
@@ -88,7 +88,7 @@ import java.util.List;
 import java.util.Set;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class KeyguardIndicationControllerTest extends KeyguardIndicationControllerBaseTest {
     @Test

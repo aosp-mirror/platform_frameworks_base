@@ -20,7 +20,6 @@ import android.annotation.DimenRes
 import android.content.res.Resources
 import android.os.UserHandle
 import android.service.notification.StatusBarNotification
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
 import android.view.NotificationHeaderView
@@ -29,6 +28,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.internal.widget.NotificationActionListLayout
@@ -60,7 +60,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations.initMocks
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class NotificationContentViewTest : SysuiTestCase() {
 

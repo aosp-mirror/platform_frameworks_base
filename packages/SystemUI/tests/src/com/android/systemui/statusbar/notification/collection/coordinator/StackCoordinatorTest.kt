@@ -17,8 +17,8 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING
 import com.android.systemui.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING_BUG_FIX
@@ -51,7 +51,7 @@ import org.mockito.MockitoAnnotations.initMocks
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class StackCoordinatorTest : SysuiTestCase() {
     private lateinit var coordinator: StackCoordinator

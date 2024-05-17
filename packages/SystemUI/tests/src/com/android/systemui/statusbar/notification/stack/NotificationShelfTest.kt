@@ -2,10 +2,10 @@ package com.android.systemui.statusbar.notification.stack
 
 import android.platform.test.annotations.DisableFlags
 import android.service.notification.StatusBarNotification
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
 import com.android.systemui.SysuiTestCase
@@ -35,7 +35,7 @@ import org.mockito.Mockito.`when` as whenever
 
 /** Tests for {@link NotificationShelf}. */
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 open class NotificationShelfTest : SysuiTestCase() {
 

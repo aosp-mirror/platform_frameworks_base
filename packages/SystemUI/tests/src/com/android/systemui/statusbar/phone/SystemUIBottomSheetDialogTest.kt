@@ -15,9 +15,9 @@ package com.android.systemui.statusbar.phone
 
 import android.app.Dialog
 import android.content.res.Configuration
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.WindowManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.testScope
@@ -39,7 +39,7 @@ import org.mockito.Mockito.verify
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 class SystemUIBottomSheetDialogTest : SysuiTestCase() {
 

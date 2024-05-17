@@ -18,8 +18,8 @@ package com.android.systemui.statusbar.notification
 
 import android.provider.DeviceConfig
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito
 
@@ -39,7 +39,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoSession
 import org.mockito.quality.Strictness
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class NotificationSectionsFeatureManagerTest : SysuiTestCase() {
     var manager: NotificationSectionsFeatureManager? = null

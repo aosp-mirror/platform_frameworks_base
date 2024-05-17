@@ -28,8 +28,8 @@ import static org.mockito.Mockito.when;
 import android.content.res.Resources;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Flags;
@@ -50,7 +50,7 @@ import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private static final int SCREEN_HEIGHT = 2000;
     private static final int EMPTY_HEIGHT = 0;

@@ -42,12 +42,12 @@ import static org.mockito.Mockito.when;
 import android.metrics.LogMaker;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
@@ -126,7 +126,7 @@ import javax.inject.Provider;
  */
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
     protected KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);

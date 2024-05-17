@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar
 
-import android.testing.AndroidTestingRunner
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
@@ -28,7 +28,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.function.Consumer
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class LightRevealScrimTest : SysuiTestCase() {
 
