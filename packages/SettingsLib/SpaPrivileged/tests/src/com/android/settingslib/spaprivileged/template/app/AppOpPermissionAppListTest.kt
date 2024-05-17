@@ -25,6 +25,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.testutils.firstWithTimeoutOrNull
 import com.android.settingslib.spaprivileged.framework.common.appOpsManager
+import com.android.settingslib.spaprivileged.model.app.AppOps
 import com.android.settingslib.spaprivileged.model.app.IAppOpsController
 import com.android.settingslib.spaprivileged.model.app.IPackageManagers
 import com.android.settingslib.spaprivileged.test.R
@@ -39,7 +40,6 @@ import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
@@ -287,16 +287,6 @@ class AppOpPermissionAppListTest {
         assertThat(appOpsController.setAllowedCalledWith).isTrue()
     }
 
-    @Test
-    fun setAllowed_setModeByUid() {
-        listModel.setModeByUid = true
-        val record = listModel.transformItem(APP)
-
-        listModel.setAllowed(record = record, newAllowed = true)
-
-        verify(appOpsManager).setUidMode(listModel.appOp, APP.uid, AppOpsManager.MODE_ALLOWED)
-    }
-
     private fun getIsAllowed(record: AppOpPermissionRecord): Boolean? {
         lateinit var isAllowedState: () -> Boolean?
         composeTestRule.setContent { isAllowedState = listModel.isAllowed(record) }
@@ -309,11 +299,9 @@ class AppOpPermissionAppListTest {
         override val switchTitleResId = R.string.test_app_op_permission_switch_title
         override val footerResId = R.string.test_app_op_permission_footer
 
-        override val appOp = AppOpsManager.OP_MANAGE_MEDIA
+        override val appOps = AppOps(AppOpsManager.OP_MANAGE_MEDIA)
         override val permission = PERMISSION
         override var broaderPermission: String? = null
-
-        override var setModeByUid = false
     }
 
     private companion object {
@@ -329,7 +317,7 @@ class AppOpPermissionAppListTest {
 private class FakeAppOpsController(private val fakeMode: Int) : IAppOpsController {
     var setAllowedCalledWith: Boolean? = null
 
-    override val mode = flowOf(fakeMode)
+    override val modeFlow = flowOf(fakeMode)
 
     override fun setAllowed(allowed: Boolean) {
         setAllowedCalledWith = allowed
