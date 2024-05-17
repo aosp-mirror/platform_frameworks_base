@@ -21,35 +21,26 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
 
 private const val TAG = "InternetDialogFactory"
 private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
 
-/** Factory to create [InternetDialogDelegate] objects. */
+/**
+ * Factory to create [InternetDialogDelegate] objects.
+ */
 @SysUISingleton
-class InternetDialogManager
-@Inject
-constructor(
+class InternetDialogManager @Inject constructor(
     private val dialogTransitionAnimator: DialogTransitionAnimator,
-    private val dialogFactory: InternetDialogDelegate.Factory,
-    @Background private val bgDispatcher: CoroutineDispatcher,
+    private val dialogFactory: InternetDialogDelegate.Factory
 ) {
-    private lateinit var coroutineScope: CoroutineScope
     companion object {
         private const val INTERACTION_JANK_TAG = "internet"
         var dialog: SystemUIDialog? = null
     }
 
-    /**
-     * Creates a [InternetDialogDelegate]. The dialog will be animated from [view] if it is not
-     * null.
-     */
+    /** Creates a [InternetDialogDelegate]. The dialog will be animated from [view] if it is not null. */
     fun create(
         aboveStatusBar: Boolean,
         canConfigMobileData: Boolean,
@@ -62,21 +53,16 @@ constructor(
             }
             return
         } else {
-            coroutineScope = CoroutineScope(bgDispatcher)
-            dialog =
-                dialogFactory
-                    .create(aboveStatusBar, canConfigMobileData, canConfigWifi, coroutineScope)
-                    .createDialog()
+            dialog = dialogFactory.create(
+                    aboveStatusBar, canConfigMobileData, canConfigWifi).createDialog()
             if (view != null) {
                 dialogTransitionAnimator.showFromView(
-                    dialog!!,
-                    view,
+                        dialog!!, view,
                     animateBackgroundBoundsChange = true,
-                    cuj =
-                        DialogCuj(
-                            InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                            INTERACTION_JANK_TAG
-                        )
+                    cuj = DialogCuj(
+                        InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                        INTERACTION_JANK_TAG
+                    )
                 )
             } else {
                 dialog!!.show()
@@ -87,9 +73,6 @@ constructor(
     fun destroyDialog() {
         if (DEBUG) {
             Log.d(TAG, "destroyDialog")
-        }
-        if (dialog != null) {
-            coroutineScope.cancel()
         }
         dialog = null
     }
