@@ -328,6 +328,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runGetPrivappDenyPermissions();
                 case "get-oem-permissions":
                     return runGetOemPermissions();
+                case "get-signature-permission-allowlist":
+                    return runGetSignaturePermissionAllowlist();
                 case "trim-caches":
                     return runTrimCaches();
                 case "create-user":
@@ -2920,6 +2922,54 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runGetSignaturePermissionAllowlist() {
+        final var partition = getNextArg();
+        if (partition == null) {
+            getErrPrintWriter().println("Error: no partition specified.");
+            return 1;
+        }
+        final var permissionAllowlist =
+                SystemConfig.getInstance().getPermissionAllowlist();
+        final ArrayMap<String, ArrayMap<String, Boolean>> allowlist;
+        switch (partition) {
+            case "system":
+                allowlist = permissionAllowlist.getSignatureAppAllowlist();
+                break;
+            case "vendor":
+                allowlist = permissionAllowlist.getVendorSignatureAppAllowlist();
+                break;
+            case "product":
+                allowlist = permissionAllowlist.getProductSignatureAppAllowlist();
+                break;
+            case "system-ext":
+                allowlist = permissionAllowlist.getSystemExtSignatureAppAllowlist();
+                break;
+            default:
+                getErrPrintWriter().println("Error: unknown partition: " + partition);
+                return 1;
+        }
+        final var ipw = new IndentingPrintWriter(getOutPrintWriter(), "  ");
+        final var allowlistSize = allowlist.size();
+        for (var allowlistIndex = 0; allowlistIndex < allowlistSize; allowlistIndex++) {
+            final var packageName = allowlist.keyAt(allowlistIndex);
+            final var permissions = allowlist.valueAt(allowlistIndex);
+            ipw.print("Package: ");
+            ipw.println(packageName);
+            ipw.increaseIndent();
+            final var permissionsSize = permissions.size();
+            for (var permissionsIndex = 0; permissionsIndex < permissionsSize; permissionsIndex++) {
+                final var permissionName = permissions.keyAt(permissionsIndex);
+                final var granted = permissions.valueAt(permissionsIndex);
+                if (granted) {
+                    ipw.print("Permission: ");
+                    ipw.println(permissionName);
+                }
+            }
+            ipw.decreaseIndent();
+        }
+        return 0;
+    }
+
     private int runTrimCaches() throws RemoteException {
         String size = getNextArg();
         if (size == null) {
@@ -4851,6 +4901,10 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  get-oem-permissions TARGET-PACKAGE");
         pw.println("    Prints all OEM permissions for a package.");
+        pw.println("");
+        pw.println("  get-signature-permission-allowlist PARTITION");
+        pw.println("    Prints the signature permission allowlist for a partition.");
+        pw.println("    PARTITION is one of system, vendor, product and system-ext");
         pw.println("");
         pw.println("  trim-caches DESIRED_FREE_SPACE [internal|UUID]");
         pw.println("    Trim cache files to reach the given free space.");
