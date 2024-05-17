@@ -493,6 +493,27 @@ class TransitionController {
         return false;
     }
 
+    /** Returns {@code true} if the display contains a transient-launch transition. */
+    boolean hasTransientLaunch(@NonNull DisplayContent dc) {
+        if (mCollectingTransition != null && mCollectingTransition.hasTransientLaunch()
+                && mCollectingTransition.isOnDisplay(dc)) {
+            return true;
+        }
+        for (int i = mWaitingTransitions.size() - 1; i >= 0; --i) {
+            final Transition transition = mWaitingTransitions.get(i);
+            if (transition.hasTransientLaunch() && transition.isOnDisplay(dc)) {
+                return true;
+            }
+        }
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            final Transition transition = mPlayingTransitions.get(i);
+            if (transition.hasTransientLaunch() && transition.isOnDisplay(dc)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     boolean isTransientHide(@NonNull Task task) {
         if (mCollectingTransition != null && mCollectingTransition.isInTransientHide(task)) {
             return true;
