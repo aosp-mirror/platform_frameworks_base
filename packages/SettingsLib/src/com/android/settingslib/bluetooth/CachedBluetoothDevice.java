@@ -1532,7 +1532,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             // the left.
             if (leftBattery >= 0) {
                 String left = res.getString(
-                        R.string.bluetooth_battery_level_untethered_left,
+                        R.string.tv_bluetooth_battery_level_untethered_left,
                         Utils.formatPercentage(leftBattery));
                 addBatterySpan(spannableBuilder, left, isBatteryLow(leftBattery,
                                 BluetoothDevice.METADATA_UNTETHERED_LEFT_LOW_BATTERY_THRESHOLD),
@@ -1543,7 +1543,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                     spannableBuilder.append(" ");
                 }
                 String right = res.getString(
-                        R.string.bluetooth_battery_level_untethered_right,
+                        R.string.tv_bluetooth_battery_level_untethered_right,
                         Utils.formatPercentage(rightBattery));
                 addBatterySpan(spannableBuilder, right, isBatteryLow(rightBattery,
                                 BluetoothDevice.METADATA_UNTETHERED_RIGHT_LOW_BATTERY_THRESHOLD),
