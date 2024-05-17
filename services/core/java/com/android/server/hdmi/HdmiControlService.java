@@ -1650,7 +1650,7 @@ public class HdmiControlService extends SystemService {
                 // allocation. This action is used by the TV to get the active source from the CEC
                 // network. If the TV sent a source changing CEC message, this action does not have
                 // to continue anymore.
-                if (isTvDevice()) {
+                if (isTvDeviceEnabled()) {
                     tv().removeAction(RequestActiveSourceAction.class);
                 }
                 sendCecCommandWithRetries(command, callback);
