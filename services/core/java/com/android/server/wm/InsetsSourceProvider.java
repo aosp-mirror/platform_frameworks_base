@@ -198,7 +198,7 @@ class InsetsSourceProvider {
             if (mControllable) {
                 mWindowContainer.setControllableInsetProvider(this);
                 if (mPendingControlTarget != mControlTarget) {
-                    updateControlForTarget(mPendingControlTarget, true /* force */);
+                    mStateController.notifyControlTargetChanged(mPendingControlTarget, this);
                 }
             }
         }

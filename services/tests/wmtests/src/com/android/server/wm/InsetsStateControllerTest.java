@@ -353,6 +353,17 @@ public class InsetsStateControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testControlTargetChangedWhileProviderHasNoWindow() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final InsetsSourceProvider provider = getController().getOrCreateSourceProvider(
+                ID_STATUS_BAR, statusBars());
+        getController().onBarControlTargetChanged(app, null, null, null);
+        assertNull(getController().getControlsForDispatch(app));
+        provider.setWindowContainer(createWindow(null, TYPE_APPLICATION, "statusBar"), null, null);
+        assertNotNull(getController().getControlsForDispatch(app));
+    }
+
+    @Test
     public void testTransientVisibilityOfFixedRotationState() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
