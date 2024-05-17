@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.dump.dumpManager
-import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testDispatcher
@@ -42,7 +41,6 @@ val Kosmos.notificationListViewModel by Fixture {
         activeNotificationsInteractor,
         notificationStackInteractor,
         headsUpNotificationInteractor,
-        keyguardInteractor,
         remoteInputInteractor,
         seenNotificationsInteractor,
         shadeInteractor,
