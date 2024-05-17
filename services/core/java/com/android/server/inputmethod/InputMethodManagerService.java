@@ -2006,7 +2006,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final var bindingController = userData.mBindingController;
         final StartInputInfo info = new StartInputInfo(mCurrentUserId,
                 getCurTokenLocked(),
-                mCurTokenDisplayId, bindingController.getCurId(), startInputReason,
+                getCurTokenDisplayIdLocked(), bindingController.getCurId(), startInputReason,
                 restarting, UserHandle.getUserId(mCurClient.mUid),
                 mCurClient.mSelfReportedDisplayId, mImeBindingState.mFocusedWindow, mCurEditorInfo,
                 mImeBindingState.mFocusedWindowSoftInputMode,
@@ -2191,7 +2191,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // display ID.
         final String curId = bindingController.getCurId();
         if (curId != null && curId.equals(bindingController.getSelectedMethodId())
-                && mDisplayIdToShowIme == mCurTokenDisplayId) {
+                && mDisplayIdToShowIme == getCurTokenDisplayIdLocked()) {
             if (cs.mCurSession != null) {
                 // Fast case: if we are already connected to the input method,
                 // then just return it.
@@ -2398,7 +2398,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     void initializeImeLocked(@NonNull IInputMethodInvoker inputMethod, @NonNull IBinder token) {
         if (DEBUG) {
             Slog.v(TAG, "Sending attach of token: " + token + " for display: "
-                    + mCurTokenDisplayId);
+                    + getCurTokenDisplayIdLocked());
         }
         inputMethod.initializeInternal(token, new InputMethodPrivilegedOperationsImpl(this, token),
                 getInputMethodNavButtonFlagsLocked());
@@ -2688,9 +2688,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
         // Whether the current display has a navigation bar. When this is false (e.g. emulator),
         // the IME should not draw the IME navigation bar.
+        final int tokenDisplayId = getCurTokenDisplayIdLocked();
         final boolean hasNavigationBar = mWindowManagerInternal
-                .hasNavigationBar(mCurTokenDisplayId != INVALID_DISPLAY
-                        ? mCurTokenDisplayId : DEFAULT_DISPLAY);
+                .hasNavigationBar(tokenDisplayId != INVALID_DISPLAY
+                        ? tokenDisplayId : DEFAULT_DISPLAY);
         final boolean canImeDrawsImeNavBar =
                 mImeDrawsImeNavBarRes != null && mImeDrawsImeNavBarRes.get() && hasNavigationBar;
         final boolean shouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherLocked(
@@ -2786,8 +2787,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // Note that we still need to update IME status when focusing external display
             // that does not support system decoration and fallback to show IME on default
             // display since it is intentional behavior.
-            if (mCurTokenDisplayId != topFocusedDisplayId
-                    && mCurTokenDisplayId != FALLBACK_DISPLAY_ID) {
+            final int tokenDisplayId = getCurTokenDisplayIdLocked();
+            if (tokenDisplayId != topFocusedDisplayId && tokenDisplayId != FALLBACK_DISPLAY_ID) {
                 return;
             }
             mImeWindowVis = vis;
@@ -2850,7 +2851,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             Slog.d(TAG, "IME window vis: " + vis
                     + " active: " + (vis & InputMethodService.IME_ACTIVE)
                     + " inv: " + (vis & InputMethodService.IME_INVISIBLE)
-                    + " displayId: " + mCurTokenDisplayId);
+                    + " displayId: " + getCurTokenDisplayIdLocked());
         }
         final IBinder focusedWindowToken = mImeBindingState != null
                 ? mImeBindingState.mFocusedWindow : null;
@@ -2879,7 +2880,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
             if (mStatusBarManagerInternal != null) {
-                mStatusBarManagerInternal.setImeWindowStatus(mCurTokenDisplayId,
+                mStatusBarManagerInternal.setImeWindowStatus(getCurTokenDisplayIdLocked(),
                         getCurTokenLocked(), vis, backDisposition, needsToShowImeSwitcher);
             }
         } finally {
@@ -3784,7 +3785,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 // window token removed.
                 // Note that we can trust client's display ID as long as it matches
                 // to the display ID obtained from the window.
-                if (cs.mSelfReportedDisplayId != mCurTokenDisplayId) {
+                if (cs.mSelfReportedDisplayId != getCurTokenDisplayIdLocked()) {
                     userData.mBindingController.unbindCurrentMethod();
                 }
             }
@@ -4166,7 +4167,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }
                 // This should probably use the caller's display id, but because this is unsupported
                 // and maintained only for compatibility, there's no point in fixing it.
-                curTokenDisplayId = mCurTokenDisplayId;
+                curTokenDisplayId = getCurTokenDisplayIdLocked();
             }
             return mWindowManagerInternal.getInputMethodWindowVisibleHeight(curTokenDisplayId);
         });
@@ -4448,7 +4449,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mVisibilityStateComputer.dumpDebug(proto, fieldId);
             proto.write(IN_FULLSCREEN_MODE, mInFullscreenMode);
             proto.write(CUR_TOKEN, Objects.toString(getCurTokenLocked()));
-            proto.write(CUR_TOKEN_DISPLAY_ID, mCurTokenDisplayId);
+            proto.write(CUR_TOKEN_DISPLAY_ID, getCurTokenDisplayIdLocked());
             proto.write(SYSTEM_READY, mSystemReady);
             proto.write(HAVE_CONNECTION, bindingController.hasMainConnection());
             proto.write(BOUND_TO_METHOD, mBoundToMethod);
@@ -4562,7 +4563,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final IBinder requestToken = mVisibilityStateComputer.getWindowTokenFrom(requestImeToken);
         final WindowManagerInternal.ImeTargetInfo info =
                 mWindowManagerInternal.onToggleImeRequested(
-                        show, mImeBindingState.mFocusedWindow, requestToken, mCurTokenDisplayId);
+                        show, mImeBindingState.mFocusedWindow, requestToken,
+                        getCurTokenDisplayIdLocked());
         mSoftInputShowHideHistory.addEntry(new SoftInputShowHideHistory.Entry(
                 mImeBindingState.mFocusedWindowClient, mImeBindingState.mFocusedWindowEditorInfo,
                 info.focusedWindowName, mImeBindingState.mFocusedWindowSoftInputMode, reason,
@@ -4825,7 +4827,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     if (bindingController.supportsStylusHandwriting()
                             && getCurMethodLocked() != null && hasSupportedStylusLocked()) {
                         Slog.d(TAG, "Initializing Handwriting Spy");
-                        mHwController.initializeHandwritingSpy(mCurTokenDisplayId);
+                        mHwController.initializeHandwritingSpy(getCurTokenDisplayIdLocked());
                     } else {
                         mHwController.reset();
                     }
@@ -5587,7 +5589,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             //TODO(b/150843766): Check if Input Token is valid.
             final IBinder curHostInputToken;
             synchronized (ImfLock.class) {
-                if (displayId != mCurTokenDisplayId) {
+                if (displayId != getCurTokenDisplayIdLocked()) {
                     return false;
                 }
                 curHostInputToken = mAutofillController.getCurHostInputToken();
@@ -5934,7 +5936,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mUserDataRepository.forAllUserData(userDataDump);
 
             p.println("  mCurToken=" + getCurTokenLocked());
-            p.println("  mCurTokenDisplayId=" + mCurTokenDisplayId);
+            p.println("  mCurTokenDisplayId=" + getCurTokenDisplayIdLocked());
             p.println("  mCurHostInputToken=" + mAutofillController.getCurHostInputToken());
             p.println("  mCurIntent=" + bindingController.getCurIntent());
             method = getCurMethodLocked();
