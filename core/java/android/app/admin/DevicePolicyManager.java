@@ -1698,7 +1698,7 @@ public class DevicePolicyManager {
 
     /**
      * A boolean extra indicating whether device encryption can be skipped as part of
-     * <a href="#managed-provisioning>provisioning</a>.
+     * <a href="#managed-provisioning">provisioning</a>.
      *
      * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} or an intent with action
      * {@link #ACTION_PROVISION_MANAGED_DEVICE} that starts device owner provisioning.
