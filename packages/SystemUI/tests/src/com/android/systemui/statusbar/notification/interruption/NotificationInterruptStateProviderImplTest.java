@@ -58,7 +58,6 @@ import android.graphics.drawable.Icon;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.os.RemoteException;
 import android.platform.test.annotations.DisableFlags;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -81,6 +80,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.FakeEventLog;
 import com.android.systemui.util.settings.FakeGlobalSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.wm.shell.bubbles.Bubbles;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -90,6 +90,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -127,6 +128,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     UserTracker mUserTracker;
     @Mock
     DeviceProvisionedController mDeviceProvisionedController;
+    @Mock
+    Bubbles mBubbles;
     FakeSystemClock mSystemClock;
     FakeGlobalSettings mGlobalSettings;
     FakeEventLog mEventLog;
@@ -137,6 +140,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
+        when(mBubbles.canShowBubbleNotification()).thenReturn(true);
 
         mUiEventLoggerFake = new UiEventLoggerFake();
         mSystemClock = new FakeSystemClock();
@@ -161,7 +165,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                         mDeviceProvisionedController,
                         mSystemClock,
                         mGlobalSettings,
-                        mEventLog);
+                        mEventLog,
+                        Optional.of(mBubbles));
         mNotifInterruptionStateProvider.mUseHeadsUp = true;
     }
 
@@ -170,7 +175,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
      * {@link NotificationInterruptStateProviderImpl#shouldHeadsUp(NotificationEntry)} will
      * pass as long its provided NotificationEntry fulfills importance & DND checks.
      */
-    private void ensureStateForHeadsUpWhenAwake() throws RemoteException {
+    private void ensureStateForHeadsUpWhenAwake() {
         when(mHeadsUpManager.isSnoozed(any())).thenReturn(false);
 
         when(mStatusBarStateController.isDozing()).thenReturn(false);
@@ -208,7 +213,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldHeadsUpAwake() throws RemoteException {
+    public void testShouldHeadsUpAwake() {
         ensureStateForHeadsUpWhenAwake();
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
@@ -216,7 +221,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotHeadsUp_suppressedForGroups() throws RemoteException {
+    public void testShouldNotHeadsUp_suppressedForGroups() {
         // GIVEN state for "heads up when awake" is true
         ensureStateForHeadsUpWhenAwake();
 
@@ -315,7 +320,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldHeadsUp() throws RemoteException {
+    public void testShouldHeadsUp() {
         ensureStateForHeadsUpWhenAwake();
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
@@ -327,7 +332,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
      * the bubble is shown rather than the heads up.
      */
     @Test
-    public void testShouldNotHeadsUp_bubble() throws RemoteException {
+    public void testShouldNotHeadsUp_bubble() {
         ensureStateForHeadsUpWhenAwake();
 
         // Bubble bit only applies to interruption when we're in the shade
@@ -337,10 +342,26 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     /**
+     * If the notification is a bubble, and the user is not on AOD / lockscreen, but a bubble
+     * notification can't be shown, then show the heads up.
+     */
+    @Test
+    public void testShouldHeadsUp_bubble_bubblesCannotShowNotification() {
+        ensureStateForHeadsUpWhenAwake();
+
+        // Bubble bit only applies to interruption when we're in the shade
+        when(mStatusBarStateController.getState()).thenReturn(SHADE);
+
+        when(mBubbles.canShowBubbleNotification()).thenReturn(false);
+
+        assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(createBubble())).isTrue();
+    }
+
+    /**
      * If we're not allowed to alert in general, we shouldn't be shown as heads up.
      */
     @Test
-    public void testShouldNotHeadsUp_filtered() throws RemoteException {
+    public void testShouldNotHeadsUp_filtered() {
         ensureStateForHeadsUpWhenAwake();
         // Make canAlertCommon false by saying it's filtered out
         when(mKeyguardNotificationVisibilityProvider.shouldHideNotification(any()))
@@ -355,7 +376,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
      * {@link android.app.NotificationManager.Policy#SUPPRESSED_EFFECT_PEEK}.
      */
     @Test
-    public void testShouldNotHeadsUp_suppressPeek() throws RemoteException {
+    public void testShouldNotHeadsUp_suppressPeek() {
         ensureStateForHeadsUpWhenAwake();
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
@@ -371,7 +392,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
      * to show as a heads up.
      */
     @Test
-    public void testShouldNotHeadsUp_lessImportant() throws RemoteException {
+    public void testShouldNotHeadsUp_lessImportant() {
         ensureStateForHeadsUpWhenAwake();
 
         NotificationEntry entry = createNotification(IMPORTANCE_DEFAULT);
@@ -382,7 +403,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
      * If the device is not in use then we shouldn't be shown as heads up.
      */
     @Test
-    public void testShouldNotHeadsUp_deviceNotInUse() throws RemoteException {
+    public void testShouldNotHeadsUp_deviceNotInUse() {
         ensureStateForHeadsUpWhenAwake();
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
 
@@ -397,7 +418,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotHeadsUp_headsUpSuppressed() throws RemoteException {
+    public void testShouldNotHeadsUp_headsUpSuppressed() {
         ensureStateForHeadsUpWhenAwake();
 
         // If a suppressor is suppressing heads up, then it shouldn't be shown as a heads up.
@@ -408,7 +429,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotHeadsUpAwake_awakeInterruptsSuppressed() throws RemoteException {
+    public void testShouldNotHeadsUpAwake_awakeInterruptsSuppressed() {
         ensureStateForHeadsUpWhenAwake();
 
         // If a suppressor is suppressing heads up, then it shouldn't be shown as a heads up.
@@ -446,7 +467,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldHeadsUp_oldWhen_whenNow() throws Exception {
+    public void testShouldHeadsUp_oldWhen_whenNow() {
         ensureStateForHeadsUpWhenAwake();
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
@@ -458,7 +479,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldHeadsUp_oldWhen_whenRecent() throws Exception {
+    public void testShouldHeadsUp_oldWhen_whenRecent() {
         ensureStateForHeadsUpWhenAwake();
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
@@ -472,7 +493,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
 
     @Test
     @DisableFlags(Flags.FLAG_SORT_SECTION_BY_TIME)
-    public void testShouldHeadsUp_oldWhen_whenZero() throws Exception {
+    public void testShouldHeadsUp_oldWhen_whenZero() {
         ensureStateForHeadsUpWhenAwake();
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
@@ -486,7 +507,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldHeadsUp_oldWhen_whenNegative() throws Exception {
+    public void testShouldHeadsUp_oldWhen_whenNegative() {
         ensureStateForHeadsUpWhenAwake();
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
@@ -499,7 +520,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldHeadsUp_oldWhen_hasFullScreenIntent() throws Exception {
+    public void testShouldHeadsUp_oldWhen_hasFullScreenIntent() {
         ensureStateForHeadsUpWhenAwake();
         long when = makeWhenHoursAgo(25);
 
@@ -514,7 +535,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldHeadsUp_oldWhen_isForegroundService() throws Exception {
+    public void testShouldHeadsUp_oldWhen_isForegroundService() {
         ensureStateForHeadsUpWhenAwake();
         long when = makeWhenHoursAgo(25);
 
@@ -529,7 +550,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotHeadsUp_oldWhen() throws Exception {
+    public void testShouldNotHeadsUp_oldWhen() {
         ensureStateForHeadsUpWhenAwake();
         long when = makeWhenHoursAgo(25);
 
@@ -543,7 +564,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotFullScreen_notPendingIntent() throws RemoteException {
+    public void testShouldNotFullScreen_notPendingIntent() {
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mStatusBarStateController.isDreaming()).thenReturn(false);
@@ -559,7 +580,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotFullScreen_suppressedOnlyByDND() throws RemoteException {
+    public void testShouldNotFullScreen_suppressedOnlyByDND() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         modifyRanking(entry)
                 .setSuppressedVisualEffects(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT)
@@ -578,7 +599,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotFullScreen_suppressedByDNDAndOther() throws RemoteException {
+    public void testShouldNotFullScreen_suppressedByDNDAndOther() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_LOW, /* silenced */ false);
         modifyRanking(entry)
                 .setSuppressedVisualEffects(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT)
@@ -597,7 +618,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotFullScreen_notHighImportance() throws RemoteException {
+    public void testShouldNotFullScreen_notHighImportance() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_DEFAULT, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mStatusBarStateController.isDreaming()).thenReturn(false);
@@ -613,7 +634,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotFullScreen_isGroupAlertSilenced() throws RemoteException {
+    public void testShouldNotFullScreen_isGroupAlertSilenced() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ true);
         when(mPowerManager.isInteractive()).thenReturn(false);
         when(mStatusBarStateController.isDreaming()).thenReturn(true);
@@ -664,7 +685,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldFullScreen_notInteractive() throws RemoteException {
+    public void testShouldFullScreen_notInteractive() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         Notification.BubbleMetadata bubbleMetadata = new Notification.BubbleMetadata.Builder("foo")
                 .setSuppressNotification(false).build();
@@ -683,7 +704,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldFullScreen_isDreaming() throws RemoteException {
+    public void testShouldFullScreen_isDreaming() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mStatusBarStateController.isDreaming()).thenReturn(true);
@@ -699,7 +720,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldFullScreen_onKeyguard() throws RemoteException {
+    public void testShouldFullScreen_onKeyguard() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mStatusBarStateController.isDreaming()).thenReturn(false);
@@ -734,7 +755,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotFullScreen_willHun() throws RemoteException {
+    public void testShouldNotFullScreen_willHun() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
@@ -751,7 +772,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotFullScreen_snoozed_occluding() throws Exception {
+    public void testShouldNotFullScreen_snoozed_occluding() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
@@ -771,7 +792,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldHeadsUp_snoozed_occluding() throws Exception {
+    public void testShouldHeadsUp_snoozed_occluding() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
@@ -795,7 +816,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotFullScreen_snoozed_lockedShade() throws Exception {
+    public void testShouldNotFullScreen_snoozed_lockedShade() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
@@ -815,7 +836,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldHeadsUp_snoozed_lockedShade() throws Exception {
+    public void testShouldHeadsUp_snoozed_lockedShade() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
@@ -839,7 +860,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotFullScreen_snoozed_unlocked() throws Exception {
+    public void testShouldNotFullScreen_snoozed_unlocked() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
@@ -859,7 +880,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotScreen_appSuspended() throws RemoteException {
+    public void testShouldNotScreen_appSuspended() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(false);
         when(mStatusBarStateController.isDreaming()).thenReturn(false);
@@ -902,7 +923,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldHeadsUp_snoozed_unlocked() throws Exception {
+    public void testShouldHeadsUp_snoozed_unlocked() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
