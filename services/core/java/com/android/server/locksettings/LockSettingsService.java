@@ -724,12 +724,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                     !mUserManager.isQuietModeEnabled(userHandle)) {
                 // Only show notifications for managed profiles once their parent
                 // user is unlocked.
-                showEncryptionNotificationForProfile(userHandle, reason);
+                showEncryptionNotificationForProfile(userHandle, parent.getUserHandle(), reason);
             }
         }
     }
 
-    private void showEncryptionNotificationForProfile(UserHandle user, String reason) {
+    private void showEncryptionNotificationForProfile(UserHandle user, UserHandle parent,
+            String reason) {
         CharSequence title = getEncryptionNotificationTitle();
         CharSequence message = getEncryptionNotificationMessage();
         CharSequence detail = getEncryptionNotificationDetail();
@@ -746,8 +747,15 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         unlockIntent.setFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        PendingIntent intent = PendingIntent.getActivity(mContext, 0, unlockIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        PendingIntent intent;
+        if (android.app.admin.flags.Flags.hsumUnlockNotificationFix()) {
+            intent = PendingIntent.getActivityAsUser(mContext, 0, unlockIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED,
+                    null, parent);
+        } else {
+            intent = PendingIntent.getActivity(mContext, 0, unlockIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        }
 
         Slogf.d(TAG, "Showing encryption notification for user %d; reason: %s",
                 user.getIdentifier(), reason);
