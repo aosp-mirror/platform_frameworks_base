@@ -101,6 +101,8 @@ import com.android.systemui.util.ViewController;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 
+import dagger.Lazy;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Optional;
@@ -108,7 +110,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import dagger.Lazy;
 import kotlinx.coroutines.Job;
 
 /** Controller for {@link KeyguardSecurityContainer} */
@@ -589,6 +590,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     public void updateSideFpsVisibility(boolean isVisible) {
         SideFpsControllerRefactor.assertInLegacyMode();
         if (!mSideFpsController.isPresent()) {
+            Log.d(TAG, "updateSideFpsVisibility(isVisible = " + isVisible + "): "
+                    + "!mSideFpsController.isPresent(): ignoring request");
             return;
         }
 
