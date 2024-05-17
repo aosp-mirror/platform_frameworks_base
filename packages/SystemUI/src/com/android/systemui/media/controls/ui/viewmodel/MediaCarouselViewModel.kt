@@ -57,12 +57,12 @@ constructor(
     val mediaItems: StateFlow<List<MediaCommonViewModel>> =
         interactor.currentMedia
             .map { sortedItems ->
-                buildList {
+                val mediaList = buildList {
                     sortedItems.forEach { commonModel ->
                         // When view is started we should make sure to clean models that are pending
                         // removal.
                         // This action should only be triggered once.
-                        if (!isAttached || !modelsPendingRemoval.contains(commonModel)) {
+                        if (!allowReorder || !modelsPendingRemoval.contains(commonModel)) {
                             when (commonModel) {
                                 is MediaCommonModel.MediaControl -> add(toViewModel(commonModel))
                                 is MediaCommonModel.MediaRecommendations ->
@@ -70,17 +70,24 @@ constructor(
                             }
                         }
                     }
-                    if (isAttached) {
-                        modelsPendingRemoval.clear()
-                    }
-                    isAttached = false
                 }
+                if (allowReorder) {
+                    if (modelsPendingRemoval.size > 0) {
+                        updateHostVisibility()
+                    }
+                    modelsPendingRemoval.clear()
+                }
+                allowReorder = false
+
+                mediaList
             }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = emptyList(),
             )
+
+    var updateHostVisibility: () -> Unit = {}
 
     private val mediaControlByInstanceId =
         mutableMapOf<InstanceId, MediaCommonViewModel.MediaControl>()
@@ -89,15 +96,15 @@ constructor(
 
     private var modelsPendingRemoval: MutableSet<MediaCommonModel> = mutableSetOf()
 
-    private var isAttached = false
+    private var allowReorder = false
 
     fun onSwipeToDismiss() {
         logger.logSwipeDismiss()
         interactor.onSwipeToDismiss()
     }
 
-    fun onAttached() {
-        isAttached = true
+    fun onReorderingAllowed() {
+        allowReorder = true
         interactor.reorderMedia()
     }
 
@@ -194,7 +201,11 @@ constructor(
     ) {
         if (immediatelyRemove || isReorderingAllowed()) {
             interactor.dismissSmartspaceRecommendation(commonModel.recsLoadingModel.key, 0L)
-            // TODO if not immediate remove update host visibility
+            if (!immediatelyRemove) {
+                // Although it wasn't requested, we were able to process the removal
+                // immediately since reordering is allowed. So, notify hosts to update
+                updateHostVisibility()
+            }
         } else {
             modelsPendingRemoval.add(commonModel)
         }

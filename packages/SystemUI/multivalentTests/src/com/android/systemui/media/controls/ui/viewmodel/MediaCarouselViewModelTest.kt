@@ -109,7 +109,7 @@ class MediaCarouselViewModelTest : SysuiTestCase() {
             assertThat(mediaControl2.instanceId).isEqualTo(instanceId2)
             assertThat(mediaControl1.instanceId).isEqualTo(instanceId1)
 
-            underTest.onAttached()
+            underTest.onReorderingAllowed()
 
             mediaControl1 = sortedMedia?.get(0) as MediaCommonViewModel.MediaControl
             mediaControl2 = sortedMedia?.get(1) as MediaCommonViewModel.MediaControl
