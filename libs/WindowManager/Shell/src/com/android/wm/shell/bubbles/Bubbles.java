@@ -297,6 +297,15 @@ public interface Bubbles {
             boolean sensitiveNotificationProtectionActive);
 
     /**
+     * Determines whether Bubbles can show notifications.
+     *
+     * <p>Normally bubble notifications are shown by Bubbles, but in some cases the bubble
+     * notification is suppressed and should be shown by the Notifications pipeline as regular
+     * notifications.
+     */
+    boolean canShowBubbleNotification();
+
+    /**
      * A listener to be notified of bubble state changes, used by launcher to render bubbles in
      * its process.
      */

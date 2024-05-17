@@ -324,6 +324,11 @@ public class BubblePositioner {
         return 0;
     }
 
+    /** Returns whether the IME is visible. */
+    public boolean getIsImeVisible() {
+        return mImeVisible;
+    }
+
     /** Sets whether the IME is visible. **/
     public void setImeVisible(boolean visible, int height) {
         mImeVisible = visible;
