@@ -200,6 +200,11 @@
             "file_patterns": [
                 "Background.*\\.java",
                 "Activity.*\\.java"
+            ],
+            "options": [
+                {
+                    "include-filter": "com.android.server.wm.BackgroundActivityStart*"
+                }
             ]
         }
    ]
