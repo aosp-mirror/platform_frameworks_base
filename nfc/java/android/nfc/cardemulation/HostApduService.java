@@ -20,6 +20,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -481,6 +482,7 @@ public abstract class HostApduService extends Service {
      *
      * @param frame A description of the polling frame.
      */
+    @SuppressLint("OnNameExpected")
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void processPollingFrames(@NonNull List<Bundle> frame) {
     }
