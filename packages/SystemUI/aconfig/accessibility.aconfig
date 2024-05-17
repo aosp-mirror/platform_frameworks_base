@@ -71,3 +71,13 @@ flag {
     description: "Animates the floating menu's transition between curved and jagged edges."
     bug: "281140482"
 }
+
+flag {
+    name: "save_and_restore_magnification_settings_buttons"
+    namespace: "accessibility"
+    description: "Saves the selected button status in magnification settings and restore the status when revisiting the same smallest screen DP."
+    bug: "325567876"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
