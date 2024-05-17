@@ -18,6 +18,7 @@ package android.app;
 
 import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.app.ConfigurationController.createNewConfigAndUpdateIfNotNull;
+import static android.app.Flags.skipBgMemTrimOnFgApp;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_CREATE;
@@ -7078,6 +7079,11 @@ public final class ActivityThread extends ClientTransactionHandler
         if (DEBUG_MEMORY_TRIM) Slog.v(TAG, "Trimming memory to level: " + level);
 
         try {
+            if (skipBgMemTrimOnFgApp()
+                    && mLastProcessState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+                    && level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
+                return;
+            }
             if (level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
                 PropertyInvalidatedCache.onTrimMemory();
             }
