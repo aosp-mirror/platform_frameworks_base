@@ -96,7 +96,7 @@ internal constructor(
     fun createSectionsForBuckets(): Array<NotificationSection> =
         sectionsFeatureManager
             .getNotificationBuckets()
-            .map { NotificationSection(parent, it) }
+            .map { NotificationSection(it) }
             .toTypedArray()
 
     /** Reinflates the entire notification header, including all decoration views. */

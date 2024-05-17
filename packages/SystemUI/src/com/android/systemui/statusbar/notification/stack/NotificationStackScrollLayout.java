@@ -2974,7 +2974,7 @@ public class NotificationStackScrollLayout
 
     private void updateFirstAndLastBackgroundViews() {
         ExpandableView lastChild = getLastChildWithBackground();
-        boolean sectionViewsChanged = mSectionsManager.updateFirstAndLastViewsForAllSections(
+        mSectionsManager.updateFirstAndLastViewsForAllSections(
                 mSections, getChildrenWithBackground());
 
         mAmbientState.setLastVisibleBackgroundChild(lastChild);
