@@ -321,22 +321,6 @@ class MenuView extends FrameLayout implements
         if (mMoveToTuckedListener != null) {
             mMoveToTuckedListener.onMoveToTuckedChanged(isMoveToTucked);
         }
-
-        if (!Flags.floatingMenuAnimatedTuck()) {
-            if (isMoveToTucked) {
-                final float halfWidth = getMenuWidth() / 2.0f;
-                final boolean isOnLeftSide = mMenuAnimationController.isOnLeftSide();
-                final Rect clipBounds = new Rect(
-                        (int) (!isOnLeftSide ? 0 : halfWidth),
-                        0,
-                        (int) (!isOnLeftSide ? halfWidth : getMenuWidth()),
-                        getMenuHeight()
-                );
-                setClipBounds(clipBounds);
-            } else {
-                setClipBounds(null);
-            }
-        }
     }
 
 

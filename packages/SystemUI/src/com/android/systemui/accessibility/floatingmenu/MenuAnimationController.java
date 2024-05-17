@@ -37,7 +37,6 @@ import androidx.dynamicanimation.animation.SpringForce;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Flags;
 
 import java.util.HashMap;
 
@@ -339,15 +338,11 @@ class MenuAnimationController {
         mMenuView.updateMenuMoveToTucked(/* isMoveToTucked= */ true);
         final PointF position = mMenuView.getMenuPosition();
         final PointF tuckedPosition = getTuckedMenuPosition();
-        if (Flags.floatingMenuAnimatedTuck()) {
-            flingThenSpringMenuWith(DynamicAnimation.TRANSLATION_X,
-                    Math.signum(tuckedPosition.x - position.x) * ESCAPE_VELOCITY,
-                    FLING_FRICTION_SCALAR,
-                    createDefaultSpringForce(),
-                    tuckedPosition.x);
-        } else {
-            moveToPosition(tuckedPosition);
-        }
+        flingThenSpringMenuWith(DynamicAnimation.TRANSLATION_X,
+                Math.signum(tuckedPosition.x - position.x) * ESCAPE_VELOCITY,
+                FLING_FRICTION_SCALAR,
+                createDefaultSpringForce(),
+                tuckedPosition.x);
 
         // Keep the touch region let users could click extra space to pop up the menu view
         // from the screen edge
@@ -359,23 +354,19 @@ class MenuAnimationController {
     void moveOutEdgeAndShow() {
         mMenuView.updateMenuMoveToTucked(/* isMoveToTucked= */ false);
 
-        if (Flags.floatingMenuAnimatedTuck()) {
-            PointF position = mMenuView.getMenuPosition();
-            springMenuWith(DynamicAnimation.TRANSLATION_X,
-                    createDefaultSpringForce(),
-                    0,
-                    position.x,
-                    true
-            );
-            springMenuWith(DynamicAnimation.TRANSLATION_Y,
-                    createDefaultSpringForce(),
-                    0,
-                    position.y,
-                    true
-            );
-        } else {
-            mMenuView.onPositionChanged();
-        }
+        PointF position = mMenuView.getMenuPosition();
+        springMenuWith(DynamicAnimation.TRANSLATION_X,
+                createDefaultSpringForce(),
+                0,
+                position.x,
+                true
+        );
+        springMenuWith(DynamicAnimation.TRANSLATION_Y,
+                createDefaultSpringForce(),
+                0,
+                position.y,
+                true
+        );
 
         mMenuView.onEdgeChangedIfNeeded();
     }
