@@ -1268,9 +1268,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @Override
         public void onUserStarting(TargetUser user) {
             // Called on ActivityManager thread.
-            SecureSettingsWrapper.onUserStarting(user.getUserIdentifier());
+            final int userId = user.getUserIdentifier();
+            SecureSettingsWrapper.onUserStarting(userId);
             synchronized (ImfLock.class) {
-                mService.mUserDataRepository.getOrCreate(user.getUserIdentifier());
+                mService.mUserDataRepository.getOrCreate(userId);
+                if (mService.mExperimentalConcurrentMultiUserModeEnabled) {
+                    if (mService.mCurrentUserId != userId) {
+                        mService.experimentalInitializeVisibleBackgroundUserLocked(userId);
+                    }
+                }
             }
         }
 
@@ -1291,6 +1297,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 // We need to rebuild IMEs.
                 postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */);
                 updateInputMethodsFromSettingsLocked(true /* enabledChanged */);
+            } else if (mExperimentalConcurrentMultiUserModeEnabled) {
+                experimentalInitializeVisibleBackgroundUserLocked(userId);
             }
         }
     }
@@ -2925,6 +2933,49 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     void updateFromSettingsLocked(boolean enabledMayChange) {
         updateInputMethodsFromSettingsLocked(enabledMayChange);
         mMenuController.updateKeyboardFromSettingsLocked();
+    }
+
+    /**
+     * This is an experimental implementation used when and only when
+     * {@link #mExperimentalConcurrentMultiUserModeEnabled}.
+     *
+     * <p>Never assume what this method is doing is officially supported. For the canonical and
+     * desired behaviors always refer to single-user code paths such as
+     * {@link #updateInputMethodsFromSettingsLocked(boolean)}.</p>
+     *
+     * <p>Here are examples of missing features.</p>
+     * <ul>
+     *     <li>Subtypes are not supported at all!</li>
+     *     <li>Profiles are not supported.</li>
+     *     <li>
+     *         {@link PackageManager#COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED} is not updated.
+     *     </li>
+     *     <li>{@link #mDeviceIdToShowIme} is ignored.</li>
+     *     <li>{@link #mSwitchingController} is ignored.</li>
+     *     <li>{@link #mHardwareKeyboardShortcutController} is ignored.</li>
+     *     <li>{@link #mPreventImeStartupUnlessTextEditor} is ignored.</li>
+     *     <li>and so on.</li>
+     * </ul>
+     */
+    @GuardedBy("ImfLock.class")
+    void experimentalInitializeVisibleBackgroundUserLocked(@UserIdInt int userId) {
+        if (!mUserManagerInternal.isUserVisible(userId)) {
+            return;
+        }
+        final var settings = InputMethodSettingsRepository.get(userId);
+        String id = settings.getSelectedInputMethod();
+        if (TextUtils.isEmpty(id)) {
+            final InputMethodInfo imi = InputMethodInfoUtils.getMostApplicableDefaultIME(
+                    settings.getEnabledInputMethodList());
+            if (imi == null) {
+                return;
+            }
+            id = imi.getId();
+            settings.putSelectedInputMethod(id);
+        }
+        final var userData = mUserDataRepository.getOrCreate(userId);
+        final var bindingController = userData.mBindingController;
+        bindingController.setSelectedMethodId(id);
     }
 
     @GuardedBy("ImfLock.class")
