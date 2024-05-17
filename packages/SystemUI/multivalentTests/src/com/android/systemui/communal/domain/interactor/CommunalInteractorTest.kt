@@ -204,14 +204,14 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun isCommunalAvailable_whenDreaming_true() =
+    fun isCommunalAvailable_whenKeyguardShowing_true() =
         testScope.runTest {
             val isAvailable by collectLastValue(underTest.isCommunalAvailable)
             assertThat(isAvailable).isFalse()
 
             keyguardRepository.setIsEncryptedOrLockdown(false)
             userRepository.setSelectedUserInfo(mainUser)
-            keyguardRepository.setDreaming(true)
+            keyguardRepository.setKeyguardShowing(true)
 
             assertThat(isAvailable).isTrue()
         }

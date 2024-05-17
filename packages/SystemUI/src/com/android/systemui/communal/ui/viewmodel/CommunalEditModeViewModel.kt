@@ -96,6 +96,8 @@ constructor(
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_CANCEL)
     }
 
+    val isIdleOnCommunal: StateFlow<Boolean> = communalInteractor.isIdleOnCommunal
+
     /** Launch the widget picker activity using the given {@link ActivityResultLauncher}. */
     suspend fun onOpenWidgetPicker(
         resources: Resources,
