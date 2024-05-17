@@ -110,7 +110,7 @@ final class InputMethodMap {
      * @return {@code true} if both {@link InputMethodMap} instances contain exactly the same data
      */
     @AnyThread
-    static boolean equals(@NonNull InputMethodMap map1, @NonNull InputMethodMap map2) {
+    static boolean areSame(@NonNull InputMethodMap map1, @NonNull InputMethodMap map2) {
         if (map1 == map2) {
             return true;
         }
