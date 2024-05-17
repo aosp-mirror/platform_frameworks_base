@@ -282,6 +282,28 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @NonNull
     private final String[] mNonPreemptibleInputMethods;
 
+    /**
+     * See {@link #shouldEnableExperimentalConcurrentMultiUserMode(Context)} about when set to be
+     * {@code true}.
+     */
+    private final boolean mExperimentalConcurrentMultiUserModeEnabled;
+
+    /**
+     * Returns {@code true} if experimental concurrent multi-user mode is enabled.
+     *
+     * <p>Currently not compatible with profiles (e.g. work profile).</p>
+     *
+     * @param context {@link Context} to be used to query
+     *                {@link PackageManager#FEATURE_AUTOMOTIVE}
+     * @return {@code true} if experimental concurrent multi-user mode is enabled.
+     */
+    static boolean shouldEnableExperimentalConcurrentMultiUserMode(@NonNull Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
+                && UserManager.isVisibleBackgroundUsersEnabled()
+                && context.getResources().getBoolean(android.R.bool.config_perDisplayFocusEnabled)
+                && Flags.concurrentInputMethods();
+    }
+
     final Context mContext;
     final Resources mRes;
     private final Handler mHandler;
@@ -1191,8 +1213,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     public static final class Lifecycle extends SystemService {
         private final InputMethodManagerService mService;
 
+
         public Lifecycle(Context context) {
-            this(context, new InputMethodManagerService(context));
+            this(context, new InputMethodManagerService(context,
+                            shouldEnableExperimentalConcurrentMultiUserMode(context)));
         }
 
         public Lifecycle(
@@ -1291,17 +1315,21 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         mHandler.post(task);
     }
 
-    public InputMethodManagerService(Context context) {
-        this(context, null, null, null);
+    public InputMethodManagerService(Context context,
+            boolean experimentalConcurrentMultiUserModeEnabled) {
+        this(context, experimentalConcurrentMultiUserModeEnabled, null, null, null);
     }
 
     @VisibleForTesting
     InputMethodManagerService(
             Context context,
+            boolean experimentalConcurrentMultiUserModeEnabled,
             @Nullable ServiceThread serviceThreadForTesting,
             @Nullable ServiceThread packageMonitorThreadForTesting,
             @Nullable IntFunction<InputMethodBindingController> bindingControllerForTesting) {
         synchronized (ImfLock.class) {
+            mExperimentalConcurrentMultiUserModeEnabled =
+                    experimentalConcurrentMultiUserModeEnabled;
             mContext = context;
             mRes = context.getResources();
             SecureSettingsWrapper.onStart(mContext);
@@ -5951,6 +5979,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mVisibilityStateComputer.dump(pw, "  ");
             p.println("  mInFullscreenMode=" + mInFullscreenMode);
             p.println("  mSystemReady=" + mSystemReady + " mInteractive=" + mIsInteractive);
+            p.println("  mExperimentalConcurrentMultiUserModeEnabled="
+                    + mExperimentalConcurrentMultiUserModeEnabled);
             p.println("  ENABLE_HIDE_IME_CAPTION_BAR="
                     + InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR);
             p.println("  mSettingsObserver=" + mSettingsObserver);
