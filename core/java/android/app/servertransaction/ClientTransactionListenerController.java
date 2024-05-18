@@ -23,8 +23,11 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.hardware.display.DisplayManagerGlobal;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * Singleton controller to manage listeners to individual {@link ClientTransaction}.
@@ -32,6 +35,8 @@ import com.android.internal.annotations.VisibleForTesting;
  * @hide
  */
 public class ClientTransactionListenerController {
+
+    private static final String TAG = "ClientTransactionListenerController";
 
     private static ClientTransactionListenerController sController;
 
@@ -73,6 +78,10 @@ public class ClientTransactionListenerController {
             // Not enable for system server.
             return;
         }
-        mDisplayManager.handleDisplayChangeFromWindowManager(displayId);
+        try {
+            mDisplayManager.handleDisplayChangeFromWindowManager(displayId);
+        } catch (RejectedExecutionException e) {
+            Log.w(TAG, "Failed to notify DisplayListener because the Handler is shutting down");
+        }
     }
 }
