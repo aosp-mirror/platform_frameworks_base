@@ -59,6 +59,8 @@ public class DropBoxManagerLoggerBackend implements PersistentLoggerBackend {
     private final Handler mHandler;
     // Flag for determining if logging is enabled as a general feature
     private final boolean mDropBoxManagerLoggingEnabled;
+    // Flag for controlling if logging is enabled at runtime
+    private boolean mIsLoggingEnabled = false;
 
     /**
      * Returns a singleton instance of {@code DropBoxManagerLoggerBackend} that will log to
@@ -89,6 +91,15 @@ public class DropBoxManagerLoggerBackend implements PersistentLoggerBackend {
             Log.w(TAG, "Persistent logging config not found");
             return false;
         }
+    }
+
+    /**
+     * Enable or disable logging to DropBoxManager
+     * @param isLoggingEnabled Whether logging should be enabled
+     */
+    public void setLoggingEnabled(boolean isLoggingEnabled) {
+        Log.i(DROPBOX_TAG, "toggle logging: " + isLoggingEnabled);
+        mIsLoggingEnabled = isLoggingEnabled;
     }
 
     /**
@@ -170,6 +181,10 @@ public class DropBoxManagerLoggerBackend implements PersistentLoggerBackend {
             @NonNull String tag,
             @NonNull String msg,
             Optional<Throwable> t) {
+        if (!mIsLoggingEnabled) {
+            return;
+        }
+
         if (mBufferStartTime == -1L) {
             mBufferStartTime = System.currentTimeMillis();
         }
