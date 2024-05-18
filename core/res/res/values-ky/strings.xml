@@ -1303,7 +1303,7 @@
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
     <skip />
     <string name="wifi_no_internet" msgid="1386911698276448061">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> Интернетке туташуусу жок"</string>
-    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Параметрлерди ачуу үчүн таптап коюңуз"</string>
+    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Параметрлерди ачуу үчүн тийип коюңуз"</string>
     <string name="mobile_no_internet" msgid="4014455157529909781">"Мобилдик Интернет жок"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Тармактын Интернет жок"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Жеке DNS сервери жеткиликсиз"</string>
@@ -1365,7 +1365,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB аркылуу MIDI режими күйгүзүлдү"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Түзмөк веб-камера катары туташты"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB шайманы туташты"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Кошумча параметрлерди ачуу үчүн таптап коюңуз."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Кошумча параметрлерди ачуу үчүн тийип коюңуз."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Туташкан түзмөк кубатталууда. Дагы параметрлерди көрүү үчүн таптап коюңуз."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Аналогдук аудио жабдуу табылды"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Тиркелген түзмөк бул телефонго шайкеш келбейт. Көбүрөөк маалымат алуу үчүн таптап коюңуз."</string>
