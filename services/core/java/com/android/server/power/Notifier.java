@@ -64,6 +64,7 @@ import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.power.feature.PowerManagerFlags;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;
@@ -187,11 +188,16 @@ public class Notifier {
 
     private final AtomicBoolean mIsPlayingChargingStartedFeedback = new AtomicBoolean(false);
 
+    private final Injector mInjector;
+
+    private final PowerManagerFlags mFlags;
+
     public Notifier(Looper looper, Context context, IBatteryStats batteryStats,
             SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
             FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector,
-            Executor backgroundExecutor) {
+            Executor backgroundExecutor, PowerManagerFlags powerManagerFlags, Injector injector) {
         mContext = context;
+        mFlags = powerManagerFlags;
         mBatteryStats = batteryStats;
         mAppOps = mContext.getSystemService(AppOpsManager.class);
         mSuspendBlocker = suspendBlocker;
@@ -224,8 +230,8 @@ public class Notifier {
         mShowWirelessChargingAnimationConfig = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_showBuiltinWirelessChargingAnim);
 
-        mWakeLockLog = new WakeLockLog(context);
-
+        mInjector = (injector == null) ? new RealInjector() : injector;
+        mWakeLockLog = mInjector.getWakeLockLog(context);
         // Initialize interactive state for battery stats.
         try {
             mBatteryStats.noteInteractive(true);
@@ -267,7 +273,7 @@ public class Notifier {
                     + ", ownerUid=" + ownerUid + ", ownerPid=" + ownerPid
                     + ", workSource=" + workSource);
         }
-        notifyWakeLockListener(callback, tag, true);
+        notifyWakeLockListener(callback, tag, true, ownerUid, flags);
         final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
         if (monitorType >= 0) {
             try {
@@ -287,8 +293,9 @@ public class Notifier {
             }
         }
 
-        mWakeLockLog.onWakeLockAcquired(tag, ownerUid, flags);
-
+        if (!mFlags.improveWakelockLatency()) {
+            mWakeLockLog.onWakeLockAcquired(tag, ownerUid, flags, /*eventTime=*/ -1);
+        }
         mWakefulnessSessionObserver.onWakeLockAcquired(flags);
     }
 
@@ -406,7 +413,7 @@ public class Notifier {
                     + ", ownerUid=" + ownerUid + ", ownerPid=" + ownerPid
                     + ", workSource=" + workSource);
         }
-        notifyWakeLockListener(callback, tag, false);
+        notifyWakeLockListener(callback, tag, false, ownerUid, flags);
         final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
         if (monitorType >= 0) {
             try {
@@ -422,8 +429,9 @@ public class Notifier {
                 // Ignore
             }
         }
-        mWakeLockLog.onWakeLockReleased(tag, ownerUid);
-
+        if (!mFlags.improveWakelockLatency()) {
+            mWakeLockLog.onWakeLockReleased(tag, ownerUid, /*eventTime=*/ -1);
+        }
         mWakefulnessSessionObserver.onWakeLockReleased(flags, releaseReason);
     }
 
@@ -1040,10 +1048,19 @@ public class Notifier {
         return enabled && dndOff;
     }
 
-    private void notifyWakeLockListener(IWakeLockCallback callback, String tag, boolean isEnabled) {
+    private void notifyWakeLockListener(IWakeLockCallback callback, String tag, boolean isEnabled,
+            int ownerUid, int flags) {
         if (callback != null) {
+            long currentTime = mInjector.currentTimeMillis();
             mHandler.post(() -> {
                 try {
+                    if (mFlags.improveWakelockLatency()) {
+                        if (isEnabled) {
+                            mWakeLockLog.onWakeLockAcquired(tag, ownerUid, flags, currentTime);
+                        } else {
+                            mWakeLockLog.onWakeLockReleased(tag, ownerUid, currentTime);
+                        }
+                    }
                     callback.onStateChanged(isEnabled);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Wakelock.mCallback [" + tag + "] is already dead.", e);
@@ -1057,6 +1074,7 @@ public class Notifier {
         public NotifierHandler(Looper looper) {
             super(looper, null, true /*async*/);
         }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -1083,6 +1101,30 @@ public class Notifier {
                     screenPolicyChanging(msg.arg1, msg.arg2);
                     break;
             }
+        }
+    }
+
+    public interface Injector {
+        /**
+         * Gets the current time in millis
+         */
+        long currentTimeMillis();
+
+        /**
+         * Gets the WakeLockLog object
+         */
+        WakeLockLog getWakeLockLog(Context context);
+    }
+
+    static class RealInjector implements Injector {
+        @Override
+        public long currentTimeMillis() {
+            return System.currentTimeMillis();
+        }
+
+        @Override
+        public WakeLockLog getWakeLockLog(Context context) {
+            return new WakeLockLog(context);
         }
     }
 }

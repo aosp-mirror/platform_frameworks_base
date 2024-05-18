@@ -6491,9 +6491,9 @@ ul.</string>
     <!-- Fingerprint dangling notification title -->
     <string name="fingerprint_dangling_notification_title">Set up Fingerprint Unlock again</string>
     <!-- Fingerprint dangling notification content for only 1 fingerprint deleted -->
-    <string name="fingerprint_dangling_notification_msg_1"><xliff:g id="fingerprint">%s</xliff:g> wasn\'t working well and was deleted to improve performance</string>
+    <string name="fingerprint_dangling_notification_msg_1"><xliff:g id="fingerprint">%s</xliff:g> wasn\'t working well and was deleted</string>
     <!-- Fingerprint dangling notification content for more than 1 fingerprints deleted -->
-    <string name="fingerprint_dangling_notification_msg_2"><xliff:g id="fingerprint">%1$s</xliff:g> and <xliff:g id="fingerprint">%2$s</xliff:g> weren\'t working well and were deleted to improve performance</string>
+    <string name="fingerprint_dangling_notification_msg_2"><xliff:g id="fingerprint">%1$s</xliff:g> and <xliff:g id="fingerprint">%2$s</xliff:g> weren\'t working well and were deleted</string>
     <!-- Fingerprint dangling notification content for only 1 fingerprint deleted and no fingerprint left-->
     <string name="fingerprint_dangling_notification_msg_all_deleted_1"><xliff:g id="fingerprint">%s</xliff:g> wasn\'t working well and was deleted. Set it up again to unlock your phone with fingerprint.</string>
     <!-- Fingerprint dangling notification content for more than 1 fingerprints deleted and no fingerprint left  -->

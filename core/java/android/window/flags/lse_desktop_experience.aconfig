@@ -78,3 +78,10 @@ flag {
     description: "Allows for additional windows tied to WindowDecoration to be layered between status bar and notification shade."
     bug: "316186265"
 }
+
+flag {
+    name: "enable_app_header_with_task_density"
+    namespace: "lse_desktop_experience"
+    description: "Matches the App Header density to that of the app window, instead of SysUI's"
+    bug: "332414819"
+}

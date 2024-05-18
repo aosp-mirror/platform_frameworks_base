@@ -142,6 +142,7 @@ public class ApplicationStartInfoTest {
         final String app1PackageName = "com.android.test.stub1";
         final long appStartTimestampIntentStarted = 1000000;
         final long appStartTimestampActivityLaunchFinished = 2000000;
+        final long appStartTimestampFirstFrameDrawn = 2500000;
         final long appStartTimestampReportFullyDrawn = 3000000;
         final long appStartTimestampService = 4000000;
         final long appStartTimestampBroadcast = 5000000;
@@ -272,6 +273,8 @@ public class ApplicationStartInfoTest {
 
         mAppStartInfoTracker.onActivityLaunchFinished(appStartTimestampIntentStarted, COMPONENT,
                 appStartTimestampActivityLaunchFinished, ApplicationStartInfo.LAUNCH_MODE_STANDARD);
+        mAppStartInfoTracker.addTimestampToStart(app1PackageName, app1Uid,
+                appStartTimestampFirstFrameDrawn, ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME);
         list.clear();
         mAppStartInfoTracker.getStartInfo(app1PackageName, app1Uid, app1Pid1, 0, list);
         verifyInProgressRecordsSize(1);

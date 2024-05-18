@@ -23,6 +23,7 @@ import static com.android.app.animation.Interpolators.STANDARD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.server.notification.Flags.screenshareNotificationHiding;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
+import static com.android.systemui.Flags.confineNotificationTouchToViewWidth;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.OnEmptySpaceClickListener;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.OnOverscrollTopChangedListener;
@@ -597,7 +598,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                             ev.getY(),
                             true /* requireMinHeight */,
                             false /* ignoreDecors */,
-                            true /* ignoreWidth */);
+                            !confineNotificationTouchToViewWidth() /* ignoreWidth */);
                     if (child instanceof ExpandableNotificationRow row) {
                         ExpandableNotificationRow parent = row.getNotificationParent();
                         if (parent != null && parent.areChildrenExpanded()

@@ -35,7 +35,6 @@ import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.dagger.MediaModule
-import com.android.systemui.res.R
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.CoroutineDispatcher
@@ -138,14 +137,6 @@ constructor(
         return Intent(Intent.ACTION_PICK).apply {
             setPackage(packageName)
             putExtra(
-                EXTRA_DESIRED_WIDGET_WIDTH,
-                resources.getDimensionPixelSize(R.dimen.communal_widget_picker_desired_width)
-            )
-            putExtra(
-                EXTRA_DESIRED_WIDGET_HEIGHT,
-                resources.getDimensionPixelSize(R.dimen.communal_widget_picker_desired_height)
-            )
-            putExtra(
                 AppWidgetManager.EXTRA_CATEGORY_FILTER,
                 communalSettingsInteractor.communalWidgetCategories.value
             )
@@ -170,8 +161,6 @@ constructor(
     companion object {
         private const val TAG = "CommunalEditModeViewModel"
 
-        private const val EXTRA_DESIRED_WIDGET_WIDTH = "desired_widget_width"
-        private const val EXTRA_DESIRED_WIDGET_HEIGHT = "desired_widget_height"
         private const val EXTRA_UI_SURFACE_KEY = "ui_surface"
         private const val EXTRA_UI_SURFACE_VALUE = "widgets_hub"
         const val EXTRA_ADDED_APP_WIDGETS_KEY = "added_app_widgets"

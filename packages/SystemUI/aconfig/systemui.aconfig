@@ -414,6 +414,13 @@ flag {
 }
 
 flag {
+   name: "confine_notification_touch_to_view_width"
+   namespace: "systemui"
+   description: "Use notification view width when detecting gestures."
+   bug: "335828150"
+}
+
+flag {
   name: "fix_image_wallpaper_crash_surface_already_released"
   namespace: "systemui"
   description: "Make sure ImageWallpaper doesn't return from OnSurfaceDestroyed until any drawing is finished"
@@ -967,4 +974,14 @@ flag {
   namespace: "systemui"
   description: "Shows a vertical bar at the right edge to indicate the user can swipe to open the glanceable hub"
   bug: "339667383"
+}
+
+flag {
+   name: "register_wallpaper_notifier_background"
+   namespace: "systemui"
+   description: "Decide whether to register wallpaper change broadcast receiver on background executor."
+   bug: "327315860"
+   metadata {
+     purpose: PURPOSE_BUGFIX
+   }
 }
