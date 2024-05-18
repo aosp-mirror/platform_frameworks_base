@@ -238,7 +238,7 @@ public class BiometricNotificationUtils {
 
         showNotificationHelper(context, name, title, content, setupPendingIntent, setupAction,
                 notNowAction, Notification.CATEGORY_SYSTEM, channel, tag,
-                Notification.VISIBILITY_SECRET, false);
+                Notification.VISIBILITY_SECRET, false, Notification.FLAG_NO_CLEAR);
     }
 
     private static String getFingerprintDanglingContentString(Context context,
@@ -296,13 +296,13 @@ public class BiometricNotificationUtils {
             String notificationTag, int visibility, boolean listenToDismissEvent) {
         showNotificationHelper(context, name, title, content, pendingIntent,
                 null /* positiveAction */, null /* negativeAction */, category, channelName,
-                notificationTag, visibility, listenToDismissEvent);
+                notificationTag, visibility, listenToDismissEvent, 0);
     }
 
     private static void showNotificationHelper(Context context, String name, String title,
             String content, PendingIntent pendingIntent, Notification.Action positiveAction,
             Notification.Action negativeAction, String category, String channelName,
-            String notificationTag, int visibility, boolean listenToDismissEvent) {
+            String notificationTag, int visibility, boolean listenToDismissEvent, int flags) {
         Slog.v(TAG," listenToDismissEvent = " + listenToDismissEvent);
         final PendingIntent dismissIntent = PendingIntent.getActivityAsUser(context,
                 0 /* requestCode */, DISMISS_FRR_INTENT, PendingIntent.FLAG_IMMUTABLE /* flags */,
@@ -324,6 +324,9 @@ public class BiometricNotificationUtils {
                 .setContentIntent(pendingIntent)
                 .setVisibility(visibility);
 
+        if (flags > 0) {
+            builder.setFlag(flags, true);
+        }
         if (positiveAction != null) {
             builder.addAction(positiveAction);
         }
