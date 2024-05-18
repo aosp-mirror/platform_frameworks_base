@@ -229,6 +229,7 @@ sealed class TransitionInteractor(
                         startTransitionTo(
                             toState = KeyguardState.OCCLUDED,
                             modeOnCanceled = TransitionModeOnCanceled.RESET,
+                            ownerReason = "keyguardInteractor.onCameraLaunchDetected",
                         )
                     }
                 }

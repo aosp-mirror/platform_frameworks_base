@@ -32,8 +32,8 @@ import android.os.UserHandle;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -52,7 +52,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class NotificationListenerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;

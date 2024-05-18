@@ -23,11 +23,11 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableResources;
 import android.testing.UiThreadTest;
 import android.util.KeyValueListParser;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -41,7 +41,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @UiThreadTest
 public class NotificationSnoozeTest extends SysuiTestCase {
     private static final int RES_DEFAULT = 2;

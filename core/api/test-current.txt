@@ -4260,6 +4260,12 @@ package android.window {
     field @NonNull public static final android.os.Parcelable.Creator<android.window.TaskFragmentOrganizerToken> CREATOR;
   }
 
+  public final class TaskFragmentParentInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.window.TaskFragmentParentInfo> CREATOR;
+  }
+
   public final class TaskFragmentTransaction implements android.os.Parcelable {
     ctor public TaskFragmentTransaction();
     method public void addChange(@Nullable android.window.TaskFragmentTransaction.Change);
@@ -4284,8 +4290,8 @@ package android.window {
     method @Nullable public android.os.IBinder getActivityToken();
     method @NonNull public android.os.Bundle getErrorBundle();
     method @Nullable public android.os.IBinder getErrorCallbackToken();
-    method @Nullable public android.content.res.Configuration getTaskConfiguration();
     method @Nullable public android.window.TaskFragmentInfo getTaskFragmentInfo();
+    method @Nullable public android.window.TaskFragmentParentInfo getTaskFragmentParentInfo();
     method @Nullable public android.os.IBinder getTaskFragmentToken();
     method public int getTaskId();
     method public int getType();
@@ -4293,7 +4299,6 @@ package android.window {
     method @NonNull public android.window.TaskFragmentTransaction.Change setActivityToken(@NonNull android.os.IBinder);
     method @NonNull public android.window.TaskFragmentTransaction.Change setErrorBundle(@NonNull android.os.Bundle);
     method @NonNull public android.window.TaskFragmentTransaction.Change setErrorCallbackToken(@Nullable android.os.IBinder);
-    method @NonNull public android.window.TaskFragmentTransaction.Change setTaskConfiguration(@NonNull android.content.res.Configuration);
     method @NonNull public android.window.TaskFragmentTransaction.Change setTaskFragmentInfo(@NonNull android.window.TaskFragmentInfo);
     method @NonNull public android.window.TaskFragmentTransaction.Change setTaskFragmentToken(@NonNull android.os.IBinder);
     method @NonNull public android.window.TaskFragmentTransaction.Change setTaskId(int);

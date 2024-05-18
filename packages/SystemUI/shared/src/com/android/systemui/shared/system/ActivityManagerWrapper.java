@@ -147,7 +147,7 @@ public class ActivityManagerWrapper {
             Log.w(TAG, "Failed to retrieve task snapshot", e);
         }
         if (snapshot != null) {
-            return new ThumbnailData(snapshot);
+            return ThumbnailData.fromSnapshot(snapshot);
         } else {
             return new ThumbnailData();
         }
@@ -167,7 +167,7 @@ public class ActivityManagerWrapper {
             Log.w(TAG, "Failed to take task snapshot", e);
         }
         if (snapshot != null) {
-            return new ThumbnailData(snapshot);
+            return ThumbnailData.fromSnapshot(snapshot);
         } else {
             return new ThumbnailData();
         }

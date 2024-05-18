@@ -34,9 +34,9 @@ import android.net.NetworkInfo;
 import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.mobile.TelephonyIcons;
@@ -50,7 +50,7 @@ import org.mockito.Mockito;
 import java.util.Collections;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     // These match the constants in WifiManager and need to be kept up to date.

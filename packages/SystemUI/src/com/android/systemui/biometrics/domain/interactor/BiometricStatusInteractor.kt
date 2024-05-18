@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics.domain.interactor
 
 import android.app.ActivityTaskManager
+import android.util.Log
 import com.android.systemui.biometrics.data.repository.BiometricStatusRepository
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.AuthenticationReason
@@ -26,6 +27,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.onEach
 
 /** Encapsulates business logic for interacting with biometric authentication state. */
 interface BiometricStatusInteractor {
@@ -49,15 +51,20 @@ constructor(
 
     override val sfpsAuthenticationReason: Flow<AuthenticationReason> =
         combine(
-            biometricStatusRepository.fingerprintAuthenticationReason,
-            fingerprintPropertyRepository.sensorType
-        ) { reason: AuthenticationReason, sensorType ->
-            if (sensorType.isPowerButton() && reason.isReasonToAlwaysUpdateSfpsOverlay(activityTaskManager)) {
-                reason
-            } else {
-                AuthenticationReason.NotRunning
+                biometricStatusRepository.fingerprintAuthenticationReason,
+                fingerprintPropertyRepository.sensorType
+            ) { reason: AuthenticationReason, sensorType ->
+                if (
+                    sensorType.isPowerButton() &&
+                        reason.isReasonToAlwaysUpdateSfpsOverlay(activityTaskManager)
+                ) {
+                    reason
+                } else {
+                    AuthenticationReason.NotRunning
+                }
             }
-        }.distinctUntilChanged()
+            .distinctUntilChanged()
+            .onEach { Log.d(TAG, "sfpsAuthenticationReason updated: $it") }
 
     override val fingerprintAcquiredStatus: Flow<FingerprintAuthenticationStatus> =
         biometricStatusRepository.fingerprintAcquiredStatus

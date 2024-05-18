@@ -40,6 +40,8 @@ import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
@@ -2222,7 +2224,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     static class ConfigOverrideHint {
         @Nullable DisplayInfo mTmpOverrideDisplayInfo;
         @Nullable ActivityRecord.CompatDisplayInsets mTmpCompatInsets;
-        boolean mUseOverrideInsetsForStableBounds;
+        boolean mUseOverrideInsetsForConfig;
     }
 
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
@@ -2255,11 +2257,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             @NonNull Configuration parentConfig, @Nullable ConfigOverrideHint overrideHint) {
         DisplayInfo overrideDisplayInfo = null;
         ActivityRecord.CompatDisplayInsets compatInsets = null;
-        boolean useOverrideInsetsForStableBounds = false;
+        boolean useOverrideInsetsForConfig = false;
         if (overrideHint != null) {
             overrideDisplayInfo = overrideHint.mTmpOverrideDisplayInfo;
             compatInsets = overrideHint.mTmpCompatInsets;
-            useOverrideInsetsForStableBounds = overrideHint.mUseOverrideInsetsForStableBounds;
+            useOverrideInsetsForConfig = overrideHint.mUseOverrideInsetsForConfig;
             if (overrideDisplayInfo != null) {
                 // Make sure the screen related configs can be computed by the provided
                 // display info.
@@ -2323,6 +2325,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             }
         }
 
+        boolean insetsOverrideApplied = false;
         if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED
                 || inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
             if (!customContainerPolicy && WindowConfiguration.isFloating(windowingMode)) {
@@ -2339,7 +2342,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 // The non decor inset are areas that could never be removed in Honeycomb. See
                 // {@link WindowManagerPolicy#getNonDecorInsetsLw}.
                 calculateInsetFrames(mTmpNonDecorBounds, mTmpStableBounds, mTmpFullBounds, di,
-                        useOverrideInsetsForStableBounds);
+                        useOverrideInsetsForConfig);
             } else {
                 // Apply the given non-decor and stable insets to calculate the corresponding bounds
                 // for screen size of configuration.
@@ -2356,8 +2359,21 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     intersectWithInsetsIfFits(mTmpStableBounds, mTmpBounds,
                             compatInsets.mStableInsets[rotation]);
                     outAppBounds.set(mTmpNonDecorBounds);
+                } else if (useOverrideInsetsForConfig) {
+                    final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+                    final int dw = rotated ? mDisplayContent.mBaseDisplayHeight
+                            : mDisplayContent.mBaseDisplayWidth;
+                    final int dh = rotated ? mDisplayContent.mBaseDisplayWidth
+                            : mDisplayContent.mBaseDisplayHeight;
+                    final DisplayPolicy.DecorInsets.Info decorInsets = mDisplayContent
+                            .getDisplayPolicy().getDecorInsetsInfo(rotation, dw, dh);
+                    mTmpStableBounds.set(outAppBounds);
+                    mTmpStableBounds.inset(decorInsets.mOverrideConfigInsets);
+                    outAppBounds.inset(decorInsets.mOverrideNonDecorInsets);
+                    mTmpNonDecorBounds.set(outAppBounds);
+                    // Record the override apply to avoid duplicated check.
+                    insetsOverrideApplied = true;
                 } else {
-                    // Set to app bounds because it excludes decor insets.
                     mTmpNonDecorBounds.set(outAppBounds);
                     mTmpStableBounds.set(outAppBounds);
                 }
@@ -2397,6 +2413,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         && insideParentBounds && !resolvedBounds.equals(parentBounds)) {
                     // For embedded TFs, the smallest width should be updated. Otherwise, inherit
                     // from the parent task would result in applications loaded wrong resource.
+                    inOutConfig.smallestScreenWidthDp =
+                            Math.min(inOutConfig.screenWidthDp, inOutConfig.screenHeightDp);
+                } else if (insetsOverrideApplied) {
+                    // The smallest width should also consider insets. If the insets are overridden,
+                    // use the overridden value.
                     inOutConfig.smallestScreenWidthDp =
                             Math.min(inOutConfig.screenWidthDp, inOutConfig.screenHeightDp);
                 }

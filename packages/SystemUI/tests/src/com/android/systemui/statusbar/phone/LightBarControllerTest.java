@@ -35,10 +35,10 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.annotation.ColorInt;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
@@ -67,7 +67,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class LightBarControllerTest extends SysuiTestCase {
 

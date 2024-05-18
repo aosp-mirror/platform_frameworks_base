@@ -106,6 +106,7 @@ public abstract class SysuiTestCase {
                     android.net.platform.flags.Flags.class,
                     android.os.Flags.class,
                     android.service.controls.flags.Flags.class,
+                    com.android.internal.telephony.flags.Flags.class,
                     com.android.server.notification.Flags.class,
                     com.android.systemui.Flags.class);
 

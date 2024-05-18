@@ -1282,4 +1282,15 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void addStartInfoTimestamp(int key, long timestampNs, int uid, int pid,
             int userId);
+
+    /**
+     * It is similar {@link IActivityManager#killApplication(String, int, int, String, int)} but
+     * it immediately stop the package.
+     *
+     * <p>Note: Do not call this method from inside PMS's lock, otherwise it'll run into
+     * watchdog reset.
+     * @hide
+     */
+    public abstract void killApplicationSync(String pkgName, int appId, int userId,
+            String reason, int exitInfoReason);
 }

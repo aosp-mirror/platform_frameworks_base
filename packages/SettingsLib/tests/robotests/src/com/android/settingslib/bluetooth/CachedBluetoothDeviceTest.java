@@ -780,9 +780,8 @@ public class CachedBluetoothDeviceTest {
         mBatteryLevel = 10;
 
         // Act & Assert:
-        //   Get "Left: 10% battery" result with Battery Level 10.
-        assertThat(mCachedDevice.getTvConnectionSummary().toString()).isEqualTo(
-                "Left: 10% battery");
+        //   Get "Left 10%" result with Battery Level 10.
+        assertThat(mCachedDevice.getTvConnectionSummary().toString()).isEqualTo("Left 10%");
     }
 
     @Test
@@ -815,9 +814,9 @@ public class CachedBluetoothDeviceTest {
         mBatteryLevel = 10;
 
         // Act & Assert:
-        //   Get "Left: 10% battery" result with Battery Level 10.
+        //   Get "Left 10%" result with Battery Level 10.
         assertThat(mCachedDevice.getTvConnectionSummary().toString()).isEqualTo(
-                "Left: 10% battery");
+                "Left 10%");
     }
 
     @Test
@@ -925,9 +924,9 @@ public class CachedBluetoothDeviceTest {
         mBatteryLevel = 10;
 
         // Act & Assert:
-        //   Get "Left: 10% battery Right: 10% battery" result with Battery Level 10.
+        //   Get "Left 10% Right 10%" result with Battery Level 10.
         assertThat(mCachedDevice.getTvConnectionSummary().toString())
-                .isEqualTo("Left: 10% battery Right: 10% battery");
+                .isEqualTo("Left 10% Right 10%");
     }
 
     @Test
@@ -1226,7 +1225,7 @@ public class CachedBluetoothDeviceTest {
                 TWS_BATTERY_RIGHT.getBytes());
 
         assertThat(mCachedDevice.getTvConnectionSummary().toString()).isEqualTo(
-                "Left: 15% battery Right: 25% battery");
+                "Left 15% Right 25%");
     }
 
     @Test
@@ -1262,11 +1261,7 @@ public class CachedBluetoothDeviceTest {
                 TWS_BATTERY_RIGHT.getBytes());
 
         assertThat(mCachedDevice.getTvConnectionSummary().toString())
-                .isEqualTo(
-                        mContext.getString(R.string.bluetooth_battery_level_untethered_left, "15%")
-                                + " "
-                                + mContext.getString(
-                                        R.string.bluetooth_battery_level_untethered_right, "25%"));
+                .isEqualTo("Left 15% Right 25%");
     }
 
     @Test
@@ -1283,10 +1278,8 @@ public class CachedBluetoothDeviceTest {
                 .thenReturn(TWS_BATTERY_RIGHT.getBytes());
 
         int lowBatteryColor = mContext.getColor(LOW_BATTERY_COLOR);
-        String leftBattery =
-                mContext.getString(R.string.bluetooth_battery_level_untethered_left, "15%");
-        String rightBattery =
-                mContext.getString(R.string.bluetooth_battery_level_untethered_right, "25%");
+        String leftBattery = "Left 15%";
+        String rightBattery = "Right 25%";
 
         // Default low battery threshold, only left battery is low
         CharSequence summary = mCachedDevice.getTvConnectionSummary(LOW_BATTERY_COLOR);

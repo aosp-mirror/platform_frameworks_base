@@ -1908,12 +1908,16 @@ public class ParsingPackageUtils {
             } else if (parser.getName().equals("package")) {
                 final TypedArray sa = res.obtainAttributes(parser,
                         R.styleable.AndroidManifestQueriesPackage);
-                final String packageName = sa.getNonConfigurationString(
-                        R.styleable.AndroidManifestQueriesPackage_name, 0);
-                if (TextUtils.isEmpty(packageName)) {
-                    return input.error("Package name is missing from package tag.");
+                try {
+                    final String packageName = sa.getNonConfigurationString(
+                            R.styleable.AndroidManifestQueriesPackage_name, 0);
+                    if (TextUtils.isEmpty(packageName)) {
+                        return input.error("Package name is missing from package tag.");
+                    }
+                    pkg.addQueriesPackage(packageName.intern());
+                } finally {
+                    sa.recycle();
                 }
-                pkg.addQueriesPackage(packageName.intern());
             } else if (parser.getName().equals("provider")) {
                 final TypedArray sa = res.obtainAttributes(parser,
                         R.styleable.AndroidManifestQueriesProvider);

@@ -1594,7 +1594,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_DISABLE_THIN_LETTERBOXING_REACHABILITY)
+    @EnableFlags(Flags.FLAG_DISABLE_THIN_LETTERBOXING_POLICY)
     public void testAllowReachabilityForThinLetterboxWithFlagEnabled() {
         spyOn(mController);
         doReturn(true).when(mController).isVerticalThinLetterboxed();
@@ -1609,7 +1609,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_DISABLE_THIN_LETTERBOXING_REACHABILITY)
+    @DisableFlags(Flags.FLAG_DISABLE_THIN_LETTERBOXING_POLICY)
     public void testAllowReachabilityForThinLetterboxWithFlagDisabled() {
         spyOn(mController);
         doReturn(true).when(mController).isVerticalThinLetterboxed();

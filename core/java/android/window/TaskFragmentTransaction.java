@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -248,13 +247,6 @@ public final class TaskFragmentTransaction implements Parcelable {
             return this;
         }
 
-        // TODO(b/241043377): Keep this API to prevent @TestApi changes. Remove in the next release.
-        /** Configuration of the parent Task. */
-        @NonNull
-        public Change setTaskConfiguration(@NonNull Configuration configuration) {
-            return this;
-        }
-
         /**
          * If the {@link #TYPE_TASK_FRAGMENT_ERROR} is from a {@link WindowContainerTransaction}
          * from the {@link TaskFragmentOrganizer}, it may come with an error callback token to
@@ -299,12 +291,11 @@ public final class TaskFragmentTransaction implements Parcelable {
             return this;
         }
 
-        // TODO(b/241043377): Hide this API to prevent @TestApi changes. Remove in the next release.
         /**
          * Sets info of the parent Task of the embedded TaskFragment.
          * @see TaskFragmentParentInfo
          *
-         * @hide pending unhide
+         * @hide
          */
         @NonNull
         public Change setTaskFragmentParentInfo(@NonNull TaskFragmentParentInfo info) {
@@ -338,12 +329,6 @@ public final class TaskFragmentTransaction implements Parcelable {
             return mTaskId;
         }
 
-        // TODO(b/241043377): Keep this API to prevent @TestApi changes. Remove in the next release.
-        @Nullable
-        public Configuration getTaskConfiguration() {
-            return mTaskFragmentParentInfo.getConfiguration();
-        }
-
         @Nullable
         public IBinder getErrorCallbackToken() {
             return mErrorCallbackToken;
@@ -365,8 +350,10 @@ public final class TaskFragmentTransaction implements Parcelable {
             return mActivityToken;
         }
 
-        // TODO(b/241043377): Hide this API to prevent @TestApi changes. Remove in the next release.
-        /** @hide pending unhide */
+        /**
+         * Obtains the {@link TaskFragmentParentInfo} for this transaction.
+         */
+        @SuppressLint("UnflaggedApi") // @TestApi to replace legacy usages.
         @Nullable
         public TaskFragmentParentInfo getTaskFragmentParentInfo() {
             return mTaskFragmentParentInfo;

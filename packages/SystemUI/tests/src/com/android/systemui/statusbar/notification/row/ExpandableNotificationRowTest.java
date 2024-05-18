@@ -46,13 +46,13 @@ import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
@@ -87,7 +87,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 public class ExpandableNotificationRowTest extends SysuiTestCase {
 

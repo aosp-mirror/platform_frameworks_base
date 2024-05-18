@@ -247,3 +247,13 @@ flag {
     description: "Allow MAIN user to access blocked number provider"
     bug: "338579331"
 }
+
+flag {
+    name: "restrict_quiet_mode_credential_bug_fix_to_managed_profiles"
+    namespace: "profile_experiences"
+    description: "Use user states to check the state of quiet mode for managed profiles only"
+    bug: "332812630"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

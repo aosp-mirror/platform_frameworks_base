@@ -22,6 +22,7 @@ import com.android.credentialmanager.CredentialSelectorUiState
 import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntry.PerUserNameEntries
 import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.get.CredentialEntryInfo
+import java.time.Instant
 
 fun Request.Get.toGet(isPrimary: Boolean): CredentialSelectorUiState.Get {
     val accounts = providerInfos
@@ -67,4 +68,4 @@ fun Request.Get.toGet(isPrimary: Boolean): CredentialSelectorUiState.Get {
 val comparator = compareBy<CredentialEntryInfo> { entryInfo ->
     // Passkey type always go first
     entryInfo.credentialType.let { if (it == CredentialType.PASSKEY) 0 else 1 }
-}.thenByDescending { it.lastUsedTimeMillis ?: 0 }
+}.thenByDescending { it.lastUsedTimeMillis ?: Instant.EPOCH }

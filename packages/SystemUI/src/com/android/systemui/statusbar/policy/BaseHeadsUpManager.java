@@ -39,6 +39,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
+import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.util.ListenerSet;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -114,7 +115,8 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         mUiEventLogger = uiEventLogger;
         mAvalancheController = avalancheController;
         Resources resources = context.getResources();
-        mMinimumDisplayTime = resources.getInteger(R.integer.heads_up_notification_minimum_time);
+        mMinimumDisplayTime = NotificationThrottleHun.isEnabled()
+                ? 500 : resources.getInteger(R.integer.heads_up_notification_minimum_time);
         mStickyForSomeTimeAutoDismissTime = resources.getInteger(
                 R.integer.sticky_heads_up_notification_time);
         mAutoDismissTime = resources.getInteger(R.integer.heads_up_notification_decay);
@@ -765,11 +767,23 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
          * @param updatePostTime whether or not to refresh the post time
          */
         public void updateEntry(boolean updatePostTime, @Nullable String reason) {
+            updateEntry(updatePostTime, /* updateEarliestRemovalTime= */ true, reason);
+        }
+
+        /**
+         * Updates an entry's removal time.
+         * @param updatePostTime whether or not to refresh the post time
+         * @param updateEarliestRemovalTime whether this update should further delay removal
+         */
+        public void updateEntry(boolean updatePostTime, boolean updateEarliestRemovalTime,
+                @Nullable String reason) {
             Runnable runnable = () -> {
                 mLogger.logUpdateEntry(mEntry, updatePostTime, reason);
 
                 final long now = mSystemClock.elapsedRealtime();
-                mEarliestRemovalTime = now + mMinimumDisplayTime;
+                if (updateEarliestRemovalTime) {
+                    mEarliestRemovalTime = now + mMinimumDisplayTime;
+                }
 
                 if (updatePostTime) {
                     mPostTime = Math.max(mPostTime, now);
@@ -785,7 +799,9 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             FinishTimeUpdater finishTimeCalculator = () -> {
                 final long finishTime = calculateFinishTime();
                 final long now = mSystemClock.elapsedRealtime();
-                final long timeLeft = Math.max(finishTime - now, mMinimumDisplayTime);
+                final long timeLeft = NotificationThrottleHun.isEnabled()
+                        ? Math.max(finishTime, mEarliestRemovalTime) - now
+                        : Math.max(finishTime - now, mMinimumDisplayTime);
                 return timeLeft;
             };
             scheduleAutoRemovalCallback(finishTimeCalculator, "updateEntry (not sticky)");
@@ -818,13 +834,6 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         }
 
         public int compareNonTimeFields(HeadsUpEntry headsUpEntry) {
-            boolean isPinned = mEntry.isRowPinned();
-            boolean otherPinned = headsUpEntry.mEntry.isRowPinned();
-            if (isPinned && !otherPinned) {
-                return -1;
-            } else if (!isPinned && otherPinned) {
-                return 1;
-            }
             boolean selfFullscreen = hasFullScreenIntent(mEntry);
             boolean otherFullscreen = hasFullScreenIntent(headsUpEntry.mEntry);
             if (selfFullscreen && !otherFullscreen) {
@@ -851,6 +860,13 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         }
 
         public int compareTo(@NonNull HeadsUpEntry headsUpEntry) {
+            boolean isPinned = mEntry.isRowPinned();
+            boolean otherPinned = headsUpEntry.mEntry.isRowPinned();
+            if (isPinned && !otherPinned) {
+                return -1;
+            } else if (!isPinned && otherPinned) {
+                return 1;
+            }
             int nonTimeCompareResult = compareNonTimeFields(headsUpEntry);
             if (nonTimeCompareResult != 0) {
                 return nonTimeCompareResult;

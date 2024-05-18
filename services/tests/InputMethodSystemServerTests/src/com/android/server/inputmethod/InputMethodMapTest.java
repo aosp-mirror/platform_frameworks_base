@@ -44,49 +44,49 @@ public final class InputMethodMapTest {
     }
 
     @Test
-    public void testEqualsSameObject() {
+    public void testAreSameSameObject() {
         final var imi1 = createFakeInputMethodInfo(TEST_IME_ID1, createFakeSubtypes(0));
         final var imi2 = createFakeInputMethodInfo(TEST_IME_ID2, createFakeSubtypes(3));
         final var map = toMap(imi1, imi2);
         assertTrue("Must return true for the same instance",
-                InputMethodMap.equals(map, map));
+                InputMethodMap.areSame(map, map));
     }
 
     @Test
-    public void testEqualsEquivalentObject() {
+    public void testAreSameEquivalentObject() {
         final var imi1 = createFakeInputMethodInfo(TEST_IME_ID1, createFakeSubtypes(0));
         final var imi2 = createFakeInputMethodInfo(TEST_IME_ID2, createFakeSubtypes(3));
         assertTrue("Must return true for the equivalent instances",
-                InputMethodMap.equals(toMap(imi1, imi2), toMap(imi1, imi2)));
+                InputMethodMap.areSame(toMap(imi1, imi2), toMap(imi1, imi2)));
 
         assertTrue("Must return true for the equivalent instances",
-                InputMethodMap.equals(toMap(imi1, imi2), toMap(imi2, imi1)));
+                InputMethodMap.areSame(toMap(imi1, imi2), toMap(imi2, imi1)));
     }
 
     @Test
-    public void testEqualsDifferentKeys() {
+    public void testAreSameDifferentKeys() {
         final var imi1 = createFakeInputMethodInfo(TEST_IME_ID1, createFakeSubtypes(0));
         final var imi2 = createFakeInputMethodInfo(TEST_IME_ID2, createFakeSubtypes(3));
         final var imi3 = createFakeInputMethodInfo(TEST_IME_ID3, createFakeSubtypes(3));
         assertFalse("Must return false if keys are different",
-                InputMethodMap.equals(toMap(imi1), toMap(imi1, imi2)));
+                InputMethodMap.areSame(toMap(imi1), toMap(imi1, imi2)));
         assertFalse("Must return false if keys are different",
-                InputMethodMap.equals(toMap(imi1, imi2), toMap(imi1)));
+                InputMethodMap.areSame(toMap(imi1, imi2), toMap(imi1)));
         assertFalse("Must return false if keys are different",
-                InputMethodMap.equals(toMap(imi1, imi2), toMap(imi1, imi3)));
+                InputMethodMap.areSame(toMap(imi1, imi2), toMap(imi1, imi3)));
     }
 
     @Test
-    public void testEqualsDifferentValues() {
+    public void testAreSameDifferentValues() {
         final var imi1_without_subtypes =
                 createFakeInputMethodInfo(TEST_IME_ID1, createFakeSubtypes(0));
         final var imi1_with_subtypes =
                 createFakeInputMethodInfo(TEST_IME_ID1, createFakeSubtypes(3));
         final var imi2 = createFakeInputMethodInfo(TEST_IME_ID2, createFakeSubtypes(3));
         assertFalse("Must return false if values are different",
-                InputMethodMap.equals(toMap(imi1_without_subtypes), toMap(imi1_with_subtypes)));
+                InputMethodMap.areSame(toMap(imi1_without_subtypes), toMap(imi1_with_subtypes)));
         assertFalse("Must return false if values are different",
-                InputMethodMap.equals(
+                InputMethodMap.areSame(
                         toMap(imi1_without_subtypes, imi2),
                         toMap(imi1_with_subtypes, imi2)));
     }

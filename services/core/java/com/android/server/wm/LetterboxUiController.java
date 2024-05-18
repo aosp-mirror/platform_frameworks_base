@@ -260,7 +260,7 @@ final class LetterboxUiController {
     // Whether activity "refresh" was requested but not finished in
     // ActivityRecord#activityResumedLocked following the camera compat force rotation in
     // DisplayRotationCompatPolicy.
-    private boolean mIsRefreshAfterRotationRequested;
+    private boolean mIsRefreshRequested;
 
     @NonNull
     private final OptProp mIgnoreRequestedOrientationOptProp;
@@ -571,15 +571,14 @@ final class LetterboxUiController {
     }
 
     /**
-     * Whether activity "refresh" was requested but not finished in {@link #activityResumedLocked}
-     * following the camera compat force rotation in {@link DisplayRotationCompatPolicy}.
+     * Whether activity "refresh" was requested but not finished in {@link #activityResumedLocked}.
      */
-    boolean isRefreshAfterRotationRequested() {
-        return mIsRefreshAfterRotationRequested;
+    boolean isRefreshRequested() {
+        return mIsRefreshRequested;
     }
 
-    void setIsRefreshAfterRotationRequested(boolean isRequested) {
-        mIsRefreshAfterRotationRequested = isRequested;
+    void setIsRefreshRequested(boolean isRequested) {
+        mIsRefreshRequested = isRequested;
     }
 
     boolean isOverrideRespectRequestedOrientationEnabled() {
@@ -1068,7 +1067,7 @@ final class LetterboxUiController {
      * thin letteboxing
      */
     boolean allowVerticalReachabilityForThinLetterbox() {
-        if (!Flags.disableThinLetterboxingReachability()) {
+        if (!Flags.disableThinLetterboxingPolicy()) {
             return true;
         }
         // When the flag is enabled we allow vertical reachability only if the
@@ -1081,7 +1080,7 @@ final class LetterboxUiController {
      * thin letteboxing
      */
     boolean allowHorizontalReachabilityForThinLetterbox() {
-        if (!Flags.disableThinLetterboxingReachability()) {
+        if (!Flags.disableThinLetterboxingPolicy()) {
             return true;
         }
         // When the flag is enabled we allow horizontal reachability only if the

@@ -87,6 +87,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.BubbleIconFactory;
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
@@ -1866,7 +1867,11 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public void bubbleOverflowChanged(boolean hasBubbles) {
-            // TODO (b/334175587): tell stack view to hide / show the overflow
+            if (Flags.enableOptionalBubbleOverflow()) {
+                if (mStackView != null) {
+                    mStackView.showOverflow(hasBubbles);
+                }
+            }
         }
     };
 
@@ -2404,7 +2409,10 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public void setBubbleBarBounds(Rect bubbleBarBounds) {
-            mMainExecutor.execute(() -> mBubblePositioner.setBubbleBarBounds(bubbleBarBounds));
+            mMainExecutor.execute(() -> {
+                mBubblePositioner.setBubbleBarBounds(bubbleBarBounds);
+                if (mLayerView != null) mLayerView.updateExpandedView();
+            });
         }
     }
 
@@ -2715,6 +2723,15 @@ public class BubbleController implements ConfigurationChangeListener,
             mMainExecutor.execute(
                     () -> BubbleController.this.onSensitiveNotificationProtectionStateChanged(
                             sensitiveNotificationProtectionActive));
+        }
+
+        @Override
+        public boolean canShowBubbleNotification() {
+            // in bubble bar mode, when the IME is visible we can't animate new bubbles.
+            if (BubbleController.this.isShowingAsBubbleBar()) {
+                return !BubbleController.this.mBubblePositioner.getIsImeVisible();
+            }
+            return true;
         }
     }
 

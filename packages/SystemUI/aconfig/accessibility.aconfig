@@ -4,6 +4,13 @@ container: "system"
 # NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
 
 flag {
+    name: "create_windowless_window_magnifier"
+    namespace: "accessibility"
+    description: "Uses SurfaceControlViewHost to create the magnifier for window magnification."
+    bug: "280992417"
+}
+
+flag {
     name: "delay_show_magnification_button"
     namespace: "accessibility"
     description: "Delays the showing of magnification mode switch button."
@@ -66,8 +73,11 @@ flag {
 }
 
 flag {
-    name: "create_windowless_window_magnifier"
+    name: "save_and_restore_magnification_settings_buttons"
     namespace: "accessibility"
-    description: "Uses SurfaceControlViewHost to create the magnifier for window magnification."
-    bug: "280992417"
+    description: "Saves the selected button status in magnification settings and restore the status when revisiting the same smallest screen DP."
+    bug: "325567876"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }

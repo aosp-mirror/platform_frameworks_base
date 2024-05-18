@@ -322,9 +322,8 @@ class MenuViewLayer extends FrameLayout implements
         }
         addView(mMessageView, LayerIndex.MESSAGE_VIEW);
 
-        if (Flags.floatingMenuAnimatedTuck()) {
-            setClipChildren(true);
-        }
+        setClipChildren(true);
+
         setClickable(false);
         setFocusable(false);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -476,10 +475,8 @@ class MenuViewLayer extends FrameLayout implements
             mMenuAnimationController.startTuckedAnimationPreview();
         }
 
-        if (Flags.floatingMenuAnimatedTuck()) {
-            if (!mMenuView.isMoveToTucked()) {
-                setClipBounds(null);
-            }
+        if (!mMenuView.isMoveToTucked()) {
+            setClipBounds(null);
         }
         mMenuView.onArrivalAtPosition(false);
     }

@@ -42,6 +42,7 @@ import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_MUTABLE
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.UserInfo
 import android.graphics.drawable.Icon
 import android.hardware.display.FakeAmbientDisplayConfiguration
@@ -129,6 +130,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     protected val userTracker = FakeUserTracker()
     protected val avalancheProvider: AvalancheProvider = mock()
     lateinit var systemSettings: SystemSettings
+    protected val packageManager: PackageManager = mock()
 
     protected abstract val provider: VisualInterruptionDecisionProvider
 

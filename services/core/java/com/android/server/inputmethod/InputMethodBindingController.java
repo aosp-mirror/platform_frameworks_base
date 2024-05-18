@@ -443,7 +443,16 @@ final class InputMethodBindingController {
             mCurId = info.getId();
             mLastBindTime = SystemClock.uptimeMillis();
 
-            addFreshWindowToken();
+            final int displayIdToShowIme = mService.getDisplayIdToShowImeLocked();
+            mCurToken = new Binder();
+            mService.setCurTokenDisplayIdLocked(displayIdToShowIme);
+            if (DEBUG) {
+                Slog.v(TAG, "Adding window token: " + mCurToken + " for display: "
+                        + displayIdToShowIme);
+            }
+            mWindowManagerInternal.addWindowToken(mCurToken,
+                    WindowManager.LayoutParams.TYPE_INPUT_METHOD,
+                    displayIdToShowIme, null /* options */);
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
                     null, null, null, mCurId, mCurSeq, false);
@@ -468,22 +477,6 @@ final class InputMethodBindingController {
                 mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS),
                 PendingIntent.FLAG_IMMUTABLE, options.toBundle()));
         return intent;
-    }
-
-    @GuardedBy("ImfLock.class")
-    private void addFreshWindowToken() {
-        int displayIdToShowIme = mService.getDisplayIdToShowImeLocked();
-        mCurToken = new Binder();
-
-        mService.setCurTokenDisplayIdLocked(displayIdToShowIme);
-
-        if (DEBUG) {
-            Slog.v(TAG, "Adding window token: " + mCurToken + " for display: "
-                    + displayIdToShowIme);
-        }
-        mWindowManagerInternal.addWindowToken(mCurToken,
-                WindowManager.LayoutParams.TYPE_INPUT_METHOD,
-                displayIdToShowIme, null /* options */);
     }
 
     @GuardedBy("ImfLock.class")

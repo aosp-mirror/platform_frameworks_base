@@ -19,6 +19,10 @@ package androidx.window.extensions.embedding;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE;
 import static android.window.TaskFragmentOperation.OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE;
 
+import static androidx.window.extensions.embedding.DividerPresenter.FLING_ANIMATION_DURATION;
+import static androidx.window.extensions.embedding.DividerPresenter.FLING_ANIMATION_INTERPOLATOR;
+import static androidx.window.extensions.embedding.DividerPresenter.MIN_DISMISS_VELOCITY_DP_PER_SECOND;
+import static androidx.window.extensions.embedding.DividerPresenter.MIN_FLING_VELOCITY_DP_PER_SECOND;
 import static androidx.window.extensions.embedding.DividerPresenter.getBoundsOffsetForDivider;
 import static androidx.window.extensions.embedding.DividerPresenter.getInitialDividerPosition;
 import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_BOTTOM;
@@ -35,6 +39,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -635,6 +640,105 @@ public class DividerPresenterTest {
         when(container.getTopNonFinishingActivity()).thenReturn(activity);
         assertEquals(activityBackgroundColor,
                 DividerPresenter.getContainerBackgroundColor(container, defaultColor));
+    }
+
+    @Test
+    public void testGetValueAnimator() {
+        ValueAnimator animator =
+                DividerPresenter.getValueAnimator(
+                        375 /* prevDividerPosition */,
+                        500 /* snappedDividerPosition */);
+
+        assertEquals(animator.getDuration(), FLING_ANIMATION_DURATION);
+        assertEquals(animator.getInterpolator(), FLING_ANIMATION_INTERPOLATOR);
+    }
+
+    @Test
+    public void testDividerPositionWithDraggingToFullscreenAllowed() {
+        final float displayDensity = 600F;
+        final float dismissVelocity = MIN_DISMISS_VELOCITY_DP_PER_SECOND * displayDensity + 10f;
+        final float nonFlingVelocity = MIN_FLING_VELOCITY_DP_PER_SECOND * displayDensity - 10f;
+        final float flingVelocity = MIN_FLING_VELOCITY_DP_PER_SECOND * displayDensity + 10f;
+
+        // Divider position is less than minPosition and the velocity is enough to be dismissed
+        assertEquals(
+                0, // Closed position
+                DividerPresenter.dividerPositionWithDraggingToFullscreenAllowed(
+                        10 /* dividerPosition */,
+                        30 /* minPosition */,
+                        900 /* maxPosition */,
+                        1200 /* fullyExpandedPosition */,
+                        -dismissVelocity,
+                        displayDensity));
+
+        // Divider position is greater than maxPosition and the velocity is enough to be dismissed
+        assertEquals(
+                1200, // Fully expanded position
+                DividerPresenter.dividerPositionWithDraggingToFullscreenAllowed(
+                        1000 /* dividerPosition */,
+                        30 /* minPosition */,
+                        900 /* maxPosition */,
+                        1200 /* fullyExpandedPosition */,
+                        dismissVelocity,
+                        displayDensity));
+
+        // Divider position is returned when the velocity is not fast enough for fling and is in
+        // between minPosition and maxPosition
+        assertEquals(
+                500, // dividerPosition is not snapped
+                DividerPresenter.dividerPositionWithDraggingToFullscreenAllowed(
+                        500 /* dividerPosition */,
+                        30 /* minPosition */,
+                        900 /* maxPosition */,
+                        1200 /* fullyExpandedPosition */,
+                        nonFlingVelocity,
+                        displayDensity));
+
+        // Divider position is snapped when the velocity is not fast enough for fling and larger
+        // than maxPosition
+        assertEquals(
+                900, // Closest position is maxPosition
+                DividerPresenter.dividerPositionWithDraggingToFullscreenAllowed(
+                        950 /* dividerPosition */,
+                        30 /* minPosition */,
+                        900 /* maxPosition */,
+                        1200 /* fullyExpandedPosition */,
+                        nonFlingVelocity,
+                        displayDensity));
+
+        // Divider position is snapped when the velocity is not fast enough for fling and smaller
+        // than minPosition
+        assertEquals(
+                30, // Closest position is minPosition
+                DividerPresenter.dividerPositionWithDraggingToFullscreenAllowed(
+                        20 /* dividerPosition */,
+                        30 /* minPosition */,
+                        900 /* maxPosition */,
+                        1200 /* fullyExpandedPosition */,
+                        nonFlingVelocity,
+                        displayDensity));
+
+        // Divider position is greater than minPosition and the velocity is enough for fling
+        assertEquals(
+                0, // Closed position
+                DividerPresenter.dividerPositionWithDraggingToFullscreenAllowed(
+                        50 /* dividerPosition */,
+                        30 /* minPosition */,
+                        900 /* maxPosition */,
+                        1200 /* fullyExpandedPosition */,
+                        -flingVelocity,
+                        displayDensity));
+
+        // Divider position is less than maxPosition and the velocity is enough for fling
+        assertEquals(
+                1200, // Fully expanded position
+                DividerPresenter.dividerPositionWithDraggingToFullscreenAllowed(
+                        800 /* dividerPosition */,
+                        30 /* minPosition */,
+                        900 /* maxPosition */,
+                        1200 /* fullyExpandedPosition */,
+                        flingVelocity,
+                        displayDensity));
     }
 
     private TaskFragmentContainer createMockTaskFragmentContainer(

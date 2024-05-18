@@ -31,6 +31,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
@@ -1366,6 +1367,7 @@ public class JobInfo implements Parcelable {
          * @return This object for method chaining
          */
         @FlaggedApi(Flags.FLAG_JOB_DEBUG_INFO_APIS)
+        @SuppressLint("BuilderSetStyle")
         @NonNull
         public Builder removeDebugTag(@NonNull String tag) {
             mDebugTags.remove(tag);

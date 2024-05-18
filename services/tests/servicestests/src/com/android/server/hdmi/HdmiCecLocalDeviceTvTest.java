@@ -26,6 +26,8 @@ import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_WAKE_UP_MESSAGE;
+import static com.android.server.hdmi.HdmiControlService.STANDBY_SCREEN_OFF;
+import static com.android.server.hdmi.HdmiControlService.WAKE_UP_SCREEN_ON;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -1780,14 +1782,26 @@ public class HdmiCecLocalDeviceTvTest {
         HdmiCecMessage activeSourceFromTv =
                 HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
 
-        mHdmiControlService.getHdmiCecNetwork().clearLocalDevices();
+        // Go to standby to invalidate the active source on the local device s.t. the
+        // RequestActiveSourceAction will start.
+        mHdmiControlService.onStandby(STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+
         mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mHdmiControlService.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+
+        // Skip the LauncherX API timeout.
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS * 2);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
         mNativeWrapper.clearResultMessages();
         mNativeWrapper.onCecMessage(activeSourceFromPlayback);
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        // Assume there was a retry and the action did not finish earlier.
         mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
         mTestLooper.dispatchAll();
 
@@ -1800,9 +1814,18 @@ public class HdmiCecLocalDeviceTvTest {
                 HdmiCecMessageBuilder.buildRequestActiveSource(ADDR_TV);
         HdmiCecMessage activeSourceFromTv =
                 HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
-        mHdmiControlService.getHdmiCecNetwork().clearLocalDevices();
+
+        // Go to standby to invalidate the active source on the local device s.t. the
+        // RequestActiveSourceAction will start.
+        mHdmiControlService.onStandby(STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+
         mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mHdmiControlService.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+
+        // Skip the LauncherX API timeout.
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS * 2);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
@@ -1827,8 +1850,18 @@ public class HdmiCecLocalDeviceTvTest {
                 HdmiCecMessageBuilder.buildRequestActiveSource(ADDR_TV);
         HdmiCecMessage activeSourceFromTv =
                 HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
-        mHdmiControlService.getHdmiCecNetwork().clearLocalDevices();
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+
+        // Go to standby to invalidate the active source on the local device s.t. the
+        // RequestActiveSourceAction will start.
+        mHdmiControlService.onStandby(STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
+        mHdmiControlService.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+
+        // Skip the LauncherX API timeout.
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS * 2);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
@@ -1847,8 +1880,16 @@ public class HdmiCecLocalDeviceTvTest {
                 HdmiCecMessageBuilder.buildRequestActiveSource(ADDR_TV);
         HdmiCecMessage activeSourceFromTv =
                 HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
-        mHdmiControlService.getHdmiCecNetwork().clearLocalDevices();
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+
+        // Go to standby to invalidate the active source on the local device s.t. the
+        // RequestActiveSourceAction will start.
+        mHdmiControlService.onStandby(STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
+        mHdmiControlService.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+
         HdmiDeviceInfo playbackDevice = HdmiDeviceInfo.cecDeviceBuilder()
                 .setLogicalAddress(ADDR_PLAYBACK_1)
                 .setPhysicalAddress(0x1000)
@@ -1860,6 +1901,10 @@ public class HdmiCecLocalDeviceTvTest {
                 .setCecVersion(HdmiControlManager.HDMI_CEC_VERSION_1_4_B)
                 .build();
         mHdmiControlService.getHdmiCecNetwork().addCecDevice(playbackDevice);
+        mTestLooper.dispatchAll();
+
+        // Skip the LauncherX API timeout.
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS * 2);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
@@ -1874,6 +1919,41 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSourceFromTv);
     }
 
+    @Test
+    public void onAddressAllocated_sendSourceChangingMessage_noRequestActiveSourceMessage() {
+        HdmiCecMessage requestActiveSource =
+                HdmiCecMessageBuilder.buildRequestActiveSource(ADDR_TV);
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+        HdmiCecMessage setStreamPathFromTv =
+                HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV, 0x2000);
+
+        // Go to standby to invalidate the active source on the local device s.t. the
+        // RequestActiveSourceAction will start.
+        mHdmiControlService.onStandby(STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlService.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+
+        // Even if the device at the end of this path doesn't answer to this message, TV should not
+        // continue the RequestActiveSourceAction.
+        mHdmiControlService.sendCecCommand(setStreamPathFromTv);
+
+        // Skip the LauncherX API timeout.
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS * 2);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(requestActiveSource);
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        // Assume there was a retry and the action did not finish earlier.
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSourceFromTv);
+    }
 
     @Test
     public void newDeviceConnectedIfOnlyOneGiveOsdNameSent() {
@@ -1900,7 +1980,12 @@ public class HdmiCecLocalDeviceTvTest {
         HdmiCecMessage activeSourceFromTv =
                 HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
 
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_WAKE_UP_MESSAGE);
+        // Go to standby to invalidate the active source on the local device s.t. the
+        // TV will send <Active Source> when it selects its internal source.
+        mHdmiControlService.onStandby(STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlService.onWakeUp(WAKE_UP_SCREEN_ON);
         mTestLooper.dispatchAll();
 
         mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
@@ -1930,6 +2015,8 @@ public class HdmiCecLocalDeviceTvTest {
     public void handleStandby_fromActiveSource_standby() {
         mPowerManager.setInteractive(true);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
         mHdmiControlService.setActiveSource(ADDR_PLAYBACK_1, 0x1000,
                 "HdmiCecLocalDeviceTvTest");
         mTestLooper.dispatchAll();

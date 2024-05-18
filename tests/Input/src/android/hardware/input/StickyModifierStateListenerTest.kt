@@ -21,6 +21,7 @@ import android.content.ContextWrapper
 import android.os.Handler
 import android.os.HandlerExecutor
 import android.os.test.TestLooper
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.Presubmit
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.KeyEvent
@@ -50,6 +51,10 @@ import kotlin.test.fail
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner::class)
+@EnableFlags(
+    com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG,
+    com.android.input.flags.Flags.FLAG_ENABLE_INPUT_FILTER_RUST_IMPL,
+)
 class StickyModifierStateListenerTest {
 
     @get:Rule
@@ -67,10 +72,6 @@ class StickyModifierStateListenerTest {
 
     @Before
     fun setUp() {
-        // Enable Sticky keys feature
-        rule.enableFlags(com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG)
-        rule.enableFlags(com.android.input.flags.Flags.FLAG_ENABLE_INPUT_FILTER_RUST_IMPL)
-
         context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
         inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManagerMock)
         inputManager = InputManager(context)

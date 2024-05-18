@@ -157,6 +157,7 @@ public class SettingsToPropertiesMapper {
         "car_telemetry",
         "codec_fwk",
         "companion",
+        "com_android_adbd",
         "content_protection",
         "context_hub",
         "core_experiments_team_internal",
@@ -264,11 +265,11 @@ public class SettingsToPropertiesMapper {
             Uri settingUri = Settings.Global.getUriFor(globalSetting);
             String propName = makePropertyName(GLOBAL_SETTINGS_CATEGORY, globalSetting);
             if (settingUri == null) {
-                log("setting uri is null for globalSetting " + globalSetting);
+                logErr("setting uri is null for globalSetting " + globalSetting);
                 continue;
             }
             if (propName == null) {
-                log("invalid prop name for globalSetting " + globalSetting);
+                logErr("invalid prop name for globalSetting " + globalSetting);
                 continue;
             }
 
@@ -296,7 +297,7 @@ public class SettingsToPropertiesMapper {
                         for (String key : properties.getKeyset()) {
                             String propertyName = makePropertyName(scope, key);
                             if (propertyName == null) {
-                                log("unable to construct system property for " + scope + "/"
+                                logErr("unable to construct system property for " + scope + "/"
                                         + key);
                                 return;
                             }
@@ -308,7 +309,7 @@ public class SettingsToPropertiesMapper {
                             // sys prop slot can be removed.
                             String aconfigPropertyName = makeAconfigFlagPropertyName(scope, key);
                             if (aconfigPropertyName == null) {
-                                log("unable to construct system property for " + scope + "/"
+                                logErr("unable to construct system property for " + scope + "/"
                                         + key);
                                 return;
                             }
@@ -326,7 +327,7 @@ public class SettingsToPropertiesMapper {
                         for (String key : properties.getKeyset()) {
                             String aconfigPropertyName = makeAconfigFlagPropertyName(scope, key);
                             if (aconfigPropertyName == null) {
-                                log("unable to construct system property for " + scope + "/"
+                                logErr("unable to construct system property for " + scope + "/"
                                         + key);
                                 return;
                             }
@@ -356,7 +357,7 @@ public class SettingsToPropertiesMapper {
 
                   if (!propertyName.matches(SYSTEM_PROPERTY_VALID_CHARACTERS_REGEX)
                       || propertyName.contains(SYSTEM_PROPERTY_INVALID_SUBSTRING)) {
-                    log("unable to construct system property for " + actualNamespace
+                    logErr("unable to construct system property for " + actualNamespace
                         + "/" + flagName);
                     continue;
                   }
@@ -394,9 +395,9 @@ public class SettingsToPropertiesMapper {
         try{
             client.connect(new LocalSocketAddress(
                 "aconfigd", LocalSocketAddress.Namespace.RESERVED));
-            log("connected to aconfigd socket");
+            Slog.d(TAG, "connected to aconfigd socket");
         } catch (IOException ioe) {
-            log("failed to connect to aconfigd socket", ioe);
+            logErr("failed to connect to aconfigd socket", ioe);
             return null;
         }
 
@@ -406,7 +407,7 @@ public class SettingsToPropertiesMapper {
             inputStream = new DataInputStream(client.getInputStream());
             outputStream = new DataOutputStream(client.getOutputStream());
         } catch (IOException ioe) {
-            log("failed to get local socket iostreams", ioe);
+            logErr("failed to get local socket iostreams", ioe);
             return null;
         }
 
@@ -415,9 +416,9 @@ public class SettingsToPropertiesMapper {
             byte[] requests_bytes = requests.getBytes();
             outputStream.writeInt(requests_bytes.length);
             outputStream.write(requests_bytes, 0, requests_bytes.length);
-            log("flag override requests sent to aconfigd");
+            Slog.d(TAG, "flag override requests sent to aconfigd");
         } catch (IOException ioe) {
-            log("failed to send requests to aconfigd", ioe);
+            logErr("failed to send requests to aconfigd", ioe);
             return null;
         }
 
@@ -425,10 +426,10 @@ public class SettingsToPropertiesMapper {
         try {
             int num_bytes = inputStream.readInt();
             ProtoInputStream returns = new ProtoInputStream(inputStream);
-            log("received " + num_bytes + " bytes back from aconfigd");
+            Slog.d(TAG, "received " + num_bytes + " bytes back from aconfigd");
             return returns;
         } catch (IOException ioe) {
-            log("failed to read requests return from aconfigd", ioe);
+            logErr("failed to read requests return from aconfigd", ioe);
             return null;
         }
     }
@@ -461,18 +462,18 @@ public class SettingsToPropertiesMapper {
               long msgsToken = proto.start(StorageReturnMessages.MSGS);
               switch (proto.nextField()) {
                 case (int) StorageReturnMessage.FLAG_OVERRIDE_MESSAGE:
-                  log("successfully handled override requests");
+                  Slog.d(TAG, "successfully handled override requests");
                   long msgToken = proto.start(StorageReturnMessage.FLAG_OVERRIDE_MESSAGE);
                   proto.end(msgToken);
                   break;
                 case (int) StorageReturnMessage.ERROR_MESSAGE:
                   String errmsg = proto.readString(StorageReturnMessage.ERROR_MESSAGE);
-                  log("override request failed: " + errmsg);
+                  Slog.d(TAG, "override request failed: " + errmsg);
                   break;
                 case ProtoInputStream.NO_MORE_FIELDS:
                   break;
                 default:
-                  log("invalid message type, expecting only flag override return or error message");
+                  logErr("invalid message type, expecting only flag override return or error message");
                   break;
               }
               proto.end(msgsToken);
@@ -480,7 +481,7 @@ public class SettingsToPropertiesMapper {
             case ProtoInputStream.NO_MORE_FIELDS:
               return;
             default:
-              log("invalid message type, expect storage return message");
+              logErr("invalid message type, expect storage return message");
               break;
           }
         }
@@ -501,14 +502,14 @@ public class SettingsToPropertiesMapper {
 
             int idx = flagName.indexOf(":");
             if (idx == -1 || idx == flagName.length() - 1 || idx == 0) {
-                log("invalid local flag override: " + flagName);
+                logErr("invalid local flag override: " + flagName);
                 continue;
             }
             String actualNamespace = flagName.substring(0, idx);
             String fullFlagName = flagName.substring(idx+1);
             idx = fullFlagName.lastIndexOf(".");
             if (idx == -1) {
-              log("invalid flag name: " + fullFlagName);
+              logErr("invalid flag name: " + fullFlagName);
               continue;
             }
             String packageName = fullFlagName.substring(0, idx);
@@ -528,7 +529,7 @@ public class SettingsToPropertiesMapper {
         try {
           parseAndLogAconfigdReturn(returns);
         } catch (IOException ioe) {
-            log("failed to parse aconfigd return", ioe);
+            logErr("failed to parse aconfigd return", ioe);
         }
     }
 
@@ -572,7 +573,7 @@ public class SettingsToPropertiesMapper {
         for (String property_name : property_names) {
             String[] segments = property_name.split("\\.");
             if (segments.length < 3) {
-                log("failed to extract category name from property " + property_name);
+                logErr("failed to extract category name from property " + property_name);
                 continue;
             }
             categories.add(segments[2]);
@@ -617,7 +618,7 @@ public class SettingsToPropertiesMapper {
                 String stagedValue = flagValuesToStage.get(fullFlagName);
                 int idx = fullFlagName.lastIndexOf(".");
                 if (idx == -1) {
-                    log("invalid flag name: " + fullFlagName);
+                    logErr("invalid flag name: " + fullFlagName);
                     continue;
                 }
                 String packageName = fullFlagName.substring(0, idx);
@@ -638,7 +639,7 @@ public class SettingsToPropertiesMapper {
         try {
           parseAndLogAconfigdReturn(returns);
         } catch (IOException ioe) {
-            log("failed to parse aconfigd return", ioe);
+            logErr("failed to parse aconfigd return", ioe);
         }
     }
 
@@ -680,7 +681,7 @@ public class SettingsToPropertiesMapper {
       for (String flagName : properties.getKeyset()) {
         int idx = flagName.indexOf(NAMESPACE_REBOOT_STAGING_DELIMITER);
         if (idx == -1 || idx == flagName.length() - 1 || idx == 0) {
-          log("invalid staged flag: " + flagName);
+          logErr("invalid staged flag: " + flagName);
           continue;
         }
         String actualNamespace = flagName.substring(0, idx);
@@ -731,7 +732,7 @@ public class SettingsToPropertiesMapper {
             }
             value = "";
         } else if (value.length() > SYSTEM_PROPERTY_MAX_LENGTH) {
-            log("key=" + key + " value=" + value + " exceeds system property max length.");
+            logErr("key=" + key + " value=" + value + " exceeds system property max length.");
             return;
         }
 
@@ -741,11 +742,11 @@ public class SettingsToPropertiesMapper {
             // Failure to set a property can be caused by SELinux denial. This usually indicates
             // that the property wasn't allowlisted in sepolicy.
             // No need to report it on all user devices, only on debug builds.
-            log("Unable to set property " + key + " value '" + value + "'", e);
+            logErr("Unable to set property " + key + " value '" + value + "'", e);
         }
     }
 
-    private static void log(String msg, Exception e) {
+    private static void logErr(String msg, Exception e) {
         if (Build.IS_DEBUGGABLE) {
             Slog.wtf(TAG, msg, e);
         } else {
@@ -753,7 +754,7 @@ public class SettingsToPropertiesMapper {
         }
     }
 
-    private static void log(String msg) {
+    private static void logErr(String msg) {
         if (Build.IS_DEBUGGABLE) {
             Slog.wtf(TAG, msg);
         } else {
@@ -771,7 +772,7 @@ public class SettingsToPropertiesMapper {
 
             br.close();
         } catch (IOException ioe) {
-            log("failed to read file " + RESET_RECORD_FILE_PATH, ioe);
+            logErr("failed to read file " + RESET_RECORD_FILE_PATH, ioe);
         }
         return content;
     }

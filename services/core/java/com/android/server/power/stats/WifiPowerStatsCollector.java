@@ -56,6 +56,7 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
         Handler getHandler();
         Clock getClock();
         PowerStatsUidResolver getUidResolver();
+        long getPowerStatsCollectionThrottlePeriod(String powerComponentName);
         PackageManager getPackageManager();
         ConsumedEnergyRetriever getConsumedEnergyRetriever();
         IntSupplier getVoltageSupplier();
@@ -92,9 +93,11 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
     private final SparseArray<WifiScanTimes> mLastScanTimes = new SparseArray<>();
     private long mLastWifiActiveDuration;
 
-    public WifiPowerStatsCollector(Injector injector, long throttlePeriodMs) {
-        super(injector.getHandler(), throttlePeriodMs, injector.getUidResolver(),
-                injector.getClock());
+    WifiPowerStatsCollector(Injector injector) {
+        super(injector.getHandler(), injector.getPowerStatsCollectionThrottlePeriod(
+                        BatteryConsumer.powerComponentIdToString(
+                                BatteryConsumer.POWER_COMPONENT_WIFI)),
+                injector.getUidResolver(), injector.getClock());
         mInjector = injector;
     }
 

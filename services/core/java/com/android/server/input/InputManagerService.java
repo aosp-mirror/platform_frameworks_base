@@ -2671,24 +2671,6 @@ public class InputManagerService extends IInputManager.Stub
         return null;
     }
 
-    private static class PointerDisplayIdChangedArgs {
-        final int mPointerDisplayId;
-        final float mXPosition;
-        final float mYPosition;
-        PointerDisplayIdChangedArgs(int pointerDisplayId, float xPosition, float yPosition) {
-            mPointerDisplayId = pointerDisplayId;
-            mXPosition = xPosition;
-            mYPosition = yPosition;
-        }
-    }
-
-    // Native callback.
-    @SuppressWarnings("unused")
-    @VisibleForTesting
-    void onPointerDisplayIdChanged(int pointerDisplayId, float xPosition, float yPosition) {
-        // TODO(b/311416205): Remove.
-    }
-
     @Override
     @EnforcePermission(Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)
     public void registerStickyModifierStateListener(

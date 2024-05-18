@@ -5796,6 +5796,8 @@ public class Activity extends ContextThemeWrapper
      * @see #onRequestPermissionsResult
      */
     @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    @SuppressLint("OnNameExpected")
+    // Suppress lint as this is an overload of the original API.
     public boolean shouldShowRequestPermissionRationale(@NonNull String permission, int deviceId) {
         final PackageManager packageManager = getDeviceId() == deviceId ? getPackageManager()
                 : createDeviceContext(deviceId).getPackageManager();

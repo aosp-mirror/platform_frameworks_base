@@ -43,10 +43,12 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.common.split.SplitScreenConstants.splitPositionToString;
+import static com.android.wm.shell.common.split.SplitScreenUtils.getResizingBackgroundColor;
 import static com.android.wm.shell.common.split.SplitScreenUtils.reverseSplitPosition;
 import static com.android.wm.shell.common.split.SplitScreenUtils.splitFailureMessage;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
+import static com.android.wm.shell.shared.TransitionUtil.isOpeningMode;
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
@@ -67,6 +69,7 @@ import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_UNKNOWN;
 import static com.android.wm.shell.splitscreen.SplitScreenController.exitReasonToString;
+import static com.android.wm.shell.transition.MixedTransitionHelper.getPipReplacingChange;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
@@ -2386,14 +2389,20 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     @Override
-    public void onLayoutSizeChanging(SplitLayout layout, int offsetX, int offsetY) {
+    public void onLayoutSizeChanging(SplitLayout layout, int offsetX, int offsetY,
+            boolean shouldUseParallaxEffect) {
         final SurfaceControl.Transaction t = mTransactionPool.acquire();
         t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
-        updateSurfaceBounds(layout, t, true /* applyResizingOffset */);
+        updateSurfaceBounds(layout, t, shouldUseParallaxEffect);
         getMainStageBounds(mTempRect1);
         getSideStageBounds(mTempRect2);
-        mMainStage.onResizing(mTempRect1, mTempRect2, t, offsetX, offsetY, mShowDecorImmediately);
-        mSideStage.onResizing(mTempRect2, mTempRect1, t, offsetX, offsetY, mShowDecorImmediately);
+        // TODO (b/307490004): "commonColor" below is a temporary fix to ensure the colors on both
+        //  sides match. When b/307490004 is fixed, this code can be reverted.
+        float[] commonColor = getResizingBackgroundColor(mSideStage.mRootTaskInfo).getComponents();
+        mMainStage.onResizing(
+                mTempRect1, mTempRect2, t, offsetX, offsetY, mShowDecorImmediately, commonColor);
+        mSideStage.onResizing(
+                mTempRect2, mTempRect1, t, offsetX, offsetY, mShowDecorImmediately, commonColor);
         t.apply();
         mTransactionPool.release(t);
     }
@@ -2836,7 +2845,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSplitLayout.setFreezeDividerWindow(false);
             final StageChangeRecord record = new StageChangeRecord();
             final int transitType = info.getType();
-            boolean hasEnteringPip = false;
+            TransitionInfo.Change pipChange = null;
             for (int iC = 0; iC < info.getChanges().size(); ++iC) {
                 final TransitionInfo.Change change = info.getChanges().get(iC);
                 if (change.getMode() == TRANSIT_CHANGE
@@ -2847,7 +2856,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
 
                 if (mMixedHandler.isEnteringPip(change, transitType)) {
-                    hasEnteringPip = true;
+                    pipChange = change;
                 }
 
                 final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
@@ -2899,9 +2908,19 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
             }
 
-            if (hasEnteringPip) {
+            if (pipChange != null) {
+                TransitionInfo.Change pipReplacingChange = getPipReplacingChange(info, pipChange,
+                        mMainStage.mRootTaskInfo.taskId, mSideStage.mRootTaskInfo.taskId,
+                        getSplitItemStage(pipChange.getLastParent()));
+                if (pipReplacingChange != null) {
+                    // Set an enter transition for when startAnimation gets called again
+                    mSplitTransitions.setEnterTransition(transition, /*remoteTransition*/ null,
+                            TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE, /*resizeAnim*/ false);
+                }
+
                 mMixedHandler.animatePendingEnterPipFromSplit(transition, info,
-                        startTransaction, finishTransaction, finishCallback);
+                        startTransaction, finishTransaction, finishCallback,
+                        pipReplacingChange != null);
                 notifySplitAnimationFinished();
                 return true;
             }

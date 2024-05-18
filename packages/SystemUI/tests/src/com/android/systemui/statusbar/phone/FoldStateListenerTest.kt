@@ -16,7 +16,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.hardware.devicestate.DeviceState
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.systemui.SysuiTestCase
@@ -30,7 +30,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations.initMocks
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class FoldStateListenerTest : SysuiTestCase() {
 

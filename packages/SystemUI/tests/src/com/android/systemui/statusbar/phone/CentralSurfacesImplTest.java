@@ -57,6 +57,7 @@ import android.app.WallpaperManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.devicestate.DeviceState;
@@ -75,7 +76,6 @@ import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.service.dreams.IDreamManager;
 import android.support.test.metricshelper.MetricsAsserts;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.DisplayMetrics;
@@ -85,6 +85,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.compose.animation.scene.ObservableTransitionState;
@@ -223,7 +224,7 @@ import java.util.Optional;
 import javax.inject.Provider;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
 @EnableFlags(FLAG_LIGHT_REVEAL_MIGRATION)
 public class CentralSurfacesImplTest extends SysuiTestCase {
@@ -339,6 +340,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
     @Mock private KeyboardShortcuts mKeyboardShortcuts;
     @Mock private KeyboardShortcutListSearch mKeyboardShortcutListSearch;
+    @Mock private PackageManager mPackageManager;
 
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
@@ -392,7 +394,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mock(UiEventLogger.class),
                         mUserTracker,
                         mAvalancheProvider,
-                        mSystemSettings);
+                        mSystemSettings,
+                        mPackageManager);
         mVisualInterruptionDecisionProvider.start();
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));

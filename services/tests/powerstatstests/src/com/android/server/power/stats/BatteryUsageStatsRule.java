@@ -98,10 +98,12 @@ public class BatteryUsageStatsRule implements TestRule {
         mFreqsByPolicy.put(0, new int[]{300000, 1000000, 2000000});
         mFreqsByPolicy.put(4, new int[]{300000, 1000000, 2500000, 3000000});
         mBatteryStatsConfigBuilder = new BatteryStatsImpl.BatteryStatsConfig.Builder()
-                .setPowerStatsThrottlePeriodMillis(BatteryConsumer.POWER_COMPONENT_CPU,
-                        10000)
-                .setPowerStatsThrottlePeriodMillis(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
-                        10000);
+                .setPowerStatsThrottlePeriodMillis(
+                        BatteryConsumer.powerComponentIdToString(
+                                BatteryConsumer.POWER_COMPONENT_CPU), 10000)
+                .setPowerStatsThrottlePeriodMillis(
+                        BatteryConsumer.powerComponentIdToString(
+                                BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO), 10000);
     }
 
     private void initBatteryStats() {
@@ -290,7 +292,8 @@ public class BatteryUsageStatsRule implements TestRule {
 
     public BatteryUsageStatsRule setPowerStatsThrottlePeriodMillis(int powerComponent,
             long throttleMs) {
-        mBatteryStatsConfigBuilder.setPowerStatsThrottlePeriodMillis(powerComponent, throttleMs);
+        mBatteryStatsConfigBuilder.setPowerStatsThrottlePeriodMillis(
+                BatteryConsumer.powerComponentIdToString(powerComponent), throttleMs);
         return this;
     }
 

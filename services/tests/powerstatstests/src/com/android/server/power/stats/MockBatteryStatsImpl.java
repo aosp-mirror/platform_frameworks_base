@@ -72,6 +72,11 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         this(DEFAULT_CONFIG, clock, historyDirectory, handler, new PowerStatsUidResolver());
     }
 
+    MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock, File historyDirectory) {
+        this(config, clock, historyDirectory, new Handler(Looper.getMainLooper()),
+                new PowerStatsUidResolver());
+    }
+
     MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock, File historyDirectory,
             Handler handler, PowerStatsUidResolver powerStatsUidResolver) {
         super(config, clock, new MonotonicClock(0, clock), historyDirectory, handler,
@@ -135,13 +140,6 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     public long getMobileRadioPowerStateUpdateRateLimit() {
         return MOBILE_RADIO_POWER_STATE_UPDATE_FREQ_MS;
-    }
-
-    public MockBatteryStatsImpl setBatteryStatsConfig(BatteryStatsConfig config) {
-        synchronized (this) {
-            mBatteryStatsConfig = config;
-        }
-        return this;
     }
 
     public MockBatteryStatsImpl setNetworkStats(NetworkStats networkStats) {

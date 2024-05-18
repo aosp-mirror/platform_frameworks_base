@@ -836,9 +836,7 @@ public class StatsPullAtomService extends SystemService {
                 registerEventListeners();
             });
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
-            if (true) {
-                initNetworkStatsManager();
-            }
+            initNetworkStatsManager();
             BackgroundThread.getHandler().post(() -> {
                 // Network stats related pullers can only be initialized after service is ready.
                 initAndRegisterNetworkStatsPullers();
@@ -859,9 +857,6 @@ public class StatsPullAtomService extends SystemService {
                 mContext.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
         mStatsSubscriptionsListener = new StatsSubscriptionsListener(mSubscriptionManager);
         mStorageManager = (StorageManager) mContext.getSystemService(StorageManager.class);
-        if (false) {
-            initNetworkStatsManager();
-        }
 
         // Initialize DiskIO
         mStoragedUidIoStatsReader = new StoragedUidIoStatsReader();
@@ -1043,10 +1038,8 @@ public class StatsPullAtomService extends SystemService {
      */
     @NonNull
     private NetworkStatsManager getNetworkStatsManager() {
-        if (true) {
-            if (mNetworkStatsManager == null) {
-                throw new IllegalStateException("NetworkStatsManager is not ready");
-            }
+        if (mNetworkStatsManager == null) {
+            throw new IllegalStateException("NetworkStatsManager is not ready");
         }
         return mNetworkStatsManager;
     }

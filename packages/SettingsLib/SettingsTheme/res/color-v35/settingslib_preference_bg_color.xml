@@ -16,8 +16,8 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true" android:color="@color/settingslib_materialColorSecondaryContainer"/>
-    <item android:state_selected="true" android:color="@color/settingslib_materialColorSecondaryContainer"/>
-    <item android:state_activated="true" android:color="@color/settingslib_materialColorSecondaryContainer"/>
-    <item android:color="@color/settingslib_materialColorSurfaceContainerHighest"/> <!-- not selected -->
+    <item android:state_pressed="true" android:color="@color/settingslib_materialColorSurfaceContainerHigh"/>
+    <item android:state_selected="true" android:color="@color/settingslib_materialColorSurfaceContainerHigh"/>
+    <item android:state_activated="true" android:color="@color/settingslib_materialColorSurfaceContainerHigh"/>
+    <item android:color="@color/settingslib_materialColorSurfaceBright"/> <!-- not selected -->
 </selector>

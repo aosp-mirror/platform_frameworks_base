@@ -252,18 +252,14 @@ public final class MediaController {
         return 0;
     }
 
-    /**
-     * Get the current playback info for this session.
-     *
-     * @return The current playback info or null.
-     */
-    public @Nullable PlaybackInfo getPlaybackInfo() {
+    /** Returns the current playback info for this session. */
+    @NonNull
+    public PlaybackInfo getPlaybackInfo() {
         try {
             return mSessionBinder.getVolumeAttributes();
-        } catch (RemoteException e) {
-            Log.wtf(TAG, "Error calling getAudioInfo.", e);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**

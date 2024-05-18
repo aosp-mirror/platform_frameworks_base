@@ -378,6 +378,14 @@
                 }
             ],
             "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "file_patterns": [
+                "(/|^)Activity.*.java",
+                "(/|^)PendingIntent.java",
+                "(/|^)ComtextImpl.java"
+            ],
+            "name": "CtsWindowManagerBackgroundActivityTestCases"
         }
     ],
     "postsubmit": [
@@ -392,14 +400,6 @@
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
             "name": "CtsAppOpsTestCases"
-        },
-        {
-            "file_patterns": [
-                "(/|^)Activity.*.java",
-                "(/|^)PendingIntent.java",
-                "(/|^)ComtextImpl.java"
-            ],
-            "name": "CtsWindowManagerBackgroundActivityTestCases"
         }
     ]
 }

@@ -18,9 +18,9 @@ package com.android.systemui.statusbar.phone
 
 import android.os.Handler
 import android.os.PowerManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Display
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.SysuiTestCase
@@ -51,7 +51,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
 

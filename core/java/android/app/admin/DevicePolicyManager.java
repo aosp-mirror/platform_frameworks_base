@@ -1698,7 +1698,7 @@ public class DevicePolicyManager {
 
     /**
      * A boolean extra indicating whether device encryption can be skipped as part of
-     * <a href="#managed-provisioning>provisioning</a>.
+     * <a href="#managed-provisioning">provisioning</a>.
      *
      * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} or an intent with action
      * {@link #ACTION_PROVISION_MANAGED_DEVICE} that starts device owner provisioning.
@@ -10427,7 +10427,7 @@ public class DevicePolicyManager {
     @WorkerThread
     public void setApplicationRestrictions(@Nullable ComponentName admin, String packageName,
             Bundle settings) {
-        if (!Flags.dmrhCanSetAppRestriction()) {
+        if (!Flags.dmrhSetAppRestrictions()) {
             throwIfParentInstance("setApplicationRestrictions");
         }
 
@@ -11835,7 +11835,7 @@ public class DevicePolicyManager {
     @WorkerThread
     public @NonNull Bundle getApplicationRestrictions(
             @Nullable ComponentName admin, String packageName) {
-        if (!Flags.dmrhCanSetAppRestriction()) {
+        if (!Flags.dmrhSetAppRestrictions()) {
             throwIfParentInstance("getApplicationRestrictions");
         }
 
@@ -14120,7 +14120,7 @@ public class DevicePolicyManager {
     public @NonNull DevicePolicyManager getParentProfileInstance(@NonNull ComponentName admin) {
         throwIfParentInstance("getParentProfileInstance");
         try {
-            if (Flags.dmrhCanSetAppRestriction()) {
+            if (Flags.dmrhSetAppRestrictions()) {
                 UserManager um = mContext.getSystemService(UserManager.class);
                 if (!um.isManagedProfile()) {
                     throw new SecurityException("The current user does not have a parent profile.");

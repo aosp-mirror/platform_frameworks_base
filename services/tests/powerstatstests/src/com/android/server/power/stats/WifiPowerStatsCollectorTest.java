@@ -138,6 +138,11 @@ public class WifiPowerStatsCollectorTest {
         }
 
         @Override
+        public long getPowerStatsCollectionThrottlePeriod(String powerComponentName) {
+            return 0;
+        }
+
+        @Override
         public PackageManager getPackageManager() {
             return mPackageManager;
         }
@@ -317,7 +322,7 @@ public class WifiPowerStatsCollectorTest {
     private PowerStats collectPowerStats(boolean hasPowerReporting) {
         when(mWifiManager.isEnhancedPowerReportingSupported()).thenReturn(hasPowerReporting);
 
-        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector, 0);
+        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector);
         collector.setEnabled(true);
 
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.WIFI))

@@ -308,7 +308,11 @@ constructor(
      * It will be called when the container is out of view.
      */
     lateinit var updateUserVisibility: () -> Unit
-    lateinit var updateHostVisibility: () -> Unit
+    var updateHostVisibility: () -> Unit = {}
+        set(value) {
+            field = value
+            mediaCarouselViewModel.updateHostVisibility = value
+        }
 
     private val isReorderingAllowed: Boolean
         get() = visualStabilityProvider.isReorderingAllowed
@@ -345,6 +349,20 @@ constructor(
         configurationController.addCallback(configListener)
         if (!mediaFlags.isMediaControlsRefactorEnabled()) {
             setUpListeners()
+        } else {
+            val visualStabilityCallback = OnReorderingAllowedListener {
+                mediaCarouselViewModel.onReorderingAllowed()
+
+                // Update user visibility so that no extra impression will be logged when
+                // activeMediaIndex resets to 0
+                if (this::updateUserVisibility.isInitialized) {
+                    updateUserVisibility()
+                }
+
+                // Let's reset our scroll position
+                mediaCarouselScrollHandler.scrollToStart()
+            }
+            visualStabilityProvider.addPersistentReorderingAllowedListener(visualStabilityCallback)
         }
         mediaFrame.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
             // The pageIndicator is not laid out yet when we get the current state update,
@@ -366,10 +384,6 @@ constructor(
         )
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
         mediaCarousel.repeatWhenAttached {
-            if (mediaFlags.isMediaControlsRefactorEnabled()) {
-                mediaCarouselViewModel.onAttached()
-                mediaCarouselScrollHandler.scrollToStart()
-            }
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 listenForAnyStateToGoneKeyguardTransition(this)
                 listenForAnyStateToLockscreenTransition(this)
@@ -592,9 +606,7 @@ constructor(
                         if (!immediately) {
                             // Although it wasn't requested, we were able to process the removal
                             // immediately since reordering is allowed. So, notify hosts to update
-                            if (this@MediaCarouselController::updateHostVisibility.isInitialized) {
-                                updateHostVisibility()
-                            }
+                            updateHostVisibility()
                         }
                     } else {
                         keysNeedRemoval.add(key)
@@ -751,6 +763,7 @@ constructor(
             }
         }
         viewController.setListening(mediaCarouselScrollHandler.visibleToUser && currentlyExpanded)
+        controllerByViewModel[commonViewModel] = viewController
         updateViewControllerToState(viewController, noAnimation = true)
         updatePageIndicator()
         if (
@@ -764,7 +777,6 @@ constructor(
         mediaCarouselScrollHandler.onPlayersChanged()
         mediaFrame.requiresRemeasuring = true
         commonViewModel.onAdded(commonViewModel)
-        controllerByViewModel[commonViewModel] = viewController
     }
 
     private fun onUpdated(commonViewModel: MediaCommonViewModel) {

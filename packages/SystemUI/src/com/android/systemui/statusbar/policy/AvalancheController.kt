@@ -22,6 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.policy.BaseHeadsUpManager.HeadsUpEntry
+import com.android.systemui.util.Compile
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -37,7 +38,7 @@ constructor(
 ) : Dumpable {
 
     private val tag = "AvalancheController"
-    private val debug = false
+    private val debug = Compile.IS_DEBUG && Log.isLoggable(tag, Log.DEBUG)
 
     // HUN showing right now, in the floating state where full shade is hidden, on launcher or AOD
     @VisibleForTesting var headsUpEntryShowing: HeadsUpEntry? = null
@@ -108,7 +109,10 @@ constructor(
             if (isOnlyNextEntry) {
                 // HeadsUpEntry.updateEntry recursively calls AvalancheController#update
                 // and goes to the isShowing case above
-                headsUpEntryShowing!!.updateEntry(false, "avalanche duration update")
+                headsUpEntryShowing!!.updateEntry(
+                        /* updatePostTime= */ false,
+                        /* updateEarliestRemovalTime= */ false,
+                        /* reason= */ "avalanche duration update")
             }
         }
         logState("after $fn")

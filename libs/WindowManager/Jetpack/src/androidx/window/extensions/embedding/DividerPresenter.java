@@ -33,7 +33,9 @@ import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSI
 import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_RIGHT;
 import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_TOP;
 
-import android.annotation.DimenRes;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityThread;
@@ -53,9 +55,11 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
+import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.window.InputTransferToken;
@@ -97,6 +101,16 @@ class DividerPresenter implements View.OnTouchListener {
     @VisibleForTesting
     static final int DEFAULT_DIVIDER_WIDTH_DP = 24;
 
+    @VisibleForTesting
+    static final PathInterpolator FLING_ANIMATION_INTERPOLATOR =
+            new PathInterpolator(0.4f, 0f, 0.2f, 1f);
+    @VisibleForTesting
+    static final int FLING_ANIMATION_DURATION = 250;
+    @VisibleForTesting
+    static final int MIN_DISMISS_VELOCITY_DP_PER_SECOND = 600;
+    @VisibleForTesting
+    static final int MIN_FLING_VELOCITY_DP_PER_SECOND = 400;
+
     private final int mTaskId;
 
     @NonNull
@@ -107,6 +121,14 @@ class DividerPresenter implements View.OnTouchListener {
 
     @NonNull
     private final Executor mCallbackExecutor;
+
+    /**
+     * The VelocityTracker of the divider, used to track the dragging velocity. This field is
+     * {@code null} until dragging starts.
+     */
+    @GuardedBy("mLock")
+    @Nullable
+    VelocityTracker mVelocityTracker;
 
     /**
      * The {@link Properties} of the divider. This field is {@code null} when no divider should be
@@ -370,13 +392,11 @@ class DividerPresenter implements View.OnTouchListener {
                 applicationContext.getResources().getDisplayMetrics());
     }
 
-    private static int getDimensionDp(@DimenRes int resId) {
-        final Context context = ActivityThread.currentActivityThread().getApplication();
-        final int px = context.getResources().getDimensionPixelSize(resId);
-        return (int) TypedValue.convertPixelsToDimension(
-                COMPLEX_UNIT_DIP,
-                px,
-                context.getResources().getDisplayMetrics());
+    private static float getDisplayDensity() {
+        // TODO(b/329193115) support divider on secondary display
+        final Context applicationContext =
+                ActivityThread.currentActivityThread().getApplication();
+        return applicationContext.getResources().getDisplayMetrics().density;
     }
 
     /**
@@ -487,24 +507,27 @@ class DividerPresenter implements View.OnTouchListener {
     @Override
     public boolean onTouch(@NonNull View view, @NonNull MotionEvent event) {
         synchronized (mLock) {
-            final Rect taskBounds = mProperties.mConfiguration.windowConfiguration.getBounds();
-            mDividerPosition = calculateDividerPosition(
-                    event, taskBounds, mRenderer.mDividerWidthPx, mProperties.mDividerAttributes,
-                    mProperties.mIsVerticalSplit, calculateMinPosition(), calculateMaxPosition());
-            mRenderer.setDividerPosition(mDividerPosition);
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    onStartDragging();
-                    break;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    onFinishDragging();
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    onDrag();
-                    break;
-                default:
-                    break;
+            if (mProperties != null && mRenderer != null) {
+                final Rect taskBounds = mProperties.mConfiguration.windowConfiguration.getBounds();
+                mDividerPosition = calculateDividerPosition(
+                        event, taskBounds, mRenderer.mDividerWidthPx,
+                        mProperties.mDividerAttributes, mProperties.mIsVerticalSplit,
+                        calculateMinPosition(), calculateMaxPosition());
+                mRenderer.setDividerPosition(mDividerPosition);
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        onStartDragging(event);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        onFinishDragging(event);
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        onDrag(event);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
@@ -514,7 +537,10 @@ class DividerPresenter implements View.OnTouchListener {
     }
 
     @GuardedBy("mLock")
-    private void onStartDragging() {
+    private void onStartDragging(@NonNull MotionEvent event) {
+        mVelocityTracker = VelocityTracker.obtain();
+        mVelocityTracker.addMovement(event);
+
         mRenderer.mIsDragging = true;
         mRenderer.mDragHandle.setPressed(mRenderer.mIsDragging);
         mRenderer.updateSurface();
@@ -536,16 +562,81 @@ class DividerPresenter implements View.OnTouchListener {
     }
 
     @GuardedBy("mLock")
-    private void onDrag() {
+    private void onDrag(@NonNull MotionEvent event) {
+        if (mVelocityTracker != null) {
+            mVelocityTracker.addMovement(event);
+        }
         mRenderer.updateSurface();
     }
 
     @GuardedBy("mLock")
-    private void onFinishDragging() {
-        mDividerPosition = adjustDividerPositionForSnapPoints(mDividerPosition);
-        mRenderer.setDividerPosition(mDividerPosition);
-        mRenderer.updateSurface();
+    private void onFinishDragging(@NonNull MotionEvent event) {
+        float velocity = 0.0f;
+        if (mVelocityTracker != null) {
+            mVelocityTracker.addMovement(event);
+            mVelocityTracker.computeCurrentVelocity(1000 /* units */);
+            velocity = mProperties.mIsVerticalSplit
+                    ? mVelocityTracker.getXVelocity()
+                    : mVelocityTracker.getYVelocity();
+            mVelocityTracker.recycle();
+        }
 
+        final int prevDividerPosition = mDividerPosition;
+        mDividerPosition = dividerPositionForSnapPoints(mDividerPosition, velocity);
+        if (mDividerPosition != prevDividerPosition) {
+            ValueAnimator animator = getFlingAnimator(prevDividerPosition, mDividerPosition);
+            animator.start();
+        } else {
+            onDraggingEnd();
+        }
+    }
+
+    @GuardedBy("mLock")
+    @NonNull
+    @VisibleForTesting
+    ValueAnimator getFlingAnimator(int prevDividerPosition, int snappedDividerPosition) {
+        final ValueAnimator animator =
+                getValueAnimator(prevDividerPosition, snappedDividerPosition);
+        animator.addUpdateListener(animation -> {
+            synchronized (mLock) {
+                updateDividerPosition((int) animation.getAnimatedValue());
+            }
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                synchronized (mLock) {
+                    onDraggingEnd();
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                synchronized (mLock) {
+                    onDraggingEnd();
+                }
+            }
+        });
+        return animator;
+    }
+
+    @VisibleForTesting
+    static ValueAnimator getValueAnimator(int prevDividerPosition, int snappedDividerPosition) {
+        ValueAnimator animator = ValueAnimator
+                .ofInt(prevDividerPosition, snappedDividerPosition)
+                .setDuration(FLING_ANIMATION_DURATION);
+        animator.setInterpolator(FLING_ANIMATION_INTERPOLATOR);
+        return animator;
+    }
+
+    @GuardedBy("mLock")
+    private void updateDividerPosition(int position) {
+        mRenderer.setDividerPosition(position);
+        mRenderer.updateSurface();
+    }
+
+    @GuardedBy("mLock")
+    private void onDraggingEnd() {
         // Veil visibility change should be applied together with the surface boost transaction in
         // the wct.
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
@@ -570,36 +661,76 @@ class DividerPresenter implements View.OnTouchListener {
 
     /**
      * Returns the divider position adjusted for the min max ratio and fullscreen expansion.
-     *
-     * If the dragging position is above the {@link DividerAttributes#getPrimaryMaxRatio()} or below
-     * {@link DividerAttributes#getPrimaryMinRatio()} and
-     * {@link DividerAttributes#isDraggingToFullscreenAllowed} is {@code true}, the system will
-     * choose a snap algorithm to adjust the ending position to either fully expand one container or
-     * move the divider back to the specified min/max ratio.
-     *
-     * TODO(b/327067596) implement snap algorithm
-     *
      * The adjusted divider position is in the range of [minPosition, maxPosition] for a split, 0
      * for expanded right (bottom) container, or task width (height) minus the divider width for
      * expanded left (top) container.
      */
     @GuardedBy("mLock")
-    private int adjustDividerPositionForSnapPoints(int dividerPosition) {
+    private int dividerPositionForSnapPoints(int dividerPosition, float velocity) {
         final Rect taskBounds = mProperties.mConfiguration.windowConfiguration.getBounds();
         final int minPosition = calculateMinPosition();
         final int maxPosition = calculateMaxPosition();
         final int fullyExpandedPosition = mProperties.mIsVerticalSplit
                 ? taskBounds.right - mRenderer.mDividerWidthPx
                 : taskBounds.bottom - mRenderer.mDividerWidthPx;
+
         if (isDraggingToFullscreenAllowed(mProperties.mDividerAttributes)) {
-            if (dividerPosition < minPosition) {
-                return 0;
-            }
-            if (dividerPosition > maxPosition) {
-                return fullyExpandedPosition;
-            }
+            final float displayDensity = getDisplayDensity();
+            return dividerPositionWithDraggingToFullscreenAllowed(
+                    dividerPosition,
+                    minPosition,
+                    maxPosition,
+                    fullyExpandedPosition,
+                    velocity,
+                    displayDensity);
         }
         return Math.clamp(dividerPosition, minPosition, maxPosition);
+    }
+
+    /**
+     * Returns the divider position given a set of position options. A snap algorithm is used to
+     * adjust the ending position to either fully expand one container or move the divider back to
+     * the specified min/max ratio depending on the dragging velocity.
+     */
+    @VisibleForTesting
+    static int dividerPositionWithDraggingToFullscreenAllowed(int dividerPosition, int minPosition,
+            int maxPosition, int fullyExpandedPosition, float velocity, float displayDensity) {
+        final float minDismissVelocityPxPerSecond =
+                MIN_DISMISS_VELOCITY_DP_PER_SECOND * displayDensity;
+        final float minFlingVelocityPxPerSecond =
+                MIN_FLING_VELOCITY_DP_PER_SECOND * displayDensity;
+        if (dividerPosition < minPosition && velocity < -minDismissVelocityPxPerSecond) {
+            return 0;
+        }
+        if (dividerPosition > maxPosition && velocity > minDismissVelocityPxPerSecond) {
+            return fullyExpandedPosition;
+        }
+        if (Math.abs(velocity) < minFlingVelocityPxPerSecond) {
+            if (dividerPosition >= minPosition && dividerPosition <= maxPosition) {
+                return dividerPosition;
+            }
+            int[] possiblePositions = {0, minPosition, maxPosition, fullyExpandedPosition};
+            return snap(dividerPosition, possiblePositions);
+        }
+        if (velocity < 0) {
+            return 0;
+        } else {
+            return fullyExpandedPosition;
+        }
+    }
+
+    /** Calculates the snapped divider position based on the possible positions and distance. */
+    private static int snap(int dividerPosition, int[] possiblePositions) {
+        int snappedPosition = dividerPosition;
+        float minDistance = Float.MAX_VALUE;
+        for (int position : possiblePositions) {
+            float distance = Math.abs(dividerPosition - position);
+            if (distance < minDistance) {
+                snappedPosition = position;
+                minDistance = distance;
+            }
+        }
+        return snappedPosition;
     }
 
     private static void setDecorSurfaceBoosted(

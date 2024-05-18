@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.contrast
 
-import android.app.Activity
-import android.os.Bundle
-import javax.inject.Inject
+package com.android.systemui.qs.tiles.base.analytics
 
-/** Trampoline activity responsible for creating a [ContrastDialogDelegate] */
-class ContrastDialogActivity
-@Inject
-constructor(
-    private val contrastDialogDelegate : ContrastDialogDelegate
-) : Activity() {
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.util.mockito.mock
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        contrastDialogDelegate.createDialog().show()
-        finish()
-    }
-}
+val Kosmos.qsTileAnalytics by Kosmos.Fixture { mock<QSTileAnalytics>() }

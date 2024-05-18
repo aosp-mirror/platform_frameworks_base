@@ -71,16 +71,32 @@ public interface ImeTracker {
     /** The type of the IME request. */
     @IntDef(prefix = { "TYPE_" }, value = {
             TYPE_SHOW,
-            TYPE_HIDE
+            TYPE_HIDE,
+            TYPE_USER,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Type {}
 
-    /** IME show request type. */
+    /**
+     * IME show request type.
+     *
+     * @see android.view.InsetsController#ANIMATION_TYPE_SHOW
+     */
     int TYPE_SHOW = ImeProtoEnums.TYPE_SHOW;
 
-    /** IME hide request type. */
+    /**
+     * IME hide request type.
+     *
+     * @see android.view.InsetsController#ANIMATION_TYPE_HIDE
+     */
     int TYPE_HIDE = ImeProtoEnums.TYPE_HIDE;
+
+    /**
+     * IME user-controlled animation request type.
+     *
+     * @see android.view.InsetsController#ANIMATION_TYPE_USER
+     */
+    int TYPE_USER = ImeProtoEnums.TYPE_USER;
 
     /** The status of the IME request. */
     @IntDef(prefix = { "STATUS_" }, value = {
@@ -88,7 +104,7 @@ public interface ImeTracker {
             STATUS_CANCEL,
             STATUS_FAIL,
             STATUS_SUCCESS,
-            STATUS_TIMEOUT
+            STATUS_TIMEOUT,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Status {}
@@ -117,7 +133,7 @@ public interface ImeTracker {
     @IntDef(prefix = { "ORIGIN_" }, value = {
             ORIGIN_CLIENT,
             ORIGIN_SERVER,
-            ORIGIN_IME
+            ORIGIN_IME,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Origin {}
@@ -400,18 +416,34 @@ public interface ImeTracker {
     void onCancelled(@Nullable Token token, @Phase int phase);
 
     /**
-     * Called when the IME show request is successful.
+     * Called when the show IME request is successful.
      *
      * @param token the token tracking the current IME request or {@code null} otherwise.
      */
     void onShown(@Nullable Token token);
 
     /**
-     * Called when the IME hide request is successful.
+     * Called when the hide IME request is successful.
      *
      * @param token the token tracking the current IME request or {@code null} otherwise.
      */
     void onHidden(@Nullable Token token);
+
+    /**
+     * Called when the user-controlled IME request was dispatched to the requesting app. The
+     * user animation can take an undetermined amount of time, so it shouldn't be tracked.
+     *
+     * @param token the token tracking the current IME request or {@code null} otherwise.
+     */
+    void onDispatched(@Nullable Token token);
+
+    /**
+     * Called when the animation of the user-controlled IME request finished.
+     *
+     * @param token the token tracking the current IME request or {@code null} otherwise.
+     * @param shown whether the end state of the animation was shown or hidden.
+     */
+    void onUserFinished(@Nullable Token token, boolean shown);
 
     /**
      * Returns whether the current IME request was created due to a user interaction. This can
@@ -482,13 +514,6 @@ public interface ImeTracker {
         /** Whether the stack trace at the request call site should be logged. */
         private boolean mLogStackTrace;
 
-        private void reloadSystemProperties() {
-            mLogProgress = SystemProperties.getBoolean(
-                    "persist.debug.imetracker", false);
-            mLogStackTrace = SystemProperties.getBoolean(
-                    "persist.debug.imerequest.logstacktrace", false);
-        }
-
         @NonNull
         @Override
         public Token onStart(@NonNull String component, int uid, @Type int type, @Origin int origin,
@@ -497,7 +522,7 @@ public interface ImeTracker {
             final var token = IInputMethodManagerGlobalInvoker.onStart(tag, uid, type,
                     origin, reason, fromUser);
 
-            Log.i(TAG, token.mTag + ": onRequest" + (type == TYPE_SHOW ? "Show" : "Hide")
+            Log.i(TAG, token.mTag + ": " + getOnStartPrefix(type)
                     + " at " + Debug.originToString(origin)
                     + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason)
                     + " fromUser " + fromUser,
@@ -551,6 +576,45 @@ public interface ImeTracker {
             IInputMethodManagerGlobalInvoker.onHidden(token);
 
             Log.i(TAG, token.mTag + ": onHidden");
+        }
+
+        @Override
+        public void onDispatched(@Nullable Token token) {
+            if (token == null) return;
+            IInputMethodManagerGlobalInvoker.onDispatched(token);
+
+            Log.i(TAG, token.mTag + ": onDispatched");
+        }
+
+        @Override
+        public void onUserFinished(@Nullable Token token, boolean shown) {
+            if (token == null) return;
+            // This is already sent to ImeTrackerService to mark it finished during onDispatched.
+
+            Log.i(TAG, token.mTag + ": onUserFinished " + (shown ? "shown" : "hidden"));
+        }
+
+        /**
+         * Gets the prefix string for {@link #onStart} based on the given request type.
+         *
+         * @param type request type for which to create the prefix string with.
+         */
+        @NonNull
+        private static String getOnStartPrefix(@Type int type) {
+            return switch (type) {
+                case TYPE_SHOW -> "onRequestShow";
+                case TYPE_HIDE -> "onRequestHide";
+                case TYPE_USER -> "onRequestUser";
+                default -> "onRequestUnknown";
+            };
+        }
+
+        /** Reloads the system properties related to this class. */
+        private void reloadSystemProperties() {
+            mLogProgress = SystemProperties.getBoolean(
+                    "persist.debug.imetracker", false);
+            mLogStackTrace = SystemProperties.getBoolean(
+                    "persist.debug.imerequest.logstacktrace", false);
         }
     };
 

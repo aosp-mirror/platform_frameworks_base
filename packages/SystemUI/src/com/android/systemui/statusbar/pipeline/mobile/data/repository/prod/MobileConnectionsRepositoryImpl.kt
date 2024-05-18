@@ -18,8 +18,10 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.telephony.CarrierConfigManager
+import android.telephony.ServiceState
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
@@ -35,7 +37,6 @@ import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.MobileMappings.Config
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -47,6 +48,7 @@ import com.android.systemui.statusbar.pipeline.airplane.data.repository.Airplane
 import com.android.systemui.statusbar.pipeline.dagger.MobileSummaryLog
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ServiceStateModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
@@ -55,6 +57,7 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.Connectivi
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.util.kotlin.pairwise
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
 import javax.inject.Inject
@@ -68,6 +71,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -168,6 +172,35 @@ constructor(
                 awaitClose { subscriptionManager.removeOnSubscriptionsChangedListener(callback) }
             }
             .flowOn(bgDispatcher)
+
+    /** Note that this flow is eager, so we don't miss any state */
+    override val deviceServiceState: StateFlow<ServiceStateModel?> =
+        broadcastDispatcher
+            .broadcastFlow(IntentFilter(Intent.ACTION_SERVICE_STATE)) { intent, _ ->
+                val subId =
+                    intent.getIntExtra(
+                        SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
+                        INVALID_SUBSCRIPTION_ID
+                    )
+
+                val extras = intent.extras
+                if (extras == null) {
+                    logger.logTopLevelServiceStateBroadcastMissingExtras(subId)
+                    return@broadcastFlow null
+                }
+
+                val serviceState = ServiceState.newFromBundle(extras)
+                logger.logTopLevelServiceStateBroadcastEmergencyOnly(subId, serviceState)
+                if (subId == INVALID_SUBSCRIPTION_ID) {
+                    // Assume that -1 here is the device's service state. We don't care about
+                    // other ones.
+                    ServiceStateModel.fromServiceState(serviceState)
+                } else {
+                    null
+                }
+            }
+            .filterNotNull()
+            .stateIn(scope, SharingStarted.Eagerly, null)
 
     /**
      * State flow that emits the set of mobile data subscriptions, each represented by its own

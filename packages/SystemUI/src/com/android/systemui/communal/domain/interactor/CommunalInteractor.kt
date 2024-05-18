@@ -61,7 +61,6 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.smartspace.data.repository.SmartspaceRepository
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
-import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
@@ -130,7 +129,7 @@ constructor(
         allOf(
                 communalSettingsInteractor.isCommunalEnabled,
                 not(keyguardInteractor.isEncryptedOrLockdown),
-                anyOf(keyguardInteractor.isKeyguardShowing, keyguardInteractor.isDreaming)
+                keyguardInteractor.isKeyguardShowing
             )
             .distinctUntilChanged()
             .onEach { available ->

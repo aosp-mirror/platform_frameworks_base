@@ -231,8 +231,10 @@ public class InputMethodManagerServiceTestBase {
                         "immstest2",
                         Process.THREAD_PRIORITY_FOREGROUND,
                         true /* allowIo */);
-        mInputMethodManagerService = new InputMethodManagerService(mContext, mServiceThread,
-                mPackageMonitorThread, unusedUserId -> mMockInputMethodBindingController);
+        mInputMethodManagerService = new InputMethodManagerService(mContext,
+                InputMethodManagerService.shouldEnableExperimentalConcurrentMultiUserMode(mContext),
+                mServiceThread, mPackageMonitorThread,
+                unusedUserId -> mMockInputMethodBindingController);
         spyOn(mInputMethodManagerService);
 
         // Start a InputMethodManagerService.Lifecycle to publish and manage the lifecycle of

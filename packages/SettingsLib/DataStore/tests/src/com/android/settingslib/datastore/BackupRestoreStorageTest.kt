@@ -248,6 +248,15 @@ class BackupRestoreStorageTest {
     }
 
     @Test
+    fun writeNewStateDescription_restoreDisabled() {
+        val storage = spy(TestStorage().apply { enabled = false })
+        temporaryFolder.newFile().toParcelFileDescriptor(MODE_WRITE_ONLY or MODE_APPEND).use {
+            storage.writeNewStateDescription(it)
+        }
+        verify(storage, never()).onRestoreFinished()
+    }
+
+    @Test
     fun backupAndRestore() {
         val storage = spy(TestStorage(entity1, entity2))
         val backupAgentHelper = BackupAgentHelper()

@@ -20,7 +20,7 @@ import android.app.Flags.FLAG_COMPACT_HEADS_UP_NOTIFICATION
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository
@@ -31,7 +31,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class HeadsUpStyleProviderImplTest : SysuiTestCase() {
 
     @Rule @JvmField val setFlagsRule = SetFlagsRule()
