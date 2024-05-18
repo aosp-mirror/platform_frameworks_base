@@ -82,6 +82,18 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
+// FOR ACONFIGD TEST MISSION AND ROLLOUT
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import android.net.LocalSocketAddress;
+import android.net.LocalSocket;
+import android.util.proto.ProtoInputStream;
+import android.aconfigd.Aconfigd.StorageRequestMessage;
+import android.aconfigd.Aconfigd.StorageRequestMessages;
+import android.aconfigd.Aconfigd.StorageReturnMessage;
+import android.aconfigd.Aconfigd.StorageReturnMessages;
+import android.aconfigd.AconfigdJavaUtils;
+import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
 /**
  * This class contains the state for one type of settings. It is responsible
  * for saving the state asynchronously to an XML file after a mutation and
@@ -346,6 +358,7 @@ final class SettingsState {
 
         mNamespaceDefaults = new HashMap<>();
 
+        ProtoOutputStream requests = null;
         synchronized (mLock) {
             readStateSyncLocked();
 
@@ -361,7 +374,146 @@ final class SettingsState {
                     loadAconfigDefaultValuesLocked(apexProtoPaths);
                 }
             }
+
+            if (isConfigSettingsKey(mKey)) {
+                requests = handleBulkSyncToNewStorage();
+            }
         }
+
+        if (requests != null) {
+            LocalSocket client = new LocalSocket();
+            try{
+                client.connect(new LocalSocketAddress(
+                    "aconfigd", LocalSocketAddress.Namespace.RESERVED));
+                Slog.d(LOG_TAG, "connected to aconfigd socket");
+            } catch (IOException ioe) {
+                Slog.e(LOG_TAG, "failed to connect to aconfigd socket", ioe);
+                return;
+            }
+            AconfigdJavaUtils.sendAconfigdRequests(client, requests);
+        }
+    }
+
+    // TODO(b/341764371): migrate aconfig flag push to GMS core
+    public static class FlagOverrideToSync {
+        public String packageName;
+        public String flagName;
+        public String flagValue;
+        public boolean isLocal;
+    }
+
+    // TODO(b/341764371): migrate aconfig flag push to GMS core
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    public FlagOverrideToSync getFlagOverrideToSync(String name, String value) {
+        int slashIdx = name.indexOf("/");
+        if (slashIdx <= 0 || slashIdx >= name.length()-1) {
+            Slog.e(LOG_TAG, "invalid flag name " + name);
+            return null;
+        }
+
+        String namespace = name.substring(0, slashIdx);
+        String fullFlagName = name.substring(slashIdx + 1);
+        boolean isLocal = false;
+
+        // get actual fully qualified flag name <package>.<flag>, note this is done
+        // after staged flag is applied, so no need to check staged flags
+        if (namespace.equals("device_config_overrides")) {
+            int colonIdx = fullFlagName.indexOf(":");
+            if (colonIdx == -1) {
+                Slog.e(LOG_TAG, "invalid local override flag name " + name);
+                return null;
+            }
+            namespace = fullFlagName.substring(0, colonIdx);
+            fullFlagName = fullFlagName.substring(colonIdx + 1);
+            isLocal = true;
+        }
+
+        String aconfigName = namespace + "/" + fullFlagName;
+        boolean isAconfig = mNamespaceDefaults.containsKey(namespace)
+                            && mNamespaceDefaults.get(namespace).containsKey(aconfigName);
+        if (!isAconfig) {
+            return null;
+        }
+
+        // get package name and flag name
+        int dotIdx = fullFlagName.lastIndexOf(".");
+        if (dotIdx == -1) {
+            Slog.e(LOG_TAG, "invalid override flag name " + name);
+            return null;
+        }
+
+        FlagOverrideToSync flag = new FlagOverrideToSync();
+        flag.packageName = fullFlagName.substring(0, dotIdx);
+        flag.flagName = fullFlagName.substring(dotIdx + 1);
+        flag.isLocal = isLocal;
+        flag.flagValue = value;
+        return flag;
+    }
+
+
+    // TODO(b/341764371): migrate aconfig flag push to GMS core
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    public ProtoOutputStream handleBulkSyncToNewStorage() {
+        // get marker or add marker if it does not exist
+        final String bulkSyncMarkerName = new String("aconfigd_marker/bulk_synced");
+        Setting markerSetting = mSettings.get(bulkSyncMarkerName);
+        if (markerSetting == null) {
+            markerSetting = new Setting(
+                bulkSyncMarkerName, "false", false, "aconfig", "aconfig");
+            mSettings.put(bulkSyncMarkerName, markerSetting);
+        }
+
+        if (enableAconfigStorageDaemon()) {
+            if (markerSetting.value.equals("true")) {
+                // CASE 1, flag is on, bulk sync marker true, nothing to do
+                return null;
+            } else {
+                // CASE 2, flag is on, bulk sync marker false. Do following two tasks
+                // (1) Do bulk sync here.
+                // (2) After bulk sync, set marker to true.
+
+                // first add storage reset request
+                ProtoOutputStream requests = new ProtoOutputStream();
+                AconfigdJavaUtils.writeResetStorageRequest(requests);
+
+                // loop over all settings and add flag override requests
+                final int numSettings = mSettings.size();
+                int num_requests = 0;
+                for (int i = 0; i < numSettings; i++) {
+                    String name = mSettings.keyAt(i);
+                    Setting setting = mSettings.valueAt(i);
+                    FlagOverrideToSync flag =
+                            getFlagOverrideToSync(name, setting.getValue());
+                    if (flag == null) {
+                        continue;
+                    }
+                    ++num_requests;
+                    AconfigdJavaUtils.writeFlagOverrideRequest(
+                        requests, flag.packageName, flag.flagName, flag.flagValue,
+                        flag.isLocal);
+                }
+
+                Slog.i(LOG_TAG, num_requests + " flag override requests created");
+
+                // mark sync has been done
+                markerSetting.value = "true";
+                scheduleWriteIfNeededLocked();
+                return requests;
+            }
+        } else {
+            if (markerSetting.value.equals("true")) {
+                // CASE 3, flag is off, bulk sync marker true, clear the marker
+                markerSetting.value = "false";
+                scheduleWriteIfNeededLocked();
+                return null;
+            } else {
+                // CASE 4, flag is off, bulk sync marker false, nothing to do
+                return null;
+            }
+        }
+
     }
 
     @GuardedBy("mLock")
