@@ -914,6 +914,38 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
+    public void onPackageChanged_disableComponent_updateInstalledServices() {
+        // Sets up two accessibility services as installed services
+        setupShortcutTargetServices();
+        assertThat(mA11yms.getCurrentUserState().mInstalledServices).hasSize(2);
+        AccessibilityServiceInfo installedService1 =
+                mA11yms.getCurrentUserState().mInstalledServices.getFirst();
+        ResolveInfo resolveInfo1 = installedService1.getResolveInfo();
+        AccessibilityServiceInfo installedService2 =
+                mA11yms.getCurrentUserState().mInstalledServices.getLast();
+
+        // Disables `installedService2`
+        when(mMockPackageManager.queryIntentServicesAsUser(any(), anyInt(), anyInt()))
+                .thenReturn(List.of(resolveInfo1));
+        when(mMockSecurityPolicy.canRegisterService(any())).thenReturn(true);
+        final Intent packageIntent = new Intent(Intent.ACTION_PACKAGE_CHANGED);
+        packageIntent.setData(
+                Uri.parse("package:" + installedService2.getResolveInfo().serviceInfo.packageName));
+        packageIntent.putExtra(Intent.EXTRA_UID, UserHandle.myUserId());
+        packageIntent.putExtra(Intent.EXTRA_USER_HANDLE, mA11yms.getCurrentUserIdLocked());
+        packageIntent.putExtra(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST,
+                new String[]{
+                        installedService2.getComponentName().flattenToString()});
+        mA11yms.getPackageMonitor().doHandlePackageEvent(packageIntent);
+
+        assertThat(mA11yms.getCurrentUserState().mInstalledServices).hasSize(1);
+        ComponentName installedService =
+                mA11yms.getCurrentUserState().mInstalledServices.getFirst().getComponentName();
+        assertThat(installedService)
+                .isEqualTo(installedService1.getComponentName());
+    }
+
+    @Test
     public void testSwitchUserScanPackages_scansWithoutHoldingLock() {
         setupAccessibilityServiceConnection(0);
         final AtomicReference<Set<Boolean>> lockState = collectLockStateWhilePackageScanning();
