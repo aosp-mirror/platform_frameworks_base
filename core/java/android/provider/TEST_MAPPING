@@ -8,6 +8,9 @@
                 }
             ]
         },
+	{
+	    "name": "CtsMediaProviderTestCases"
+	},
         {
             "name": "CalendarProviderTests"
         },
