@@ -709,6 +709,64 @@ public class DisplayManagerServiceTest {
         assertTrue((ddi.flags & DisplayDeviceInfo.FLAG_OWN_FOCUS) == 0);
     }
 
+    @Test
+    public void testCreateVirtualDisplayOwnFocus_checkDisplayDeviceInfo() throws RemoteException {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        registerDefaultDisplays(displayManager);
+
+        // This is effectively the DisplayManager service published to ServiceManager.
+        DisplayManagerService.BinderService bs = displayManager.new BinderService();
+
+        final String uniqueId = "uniqueId --- Own Focus Test -- checkDisplayDeviceInfo";
+        float refreshRate = 60.0f;
+        int width = 600;
+        int height = 800;
+        int dpi = 320;
+        int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
+
+        when(mContext.checkCallingPermission(ADD_TRUSTED_DISPLAY)).thenReturn(
+                PackageManager.PERMISSION_GRANTED);
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                VIRTUAL_DISPLAY_NAME, width, height, dpi);
+        builder.setFlags(flags);
+        builder.setUniqueId(uniqueId);
+        builder.setRequestedRefreshRate(refreshRate);
+
+        // Create a virtual display in its own display group.
+        final VirtualDisplayConfig ownerDisplayConfig = builder.build();
+        int displayId = bs.createVirtualDisplay(ownerDisplayConfig, /* callback= */ mMockAppToken,
+                /* projection= */ null, PACKAGE_NAME);
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
+
+        DisplayInfo displayInfo = bs.getDisplayInfo(displayId);
+        assertNotNull(displayInfo);
+        assertTrue((displayInfo.flags & DisplayDeviceInfo.FLAG_OWN_FOCUS) == 0);
+        final String displayUniqueId = VirtualDisplayAdapter.generateDisplayUniqueId(
+                PACKAGE_NAME, Process.myUid(), ownerDisplayConfig);
+        assertEquals(displayInfo.uniqueId, displayUniqueId);
+        assertEquals(displayInfo.name, VIRTUAL_DISPLAY_NAME);
+        assertEquals(displayInfo.ownerPackageName, PACKAGE_NAME);
+        assertEquals(displayInfo.getRefreshRate(), refreshRate, 0.1f);
+
+        performTraversalInternal(displayManager);
+
+        // Flush the handler.
+        displayManager.getDisplayHandler().runWithScissors(() -> {}, /* now= */ 0);
+
+        DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayId);
+        assertNotNull(ddi);
+        assertTrue((ddi.flags & DisplayDeviceInfo.FLAG_OWN_FOCUS) == 0);
+        assertEquals(ddi.width, width);
+        assertEquals(ddi.height, height);
+        assertEquals(ddi.name, displayInfo.name);
+        assertEquals(ddi.ownerPackageName, displayInfo.ownerPackageName);
+        assertEquals(ddi.uniqueId, displayInfo.uniqueId);
+        assertEquals(ddi.renderFrameRate, displayInfo.getRefreshRate(), 0.1f);
+    }
+
     /**
      * Tests that the virtual display is created along-side the default display.
      */
