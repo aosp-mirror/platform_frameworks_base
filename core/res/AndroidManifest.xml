@@ -4697,6 +4697,11 @@
     <permission android:name="android.permission.REQUEST_UNIQUE_ID_ATTESTATION"
          android:protectionLevel="signature" />
 
+    <!-- Allows an application to use the RemoteKeyProvisioningService.
+         @hide -->
+    <permission android:name="android.permission.BIND_RKP_SERVICE"
+                android:protectionLevel="signature" />
+
     <!-- Allows an application to get enabled credential manager providers.
          @hide -->
     <permission android:name="android.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS"
