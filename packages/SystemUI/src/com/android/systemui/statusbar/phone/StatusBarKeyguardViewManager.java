@@ -695,11 +695,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void show(Bundle options) {
         Trace.beginSection("StatusBarKeyguardViewManager#show");
         mNotificationShadeWindowController.setKeyguardShowing(true);
-        if (SceneContainerFlag.isEnabled()) {
-            // TODO(b/336581871): add sceneState?
-            mSceneInteractorLazy.get().changeScene(
-                    Scenes.Lockscreen, "StatusBarKeyguardViewManager.show");
-        }
         mKeyguardStateController.notifyKeyguardState(true, mKeyguardStateController.isOccluded());
         reset(true /* hideBouncerWhenShowing */);
         SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_STATE_CHANGED,
