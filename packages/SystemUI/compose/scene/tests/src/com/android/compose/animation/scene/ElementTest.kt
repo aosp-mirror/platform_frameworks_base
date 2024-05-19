@@ -35,7 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.approachLayout
+import androidx.compose.ui.layout.intermediateLayout
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -67,9 +67,7 @@ class ElementTest {
             modifier
                 .offset(offset)
                 .element(key)
-                .approachLayout(
-                    isMeasurementApproachInProgress = { layoutState.isTransitioning() },
-                ) { measurable, constraints ->
+                .intermediateLayout { measurable, constraints ->
                     onLayout()
                     val placement = measurable.measure(constraints)
                     layout(placement.width, placement.height) {
@@ -438,7 +436,7 @@ class ElementTest {
                     // page should be composed.
                     HorizontalPager(
                         pagerState,
-                        beyondViewportPageCount = 0,
+                        outOfBoundsPageCount = 0,
                     ) { page ->
                         when (page) {
                             0 -> Box(Modifier.element(TestElements.Foo).fillMaxSize())
