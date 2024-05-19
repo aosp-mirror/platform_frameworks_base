@@ -42,7 +42,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
@@ -90,11 +89,6 @@ class NightDisplayRepositoryTest : SysuiTestCase() {
             locationController,
         )
 
-    @Before
-    fun setup() {
-        enrollInForcedNightDisplayAutoMode(INITIALLY_FORCE_AUTO_MODE, testUser)
-    }
-
     @Test
     fun nightDisplayState_matchesAutoMode() =
         scope.runTest {
@@ -126,6 +120,8 @@ class NightDisplayRepositoryTest : SysuiTestCase() {
     @Test
     fun nightDisplayState_matchesIsNightDisplayActivated() =
         scope.runTest {
+            enrollInForcedNightDisplayAutoMode(INITIALLY_FORCE_AUTO_MODE, testUser)
+
             val callbackCaptor = argumentCaptor<NightDisplayListener.Callback>()
 
             val lastState by collectLastValue(underTest.nightDisplayState(testUser))
@@ -148,6 +144,7 @@ class NightDisplayRepositoryTest : SysuiTestCase() {
         scope.runTest {
             whenever(colorDisplayManager.nightDisplayAutoMode)
                 .thenReturn(ColorDisplayManager.AUTO_MODE_CUSTOM_TIME)
+            enrollInForcedNightDisplayAutoMode(INITIALLY_FORCE_AUTO_MODE, testUser)
 
             val lastState by collectLastValue(underTest.nightDisplayState(testUser))
             runCurrent()
@@ -160,11 +157,30 @@ class NightDisplayRepositoryTest : SysuiTestCase() {
         scope.runTest {
             whenever(colorDisplayManager.nightDisplayAutoMode)
                 .thenReturn(ColorDisplayManager.AUTO_MODE_TWILIGHT)
+            enrollInForcedNightDisplayAutoMode(INITIALLY_FORCE_AUTO_MODE, testUser)
 
             val lastState by collectLastValue(underTest.nightDisplayState(testUser))
             runCurrent()
 
             assertThat(lastState!!.autoMode).isEqualTo(ColorDisplayManager.AUTO_MODE_TWILIGHT)
+        }
+
+    /**
+     * When the value of the raw auto mode is missing the call to nightDisplayState should not crash
+     */
+    @Test
+    fun nightDisplayState_whenAutoModeSettingIsNotInitialized_loadsDataWithoutException() =
+        scope.runTest {
+            // only auto mode_available is set, and the raw auto_mode has nothing set
+            globalSettings.putString(
+                Settings.Global.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE,
+                NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE
+            )
+
+            val lastState by collectLastValue(underTest.nightDisplayState(testUser))
+            runCurrent()
+
+            assertThat(lastState!!.shouldForceAutoMode).isTrue()
         }
 
     @Test

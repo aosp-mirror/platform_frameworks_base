@@ -149,12 +149,7 @@ constructor(
                 secureSettings
                     .observerFlow(userHandle.identifier, DISPLAY_AUTO_MODE_RAW_SETTING_NAME)
                     .onStart { emit(Unit) }
-                    .map {
-                        secureSettings.getIntForUser(
-                            DISPLAY_AUTO_MODE_RAW_SETTING_NAME,
-                            userHandle.identifier
-                        ) == NIGHT_DISPLAY_AUTO_MODE_RAW_NOT_SET
-                    }
+                    .map { isNightDisplayAutoModeRawSettingNotSet(userHandle.identifier) }
             }
             .distinctUntilChanged()
 
@@ -179,10 +174,17 @@ constructor(
             colorDisplayManager.nightDisplayCustomEndTime,
             globalSettings.getString(IS_FORCE_AUTO_MODE_AVAILABLE_SETTING_NAME) ==
                 NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE &&
-                secureSettings.getIntForUser(DISPLAY_AUTO_MODE_RAW_SETTING_NAME, user.identifier) ==
-                    NIGHT_DISPLAY_AUTO_MODE_RAW_NOT_SET,
+                isNightDisplayAutoModeRawSettingNotSet(user.identifier),
             locationController.isLocationEnabled,
         )
+    }
+
+    private fun isNightDisplayAutoModeRawSettingNotSet(userId: Int): Boolean {
+        return secureSettings.getIntForUser(
+            DISPLAY_AUTO_MODE_RAW_SETTING_NAME,
+            NIGHT_DISPLAY_AUTO_MODE_RAW_NOT_SET,
+            userId
+        ) == NIGHT_DISPLAY_AUTO_MODE_RAW_NOT_SET
     }
 
     private companion object {
