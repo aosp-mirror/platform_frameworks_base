@@ -283,6 +283,8 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Voice Assist"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Låsning"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
+    <skip />
     <string name="notification_hidden_text" msgid="2835519769868187223">"Ny avisering"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Fysiskt tangentbord"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Säkerhet"</string>
@@ -623,12 +625,12 @@
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Tillåter att appen visar aviseringar"</string>
     <string name="permlab_turnScreenOn" msgid="219344053664171492">"Slå på skärmen"</string>
     <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Tillåter att appen slår på skärmen."</string>
-    <string name="permlab_useBiometric" msgid="6314741124749633786">"använd biometrisk maskinvara"</string>
-    <string name="permdesc_useBiometric" msgid="7502858732677143410">"Tillåter att appen använder biometrisk maskinvara vid autentisering"</string>
-    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"hantera maskinvara för fingeravtryck"</string>
+    <string name="permlab_useBiometric" msgid="6314741124749633786">"använd biometrisk hårdvara"</string>
+    <string name="permdesc_useBiometric" msgid="7502858732677143410">"Tillåter att appen använder biometrisk hårdvara vid autentisering"</string>
+    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"hantera hårdvara för fingeravtryck"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Tillåter att appen anropar metoder för att lägga till och radera fingeravtrycksmallar."</string>
-    <string name="permlab_useFingerprint" msgid="1001421069766751922">"använda maskinvara för fingeravtryck"</string>
-    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Tillåter att appen använder maskinvara för fingeravtryck vid autentisering"</string>
+    <string name="permlab_useFingerprint" msgid="1001421069766751922">"använda hårdvara för fingeravtryck"</string>
+    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Tillåter att appen använder hårdvara för fingeravtryck vid autentisering"</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"göra ändringar i din musiksamling"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"Tillåter att appen gör ändringar i din musiksamling."</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"göra ändringar i din videosamling"</string>
@@ -642,7 +644,7 @@
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifiera din identitet"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Fortsätt med hjälp av din biometriska data"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Fortsätt med hjälp av din biometriska data eller skärmlåset"</string>
-    <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrisk maskinvara är inte tillgänglig"</string>
+    <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrisk hårdvara är inte tillgänglig"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentiseringen avbröts"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Identifierades inte"</string>
     <string name="biometric_face_not_recognized" msgid="5535599455744525200">"Ansiktet känns inte igen"</string>
@@ -670,7 +672,7 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingeravtrycket har autentiserats"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Ansiktet har autentiserats"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Ansiktet har autentiserats. Tryck på Bekräfta"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Det finns ingen maskinvara för fingeravtryck"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Det finns ingen hårdvara för fingeravtryck"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Det gick inte att konfigurera fingeravtryck"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Tiden för fingeravtrycksinställning gick ut. Försök igen."</string>
     <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Fingeravtrycksåtgärden avbröts"</string>
@@ -732,7 +734,7 @@
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Något täcker ansiktet. Hela ansiktet måste synas."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
-    <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansiktsverifiering går ej. Otillgänglig maskinvara."</string>
+    <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansiktsverifiering går ej. Otillgänglig hårdvara."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Försök att använda ansiktslåset igen"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Kan inte lagra ny ansiktsdata. Radera först gammal data."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Ansiktsåtgärden har avbrutits."</string>
@@ -1731,7 +1733,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Visa och styra skärmen"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Den kan läsa allt innehåll på skärmen och visa innehåll över andra appar."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Visa och vidta åtgärder"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Den kan registrera din användning av en app eller maskinvarusensor och interagera med appar åt dig."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Den kan registrera din användning av en app eller hårdvarusensor och interagera med appar åt dig."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Tillåt"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Neka"</string>
     <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"Avinstallera"</string>
@@ -2413,22 +2415,15 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Öppna Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Så fungerar det"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Väntar …"</string>
-    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Konfigurera fingeravtryckslås igen"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> fungerade inte bra och har raderats. Konfigurera det igen för att låsa upp telefonen med fingeravtryck."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> och <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> fungerade inte bra och har raderats. Konfigurera dem igen för att låsa upp telefonen med fingeravtryck."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"Konfigurera ansiktslås igen"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Ansiktsmodellen fungerade inte bra och har raderats. Konfigurera den igen för att låsa upp telefonen med ansiktet."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Ställ in"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Inte nu"</string>
 </resources>

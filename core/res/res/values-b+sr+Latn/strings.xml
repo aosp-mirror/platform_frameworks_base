@@ -284,6 +284,8 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Glasovna pomoć"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Zaključavanje"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
+    <skip />
     <string name="notification_hidden_text" msgid="2835519769868187223">"Novo obaveštenje"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Fizička tastatura"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Bezbednost"</string>
@@ -835,11 +837,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Nadzor pokušaja otključavanja ekrana"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Prati broj netačno unetih lozinki prilikom otključavanja ekrana i zaključava tablet ili briše podatke sa tableta ako je netačna lozinka uneta previše puta."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava Android TV uređaj ili briše sve podatke sa Android TV uređaja ako se unese previše netačnih lozinki."</string>
-    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Prati broj netačno unetih lozinki pri otključavanju ekrana i zaključava sistem za info-zabavu ili briše sve podatke sa sistema za info-zabavu ako je netačna lozinka uneta previše puta."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Prati broj netačno unetih lozinki pri otključavanju ekrana i zaključava sistem za informacije i zabavu ili briše sve podatke sa sistema za informacije i zabavu ako je netačna lozinka uneta previše puta."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Prati broj netačno unetih lozinki pri otključavanju ekrana i zaključava telefon ili briše sve podatke sa telefona ako je netačna lozinka uneta previše puta."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava tablet ili briše sve podatke ovog korisnika ako se unese previše netačnih lozinki."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava Android TV uređaj ili briše sve podatke ovog korisnika ako se unese previše netačnih lozinki."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava sistem za info-zabavu ili briše sve podatke ovog profila ako se unese previše netačnih lozinki."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava sistem za informacije i zabavu ili briše sve podatke ovog profila ako se unese previše netačnih lozinki."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Nadgleda broj netačnih lozinki unetih pri otključavanju ekrana i zaključava telefon ili briše sve podatke ovog korisnika ako se unese previše netačnih lozinki."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Promena zaključavanja ekrana"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Menja otključavanje ekrana."</string>
@@ -848,13 +850,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Brisanje svih podataka"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Brisanje podataka na tabletu bez upozorenja resetovanjem na fabrička podešavanja."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Briše podatke Android TV uređaja bez upozorenja pomoću resetovanja na fabrička podešavanja."</string>
-    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Briše podatke na sistemu za info-zabavu bez upozorenja resetovanjem na fabrička podešavanja."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Briše podatke na sistemu za informacije i zabavu bez upozorenja resetovanjem na fabrička podešavanja."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Brisanje podataka na telefonu bez upozorenja resetovanjem na fabrička podešavanja."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Brisanje podataka profila"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Obriši podatke korisnika"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Briše podatke ovog korisnika na ovom tabletu bez upozorenja."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Briše podatke ovog korisnika na ovom Android TV uređaju bez upozorenja."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Briše podatke ovog profila na ovom sistemu za info-zabavu bez upozorenja."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Briše podatke ovog profila na ovom sistemu za informacije i zabavu bez upozorenja."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Briše podatke ovog korisnika na ovom telefonu bez upozorenja."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Podesite globalni proksi server uređaja"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Podešava globalni proksi uređaja koji će se koristiti dok su smernice omogućene. Samo vlasnik uređaja može da podesi globalni proksi."</string>
@@ -2414,22 +2416,15 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otvori Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Princip rada"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Na čekanju..."</string>
-    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Ponovo podesite otključavanje otiskom prsta"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> nije funkcionisao i izbrisali smo ga. Ponovo ga podesite da biste telefon otključavali otiskom prsta."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nisu funkcionisali i izbrisali smo ih. Ponovo ih podesite da biste telefon otključavali otiskom prsta."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"Ponovo podesite otključavanje licem"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Vaš model lica nije funkcionisao i izbrisali smo ga. Ponovo ga podesite da biste telefon otključavali licem."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Podesi"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ne sada"</string>
 </resources>

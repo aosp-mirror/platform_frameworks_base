@@ -85,7 +85,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"No es pot accedir a la xarxa mòbil"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Prova de canviar de xarxa preferent. Toca per canviar-la."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Les trucades d\'emergència no estan disponibles"</string>
-    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Per poder fer trucades d\'emergència, cal tenir connexió a una xarxa mòbil"</string>
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Per poder fer trucades d\'emergència, cal tenir connexió de xarxa mòbil"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertes"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Desviació de trucades"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Mode de devolució de trucada d\'emergència"</string>
@@ -284,6 +284,8 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Assist. per veu"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Bloqueig de seguretat"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"+999"</string>
+    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
+    <skip />
     <string name="notification_hidden_text" msgid="2835519769868187223">"Notificació nova"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Teclat físic"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Seguretat"</string>
@@ -1905,8 +1907,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Suprimit per l\'administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"D\'acord"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Estalvi de bateria activa el tema fosc i limita o desactiva l\'activitat en segon pla, alguns efectes visuals, determinades funcions i algunes connexions a la xarxa."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"Estalvi de bateria activa el tema fosc i limita o desactiva l\'activitat en segon pla, alguns efectes visuals, determinades funcions i algunes connexions a la xarxa."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Estalvi de bateria activa el tema fosc i limita o desactiva l\'activitat en segon pla, alguns efectes visuals, determinades funcions i algunes connexions de xarxa."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Estalvi de bateria activa el tema fosc i limita o desactiva l\'activitat en segon pla, alguns efectes visuals, determinades funcions i algunes connexions de xarxa."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Estalvi de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vols activar l\'Estalvi de dades?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activa"</string>
@@ -2414,22 +2416,15 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Obre Missatges"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Com funciona"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendent..."</string>
-    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Torna a configurar Desbloqueig amb empremta digital"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> no funcionava correctament i s\'ha suprimit. Torna a configurar-la per desbloquejar el telèfon amb l\'empremta digital."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> no funcionaven correctament i s\'han suprimit. Torna a configurar-les per desbloquejar el telèfon amb l\'empremta digital."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"Torna a configurar Desbloqueig facial"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"El teu model facial no funcionava correctament i s\'ha suprimit. Torna a configurar-lo per desbloquejar el telèfon amb la cara."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configura"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ara no"</string>
 </resources>
