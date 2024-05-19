@@ -247,13 +247,11 @@
     <!-- Padding for the bubble popup view contents. -->
     <dimen name="bubble_popup_padding">24dp</dimen>
     <!-- The size of the caption bar inset at the top of bubble bar expanded view. -->
-    <dimen name="bubble_bar_expanded_view_caption_height">32dp</dimen>
+    <dimen name="bubble_bar_expanded_view_caption_height">36dp</dimen>
     <!-- The width of the caption bar at the top of bubble bar expanded view. -->
-    <dimen name="bubble_bar_expanded_view_caption_width">128dp</dimen>
-    <!-- The height of the dots shown for the caption menu in the bubble bar expanded view.. -->
-    <dimen name="bubble_bar_expanded_view_caption_dot_size">4dp</dimen>
-    <!-- The spacing between the dots for the caption menu in the bubble bar expanded view.. -->
-    <dimen name="bubble_bar_expanded_view_caption_dot_spacing">4dp</dimen>
+    <dimen name="bubble_bar_expanded_view_caption_width">80dp</dimen>
+    <!-- The height of the handle shown for the caption menu in the bubble bar expanded view. -->
+    <dimen name="bubble_bar_expanded_view_handle_height">4dp</dimen>
     <!-- Width of the expanded bubble bar view shown when the bubble is expanded. -->
     <dimen name="bubble_bar_expanded_view_width">412dp</dimen>
     <!-- Minimum width of the bubble bar manage menu. -->
