@@ -143,7 +143,7 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"تمّ التأكيد."</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"يمكنك النقر على \"تأكيد\" لإكمال المهمة."</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"تم فتح قفل جهازك عند تقريبه من وجهك."</string>
-    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"تم فتح قفل جهازك عند تقريبه من وجهك. اضغط للمتابعة."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"تم فتح الجهاز بالتعرّف على وجهك. اضغط للمتابعة."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"تم التعرّف على الوجه. اضغط للمتابعة."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"تم التعرّف على الوجه. للمتابعة، اضغط على رمز فتح القفل."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"مصادقة"</string>

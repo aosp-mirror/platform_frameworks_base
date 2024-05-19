@@ -820,7 +820,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"قفل الشاشة"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"التحكّم في طريقة ووقت قفل الشاشة"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"محو جميع البيانات"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"يمكنك محو بيانات الجهاز اللوحي بدون تحذير، وذلك عبر إجراء إعادة الضبط على الإعدادات الأصلية."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"محو بيانات الجهاز اللوحي بدون تحذير، وذلك عبر إعادة الضبط على الإعدادات الأصلية"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"‏يمكنك محو بيانات جهاز Android TV بدون تحذير عن طريق تنفيذ إعادة الضبط على الإعدادات الأصلية."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"يمكنك محو بيانات \"نظام الترفيه والمعلومات\" بدون تحذير، وذلك من خلال إعادة الضبط على الإعدادات الأصلية."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"محو بيانات الهاتف بدون تحذير، وذلك من خلال إعادة ضبط البيانات على الإعدادات الأصلية"</string>

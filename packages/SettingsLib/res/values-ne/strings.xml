@@ -139,7 +139,7 @@
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"कनेक्ट गर्नुहोस्"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"जोडी"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"रद्द गर्नुहोस्"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"जब जडान हुन्छ जोडी अनुदानले तपाईँको सम्पर्कहरू पहुँच गर्छ र इतिहास सम्झाउँछ।"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"जब जडान हुन्छ जोडी अनुदानले तपाईँको कन्ट्याक्टहरू पहुँच गर्छ र इतिहास सम्झाउँछ।"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>सँग जोडा मिलाउन सकेन"</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"गलत PIN वा पासकीका कारणले <xliff:g id="DEVICE_NAME">%1$s</xliff:g> मा कनेक्ट गर्न सकिएन।"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> सँग कुराकानी हुन सक्दैन।"</string>
