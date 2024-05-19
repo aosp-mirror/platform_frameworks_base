@@ -647,11 +647,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"驗證時發生錯誤"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"使用螢幕鎖定"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"如要繼續操作，請輸入螢幕鎖定解鎖憑證"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"請用力按住感應器"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"請按住感應器"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"無法辨識指紋，請再試一次。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"請清潔指紋感應器，然後再試一次"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"請清潔感應器，然後再試一次"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"請用力按住感應器"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"請按住感應器"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"手指移動太慢，請重試。"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"改用其他指紋"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"太亮"</string>
@@ -2395,22 +2395,15 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"你可在沒有流動/Wi-Fi 網絡的情況下收發訊息"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"開啟「訊息」"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"運作方式"</string>
-    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"重新設定「指紋解鎖」功能"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"由於「<xliff:g id="FINGERPRINT">%s</xliff:g>」無法正常運作，因此系統已將其刪除。請重新設定，才能使用指紋解鎖手機。"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"由於「<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>」和「<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>」無法正常運作，因此系統已將其刪除。請重新設定，才能使用指紋解鎖手機。"</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"重新設定「面孔解鎖」功能"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"由於面部模型無法正常運作，因此系統已將其刪除。請重新設定，才能使用面孔解鎖手機。"</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"設定"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"暫時不要"</string>
 </resources>

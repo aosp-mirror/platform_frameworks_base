@@ -2383,7 +2383,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Ստեղնաշարի համար կարգավորված են <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> դասավորությունները։ Հպեք փոխելու համար։"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Ֆիզիկական ստեղնաշարերը կարգավորված են"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Հպեք՝ ստեղնաշարերը դիտելու համար"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Անձնական"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Մասնավոր"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Կլոն"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"Աշխատանքային"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Աշխատանքային 2"</string>
@@ -2395,22 +2395,15 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Դուք կարող եք ուղարկել և ստանալ հաղորդագրություններ՝ առանց բջջային կամ Wi-Fi կապի"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Բացել Messages-ը"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ինչպես է դա աշխատում"</string>
-    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Նորից կարգավորեք մատնահետքով ապակողպումը"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"«<xliff:g id="FINGERPRINT">%s</xliff:g>» մատնահետքը հեռացվել է, քանի որ լավ չէր աշխատում։ Նորից կարգավորեք այն՝ ձեր հեռախոսը մատնահետքով ապակողպելու համար։"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"«<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>» և «<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>» մատնահետքերը հեռացվել են, քանի որ լավ չէին աշխատում։ Նորից կարգավորեք դրանք՝ ձեր հեռախոսը մատնահետքով ապակողպելու համար։"</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"Նորից կարգավորեք դեմքով ապակողպումը"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Ձեր դեմքի նմուշը հեռացվել է, քանի որ լավ չէր աշխատում։ Նորից կարգավորեք այն՝ ձեր հեռախոսը դեմքով ապակողպելու համար։"</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Կարգավորել"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ոչ հիմա"</string>
 </resources>
