@@ -2340,7 +2340,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Layout do teclado definido como <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Toque para mudar."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Teclados físicos configurados"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Toque para conferir os teclados"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Particular"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Privado"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Clone"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"Trabalho"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Trabalho 2"</string>
