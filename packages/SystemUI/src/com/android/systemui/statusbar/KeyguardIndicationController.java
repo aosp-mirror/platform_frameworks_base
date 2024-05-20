@@ -633,6 +633,7 @@ public class KeyguardIndicationController {
                     INDICATION_TYPE_BIOMETRIC_MESSAGE,
                     new KeyguardIndication.Builder()
                             .setMessage(mBiometricMessage)
+                            .setForceAccessibilityLiveRegionAssertive()
                             .setMinVisibilityMillis(IMPORTANT_MSG_MIN_DURATION)
                             .setTextColor(mInitialTextColorState)
                             .build(),

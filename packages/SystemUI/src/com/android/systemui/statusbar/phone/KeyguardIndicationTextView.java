@@ -219,6 +219,7 @@ public class KeyguardIndicationTextView extends TextView {
     }
 
     private void setNextIndication() {
+        boolean forceAssertiveAccessibilityLiveRegion = false;
         if (mKeyguardIndicationInfo != null) {
             // First, update the style.
             // If a background is set on the text, we don't want shadow on the text
@@ -239,8 +240,16 @@ public class KeyguardIndicationTextView extends TextView {
                 }
             }
             setCompoundDrawablesRelativeWithIntrinsicBounds(icon, null, null, null);
+            forceAssertiveAccessibilityLiveRegion =
+                mKeyguardIndicationInfo.getForceAssertiveAccessibilityLiveRegion();
+        }
+        if (!forceAssertiveAccessibilityLiveRegion) {
+            setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_NONE);
         }
         setText(mMessage);
+        if (forceAssertiveAccessibilityLiveRegion) {
+            setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_ASSERTIVE);
+        }
         if (mAlwaysAnnounceText) {
             announceForAccessibility(mMessage);
         }
