@@ -451,12 +451,16 @@ public abstract class OnDeviceIntelligenceService extends Service {
             Slog.v(TAG,
                     "onGetReadOnlyFileDescriptor: " + fileName + " under internal app storage.");
             File f = new File(getBaseContext().getFilesDir(), fileName);
+            if (!f.exists()) {
+                f = new File(fileName);
+            }
             ParcelFileDescriptor pfd = null;
             try {
                 pfd = ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
                 Slog.d(TAG, "Successfully opened a file with ParcelFileDescriptor.");
             } catch (FileNotFoundException e) {
                 Slog.e(TAG, "Cannot open file. No ParcelFileDescriptor returned.");
+                future.completeExceptionally(e);
             } finally {
                 future.complete(pfd);
                 if (pfd != null) {
