@@ -78,3 +78,10 @@ flag {
     description: "Allow opening bubbles overflow UI without bubbles being visible"
     bug: "340337839"
 }
+
+flag {
+    name: "enable_bubble_stashing"
+    namespace: "multitasking"
+    description: "Allow the floating bubble stack to stash on the edge of the screen"
+    bug: "341361249"
+}
