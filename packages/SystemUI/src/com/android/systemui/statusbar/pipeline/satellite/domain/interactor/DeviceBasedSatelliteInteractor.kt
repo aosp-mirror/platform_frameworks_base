@@ -19,6 +19,9 @@ package com.android.systemui.statusbar.pipeline.satellite.domain.interactor
 import com.android.internal.telephony.flags.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.statusbar.pipeline.dagger.OemSatelliteInputLog
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.satellite.data.DeviceBasedSatelliteRepository
 import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteConnectionState
@@ -45,6 +48,7 @@ constructor(
     deviceProvisioningInteractor: DeviceProvisioningInteractor,
     wifiInteractor: WifiInteractor,
     @Application scope: CoroutineScope,
+    @OemSatelliteInputLog private val logBuffer: LogBuffer,
 ) {
     /** Must be observed by any UI showing Satellite iconography */
     val isSatelliteAllowed =
@@ -79,25 +83,52 @@ constructor(
     val isWifiActive: Flow<Boolean> =
         wifiInteractor.wifiNetwork.map { it is WifiNetworkModel.Active }
 
+    private val allConnectionsOos =
+        iconsInteractor.icons.aggregateOver(
+            selector = { intr ->
+                combine(intr.isInService, intr.isEmergencyOnly, intr.isNonTerrestrial) {
+                    isInService,
+                    isEmergencyOnly,
+                    isNtn ->
+                    !isInService && !isEmergencyOnly && !isNtn
+                }
+            },
+            defaultValue = true, // no connections == everything is OOS
+        ) { isOosAndNotEmergencyAndNotSatellite ->
+            isOosAndNotEmergencyAndNotSatellite.all { it }
+        }
+
     /** When all connections are considered OOS, satellite connectivity is potentially valid */
     val areAllConnectionsOutOfService =
         if (Flags.oemEnabledSatelliteFlag()) {
-                iconsInteractor.icons.aggregateOver(
-                    selector = { intr ->
-                        combine(intr.isInService, intr.isEmergencyOnly, intr.isNonTerrestrial) {
-                            isInService,
-                            isEmergencyOnly,
-                            isNtn ->
-                            !isInService && !(isEmergencyOnly || isNtn)
-                        }
-                    }
-                ) { isOosAndNotEmergencyOnlyOrSatellite ->
-                    isOosAndNotEmergencyOnlyOrSatellite.all { it }
+                combine(
+                    allConnectionsOos,
+                    iconsInteractor.isDeviceInEmergencyCallsOnlyMode,
+                ) { connectionsOos, deviceEmergencyOnly ->
+                    logBuffer.log(
+                        TAG,
+                        LogLevel.INFO,
+                        {
+                            bool1 = connectionsOos
+                            bool2 = deviceEmergencyOnly
+                        },
+                        {
+                            "Updating OOS status. allConnectionsOOs=$bool1 " +
+                                "deviceEmergencyOnly=$bool2"
+                        },
+                    )
+                    // If no connections exist, or all are OOS, then we look to the device-based
+                    // service state to detect if any calls are possible
+                    connectionsOos && !deviceEmergencyOnly
                 }
             } else {
                 flowOf(false)
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), true)
+
+    companion object {
+        const val TAG = "DeviceBasedSatelliteInteractor"
+    }
 }
 
 /**
@@ -106,12 +137,22 @@ constructor(
  *
  * Provides a way to connect the reactivity of the top-level flow with the reactivity of an
  * arbitrarily-defined relationship ([selector]) from R to the flow that R exposes.
+ *
+ * [defaultValue] allows for a default value to be used if there are no leaf nodes after applying
+ * [selector]. E.g., if there are no mobile connections, assume that there is no service.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 private inline fun <R, reified S, T> Flow<List<R>>.aggregateOver(
     crossinline selector: (R) -> Flow<S>,
-    crossinline transform: (Array<S>) -> T
+    defaultValue: T,
+    crossinline transform: (Array<S>) -> T,
 ): Flow<T> {
     return map { list -> list.map { selector(it) } }
-        .flatMapLatest { newFlows -> combine(newFlows) { newVals -> transform(newVals) } }
+        .flatMapLatest { newFlows ->
+            if (newFlows.isEmpty()) {
+                flowOf(defaultValue)
+            } else {
+                combine(newFlows) { newVals -> transform(newVals) }
+            }
+        }
 }
