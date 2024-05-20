@@ -97,6 +97,8 @@ public final class BinaryXmlSerializer implements TypedXmlSerializer {
      */
     private static final int BUFFER_SIZE = 32_768;
 
+    private static final int MAX_UNSIGNED_SHORT = 65_535;
+
     private FastDataOutput mOut;
 
     /**
@@ -226,6 +228,10 @@ public final class BinaryXmlSerializer implements TypedXmlSerializer {
         if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
         mOut.writeByte(ATTRIBUTE | TYPE_BYTES_HEX);
         mOut.writeInternedUTF(name);
+        if (value.length > MAX_UNSIGNED_SHORT) {
+            throw new IOException("attributeBytesHex: input size (" + value.length
+                    + ") exceeds maximum allowed size (" + MAX_UNSIGNED_SHORT + ")");
+        }
         mOut.writeShort(value.length);
         mOut.write(value);
         return this;
@@ -237,6 +243,10 @@ public final class BinaryXmlSerializer implements TypedXmlSerializer {
         if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
         mOut.writeByte(ATTRIBUTE | TYPE_BYTES_BASE64);
         mOut.writeInternedUTF(name);
+        if (value.length > MAX_UNSIGNED_SHORT) {
+            throw new IOException("attributeBytesBase64: input size (" + value.length
+                    + ") exceeds maximum allowed size (" + MAX_UNSIGNED_SHORT + ")");
+        }
         mOut.writeShort(value.length);
         mOut.write(value);
         return this;
