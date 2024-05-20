@@ -318,7 +318,7 @@ public class TransitionUtil {
                 null,
                 new Rect(change.getStartAbsBounds()),
                 taskInfo,
-                change.getAllowEnterPip(),
+                change.isAllowEnterPip(),
                 INVALID_WINDOW_TYPE
         );
         target.setWillShowImeOnTarget(
