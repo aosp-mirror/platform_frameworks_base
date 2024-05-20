@@ -25,6 +25,7 @@ import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.pm.ActivityInfo.CONFIG_DENSITY
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
@@ -115,6 +116,8 @@ import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.capture
 import org.mockito.quality.Strictness
 import java.util.Optional
+import junit.framework.Assert.assertFalse
+import junit.framework.Assert.assertTrue
 import org.mockito.Mockito.`when` as whenever
 
 /**
@@ -1045,17 +1048,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    fun handleRequest_freeformTask_freeformVisible_returnNull() {
-        assumeTrue(ENABLE_SHELL_TRANSITIONS)
-
-        val freeformTask1 = setUpFreeformTask()
-        markTaskVisible(freeformTask1)
-
-        val freeformTask2 = createFreeformTask()
-        assertThat(controller.handleRequest(Binder(), createTransition(freeformTask2))).isNull()
-    }
-
-    @Test
     fun handleRequest_freeformTask_freeformVisible_aboveTaskLimit_minimize() {
         assumeTrue(ENABLE_SHELL_TRANSITIONS)
 
@@ -1110,6 +1102,34 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val result = controller.handleRequest(Binder(), createTransition(taskDefaultDisplay))
         assertThat(result?.hierarchyOps?.size).isEqualTo(1)
         result!!.assertReorderAt(0, taskDefaultDisplay, toTop = true)
+    }
+
+    @Test
+    fun handleRequest_freeformTask_alreadyInDesktop_noOverrideDensity_noConfigDensityChange() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+        whenever(DesktopModeStatus.isDesktopDensityOverrideSet()).thenReturn(false)
+
+        val freeformTask1 = setUpFreeformTask()
+        markTaskVisible(freeformTask1)
+
+        val freeformTask2 = createFreeformTask()
+        val result = controller.handleRequest(freeformTask2.token.asBinder(),
+            createTransition(freeformTask2))
+        assertFalse(result.anyDensityConfigChange(freeformTask2.token))
+    }
+
+    @Test
+    fun handleRequest_freeformTask_alreadyInDesktop_overrideDensity_hasConfigDensityChange() {
+        assumeTrue(ENABLE_SHELL_TRANSITIONS)
+        whenever(DesktopModeStatus.isDesktopDensityOverrideSet()).thenReturn(true)
+
+        val freeformTask1 = setUpFreeformTask()
+        markTaskVisible(freeformTask1)
+
+        val freeformTask2 = createFreeformTask()
+        val result = controller.handleRequest(freeformTask2.token.asBinder(),
+            createTransition(freeformTask2))
+        assertTrue(result.anyDensityConfigChange(freeformTask2.token))
     }
 
     @Test
@@ -1812,4 +1832,12 @@ private fun WindowContainerTransaction.assertPendingIntentAt(index: Int, intent:
     val op = hierarchyOps[index]
     assertThat(op.type).isEqualTo(HIERARCHY_OP_TYPE_PENDING_INTENT)
     assertThat(op.pendingIntent?.intent?.component).isEqualTo(intent.component)
+}
+
+private fun WindowContainerTransaction?.anyDensityConfigChange(
+    token: WindowContainerToken
+): Boolean {
+    return this?.changes?.any { change ->
+        change.key == token.asBinder() && ((change.value.configSetMask and CONFIG_DENSITY) != 0)
+    } ?: false
 }
