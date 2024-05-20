@@ -181,3 +181,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "missing_getter_apis"
+  namespace: "text"
+  description: "Fix the lint warning about missing getters."
+  bug: "340875345"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
