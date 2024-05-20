@@ -1264,8 +1264,12 @@ public final class NfcAdapter {
 
     @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
     public boolean setObserveModeEnabled(boolean enabled) {
+        if (mContext == null) {
+            throw new UnsupportedOperationException("You need a context on NfcAdapter to use the "
+                    + " observe mode APIs");
+        }
         try {
-            return sService.setObserveMode(enabled);
+            return sService.setObserveMode(enabled, mContext.getPackageName());
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
