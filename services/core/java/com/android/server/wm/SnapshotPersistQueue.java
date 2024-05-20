@@ -348,6 +348,9 @@ class SnapshotPersistQueue {
                         + bitmap.isMutable() + ") to (config=ARGB_8888, isMutable=false) failed.");
                 return false;
             }
+            final int width = bitmap.getWidth();
+            final int height = bitmap.getHeight();
+            bitmap.recycle();
 
             final File file = mPersistInfoProvider.getHighResolutionBitmapFile(mId, mUserId);
             try {
@@ -365,8 +368,8 @@ class SnapshotPersistQueue {
             }
 
             final Bitmap lowResBitmap = Bitmap.createScaledBitmap(swBitmap,
-                    (int) (bitmap.getWidth() * mPersistInfoProvider.lowResScaleFactor()),
-                    (int) (bitmap.getHeight() * mPersistInfoProvider.lowResScaleFactor()),
+                    (int) (width * mPersistInfoProvider.lowResScaleFactor()),
+                    (int) (height * mPersistInfoProvider.lowResScaleFactor()),
                     true /* filter */);
             swBitmap.recycle();
 
