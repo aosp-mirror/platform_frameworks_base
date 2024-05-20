@@ -26,7 +26,6 @@ import static android.os.ParcelFileDescriptor.MODE_WORLD_WRITEABLE;
 import static android.os.ParcelFileDescriptor.MODE_WRITE_ONLY;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.ravenwood.common.JvmWorkaround;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -47,11 +46,27 @@ public class ParcelFileDescriptor_host {
     private static final Map<FileDescriptor, RandomAccessFile> sActive = new HashMap<>();
 
     public static void native_setFdInt$ravenwood(FileDescriptor fd, int fdInt) {
-        JvmWorkaround.getInstance().setFdInt(fd, fdInt);
+        try {
+            final Object obj = Class.forName("jdk.internal.access.SharedSecrets").getMethod(
+                    "getJavaIOFileDescriptorAccess").invoke(null);
+            Class.forName("jdk.internal.access.JavaIOFileDescriptorAccess").getMethod(
+                    "set", FileDescriptor.class, int.class).invoke(obj, fd, fdInt);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Failed to interact with raw FileDescriptor internals;"
+                    + " perhaps JRE has changed?", e);
+        }
     }
 
     public static int native_getFdInt$ravenwood(FileDescriptor fd) {
-        return JvmWorkaround.getInstance().getFdInt(fd);
+        try {
+            final Object obj = Class.forName("jdk.internal.access.SharedSecrets").getMethod(
+                    "getJavaIOFileDescriptorAccess").invoke(null);
+            return (int) Class.forName("jdk.internal.access.JavaIOFileDescriptorAccess").getMethod(
+                    "get", FileDescriptor.class).invoke(obj, fd);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Failed to interact with raw FileDescriptor internals;"
+                    + " perhaps JRE has changed?", e);
+        }
     }
 
     public static FileDescriptor native_open$ravenwood(File file, int pfdMode) throws IOException {
