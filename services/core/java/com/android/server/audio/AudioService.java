@@ -2123,7 +2123,10 @@ public class AudioService extends IAudioService.Stub
         return AudioProductStrategy.getAudioProductStrategies();
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    @android.annotation.EnforcePermission(anyOf = {
+            MODIFY_AUDIO_SETTINGS_PRIVILEGED,
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING
+    })
     /**
      * @return the List of {@link android.media.audiopolicy.AudioVolumeGroup} discovered from the
      * platform configuration file.

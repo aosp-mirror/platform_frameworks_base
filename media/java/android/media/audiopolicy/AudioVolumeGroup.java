@@ -31,6 +31,7 @@ import com.android.internal.util.Preconditions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A class to create the association between different playback attributes
@@ -116,6 +117,12 @@ public final class AudioVolumeGroup implements Parcelable {
 
         return mName.equals(thatAvg.mName) && mId == thatAvg.mId
                 && Arrays.equals(mAudioAttributes, thatAvg.mAudioAttributes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mName, mId,
+                Arrays.hashCode(mAudioAttributes), Arrays.hashCode(mLegacyStreamTypes));
     }
 
     /**
