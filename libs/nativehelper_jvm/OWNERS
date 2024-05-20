@@ -1,0 +1,7 @@
+# Bug component: 326772
+
+include /libs/hwui/OWNERS
+include platform/libnativehelper:/OWNERS
+
+diegoperez@google.com
+jgaillard@google.com

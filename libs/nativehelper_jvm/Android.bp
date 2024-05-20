@@ -1,0 +1,19 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+cc_library_host_static {
+    name: "libnativehelper_jvm",
+    srcs: [
+        "JNIPlatformHelp.c",
+        "JniConstants.c",
+        "file_descriptor_jni.c",
+    ],
+    whole_static_libs: ["libnativehelper_any_vm"],
+    export_static_lib_headers: ["libnativehelper_any_vm"],
+    target: {
+        windows: {
+            enabled: true,
+        },
+    },
+}
