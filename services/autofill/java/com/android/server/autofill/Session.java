@@ -4778,7 +4778,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         updateFilteringStateOnValueChangedLocked(textValue, viewState);
 
         viewState.setCurrentValue(value);
-
         final String filterText = textValue;
 
         final AutofillValue filledValue = viewState.getAutofilledValue();
@@ -4805,6 +4804,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 currentView.maybeCallOnFillReady(flags);
             }
         }
+        mPresentationStatsEventLogger.onFieldTextUpdated(viewState);
 
         if (viewState.id.equals(this.mCurrentViewId)
                 && (viewState.getState() & ViewState.STATE_INLINE_SHOWN) != 0) {
