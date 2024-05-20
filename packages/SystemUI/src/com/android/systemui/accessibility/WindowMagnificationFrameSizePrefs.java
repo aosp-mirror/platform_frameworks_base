@@ -23,14 +23,14 @@ import android.util.Size;
 /**
  * Class to handle SharedPreference for window magnification size.
  */
-final class WindowMagnificationSizePrefs {
+final class WindowMagnificationFrameSizePrefs {
 
     private static final String WINDOW_MAGNIFICATION_PREFERENCES =
             "window_magnification_preferences";
     Context mContext;
     SharedPreferences mWindowMagnificationSizePreferences;
 
-    public WindowMagnificationSizePrefs(Context context) {
+    WindowMagnificationFrameSizePrefs(Context context) {
         mContext = context;
         mWindowMagnificationSizePreferences = mContext
                 .getSharedPreferences(WINDOW_MAGNIFICATION_PREFERENCES, Context.MODE_PRIVATE);
