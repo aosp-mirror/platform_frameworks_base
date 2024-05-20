@@ -9638,6 +9638,7 @@ public class Activity extends ContextThemeWrapper
      *                            the default behaviour
      */
     @FlaggedApi(android.security.Flags.FLAG_ASM_RESTRICTIONS_ENABLED)
+    @SuppressLint("OnNameExpected")
     public void setAllowCrossUidActivitySwitchFromBelow(boolean allowed) {
         ActivityClient.getInstance().setAllowCrossUidActivitySwitchFromBelow(mToken, allowed);
     }
