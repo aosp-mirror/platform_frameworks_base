@@ -29,6 +29,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.LongSparseArray;
 import android.util.Pools;
 import android.util.Slog;
@@ -265,8 +266,9 @@ final class AttributedOp {
         }
 
         int numStartedOps = events.size();
+        ArraySet<IBinder> keys = new ArraySet<>(events.keySet());
         for (int i = 0; i < numStartedOps; i++) {
-            action.accept(events.valueAt(i));
+            action.accept(events.get(keys.valueAt(i)));
         }
     }
 

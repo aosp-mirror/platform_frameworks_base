@@ -1549,6 +1549,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         final SparseLongArray chainsToFinish = new SparseLongArray();
         doForAllAttributedOpsInUidLocked(uid, (attributedOp) -> {
             attributedOp.doForAllInProgressStartOpEvents((event) -> {
+                if (event == null) {
+                    return;
+                }
                 int chainId = event.getAttributionChainId();
                 if (chainId != ATTRIBUTION_CHAIN_ID_NONE) {
                     long currentEarliestStartTime =
