@@ -95,7 +95,8 @@ final class TextToSpeechManagerPerUserService extends
                 ITextToSpeechSessionCallback callback) {
             super(context,
                     new Intent(TextToSpeech.Engine.INTENT_ACTION_TTS_SERVICE).setPackage(engine),
-                    Context.BIND_AUTO_CREATE | Context.BIND_SCHEDULE_LIKE_TOP_APP,
+                    Context.BIND_AUTO_CREATE | Context.BIND_SCHEDULE_LIKE_TOP_APP 
+                            | Context.BIND_DENY_ACTIVITY_STARTS_PRE_34,
                     userId,
                     ITextToSpeechService.Stub::asInterface);
             mEngine = engine;
