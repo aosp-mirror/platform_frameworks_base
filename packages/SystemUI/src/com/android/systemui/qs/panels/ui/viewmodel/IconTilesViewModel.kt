@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.PartitionedGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.partitionedGridViewModel
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.panels.domain.interactor.IconTilesInteractor
+import com.android.systemui.qs.pipeline.shared.TileSpec
+import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 
-val Kosmos.partitionedGridLayout by
-    Kosmos.Fixture { PartitionedGridLayout(partitionedGridViewModel) }
+interface IconTilesViewModel {
+    val iconTilesSpecs: StateFlow<Set<TileSpec>>
+}
+
+@SysUISingleton
+class IconTilesViewModelImpl @Inject constructor(interactor: IconTilesInteractor) :
+    IconTilesViewModel {
+    override val iconTilesSpecs = interactor.iconTilesSpecs
+}

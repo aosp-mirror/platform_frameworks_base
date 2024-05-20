@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.PartitionedGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.partitionedGridViewModel
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.panels.domain.interactor.InfiniteGridSizeInteractor
+import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 
-val Kosmos.partitionedGridLayout by
-    Kosmos.Fixture { PartitionedGridLayout(partitionedGridViewModel) }
+interface InfiniteGridSizeViewModel {
+    val columns: StateFlow<Int>
+}
+
+@SysUISingleton
+class InfiniteGridSizeViewModelImpl @Inject constructor(interactor: InfiniteGridSizeInteractor) :
+    InfiniteGridSizeViewModel {
+    override val columns: StateFlow<Int> = interactor.columns
+}

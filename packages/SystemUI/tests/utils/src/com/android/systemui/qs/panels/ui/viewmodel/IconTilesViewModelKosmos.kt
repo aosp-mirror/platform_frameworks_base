@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.PartitionedGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.partitionedGridViewModel
+import com.android.systemui.qs.panels.domain.interactor.iconTilesInteractor
 
-val Kosmos.partitionedGridLayout by
-    Kosmos.Fixture { PartitionedGridLayout(partitionedGridViewModel) }
+val Kosmos.iconTilesViewModel by Kosmos.Fixture { IconTilesViewModelImpl(iconTilesInteractor) }
