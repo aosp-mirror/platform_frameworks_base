@@ -58,6 +58,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -117,7 +118,8 @@ constructor(
     private val shadeInteractor: ShadeInteractor,
 ) {
     private var burnInJob: Job? = null
-    internal val burnInModel = MutableStateFlow(BurnInModel())
+    private val _burnInModel = MutableStateFlow(BurnInModel())
+    val burnInModel = _burnInModel.asStateFlow()
 
     val burnInLayerVisibility: Flow<Int> =
         keyguardTransitionInteractor.startedKeyguardState
@@ -279,7 +281,7 @@ constructor(
 
         burnInJob =
             scope.launch("$TAG#aodBurnInViewModel") {
-                aodBurnInViewModel.movement(params).collect { burnInModel.value = it }
+                aodBurnInViewModel.movement(params).collect { _burnInModel.value = it }
             }
     }
 
