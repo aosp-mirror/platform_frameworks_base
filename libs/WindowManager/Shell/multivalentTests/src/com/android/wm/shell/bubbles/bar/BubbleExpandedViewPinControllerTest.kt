@@ -53,7 +53,6 @@ class BubbleExpandedViewPinControllerTest {
         const val SCREEN_WIDTH = 2000
         const val SCREEN_HEIGHT = 1000
 
-        const val BUBBLE_BAR_WIDTH = 100
         const val BUBBLE_BAR_HEIGHT = 50
     }
 
@@ -84,14 +83,8 @@ class BubbleExpandedViewPinControllerTest {
                 insets = Insets.of(10, 20, 30, 40)
             )
         positioner.update(deviceConfig)
-        positioner.bubbleBarBounds =
-            Rect(
-                SCREEN_WIDTH - deviceConfig.insets.right - BUBBLE_BAR_WIDTH,
-                SCREEN_HEIGHT - deviceConfig.insets.bottom - BUBBLE_BAR_HEIGHT,
-                SCREEN_WIDTH - deviceConfig.insets.right,
-                SCREEN_HEIGHT - deviceConfig.insets.bottom
-            )
-
+        positioner.bubbleBarTopOnScreen =
+            SCREEN_HEIGHT - deviceConfig.insets.bottom - BUBBLE_BAR_HEIGHT
         controller = BubbleExpandedViewPinController(context, container, positioner)
         testListener = TestLocationChangeListener()
         controller.setListener(testListener)
@@ -247,9 +240,10 @@ class BubbleExpandedViewPinControllerTest {
     private val dropTargetView: View?
         get() = container.findViewById(R.id.bubble_bar_drop_target)
 
-    private fun getExpectedDropTargetBounds(onLeft: Boolean): Rect = Rect().also {
-        positioner.getBubbleBarExpandedViewBounds(onLeft, false /* isOveflowExpanded */, it)
-    }
+    private fun getExpectedDropTargetBounds(onLeft: Boolean): Rect =
+        Rect().also {
+            positioner.getBubbleBarExpandedViewBounds(onLeft, false /* isOveflowExpanded */, it)
+        }
 
     private fun runOnMainSync(runnable: Runnable) {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(runnable)

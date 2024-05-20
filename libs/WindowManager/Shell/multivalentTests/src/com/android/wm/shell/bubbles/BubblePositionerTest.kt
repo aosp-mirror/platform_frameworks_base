@@ -218,11 +218,10 @@ class BubblePositionerTest {
                 insets = Insets.of(10, 20, 5, 15),
                 windowBounds = Rect(0, 0, 1800, 2600)
             )
-        val bubbleBarBounds = Rect(1700, 2500, 1780, 2600)
 
         positioner.setShowingInBubbleBar(true)
         positioner.update(deviceConfig)
-        positioner.bubbleBarBounds = bubbleBarBounds
+        positioner.bubbleBarTopOnScreen = 2500
 
         val spaceBetweenTopInsetAndBubbleBarInLandscape = 1680
         val expandedViewVerticalSpacing =
@@ -246,10 +245,9 @@ class BubblePositionerTest {
                 insets = Insets.of(10, 20, 5, 15),
                 windowBounds = Rect(0, 0, screenWidth, 2600)
             )
-        val bubbleBarBounds = Rect(100, 2500, 280, 2550)
         positioner.setShowingInBubbleBar(true)
         positioner.update(deviceConfig)
-        positioner.bubbleBarBounds = bubbleBarBounds
+        positioner.bubbleBarTopOnScreen = 2500
 
         val spaceBetweenTopInsetAndBubbleBarInLandscape = 180
         val expandedViewSpacing =
@@ -597,16 +595,19 @@ class BubblePositionerTest {
 
     private fun testGetBubbleBarExpandedViewBounds(onLeft: Boolean, isOverflow: Boolean) {
         positioner.setShowingInBubbleBar(true)
+        val windowBounds = Rect(0, 0, 2000, 2600)
+        val insets = Insets.of(10, 20, 5, 15)
         val deviceConfig =
             defaultDeviceConfig.copy(
                 isLargeScreen = true,
                 isLandscape = true,
-                insets = Insets.of(10, 20, 5, 15),
-                windowBounds = Rect(0, 0, 2000, 2600)
+                insets = insets,
+                windowBounds = windowBounds
             )
         positioner.update(deviceConfig)
 
-        positioner.bubbleBarBounds = getBubbleBarBounds(onLeft, deviceConfig)
+        val bubbleBarHeight = 100
+        positioner.bubbleBarTopOnScreen = windowBounds.bottom - insets.bottom - bubbleBarHeight
 
         val expandedViewPadding =
             context.resources.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding)
@@ -624,7 +625,7 @@ class BubblePositionerTest {
             left = right - positioner.getExpandedViewWidthForBubbleBar(isOverflow)
         }
         // Above the bubble bar
-        val bottom = positioner.bubbleBarBounds.top - expandedViewPadding
+        val bottom = positioner.bubbleBarTopOnScreen - expandedViewPadding
         // Calculate right and top based on size
         val top = bottom - positioner.getExpandedViewHeightForBubbleBar(isOverflow)
         val expectedBounds = Rect(left, top, right, bottom)
@@ -666,21 +667,4 @@ class BubblePositionerTest {
                 positioner.getAllowableStackPositionRegion(1 /* bubbleCount */)
             return allowableStackRegion.top + allowableStackRegion.height() * offsetPercent
         }
-
-    private fun getBubbleBarBounds(onLeft: Boolean, deviceConfig: DeviceConfig): Rect {
-        val width = 200
-        val height = 100
-        val bottom = deviceConfig.windowBounds.bottom - deviceConfig.insets.bottom
-        val top = bottom - height
-        val left: Int
-        val right: Int
-        if (onLeft) {
-            left = deviceConfig.insets.left
-            right = left + width
-        } else {
-            right = deviceConfig.windowBounds.right - deviceConfig.insets.right
-            left = right - width
-        }
-        return Rect(left, top, right, bottom)
-    }
 }
