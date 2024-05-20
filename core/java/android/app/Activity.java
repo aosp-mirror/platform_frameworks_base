@@ -1183,6 +1183,7 @@ public class Activity extends ContextThemeWrapper
      * @see #setIntent(Intent, ComponentCaller)
      */
     @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @SuppressLint("OnNameExpected")
     public @Nullable ComponentCaller getCaller() {
         return mCaller;
     }
@@ -1203,6 +1204,7 @@ public class Activity extends ContextThemeWrapper
      * @see #getCaller
      */
     @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @SuppressLint("OnNameExpected")
     public void setIntent(@Nullable Intent newIntent, @Nullable ComponentCaller newCaller) {
         internalSetIntent(newIntent, newCaller);
     }
@@ -7161,6 +7163,7 @@ public class Activity extends ContextThemeWrapper
      * @see ComponentCaller
      */
     @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @SuppressLint("OnNameExpected")
     public @NonNull ComponentCaller getInitialCaller() {
         return mInitialCaller;
     }
@@ -7188,10 +7191,11 @@ public class Activity extends ContextThemeWrapper
      * @see #getCaller
      */
     @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @SuppressLint("OnNameExpected")
     public @NonNull ComponentCaller getCurrentCaller() {
         if (mCurrentCaller == null) {
             throw new IllegalStateException("The caller is null because #getCurrentCaller should be"
-                    + " called within #onNewIntent method");
+                    + " called within #onNewIntent or #onActivityResult methods");
         }
         return mCurrentCaller;
     }
