@@ -603,17 +603,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      */
     @GuardedBy("ImfLock.class")
     int getCurTokenDisplayIdLocked() {
-        return mCurTokenDisplayId;
+        final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
+        return userData.mBindingController.getCurTokenDisplayId();
     }
-
-    @GuardedBy("ImfLock.class")
-    void setCurTokenDisplayIdLocked(int curTokenDisplayId) {
-        mCurTokenDisplayId = curTokenDisplayId;
-    }
-
-    @GuardedBy("ImfLock.class")
-    @MultiUserUnawareField
-    private int mCurTokenDisplayId = INVALID_DISPLAY;
 
     /**
      * The display ID of the input method indicates the fallback display which returned by
@@ -2405,7 +2397,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         mImeWindowVis = 0;
         mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
         updateSystemUiLocked(mImeWindowVis, mBackDisposition);
-        mCurTokenDisplayId = INVALID_DISPLAY;
         mAutofillController.onResetSystemUi();
     }
 
