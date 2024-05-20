@@ -283,6 +283,8 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"ଭଏସ୍‌ ସହାୟକ"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"ଲକ୍ କରନ୍ତୁ"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
+    <skip />
     <string name="notification_hidden_text" msgid="2835519769868187223">"ନୂଆ ବିଜ୍ଞପ୍ତି"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"ଫିଜିକଲ୍ କୀ’ବୋର୍ଡ"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"ସୁରକ୍ଷା"</string>
@@ -2144,7 +2146,7 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ନିୟମିତ ମୋଡ୍‍ ସୂଚନା ବିଜ୍ଞପ୍ତି"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ବେଟେରୀ ସେଭର ଚାଲୁ କରାଯାଇଛି"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ବ୍ୟାଟେରୀ ଲାଇଫ ବଢ଼ାଇବା ପାଇଁ ବ୍ୟାଟେରୀ ବ୍ୟବହାର କମ୍ କରିବା"</string>
-    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଚାଲୁ‌ ଅଛି"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"ବେଟେରୀ ସେଭର ଚାଲୁ ଅଛି"</string>
     <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"ବେଟେରୀ ଲାଇଫକୁ ବଢ଼ାଇବା ପାଇଁ ବେଟେରୀ ସେଭରକୁ ଚାଲୁ କରାଯାଇଛି"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ବେଟେରୀ ସେଭର"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ବ୍ୟାଟେରୀ ସେଭର୍ ବନ୍ଦ ଅଛି"</string>
@@ -2413,22 +2415,15 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ଖୋଲନ୍ତୁ"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ଏହା କିପରି କାମ କରେ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ବାକି ଅଛି…"</string>
-    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଅନଲକ ପୁଣି ସେଟ ଅପ କରନ୍ତୁ"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ସଠିକ ଭାବେ କାମ କରୁନାହିଁ ଏବଂ ଏହାକୁ ଡିଲିଟ କରାଯାଇଛି। ଟିପଚିହ୍ନ ମାଧ୍ୟମରେ ଆପଣଙ୍କ ଫୋନକୁ ଅନଲକ କରିବାକୁ ଏହାକୁ ପୁଣି ସେଟ ଅପ କରନ୍ତୁ।"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ଏବଂ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ସଠିକ ଭାବେ କାମ କରୁନାହିଁ ଏବଂ ଏଗୁଡ଼ିକୁ ଡିଲିଟ କରାଯାଇଛି। ଆପଣଙ୍କ ଟିପଚିହ୍ନ ମାଧ୍ୟମରେ ଆପଣଙ୍କ ଫୋନକୁ ଅନଲକ କରିବାକୁ ଏଗୁଡ଼ିକୁ ପୁଣି ସେଟ ଅପ କରନ୍ତୁ।"</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"ଫେସ୍ ଅନଲକ୍ ପୁଣି ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"ଆପଣଙ୍କ ଫେସ ମଡେଲ ସଠିକ ଭାବେ କାମ କରୁନାହିଁ ଏବଂ ଏହାକୁ ଡିଲିଟ କରାଯାଇଛି। ଫେସ ମାଧ୍ୟମରେ ଆପଣଙ୍କ ଫୋନକୁ ଅନଲକ କରିବାକୁ ଏହାକୁ ପୁଣି ସେଟ ଅପ କରନ୍ତୁ।"</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"ସେଟ ଅପ କରନ୍ତୁ"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ବର୍ତ୍ତମାନ ନୁହେଁ"</string>
 </resources>

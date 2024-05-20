@@ -283,6 +283,8 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"음성 지원"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"잠금"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
+    <skip />
     <string name="notification_hidden_text" msgid="2835519769868187223">"새 알림"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"물리적 키보드"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"보안"</string>
@@ -1388,7 +1390,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"권한 필요 없음"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"비용이 부과될 수 있습니다."</string>
     <string name="dlg_ok" msgid="5103447663504839312">"확인"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"이 기기를 USB로 충전 중."</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"이 기기를 USB로 충전 중"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"USB를 통해 연결된 기기 충전"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB 파일 전송 사용 설정됨"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB를 통해 PTP 사용 설정됨"</string>
@@ -2413,22 +2415,15 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"메시지 열기"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"작동 방식"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"대기 중…"</string>
-    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"지문 잠금 해제 다시 설정"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g>이(가) 제대로 작동하지 않아 삭제되었습니다. 지문으로 휴대전화를 잠금 해제하려면 다시 설정하세요."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> 및 <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>이(가) 제대로 작동하지 않아 삭제되었습니다. 지문으로 휴대전화를 잠금 해제하려면 다시 설정하세요."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"얼굴 인식 잠금 해제 다시 설정"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"얼굴 모델이 제대로 작동하지 않아 삭제되었습니다. 얼굴로 휴대전화를 잠금 해제하려면 다시 설정하세요."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"설정"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"나중에"</string>
 </resources>

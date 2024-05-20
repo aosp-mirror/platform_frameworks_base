@@ -283,6 +283,8 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"വോയ്‌സ് സഹായം"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"ലോക്ക്‌ഡൗൺ"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
+    <skip />
     <string name="notification_hidden_text" msgid="2835519769868187223">"പുതിയ അറിയിപ്പ്"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"ഫിസിക്കൽ കീബോഡ്"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"സുരക്ഷ"</string>
@@ -1904,8 +1906,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"നിങ്ങളുടെ അഡ്‌മിൻ അപ്‌ഡേറ്റ് ചെയ്യുന്നത്"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"നിങ്ങളുടെ അഡ്‌മിൻ ഇല്ലാതാക്കുന്നത്"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ശരി"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"\'ബാറ്ററി ലാഭിക്കൽ\' ഡാർക്ക് തീം ഓണാക്കുന്നു, ഒപ്പം പശ്ചാത്തല ആക്‌റ്റിവിറ്റിയും ചില വിഷ്വൽ ഇഫക്റ്റുകളും ചില ഫീച്ചറുകളും ചില നെറ്റ്‌വർക്ക് കണക്ഷനുകളും പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"ബാറ്ററി ലാഭിക്കൽ ഡാർക്ക് തീം ഓണാക്കുന്നു, പശ്ചാത്തല ആക്‌റ്റിവിറ്റിയും ചില വിഷ്വൽ ഇഫക്റ്റുകളും ചില ഫീച്ചറുകളും ചില നെറ്റ്‌വർക്ക് കണക്ഷനുകളും അത് പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"\'ബാറ്ററി സേവർ\' ഡാർക്ക് തീം ഓണാക്കുന്നു, ഒപ്പം പശ്ചാത്തല ആക്‌റ്റിവിറ്റിയും ചില വിഷ്വൽ ഇഫക്റ്റുകളും ചില ഫീച്ചറുകളും ചില നെറ്റ്‌വർക്ക് കണക്ഷനുകളും പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"ബാറ്ററി സേവർ ഡാർക്ക് തീം ഓണാക്കുന്നു, പശ്ചാത്തല ആക്‌റ്റിവിറ്റിയും ചില വിഷ്വൽ ഇഫക്റ്റുകളും ചില ഫീച്ചറുകളും ചില നെറ്റ്‌വർക്ക് കണക്ഷനുകളും അത് പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിനായി പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്പുകളെ ഡാറ്റാ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്‌സസ് ചെയ്യാനാകും, എന്നാൽ വല്ലപ്പോഴും മാത്രമെ സംഭവിക്കുന്നുള്ളു. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ഡാറ്റാ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ഓണാക്കുക"</string>
@@ -2384,7 +2386,7 @@
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ഉപകരണത്തിന് ചൂട് കൂടുതലാണ്"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"നിങ്ങളുടെ ഫോൺ വളരെയധികം ചൂടാകുന്നതിനാൽ ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"ബാറ്ററി ലാഭിക്കൽ ഓണായതിനാൽ ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല. നിങ്ങൾക്ക് ഇത് ക്രമീകരണത്തിൽ ഓഫാക്കാം."</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"ബാറ്ററി സേവർ ഓണായതിനാൽ ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല. നിങ്ങൾക്ക് ഇത് ക്രമീകരണത്തിൽ ഓഫാക്കാം."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"ക്രമീകരണത്തിലേക്ക് പോകുക"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ഓഫാക്കുക"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> കോൺഫിഗർ ചെയ്‌തു"</string>
@@ -2413,22 +2415,15 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages തുറക്കുക"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ഇത് പ്രവർത്തിക്കുന്നത് എങ്ങനെയാണ്"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"തീർപ്പാക്കിയിട്ടില്ല..."</string>
-    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ഫിംഗർപ്രിന്റ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അത് ഇല്ലാതാക്കി. നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യുന്നതിനായി വീണ്ടും സജ്ജീകരിക്കുക."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> എന്നിവ ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അവ ഇല്ലാതാക്കി. നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യുന്നതിനായി അവ വീണ്ടും സജ്ജീകരിക്കുക."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"ഫെയ്‌സ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"നിങ്ങളുടെ മുഖ മോഡൽ ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അത് ഇല്ലാതാക്കി. നിങ്ങളുടെ മുഖം ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യുന്നതിനായി വീണ്ടും സജ്ജീകരിക്കുക."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"സജ്ജീകരിക്കുക"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ഇപ്പോൾ വേണ്ട"</string>
 </resources>
