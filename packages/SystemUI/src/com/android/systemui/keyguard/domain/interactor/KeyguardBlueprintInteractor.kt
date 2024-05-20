@@ -78,7 +78,7 @@ constructor(
     private val refreshEvents: Flow<Unit> =
         merge(
             configurationInteractor.onAnyConfigurationChange,
-            fingerprintPropertyInteractor.propertiesInitialized.filter { it }.map { Unit },
+            fingerprintPropertyInteractor.propertiesInitialized.filter { it }.map {},
         )
 
     init {
