@@ -2643,7 +2643,7 @@ class ActivityStarter {
         // If a target task is specified, try to reuse that one
         if (mOptions != null && mOptions.getLaunchTaskId() != INVALID_TASK_ID) {
             Task launchTask = mRootWindowContainer.anyTaskForId(mOptions.getLaunchTaskId());
-            if (launchTask != null) {
+            if (launchTask != null && launchTask.isLeafTask()) {
                 return launchTask;
             }
             return null;
