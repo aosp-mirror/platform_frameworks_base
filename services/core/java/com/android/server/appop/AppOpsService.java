@@ -1110,12 +1110,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                         final String changedPkg = changedPkgs[i];
                         // We trust packagemanager to insert matching uid and packageNames in the
                         // extras
-                        Set<String> devices;
+                        Set<String> devices = new ArraySet<>();
+                        devices.add(PERSISTENT_DEVICE_ID_DEFAULT);
+
                         if (mVirtualDeviceManagerInternal != null) {
-                            devices = mVirtualDeviceManagerInternal.getAllPersistentDeviceIds();
-                        } else {
-                            devices = new ArraySet<>();
-                            devices.add(PERSISTENT_DEVICE_ID_DEFAULT);
+                            devices.addAll(
+                                    mVirtualDeviceManagerInternal.getAllPersistentDeviceIds());
                         }
                         for (String device: devices) {
                             notifyOpChanged(onModeChangedListeners, code, changedUid, changedPkg,
@@ -2609,12 +2609,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                 ArrayList<ChangeRec> reports = ent.getValue();
                 for (int i=0; i<reports.size(); i++) {
                     ChangeRec rep = reports.get(i);
-                    Set<String> devices;
+                    Set<String> devices = new ArraySet<>();
+                    devices.add(PERSISTENT_DEVICE_ID_DEFAULT);
                     if (mVirtualDeviceManagerInternal != null) {
-                        devices = mVirtualDeviceManagerInternal.getAllPersistentDeviceIds();
-                    } else {
-                        devices = new ArraySet<>();
-                        devices.add(PERSISTENT_DEVICE_ID_DEFAULT);
+                        devices.addAll(mVirtualDeviceManagerInternal.getAllPersistentDeviceIds());
                     }
                     for (String device: devices) {
                         mHandler.sendMessage(PooledLambda.obtainMessage(
