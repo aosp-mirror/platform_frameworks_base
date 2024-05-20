@@ -44,6 +44,8 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
 private const val USER_ID = 9
+private const val REQUEST_ID = 9L
+private const val WRONG_REQUEST_ID = 10L
 private const val CHALLENGE = 90L
 private const val OP_PACKAGE_NAME = "biometric.testapp"
 
@@ -105,6 +107,7 @@ class PromptRepositoryImplTest : SysuiTestCase() {
                 repository.setPrompt(
                     PromptInfo().apply { isConfirmationRequested = case },
                     USER_ID,
+                    REQUEST_ID,
                     CHALLENGE,
                     PromptKind.Biometric(),
                     OP_PACKAGE_NAME
@@ -124,6 +127,7 @@ class PromptRepositoryImplTest : SysuiTestCase() {
                 repository.setPrompt(
                     PromptInfo().apply { isConfirmationRequested = case },
                     USER_ID,
+                    REQUEST_ID,
                     CHALLENGE,
                     PromptKind.Biometric(),
                     OP_PACKAGE_NAME
@@ -134,12 +138,12 @@ class PromptRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun setsAndUnsetsPrompt() =
+    fun setsAndUnsetsPrompt_whenRequestIdMatches() =
         testScope.runTest {
             val kind = PromptKind.Pin
             val promptInfo = PromptInfo()
 
-            repository.setPrompt(promptInfo, USER_ID, CHALLENGE, kind, OP_PACKAGE_NAME)
+            repository.setPrompt(promptInfo, USER_ID, REQUEST_ID, CHALLENGE, kind, OP_PACKAGE_NAME)
 
             assertThat(repository.promptKind.value).isEqualTo(kind)
             assertThat(repository.userId.value).isEqualTo(USER_ID)
@@ -147,11 +151,33 @@ class PromptRepositoryImplTest : SysuiTestCase() {
             assertThat(repository.promptInfo.value).isSameInstanceAs(promptInfo)
             assertThat(repository.opPackageName.value).isEqualTo(OP_PACKAGE_NAME)
 
-            repository.unsetPrompt()
+            repository.unsetPrompt(REQUEST_ID)
 
             assertThat(repository.promptInfo.value).isNull()
             assertThat(repository.userId.value).isNull()
             assertThat(repository.challenge.value).isNull()
             assertThat(repository.opPackageName.value).isNull()
+        }
+
+    @Test
+    fun setsAndUnsetsPrompt_whenRequestIdDoesNotMatch() =
+        testScope.runTest {
+            val kind = PromptKind.Pin
+            val promptInfo = PromptInfo()
+
+            repository.setPrompt(promptInfo, USER_ID, REQUEST_ID, CHALLENGE, kind, OP_PACKAGE_NAME)
+
+            assertThat(repository.promptKind.value).isEqualTo(kind)
+            assertThat(repository.userId.value).isEqualTo(USER_ID)
+            assertThat(repository.challenge.value).isEqualTo(CHALLENGE)
+            assertThat(repository.promptInfo.value).isSameInstanceAs(promptInfo)
+            assertThat(repository.opPackageName.value).isEqualTo(OP_PACKAGE_NAME)
+
+            repository.unsetPrompt(WRONG_REQUEST_ID)
+
+            assertThat(repository.promptInfo.value).isNotNull()
+            assertThat(repository.userId.value).isNotNull()
+            assertThat(repository.challenge.value).isNotNull()
+            assertThat(repository.opPackageName.value).isNotNull()
         }
 }
