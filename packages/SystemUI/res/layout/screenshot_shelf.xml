@@ -26,36 +26,6 @@
         android:layout_height="match_parent"
         android:clipChildren="false"
         android:clipToPadding="false">
-        <FrameLayout
-            android:id="@+id/actions_container_background"
-            android:visibility="gone"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:elevation="4dp"
-            android:background="@drawable/shelf_action_chip_container_background"
-            android:layout_marginHorizontal="@dimen/overlay_action_container_minimum_edge_spacing"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/guideline"
-            >
-            <HorizontalScrollView
-                android:id="@+id/actions_container"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/overlay_action_container_padding_vertical"
-                android:layout_marginHorizontal="@dimen/overlay_action_chip_margin_start"
-                android:background="@drawable/shelf_action_container_clipping_shape"
-                android:clipToOutline="true"
-                android:scrollbars="none">
-                <LinearLayout
-                    android:id="@+id/screenshot_actions"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:showDividers="middle"
-                    android:divider="@drawable/shelf_action_chip_divider"
-                    android:animateLayoutChanges="true"
-                    />
-            </HorizontalScrollView>
-        </FrameLayout>
         <View
             android:id="@+id/screenshot_preview_border"
             android:layout_width="0dp"
@@ -101,6 +71,37 @@
             android:visibility="invisible"
             app:layout_constraintStart_toStartOf="@id/screenshot_preview_border"
             app:layout_constraintBottom_toBottomOf="@id/screenshot_preview_border"/>
+        <!-- Action bar should be drawn on top of the thumbnail -->
+        <FrameLayout
+            android:id="@+id/actions_container_background"
+            android:visibility="gone"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:elevation="4dp"
+            android:background="@drawable/shelf_action_chip_container_background"
+            android:layout_marginHorizontal="@dimen/overlay_action_container_minimum_edge_spacing"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/guideline"
+            >
+            <HorizontalScrollView
+                android:id="@+id/actions_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/overlay_action_container_padding_vertical"
+                android:layout_marginHorizontal="@dimen/overlay_action_chip_margin_start"
+                android:background="@drawable/shelf_action_container_clipping_shape"
+                android:clipToOutline="true"
+                android:scrollbars="none">
+                <LinearLayout
+                    android:id="@+id/screenshot_actions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:showDividers="middle"
+                    android:divider="@drawable/shelf_action_chip_divider"
+                    android:animateLayoutChanges="true"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+        </FrameLayout>
         <ImageView
             android:id="@+id/screenshot_badge"
             android:layout_width="56dp"
