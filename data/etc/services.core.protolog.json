@@ -1123,12 +1123,6 @@
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/BlackFrame.java"
     },
-    "5256889109971284149": {
-      "message": "CameraManager cannot be found.",
-      "level": "ERROR",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/CameraStateMonitor.java"
-    },
     "8116030277393789125": {
       "message": "Display id=%d is notified that Camera %s is open for package %s",
       "level": "VERBOSE",
@@ -3241,6 +3235,36 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/TransitionController.java"
     },
+    "-4546322749928357965": {
+      "message": "Registering transition player %s over %d other players",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
+    "-4250307779892136611": {
+      "message": "Registering transition player %s ",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
+    "3242771541905259983": {
+      "message": "Attempt to unregister transition player %s but it isn't registered",
+      "level": "WARN",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
+    "3691912781236221027": {
+      "message": "Unregistering active transition player %s at index=%d leaving %d in stack",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
+    "-2879980134100946679": {
+      "message": "Unregistering transition player %s at index=%d leaving %d in stack",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
     "-4235778637051052061": {
       "message": "Disabling player for transition #%d because display isn't enabled yet",
       "level": "VERBOSE",
@@ -4185,18 +4209,6 @@
     },
     "1278715281433572858": {
       "message": "Bad requesting window %s",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "-707915937966769475": {
-      "message": "unable to update pointer icon",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "-8663841671650918687": {
-      "message": "unable to restore pointer icon",
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
