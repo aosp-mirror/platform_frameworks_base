@@ -63,6 +63,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final SyncTransactionQueue mSyncQueue;
     private final Transitions mTransitions;
+    private final ResizeHandleSizeRepository mResizeHandleSizeRepository;
     private TaskOperations mTaskOperations;
 
     private final SparseArray<CaptionWindowDecoration> mWindowDecorByTaskId = new SparseArray<>();
@@ -75,7 +76,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             DisplayController displayController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             SyncTransactionQueue syncQueue,
-            Transitions transitions) {
+            Transitions transitions,
+            ResizeHandleSizeRepository resizeHandleSizeRepository) {
         mContext = context;
         mMainHandler = mainHandler;
         mMainChoreographer = mainChoreographer;
@@ -84,6 +86,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mSyncQueue = syncQueue;
         mTransitions = transitions;
+        mResizeHandleSizeRepository = resizeHandleSizeRepository;
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTaskOperations = new TaskOperations(null, mContext, mSyncQueue);
         }
@@ -231,7 +234,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                         taskSurface,
                         mMainHandler,
                         mMainChoreographer,
-                        mSyncQueue);
+                        mSyncQueue,
+                        mResizeHandleSizeRepository);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
         final FluidResizeTaskPositioner taskPositioner =

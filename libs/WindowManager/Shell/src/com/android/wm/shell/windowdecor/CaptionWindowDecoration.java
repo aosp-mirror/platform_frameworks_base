@@ -16,11 +16,11 @@
 
 package com.android.wm.shell.windowdecor;
 
-import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
-import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
-import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
+import static com.android.wm.shell.windowdecor.ResizeHandleSizeRepository.getFineResizeCornerPixels;
+import static com.android.wm.shell.windowdecor.ResizeHandleSizeRepository.getLargeResizeCornerPixels;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.WindowingMode;
@@ -45,6 +45,8 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
+import java.util.function.Consumer;
+
 /**
  * Defines visuals and behaviors of a window decoration of a caption bar and shadows. It works with
  * {@link CaptionWindowDecorViewModel}. The caption bar contains a back button, minimize button,
@@ -58,12 +60,28 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     private View.OnClickListener mOnCaptionButtonClickListener;
     private View.OnTouchListener mOnCaptionTouchListener;
     private DragPositioningCallback mDragPositioningCallback;
+    // Listener for handling drag resize events. Will be null if the task cannot be resized.
+    @Nullable
     private DragResizeInputListener mDragResizeListener;
     private DragDetector mDragDetector;
 
     private RelayoutParams mRelayoutParams = new RelayoutParams();
     private final RelayoutResult<WindowDecorLinearLayout> mResult =
             new RelayoutResult<>();
+    private final ResizeHandleSizeRepository mResizeHandleSizeRepository;
+    private final Consumer<ResizeHandleSizeRepository> mResizeHandleSizeChangedFunction =
+            (ResizeHandleSizeRepository sizeRepository) -> {
+                if (mDragResizeListener == null) {
+                    return;
+                }
+                final Resources res = mResult.mRootView.getResources();
+                mDragResizeListener.setGeometry(
+                        new DragResizeWindowGeometry(0 /* taskCornerRadius */,
+                                new Size(mResult.mWidth, mResult.mHeight),
+                                sizeRepository.getResizeEdgeHandlePixels(res),
+                                getFineResizeCornerPixels(res), getLargeResizeCornerPixels(res)),
+                        mDragDetector.getTouchSlop());
+            };
 
     CaptionWindowDecoration(
             Context context,
@@ -73,13 +91,16 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             SurfaceControl taskSurface,
             Handler handler,
             Choreographer choreographer,
-            SyncTransactionQueue syncQueue) {
+            SyncTransactionQueue syncQueue,
+            ResizeHandleSizeRepository resizeHandleSizeRepository) {
         super(context, displayController, taskOrganizer, taskInfo, taskSurface,
                 taskInfo.getConfiguration());
 
         mHandler = handler;
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
+        mResizeHandleSizeRepository = resizeHandleSizeRepository;
+        mResizeHandleSizeRepository.registerSizeChangeFunction(mResizeHandleSizeChangedFunction);
     }
 
     void setCaptionListeners(
@@ -238,10 +259,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                 .getScaledTouchSlop();
         mDragDetector.setTouchSlop(touchSlop);
 
-        final Resources res = mResult.mRootView.getResources();
-        mDragResizeListener.setGeometry(new DragResizeWindowGeometry(0 /* taskCornerRadius */,
-                new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(res),
-                getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop);
+        mResizeHandleSizeChangedFunction.accept(mResizeHandleSizeRepository);
     }
 
     /**
