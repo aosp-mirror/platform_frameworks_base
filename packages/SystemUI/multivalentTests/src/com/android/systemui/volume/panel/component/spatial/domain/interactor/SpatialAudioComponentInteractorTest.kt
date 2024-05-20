@@ -29,7 +29,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.media.spatializerInteractor
 import com.android.systemui.media.spatializerRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
@@ -37,9 +36,9 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.volume.localMediaController
 import com.android.systemui.volume.localMediaRepository
 import com.android.systemui.volume.mediaControllerRepository
-import com.android.systemui.volume.mediaOutputInteractor
 import com.android.systemui.volume.panel.component.spatial.domain.model.SpatialAudioAvailabilityModel
 import com.android.systemui.volume.panel.component.spatial.domain.model.SpatialAudioEnabledModel
+import com.android.systemui.volume.panel.component.spatial.spatialAudioComponentInteractor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -76,12 +75,7 @@ class SpatialAudioComponentInteractorTest : SysuiTestCase() {
 
             mediaControllerRepository.setActiveSessions(listOf(localMediaController))
 
-            underTest =
-                SpatialAudioComponentInteractor(
-                    mediaOutputInteractor,
-                    spatializerInteractor,
-                    testScope.backgroundScope,
-                )
+            underTest = spatialAudioComponentInteractor
         }
     }
 

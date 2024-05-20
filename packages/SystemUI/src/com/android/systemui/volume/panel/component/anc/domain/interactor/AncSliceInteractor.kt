@@ -19,6 +19,8 @@ package com.android.systemui.volume.panel.component.anc.domain.interactor
 import android.app.slice.Slice.HINT_ERROR
 import android.app.slice.SliceItem.FORMAT_SLICE
 import androidx.slice.Slice
+import com.android.systemui.volume.domain.interactor.AudioOutputInteractor
+import com.android.systemui.volume.domain.model.AudioOutputDevice
 import com.android.systemui.volume.panel.component.anc.data.repository.AncSliceRepository
 import com.android.systemui.volume.panel.component.anc.domain.model.AncSlices
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
@@ -32,6 +34,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
 /** Provides a valid slice from [AncSliceRepository]. */
@@ -40,6 +43,7 @@ import kotlinx.coroutines.flow.stateIn
 class AncSliceInteractor
 @Inject
 constructor(
+    private val audioOutputInteractor: AudioOutputInteractor,
     private val ancSliceRepository: AncSliceRepository,
     scope: CoroutineScope,
 ) {
@@ -70,9 +74,20 @@ constructor(
      * remove the labels from the [Slice].
      */
     private fun ancSlice(width: Int, isCollapsed: Boolean, hideLabel: Boolean): Flow<Slice?> {
-        return ancSliceRepository
-            .ancSlice(width = width, isCollapsed = isCollapsed, hideLabel = hideLabel)
-            .filter { it?.isValidSlice() != false }
+        return audioOutputInteractor.currentAudioDevice.flatMapLatest { outputDevice ->
+            if (outputDevice is AudioOutputDevice.Bluetooth) {
+                ancSliceRepository
+                    .ancSlice(
+                        device = outputDevice.cachedBluetoothDevice.device,
+                        width = width,
+                        isCollapsed = isCollapsed,
+                        hideLabel = hideLabel,
+                    )
+                    .filter { it?.isValidSlice() != false }
+            } else {
+                flowOf(null)
+            }
+        }
     }
 
     private fun Slice.isValidSlice(): Boolean {
