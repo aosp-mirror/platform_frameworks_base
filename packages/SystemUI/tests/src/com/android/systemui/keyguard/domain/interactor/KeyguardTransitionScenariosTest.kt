@@ -1669,9 +1669,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
             // THEN a transition from DOZING => OCCLUDED should occur
             assertThat(transitionRepository)
                 .startedTransition(
-                    ownerName =
-                        "FromDozingTransitionInteractor" +
-                            "(keyguardInteractor.onCameraLaunchDetected)",
+                    ownerName = "FromDozingTransitionInteractor",
                     from = KeyguardState.DOZING,
                     to = KeyguardState.OCCLUDED,
                     animatorAssertion = { it.isNotNull() },
