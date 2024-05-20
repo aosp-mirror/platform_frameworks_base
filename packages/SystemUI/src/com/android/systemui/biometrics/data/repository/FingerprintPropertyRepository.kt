@@ -30,10 +30,10 @@ import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.biometrics.shared.model.toSensorStrength
 import com.android.systemui.biometrics.shared.model.toSensorType
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -41,6 +41,8 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
@@ -111,9 +113,6 @@ constructor(
                 initialValue = UNINITIALIZED_PROPS,
             )
 
-    override val propertiesInitialized: Flow<Boolean> =
-        props.map { it != UNINITIALIZED_PROPS }.onStart { emit(props.value != UNINITIALIZED_PROPS) }
-
     override val sensorId: Flow<Int> = props.map { it.sensorId }
 
     override val strength: Flow<SensorStrength> = props.map { it.sensorStrength.toSensorStrength() }
@@ -134,9 +133,25 @@ constructor(
             }
         }
 
+    override val propertiesInitialized: Flow<Boolean> =
+        combine(
+                props
+                    .map { it != UNINITIALIZED_PROPS }
+                    .onStart { emit(props.value != UNINITIALIZED_PROPS) },
+                sensorId.map {}.onStart { if (props.value != UNINITIALIZED_PROPS) emit(Unit) },
+                sensorLocations
+                    .map {}
+                    .onStart { if (props.value != UNINITIALIZED_PROPS) emit(Unit) },
+                sensorType.map {}.onStart { if (props.value != UNINITIALIZED_PROPS) emit(Unit) },
+                strength.map {}.onStart { if (props.value != UNINITIALIZED_PROPS) emit(Unit) },
+            ) { initialized, _, _, _, _ ->
+                initialized
+            }
+            .distinctUntilChanged()
+
     companion object {
         private const val TAG = "FingerprintPropertyRepositoryImpl"
-        val UNINITIALIZED_PROPS =
+        private val UNINITIALIZED_PROPS =
             FingerprintSensorPropertiesInternal(
                 -2 /* sensorId */,
                 SensorProperties.STRENGTH_CONVENIENCE,
