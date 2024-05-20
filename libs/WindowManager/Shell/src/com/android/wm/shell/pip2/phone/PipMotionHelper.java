@@ -696,6 +696,19 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             case PipTransitionState.SCHEDULED_BOUNDS_CHANGE:
                 if (!extra.getBoolean(FLING_BOUNDS_CHANGE)) break;
 
+                if (mPipBoundsState.getBounds().equals(
+                        mPipBoundsState.getMotionBoundsState().getBoundsInMotion())) {
+                    // Avoid scheduling transitions for bounds that don't change, such transition is
+                    // a no-op and would be aborted.
+                    settlePipBoundsAfterPhysicsAnimation(false /* animatingAfter */);
+                    cleanUpHighPerfSessionMaybe();
+                    // SCHEDULED_BOUNDS_CHANGE can have multiple active listeners making
+                    // actual changes (e.g. PipTouchHandler). So post state update onto handler,
+                    // to run after synchronous dispatch is complete.
+                    mPipTransitionState.postState(PipTransitionState.CHANGED_PIP_BOUNDS);
+                    break;
+                }
+
                 // If touch is turned off and we are in a fling animation, schedule a transition.
                 mWaitingForBoundsChangeTransition = true;
                 mPipScheduler.scheduleAnimateResizePip(

@@ -19,6 +19,7 @@ package com.android.wm.shell.pip2.phone;
 import android.annotation.IntDef;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.SurfaceControl;
 import android.window.WindowContainerToken;
 
@@ -26,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.util.Preconditions;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -109,6 +111,13 @@ public class PipTransitionState {
     private int mState;
 
     //
+    // Dependencies
+    //
+
+    @ShellMainThread
+    private final Handler mMainHandler;
+
+    //
     // Swipe up to enter PiP related state
     //
 
@@ -149,6 +158,10 @@ public class PipTransitionState {
 
     private final List<PipTransitionStateChangedListener> mCallbacks = new ArrayList<>();
 
+    public PipTransitionState(@ShellMainThread Handler handler) {
+        mMainHandler = handler;
+    }
+
     /**
      * @return the state of PiP in the context of transitions.
      */
@@ -180,6 +193,32 @@ public class PipTransitionState {
             dispatchPipTransitionStateChanged(mState, state, extra);
             mState = state;
         }
+    }
+
+    /**
+     * Posts the state update for PiP in the context of transitions onto the main handler.
+     *
+     * <p>This is done to guarantee that any callback dispatches for the present state are
+     * complete. This is relevant for states that have multiple listeners, such as
+     * <code>SCHEDULED_BOUNDS_CHANGE</code> that helps turn off touch interactions along with
+     * the actual transition scheduling.</p>
+     */
+    public void postState(@TransitionState int state) {
+        postState(state, null /* extra */);
+    }
+
+    /**
+     * Posts the state update for PiP in the context of transitions onto the main handler.
+     *
+     * <p>This is done to guarantee that any callback dispatches for the present state are
+     * complete. This is relevant for states that have multiple listeners, such as
+     * <code>SCHEDULED_BOUNDS_CHANGE</code> that helps turn off touch interactions along with
+     * the actual transition scheduling.</p>
+     *
+     * @param extra a bundle passed to the subscribed listeners to resolve/cache extra info.
+     */
+    public void postState(@TransitionState int state, @Nullable Bundle extra) {
+        mMainHandler.post(() -> setState(state, extra));
     }
 
     private void dispatchPipTransitionStateChanged(@TransitionState int oldState,
