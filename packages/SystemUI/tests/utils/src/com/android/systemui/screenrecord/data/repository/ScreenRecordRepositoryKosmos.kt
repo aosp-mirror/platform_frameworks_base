@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.tiles.impl.screenrecord.domain.model
+package com.android.systemui.screenrecord.data.repository
 
-/** Data model for screen record tile */
-sealed interface ScreenRecordTileModel {
-    data object Recording : ScreenRecordTileModel
-    data class Starting(val millisUntilStarted: Long) : ScreenRecordTileModel
-    data object DoingNothing : ScreenRecordTileModel
-}
+import com.android.systemui.kosmos.Kosmos
+
+val Kosmos.screenRecordRepository: FakeScreenRecordRepository by
+    Kosmos.Fixture { FakeScreenRecordRepository() }
