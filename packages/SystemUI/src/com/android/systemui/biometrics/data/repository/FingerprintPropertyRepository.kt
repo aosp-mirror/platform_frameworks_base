@@ -30,10 +30,10 @@ import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.biometrics.shared.model.toSensorStrength
 import com.android.systemui.biometrics.shared.model.toSensorType
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -42,7 +42,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
@@ -53,7 +52,7 @@ import kotlinx.coroutines.withContext
  */
 interface FingerprintPropertyRepository {
     /** Whether the fingerprint properties have been initialized yet. */
-    val propertiesInitialized: Flow<Boolean>
+    val propertiesInitialized: StateFlow<Boolean>
 
     /** The id of fingerprint sensor. */
     val sensorId: Flow<Int>
@@ -111,8 +110,14 @@ constructor(
                 initialValue = UNINITIALIZED_PROPS,
             )
 
-    override val propertiesInitialized: Flow<Boolean> =
-        props.map { it != UNINITIALIZED_PROPS }.onStart { emit(props.value != UNINITIALIZED_PROPS) }
+    override val propertiesInitialized: StateFlow<Boolean> =
+        props
+            .map { it != UNINITIALIZED_PROPS }
+            .stateIn(
+                applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = props.value != UNINITIALIZED_PROPS,
+            )
 
     override val sensorId: Flow<Int> = props.map { it.sensorId }
 
@@ -136,7 +141,7 @@ constructor(
 
     companion object {
         private const val TAG = "FingerprintPropertyRepositoryImpl"
-        val UNINITIALIZED_PROPS =
+        private val UNINITIALIZED_PROPS =
             FingerprintSensorPropertiesInternal(
                 -2 /* sensorId */,
                 SensorProperties.STRENGTH_CONVENIENCE,
