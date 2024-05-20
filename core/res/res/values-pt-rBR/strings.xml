@@ -2384,7 +2384,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Layout do teclado definido como <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Toque para mudar."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Teclados físicos configurados"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Toque para conferir os teclados"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Particular"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Privado"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Clone"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"Trabalho"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Trabalho 2"</string>
@@ -2396,22 +2396,15 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Você pode enviar e receber mensagens sem um dispositivo móvel ou uma rede Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abrir o app Mensagens"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Como funciona"</string>
-    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configurar o Desbloqueio por impressão digital de novo"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"A impressão digital <xliff:g id="FINGERPRINT">%s</xliff:g> não estava funcionando bem e foi excluída. Configure de novo para desbloquear o smartphone com a impressão digital."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"As impressões digitais <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> não estavam funcionando bem e foram excluídas. Configure de novo para desbloquear o smartphone com a impressão digital."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"Configure o Desbloqueio facial de novo"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Seu modelo de rosto não estava funcionando bem e foi excluído. Configure de novo para desbloquear o smartphone com o rosto."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configuração"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Agora não"</string>
 </resources>

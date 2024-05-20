@@ -662,7 +662,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"اثر انگشت تشخیص داده نشد"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"اثر انگشت تشخیص داده نشد"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"چهره شناسایی نشد. درعوض از اثر انگشت استفاده کنید."</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"چهره شناسایی نشد، از اثر انگشت استفاده کنید."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"اثر انگشت اصالت‌سنجی شد"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"چهره اصالت‌سنجی شد"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چهره اصالت‌سنجی شد، لطفاً تأیید را فشار دهید"</string>
@@ -2395,22 +2395,15 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"‏می‌توانید بدون شبکه تلفن همراه یا Wi-Fi پیام ارسال و دریافت کنید"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"باز کردن «پیام‌ها»"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"روش کار"</string>
-    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"راه‌اندازی مجدد «قفل‌گشایی با اثر انگشت»"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> خوب کار نمی‌کرد و حذف شد. برای باز کردن قفل تلفن با اثر انگشت، آن را دوباره راه‌اندازی کنید."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"‫<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> و <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> خوب کار نمی‌کرد و حذف شد. برای باز کردن قفل تلفن با اثر انگشت، آن‌ها را دوباره راه‌اندازی کنید."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"راه‌اندازی مجدد «قفل‌گشایی با چهره»"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"مدل چهره شما خوب کار نمی‌کرد و حذف شد. برای باز کردن قفل تلفن با چهره، دوباره آن را راه‌اندازی کنید."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"راه‌اندازی"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"حالا نه"</string>
 </resources>
