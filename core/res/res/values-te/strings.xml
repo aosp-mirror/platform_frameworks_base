@@ -2395,22 +2395,15 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"మీరు మొబైల్ లేదా Wi-Fi నెట్‌వర్క్ లేకుండా మెసేజ్‌లను పంపవచ్చు, స్వీకరించవచ్చు"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messagesను తెరవండి"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ఇది ఎలా పని చేస్తుంది"</string>
-    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"వేలిముద్ర అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> సరిగ్గా పని చేయడం లేదు, తొలగించబడింది. వేలిముద్రతో మీ ఫోన్‌ను అన్‌లాక్ చేయడానికి దాన్ని మళ్లీ సెటప్ చేయండి."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> బాగా పని చేయడం లేదు, తొలగించబడ్డాయి. మీ వేలిముద్రతో మీ ఫోన్‌ను అన్‌లాక్ చేయడానికి వాటిని మళ్లీ సెటప్ చేయండి."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"ఫేస్ అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"మీ ఫేస్ మోడల్ సరిగ్గా పని చేయడం లేదు, తొలగించబడింది. ఫేస్‌తో మీ ఫోన్‌ను అన్‌లాక్ చేయడానికి దాన్ని మళ్లీ సెటప్ చేయండి."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"సెటప్ చేయండి"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ఇప్పుడు కాదు"</string>
 </resources>

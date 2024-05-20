@@ -75,6 +75,7 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
                 deviceProvisioningInteractor,
                 wifiInteractor,
                 testScope.backgroundScope,
+                FakeLogBuffer.Factory.create(),
             )
 
         underTest =

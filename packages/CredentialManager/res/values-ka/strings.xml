@@ -73,7 +73,7 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"გსურთ შესვლის <xliff:g id="APP_NAME">%1$s</xliff:g>-ისთვის გამოყენება?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"გსურთ შესვლის ვარიანტების განბლოკვა <xliff:g id="APP_NAME">%1$s</xliff:g>-სთვის?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"აირჩიეთ შენახული წვდომის გასაღები <xliff:g id="APP_NAME">%1$s</xliff:g>-სთვის"</string>
-    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"აირჩიეთ შენახული პაროლი <xliff:g id="APP_NAME">%1$s</xliff:g>-სთვის"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"აირჩიეთ შენახული პაროლი <xliff:g id="APP_NAME">%1$s</xliff:g>-ისთვის"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"აირჩიეთ სისტემაში შესვლის ინფორმაცია <xliff:g id="APP_NAME">%1$s</xliff:g>-სთვის"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"აირჩიეთ შესვლა <xliff:g id="APP_NAME">%1$s</xliff:g>-ისთვის"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"გსურთ აირჩიოთ ვარიანტი <xliff:g id="APP_NAME">%1$s</xliff:g>-ისთვის?"</string>

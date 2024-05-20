@@ -640,7 +640,7 @@
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"চালিয়ে যেতে আপনার বায়োমেট্রিক্স বা স্ক্রিন লক ব্যবহার করুন"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"বায়োমেট্রিক হার্ডওয়্যার পাওয়া যাবে না"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"যাচাইকরণ বাতিল হয়েছে"</string>
-    <string name="biometric_not_recognized" msgid="5106687642694635888">"স্বীকৃত নয়"</string>
+    <string name="biometric_not_recognized" msgid="5106687642694635888">"শনাক্ত করা যায়নি"</string>
     <string name="biometric_face_not_recognized" msgid="5535599455744525200">"ফেস চেনা যায়নি"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"যাচাইকরণ বাতিল হয়েছে"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"পিন, প্যাটার্ন অথবা পাসওয়ার্ড সেট করা নেই"</string>
@@ -2395,22 +2395,15 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"আপনি কোনও মেবাইল বা ওয়াই-ফাই নেটওয়ার্ক ছাড়াই মেসেজ পাঠাতে ও পেতে পারবেন"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages খুলুন"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"এটি কীভাবে কাজ করে"</string>
-    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"\'ফিঙ্গারপ্রিন্ট আনলক\' আবার সেট-আপ করুন"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ভালোভাবে কাজ করছিল না বলে সেটি মুছে ফেলা হয়েছে। ফিঙ্গারপ্রিন্ট ব্যবহার করে আপনার ফোন আনলক করতে হলে এটি আবার সেট-আপ করুন।"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ও <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ভালোভাবে কাজ করছিল না বলে মুছে ফেলা হয়েছে। ফিঙ্গারপ্রিন্ট ব্যবহার করে আপনার ফোন আনলক করতে হলে সেগুলি আবার সেট-আপ করুন।"</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"\'ফেস আনলক\' আবার সেট-আপ করুন"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"আপনার ফেস মডেল ভালোভাবে কাজ করছিল না বলে সেটি মুছে ফেলা হয়েছে। ফেস ব্যবহার করে আপনার ফোন আনলক করতে হলে এটি আবার সেট-আপ করুন।"</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"সেট-আপ করুন"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"এখন নয়"</string>
 </resources>

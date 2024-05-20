@@ -48,7 +48,7 @@
     <string name="passwords" msgid="5419394230391253816">"mots de passe"</string>
     <string name="sign_ins" msgid="4710739369149469208">"connexions"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"renseignements de connexion"</string>
-    <string name="save_credential_to_title" msgid="3172811692275634301">"Enregistrer la <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> dans"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Enregistrer le <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> dans"</string>
     <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Créer une clé d\'accès sur un autre appareil?"</string>
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Enregistrer le mot de passe sur un autre appareil?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Enregistrer l\'authentifiant de connexion sur un autre appareil?"</string>
@@ -57,9 +57,9 @@
     <string name="set_as_default" msgid="4415328591568654603">"Définir par défaut"</string>
     <string name="settings" msgid="6536394145760913145">"Paramètres"</string>
     <string name="use_once" msgid="9027366575315399714">"Utiliser une fois"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> mots de passe • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> clés d\'accès"</string>
-    <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> mots de passe"</string>
-    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> clés d\'accès"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> mot(s) de passe • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> clé(s) d\'accès"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> mot(s) de passe"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> clé(s) d\'accès"</string>
     <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> authentifiants"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Clé d\'accès"</string>
     <string name="another_device" msgid="5147276802037801217">"Un autre appareil"</string>
