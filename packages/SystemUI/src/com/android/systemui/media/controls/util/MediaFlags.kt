@@ -54,5 +54,6 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlagsClass
     fun isSceneContainerEnabled() = SceneContainerFlag.isEnabled
 
     /** Check whether to use media refactor code */
-    fun isMediaControlsRefactorEnabled() = MediaControlsRefactorFlag.isEnabled
+    fun isMediaControlsRefactorEnabled() =
+        MediaControlsRefactorFlag.isEnabled && SceneContainerFlag.isEnabled
 }
