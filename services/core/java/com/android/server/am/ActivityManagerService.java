@@ -369,6 +369,8 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.server.ServerProtoEnums;
 import android.sysprop.InitProperties;
+import android.system.Os;
+import android.system.OsConstants;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
@@ -9618,6 +9620,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             sb.append("ErrorId: ").append(errorId.toString()).append("\n");
         }
         sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
+
+        // If device is not using 4KB pages, add the PageSize
+        long pageSize = Os.sysconf(OsConstants._SC_PAGESIZE);
+        if (pageSize != 4096) {
+            sb.append("PageSize: ").append(pageSize).append("\n");
+        }
+
         if (Debug.isDebuggerConnected()) {
             sb.append("Debugger: Connected\n");
         }
