@@ -991,9 +991,7 @@ public final class MediaRouter2 {
     void requestCreateController(
             @NonNull RoutingController controller,
             @NonNull MediaRoute2Info route,
-            long managerRequestId,
-            @NonNull UserHandle transferInitiatorUserHandle,
-            @NonNull String transferInitiatorPackageName) {
+            long managerRequestId) {
 
         final int requestId = mNextRequestId.getAndIncrement();
 
@@ -1022,9 +1020,7 @@ public final class MediaRouter2 {
                         managerRequestId,
                         controller.getRoutingSessionInfo(),
                         route,
-                        controllerHints,
-                        transferInitiatorUserHandle,
-                        transferInitiatorPackageName);
+                        controllerHints);
             } catch (RemoteException ex) {
                 Log.e(TAG, "createControllerForTransfer: "
                                 + "Failed to request for creating a controller.", ex);
@@ -1366,11 +1362,7 @@ public final class MediaRouter2 {
     }
 
     void onRequestCreateControllerByManagerOnHandler(
-            RoutingSessionInfo oldSession,
-            MediaRoute2Info route,
-            long managerRequestId,
-            @NonNull UserHandle transferInitiatorUserHandle,
-            @NonNull String transferInitiatorPackageName) {
+            RoutingSessionInfo oldSession, MediaRoute2Info route, long managerRequestId) {
         Log.i(
                 TAG,
                 TextUtils.formatSimple(
@@ -1387,8 +1379,7 @@ public final class MediaRouter2 {
         if (controller == null) {
             return;
         }
-        requestCreateController(controller, route, managerRequestId, transferInitiatorUserHandle,
-                transferInitiatorPackageName);
+        requestCreateController(controller, route, managerRequestId);
     }
 
     private List<MediaRoute2Info> getSortedRoutes(
@@ -2423,20 +2414,14 @@ public final class MediaRouter2 {
 
         @Override
         public void requestCreateSessionByManager(
-                long managerRequestId,
-                RoutingSessionInfo oldSession,
-                MediaRoute2Info route,
-                UserHandle transferInitiatorUserHandle,
-                String transferInitiatorPackageName) {
+                long managerRequestId, RoutingSessionInfo oldSession, MediaRoute2Info route) {
             mHandler.sendMessage(
                     obtainMessage(
                             MediaRouter2::onRequestCreateControllerByManagerOnHandler,
                             MediaRouter2.this,
                             oldSession,
                             route,
-                            managerRequestId,
-                            transferInitiatorUserHandle,
-                            transferInitiatorPackageName));
+                            managerRequestId));
         }
     }
 
@@ -3581,12 +3566,7 @@ public final class MediaRouter2 {
 
             RoutingController controller = getCurrentController();
             if (!controller.tryTransferWithinProvider(route)) {
-                requestCreateController(
-                        controller,
-                        route,
-                        MANAGER_REQUEST_ID_NONE,
-                        Process.myUserHandle(),
-                        mContext.getPackageName());
+                requestCreateController(controller, route, MANAGER_REQUEST_ID_NONE);
             }
         }
 
