@@ -9282,9 +9282,19 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.header_text_divider, View.GONE);
             if (conversationIcon != null) {
                 contentView.setViewVisibility(R.id.icon, View.GONE);
+                contentView.setViewVisibility(R.id.conversation_face_pile, View.GONE);
                 contentView.setViewVisibility(R.id.conversation_icon, View.VISIBLE);
                 contentView.setBoolean(R.id.conversation_icon, "setApplyCircularCrop", true);
                 contentView.setImageViewIcon(R.id.conversation_icon, conversationIcon);
+            } else if (mIsGroupConversation) {
+                contentView.setViewVisibility(R.id.icon, View.GONE);
+                contentView.setViewVisibility(R.id.conversation_icon, View.GONE);
+                contentView.setInt(R.id.status_bar_latest_event_content,
+                        "setNotificationBackgroundColor", mBuilder.getBackgroundColor(p));
+                contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
+                        mBuilder.getSmallIconColor(p));
+                contentView.setBundle(R.id.status_bar_latest_event_content, "setGroupFacePile",
+                        mBuilder.mN.extras);
             }
 
             if (remoteInputAction != null) {
