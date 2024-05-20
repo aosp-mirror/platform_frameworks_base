@@ -41,7 +41,10 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
@@ -52,7 +55,7 @@ import kotlinx.coroutines.withContext
  */
 interface FingerprintPropertyRepository {
     /** Whether the fingerprint properties have been initialized yet. */
-    val propertiesInitialized: StateFlow<Boolean>
+    val propertiesInitialized: Flow<Boolean>
 
     /** The id of fingerprint sensor. */
     val sensorId: Flow<Int>
@@ -110,15 +113,6 @@ constructor(
                 initialValue = UNINITIALIZED_PROPS,
             )
 
-    override val propertiesInitialized: StateFlow<Boolean> =
-        props
-            .map { it != UNINITIALIZED_PROPS }
-            .stateIn(
-                applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = props.value != UNINITIALIZED_PROPS,
-            )
-
     override val sensorId: Flow<Int> = props.map { it.sensorId }
 
     override val strength: Flow<SensorStrength> = props.map { it.sensorStrength.toSensorStrength() }
@@ -138,6 +132,22 @@ constructor(
                 sensorLocationInternal.displayId
             }
         }
+
+    override val propertiesInitialized: Flow<Boolean> =
+        combine(
+                props
+                    .map { it != UNINITIALIZED_PROPS }
+                    .onStart { emit(props.value != UNINITIALIZED_PROPS) },
+                sensorId.map {}.onStart { if (props.value != UNINITIALIZED_PROPS) emit(Unit) },
+                sensorLocations
+                    .map {}
+                    .onStart { if (props.value != UNINITIALIZED_PROPS) emit(Unit) },
+                sensorType.map {}.onStart { if (props.value != UNINITIALIZED_PROPS) emit(Unit) },
+                strength.map {}.onStart { if (props.value != UNINITIALIZED_PROPS) emit(Unit) },
+            ) { initialized, _, _, _, _ ->
+                initialized
+            }
+            .distinctUntilChanged()
 
     companion object {
         private const val TAG = "FingerprintPropertyRepositoryImpl"
