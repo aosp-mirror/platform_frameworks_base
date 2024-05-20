@@ -189,6 +189,10 @@ public final class TaskFragmentTransaction implements Parcelable {
         @Nullable
         private IBinder mActivityToken;
 
+        /** @see #setOtherActivityToken(IBinder) */
+        @Nullable
+        private IBinder mOtherActivityToken;
+
         @Nullable
         private TaskFragmentParentInfo mTaskFragmentParentInfo;
 
@@ -210,6 +214,7 @@ public final class TaskFragmentTransaction implements Parcelable {
             mActivityToken = in.readStrongBinder();
             mTaskFragmentParentInfo = in.readTypedObject(TaskFragmentParentInfo.CREATOR);
             mSurfaceControl = in.readTypedObject(SurfaceControl.CREATOR);
+            mOtherActivityToken = in.readStrongBinder();
         }
 
         @Override
@@ -224,6 +229,7 @@ public final class TaskFragmentTransaction implements Parcelable {
             dest.writeStrongBinder(mActivityToken);
             dest.writeTypedObject(mTaskFragmentParentInfo, flags);
             dest.writeTypedObject(mSurfaceControl, flags);
+            dest.writeStrongBinder(mOtherActivityToken);
         }
 
         /** The change is related to the TaskFragment created with this unique token. */
@@ -292,6 +298,21 @@ public final class TaskFragmentTransaction implements Parcelable {
         }
 
         /**
+         * Token of another activity.
+         * <p>For {@link #TYPE_ACTIVITY_REPARENTED_TO_TASK}, it is the next activity (behind the
+         * reparented one) that fills the Task and occludes other activities. It will be the
+         * actual activity token if the activity belongs to the same process as the organizer.
+         * Otherwise, it is {@code null}.
+         *
+         * @hide
+         */
+        @NonNull
+        public Change setOtherActivityToken(@NonNull IBinder activityToken) {
+            mOtherActivityToken = requireNonNull(activityToken);
+            return this;
+        }
+
+        /**
          * Sets info of the parent Task of the embedded TaskFragment.
          * @see TaskFragmentParentInfo
          *
@@ -348,6 +369,12 @@ public final class TaskFragmentTransaction implements Parcelable {
         @Nullable
         public IBinder getActivityToken() {
             return mActivityToken;
+        }
+
+        /** @hide */
+        @Nullable
+        public IBinder getOtherActivityToken() {
+            return mOtherActivityToken;
         }
 
         /**
