@@ -501,10 +501,11 @@ class SplitScreenTransitions {
         mAnimatingTransition = null;
 
         mOnFinish.run();
-        if (mFinishCallback != null) {
-            mFinishCallback.onTransitionFinished(wct /* wct */);
-            mFinishCallback = null;
-        }
+         if (mFinishCallback != null) {
+             Transitions.TransitionFinishCallback currentFinishCallback = mFinishCallback;
+             mFinishCallback = null;
+             currentFinishCallback.onTransitionFinished(wct /* wct */);
+         }
     }
 
     private void startFadeAnimation(@NonNull SurfaceControl leash, boolean show) {
