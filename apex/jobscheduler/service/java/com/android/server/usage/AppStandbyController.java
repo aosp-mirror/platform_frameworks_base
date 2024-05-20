@@ -707,7 +707,7 @@ public class AppStandbyController
                 initializeDefaultsForSystemApps(UserHandle.USER_SYSTEM);
             }
 
-            if (mPendingOneTimeCheckIdleStates) {
+            if (!Flags.avoidIdleCheck() && mPendingOneTimeCheckIdleStates) {
                 postOneTimeCheckIdleStates();
             }
 
@@ -1021,7 +1021,7 @@ public class AppStandbyController
                                         == REASON_SUB_DEFAULT_APP_RESTORED)) {
                             newBucket = getBucketForLocked(packageName, userId, elapsedRealtime);
                             if (DEBUG) {
-                                Slog.d(TAG, "Evaluated AOSP newBucket = "
+                                Slog.d(TAG, "Evaluated " + packageName + " newBucket = "
                                         + standbyBucketToString(newBucket));
                             }
                             reason = REASON_MAIN_TIMEOUT;
@@ -1990,7 +1990,9 @@ public class AppStandbyController
             }
         }
         if (android.app.admin.flags.Flags.disallowUserControlBgUsageFix()) {
-            postCheckIdleStates(userId);
+            if (!Flags.avoidIdleCheck()) {
+                postCheckIdleStates(userId);
+            }
         }
     }
 
@@ -2392,9 +2394,14 @@ public class AppStandbyController
             final boolean isHeadLess = !systemLauncherActivities.contains(pkg);
 
             if (updateHeadlessSystemAppCache(pkg, isHeadLess)) {
-                mHandler.obtainMessage(MSG_CHECK_PACKAGE_IDLE_STATE,
-                        UserHandle.USER_SYSTEM, -1, pkg)
-                    .sendToTarget();
+                if (!Flags.avoidIdleCheck()) {
+                    // Checking idle state for the each individual headless system app
+                    // during the boot up is not necessary, a full idle check for all
+                    // usres will be scheduled after boot completed.
+                    mHandler.obtainMessage(MSG_CHECK_PACKAGE_IDLE_STATE,
+                                    UserHandle.USER_SYSTEM, -1, pkg)
+                            .sendToTarget();
+                }
             }
         }
         final long end = SystemClock.uptimeMillis();
@@ -2438,6 +2445,11 @@ public class AppStandbyController
 
     @Override
     public void dumpState(String[] args, PrintWriter pw) {
+        pw.println("Flags: ");
+        pw.println("    " + Flags.FLAG_AVOID_IDLE_CHECK
+                + ": " + Flags.avoidIdleCheck());
+        pw.println();
+
         synchronized (mCarrierPrivilegedLock) {
             pw.println("Carrier privileged apps (have=" + mHaveCarrierPrivilegedApps
                     + "): " + mCarrierPrivilegedApps);
