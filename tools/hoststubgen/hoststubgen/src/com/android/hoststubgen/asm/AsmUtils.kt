@@ -290,6 +290,16 @@ fun FieldNode.getVisibility(): Visibility {
     return Visibility.fromAccess(this.access)
 }
 
+/** Return the [access] flags without the visibility */
+fun clearVisibility(access: Int): Int {
+    return access and (Opcodes.ACC_PUBLIC or Opcodes.ACC_PROTECTED or Opcodes.ACC_PRIVATE).inv()
+}
+
+/** Return the visibility part of the [access] flags */
+fun getVisibility(access: Int): Int {
+    return access and (Opcodes.ACC_PUBLIC or Opcodes.ACC_PROTECTED or Opcodes.ACC_PRIVATE)
+}
+
 
 /*
 

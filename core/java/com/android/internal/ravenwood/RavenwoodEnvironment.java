@@ -49,7 +49,7 @@ public class RavenwoodEnvironment {
         return false;
     }
 
-    public boolean isRunningOnRavenwood$ravenwood() {
+    private boolean isRunningOnRavenwood$ravenwood() {
         return true;
     }
 }
