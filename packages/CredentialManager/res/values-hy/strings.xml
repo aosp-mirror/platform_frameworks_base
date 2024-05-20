@@ -24,15 +24,15 @@
     <string name="string_learn_more" msgid="4541600451688392447">"Իմանալ ավելին"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"Ցուցադրել գաղտնաբառը"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"Թաքցնել գաղտնաբառը"</string>
-    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Անցաբառերի հետ ավելի ապահով է"</string>
-    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Անցաբառերի շնորհիվ դուք բարդ գաղտնաբառեր ստեղծելու կամ հիշելու անհրաժեշտություն չեք ունենա"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Անցաբառերը գաղտնագրված թվային բանալիներ են, որոնք ստեղծվում են մատնահետքի, դեմքով ապակողպման կամ էկրանի կողպման օգտագործմամբ"</string>
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Մուտքի բանալիների հետ ավելի ապահով է"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Մուտքի բանալիների շնորհիվ դուք բարդ գաղտնաբառեր ստեղծելու կամ հիշելու անհրաժեշտություն չեք ունենա"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Մուտքի բանալիները գաղտնագրված թվային բանալիներ են, որոնք ստեղծվում են մատնահետքի, դեմքով ապակողպման կամ էկրանի կողպման օգտագործմամբ"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Դուք կարող եք մուտք գործել այլ սարքերում, քանի որ մուտքի բանալիները պահվում են գաղտնաբառերի կառավարիչում"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Ավելին՝ մուտքի բանալիների մասին"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Գաղտնաբառեր չպահանջող տեխնոլոգիա"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Մուտքի բանալիները ձեզ թույլ են տալիս մուտք գործել առանց գաղտնաբառերի։ Ձեզ պարզապես հարկավոր է օգտագործել ձեր մատնահետքը, դիմաճանաչումը, PIN կոդը կամ նախշը՝ ձեր ինքնությունը հաստատելու և մուտքի բանալի ստեղծելու համար։"</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Բաց բանալու կրիպտոգրաֆիա"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Ըստ FIDO դաշինքի (որը ներառում է Google-ը, Apple-ը, Microsoft-ը և այլ ընկերություններ) և W3C ստանդարտների՝ անցաբառերն օգտագործում են կրիպտոգրաֆիկ բանալիների զույգ։ Օգտանվան և գաղտնաբառի փոխարեն հավելվածի կամ կայքի համար մենք ստեղծում ենք բաց-փակ բանալիների զույգ։ Փակ բանալին ապահով պահվում է ձեր սարքում կամ գաղտնաբառերի կառավարիչում և հաստատում է ձեր ինքնությունը։ Բաց բանալին փոխանցվում է հավելվածի կամ կայքի սերվերին։ Համապատասխան բանալիների միջոցով կարող եք ակնթարթորեն գրանցվել և մուտք գործել։"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Ըստ FIDO դաշինքի (որը ներառում է Google-ը, Apple-ը, Microsoft-ը և այլ ընկերություններ) և W3C ստանդարտների՝ մուտքի բանալիներն օգտագործում են կրիպտոգրաֆիկ բանալիների զույգ։ Օգտանվան և գաղտնաբառի փոխարեն հավելվածի կամ կայքի համար մենք ստեղծում ենք բաց-փակ բանալիների զույգ։ Փակ բանալին ապահով պահվում է ձեր սարքում կամ գաղտնաբառերի կառավարիչում և հաստատում է ձեր ինքնությունը։ Բաց բանալին փոխանցվում է հավելվածի կամ կայքի սերվերին։ Համապատասխան բանալիների միջոցով կարող եք ակնթարթորեն գրանցվել և մուտք գործել։"</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Հաշվի բարելավված անվտանգություն"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Յուրաքանչյուր բանալի բացառապես կապված է հավելվածի կամ կայքի հետ, որի համար այն ստեղծվել է, ուստի դուք երբեք չեք կարող սխալմամբ մուտք գործել կեղծ հավելված կամ կայք։ Բացի այդ՝ սերվերներում պահվում են միայն բաց բանալիներ, ինչը զգալիորեն դժվարացնում է կոտրումը։"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Սահուն անցում"</string>
@@ -61,14 +61,14 @@
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> գաղտնաբառ"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> մուտքի բանալի"</string>
     <string name="more_options_usage_credentials" msgid="1785697001787193984">"Մուտքի տվյալներ (<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>)"</string>
-    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Անցաբառ"</string>
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Մուտքի բանալի"</string>
     <string name="another_device" msgid="5147276802037801217">"Այլ սարք"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Գաղտնաբառերի այլ կառավարիչներ"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Փակել թերթը"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Անցնել նախորդ էջ"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Փակել"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Փակել"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Օգտագործե՞լ պահված անցաբառը <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի համար"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Օգտագործե՞լ պահված մուտքի բանալին <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի համար"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Օգտագործե՞լ <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի համար պահված ձեր գաղտնաբառը"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Օգտագործե՞լ այս տվյալները <xliff:g id="APP_NAME">%1$s</xliff:g> հավելված մուտք գործելու համար"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Ապակողպե՞լ մուտքի տարբերակներ <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի համար"</string>
