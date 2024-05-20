@@ -60,10 +60,6 @@ import android.util.AndroidException;
  * {@link android.app.PendingIntent#getIntentSender() PendingIntent.getIntentSender()}.
  */
 public class IntentSender implements Parcelable {
-    private static final Bundle SEND_INTENT_DEFAULT_OPTIONS =
-            ActivityOptions.makeBasic().setPendingIntentBackgroundActivityStartMode(
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_COMPAT).toBundle();
-
     @UnsupportedAppUsage
     private final IIntentSender mTarget;
     IBinder mWhitelistToken;
@@ -165,8 +161,7 @@ public class IntentSender implements Parcelable {
      */
     public void sendIntent(Context context, int code, Intent intent,
             OnFinished onFinished, Handler handler) throws SendIntentException {
-        sendIntent(context, code, intent, onFinished, handler, null,
-                SEND_INTENT_DEFAULT_OPTIONS);
+        sendIntent(context, code, intent, onFinished, handler, null, null /* options */);
     }
 
     /**
@@ -199,7 +194,7 @@ public class IntentSender implements Parcelable {
             OnFinished onFinished, Handler handler, String requiredPermission)
             throws SendIntentException {
         sendIntent(context, code, intent, onFinished, handler, requiredPermission,
-                SEND_INTENT_DEFAULT_OPTIONS);
+                null /* options */);
     }
 
     /**
