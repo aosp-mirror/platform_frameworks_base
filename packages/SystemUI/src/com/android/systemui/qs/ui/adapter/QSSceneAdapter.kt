@@ -127,28 +127,28 @@ interface QSSceneAdapter {
 
         val isVisible: Boolean
         val expansion: Float
-        val squishiness: Float
+        val squishiness: () -> Float
 
         data object CLOSED : State {
             override val isVisible = false
             override val expansion = 0f
-            override val squishiness = 1f
+            override val squishiness = { 1f }
         }
 
         /** State for expanding between QQS and QS */
         data class Expanding(override val expansion: Float) : State {
             override val isVisible = true
-            override val squishiness = 1f
+            override val squishiness = { 1f }
         }
 
         /** State for appearing QQS from Lockscreen or Gone */
-        data class UnsquishingQQS(override val squishiness: Float) : State {
+        data class UnsquishingQQS(override val squishiness: () -> Float) : State {
             override val isVisible = true
             override val expansion = 0f
         }
 
         /** State for appearing QS from Lockscreen or Gone, used in Split shade */
-        data class UnsquishingQS(override val squishiness: Float) : State {
+        data class UnsquishingQS(override val squishiness: () -> Float) : State {
             override val isVisible = true
             override val expansion = 1f
         }
@@ -370,7 +370,7 @@ constructor(
         setQsVisible(state.isVisible)
         setExpanded(state.isVisible && state.expansion > 0f)
         setListening(state.isVisible)
-        setQsExpansion(state.expansion, 1f, 0f, state.squishiness)
+        setQsExpansion(state.expansion, 1f, 0f, state.squishiness())
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {

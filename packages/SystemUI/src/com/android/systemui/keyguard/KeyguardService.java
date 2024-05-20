@@ -84,19 +84,24 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardSurfaceBehindViewModel
 import com.android.systemui.keyguard.ui.viewmodel.WindowManagerLockscreenVisibilityViewModel;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.power.shared.model.ScreenPowerState;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.wm.shell.shared.CounterRotator;
 import com.android.wm.shell.shared.ShellTransitions;
 import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.transition.Transitions;
 
+import dagger.Lazy;
+
+import kotlinx.coroutines.CoroutineScope;
+
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.WeakHashMap;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.CoroutineScope;
 
 public class KeyguardService extends Service {
     static final String TAG = "KeyguardService";
@@ -109,6 +114,7 @@ public class KeyguardService extends Service {
     private final ShellTransitions mShellTransitions;
     private final DisplayTracker mDisplayTracker;
     private final PowerInteractor mPowerInteractor;
+    private final Lazy<SceneInteractor> mSceneInteractorLazy;
 
     private static RemoteAnimationTarget[] wrap(TransitionInfo info, boolean wallpapers,
             SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap,
@@ -316,7 +322,8 @@ public class KeyguardService extends Service {
             @Application CoroutineScope scope,
             FeatureFlags featureFlags,
             PowerInteractor powerInteractor,
-            WindowManagerOcclusionManager windowManagerOcclusionManager) {
+            WindowManagerOcclusionManager windowManagerOcclusionManager,
+            Lazy<SceneInteractor> sceneInteractorLazy) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
@@ -325,6 +332,7 @@ public class KeyguardService extends Service {
         mDisplayTracker = displayTracker;
         mFlags = featureFlags;
         mPowerInteractor = powerInteractor;
+        mSceneInteractorLazy = sceneInteractorLazy;
 
         if (KeyguardWmStateRefactor.isEnabled()) {
             WindowManagerLockscreenVisibilityViewBinder.bind(
@@ -601,6 +609,10 @@ public class KeyguardService extends Service {
             trace("showDismissibleKeyguard");
             checkPermission();
             mKeyguardViewMediator.showDismissibleKeyguard();
+            if (SceneContainerFlag.isEnabled()) {
+                mSceneInteractorLazy.get().changeScene(
+                        Scenes.Lockscreen, "KeyguardService.showDismissibleKeyguard");
+            }
         }
 
         @Override // Binder interface

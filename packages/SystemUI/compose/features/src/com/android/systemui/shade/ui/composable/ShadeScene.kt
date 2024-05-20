@@ -279,7 +279,7 @@ private fun SceneScope.SingleShade(
                                     viewModel.qsSceneAdapter,
                                     { viewModel.qsSceneAdapter.qqsHeight },
                                     isSplitShade = false,
-                                    squishiness = tileSquishiness,
+                                    squishiness = { tileSquishiness },
                                 )
                             }
 
@@ -468,7 +468,7 @@ private fun SceneScope.SplitShade(
                                     heightProvider = { viewModel.qsSceneAdapter.qsHeight },
                                     isSplitShade = true,
                                     modifier = Modifier.fillMaxWidth(),
-                                    squishiness = tileSquishiness,
+                                    squishiness = { tileSquishiness },
                                 )
                             }
 
