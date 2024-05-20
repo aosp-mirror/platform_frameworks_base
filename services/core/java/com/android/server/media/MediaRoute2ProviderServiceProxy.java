@@ -238,7 +238,8 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             service.setComponent(mComponentName);
             try {
                 mBound = mContext.bindServiceAsUser(service, this,
-                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE
+                                | Context.BIND_DENY_ACTIVITY_STARTS_PRE_34,
                         new UserHandle(mUserId));
                 if (!mBound && DEBUG) {
                     Slog.d(TAG, this + ": Bind failed");
