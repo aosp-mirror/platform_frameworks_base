@@ -17,8 +17,11 @@
 package android.os;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -112,6 +115,21 @@ public class VintfObject {
      */
     @TestApi
     public static native Long getTargetFrameworkCompatibilityMatrixVersion();
+
+    /**
+     * Executes a shell command using shell user identity, and return the standard output in string.
+     *
+     * @hide
+     */
+    private static @Nullable String runShellCommand(@NonNull String command) throws IOException {
+        var activityThread = ActivityThread.currentActivityThread();
+        var instrumentation = activityThread.getInstrumentation();
+        var automation = instrumentation.getUiAutomation();
+        var pfd = automation.executeShellCommand(command);
+        try (var is = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
+            return new String(is.readAllBytes());
+        }
+    }
 
     private VintfObject() {}
 }
