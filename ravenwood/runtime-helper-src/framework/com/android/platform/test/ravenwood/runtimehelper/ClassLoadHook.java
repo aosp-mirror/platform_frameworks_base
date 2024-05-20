@@ -15,7 +15,7 @@
  */
 package com.android.platform.test.ravenwood.runtimehelper;
 
-import com.android.ravenwood.common.RavenwoodCommonUtils;
+import android.platform.test.ravenwood.RavenwoodUtils;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
@@ -141,7 +141,7 @@ public class ClassLoadHook {
 
         log("Loading " + LIBANDROID_RUNTIME_NAME + " for '" + libanrdoidClasses + "' and '"
                 + libhwuiClasses + "'");
-        RavenwoodCommonUtils.loadJniLibrary(LIBANDROID_RUNTIME_NAME);
+        RavenwoodUtils.loadJniLibrary(LIBANDROID_RUNTIME_NAME);
     }
 
     /**

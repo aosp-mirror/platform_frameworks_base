@@ -86,6 +86,10 @@ public class RavenwoodRuleImpl {
                 sPendingUncaughtException.compareAndSet(null, throwable);
             };
 
+    public static boolean isOnRavenwood() {
+        return true;
+    }
+
     public static void init(RavenwoodRule rule) {
         if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
             maybeThrowPendingUncaughtException(false);

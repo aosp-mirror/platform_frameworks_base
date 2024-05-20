@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// [ravenwood] Copied from libcore.
-
 package android.system;
 
 import java.io.IOException;
