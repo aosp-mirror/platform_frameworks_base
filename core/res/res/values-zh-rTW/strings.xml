@@ -267,7 +267,7 @@
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"完整報告"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"如果你的裝置沒有回應或運行速度過慢，或是當你需要所有區段的報告時，建議你使用這個選項來減少系統干擾。這個選項不支援你輸入更多資訊，也不會擷取其他螢幕畫面。"</string>
     <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{系統將在 # 秒後擷取錯誤報告的螢幕截圖。}other{系統將在 # 秒後擷取錯誤報告的螢幕截圖。}}"</string>
-    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"已拍攝錯誤報告的螢幕截圖"</string>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"已擷取錯誤報告的螢幕截圖"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"無法拍攝錯誤報告的螢幕截圖"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"靜音模式"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"音效已關閉"</string>
