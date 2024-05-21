@@ -516,8 +516,6 @@ public final class DisplayManagerService extends SystemService {
     private final BroadcastReceiver mIdleModeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final DisplayManagerInternal dmi =
-                    LocalServices.getService(DisplayManagerInternal.class);
             if (Intent.ACTION_DOCK_EVENT.equals(intent.getAction())) {
                 int dockState = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
                         Intent.EXTRA_DOCK_STATE_UNDOCKED);
@@ -586,9 +584,6 @@ public final class DisplayManagerService extends SystemService {
     @ChangeId
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.S)
     static final long DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE = 170503758L;
-
-    private final Uri mScreenResolutionModeUri = Settings.Secure.getUriFor(
-            Settings.Secure.SCREEN_RESOLUTION_MODE);
 
     public DisplayManagerService(Context context) {
         this(context, new Injector());
@@ -4644,14 +4639,6 @@ public final class DisplayManagerService extends SystemService {
         return !Float.isNaN(brightness)
                 && (brightness >= PowerManager.BRIGHTNESS_MIN)
                 && (brightness <= PowerManager.BRIGHTNESS_MAX);
-    }
-
-    private static boolean isValidResolution(Point resolution) {
-        return (resolution != null) && (resolution.x > 0) && (resolution.y > 0);
-    }
-
-    private static boolean isValidRefreshRate(float refreshRate) {
-        return !Float.isNaN(refreshRate) && (refreshRate > 0.0f);
     }
 
     @VisibleForTesting
