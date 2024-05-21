@@ -5147,7 +5147,7 @@ public final class DisplayManagerService extends SystemService {
         }
     };
 
-    private class BrightnessPair {
+    private static class BrightnessPair {
         public float brightness;
         public float sdrBrightness;
 
