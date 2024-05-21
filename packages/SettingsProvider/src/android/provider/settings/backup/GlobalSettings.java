@@ -120,5 +120,8 @@ public class GlobalSettings {
         Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_ENABLED,
         Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE,
         Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED,
+        Settings.Global.ADD_USERS_WHEN_LOCKED,
+        Settings.Global.REMOVE_GUEST_ON_EXIT,
+        Settings.Global.USER_SWITCHER_ENABLED,
     };
 }
