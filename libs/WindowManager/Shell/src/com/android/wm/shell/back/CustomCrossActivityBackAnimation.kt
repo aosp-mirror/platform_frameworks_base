@@ -23,6 +23,7 @@ import android.view.Choreographer
 import android.view.SurfaceControl
 import android.view.animation.Animation
 import android.view.animation.Transformation
+import android.window.BackEvent
 import android.window.BackMotionEvent
 import android.window.BackNavigationInfo
 import com.android.internal.R
@@ -73,6 +74,21 @@ class CustomCrossActivityBackAnimation(
             TransitionAnimation(context, false /* debug */, "CustomCrossActivityBackAnimation")
         )
     )
+
+    override fun preparePreCommitClosingRectMovement(swipeEdge: Int) {
+        startClosingRect.set(backAnimRect)
+
+        // scale closing target to the left for right-hand-swipe and to the right for
+        // left-hand-swipe
+        targetClosingRect.set(startClosingRect)
+        targetClosingRect.scaleCentered(MAX_SCALE)
+        val offset = if (swipeEdge != BackEvent.EDGE_RIGHT) {
+            startClosingRect.right - targetClosingRect.right - displayBoundsMargin
+        } else {
+            -targetClosingRect.left + displayBoundsMargin
+        }
+        targetClosingRect.offset(offset, 0f)
+    }
 
     override fun preparePreCommitEnteringRectMovement() {
         // No movement for the entering rect

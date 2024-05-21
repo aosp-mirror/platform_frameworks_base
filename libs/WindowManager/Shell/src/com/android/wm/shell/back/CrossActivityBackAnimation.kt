@@ -87,7 +87,7 @@ abstract class CrossActivityBackAnimation(
     private var triggerBack = false
     private var finishCallback: IRemoteAnimationFinishedCallback? = null
     private val progressAnimator = BackProgressAnimator()
-    private val displayBoundsMargin =
+    protected val displayBoundsMargin =
         context.resources.getDimension(R.dimen.cross_task_back_vertical_margin)
 
     private val gestureInterpolator = Interpolators.BACK_GESTURE
@@ -115,6 +115,12 @@ abstract class CrossActivityBackAnimation(
      * Whether the entering target should be shifted vertically with the user gesture in pre-commit
      */
     abstract val allowEnteringYShift: Boolean
+
+    /**
+     * Subclasses must set the [startClosingRect] and [targetClosingRect] to define the movement
+     * of the closingTarget during pre-commit phase.
+     */
+    abstract fun preparePreCommitClosingRectMovement(@BackEvent.SwipeEdge swipeEdge: Int)
 
     /**
      * Subclasses must set the [startEnteringRect] and [targetEnteringRect] to define the movement
@@ -170,18 +176,7 @@ abstract class CrossActivityBackAnimation(
         // Offset start rectangle to align task bounds.
         backAnimRect.offsetTo(0, 0)
 
-        startClosingRect.set(backAnimRect)
-
-        // scale closing target into the middle for rhs and to the right for lhs
-        targetClosingRect.set(startClosingRect)
-        targetClosingRect.scaleCentered(MAX_SCALE)
-        if (backMotionEvent.swipeEdge != BackEvent.EDGE_RIGHT) {
-            targetClosingRect.offset(
-                startClosingRect.right - targetClosingRect.right - displayBoundsMargin,
-                0f
-            )
-        }
-
+        preparePreCommitClosingRectMovement(backMotionEvent.swipeEdge)
         preparePreCommitEnteringRectMovement()
 
         background.ensureBackground(

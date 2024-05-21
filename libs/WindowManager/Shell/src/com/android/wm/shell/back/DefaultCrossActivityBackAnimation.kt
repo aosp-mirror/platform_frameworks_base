@@ -18,6 +18,7 @@ package com.android.wm.shell.back
 import android.content.Context
 import android.view.Choreographer
 import android.view.SurfaceControl
+import android.window.BackEvent
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.animation.Interpolators
@@ -46,6 +47,20 @@ constructor(
     private val enteringStartOffset =
         context.resources.getDimension(R.dimen.cross_activity_back_entering_start_offset)
     override val allowEnteringYShift = true
+
+    override fun preparePreCommitClosingRectMovement(swipeEdge: Int) {
+        startClosingRect.set(backAnimRect)
+
+        // scale closing target into the middle for rhs and to the right for lhs
+        targetClosingRect.set(startClosingRect)
+        targetClosingRect.scaleCentered(MAX_SCALE)
+        if (swipeEdge != BackEvent.EDGE_RIGHT) {
+            targetClosingRect.offset(
+                    startClosingRect.right - targetClosingRect.right - displayBoundsMargin,
+                    0f
+            )
+        }
+    }
 
     override fun preparePreCommitEnteringRectMovement() {
         // the entering target starts 96dp to the left of the screen edge...
