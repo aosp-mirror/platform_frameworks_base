@@ -227,7 +227,10 @@ public class HandwritingInitiator {
                             mState.mStylusDownY, /* isHover */ false);
                     if (candidateView != null && candidateView.isEnabled()) {
                         boolean candidateHasFocus = candidateView.hasFocus();
-                        if (shouldShowHandwritingUnavailableMessageForView(candidateView)) {
+                        if (!candidateView.isStylusHandwritingAvailable()) {
+                            mState.mShouldInitHandwriting = false;
+                            return false;
+                        } else if (shouldShowHandwritingUnavailableMessageForView(candidateView)) {
                             int messagesResId = (candidateView instanceof TextView tv
                                     && tv.isAnyPasswordInputType())
                                     ? R.string.error_handwriting_unsupported_password
