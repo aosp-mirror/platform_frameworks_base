@@ -196,7 +196,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(globalSettings)
             .registerContentObserver(
                 eq(Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE)),
-                settingsObserverCaptor.capture()
+                capture(settingsObserverCaptor)
             )
     }
 

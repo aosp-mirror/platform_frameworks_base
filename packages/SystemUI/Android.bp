@@ -766,6 +766,7 @@ android_robolectric_test {
     ],
     static_libs: [
         "RoboTestLibraries",
+        "mockito-kotlin2",
     ],
     libs: [
         "android.test.runner",
