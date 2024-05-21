@@ -601,6 +601,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private String mSessionErrorMessage;
 
+    @GuardedBy("mLock")
+    private boolean mHasAppMetadataFile = false;
+
     @Nullable
     final StagedSession mStagedSession;
 
@@ -1814,7 +1817,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         assertCallerIsOwnerOrRoot();
         synchronized (mLock) {
             assertPreparedAndNotCommittedOrDestroyedLocked("getAppMetadataFd");
-            if (!getStagedAppMetadataFile().exists()) {
+            if (!mHasAppMetadataFile) {
                 return null;
             }
             try {
@@ -1827,9 +1830,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void removeAppMetadata() {
-        File file = getStagedAppMetadataFile();
-        if (file.exists()) {
-            file.delete();
+        synchronized (mLock) {
+            if (mHasAppMetadataFile) {
+                getStagedAppMetadataFile().delete();
+                mHasAppMetadataFile = false;
+            }
         }
     }
 
@@ -1850,8 +1855,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertPreparedAndNotSealedLocked("openWriteAppMetadata");
         }
         try {
-            return doWriteInternal(APP_METADATA_FILE_NAME, /* offsetBytes= */ 0,
+            ParcelFileDescriptor fd = doWriteInternal(APP_METADATA_FILE_NAME, /* offsetBytes= */ 0,
                     /* lengthBytes= */ -1, null);
+            synchronized (mLock) {
+                mHasAppMetadataFile = true;
+            }
+            return fd;
         } catch (IOException e) {
             throw ExceptionUtils.wrap(e);
         }
@@ -2145,18 +2154,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        File appMetadataFile = getStagedAppMetadataFile();
-        if (appMetadataFile.exists()) {
-            long sizeLimit = getAppMetadataSizeLimit();
-            if (appMetadataFile.length() > sizeLimit) {
-                appMetadataFile.delete();
-                throw new IllegalArgumentException(
-                        "App metadata size exceeds the maximum allowed limit of " + sizeLimit);
-            }
-            if (isIncrementalInstallation()) {
-                // Incremental requires stageDir to be empty so move the app metadata file to a
-                // temporary location and move back after commit.
-                appMetadataFile.renameTo(getTmpAppMetadataFile());
+        synchronized (mLock) {
+            if (mHasAppMetadataFile) {
+                File appMetadataFile = getStagedAppMetadataFile();
+                long sizeLimit = getAppMetadataSizeLimit();
+                if (appMetadataFile.length() > sizeLimit) {
+                    appMetadataFile.delete();
+                    mHasAppMetadataFile = false;
+                    throw new IllegalArgumentException(
+                            "App metadata size exceeds the maximum allowed limit of " + sizeLimit);
+                }
+                if (isIncrementalInstallation()) {
+                    // Incremental requires stageDir to be empty so move the app metadata file to a
+                    // temporary location and move back after commit.
+                    appMetadataFile.renameTo(getTmpAppMetadataFile());
+                }
             }
         }
 
@@ -3207,7 +3219,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         synchronized (mLock) {
             return new InstallingSession(sessionId, stageDir, localObserver, params, mInstallSource,
-                    user, mSigningDetails, mInstallerUid, mPackageLite, mPreVerifiedDomains, mPm);
+                    user, mSigningDetails, mInstallerUid, mPackageLite, mPreVerifiedDomains, mPm,
+                    mHasAppMetadataFile);
         }
     }
 
@@ -3445,9 +3458,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
+        if (mHasAppMetadataFile && !getStagedAppMetadataFile().exists()) {
+            throw new PackageManagerException(INSTALL_FAILED_VERIFICATION_FAILURE,
+                    "App metadata file expected but not found in " + stageDir.getAbsolutePath());
+        }
+
         final List<ApkLite> addedFiles = getAddedApkLitesLocked();
         if (addedFiles.isEmpty()
-                && (removeSplitList.size() == 0 || getStagedAppMetadataFile().exists())) {
+                && (removeSplitList.size() == 0 || mHasAppMetadataFile)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     TextUtils.formatSimple("Session: %d. No packages staged in %s", sessionId,
                           stageDir.getAbsolutePath()));

@@ -511,14 +511,13 @@ final class InstallPackageHelper {
         // metadata file on the system image. Do not reset the path and source if this is the
         // case.
         if (pkgSetting.getAppMetadataFilePath() == null) {
-            File dir = new File(pkg.getPath());
+            String dir = pkg.getPath();
             if (pkgSetting.isSystem()) {
-                dir = new File(Environment.getDataDirectory(),
-                        "app-metadata/" + pkg.getPackageName());
+                dir = Environment.getDataDirectoryPath() + "/app-metadata/" + pkg.getPackageName();
             }
-            File appMetadataFile = new File(dir, APP_METADATA_FILE_NAME);
-            if (appMetadataFile.exists()) {
-                pkgSetting.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
+            String appMetadataFilePath = dir + "/" + APP_METADATA_FILE_NAME;
+            if (request.hasAppMetadataFile()) {
+                pkgSetting.setAppMetadataFilePath(appMetadataFilePath);
                 if (Flags.aslInApkAppMetadataSource()) {
                     pkgSetting.setAppMetadataSource(APP_METADATA_SOURCE_INSTALLER);
                 }
@@ -526,7 +525,7 @@ final class InstallPackageHelper {
                 Map<String, PackageManager.Property> properties = pkg.getProperties();
                 if (properties.containsKey(PROPERTY_ANDROID_SAFETY_LABEL)) {
                     // ASL file extraction is done in post-install
-                    pkgSetting.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
+                    pkgSetting.setAppMetadataFilePath(appMetadataFilePath);
                     pkgSetting.setAppMetadataSource(APP_METADATA_SOURCE_APK);
                 }
             }
