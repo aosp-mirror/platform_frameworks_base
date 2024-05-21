@@ -153,6 +153,8 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"ផ្ញើ"</string>
     <string name="cancel" msgid="1089011503403416730">"បោះបង់"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"និមិត្តសញ្ញាកម្មវិធី"</string>
+  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
+  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"បញ្ជាក់"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ព្យាយាម​ម្ដង​ទៀត"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ចុចដើម្បីបោះបង់​ការផ្ទៀងផ្ទាត់"</string>
@@ -201,7 +203,7 @@
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"រៀបចំ​ការដោះសោ​ដោយស្កេនមុខ"</string>
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"ដើម្បីរៀបចំ​ដោះសោតាមទម្រង់មុខ​ម្ដងទៀត គំរូមុខបច្ចុប្បន្ន​របស់អ្នក​នឹងត្រូវបានលុប។\n\nអ្នកនឹងត្រូវ​រៀបចំមុខងារនេះ​ម្ដងទៀត ដើម្បីប្រើមុខរបស់អ្នក​សម្រាប់ដោះសោទូរសព្ទរបស់អ្នក។"</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"មិនអាច​រៀបចំ​ការដោះសោតាមទម្រង់មុខបានទេ។ សូមចូលទៅកាន់​ការកំណត់​ ដើម្បីព្យាយាមម្ដងទៀត។"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ប៉ះ​ឧបករណ៍​ចាប់ស្នាម​ម្រាមដៃ"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ប៉ះ​សេនស័រចាប់ស្នាមម្រាមដៃ"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"សូមចុចរូបដោះសោ ដើម្បីបន្ត"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"មិន​ស្គាល់​មុខទេ។ សូមប្រើស្នាមម្រាមដៃជំនួសវិញ។"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -302,7 +304,7 @@
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"​មិនអាចប្រើ​បណ្តាញ​បានទេ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"គ្មានបណ្តាញ Wi-Fi ទេ"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"កំពុង​បើក..."</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"ការបញ្ចាំងអេក្រង់"</string>
+    <string name="quick_settings_cast_title" msgid="3033553249449938182">"ភ្ជាប់"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"ការ​ចាត់​ថ្នាក់"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"ឧបករណ៍​​ដែល​មិន​មាន​ឈ្មោះ"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"មិន​មាន​ឧបករណ៍​ដែល​អាច​ប្រើ​បាន"</string>
@@ -364,10 +366,6 @@
     <item msgid="8309220355268900335">"ថ្ម"</item>
   </string-array>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"មុខងារប្រើដៃម្ខាង"</string>
-    <string name="quick_settings_contrast_label" msgid="988087460210159123">"កម្រិត​រំលេចពណ៌"</string>
-    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"ស្តង់ដារ"</string>
-    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"មធ្យម"</string>
-    <string name="quick_settings_contrast_high" msgid="656049259587494499">"ខ្ពស់"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"ឧបករណ៍ជំនួយការស្ដាប់"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"ឧបករណ៍ជំនួយការស្ដាប់"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"ផ្គូផ្គង​ឧបករណ៍ថ្មី"</string>
@@ -447,8 +445,7 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ចុច​ឱ្យ​យូរ ដើម្បីប្ដូរធាតុ​ក្រាហ្វិកតាមបំណង"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ប្ដូរ​ធាតុ​ក្រាហ្វិកតាម​បំណង"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"រូបកម្មវិធីសម្រាប់ធាតុ​ក្រាហ្វិកដែលបានបិទ"</string>
-    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
-    <skip />
+    <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"រូបតំណាងកម្មវិធីសម្រាប់ធាតុ​ក្រាហ្វិកកំពុងត្រូវបានដំឡើង"</string>
     <string name="edit_widget" msgid="9030848101135393954">"កែធាតុ​ក្រាហ្វិក"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ដកចេញ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"បញ្ចូលធាតុ​ក្រាហ្វិក"</string>
@@ -629,14 +626,10 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"ចូលការកំណត់ឧបករណ៍មេឌៀ"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"បានពង្រីកគ្រាប់រំកិលកម្រិតសំឡេង"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"បានបង្រួមគ្រាប់រំកិលកម្រិតសំឡេង"</string>
-    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
-    <skip />
+    <string name="volume_panel_hint_mute" msgid="2153922288568199077">"បិទសំឡេង %s"</string>
+    <string name="volume_panel_hint_unmute" msgid="4831850937582282340">"បើក​សំឡេង %s"</string>
+    <string name="volume_panel_hint_muted" msgid="1124844870181285320">"បានបិទសំឡេង"</string>
+    <string name="volume_panel_hint_vibrate" msgid="4136223145435914132">"ញ័រ"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"កំពុងចាក់​​ <xliff:g id="LABEL">%s</xliff:g> នៅ​លើ"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"សំឡេងនឹងលេងនៅលើ"</string>
     <string name="media_output_title_ongoing_call" msgid="208426888064112006">"កំពុងនិយាយទូរសព្ទ"</string>
