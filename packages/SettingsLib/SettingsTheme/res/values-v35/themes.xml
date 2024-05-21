@@ -20,7 +20,7 @@
         <item name="android:colorAccent">@color/settingslib_materialColorPrimary</item>
         <item name="android:colorBackground">@color/settingslib_materialColorSurfaceContainer</item>
         <item name="android:textColorPrimary">@color/settingslib_materialColorOnSurface</item>
-        <item name="android:textColorSecondary">@color/settingslib_materialColorOnSurfaceVariant</item>
+        <item name="android:textColorSecondary">@color/settingslib_text_color_secondary</item>
         <item name="android:textColorTertiary">@color/settingslib_materialColorOutline</item>
     </style>
 
