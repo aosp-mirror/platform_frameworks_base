@@ -22,6 +22,7 @@ data class AudioStreamModel(
     val volume: Int,
     val minVolume: Int,
     val maxVolume: Int,
+    val isAffectedByMute: Boolean,
     val isAffectedByRingerMode: Boolean,
     val isMuted: Boolean,
 )

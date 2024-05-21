@@ -192,10 +192,12 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
     fun streamNotAffectedByMute_isNotMutable() {
         with(kosmos) {
             testScope.runTest {
-                audioRepository.setIsAffectedByMute(audioStream, false)
-                val isMutable = underTest.isAffectedByMute(audioStream)
+                val audioStreamModel by collectLastValue(underTest.getAudioStream(audioStream))
+                audioRepository.setAudioStreamModel(
+                    audioStreamModel!!.copy(isAffectedByMute = false)
+                )
 
-                assertThat(isMutable).isFalse()
+                assertThat(audioStreamModel!!.isAffectedByMute).isFalse()
             }
         }
     }
@@ -230,6 +232,7 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
             testScope.runTest {
                 val audioStreamModel by
                     collectLastValue(audioRepository.getAudioStream(audioStream))
+                underTest.setVolume(audioStream, audioStreamModel!!.maxVolume)
                 runCurrent()
 
                 underTest.setVolume(audioStream, audioStreamModel!!.minVolume)

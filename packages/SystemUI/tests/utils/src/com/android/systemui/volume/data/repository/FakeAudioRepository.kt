@@ -43,8 +43,6 @@ class FakeAudioRepository : AudioRepository {
     private val models: MutableMap<AudioStream, MutableStateFlow<AudioStreamModel>> = mutableMapOf()
     private val lastAudibleVolumes: MutableMap<AudioStream, Int> = mutableMapOf()
 
-    private var isAffectedByMute: MutableMap<AudioStream, Boolean> = mutableMapOf()
-
     private fun getAudioStreamModelState(
         audioStream: AudioStream
     ): MutableStateFlow<AudioStreamModel> =
@@ -55,6 +53,7 @@ class FakeAudioRepository : AudioRepository {
                     volume = 0,
                     minVolume = 0,
                     maxVolume = 10,
+                    isAffectedByMute = false,
                     isAffectedByRingerMode = false,
                     isMuted = false,
                 )
@@ -103,12 +102,5 @@ class FakeAudioRepository : AudioRepository {
 
     override suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode) {
         mutableRingerMode.value = mode
-    }
-
-    override suspend fun isAffectedByMute(audioStream: AudioStream): Boolean =
-        isAffectedByMute[audioStream] ?: true
-
-    fun setIsAffectedByMute(audioStream: AudioStream, isAffected: Boolean) {
-        isAffectedByMute[audioStream] = isAffected
     }
 }
