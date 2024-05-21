@@ -90,7 +90,7 @@
     <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Кіру ақпараты жоқ."</string>
     <string name="no_sign_in_info_in" msgid="2641118151920288356">"<xliff:g id="SOURCE">%1$s</xliff:g> аккаунтында кіру туралы ешқандай ақпарат жоқ."</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Кіру әрекеттерін басқару"</string>
-    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Басқа құрылғыдан жасау"</string>
+    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Басқа құрылғыдан"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Басқа құрылғыны пайдалану"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасы сұрауды тоқтатты."</string>
     <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Кіру опциялары"</string>

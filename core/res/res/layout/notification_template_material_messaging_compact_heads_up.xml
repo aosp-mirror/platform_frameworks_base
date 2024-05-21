@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<FrameLayout
+<com.android.internal.widget.CompactMessagingLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
@@ -44,6 +44,14 @@
         android:maxDrawableHeight="@dimen/notification_icon_circle_size"
         android:scaleType="centerCrop"
         android:importantForAccessibility="no"
+        />
+    <ViewStub
+        android:layout="@layout/conversation_face_pile_layout"
+        android:layout_gravity="center_vertical|start"
+        android:layout_width="@dimen/conversation_compact_face_pile_size"
+        android:layout_height="@dimen/conversation_compact_face_pile_size"
+        android:layout_marginStart="@dimen/notification_icon_circle_start"
+        android:id="@+id/conversation_face_pile"
         />
     <FrameLayout
         android:id="@+id/alternate_expand_target"
@@ -101,4 +109,4 @@
                 />
         </FrameLayout>
     </LinearLayout>
-</FrameLayout>
+</com.android.internal.widget.CompactMessagingLayout>

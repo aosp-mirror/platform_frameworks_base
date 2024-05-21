@@ -6263,6 +6263,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
             }
         }
+
+        @Override
+        public boolean onPackageChanged(String packageName, int uid, String[] components) {
+            // We care about all package changes, not just the whole package itself which is
+            // default behavior.
+            return true;
+        }
     }
 
     void sendPendingWindowStateChangedEventsForAvailableWindowLocked(int windowId) {

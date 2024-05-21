@@ -1252,7 +1252,7 @@ public class PackageManagerServiceUtils {
                 }
                 final ParsedMainComponent comp = componentInfoToComponent(
                         resolveInfo.getComponentInfo(), resolver, isReceiver);
-                if (!comp.getIntents().isEmpty() && intent.getAction() == null) {
+                if (comp != null && !comp.getIntents().isEmpty() && intent.getAction() == null) {
                     match = false;
                 }
             } else if (c instanceof IntentFilter) {

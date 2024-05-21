@@ -8892,6 +8892,62 @@ public class Notification implements Parcelable
             }
         }
 
+        private void fixTitleAndTextForCompactMessaging(StandardTemplateParams p) {
+            Message m = findLatestIncomingMessage();
+            final CharSequence text = (m == null) ? null : m.mText;
+            CharSequence sender = m == null ? null
+                    : m.mSender == null || TextUtils.isEmpty(m.mSender.getName())
+                            ? mUser.getName() : m.mSender.getName();
+
+            CharSequence conversationTitle = mIsGroupConversation ? mConversationTitle : null;
+
+            // we want to have colon for possible title for conversation.
+            final BidiFormatter bidi = BidiFormatter.getInstance();
+            if (sender != null) {
+                sender = mBuilder.mContext.getString(
+                        com.android.internal.R.string.notification_messaging_title_template,
+                        bidi.unicodeWrap(sender), "");
+            } else if (conversationTitle != null) {
+                conversationTitle = mBuilder.mContext.getString(
+                        com.android.internal.R.string.notification_messaging_title_template,
+                        bidi.unicodeWrap(conversationTitle), "");
+            }
+
+            if (Flags.cleanUpSpansAndNewLines()) {
+                conversationTitle = stripStyling(conversationTitle);
+                sender = stripStyling(sender);
+            }
+
+            final boolean showOnlySenderName = showOnlySenderName();
+
+            final CharSequence title;
+            boolean isConversationTitleAvailable = !showOnlySenderName && conversationTitle != null;
+            if (isConversationTitleAvailable) {
+                title = conversationTitle;
+            } else {
+                title = sender;
+            }
+
+            p.title(title);
+            // when the conversation title is available, use headerTextSecondary for sender and
+            // summaryText for text
+            if (isConversationTitleAvailable) {
+                p.headerTextSecondary(sender);
+                p.summaryText(text);
+            } else {
+                // when it is not, use headerTextSecondary for text and don't use summaryText
+                p.headerTextSecondary(text);
+                p.summaryText(null);
+            }
+        }
+
+        /** developer settings to always show sender name */
+        private boolean showOnlySenderName() {
+            return SystemProperties.getBoolean(
+                    "persist.compact_heads_up_notification.show_only_sender_name",
+                    false);
+        }
+
         /**
          * @hide
          */
@@ -9211,24 +9267,34 @@ public class Notification implements Parcelable
                 }
             }
 
-            // This method fills title and text
-            fixTitleAndTextExtras(mBuilder.mN.extras);
             final StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
                     .highlightExpander(isConversationLayout)
                     .fillTextsFrom(mBuilder)
-                    .hideTime(true)
-                    .summaryText("");
-            p.headerTextSecondary(p.mText);
+                    .hideTime(true);
+
+            fixTitleAndTextForCompactMessaging(p);
             TemplateBindResult bindResult = new TemplateBindResult();
 
             RemoteViews contentView = mBuilder.applyStandardTemplate(
                     mBuilder.getMessagingCompactHeadsUpLayoutResource(), p, bindResult);
+            contentView.setViewVisibility(R.id.header_text_secondary_divider, View.GONE);
+            contentView.setViewVisibility(R.id.header_text_divider, View.GONE);
             if (conversationIcon != null) {
                 contentView.setViewVisibility(R.id.icon, View.GONE);
+                contentView.setViewVisibility(R.id.conversation_face_pile, View.GONE);
                 contentView.setViewVisibility(R.id.conversation_icon, View.VISIBLE);
                 contentView.setBoolean(R.id.conversation_icon, "setApplyCircularCrop", true);
                 contentView.setImageViewIcon(R.id.conversation_icon, conversationIcon);
+            } else if (mIsGroupConversation) {
+                contentView.setViewVisibility(R.id.icon, View.GONE);
+                contentView.setViewVisibility(R.id.conversation_icon, View.GONE);
+                contentView.setInt(R.id.status_bar_latest_event_content,
+                        "setNotificationBackgroundColor", mBuilder.getBackgroundColor(p));
+                contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
+                        mBuilder.getSmallIconColor(p));
+                contentView.setBundle(R.id.status_bar_latest_event_content, "setGroupFacePile",
+                        mBuilder.mN.extras);
             }
 
             if (remoteInputAction != null) {

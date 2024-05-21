@@ -670,7 +670,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
     }
 
     private void registerDeviceConfigChangeListener() {
-        Log.e(TAG, "registerDeviceConfigChangeListener");
+        Log.d(TAG, "registerDeviceConfigChangeListener");
         String configNamespace = getConfigNamespace();
         if (configNamespace.isEmpty()) {
             Slog.e(TAG, "config_defaultOnDeviceIntelligenceDeviceConfigNamespace is empty");
@@ -695,7 +695,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
 
     private void sendUpdatedConfig(
             DeviceConfig.Properties props) {
-        Log.e(TAG, "sendUpdatedConfig");
+        Log.d(TAG, "sendUpdatedConfig");
 
         PersistableBundle persistableBundle = new PersistableBundle();
         for (String key : props.getKeyset()) {
@@ -704,8 +704,6 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
         Bundle bundle = new Bundle();
         bundle.putParcelable(DEVICE_CONFIG_UPDATE_BUNDLE_KEY, persistableBundle);
         ensureRemoteInferenceServiceInitialized();
-        Log.e(TAG, "sendUpdatedConfig: BUNDLE: " + bundle);
-
         mRemoteInferenceService.run(service -> service.updateProcessingState(bundle,
                 new IProcessingUpdateStatusCallback.Stub() {
                     @Override

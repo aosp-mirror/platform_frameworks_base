@@ -142,6 +142,7 @@ final class MediaRoute2ProviderWatcher {
                     MediaRoute2ProviderServiceProxy proxy =
                             new MediaRoute2ProviderServiceProxy(
                                     mContext,
+                                    mHandler.getLooper(),
                                     new ComponentName(serviceInfo.packageName, serviceInfo.name),
                                     isSelfScanOnlyProvider,
                                     mUserId);

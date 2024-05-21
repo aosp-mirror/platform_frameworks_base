@@ -17,7 +17,6 @@
 package com.android.systemui.deviceentry.domain.interactor
 
 import com.android.systemui.biometrics.domain.interactor.FingerprintPropertyInteractor
-import com.android.systemui.biometrics.shared.model.SensorLocation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
@@ -57,19 +56,6 @@ constructor(
                 fingerprintAuthRepository.isRunning
             } else {
                 flowOf(false)
-            }
-        }
-
-    /**
-     * Location of the under-display fingerprint sensor on the display. Null if the device does not
-     * support UDFPS.
-     */
-    val udfpsLocation: Flow<SensorLocation?> =
-        isUdfpsSupported.flatMapLatest {
-            if (it) {
-                fingerprintPropertyInteractor.sensorLocation
-            } else {
-                flowOf(null)
             }
         }
 }

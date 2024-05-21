@@ -21,7 +21,6 @@ import android.content.Context
 import android.graphics.Point
 import android.graphics.Rect
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
@@ -117,10 +116,6 @@ constructor(
     override fun applyConstraints(constraintSet: ConstraintSet) {
         val isUdfpsSupported =
             if (DeviceEntryUdfpsRefactor.isEnabled) {
-                Log.d(
-                    "DefaultDeviceEntrySection",
-                    "isUdfpsSupported=${deviceEntryIconViewModel.get().isUdfpsSupported.value}"
-                )
                 deviceEntryIconViewModel.get().isUdfpsSupported.value
             } else {
                 authController.isUdfpsSupported
@@ -143,24 +138,8 @@ constructor(
         val iconRadiusPx = (defaultDensity * 36).toInt()
 
         if (isUdfpsSupported) {
-            if (DeviceEntryUdfpsRefactor.isEnabled) {
-                deviceEntryIconViewModel.get().udfpsLocation.value?.let { udfpsLocation ->
-                    Log.d(
-                        "DeviceEntrySection",
-                        "udfpsLocation=$udfpsLocation" +
-                            " unusedAuthController=${authController.udfpsLocation}"
-                    )
-                    centerIcon(
-                        Point(udfpsLocation.centerX.toInt(), udfpsLocation.centerY.toInt()),
-                        udfpsLocation.radius,
-                        constraintSet
-                    )
-                }
-            } else {
-                authController.udfpsLocation?.let { udfpsLocation ->
-                    Log.d("DeviceEntrySection", "udfpsLocation=$udfpsLocation")
-                    centerIcon(udfpsLocation, authController.udfpsRadius, constraintSet)
-                }
+            authController.udfpsLocation?.let { udfpsLocation ->
+                centerIcon(udfpsLocation, authController.udfpsRadius, constraintSet)
             }
         } else {
             centerIcon(

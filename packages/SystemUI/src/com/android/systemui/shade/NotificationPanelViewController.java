@@ -253,6 +253,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -448,6 +449,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final FalsingCollector mFalsingCollector;
     private final ShadeHeadsUpTrackerImpl mShadeHeadsUpTracker = new ShadeHeadsUpTrackerImpl();
     private final ShadeFoldAnimatorImpl mShadeFoldAnimator = new ShadeFoldAnimatorImpl();
+
+    @VisibleForTesting
+    Set<Animator> mTestSetOfAnimatorsUsed;
 
     private boolean mShowIconsWhenExpanded;
     private int mIndicationBottomPadding;
@@ -4149,6 +4153,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void setAnimator(ValueAnimator animator) {
+        // TODO(b/341163515): Should we clean up the old animator?
+        registerAnimatorForTest(animator);
         mHeightAnimator = animator;
         if (animator == null && mPanelUpdateWhenAnimatorEnds) {
             mPanelUpdateWhenAnimatorEnds = false;
@@ -4193,6 +4199,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private ValueAnimator createHeightAnimator(float targetHeight, float overshootAmount) {
         float startExpansion = mOverExpansion;
         ValueAnimator animator = ValueAnimator.ofFloat(mExpandedHeight, targetHeight);
+        registerAnimatorForTest(animator);
         animator.addUpdateListener(
                 animation -> {
                     if (overshootAmount > 0.0f
@@ -4208,6 +4215,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     setExpandedHeightInternal((float) animation.getAnimatedValue());
                 });
         return animator;
+    }
+
+    private void registerAnimatorForTest(Animator animator) {
+        if (mTestSetOfAnimatorsUsed != null && animator != null) {
+            mTestSetOfAnimatorsUsed.add(animator);
+        }
     }
 
     /** Update the visibility of {@link NotificationPanelView} if necessary. */

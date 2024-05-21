@@ -52,7 +52,7 @@ constructor(
             .map { it.isUdfps() }
             .stateIn(
                 scope = applicationScope,
-                started = SharingStarted.Eagerly,
+                started = SharingStarted.WhileSubscribed(),
                 initialValue = repository.sensorType.value.isUdfps(),
             )
 

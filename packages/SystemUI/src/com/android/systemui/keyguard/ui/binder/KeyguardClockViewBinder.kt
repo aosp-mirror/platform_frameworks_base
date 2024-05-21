@@ -37,7 +37,6 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.clocks.AodClockBurnInModel
 import com.android.systemui.plugins.clocks.ClockController
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 object KeyguardClockViewBinder {
@@ -113,24 +112,17 @@ object KeyguardClockViewBinder {
 
                 launch {
                     if (!MigrateClocksToBlueprint.isEnabled) return@launch
-                    combine(
-                            rootViewModel.translationX,
-                            rootViewModel.translationY,
-                            rootViewModel.scale,
-                            ::Triple
-                        )
-                        .collect { (translationX, translationY, scale) ->
-                            viewModel.currentClock.value
-                                ?.largeClock
-                                ?.layout
-                                ?.applyAodBurnIn(
-                                    AodClockBurnInModel(
-                                        translationX = translationX.value!!,
-                                        translationY = translationY,
-                                        scale = scale.scale
-                                    )
+                    rootViewModel.burnInModel.collect { burnInModel ->
+                        viewModel.currentClock.value?.let {
+                            it.largeClock.layout.applyAodBurnIn(
+                                AodClockBurnInModel(
+                                    translationX = burnInModel.translationX.toFloat(),
+                                    translationY = burnInModel.translationY.toFloat(),
+                                    scale = burnInModel.scale
                                 )
+                            )
                         }
+                    }
                 }
             }
         }

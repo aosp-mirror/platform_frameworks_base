@@ -32,6 +32,12 @@ constructor(ctx: Context, view: View, row: ExpandableNotificationRow) :
 
     private var conversationIconView: CachingIconView? = null
     private var expandBtn: View? = null
+    private var titleView: View? = null
+    private var headerTextSecondary: View? = null
+    private var subText: View? = null
+    private var facePileTop: View? = null
+    private var facePileBottom: View? = null
+    private var facePileBottomBg: View? = null
     override fun onContentUpdated(row: ExpandableNotificationRow?) {
         resolveViews()
         super.onContentUpdated(row)
@@ -39,6 +45,14 @@ constructor(ctx: Context, view: View, row: ExpandableNotificationRow) :
 
     private fun resolveViews() {
         conversationIconView = compactMessagingView.requireViewById(R.id.conversation_icon)
+        titleView = compactMessagingView.findViewById(R.id.title)
+        headerTextSecondary = compactMessagingView.findViewById(R.id.header_text_secondary)
+        subText = compactMessagingView.findViewById(R.id.header_text)
+        facePileTop = compactMessagingView.findViewById(R.id.conversation_face_pile_top)
+        facePileBottom = compactMessagingView.findViewById(R.id.conversation_face_pile_bottom)
+        facePileBottomBg =
+            compactMessagingView.findViewById(R.id.conversation_face_pile_bottom_background)
+
         expandBtn = compactMessagingView.requireViewById(R.id.expand_button)
     }
 
@@ -47,6 +61,12 @@ constructor(ctx: Context, view: View, row: ExpandableNotificationRow) :
 
         addViewsTransformingToSimilar(
             conversationIconView,
+            titleView,
+            headerTextSecondary,
+            subText,
+            facePileTop,
+            facePileBottom,
+            facePileBottomBg,
             expandBtn,
         )
     }

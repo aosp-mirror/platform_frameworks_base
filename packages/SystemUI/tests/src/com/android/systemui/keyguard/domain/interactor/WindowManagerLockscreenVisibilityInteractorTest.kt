@@ -20,8 +20,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
+import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -30,6 +33,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.sceneContainerRepository
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
@@ -38,6 +42,7 @@ import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -727,42 +732,48 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableSceneContainer
-    fun sceneContainer_lockscreenVisibility_visibleWhenNotGone() =
+    fun lockscreenVisibility() =
         testScope.runTest {
-            val lockscreenVisibility by collectLastValue(underTest.value.lockscreenVisibility)
+            val isDeviceUnlocked by
+                collectLastValue(
+                    kosmos.deviceUnlockedInteractor.deviceUnlockStatus.map { it.isUnlocked }
+                )
+            assertThat(isDeviceUnlocked).isFalse()
 
-            sceneTransitions.value = lsToGone
+            val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+
+            val lockscreenVisibility by collectLastValue(underTest.value.lockscreenVisibility)
             assertThat(lockscreenVisibility).isTrue()
 
-            sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Gone)
-            assertThat(lockscreenVisibility).isFalse()
-
-            sceneTransitions.value = goneToLs
-            assertThat(lockscreenVisibility).isFalse()
-
-            sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Lockscreen)
+            kosmos.sceneInteractor.changeScene(Scenes.Bouncer, "")
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
             assertThat(lockscreenVisibility).isTrue()
-        }
 
-    @Test
-    @EnableSceneContainer
-    fun sceneContainer_lockscreenVisibility_notVisibleWhenReturningToGone() =
-        testScope.runTest {
-            val lockscreenVisibility by collectLastValue(underTest.value.lockscreenVisibility)
-
-            sceneTransitions.value = goneToLs
+            kosmos.authenticationInteractor.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)
+            assertThat(isDeviceUnlocked).isTrue()
+            kosmos.sceneInteractor.changeScene(Scenes.Gone, "")
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
             assertThat(lockscreenVisibility).isFalse()
 
-            sceneTransitions.value = lsToGone
+            kosmos.sceneInteractor.changeScene(Scenes.Shade, "")
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
             assertThat(lockscreenVisibility).isFalse()
 
-            sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Gone)
+            kosmos.sceneInteractor.changeScene(Scenes.QuickSettings, "")
+            assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
             assertThat(lockscreenVisibility).isFalse()
 
-            sceneTransitions.value = goneToLs
+            kosmos.sceneInteractor.changeScene(Scenes.Shade, "")
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
             assertThat(lockscreenVisibility).isFalse()
 
-            sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Lockscreen)
+            kosmos.sceneInteractor.changeScene(Scenes.Gone, "")
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            assertThat(lockscreenVisibility).isFalse()
+
+            kosmos.sceneInteractor.changeScene(Scenes.Lockscreen, "")
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
             assertThat(lockscreenVisibility).isTrue()
         }
 

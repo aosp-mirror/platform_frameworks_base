@@ -36,6 +36,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -274,6 +275,15 @@ class TaskFragmentContainer {
             addPendingAppearedActivity(pendingAppearedActivity);
         }
         mPendingAppearedIntent = pendingAppearedIntent;
+
+        // Save the information necessary for restoring the overlay when needed.
+        if (Flags.fixPipRestoreToOverlay() && overlayTag != null && pendingAppearedIntent != null
+                && associatedActivity != null && !associatedActivity.isFinishing()) {
+            final IBinder associatedActivityToken = associatedActivity.getActivityToken();
+            final OverlayContainerRestoreParams params = new OverlayContainerRestoreParams(mToken,
+                    launchOptions, pendingAppearedIntent);
+            mController.mOverlayRestoreParams.put(associatedActivityToken, params);
+        }
     }
 
     /**
@@ -1104,5 +1114,26 @@ class TaskFragmentContainer {
             }
         }
         return sb.append("]").toString();
+    }
+
+    static class OverlayContainerRestoreParams {
+        /** The token of the overlay container */
+        @NonNull
+        final IBinder mOverlayToken;
+
+        /** The launch options to create this container. */
+        @NonNull
+        final Bundle mOptions;
+
+        /** The Intent that used to be started in the overlay container. */
+        @NonNull
+        final Intent mIntent;
+
+        OverlayContainerRestoreParams(@NonNull IBinder overlayToken, @NonNull Bundle options,
+                @NonNull Intent intent) {
+            mOverlayToken = overlayToken;
+            mOptions = options;
+            mIntent = intent;
+        }
     }
 }

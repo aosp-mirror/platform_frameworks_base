@@ -21,22 +21,15 @@ import android.net.Uri
 import androidx.slice.Slice
 import androidx.slice.SliceViewManager
 import com.android.settingslib.bluetooth.BluetoothUtils
-import com.android.settingslib.media.BluetoothMediaDevice
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.slice.sliceForUri
-import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactory
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 
 /** Provides ANC slice data */
 interface AncSliceRepository {
@@ -49,35 +42,30 @@ interface AncSliceRepository {
      * - there is no supported device connected;
      * - there is no slice provider for the uri;
      */
-    fun ancSlice(width: Int, isCollapsed: Boolean, hideLabel: Boolean): Flow<Slice?>
+    fun ancSlice(
+        device: BluetoothDevice,
+        width: Int,
+        isCollapsed: Boolean,
+        hideLabel: Boolean
+    ): Flow<Slice?>
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class AncSliceRepositoryImpl
 @AssistedInject
 constructor(
-    mediaRepositoryFactory: LocalMediaRepositoryFactory,
-    @Background private val backgroundCoroutineContext: CoroutineContext,
     @Main private val mainCoroutineContext: CoroutineContext,
     @Assisted private val sliceViewManager: SliceViewManager,
 ) : AncSliceRepository {
 
-    private val localMediaRepository = mediaRepositoryFactory.create(null)
-
-    override fun ancSlice(width: Int, isCollapsed: Boolean, hideLabel: Boolean): Flow<Slice?> {
-        return localMediaRepository.currentConnectedDevice
-            .map {
-                (it as? BluetoothMediaDevice)
-                    ?.cachedDevice
-                    ?.device
-                    ?.getExtraControlUri(width, isCollapsed, hideLabel)
-            }
-            .distinctUntilChanged()
-            .flatMapLatest { sliceUri ->
-                sliceUri ?: return@flatMapLatest flowOf(null)
-                sliceViewManager.sliceForUri(sliceUri).flowOn(mainCoroutineContext)
-            }
-            .flowOn(backgroundCoroutineContext)
+    override fun ancSlice(
+        device: BluetoothDevice,
+        width: Int,
+        isCollapsed: Boolean,
+        hideLabel: Boolean
+    ): Flow<Slice?> {
+        val sliceUri =
+            device.getExtraControlUri(width, isCollapsed, hideLabel) ?: return flowOf(null)
+        return sliceViewManager.sliceForUri(sliceUri).flowOn(mainCoroutineContext)
     }
 
     private fun BluetoothDevice.getExtraControlUri(

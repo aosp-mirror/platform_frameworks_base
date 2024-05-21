@@ -59,6 +59,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
         private const val NEGATIVE_TEXT = "escape"
 
         private const val USER_ID = 8
+        private const val REQUEST_ID = 8L
         private const val CHALLENGE = 999L
         private const val OP_PACKAGE_NAME = "biometric.testapp"
         private val componentNameOverriddenForConfirmDeviceCredentialActivity =
@@ -150,6 +151,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
         interactor.setPrompt(
             info,
             USER_ID,
+            REQUEST_ID,
             modalities,
             CHALLENGE,
             OP_PACKAGE_NAME,
@@ -179,7 +181,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
         }
         assertThat(isConfirmationRequired).isEqualTo(confirmationRequired)
 
-        interactor.resetPrompt()
+        interactor.resetPrompt(REQUEST_ID)
         verifyUnset()
     }
 
@@ -206,6 +208,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
             interactor.setPrompt(
                 info,
                 USER_ID,
+                REQUEST_ID,
                 modalities,
                 CHALLENGE,
                 OP_PACKAGE_NAME,
@@ -214,7 +217,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
 
             assertThat(promptKind?.isBiometric()).isTrue()
 
-            interactor.resetPrompt()
+            interactor.resetPrompt(REQUEST_ID)
             verifyUnset()
         }
 
@@ -230,6 +233,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
             interactor.setPrompt(
                 info,
                 USER_ID,
+                REQUEST_ID,
                 modalities,
                 CHALLENGE,
                 OP_PACKAGE_NAME,
@@ -238,7 +242,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
 
             assertThat(promptKind).isEqualTo(PromptKind.Password)
 
-            interactor.resetPrompt()
+            interactor.resetPrompt(REQUEST_ID)
             verifyUnset()
         }
 
@@ -258,6 +262,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
             interactor.setPrompt(
                 info,
                 USER_ID,
+                REQUEST_ID,
                 modalities,
                 CHALLENGE,
                 OP_PACKAGE_NAME,
@@ -266,7 +271,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
 
             assertThat(promptKind).isEqualTo(PromptKind.Password)
 
-            interactor.resetPrompt()
+            interactor.resetPrompt(REQUEST_ID)
             verifyUnset()
         }
 
@@ -290,6 +295,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
             interactor.setPrompt(
                 info,
                 USER_ID,
+                REQUEST_ID,
                 modalities,
                 CHALLENGE,
                 OP_PACKAGE_NAME,
@@ -298,7 +304,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
 
             assertThat(promptKind).isEqualTo(PromptKind.Password)
 
-            interactor.resetPrompt()
+            interactor.resetPrompt(REQUEST_ID)
             verifyUnset()
         }
 
@@ -319,6 +325,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
             interactor.setPrompt(
                 info,
                 USER_ID,
+                REQUEST_ID,
                 modalities,
                 CHALLENGE,
                 OP_PACKAGE_NAME,
@@ -327,7 +334,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
 
             assertThat(promptKind?.isBiometric()).isTrue()
 
-            interactor.resetPrompt()
+            interactor.resetPrompt(REQUEST_ID)
             verifyUnset()
         }
 
@@ -355,6 +362,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
         interactor.setPrompt(
             info,
             USER_ID,
+            REQUEST_ID,
             BiometricModalities(),
             CHALLENGE,
             OP_PACKAGE_NAME,
@@ -365,7 +373,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
         assertThat(currentPrompt).isNull()
         assertThat(credentialKind).isEqualTo(PromptKind.None)
 
-        interactor.resetPrompt()
+        interactor.resetPrompt(REQUEST_ID)
         verifyUnset()
     }
 

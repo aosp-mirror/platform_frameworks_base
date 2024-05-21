@@ -2133,8 +2133,7 @@ public class BubblesTest extends SysuiTestCase {
 
         FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
         mBubbleController.registerBubbleStateListener(bubbleStateListener);
-        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(),
-                new Rect(500, 1000, 600, 1100));
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), 1000);
 
         assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
 
@@ -2158,7 +2157,7 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController.updateBubble(mBubbleEntry2);
 
         // Select first bubble
-        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), new Rect());
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), 0);
         assertThat(mBubbleData.getSelectedBubbleKey()).isEqualTo(mBubbleEntry.getKey());
         assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
 
@@ -2167,7 +2166,7 @@ public class BubblesTest extends SysuiTestCase {
         assertThat(mBubbleController.getLayerView().isExpanded()).isFalse();
 
         // Stop dragging, first bubble should be expanded
-        mBubbleController.stopBubbleDrag(BubbleBarLocation.LEFT);
+        mBubbleController.stopBubbleDrag(BubbleBarLocation.LEFT, 0);
         assertThat(mBubbleData.getSelectedBubbleKey()).isEqualTo(mBubbleEntry.getKey());
         assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
     }
@@ -2187,7 +2186,7 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController.updateBubble(mBubbleEntry2);
 
         // Select first bubble
-        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), new Rect());
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), 0);
         assertThat(mBubbleData.getSelectedBubbleKey()).isEqualTo(mBubbleEntry.getKey());
         assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
 
@@ -2196,7 +2195,7 @@ public class BubblesTest extends SysuiTestCase {
         assertThat(mBubbleController.getLayerView().isExpanded()).isFalse();
 
         // Stop dragging, first bubble should be expanded
-        mBubbleController.stopBubbleDrag(BubbleBarLocation.LEFT);
+        mBubbleController.stopBubbleDrag(BubbleBarLocation.LEFT, 0);
         assertThat(mBubbleData.getSelectedBubbleKey()).isEqualTo(mBubbleEntry.getKey());
         assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
     }
@@ -2216,7 +2215,7 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController.updateBubble(mBubbleEntry2);
 
         // Select first bubble
-        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), new Rect());
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), 0);
         // Drag first bubble to dismiss
         mBubbleController.startBubbleDrag(mBubbleEntry.getKey());
         mBubbleController.dragBubbleToDismiss(mBubbleEntry.getKey());
@@ -2240,7 +2239,7 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController.updateBubble(mBubbleEntry2);
 
         // Select first bubble
-        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), new Rect());
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), 0);
         // Drag second bubble to dismiss
         mBubbleController.startBubbleDrag(mBubbleEntry2.getKey());
         mBubbleController.dragBubbleToDismiss(mBubbleEntry2.getKey());

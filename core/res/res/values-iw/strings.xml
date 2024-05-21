@@ -284,6 +284,8 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"האסיסטנט"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"נעילה"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
+    <skip />
     <string name="notification_hidden_text" msgid="2835519769868187223">"התראה חדשה"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"מקלדת פיזית"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"אבטחה"</string>
@@ -2395,7 +2397,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"פריסת המקלדת מוגדרת ל<xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… אפשר להקיש כדי לשנות את ההגדרה הזו."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"הוגדרו מקלדות פיזיות"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"יש להקיש כדי להציג את המקלדות"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"פרטי"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"פרופיל פרטי"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"שכפול"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"פרופיל עבודה"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"פרופיל עבודה 2"</string>
@@ -2414,22 +2416,15 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"‏לפתיחת Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"איך זה עובד"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"בהמתנה..."</string>
-    <!-- no translation found for fingerprint_dangling_notification_title (7362075195588639989) -->
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"הגדרה חוזרת של \'ביטול הנעילה בטביעת אצבע\'"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (6261149111900787302) -->
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
     <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7688302770424064884) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_1 (2927018569542316055) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_all_deleted_2 (6897989352716156176) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_title (947852541060975473) -->
-    <skip />
-    <!-- no translation found for face_dangling_notification_msg (8806849376915541655) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_set_up (8246885009807817961) -->
-    <skip />
-    <!-- no translation found for biometric_dangling_notification_action_not_now (8095249216864443491) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"‫<xliff:g id="FINGERPRINT">%s</xliff:g> לא פעלה היטב ולכן היא נמחקה. עליך להגדיר אותה שוב כדי שתהיה לך אפשרות לבטל את הנעילה של הטלפון באמצעות טביעת אצבע."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"‫<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ו<xliff:g id="FINGERPRINT_1">%2$s</xliff:g> לא פעלו היטב ולכן הן נמחקו. עליך להגדיר אותן שוב כדי שתהיה לך אפשרות לבטל את הנעילה של הטלפון באמצעות טביעת אצבע."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"הגדרה חוזרת של \'פתיחה ע\"י זיהוי הפנים\'"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"התבנית לזיהוי הפנים לא פעלה היטב ולכן היא נמחקה. עליך להגדיר אותה שוב כדי שתהיה לך אפשרות לבטל את הנעילה של הטלפון באמצעות זיהוי הפנים."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"הגדרה"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"לא עכשיו"</string>
 </resources>

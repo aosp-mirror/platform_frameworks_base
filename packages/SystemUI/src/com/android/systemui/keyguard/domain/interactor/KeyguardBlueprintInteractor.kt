@@ -20,6 +20,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.content.Context
+import android.util.Log
 import com.android.systemui.biometrics.domain.interactor.FingerprintPropertyInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
@@ -42,6 +43,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -78,7 +80,15 @@ constructor(
     private val refreshEvents: Flow<Unit> =
         merge(
             configurationInteractor.onAnyConfigurationChange,
-            fingerprintPropertyInteractor.propertiesInitialized.filter { it }.map {},
+            fingerprintPropertyInteractor.propertiesInitialized
+                .filter { it }
+                .map { Unit }
+                .onEach {
+                    Log.d(
+                        "KeyguardBlueprintInteractor",
+                        "triggering refreshEvent from fpPropertiesInitialized"
+                    )
+                },
         )
 
     init {

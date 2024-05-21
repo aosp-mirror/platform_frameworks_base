@@ -397,7 +397,8 @@ public class SplitControllerTest {
     @Test
     public void testOnActivityReparentedToTask_sameProcess() {
         mSplitController.onActivityReparentedToTask(mTransaction, TASK_ID, new Intent(),
-                mActivity.getActivityToken());
+                mActivity.getActivityToken(), null /* fillTaskActivityToken */,
+                null /* lastOverlayToken */);
 
         // Treated as on activity created, but allow to split as primary.
         verify(mSplitController).resolveActivityToContainer(mTransaction,
@@ -413,7 +414,8 @@ public class SplitControllerTest {
         final IBinder activityToken = new Binder();
         final Intent intent = new Intent();
 
-        mSplitController.onActivityReparentedToTask(mTransaction, TASK_ID, intent, activityToken);
+        mSplitController.onActivityReparentedToTask(mTransaction, TASK_ID, intent, activityToken,
+                null /* fillTaskActivityToken */, null /* lastOverlayToken */);
 
         // Treated as starting new intent
         verify(mSplitController, never()).resolveActivityToContainer(any(), any(), anyBoolean());
@@ -1210,7 +1212,7 @@ public class SplitControllerTest {
         mSplitController.onTransactionReady(transaction);
 
         verify(mSplitController).onActivityReparentedToTask(any(), eq(TASK_ID), eq(intent),
-                eq(activityToken));
+                eq(activityToken), any(), any());
         verify(mSplitPresenter).onTransactionHandled(eq(transaction.getTransactionToken()), any(),
                 anyInt(), anyBoolean());
     }

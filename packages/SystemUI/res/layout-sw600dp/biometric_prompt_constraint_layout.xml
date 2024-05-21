@@ -33,8 +33,7 @@
         layout="@layout/biometric_prompt_button_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="40dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/bottomGuideline"
         app:layout_constraintEnd_toEndOf="@id/panel"
         app:layout_constraintStart_toStartOf="@id/panel" />
 

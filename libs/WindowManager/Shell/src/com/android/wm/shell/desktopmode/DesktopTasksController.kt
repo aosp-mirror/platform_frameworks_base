@@ -73,6 +73,8 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.shared.DesktopModeStatus
+import com.android.wm.shell.shared.DesktopModeStatus.DESKTOP_DENSITY_OVERRIDE
+import com.android.wm.shell.shared.DesktopModeStatus.isDesktopDensityOverrideSet
 import com.android.wm.shell.shared.annotations.ExternalThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -906,18 +908,22 @@ class DesktopTasksController(
                     task.taskId
             )
             return WindowContainerTransaction().also { wct ->
-                addMoveToFullscreenChanges(wct, task)
+                bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
+                wct.reorder(task.token, true)
             }
+        }
+        val wct = WindowContainerTransaction()
+        if (isDesktopDensityOverrideSet()) {
+            wct.setDensityDpi(task.token, DESKTOP_DENSITY_OVERRIDE)
         }
         // Desktop Mode is showing and we're launching a new Task - we might need to minimize
         // a Task.
-        val wct = WindowContainerTransaction()
         val taskToMinimize = addAndGetMinimizeChangesIfNeeded(task.displayId, wct, task)
         if (taskToMinimize != null) {
             addPendingMinimizeTransition(transition, taskToMinimize)
             return wct
         }
-        return null
+        return if (wct.isEmpty) null else wct
     }
 
     private fun handleFullscreenTaskLaunch(
@@ -985,7 +991,7 @@ class DesktopTasksController(
         wct.setWindowingMode(taskInfo.token, targetWindowingMode)
         wct.reorder(taskInfo.token, true /* onTop */)
         if (isDesktopDensityOverrideSet()) {
-            wct.setDensityDpi(taskInfo.token, getDesktopDensityDpi())
+            wct.setDensityDpi(taskInfo.token, DESKTOP_DENSITY_OVERRIDE)
         }
     }
 
@@ -1087,10 +1093,6 @@ class DesktopTasksController(
 
     private fun getDefaultDensityDpi(): Int {
         return context.resources.displayMetrics.densityDpi
-    }
-
-    private fun getDesktopDensityDpi(): Int {
-        return DESKTOP_DENSITY_OVERRIDE
     }
 
     /** Creates a new instance of the external interface to pass to another process. */
@@ -1466,21 +1468,9 @@ class DesktopTasksController(
     }
 
     companion object {
-        private val DESKTOP_DENSITY_OVERRIDE =
-            SystemProperties.getInt("persist.wm.debug.desktop_mode_density", 284)
-        private val DESKTOP_DENSITY_ALLOWED_RANGE = (100..1000)
-
         @JvmField
         val DESKTOP_MODE_INITIAL_BOUNDS_SCALE = SystemProperties
                 .getInt("persist.wm.debug.desktop_mode_initial_bounds_scale", 75) / 100f
-
-        /**
-         * Check if desktop density override is enabled
-         */
-        @JvmStatic
-        fun isDesktopDensityOverrideSet(): Boolean {
-            return DESKTOP_DENSITY_OVERRIDE in DESKTOP_DENSITY_ALLOWED_RANGE
-        }
     }
 
     /** The positions on a screen that a task can snap to. */

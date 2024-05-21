@@ -33,6 +33,7 @@ import org.junit.runners.JUnit4
 import org.mockito.junit.MockitoJUnit
 
 private const val USER_ID = 22
+private const val REQUEST_ID = 22L
 private const val OPERATION_ID = 100L
 private const val OP_PACKAGE_NAME = "biometric.testapp"
 
@@ -112,6 +113,7 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
                 },
                 kind = PromptKind.Pin,
                 userId = USER_ID,
+                requestId = REQUEST_ID,
                 challenge = OPERATION_ID,
                 opPackageName = OP_PACKAGE_NAME
             )
@@ -137,6 +139,7 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
                 },
                 kind = PromptKind.Pin,
                 userId = USER_ID,
+                requestId = REQUEST_ID,
                 challenge = OPERATION_ID,
                 opPackageName = OP_PACKAGE_NAME
             )
@@ -165,6 +168,7 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
                 },
                 kind = PromptKind.Pin,
                 userId = USER_ID,
+                requestId = REQUEST_ID,
                 challenge = OPERATION_ID,
                 opPackageName = OP_PACKAGE_NAME
             )
@@ -198,6 +202,7 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
                 },
                 kind = kind,
                 userId = USER_ID,
+                requestId = REQUEST_ID,
                 challenge = OPERATION_ID,
                 opPackageName = OP_PACKAGE_NAME
             )
@@ -223,7 +228,7 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
                 assertThat(pattern.stealthMode).isEqualTo(isStealth)
             }
 
-            interactor.resetPrompt()
+            interactor.resetPrompt(REQUEST_ID)
 
             assertThat(prompt).isNull()
         }
@@ -346,12 +351,14 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
         promptInfo: PromptInfo,
         kind: PromptKind,
         userId: Int,
+        requestId: Long,
         challenge: Long,
         opPackageName: String,
     ) {
         biometricPromptRepository.setPrompt(
             promptInfo,
             userId,
+            requestId,
             challenge,
             kind,
             opPackageName,
@@ -359,8 +366,8 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
     }
 
     /** Unset the current authentication request. */
-    private fun PromptCredentialInteractor.resetPrompt() {
-        biometricPromptRepository.unsetPrompt()
+    private fun PromptCredentialInteractor.resetPrompt(requestId: Long) {
+        biometricPromptRepository.unsetPrompt(requestId)
     }
 }
 

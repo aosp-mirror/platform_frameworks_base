@@ -77,7 +77,6 @@ import static android.content.pm.ActivityInfo.FLAG_NO_HISTORY;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.ActivityInfo.FLAG_STATE_NOT_NEEDED;
 import static android.content.pm.ActivityInfo.FLAG_TURN_SCREEN_ON;
-import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_INSETS_DECOUPLED_CONFIGURATION;
 import static android.content.pm.ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
@@ -87,6 +86,7 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
+import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_INSETS_DECOUPLED_CONFIGURATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_EXCLUDE_PORTRAIT_FULLSCREEN;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM;
@@ -121,6 +121,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.ACTIVITY_EMBEDDING_GUARD_WITH_ANDROID_15;
+import static android.view.WindowManager.ENABLE_ACTIVITY_EMBEDDING_FOR_ANDROID_15;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -128,7 +129,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED;
 import static android.view.WindowManager.PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING;
-import static android.view.WindowManager.ENABLE_ACTIVITY_EMBEDDING_FOR_ANDROID_15;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
@@ -681,6 +681,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // due to picture-in-picture. This gets cleared whenever this activity or the Task
     // it references to gets removed. This should also be cleared when we move out of pip.
     private Task mLastParentBeforePip;
+
+    // The token of the previous TaskFragment parent of this embedded ActivityRecord when it is
+    // reparented to a new Task due to picture-in-picture.
+    // Note that the TaskFragment may be finished and no longer attached in WM hierarchy.
+    @Nullable
+    private IBinder mLastEmbeddedParentTfTokenBeforePip;
 
     // Only set if this instance is a launch-into-pip Activity, points to the
     // host Activity the launch-into-pip Activity is originated from.
@@ -1806,6 +1812,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mLastTaskFragmentOrganizerBeforePip = organizedTf != null
                 ? organizedTf.getTaskFragmentOrganizer()
                 : null;
+        if (organizedTf != null
+                // Not necessary for content pip.
+                && launchIntoPipHostActivity == null) {
+            mLastEmbeddedParentTfTokenBeforePip = organizedTf.getFragmentToken();
+        }
     }
 
     void clearLastParentBeforePip() {
@@ -1815,10 +1826,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         mLaunchIntoPipHostActivity = null;
         mLastTaskFragmentOrganizerBeforePip = null;
+        mLastEmbeddedParentTfTokenBeforePip = null;
     }
 
     @Nullable Task getLastParentBeforePip() {
         return mLastParentBeforePip;
+    }
+
+    @Nullable IBinder getLastEmbeddedParentTfTokenBeforePip() {
+        return mLastEmbeddedParentTfTokenBeforePip;
     }
 
     @Nullable ActivityRecord getLaunchIntoPipHostActivity() {

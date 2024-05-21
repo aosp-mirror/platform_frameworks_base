@@ -69,7 +69,7 @@ object QuickSettings {
 
 private fun SceneScope.stateForQuickSettingsContent(
     isSplitShade: Boolean,
-    squishiness: Float = QuickSettings.SharedValues.SquishinessValues.Default
+    squishiness: () -> Float = { QuickSettings.SharedValues.SquishinessValues.Default }
 ): QSSceneAdapter.State {
     return when (val transitionState = layoutState.transitionState) {
         is TransitionState.Idle -> {
@@ -125,9 +125,9 @@ fun SceneScope.QuickSettings(
     heightProvider: () -> Int,
     isSplitShade: Boolean,
     modifier: Modifier = Modifier,
-    squishiness: Float = QuickSettings.SharedValues.SquishinessValues.Default,
+    squishiness: () -> Float = { QuickSettings.SharedValues.SquishinessValues.Default },
 ) {
-    val contentState = stateForQuickSettingsContent(isSplitShade, squishiness)
+    val contentState = { stateForQuickSettingsContent(isSplitShade, squishiness) }
     val transitionState = layoutState.transitionState
     val isClosing =
         transitionState is TransitionState.Transition &&
@@ -161,7 +161,7 @@ fun SceneScope.QuickSettings(
 @Composable
 private fun QuickSettingsContent(
     qsSceneAdapter: QSSceneAdapter,
-    state: QSSceneAdapter.State,
+    state: () -> QSSceneAdapter.State,
     modifier: Modifier = Modifier,
 ) {
     val qsView by qsSceneAdapter.qsView.collectAsStateWithLifecycle(null)
@@ -185,10 +185,10 @@ private fun QuickSettingsContent(
                 AndroidView(
                     modifier = Modifier.fillMaxWidth(),
                     factory = { _ ->
-                        qsSceneAdapter.setState(state)
+                        qsSceneAdapter.setState(state())
                         view
                     },
-                    update = { qsSceneAdapter.setState(state) }
+                    update = { qsSceneAdapter.setState(state()) }
                 )
             }
         }

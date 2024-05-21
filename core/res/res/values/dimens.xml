@@ -846,6 +846,12 @@
     <dimen name="conversation_face_pile_protection_width">2dp</dimen>
     <!-- The width of the protection of the face pile layout when expanded-->
     <dimen name="conversation_face_pile_protection_width_expanded">@dimen/conversation_face_pile_protection_width</dimen>
+    <!-- size of the compact face pile -->
+    <dimen name="conversation_compact_face_pile_size">24dp</dimen>
+    <!-- size of the face pile avatar -->
+    <dimen name="conversation_compact_face_pile_avatar_size">17dp</dimen>
+    <!-- size of the face pile protection -->
+    <dimen name="conversation_compact_face_pile_protection_width">1dp</dimen>
     <!-- The padding of the expanded message container-->
     <dimen name="expanded_group_conversation_message_padding">32dp</dimen>
     <!-- The stroke width of the ring used to visually mark a conversation as important -->

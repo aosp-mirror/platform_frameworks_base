@@ -18,10 +18,6 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.START_SUCCESS;
-import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
-import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_COMPAT;
-import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
-import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -393,20 +389,13 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
 
     private static BackgroundStartPrivileges getBackgroundStartPrivilegesAllowedByCaller(
             @Nullable Bundle options, int callingUid, @Nullable String callingPackage) {
-        if (options == null) {
+        if (options == null || !options.containsKey(
+                        ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED)) {
             return getDefaultBackgroundStartPrivileges(callingUid, callingPackage);
         }
-        switch (options.getInt(ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
-                MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED)) {
-            case MODE_BACKGROUND_ACTIVITY_START_DENIED:
-                return BackgroundStartPrivileges.NONE;
-            case MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED:
-                return getDefaultBackgroundStartPrivileges(callingUid, callingPackage);
-            case MODE_BACKGROUND_ACTIVITY_START_ALLOWED:
-            case MODE_BACKGROUND_ACTIVITY_START_COMPAT:
-            default:
-                return BackgroundStartPrivileges.ALLOW_BAL;
-        }
+        return options.getBoolean(ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED)
+                ? BackgroundStartPrivileges.ALLOW_BAL
+                : BackgroundStartPrivileges.NONE;
     }
 
     /**

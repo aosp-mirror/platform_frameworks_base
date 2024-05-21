@@ -1241,7 +1241,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 // have any running activities, not starting one and not home stack.
                 shouldBeVisible = hasRunningActivities
                         || (starting != null && starting.isDescendantOf(this))
-                        || isActivityTypeHome();
+                        || (isActivityTypeHome() && !isEmbedded());
                 break;
             }
 
