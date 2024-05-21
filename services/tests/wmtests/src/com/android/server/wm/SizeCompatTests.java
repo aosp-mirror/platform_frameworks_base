@@ -396,8 +396,7 @@ public class SizeCompatTests extends WindowTestsBase {
         opaqueActivity.removeImmediately();
 
         // Check that updateInheritedLetterbox() is invoked again
-        verify(translucentActivity.mLetterboxUiController.getTransparentPolicy())
-                .updateInheritedLetterbox();
+        verify(translucentActivity.mLetterboxUiController.getTransparentPolicy()).start();
     }
 
     // TODO(b/333663877): Enable test after fix
@@ -466,8 +465,6 @@ public class SizeCompatTests extends WindowTestsBase {
         mTask.addChild(translucentActivity);
         // Transparent strategy applied
         assertTrue(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
-        assertNotNull(translucentActivity.mLetterboxUiController
-                .getTransparentPolicy().mFirstOpaqueActivityBeneath);
 
         spyOn(translucentActivity.mLetterboxUiController.getTransparentPolicy());
         clearInvocations(translucentActivity.mLetterboxUiController.getTransparentPolicy());
@@ -475,11 +472,10 @@ public class SizeCompatTests extends WindowTestsBase {
         // We destroy the first opaque activity
         mActivity.removeImmediately();
 
-        // Check that updateInheritedLetterbox() is invoked again on the TransparentPolicy
-        verify(translucentActivity.mLetterboxUiController.getTransparentPolicy())
-                .updateInheritedLetterbox();
-        assertNull(translucentActivity.mLetterboxUiController
-                .getTransparentPolicy().mFirstOpaqueActivityBeneath);
+        // Check that start() is invoked again on the TransparentPolicy
+        verify(translucentActivity.mLetterboxUiController.getTransparentPolicy()).start();
+        assertFalse(translucentActivity.mLetterboxUiController
+                .getTransparentPolicy().hasInheritedLetterboxBehavior());
     }
 
     @Test
@@ -507,11 +503,12 @@ public class SizeCompatTests extends WindowTestsBase {
         // Transparent strategy applied
         assertTrue(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
 
-        spyOn(translucentActivity.mLetterboxUiController);
-        clearInvocations(translucentActivity.mLetterboxUiController);
+        spyOn(translucentActivity.mLetterboxUiController.getTransparentPolicy());
+        clearInvocations(translucentActivity.mLetterboxUiController.getTransparentPolicy());
 
         // Check that updateInheritedLetterbox() is invoked again
-        verify(translucentActivity.mLetterboxUiController, never()).updateInheritedLetterbox();
+        verify(translucentActivity.mLetterboxUiController.getTransparentPolicy(), never())
+                .start();
     }
 
     @Test

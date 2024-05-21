@@ -132,6 +132,7 @@ import java.io.PrintWriter;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /** Controls behaviour of the letterbox UI for {@link mActivityRecord}. */
 // TODO(b/185262487): Improve test coverage of this class. Parts of it are tested in
@@ -244,7 +245,24 @@ final class LetterboxUiController {
         // to use it after since controller is only used in ActivityRecord.
         mActivityRecord = activityRecord;
 
-        mTransparentPolicy = new TransparentPolicy(activityRecord, mLetterboxConfiguration);
+        mTransparentPolicy = new TransparentPolicy(activityRecord, mLetterboxConfiguration,
+                new Predicate<ActivityRecord>() {
+                    @Override
+                    public boolean test(ActivityRecord opaqueActivity) {
+                        if (opaqueActivity == null || opaqueActivity.isEmbedded()) {
+                            // We skip letterboxing if the translucent activity doesn't have any
+                            // opaque activities beneath or the activity below is embedded which
+                            // never has letterbox.
+                            mActivityRecord.recomputeConfiguration();
+                            return true;
+                        }
+                        if (mActivityRecord.getTask() == null || mActivityRecord.fillsParent()
+                                || mActivityRecord.hasCompatDisplayInsetsWithoutInheritance()) {
+                            return true;
+                        }
+                        return false;
+                    }
+                });
         PackageManager packageManager = wmService.mContext.getPackageManager();
 
         final OptPropFactory optPropBuilder = new OptPropFactory(packageManager,
@@ -322,7 +340,7 @@ final class LetterboxUiController {
             mLetterbox.destroy();
             mLetterbox = null;
         }
-        mTransparentPolicy.destroy();
+        mTransparentPolicy.stop();
     }
 
     void onMovedToDisplay(int displayId) {
@@ -1303,7 +1321,8 @@ final class LetterboxUiController {
         // Use screen resolved bounds which uses resolved bounds or size compat bounds
         // as activity bounds can sometimes be empty
         final Rect opaqueActivityBounds = hasInheritedLetterboxBehavior()
-                ? getTransparentPolicy().mFirstOpaqueActivityBeneath.getScreenResolvedBounds()
+                ? getTransparentPolicy().getTransparentPolicyState()
+                    .mFirstOpaqueActivity.getScreenResolvedBounds()
                 : mActivityRecord.getScreenResolvedBounds();
         return mLetterboxConfiguration.getIsHorizontalReachabilityEnabled()
                 && parentConfiguration.windowConfiguration.getWindowingMode()
@@ -1341,7 +1360,8 @@ final class LetterboxUiController {
         // Use screen resolved bounds which uses resolved bounds or size compat bounds
         // as activity bounds can sometimes be empty
         final Rect opaqueActivityBounds = hasInheritedLetterboxBehavior()
-                ? getTransparentPolicy().mFirstOpaqueActivityBeneath.getScreenResolvedBounds()
+                ? getTransparentPolicy().getTransparentPolicyState()
+                    .mFirstOpaqueActivity.getScreenResolvedBounds()
                 : mActivityRecord.getScreenResolvedBounds();
         return mLetterboxConfiguration.getIsVerticalReachabilityEnabled()
                 && parentConfiguration.windowConfiguration.getWindowingMode()
@@ -1758,7 +1778,7 @@ final class LetterboxUiController {
      * first opaque activity beneath.
      */
     void updateInheritedLetterbox() {
-        mTransparentPolicy.updateInheritedLetterbox();
+        mTransparentPolicy.start();
     }
 
     /**
