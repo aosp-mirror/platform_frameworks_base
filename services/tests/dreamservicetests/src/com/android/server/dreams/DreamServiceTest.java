@@ -37,6 +37,7 @@ import android.service.dreams.DreamService;
 import android.service.dreams.Flags;
 import android.service.dreams.IDreamOverlayCallback;
 import android.testing.TestableLooper;
+import android.view.KeyEvent;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -180,5 +181,16 @@ public class DreamServiceTest {
         environment.resetClientInvocations();
         environment.advance(TestDreamEnvironment.DREAM_STATE_WOKEN);
         verify(environment.getDreamOverlayClient()).onWakeRequested();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_DREAM_HANDLES_CONFIRM_KEYS)
+    public void testPartialKeyHandling() throws Exception {
+        TestDreamEnvironment environment = new TestDreamEnvironment.Builder(mTestableLooper)
+                .build();
+        environment.advance(TestDreamEnvironment.DREAM_STATE_STARTED);
+
+        // Ensure service does not crash from only receiving up event.
+        environment.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_SPACE));
     }
 }
