@@ -411,18 +411,6 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#isInputDeviceEnabled(int)
-     */
-    public boolean isInputDeviceEnabled(int id) {
-        try {
-            return mIm.isInputDeviceEnabled(id);
-        } catch (RemoteException ex) {
-            Log.w(TAG, "Could not check enabled status of input device with id = " + id);
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * @see InputManager#enableInputDevice(int)
      */
     public void enableInputDevice(int id) {

@@ -183,8 +183,6 @@ interface NativeInputManagerService {
 
     void monitor();
 
-    boolean isInputDeviceEnabled(int deviceId);
-
     void enableInputDevice(int deviceId);
 
     void disableInputDevice(int deviceId);
@@ -461,9 +459,6 @@ interface NativeInputManagerService {
 
         @Override
         public native void monitor();
-
-        @Override
-        public native boolean isInputDeviceEnabled(int deviceId);
 
         @Override
         public native void enableInputDevice(int deviceId);
