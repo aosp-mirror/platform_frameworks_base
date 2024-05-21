@@ -273,7 +273,7 @@
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begränsning av wifi-sökning"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Slumpgenerering av icke-beständig MAC för wifi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobildata alltid aktiverad"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Maskinvaruacceleration för internetdelning"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hårdvaruacceleration för internetdelning"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Visa namnlösa Bluetooth-enheter"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Inaktivera Absolute volume"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Aktivera Gabeldorsche"</string>
