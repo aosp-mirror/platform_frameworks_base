@@ -265,6 +265,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     && state != BiometricSensor.STATE_CANCELING) {
                 Slog.d(TAG, "Skip retry because sensor: " + sensor.id + " is: " + state);
                 continue;
+            } else if (isTryAgain) {
+                mState = STATE_AUTH_PAUSED_RESUMING;
             }
 
             final int cookie = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
@@ -616,7 +618,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
 
         try {
             setSensorsToStateWaitingForCookie(true /* isTryAgain */);
-            mState = STATE_AUTH_PAUSED_RESUMING;
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException: " + e);
         }
