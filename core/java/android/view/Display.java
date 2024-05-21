@@ -1223,7 +1223,7 @@ public final class Display {
     public Mode[] getSupportedModes() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            final Display.Mode[] modes = mDisplayInfo.appsSupportedModes;
+            final Display.Mode[] modes = mDisplayInfo.supportedModes;
             return Arrays.copyOf(modes, modes.length);
         }
     }
@@ -2206,7 +2206,6 @@ public final class Display {
         @NonNull
         @HdrCapabilities.HdrType
         private final int[] mSupportedHdrTypes;
-        private final boolean mIsSynthetic;
 
         /**
          * @hide
@@ -2215,6 +2214,13 @@ public final class Display {
         public Mode(int width, int height, float refreshRate) {
             this(INVALID_MODE_ID, width, height, refreshRate, refreshRate, new float[0],
                     new int[0]);
+        }
+
+        /**
+         * @hide
+         */
+        public Mode(int width, int height, float refreshRate, float vsyncRate) {
+            this(INVALID_MODE_ID, width, height, refreshRate, vsyncRate, new float[0], new int[0]);
         }
 
         /**
@@ -2240,21 +2246,11 @@ public final class Display {
          */
         public Mode(int modeId, int width, int height, float refreshRate, float vsyncRate,
                 float[] alternativeRefreshRates, @HdrCapabilities.HdrType int[] supportedHdrTypes) {
-            this(modeId, width, height, refreshRate, vsyncRate, false, alternativeRefreshRates,
-                    supportedHdrTypes);
-        }
-        /**
-         * @hide
-         */
-        public Mode(int modeId, int width, int height, float refreshRate, float vsyncRate,
-                boolean isSynthetic, float[] alternativeRefreshRates,
-                @HdrCapabilities.HdrType int[] supportedHdrTypes) {
             mModeId = modeId;
             mWidth = width;
             mHeight = height;
             mPeakRefreshRate = refreshRate;
             mVsyncRate = vsyncRate;
-            mIsSynthetic = isSynthetic;
             mAlternativeRefreshRates =
                     Arrays.copyOf(alternativeRefreshRates, alternativeRefreshRates.length);
             Arrays.sort(mAlternativeRefreshRates);
@@ -2316,15 +2312,6 @@ public final class Display {
          */
         public float getVsyncRate() {
             return mVsyncRate;
-        }
-
-        /**
-         * Returns true if mode is synthetic and does not have corresponding
-         * SurfaceControl.DisplayMode
-         * @hide
-         */
-        public boolean isSynthetic() {
-            return mIsSynthetic;
         }
 
         /**
@@ -2462,7 +2449,6 @@ public final class Display {
                     .append(", height=").append(mHeight)
                     .append(", fps=").append(mPeakRefreshRate)
                     .append(", vsync=").append(mVsyncRate)
-                    .append(", synthetic=").append(mIsSynthetic)
                     .append(", alternativeRefreshRates=")
                     .append(Arrays.toString(mAlternativeRefreshRates))
                     .append(", supportedHdrTypes=")
@@ -2478,7 +2464,7 @@ public final class Display {
 
         private Mode(Parcel in) {
             this(in.readInt(), in.readInt(), in.readInt(), in.readFloat(), in.readFloat(),
-                    in.readBoolean(), in.createFloatArray(), in.createIntArray());
+                    in.createFloatArray(), in.createIntArray());
         }
 
         @Override
@@ -2488,7 +2474,6 @@ public final class Display {
             out.writeInt(mHeight);
             out.writeFloat(mPeakRefreshRate);
             out.writeFloat(mVsyncRate);
-            out.writeBoolean(mIsSynthetic);
             out.writeFloatArray(mAlternativeRefreshRates);
             out.writeIntArray(mSupportedHdrTypes);
         }

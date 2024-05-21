@@ -45,7 +45,6 @@ import com.android.server.LocalServices;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.DisplayIdProducer;
 import com.android.server.display.layout.Layout;
-import com.android.server.display.mode.SyntheticModeManager;
 import com.android.server.display.utils.DebugUtils;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.utils.FoldSettingProvider;
@@ -205,7 +204,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private boolean mBootCompleted = false;
     private boolean mInteractive;
     private final DisplayManagerFlags mFlags;
-    private final SyntheticModeManager mSyntheticModeManager;
 
     LogicalDisplayMapper(@NonNull Context context, FoldSettingProvider foldSettingProvider,
             FoldGracePeriodProvider foldGracePeriodProvider,
@@ -215,8 +213,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         this(context, foldSettingProvider, foldGracePeriodProvider, repo, listener, syncRoot,
                 handler,
                 new DeviceStateToLayoutMap((isDefault) -> isDefault ? DEFAULT_DISPLAY
-                        : sNextNonDefaultDisplayId++, flags), flags,
-                new SyntheticModeManager(flags));
+                        : sNextNonDefaultDisplayId++, flags), flags);
     }
 
     LogicalDisplayMapper(@NonNull Context context, FoldSettingProvider foldSettingProvider,
@@ -224,7 +221,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             @NonNull DisplayDeviceRepository repo,
             @NonNull Listener listener, @NonNull DisplayManagerService.SyncRoot syncRoot,
             @NonNull Handler handler, @NonNull DeviceStateToLayoutMap deviceStateToLayoutMap,
-            DisplayManagerFlags flags, SyntheticModeManager syntheticModeManager) {
+            DisplayManagerFlags flags) {
         mSyncRoot = syncRoot;
         mPowerManager = context.getSystemService(PowerManager.class);
         mInteractive = mPowerManager.isInteractive();
@@ -244,7 +241,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         mDisplayDeviceRepo.addListener(this);
         mDeviceStateToLayoutMap = deviceStateToLayoutMap;
         mFlags = flags;
-        mSyntheticModeManager = syntheticModeManager;
     }
 
     @Override
@@ -741,7 +737,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             mTempDisplayInfo.copyFrom(display.getDisplayInfoLocked());
             display.getNonOverrideDisplayInfoLocked(mTempNonOverrideDisplayInfo);
 
-            display.updateLocked(mDisplayDeviceRepo, mSyntheticModeManager);
+            display.updateLocked(mDisplayDeviceRepo);
             final DisplayInfo newDisplayInfo = display.getDisplayInfoLocked();
             final int updateState = mUpdatedLogicalDisplays.get(displayId, UPDATE_STATE_NEW);
             final boolean wasPreviouslyUpdated = updateState != UPDATE_STATE_NEW;
@@ -1181,7 +1177,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         final LogicalDisplay display = new LogicalDisplay(displayId, layerStack, device,
                 mFlags.isPixelAnisotropyCorrectionInLogicalDisplayEnabled(),
                 mFlags.isAlwaysRotateDisplayDeviceEnabled());
-        display.updateLocked(mDisplayDeviceRepo, mSyntheticModeManager);
+        display.updateLocked(mDisplayDeviceRepo);
 
         final DisplayInfo info = display.getDisplayInfoLocked();
         if (info.type == Display.TYPE_INTERNAL && mDeviceStateToLayoutMap.size() > 1) {

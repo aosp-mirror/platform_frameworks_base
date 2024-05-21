@@ -58,14 +58,11 @@ class AppRequestObserverTest {
         val modes = arrayOf(
             Display.Mode(1, 1000, 1000, 60f),
             Display.Mode(2, 1000, 1000, 90f),
-            Display.Mode(3, 1000, 1000, 120f),
-            Display.Mode(99, 1000, 1000, 45f, 45f, true, floatArrayOf(), intArrayOf())
+            Display.Mode(3, 1000, 1000, 120f)
         )
-
-        displayModeDirector.injectAppSupportedModesByDisplay(
-            SparseArray<Array<Display.Mode>>().apply {
-                append(Display.DEFAULT_DISPLAY, modes)
-            })
+        displayModeDirector.injectSupportedModesByDisplay(SparseArray<Array<Display.Mode>>().apply {
+            append(Display.DEFAULT_DISPLAY, modes)
+        })
         displayModeDirector.injectDefaultModeByDisplay(SparseArray<Display.Mode>().apply {
             append(Display.DEFAULT_DISPLAY, modes[0])
         })
@@ -119,9 +116,7 @@ class AppRequestObserverTest {
             BaseModeRefreshRateVote(60f), SizeVote(1000, 1000, 1000, 1000), null),
         PREFERRED_REFRESH_RATE_IGNORED(true, 0, 60f, 0f, 0f,
             null, null, null),
-        PREFERRED_REFRESH_RATE_INVALID(false, 0, 25f, 0f, 0f,
+        PREFERRED_REFRESH_RATE_INVALID(false, 0, 45f, 0f, 0f,
             null, null, null),
-        SYNTHETIC_MODE(false, 99, 0f, 0f, 0f,
-            RenderVote(45f, 45f), SizeVote(1000, 1000, 1000, 1000), null),
     }
 }

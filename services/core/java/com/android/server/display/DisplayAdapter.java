@@ -135,7 +135,7 @@ abstract class DisplayAdapter {
             float[] alternativeRefreshRates,
             @Display.HdrCapabilities.HdrType int[] supportedHdrTypes) {
         return new Display.Mode(NEXT_DISPLAY_MODE_ID.getAndIncrement(), width, height, refreshRate,
-                vsyncRate, false, alternativeRefreshRates, supportedHdrTypes);
+                vsyncRate, alternativeRefreshRates, supportedHdrTypes);
     }
 
     public interface Listener {
