@@ -102,6 +102,17 @@
     <dimen name="lockscreen_shade_status_bar_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
     <dimen name="lockscreen_shade_keyguard_transition_distance">@dimen/lockscreen_shade_media_transition_distance</dimen>
 
+    <!-- Dimensions for biometric prompt panel padding -->
+    <dimen name="biometric_prompt_one_pane_medium_top_guideline_padding">56dp</dimen>
+    <dimen name="biometric_prompt_one_pane_medium_horizontal_guideline_padding">@dimen/biometric_dialog_border_padding</dimen>
+
+    <!-- Dimensions for biometric prompt scroll view padding -->
+    <dimen name="biometric_prompt_top_scroll_view_bottom_padding">32dp</dimen>
+    <dimen name="biometric_prompt_top_scroll_view_horizontal_padding">32dp</dimen>
+
+    <!-- Dimensions for biometric prompt custom content view. -->
+    <dimen name="biometric_prompt_logo_description_top_padding">16dp</dimen>
+
     <!-- Biometric Auth pattern view size, better to align keyguard_security_width -->
     <dimen name="biometric_auth_pattern_view_size">348dp</dimen>
 
