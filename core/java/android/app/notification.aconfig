@@ -60,6 +60,13 @@ flag {
 }
 
 flag {
+  name: "notifications_use_monochrome_app_icon"
+  namespace: "systemui"
+  description: "Experiment to replace the notification icon in the status bar and shelf with the monochrome app icon, if available."
+  bug: "335211019"
+}
+
+flag {
   name: "notification_expansion_optional"
   namespace: "systemui"
   description: "Experiment to restore the pre-S behavior where standard notifications are not expandable unless they have actions."

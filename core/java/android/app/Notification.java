@@ -3128,6 +3128,28 @@ public class Notification implements Parcelable
     }
 
     /**
+     * @hide
+     */
+    public Drawable loadHeaderAppIcon(Context context) {
+        Trace.beginSection("Notification#loadHeaderAppIcon");
+
+        try {
+            final PackageManager pm = context.getPackageManager();
+            if (extras.containsKey(EXTRA_BUILDER_APPLICATION_INFO)) {
+                final ApplicationInfo info = extras.getParcelable(
+                        EXTRA_BUILDER_APPLICATION_INFO,
+                        ApplicationInfo.class);
+                if (info != null) {
+                    return pm.getApplicationIcon(info);
+                }
+            }
+            return pm.getApplicationIcon(context.getApplicationInfo());
+        } finally {
+            Trace.endSection();
+        }
+    }
+
+    /**
      * Removes heavyweight parts of the Notification object for archival or for sending to
      * listeners when the full contents are not necessary.
      * @hide
