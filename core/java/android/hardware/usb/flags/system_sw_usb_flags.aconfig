@@ -36,3 +36,10 @@ flag {
     description: "Enable identifying midi device using USB sysfs"
     bug: "333778731"
 }
+
+flag {
+    name: "enable_udc_sysfs_usb_state_update"
+    namespace: "system_sw_usb"
+    description: "Enable usb state update based on udc sysfs"
+    bug: "339241080"
+}
