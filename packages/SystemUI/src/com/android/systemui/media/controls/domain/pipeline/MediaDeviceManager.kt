@@ -225,9 +225,9 @@ constructor(
         }
 
         @WorkerThread
-        override fun onAudioInfoChanged(info: MediaController.PlaybackInfo?) {
-            val newPlaybackType = info?.playbackType ?: PLAYBACK_TYPE_UNKNOWN
-            val newPlaybackVolumeControlId = info?.volumeControlId
+        override fun onAudioInfoChanged(info: MediaController.PlaybackInfo) {
+            val newPlaybackType = info.playbackType
+            val newPlaybackVolumeControlId = info.volumeControlId
             if (
                 newPlaybackType == playbackType &&
                     newPlaybackVolumeControlId == playbackVolumeControlId

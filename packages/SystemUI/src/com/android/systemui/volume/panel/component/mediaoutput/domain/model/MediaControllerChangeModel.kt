@@ -40,6 +40,6 @@ sealed interface MediaControllerChangeModel {
 
     data class ExtrasChanged(val extras: Bundle?) : MediaControllerChangeModel
 
-    data class AudioInfoChanged(val info: MediaController.PlaybackInfo?) :
+    data class AudioInfoChanged(val info: MediaController.PlaybackInfo) :
         MediaControllerChangeModel
 }
