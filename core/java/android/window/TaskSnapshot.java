@@ -33,6 +33,8 @@ import android.os.SystemClock;
 import android.view.Surface;
 import android.view.WindowInsetsController;
 
+import com.android.window.flags.Flags;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -334,7 +336,8 @@ public class TaskSnapshot implements Parcelable {
      */
     public synchronized void removeReference(@ReferenceFlags int usage) {
         mInternalReferences &= ~usage;
-        if (mInternalReferences == 0 && mSnapshot != null && !mSnapshot.isClosed()) {
+        if (Flags.releaseSnapshotAggressively() && mInternalReferences == 0 && mSnapshot != null
+                && !mSnapshot.isClosed()) {
             mSnapshot.close();
         }
     }
