@@ -16,10 +16,8 @@
 
 package com.android.wm.shell.splitscreen;
 
-import static android.app.ActivityOptions.KEY_LAUNCH_ROOT_TASK_TOKEN;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED;
-import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -48,7 +46,6 @@ import static com.android.wm.shell.common.split.SplitScreenUtils.reverseSplitPos
 import static com.android.wm.shell.common.split.SplitScreenUtils.splitFailureMessage;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
-import static com.android.wm.shell.shared.TransitionUtil.isOpeningMode;
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
@@ -1888,13 +1885,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     private void addActivityOptions(Bundle opts, @Nullable StageTaskListener launchTarget) {
+        ActivityOptions options = ActivityOptions.fromBundle(opts);
         if (launchTarget != null) {
-            opts.putParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, launchTarget.mRootTaskInfo.token);
+            options.setLaunchRootTask(launchTarget.mRootTaskInfo.token);
         }
         // Put BAL flags to avoid activity start aborted. Otherwise, flows like shortcut to split
         // will be canceled.
-        opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, true);
-        opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, true);
+        options.setPendingIntentBackgroundActivityStartMode(MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+        options.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
+        opts.putAll(options.toBundle());
     }
 
     void updateActivityOptions(Bundle opts, @SplitPosition int position) {
