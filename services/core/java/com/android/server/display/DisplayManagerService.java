@@ -4147,7 +4147,7 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
+        public void dump(@NonNull FileDescriptor fd, @NonNull final PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
             final long token = Binder.clearCallingIdentity();
@@ -4423,8 +4423,8 @@ public final class DisplayManagerService extends SystemService {
 
         @Override // Binder call
         public void onShellCommand(FileDescriptor in, FileDescriptor out,
-                FileDescriptor err, String[] args, ShellCallback callback,
-                ResultReceiver resultReceiver) {
+                FileDescriptor err, @NonNull String[] args, ShellCallback callback,
+                @NonNull ResultReceiver resultReceiver) {
             new DisplayManagerShellCommand(DisplayManagerService.this, mFlags).exec(this, in, out,
                     err, args, callback, resultReceiver);
         }
