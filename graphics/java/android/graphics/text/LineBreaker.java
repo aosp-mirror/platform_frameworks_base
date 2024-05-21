@@ -18,6 +18,8 @@ package android.graphics.text;
 
 import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
 import static com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION;
+import static com.android.text.flags.Flags.FLAG_MISSING_GETTER_APIS;
+
 
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
@@ -488,6 +490,12 @@ public class LineBreaker {
 
     private final long mNativePtr;
 
+    private final @BreakStrategy int mBreakStrategy;
+    private final @HyphenationFrequency int mHyphenationFrequency;
+    private final @JustificationMode int mJustificationMode;
+    private final int[] mIndents;
+    private final boolean mUseBoundsForWidth;
+
     /**
      * Use Builder instead.
      */
@@ -497,6 +505,67 @@ public class LineBreaker {
         mNativePtr = nInit(breakStrategy, hyphenationFrequency,
                 justify == JUSTIFICATION_MODE_INTER_WORD, indents, useBoundsForWidth);
         NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativePtr);
+
+        mBreakStrategy = breakStrategy;
+        mHyphenationFrequency = hyphenationFrequency;
+        mJustificationMode = justify;
+        mIndents = indents;
+        mUseBoundsForWidth = useBoundsForWidth;
+    }
+
+    /**
+     * Returns the break strategy used for this line breaker.
+     *
+     * @return the break strategy used for this line breaker.
+     * @see Builder#setBreakStrategy(int)
+     */
+    @FlaggedApi(FLAG_MISSING_GETTER_APIS)
+    public @BreakStrategy int getBreakStrategy() {
+        return mBreakStrategy;
+    }
+
+    /**
+     * Returns the hyphenation frequency used for this line breaker.
+     *
+     * @return the hyphenation frequency used for this line breaker.
+     * @see Builder#setHyphenationFrequency(int)
+     */
+    @FlaggedApi(FLAG_MISSING_GETTER_APIS)
+    public @HyphenationFrequency int getHyphenationFrequency() {
+        return mHyphenationFrequency;
+    }
+
+    /**
+     * Returns the justification mode used for this line breaker.
+     *
+     * @return the justification mode used for this line breaker.
+     * @see Builder#setJustificationMode(int)
+     */
+    @FlaggedApi(FLAG_MISSING_GETTER_APIS)
+    public @JustificationMode int getJustificationMode() {
+        return mJustificationMode;
+    }
+
+    /**
+     * Returns the indents used for this line breaker.
+     *
+     * @return the indents used for this line breaker.
+     * @see Builder#setIndents(int[])
+     */
+    @FlaggedApi(FLAG_MISSING_GETTER_APIS)
+    public @Nullable int[] getIndents() {
+        return mIndents;
+    }
+
+    /**
+     * Returns true if this line breaker uses bounds as width for line breaking.
+     *
+     * @return true if this line breaker uses bounds as width for line breaking.
+     * @see Builder#setUseBoundsForWidth(boolean)
+     */
+    @FlaggedApi(FLAG_MISSING_GETTER_APIS)
+    public boolean getUseBoundsForWidth() {
+        return mUseBoundsForWidth;
     }
 
     /**
