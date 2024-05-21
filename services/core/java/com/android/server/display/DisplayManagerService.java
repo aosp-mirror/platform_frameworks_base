@@ -274,7 +274,6 @@ public final class DisplayManagerService extends SystemService {
     private WindowManagerInternal mWindowManagerInternal;
     private InputManagerInternal mInputManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
-    private ActivityManager mActivityManager;
     private UidImportanceListener mUidImportanceListener = new UidImportanceListener();
     @Nullable
     private IMediaProjectionManager mProjectionService;
@@ -763,8 +762,8 @@ public final class DisplayManagerService extends SystemService {
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
             mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
             mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
-            mActivityManager = mContext.getSystemService(ActivityManager.class);
-            mActivityManager.addOnUidImportanceListener(mUidImportanceListener, IMPORTANCE_CACHED);
+            ActivityManager activityManager = mContext.getSystemService(ActivityManager.class);
+            activityManager.addOnUidImportanceListener(mUidImportanceListener, IMPORTANCE_CACHED);
 
             mDeviceStateManager = LocalServices.getService(DeviceStateManagerInternal.class);
             mContext.getSystemService(DeviceStateManager.class).registerCallback(
