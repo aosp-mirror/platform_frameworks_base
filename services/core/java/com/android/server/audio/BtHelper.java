@@ -1249,21 +1249,46 @@ public class BtHelper {
             return AUDIO_DEVICE_CATEGORY_UNKNOWN;
         }
         String deviceCategory = new String(deviceType);
-        switch (deviceCategory) {
-            case DEVICE_TYPE_HEARING_AID:
-                return AUDIO_DEVICE_CATEGORY_HEARING_AID;
-            case DEVICE_TYPE_CARKIT:
-                return AUDIO_DEVICE_CATEGORY_CARKIT;
-            case DEVICE_TYPE_HEADSET:
-            case DEVICE_TYPE_UNTETHERED_HEADSET:
-                return AUDIO_DEVICE_CATEGORY_HEADPHONES;
-            case DEVICE_TYPE_SPEAKER:
-                return AUDIO_DEVICE_CATEGORY_SPEAKER;
-            case DEVICE_TYPE_WATCH:
-                return AUDIO_DEVICE_CATEGORY_WATCH;
-            case DEVICE_TYPE_DEFAULT:
-            default:
-                // fall through
+
+        if (com.android.bluetooth.flags.Flags.supportMetadataDeviceTypesApis()) {
+            switch (deviceCategory) {
+                case DEVICE_TYPE_HEARING_AID:
+                    return AUDIO_DEVICE_CATEGORY_HEARING_AID;
+                case DEVICE_TYPE_CARKIT:
+                    return AUDIO_DEVICE_CATEGORY_CARKIT;
+                case DEVICE_TYPE_HEADSET:
+                case DEVICE_TYPE_UNTETHERED_HEADSET:
+                    return AUDIO_DEVICE_CATEGORY_HEADPHONES;
+                case DEVICE_TYPE_SPEAKER:
+                    return AUDIO_DEVICE_CATEGORY_SPEAKER;
+                case DEVICE_TYPE_WATCH:
+                    return AUDIO_DEVICE_CATEGORY_WATCH;
+                case DEVICE_TYPE_DEFAULT:
+                    // fall through
+                default:
+                    break;
+            }
+        } else {
+            // Duplicate switch for now to cover the cases when the flag is not rolled out
+            // This will cover the cases in which clients could write directly to these
+            // metadata keys
+            switch (deviceCategory) {
+                case "HearingAid":
+                    return AUDIO_DEVICE_CATEGORY_HEARING_AID;
+                case "Carkit":
+                    return AUDIO_DEVICE_CATEGORY_CARKIT;
+                case "Headset":
+                case DEVICE_TYPE_UNTETHERED_HEADSET:
+                    return AUDIO_DEVICE_CATEGORY_HEADPHONES;
+                case "Speaker":
+                    return AUDIO_DEVICE_CATEGORY_SPEAKER;
+                case "Watch":
+                    return AUDIO_DEVICE_CATEGORY_WATCH;
+                case "Default":
+                    // fall through
+                default:
+                    break;
+            }
         }
 
         BluetoothClass deviceClass = device.getBluetoothClass();
