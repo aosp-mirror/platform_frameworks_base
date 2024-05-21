@@ -1553,7 +1553,7 @@ final class DevicePolicyEngine {
     private Set<EnforcingAdmin> getEnforcingAdminsOnUser(int userId) {
         synchronized (mLock) {
             return mEnforcingAdmins.contains(userId)
-                    ? mEnforcingAdmins.get(userId) : Collections.emptySet();
+                    ? new HashSet<>(mEnforcingAdmins.get(userId)) : Collections.emptySet();
         }
     }
 
