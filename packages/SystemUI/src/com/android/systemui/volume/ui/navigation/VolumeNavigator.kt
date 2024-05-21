@@ -16,26 +16,40 @@
 
 package com.android.systemui.volume.ui.navigation
 
+import android.app.Dialog
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.statusbar.phone.createBottomSheet
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import com.android.systemui.volume.VolumePanelFactory
 import com.android.systemui.volume.domain.model.VolumePanelRoute
+import com.android.systemui.volume.panel.domain.interactor.VolumePanelGlobalStateInteractor
 import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import com.android.systemui.volume.panel.ui.composable.VolumePanelRoot
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 
+@OptIn(ExperimentalCoroutinesApi::class)
+@SysUISingleton
 class VolumeNavigator
 @Inject
 constructor(
@@ -46,7 +60,28 @@ constructor(
     private val viewModelFactory: VolumePanelViewModel.Factory,
     private val dialogFactory: SystemUIDialogFactory,
     private val uiEventLogger: UiEventLogger,
+    private val volumePanelGlobalStateInteractor: VolumePanelGlobalStateInteractor,
 ) {
+
+    init {
+        volumePanelGlobalStateInteractor.globalState
+            .map { it.isVisible }
+            .distinctUntilChanged()
+            .flatMapLatest { isVisible ->
+                if (isVisible) {
+                    conflatedCallbackFlow<Unit> {
+                            val dialog = createNewVolumePanelDialog()
+                            uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_SHOWN)
+                            dialog.show()
+                            awaitClose { dialog.dismiss() }
+                        }
+                        .flowOn(mainContext)
+                } else {
+                    emptyFlow()
+                }
+            }
+            .launchIn(applicationScope)
+    }
 
     fun openVolumePanel(route: VolumePanelRoute) {
         when (route) {
@@ -62,24 +97,24 @@ constructor(
     }
 
     private fun showNewVolumePanel() {
-        applicationScope.launch(mainContext) {
-            uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_SHOWN)
-            dialogFactory
-                .createBottomSheet(
-                    content = { dialog ->
-                        LaunchedEffect(dialog) {
-                            dialog.setOnDismissListener {
-                                uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_GONE)
-                            }
-                        }
+        volumePanelGlobalStateInteractor.setVisible(true)
+    }
 
-                        VolumePanelRoot(
-                            viewModel = viewModelFactory.create(rememberCoroutineScope()),
-                            onDismiss = { dialog.dismiss() },
-                        )
-                    },
+    private fun createNewVolumePanelDialog(): Dialog {
+        return dialogFactory.createBottomSheet(
+            content = { dialog ->
+                LaunchedEffect(dialog) {
+                    dialog.setOnDismissListener {
+                        uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_GONE)
+                        volumePanelGlobalStateInteractor.setVisible(false)
+                    }
+                }
+
+                val coroutineScope = rememberCoroutineScope()
+                VolumePanelRoot(
+                    remember(coroutineScope) { viewModelFactory.create(coroutineScope) }
                 )
-                .show()
-        }
+            },
+        )
     }
 }

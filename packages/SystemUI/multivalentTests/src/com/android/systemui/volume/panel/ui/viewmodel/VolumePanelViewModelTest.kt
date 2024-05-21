@@ -28,6 +28,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.policy.fakeConfigurationController
 import com.android.systemui.testKosmos
+import com.android.systemui.volume.panel.data.repository.volumePanelGlobalStateRepository
 import com.android.systemui.volume.panel.domain.interactor.criteriaByKey
 import com.android.systemui.volume.panel.domain.unavailableCriteria
 import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
@@ -49,7 +50,10 @@ import org.junit.runner.RunWith
 class VolumePanelViewModelTest : SysuiTestCase() {
 
     private val kosmos =
-        testKosmos().apply { componentsLayoutManager = DefaultComponentsLayoutManager(BOTTOM_BAR) }
+        testKosmos().apply {
+            componentsLayoutManager = DefaultComponentsLayoutManager(BOTTOM_BAR)
+            volumePanelGlobalStateRepository.updateVolumePanelState { it.copy(isVisible = true) }
+        }
 
     private val testableResources = context.orCreateTestableResources
 
@@ -58,12 +62,10 @@ class VolumePanelViewModelTest : SysuiTestCase() {
     @Test
     fun dismissingPanel_changesVisibility() = test {
         testScope.runTest {
-            assertThat(underTest.volumePanelState.value.isVisible).isTrue()
-
             underTest.dismissPanel()
             runCurrent()
 
-            assertThat(underTest.volumePanelState.value.isVisible).isFalse()
+            assertThat(volumePanelGlobalStateRepository.globalState.value.isVisible).isFalse()
         }
     }
 
@@ -114,11 +116,10 @@ class VolumePanelViewModelTest : SysuiTestCase() {
     @Test
     fun dismissPanel_dismissesPanel() = test {
         testScope.runTest {
-            val volumePanelState by collectLastValue(underTest.volumePanelState)
             underTest.dismissPanel()
             runCurrent()
 
-            assertThat(volumePanelState!!.isVisible).isFalse()
+            assertThat(volumePanelGlobalStateRepository.globalState.value.isVisible).isFalse()
         }
     }
 
@@ -126,14 +127,13 @@ class VolumePanelViewModelTest : SysuiTestCase() {
     fun dismissBroadcast_dismissesPanel() = test {
         testScope.runTest {
             runCurrent() // run the flows to let allow the receiver to be registered
-            val volumePanelState by collectLastValue(underTest.volumePanelState)
             broadcastDispatcher.sendIntentToMatchingReceiversOnly(
                 applicationContext,
                 Intent(DISMISS_ACTION),
             )
             runCurrent()
 
-            assertThat(volumePanelState!!.isVisible).isFalse()
+            assertThat(volumePanelGlobalStateRepository.globalState.value.isVisible).isFalse()
         }
     }
 

@@ -51,7 +51,7 @@ class DefaultComponentsLayoutManagerTest : SysuiTestCase() {
         val component5 = ComponentState(COMPONENT_5, kosmos.mockVolumePanelUiComponent, false)
         val layout =
             underTest.layout(
-                VolumePanelState(0, false, false),
+                VolumePanelState(orientation = 0, isLargeScreen = false),
                 setOf(
                     bottomBarComponentState,
                     component1,
@@ -79,7 +79,7 @@ class DefaultComponentsLayoutManagerTest : SysuiTestCase() {
         val component1State = ComponentState(COMPONENT_1, kosmos.mockVolumePanelUiComponent, false)
         val component2State = ComponentState(COMPONENT_2, kosmos.mockVolumePanelUiComponent, false)
         underTest.layout(
-            VolumePanelState(0, false, false),
+            VolumePanelState(orientation = 0, isLargeScreen = false),
             setOf(
                 component1State,
                 component2State,
