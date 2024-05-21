@@ -36,6 +36,9 @@ dependencyResolutionManagement {
         }
         mavenCentral()
         maven {
+            url = uri("https://androidx.dev/snapshots/builds/11846308/artifacts/repository")
+        }
+        maven {
             url = uri("https://jitpack.io")
             content {
                 includeGroup("com.github.PhilJay")

@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -98,7 +99,9 @@ private fun AnnotatedString.Builder.addUrlSpan(
 ) {
     val url = LinkAnnotation.Url(
         url = urlSpan.url,
-        style = SpanStyle(color = urlSpanColor, textDecoration = TextDecoration.Underline),
+        styles = TextLinkStyles(
+            style = SpanStyle(color = urlSpanColor, textDecoration = TextDecoration.Underline),
+        ),
     )
     addLink(url, start, end)
 }
