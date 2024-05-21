@@ -186,7 +186,8 @@ public class BugreportManagerServiceImplTest {
                 new FileDescriptor(), /* screenshotFd= */ null,
                 BugreportParams.BUGREPORT_MODE_FULL,
                 /* flags= */ 0, new Listener(new CountDownLatch(1)),
-                /* isScreenshotRequested= */ false);
+                /* isScreenshotRequested= */ false,
+                /* skipUserConsentUnused = */ false);
 
         assertThat(mInjector.isBugreportStarted()).isTrue();
     }
@@ -202,7 +203,8 @@ public class BugreportManagerServiceImplTest {
                 new FileDescriptor(), /* screenshotFd= */ null,
                 BugreportParams.BUGREPORT_MODE_FULL,
                 /* flags= */ 0, new Listener(new CountDownLatch(1)),
-                /* isScreenshotRequested= */ false);
+                /* isScreenshotRequested= */ false,
+                /* skipUserConsentUnused = */ false);
 
         assertThat(mInjector.isBugreportStarted()).isTrue();
     }
@@ -216,7 +218,8 @@ public class BugreportManagerServiceImplTest {
                         new FileDescriptor(), /* screenshotFd= */ null,
                         BugreportParams.BUGREPORT_MODE_FULL,
                         /* flags= */ 0, new Listener(new CountDownLatch(1)),
-                        /* isScreenshotRequested= */ false));
+                        /* isScreenshotRequested= */ false,
+                        /* skipUserConsentUnused = */ false));
 
         assertThat(thrown.getMessage()).contains("not an admin user");
     }
@@ -232,7 +235,8 @@ public class BugreportManagerServiceImplTest {
                         new FileDescriptor(), /* screenshotFd= */ null,
                         BugreportParams.BUGREPORT_MODE_REMOTE,
                         /* flags= */ 0, new Listener(new CountDownLatch(1)),
-                        /* isScreenshotRequested= */ false));
+                        /* isScreenshotRequested= */ false,
+                        /* skipUserConsentUnused = */ false));
 
         assertThat(thrown.getMessage()).contains("not affiliated to the device owner");
     }
@@ -243,7 +247,7 @@ public class BugreportManagerServiceImplTest {
         Listener listener = new Listener(latch);
         mService.retrieveBugreport(Binder.getCallingUid(), mContext.getPackageName(),
                 mContext.getUserId(), new FileDescriptor(), mBugreportFile,
-                /* keepOnRetrieval= */ false, listener);
+                /* keepOnRetrieval= */ false, /* skipUserConsent = */ false, listener);
         assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(listener.getErrorCode()).isEqualTo(
                 BugreportCallback.BUGREPORT_ERROR_NO_BUGREPORT_TO_RETRIEVE);

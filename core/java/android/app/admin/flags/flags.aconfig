@@ -346,3 +346,13 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+  name: "onboarding_consentless_bugreports"
+  namespace: "enterprise"
+  description: "Allow subsequent bugreports to skip user consent within a time frame"
+  bug: "340439309"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
