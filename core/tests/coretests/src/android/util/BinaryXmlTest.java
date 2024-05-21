@@ -24,6 +24,8 @@ import static android.util.XmlTest.doVerifyRead;
 import static android.util.XmlTest.doVerifyWrite;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.fail;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.os.PersistableBundle;
@@ -41,12 +43,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 @RunWith(AndroidJUnit4.class)
 public class BinaryXmlTest {
+    private static final int MAX_UNSIGNED_SHORT = 65_535;
+
     /**
      * Verify that we can write and read large numbers of interned
      * {@link String} values.
@@ -168,6 +173,51 @@ public class BinaryXmlTest {
             }) {
                 doVerifyRead(Xml.resolvePullParser(is));
             }
+        }
+    }
+
+    @Test
+    public void testAttributeBytes_BinaryDataOverflow() throws Exception {
+        final TypedXmlSerializer out = Xml.newBinarySerializer();
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        out.setOutput(os, StandardCharsets.UTF_8.name());
+
+        final byte[] testBytes = new byte[MAX_UNSIGNED_SHORT + 1];
+        assertThrows(IOException.class,
+                () -> out.attributeBytesHex(/* namespace */ null, /* name */ "attributeBytesHex",
+                        testBytes));
+
+        assertThrows(IOException.class,
+                () -> out.attributeBytesBase64(/* namespace */ null, /* name */
+                        "attributeBytesBase64", testBytes));
+    }
+
+    @Test
+    public void testAttributeBytesHex_MaximumBinaryData() throws Exception {
+        final TypedXmlSerializer out = Xml.newBinarySerializer();
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        out.setOutput(os, StandardCharsets.UTF_8.name());
+
+        final byte[] testBytes = new byte[MAX_UNSIGNED_SHORT];
+        try {
+            out.attributeBytesHex(/* namespace */ null, /* name */ "attributeBytesHex", testBytes);
+        } catch (Exception e) {
+            fail("testAttributeBytesHex fails with exception: " + e.toString());
+        }
+    }
+
+    @Test
+    public void testAttributeBytesBase64_MaximumBinaryData() throws Exception {
+        final TypedXmlSerializer out = Xml.newBinarySerializer();
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        out.setOutput(os, StandardCharsets.UTF_8.name());
+
+        final byte[] testBytes = new byte[MAX_UNSIGNED_SHORT];
+        try {
+            out.attributeBytesBase64(/* namespace */ null, /* name */ "attributeBytesBase64",
+                    testBytes);
+        } catch (Exception e) {
+            fail("testAttributeBytesBase64 fails with exception: " + e.toString());
         }
     }
 }
