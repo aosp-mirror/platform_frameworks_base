@@ -1276,7 +1276,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             InputMethodSettingsRepository.initialize(mHandler, mContext);
             AdditionalSubtypeMapRepository.initialize(mHandler, mContext);
 
-            mCurrentUserId = mActivityManagerInternal.getCurrentUserId();
+            final int currentUserId = mActivityManagerInternal.getCurrentUserId();
+
+            // For concurrent multi-user mode, we try to initialize mCurrentUserId with main
+            // user rather than the current user when possible.
+            mCurrentUserId = mExperimentalConcurrentMultiUserModeEnabled
+                    ? MultiUserUtils.getFirstMainUserIdOrDefault(
+                            mUserManagerInternal, currentUserId)
+                    : currentUserId;
+
             @SuppressWarnings("GuardedBy") final IntFunction<InputMethodBindingController>
                     bindingControllerFactory = userId -> new InputMethodBindingController(userId,
                     InputMethodManagerService.this);
