@@ -447,6 +447,7 @@ public class StaticLayout extends Layout {
          * @see Layout#getUseBoundsForWidth()
          * @see Layout.Builder#setUseBoundsForWidth(boolean)
          */
+        @SuppressLint("MissingGetterMatchingBuilder")  // The base class `Layout` has a getter.
         @NonNull
         @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
         public Builder setUseBoundsForWidth(boolean useBoundsForWidth) {
