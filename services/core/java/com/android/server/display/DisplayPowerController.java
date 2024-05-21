@@ -159,7 +159,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int MSG_STATSD_HBM_BRIGHTNESS = 11;
     private static final int MSG_SWITCH_USER = 12;
     private static final int MSG_BOOT_COMPLETED = 13;
-    private static final int MSG_SET_DWBC_STRONG_MODE = 14;
+    private static final int MSG_SWITCH_AUTOBRIGHTNESS_MODE = 14;
     private static final int MSG_SET_DWBC_COLOR_OVERRIDE = 15;
     private static final int MSG_SET_DWBC_LOGGING_ENABLED = 16;
     private static final int MSG_SET_BRIGHTNESS_FROM_OFFLOAD = 17;
@@ -1184,15 +1184,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     @Override
     public void setAutomaticScreenBrightnessMode(
             @AutomaticBrightnessController.AutomaticBrightnessMode int mode) {
-        boolean isIdle = mode == AUTO_BRIGHTNESS_MODE_IDLE;
-        if (mAutomaticBrightnessController != null) {
-            // Set sendUpdate to true to make sure that updatePowerState() gets called
-            mAutomaticBrightnessController.switchMode(mode, /* sendUpdate= */ true);
-            setAnimatorRampSpeeds(isIdle);
-        }
         Message msg = mHandler.obtainMessage();
-        msg.what = MSG_SET_DWBC_STRONG_MODE;
-        msg.arg1 = isIdle ? 1 : 0;
+        msg.what = MSG_SWITCH_AUTOBRIGHTNESS_MODE;
+        msg.arg1 = mode;
         mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
     }
 
@@ -1868,7 +1862,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private void setDwbcStrongMode(int arg) {
         if (mDisplayWhiteBalanceController != null) {
-            final boolean isIdle = (arg == 1);
+            final boolean isIdle = (arg == AUTO_BRIGHTNESS_MODE_IDLE);
             mDisplayWhiteBalanceController.setStrongModeEnabled(isIdle);
         }
     }
@@ -3034,7 +3028,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     updatePowerState();
                     break;
 
-                case MSG_SET_DWBC_STRONG_MODE:
+                case MSG_SWITCH_AUTOBRIGHTNESS_MODE:
+                    boolean isIdle = msg.arg1 == AUTO_BRIGHTNESS_MODE_IDLE;
+                    if (mAutomaticBrightnessController != null) {
+                        mAutomaticBrightnessController.switchMode(msg.arg1, /* sendUpdate= */ true);
+                        setAnimatorRampSpeeds(isIdle);
+                    }
                     setDwbcStrongMode(msg.arg1);
                     break;
 
