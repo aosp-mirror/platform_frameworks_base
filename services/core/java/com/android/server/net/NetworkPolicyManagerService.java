@@ -60,6 +60,9 @@ import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_BACKGROUND;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_ALLOW;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_DENY_ADMIN;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_DENY_USER;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_RESTRICTED;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_STANDBY;
@@ -513,6 +516,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * {@link NetworkPolicyManager#BACKGROUND_THRESHOLD_STATE} is always blocked.
      */
     private boolean mBackgroundNetworkRestricted;
+
+    /**
+     * Whether or not metered firewall chains should be used for uid policy controlling access to
+     * metered networks.
+     */
+    private boolean mUseMeteredFirewallChains;
 
     // See main javadoc for instructions on how to use these locks.
     final Object mUidRulesFirstLock = new Object();
@@ -996,6 +1005,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
             mAppStandby = LocalServices.getService(AppStandbyInternal.class);
             mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+
+            mUseMeteredFirewallChains = Flags.useMeteredFirewallChains();
 
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
@@ -4030,8 +4041,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 fout.println();
                 fout.println("Flags:");
-                fout.println("Network blocked for TOP_SLEEPING and above: "
+                fout.println(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE + ": "
                         + mBackgroundNetworkRestricted);
+                fout.println(Flags.FLAG_USE_METERED_FIREWALL_CHAINS + ": "
+                        + mUseMeteredFirewallChains);
 
                 fout.println();
                 fout.println("mRestrictBackgroundLowPowerMode: " + mRestrictBackgroundLowPowerMode);
@@ -5367,23 +5380,44 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             postUidRulesChangedMsg(uid, uidRules);
         }
 
-        // Note that the conditionals below are for avoiding unnecessary calls to netd.
-        // TODO: Measure the performance for doing a no-op call to netd so that we can
-        // remove the conditionals to simplify the logic below. We can also further reduce
-        // some calls to netd if they turn out to be costly.
-        final int denylistReasons = BLOCKED_METERED_REASON_ADMIN_DISABLED
-                | BLOCKED_METERED_REASON_USER_RESTRICTED;
-        if ((oldEffectiveBlockedReasons & denylistReasons) != BLOCKED_REASON_NONE
-                || (newEffectiveBlockedReasons & denylistReasons) != BLOCKED_REASON_NONE) {
-            setMeteredNetworkDenylist(uid,
-                    (newEffectiveBlockedReasons & denylistReasons) != BLOCKED_REASON_NONE);
-        }
-        final int allowlistReasons = ALLOWED_METERED_REASON_FOREGROUND
-                | ALLOWED_METERED_REASON_USER_EXEMPTED;
-        if ((oldAllowedReasons & allowlistReasons) != ALLOWED_REASON_NONE
-                || (newAllowedReasons & allowlistReasons) != ALLOWED_REASON_NONE) {
-            setMeteredNetworkAllowlist(uid,
-                    (newAllowedReasons & allowlistReasons) != ALLOWED_REASON_NONE);
+        if (mUseMeteredFirewallChains) {
+            if ((newEffectiveBlockedReasons & BLOCKED_METERED_REASON_ADMIN_DISABLED)
+                    != BLOCKED_REASON_NONE) {
+                setUidFirewallRuleUL(FIREWALL_CHAIN_METERED_DENY_ADMIN, uid, FIREWALL_RULE_DENY);
+            } else {
+                setUidFirewallRuleUL(FIREWALL_CHAIN_METERED_DENY_ADMIN, uid, FIREWALL_RULE_DEFAULT);
+            }
+            if ((newEffectiveBlockedReasons & BLOCKED_METERED_REASON_USER_RESTRICTED)
+                    != BLOCKED_REASON_NONE) {
+                setUidFirewallRuleUL(FIREWALL_CHAIN_METERED_DENY_USER, uid, FIREWALL_RULE_DENY);
+            } else {
+                setUidFirewallRuleUL(FIREWALL_CHAIN_METERED_DENY_USER, uid, FIREWALL_RULE_DEFAULT);
+            }
+            if ((newAllowedReasons & (ALLOWED_METERED_REASON_FOREGROUND
+                    | ALLOWED_METERED_REASON_USER_EXEMPTED)) != ALLOWED_REASON_NONE) {
+                setUidFirewallRuleUL(FIREWALL_CHAIN_METERED_ALLOW, uid, FIREWALL_RULE_ALLOW);
+            } else {
+                setUidFirewallRuleUL(FIREWALL_CHAIN_METERED_ALLOW, uid, FIREWALL_RULE_DEFAULT);
+            }
+        } else {
+            // Note that the conditionals below are for avoiding unnecessary calls to netd.
+            // TODO: Measure the performance for doing a no-op call to netd so that we can
+            // remove the conditionals to simplify the logic below. We can also further reduce
+            // some calls to netd if they turn out to be costly.
+            final int denylistReasons = BLOCKED_METERED_REASON_ADMIN_DISABLED
+                    | BLOCKED_METERED_REASON_USER_RESTRICTED;
+            if ((oldEffectiveBlockedReasons & denylistReasons) != BLOCKED_REASON_NONE
+                    || (newEffectiveBlockedReasons & denylistReasons) != BLOCKED_REASON_NONE) {
+                setMeteredNetworkDenylist(uid,
+                        (newEffectiveBlockedReasons & denylistReasons) != BLOCKED_REASON_NONE);
+            }
+            final int allowlistReasons = ALLOWED_METERED_REASON_FOREGROUND
+                    | ALLOWED_METERED_REASON_USER_EXEMPTED;
+            if ((oldAllowedReasons & allowlistReasons) != ALLOWED_REASON_NONE
+                    || (newAllowedReasons & allowlistReasons) != ALLOWED_REASON_NONE) {
+                setMeteredNetworkAllowlist(uid,
+                        (newAllowedReasons & allowlistReasons) != ALLOWED_REASON_NONE);
+            }
         }
     }
 
@@ -6143,6 +6177,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             } else if (chain == FIREWALL_CHAIN_BACKGROUND) {
                 mUidFirewallBackgroundRules.put(uid, rule);
             }
+            // Note that we do not need keep a separate cache of uid rules for chains that we do
+            // not call #setUidFirewallRulesUL for.
 
             try {
                 mNetworkManager.setFirewallUidRule(chain, uid, rule);
@@ -6200,10 +6236,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     FIREWALL_RULE_DEFAULT);
             mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_BACKGROUND, uid,
                     FIREWALL_RULE_DEFAULT);
-            mNetworkManager.setUidOnMeteredNetworkAllowlist(uid, false);
-            mLogger.meteredAllowlistChanged(uid, false);
-            mNetworkManager.setUidOnMeteredNetworkDenylist(uid, false);
-            mLogger.meteredDenylistChanged(uid, false);
+            if (mUseMeteredFirewallChains) {
+                mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_METERED_DENY_ADMIN, uid,
+                        FIREWALL_RULE_DEFAULT);
+                mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_METERED_DENY_USER, uid,
+                        FIREWALL_RULE_DEFAULT);
+                mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_METERED_ALLOW, uid,
+                        FIREWALL_RULE_DEFAULT);
+            } else {
+                mNetworkManager.setUidOnMeteredNetworkAllowlist(uid, false);
+                mLogger.meteredAllowlistChanged(uid, false);
+                mNetworkManager.setUidOnMeteredNetworkDenylist(uid, false);
+                mLogger.meteredDenylistChanged(uid, false);
+            }
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem resetting firewall uid rules for " + uid, e);
         } catch (RemoteException e) {

@@ -34,7 +34,7 @@ import java.util.Set;
  */
 public class FontFileUtil {
 
-    private FontFileUtil() {}  // Do not instanciate
+    private FontFileUtil() {}  // Do not instantiate
 
     /**
      * Unpack the weight value from packed integer.
@@ -87,7 +87,7 @@ public class FontFileUtil {
         }
 
         if (weight != -1 && italic != -1) {
-            // Both weight/italic style are specifeid by variation settings.
+            // Both weight/italic style are specified by variation settings.
             // No need to look into OS/2 table.
             // TODO: Good to look HVAR table to check if this font supports wght/ital axes.
             return pack(weight, italic == 1);

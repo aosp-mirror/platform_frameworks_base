@@ -364,12 +364,12 @@ public abstract class AccessibilityService extends Service {
     public static final int GESTURE_SWIPE_UP_AND_RIGHT = 14;
 
     /**
-     * The user has performed an down and left gesture on the touch screen.
+     * The user has performed a down and left gesture on the touch screen.
      */
     public static final int GESTURE_SWIPE_DOWN_AND_LEFT = 15;
 
     /**
-     * The user has performed an down and right gesture on the touch screen.
+     * The user has performed a down and right gesture on the touch screen.
      */
     public static final int GESTURE_SWIPE_DOWN_AND_RIGHT = 16;
 

@@ -7,3 +7,13 @@ flag {
     description: "Block network access for apps in a low importance background state"
     bug: "304347838"
 }
+
+flag {
+    name: "use_metered_firewall_chains"
+    namespace: "backstage_power"
+    description: "Use metered firewall chains to control access to metered networks"
+    bug: "336693007"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

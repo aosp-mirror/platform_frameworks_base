@@ -63,7 +63,7 @@ public class YuvImage {
     private int mWidth;
 
     /**
-     * The height of the the image.
+     * The height of the image.
      */
     private int mHeight;
 
