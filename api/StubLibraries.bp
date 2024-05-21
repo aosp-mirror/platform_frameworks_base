@@ -44,8 +44,8 @@ non_updatable_exportable_droidstubs {
             removed_api_file: ":non-updatable-removed.txt",
         },
         last_released: {
-            api_file: ":android-non-updatable.api.public.latest",
-            removed_api_file: ":android-non-updatable-removed.api.public.latest",
+            api_file: ":android-non-updatable.api.combined.public.latest",
+            removed_api_file: ":android-non-updatable-removed.api.combined.public.latest",
             baseline_file: ":android-non-updatable-incompatibilities.api.public.latest",
         },
         api_lint: {
@@ -124,8 +124,8 @@ non_updatable_exportable_droidstubs {
             removed_api_file: ":non-updatable-system-removed.txt",
         },
         last_released: {
-            api_file: ":android-non-updatable.api.system.latest",
-            removed_api_file: ":android-non-updatable-removed.api.system.latest",
+            api_file: ":android-non-updatable.api.combined.system.latest",
+            removed_api_file: ":android-non-updatable-removed.api.combined.system.latest",
             baseline_file: ":android-non-updatable-incompatibilities.api.system.latest",
         },
         api_lint: {
@@ -263,8 +263,8 @@ non_updatable_exportable_droidstubs {
             removed_api_file: ":non-updatable-module-lib-removed.txt",
         },
         last_released: {
-            api_file: ":android-non-updatable.api.module-lib.latest",
-            removed_api_file: ":android-non-updatable-removed.api.module-lib.latest",
+            api_file: ":android-non-updatable.api.combined.module-lib.latest",
+            removed_api_file: ":android-non-updatable-removed.api.combined.module-lib.latest",
             baseline_file: ":android-non-updatable-incompatibilities.api.module-lib.latest",
         },
         api_lint: {
