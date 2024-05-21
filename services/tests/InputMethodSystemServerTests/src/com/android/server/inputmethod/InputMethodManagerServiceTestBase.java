@@ -37,6 +37,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManagerGlobal;
@@ -207,6 +208,16 @@ public class InputMethodManagerServiceTestBase {
         when(mMockUserManagerInternal.getProfileIds(anyInt(), anyBoolean()))
                 .thenReturn(new int[] {0});
         when(mMockUserManagerInternal.getUserIds()).thenReturn(new int[] {0});
+        when(mMockUserManagerInternal.getUserInfo(anyInt())).thenAnswer(invocation -> {
+            final int userId = invocation.getArgument(0);
+            if (userId == 0) {
+                new UserInfo(userId, "main",
+                        UserInfo.FLAG_PRIMARY | UserInfo.FLAG_MAIN | UserInfo.FLAG_SYSTEM);
+            }
+            // TODO(b/315348827): Update mock for multi-user scenarios.
+            throw new UnsupportedOperationException(
+                    "Please mock #getUserInfo for userId=" + userId);
+        });
         when(mMockActivityManagerInternal.isSystemReady()).thenReturn(true);
         when(mMockActivityManagerInternal.getCurrentUserId()).thenReturn(mCallingUserId);
         when(mMockPackageManagerInternal.getPackageUid(anyString(), anyLong(), anyInt()))
