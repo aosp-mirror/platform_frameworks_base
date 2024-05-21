@@ -916,6 +916,12 @@ public final class Display {
      *         {@code getWindowManager()} or {@code getSystemService(Context.WINDOW_SERVICE)}), the
      *         size of the current app window is returned. As a result, in multi-window mode, the
      *         returned size can be smaller than the size of the device screen.
+     *         The returned window size can vary depending on API level:
+     *         <ul>
+     *             <li>API level 35 and above, the window size will be returned.
+     *             <li>API level 34 and below, the window size minus system decoration areas and
+     *             display cutout is returned.
+     *         </ul>
      *     <li>If size is requested from a non-activity context (for example, the application
      *         context, where the WindowManager is accessed by
      *         {@code getApplicationContext().getSystemService(Context.WINDOW_SERVICE)}), the
@@ -924,9 +930,10 @@ public final class Display {
      *             <li>API level 29 and below &mdash; The size of the entire display (based on
      *                 current rotation) minus system decoration areas is returned.
      *             <li>API level 30 and above &mdash; The size of the top running activity in the
-     *                 current process is returned. If the current process has no running
-     *                 activities, the size of the device default display, including system
-     *                 decoration areas, is returned.
+     *                 current process is returned, system decoration areas exclusion follows the
+     *                 behavior defined above, based on the caller's API level. If the current
+     *                 process has no running activities, the size of the device default display,
+     *                 including system decoration areas, is returned.
      *         </ul>
      * </ul>
      *

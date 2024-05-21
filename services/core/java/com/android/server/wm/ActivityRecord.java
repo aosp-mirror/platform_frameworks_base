@@ -660,6 +660,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private final TaskFragment.ConfigOverrideHint mResolveConfigHint;
 
+    private final boolean mOptOutEdgeToEdge;
+
     private static ConstrainDisplayApisConfig sConstrainDisplayApisConfig;
 
     boolean pendingVoiceInteractionStart;   // Waiting for activity-invoked voice session
@@ -2179,9 +2181,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     || ent.array.getBoolean(R.styleable.Window_windowShowWallpaper, false);
             mStyleFillsParent = mOccludesParent;
             noDisplay = ent.array.getBoolean(R.styleable.Window_windowNoDisplay, false);
+            mOptOutEdgeToEdge = ent.array.getBoolean(
+                    R.styleable.Window_windowOptOutEdgeToEdgeEnforcement, false);
         } else {
             mStyleFillsParent = mOccludesParent = true;
             noDisplay = false;
+            mOptOutEdgeToEdge = false;
         }
 
         if (options != null) {
@@ -8710,9 +8715,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (rotation == ROTATION_UNDEFINED && !isFixedRotationTransforming()) {
             rotation = mDisplayContent.getRotation();
         }
-        if (!mResolveConfigHint.mUseOverrideInsetsForConfig
-                || getCompatDisplayInsets() != null || shouldCreateCompatDisplayInsets()
-                || isFloating(parentWindowingMode) || rotation == ROTATION_UNDEFINED) {
+        if (!mOptOutEdgeToEdge && (!mResolveConfigHint.mUseOverrideInsetsForConfig
+                || getCompatDisplayInsets() != null || isFloating(parentWindowingMode)
+                || rotation == ROTATION_UNDEFINED)) {
             // If the insets configuration decoupled logic is not enabled for the app, or the app
             // already has a compat override, or the context doesn't contain enough info to
             // calculate the override, skip the override.
