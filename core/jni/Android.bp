@@ -439,6 +439,7 @@ cc_library_shared_for_libandroid_runtime {
                 "android_database_SQLiteConnection.cpp",
                 "android_database_SQLiteGlobal.cpp",
                 "android_database_SQLiteDebug.cpp",
+                "android_database_SQLiteRawStatement.cpp",
                 "android_hardware_input_InputApplicationHandle.cpp",
                 "android_os_MessageQueue.cpp",
                 "android_os_Parcel.cpp",
