@@ -21,6 +21,7 @@ import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
+import android.media.session.MediaController;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -55,8 +56,9 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
             Context context,
             @NonNull String packageName,
             @NonNull UserHandle userHandle,
-            LocalBluetoothManager localBluetoothManager) {
-        super(context, packageName, userHandle, localBluetoothManager);
+            LocalBluetoothManager localBluetoothManager,
+            @Nullable MediaController mediaController) {
+        super(context, packageName, userHandle, localBluetoothManager, mediaController);
 
         mRouterManager = MediaRouter2Manager.getInstance(context);
     }

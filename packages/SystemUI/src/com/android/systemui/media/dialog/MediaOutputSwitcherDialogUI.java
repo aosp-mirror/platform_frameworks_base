@@ -56,7 +56,11 @@ public class MediaOutputSwitcherDialogUI implements CoreStartable, CommandQueue.
     public void showMediaOutputSwitcher(String packageName, UserHandle userHandle) {
         if (!TextUtils.isEmpty(packageName)) {
             mMediaOutputDialogManager.createAndShow(
-                    packageName, /* aboveStatusBar= */ false, /* view= */ null, userHandle);
+                    packageName,
+                    /* aboveStatusBar= */ false,
+                    /* view= */ null,
+                    userHandle,
+                    /* token */ null);
         } else {
             Log.e(TAG, "Unable to launch media output dialog. Package name is empty.");
         }

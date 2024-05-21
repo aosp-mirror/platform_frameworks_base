@@ -2589,6 +2589,8 @@
                  <li>The framework will set {@link android.R.attr#statusBarColor},
                  {@link android.R.attr#navigationBarColor}, and
                  {@link android.R.attr#navigationBarDividerColor} to transparent.
+                 <li>The frameworks will send Configuration no longer considering system insets.
+                 The Configuration will be stable regardless of the system insets change.
              </ul>
 
              <p>If this is true, the edge-to-edge enforcement won't be applied. However, this

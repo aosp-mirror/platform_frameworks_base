@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.media.MediaMetadata;
@@ -247,7 +248,7 @@ public class MediaShellCommand extends ShellCommand {
         }
 
         @Override
-        public void onAudioInfoChanged(MediaController.PlaybackInfo info) {
+        public void onAudioInfoChanged(@NonNull MediaController.PlaybackInfo info) {
             mWriter.println("onAudioInfoChanged " + info);
         }
     }

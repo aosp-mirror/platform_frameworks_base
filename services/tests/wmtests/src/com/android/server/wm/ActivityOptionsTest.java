@@ -24,6 +24,8 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -250,6 +252,7 @@ public class ActivityOptionsTest {
                 case ActivityOptions.KEY_LAUNCH_ROOT_TASK_TOKEN:
                 case ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN:
                 case ActivityOptions.KEY_TRANSIENT_LAUNCH:
+                case ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED:
                 case "android:activity.animationFinishedListener":
                     // KEY_ANIMATION_FINISHED_LISTENER
                 case "android:activity.animSpecs": // KEY_ANIM_SPECS
@@ -319,7 +322,7 @@ public class ActivityOptionsTest {
             Log.e("ActivityOptionsTests", "Unknown key " + key + " is found. "
                     + "Please review if the given bundle should be protected with permissions.");
         }
-        assertTrue(unknownKeys.isEmpty());
+        assertThat(unknownKeys).isEmpty();
     }
 
     public static class TrampolineActivity extends Activity {

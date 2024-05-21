@@ -18,6 +18,7 @@ package com.android.wm.shell.windowdecor;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.mandatorySystemGestures;
 import static android.view.WindowInsets.Type.statusBars;
@@ -145,9 +146,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             DisplayController displayController,
             ShellTaskOrganizer taskOrganizer,
             RunningTaskInfo taskInfo,
-            SurfaceControl taskSurface,
-            Configuration windowDecorConfig) {
-        this(context, displayController, taskOrganizer, taskInfo, taskSurface, windowDecorConfig,
+            SurfaceControl taskSurface) {
+        this(context, displayController, taskOrganizer, taskInfo, taskSurface,
                 SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
                 WindowContainerTransaction::new, SurfaceControl::new,
                 new SurfaceControlViewHostFactory() {});
@@ -159,7 +159,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             ShellTaskOrganizer taskOrganizer,
             RunningTaskInfo taskInfo,
             @NonNull SurfaceControl taskSurface,
-            Configuration windowDecorConfig,
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
             Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
@@ -176,8 +175,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mSurfaceControlViewHostFactory = surfaceControlViewHostFactory;
 
         mDisplay = mDisplayController.getDisplay(mTaskInfo.displayId);
-        mWindowDecorConfig = windowDecorConfig;
-        mDecorWindowContext = mContext.createConfigurationContext(mWindowDecorConfig);
     }
 
     /**
@@ -220,8 +217,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         outResult.mRootView = rootView;
         rootView = null; // Clear it just in case we use it accidentally
 
-        final int oldDensityDpi = mWindowDecorConfig.densityDpi;
-        final int oldNightMode = mWindowDecorConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        final int oldDensityDpi = mWindowDecorConfig != null
+                ? mWindowDecorConfig.densityDpi : DENSITY_DPI_UNDEFINED;
+        final int oldNightMode =  mWindowDecorConfig != null
+                ? (mWindowDecorConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                : Configuration.UI_MODE_NIGHT_UNDEFINED;
         mWindowDecorConfig = params.mWindowDecorConfig != null ? params.mWindowDecorConfig
                 : mTaskInfo.getConfiguration();
         final int newDensityDpi = mWindowDecorConfig.densityDpi;
@@ -230,7 +230,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 || mDisplay == null
                 || mDisplay.getDisplayId() != mTaskInfo.displayId
                 || oldLayoutResId != mLayoutResId
-                || oldNightMode != newNightMode) {
+                || oldNightMode != newNightMode
+                || mDecorWindowContext == null) {
             releaseViews(wct);
 
             if (!obtainDisplayOrRegisterListener()) {

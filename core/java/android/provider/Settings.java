@@ -17032,6 +17032,28 @@ public final class Settings {
          */
         public static final String ENABLE_BACK_ANIMATION = "enable_back_animation";
 
+        /**
+         * An allow list of packages for which the user has granted the permission to communicate
+         * across profiles.
+         *
+         * @hide
+         */
+        @Readable
+        @FlaggedApi(android.app.admin.flags.Flags.FLAG_BACKUP_CONNECTED_APPS_SETTINGS)
+        public static final String CONNECTED_APPS_ALLOWED_PACKAGES =
+                "connected_apps_allowed_packages";
+
+        /**
+         * A block list of packages for which the user has denied the permission to communicate
+         * across profiles.
+         *
+         * @hide
+         */
+        @Readable
+        @FlaggedApi(android.app.admin.flags.Flags.FLAG_BACKUP_CONNECTED_APPS_SETTINGS)
+        public static final String CONNECTED_APPS_DISALLOWED_PACKAGES =
+                "connected_apps_disallowed_packages";
+
         /** @hide */ public static String zenModeToString(int mode) {
             if (mode == ZEN_MODE_IMPORTANT_INTERRUPTIONS) return "ZEN_MODE_IMPORTANT_INTERRUPTIONS";
             if (mode == ZEN_MODE_ALARMS) return "ZEN_MODE_ALARMS";

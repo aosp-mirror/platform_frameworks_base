@@ -117,9 +117,16 @@ public class LocalMediaManagerTest {
         when(mLocalProfileManager.getHearingAidProfile()).thenReturn(mHapProfile);
 
         // Need to call constructor to initialize final fields.
-        mInfoMediaManager = mock(
-                InfoMediaManager.class,
-                withSettings().useConstructor(mContext, TEST_PACKAGE_NAME, mLocalBluetoothManager));
+        mInfoMediaManager =
+                mock(
+                        InfoMediaManager.class,
+                        withSettings()
+                                .useConstructor(
+                                        mContext,
+                                        TEST_PACKAGE_NAME,
+                                        android.os.Process.myUserHandle(),
+                                        mLocalBluetoothManager,
+                                        /* mediaController */ null));
         doReturn(
                         List.of(
                                 new RoutingSessionInfo.Builder(TEST_SESSION_ID, TEST_PACKAGE_NAME)

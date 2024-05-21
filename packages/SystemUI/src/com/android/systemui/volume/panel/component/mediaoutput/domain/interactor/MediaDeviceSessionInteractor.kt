@@ -57,7 +57,7 @@ constructor(
     }
 
     /** [MediaController.PlaybackInfo] changes for the [MediaDeviceSession]. */
-    fun playbackInfo(session: MediaDeviceSession): Flow<MediaController.PlaybackInfo?> {
+    fun playbackInfo(session: MediaDeviceSession): Flow<MediaController.PlaybackInfo> {
         return stateChanges(session) {
                 emit(MediaControllerChangeModel.AudioInfoChanged(it.playbackInfo))
             }

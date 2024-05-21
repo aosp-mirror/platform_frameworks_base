@@ -50,6 +50,7 @@ import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -445,6 +446,25 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     @Deprecated
     public static final int ACTION_POINTER_ID_SHIFT = 8;
 
+    /** @hide */
+    @IntDef(prefix = { "ACTION_" }, value = {
+            ACTION_DOWN,
+            ACTION_UP,
+            ACTION_MOVE,
+            ACTION_CANCEL,
+            ACTION_OUTSIDE,
+            ACTION_POINTER_DOWN,
+            ACTION_POINTER_UP,
+            ACTION_HOVER_MOVE,
+            ACTION_SCROLL,
+            ACTION_HOVER_ENTER,
+            ACTION_HOVER_EXIT,
+            ACTION_BUTTON_PRESS,
+            ACTION_BUTTON_RELEASE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ActionMasked {}
+
     /**
      * This flag indicates that the window that received this motion event is partly
      * or wholly obscured by another visible window above it and the event directly passed through
@@ -547,6 +567,21 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     public static final int FLAG_TARGET_ACCESSIBILITY_FOCUS =
             MOTION_EVENT_FLAG_TARGET_ACCESSIBILITY_FOCUS;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            FLAG_WINDOW_IS_OBSCURED,
+            FLAG_WINDOW_IS_PARTIALLY_OBSCURED,
+            FLAG_HOVER_EXIT_PENDING,
+            FLAG_IS_GENERATED_GESTURE,
+            FLAG_CANCELED,
+            FLAG_NO_FOCUS_CHANGE,
+            FLAG_IS_ACCESSIBILITY_EVENT,
+            FLAG_TAINTED,
+            FLAG_TARGET_ACCESSIBILITY_FOCUS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Flag {}
 
     /**
      * Flag indicating the motion event intersected the top edge of the screen.
@@ -1422,6 +1457,63 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         names.append(AXIS_GESTURE_SWIPE_FINGER_COUNT, "AXIS_GESTURE_SWIPE_FINGER_COUNT");
     }
 
+    /** @hide */
+    @IntDef(prefix = { "AXIS_" }, value = {
+            AXIS_X,
+            AXIS_Y,
+            AXIS_PRESSURE,
+            AXIS_SIZE,
+            AXIS_TOUCH_MAJOR,
+            AXIS_TOUCH_MINOR,
+            AXIS_TOOL_MAJOR,
+            AXIS_TOOL_MINOR,
+            AXIS_ORIENTATION,
+            AXIS_VSCROLL,
+            AXIS_HSCROLL,
+            AXIS_Z,
+            AXIS_RX,
+            AXIS_RY,
+            AXIS_RZ,
+            AXIS_HAT_X,
+            AXIS_HAT_Y,
+            AXIS_LTRIGGER,
+            AXIS_RTRIGGER,
+            AXIS_THROTTLE,
+            AXIS_RUDDER,
+            AXIS_WHEEL,
+            AXIS_GAS,
+            AXIS_BRAKE,
+            AXIS_DISTANCE,
+            AXIS_TILT,
+            AXIS_SCROLL,
+            AXIS_RELATIVE_X,
+            AXIS_RELATIVE_Y,
+            AXIS_GENERIC_1,
+            AXIS_GENERIC_2,
+            AXIS_GENERIC_3,
+            AXIS_GENERIC_4,
+            AXIS_GENERIC_5,
+            AXIS_GENERIC_6,
+            AXIS_GENERIC_7,
+            AXIS_GENERIC_8,
+            AXIS_GENERIC_9,
+            AXIS_GENERIC_10,
+            AXIS_GENERIC_11,
+            AXIS_GENERIC_12,
+            AXIS_GENERIC_13,
+            AXIS_GENERIC_14,
+            AXIS_GENERIC_15,
+            AXIS_GENERIC_16,
+            AXIS_GESTURE_X_OFFSET,
+            AXIS_GESTURE_Y_OFFSET,
+            AXIS_GESTURE_SCROLL_X_DISTANCE,
+            AXIS_GESTURE_SCROLL_Y_DISTANCE,
+            AXIS_GESTURE_PINCH_SCALE_FACTOR,
+            AXIS_GESTURE_SWIPE_FINGER_COUNT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Axis {}
+
     /**
      * Button constant: Primary button (left mouse button).
      *
@@ -1521,6 +1613,19 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         "0x40000000",
         "0x80000000",
     };
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "BUTTON_" }, value = {
+            BUTTON_PRIMARY,
+            BUTTON_SECONDARY,
+            BUTTON_TERTIARY,
+            BUTTON_BACK,
+            BUTTON_FORWARD,
+            BUTTON_STYLUS_PRIMARY,
+            BUTTON_STYLUS_SECONDARY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Button {}
 
     /**
      * Classification constant: None.

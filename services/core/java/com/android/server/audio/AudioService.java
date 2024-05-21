@@ -7897,7 +7897,7 @@ public class AudioService extends IAudioService.Stub
                     + previousDevice + " -> " + newDevice + ". Got: " + profile);
         }
 
-        sDeviceLogger.enqueue(new EventLogger.StringEvent("BlutoothActiveDeviceChanged for "
+        sDeviceLogger.enqueue(new EventLogger.StringEvent("BluetoothActiveDeviceChanged for "
                 + BluetoothProfile.getProfileName(profile) + ", device update " + previousDevice
                 + " -> " + newDevice).printLog(TAG));
         AudioDeviceBroker.BtDeviceChangedData data =

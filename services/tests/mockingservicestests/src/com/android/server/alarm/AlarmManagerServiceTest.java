@@ -3094,13 +3094,14 @@ public final class AlarmManagerServiceTest {
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(alarmPi).send(eq(mMockContext), eq(0), any(Intent.class),
                 any(), any(Handler.class), isNull(), bundleCaptor.capture());
+        Bundle bundle = bundleCaptor.getValue();
         if (idleOptions != null) {
-            assertEquals(idleOptions, bundleCaptor.getValue());
+            assertEquals(idleOptions, bundle);
         } else {
-            assertFalse("BAL flag needs to be false in alarm manager",
-                    bundleCaptor.getValue().getBoolean(
-                            ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
-                            true));
+            ActivityOptions options = ActivityOptions.fromBundle(bundle);
+            assertEquals("BAL should not be allowed in alarm manager",
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED,
+                    options.getPendingIntentBackgroundActivityStartMode());
         }
     }
 

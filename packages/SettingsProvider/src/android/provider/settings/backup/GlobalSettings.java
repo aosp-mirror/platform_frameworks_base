@@ -38,6 +38,8 @@ public class GlobalSettings {
      * NOTE: All settings which are backed up should have a corresponding validator.
      */
     public static final String[] SETTINGS_TO_BACKUP = {
+        Settings.Global.CONNECTED_APPS_ALLOWED_PACKAGES,
+        Settings.Global.CONNECTED_APPS_DISALLOWED_PACKAGES,
         Settings.Global.APPLY_RAMPING_RINGER,
         Settings.Global.BUGREPORT_IN_POWER_MENU,                        // moved to secure
         Settings.Global.STAY_ON_WHILE_PLUGGED_IN,

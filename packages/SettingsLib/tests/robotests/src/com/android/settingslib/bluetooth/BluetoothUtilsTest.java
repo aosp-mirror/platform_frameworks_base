@@ -15,6 +15,8 @@
  */
 package com.android.settingslib.bluetooth;
 
+import static com.android.settingslib.flags.Flags.FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -33,11 +35,13 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.Pair;
 
 import com.android.settingslib.widget.AdaptiveIcon;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -83,11 +87,15 @@ public class BluetoothUtilsTest {
     private static final String TEST_EXCLUSIVE_MANAGER_PACKAGE = "com.test.manager";
     private static final String TEST_EXCLUSIVE_MANAGER_COMPONENT = "com.test.manager/.component";
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         mContext = spy(RuntimeEnvironment.application);
+        mSetFlagsRule.disableFlags(FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA);
         when(mLocalBluetoothManager.getProfileManager()).thenReturn(mProfileManager);
         when(mProfileManager.getLeAudioBroadcastProfile()).thenReturn(mBroadcast);
         when(mProfileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(mAssistant);
@@ -253,6 +261,25 @@ public class BluetoothUtilsTest {
     }
 
     @Test
+    public void isAdvancedDetailsHeader_noMainIcon_returnFalse() {
+        mSetFlagsRule.enableFlags(FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA);
+
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_MAIN_ICON)).thenReturn(null);
+
+        assertThat(BluetoothUtils.isAdvancedDetailsHeader(mBluetoothDevice)).isFalse();
+    }
+
+    @Test
+    public void isAdvancedDetailsHeader_hasMainIcon_returnTrue() {
+        mSetFlagsRule.enableFlags(FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA);
+
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_MAIN_ICON))
+                .thenReturn(STRING_METADATA.getBytes());
+
+        assertThat(BluetoothUtils.isAdvancedDetailsHeader(mBluetoothDevice)).isTrue();
+    }
+
+    @Test
     public void isAdvancedUntetheredDevice_untetheredHeadset_returnTrue() {
         when(mBluetoothDevice.getMetadata(
                 BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET)).thenReturn(
@@ -291,6 +318,18 @@ public class BluetoothUtilsTest {
     @Test
     public void isAdvancedUntetheredDevice_noMetadata_returnFalse() {
         assertThat(BluetoothUtils.isAdvancedUntetheredDevice(mBluetoothDevice)).isEqualTo(false);
+    }
+
+    @Test
+    public void isAdvancedUntetheredDevice_untetheredHeadsetMetadataIsFalse_returnFalse() {
+        mSetFlagsRule.enableFlags(FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA);
+
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET))
+                .thenReturn("false".getBytes());
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_DEVICE_TYPE))
+                .thenReturn(BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET.getBytes());
+
+        assertThat(BluetoothUtils.isAdvancedUntetheredDevice(mBluetoothDevice)).isFalse();
     }
 
     @Test

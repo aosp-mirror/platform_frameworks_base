@@ -195,6 +195,8 @@ abstract class BaseAdapter (
                 return null
             }
 
+            var newAccess = access
+
             // Maybe rename the method.
             val newName: String
             val renameTo = filter.getRenameTo(currentClassName, name, descriptor)
@@ -205,8 +207,9 @@ abstract class BaseAdapter (
                 // (the one with the @substitute/replace annotation).
                 // `name` is the name of the method we're currently visiting, so it's usually a
                 // "...$ravewnwood" name.
-                if (!checkSubstitutionMethodCompatibility(
-                        classes, currentClassName, newName, name, descriptor, options.errors)) {
+                newAccess = checkSubstitutionMethodCompatibility(
+                        classes, currentClassName, newName, name, descriptor, options.errors)
+                if (newAccess == NOT_COMPATIBLE) {
                     return null
                 }
 
@@ -221,7 +224,7 @@ abstract class BaseAdapter (
             // But note, we only use it when calling the super's method,
             // but not for visitMethodInner(), because when subclass wants to change access,
             // it can do so inside visitMethodInner().
-            val newAccess = updateAccessFlags(access, name, descriptor)
+            newAccess = updateAccessFlags(newAccess, name, descriptor)
 
             val ret = visitMethodInner(access, newName, descriptor, signature, exceptions, policy,
                 renameTo != null,

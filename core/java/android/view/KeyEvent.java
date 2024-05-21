@@ -20,6 +20,7 @@ import static android.os.IInputConstants.INPUT_EVENT_FLAG_IS_ACCESSIBILITY_EVENT
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -35,6 +36,8 @@ import android.view.KeyCharacterMap.KeyData;
 
 import com.android.hardware.input.Flags;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -944,7 +947,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     @FlaggedApi(Flags.FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE)
     public static final int KEYCODE_SCREENSHOT = 318;
 
-   /**
+    /**
      * Integer value of the last KEYCODE. Increases as new keycodes are added to KeyEvent.
      * @hide
      */
@@ -1033,6 +1036,15 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     @Deprecated
     public static final int ACTION_MULTIPLE         = 2;
+
+    /** @hide */
+    @IntDef(prefix = {"ACTION_"}, value = {
+            ACTION_DOWN,
+            ACTION_UP,
+            ACTION_MULTIPLE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Action {}
 
     /**
      * SHIFT key locked in CAPS mode.
@@ -1222,6 +1234,33 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public static final int META_SCROLL_LOCK_ON = 0x400000;
 
+    /** @hide */
+    @IntDef(flag = true, prefix = {"META_"}, value = {
+            META_CAP_LOCKED,
+            META_ALT_LOCKED,
+            META_SYM_LOCKED,
+            META_SELECTING,
+            META_ALT_ON,
+            META_ALT_LEFT_ON,
+            META_ALT_RIGHT_ON,
+            META_SHIFT_ON,
+            META_SHIFT_LEFT_ON,
+            META_SHIFT_RIGHT_ON,
+            META_SYM_ON,
+            META_FUNCTION_ON,
+            META_CTRL_ON,
+            META_CTRL_LEFT_ON,
+            META_CTRL_RIGHT_ON,
+            META_META_ON,
+            META_META_LEFT_ON,
+            META_META_RIGHT_ON,
+            META_CAPS_LOCK_ON,
+            META_NUM_LOCK_ON,
+            META_SCROLL_LOCK_ON,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface MetaState {}
+
     /**
      * This mask is a combination of {@link #META_SHIFT_ON}, {@link #META_SHIFT_LEFT_ON}
      * and {@link #META_SHIFT_RIGHT_ON}.
@@ -1366,6 +1405,27 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public static final int FLAG_TAINTED = IInputConstants.INPUT_EVENT_FLAG_TAINTED;
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            FLAG_WOKE_HERE,
+            FLAG_SOFT_KEYBOARD,
+            FLAG_KEEP_TOUCH_MODE,
+            FLAG_FROM_SYSTEM,
+            FLAG_EDITOR_ACTION,
+            FLAG_CANCELED,
+            FLAG_VIRTUAL_HARD_KEY,
+            FLAG_LONG_PRESS,
+            FLAG_CANCELED_LONG_PRESS,
+            FLAG_TRACKING,
+            FLAG_FALLBACK,
+            FLAG_IS_ACCESSIBILITY_EVENT,
+            FLAG_PREDISPATCH,
+            FLAG_START_TRACKING,
+            FLAG_TAINTED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Flag {}
+
     /**
      * Returns the maximum keycode.
      */
@@ -1401,8 +1461,10 @@ public class KeyEvent extends InputEvent implements Parcelable {
     // NOTE: mHmac is private and not used in this class, but it's used on native side / parcel.
     private @Nullable byte[] mHmac;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @MetaState
     private int mMetaState;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @Action
     private int mAction;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mKeyCode;
@@ -1411,6 +1473,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mRepeatCount;
     @UnsupportedAppUsage
+    @Flag
     private int mFlags;
     /**
      * The time when the key initially was pressed, in nanoseconds. Only millisecond precision is

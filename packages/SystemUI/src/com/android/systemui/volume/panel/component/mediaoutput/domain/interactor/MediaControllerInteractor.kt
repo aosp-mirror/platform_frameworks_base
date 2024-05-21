@@ -86,7 +86,7 @@ private class MediaControllerCallbackProducer(
         send(MediaControllerChangeModel.ExtrasChanged(extras))
     }
 
-    override fun onAudioInfoChanged(info: MediaController.PlaybackInfo?) {
+    override fun onAudioInfoChanged(info: MediaController.PlaybackInfo) {
         send(MediaControllerChangeModel.AudioInfoChanged(info))
     }
 

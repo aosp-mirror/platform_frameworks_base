@@ -69,3 +69,13 @@ flag {
   description: "Allow all widgets on the lock screen by default."
   bug: "328261690"
 }
+
+flag {
+    name: "enable_determining_advanced_details_header_with_metadata"
+    namespace: "pixel_cross_device_control"
+    description: "Use metadata instead of device type to determine whether a bluetooth device should use advanced details header."
+    bug: "328556903"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

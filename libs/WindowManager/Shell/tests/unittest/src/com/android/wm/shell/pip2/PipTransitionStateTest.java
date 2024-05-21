@@ -17,6 +17,7 @@
 package com.android.wm.shell.pip2;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.testing.AndroidTestingRunner;
 
@@ -29,6 +30,7 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 
 /**
  * Unit test against {@link PhoneSizeSpecSource}.
@@ -42,9 +44,12 @@ public class PipTransitionStateTest extends ShellTestCase {
     private PipTransitionState.PipTransitionStateChangedListener mStateChangedListener;
     private Parcelable mEmptyParcelable;
 
+    @Mock
+    private Handler mMainHandler;
+
     @Before
     public void setUp() {
-        mPipTransitionState = new PipTransitionState();
+        mPipTransitionState = new PipTransitionState(mMainHandler);
         mPipTransitionState.setState(PipTransitionState.UNDEFINED);
         mEmptyParcelable = new Bundle();
     }

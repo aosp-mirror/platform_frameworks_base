@@ -188,30 +188,23 @@ constructor(
         view.repeatWhenAttached { alternateBouncerViewContainer ->
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch("$TAG#viewModel.registerForDismissGestures") {
-                        viewModel.registerForDismissGestures.collect { registerForDismissGestures ->
-                            if (registerForDismissGestures) {
-                                swipeUpAnywhereGestureHandler.addOnGestureDetectedCallback(
-                                    swipeTag
-                                ) { _ ->
-                                    alternateBouncerDependencies.powerInteractor.onUserTouch()
-                                    viewModel.showPrimaryBouncer()
-                                }
-                                tapGestureDetector.addOnGestureDetectedCallback(tapTag) { _ ->
-                                    alternateBouncerDependencies.powerInteractor.onUserTouch()
-                                    viewModel.showPrimaryBouncer()
-                                }
-                            } else {
-                                swipeUpAnywhereGestureHandler.removeOnGestureDetectedCallback(
-                                    swipeTag
-                                )
-                                tapGestureDetector.removeOnGestureDetectedCallback(tapTag)
+                    viewModel.registerForDismissGestures.collect { registerForDismissGestures ->
+                        if (registerForDismissGestures) {
+                            swipeUpAnywhereGestureHandler.addOnGestureDetectedCallback(swipeTag) { _
+                                ->
+                                alternateBouncerDependencies.powerInteractor.onUserTouch()
+                                viewModel.showPrimaryBouncer()
                             }
+                            tapGestureDetector.addOnGestureDetectedCallback(tapTag) { _ ->
+                                alternateBouncerDependencies.powerInteractor.onUserTouch()
+                                viewModel.showPrimaryBouncer()
+                            }
+                        } else {
+                            swipeUpAnywhereGestureHandler.removeOnGestureDetectedCallback(swipeTag)
+                            tapGestureDetector.removeOnGestureDetectedCallback(tapTag)
                         }
                     }
-                    .invokeOnCompletion {
-                        swipeUpAnywhereGestureHandler.removeOnGestureDetectedCallback(swipeTag)
-                        tapGestureDetector.removeOnGestureDetectedCallback(tapTag)
-                    }
+                }
 
                 launch("$TAG#viewModel.scrimAlpha") {
                     viewModel.scrimAlpha.collect { scrim.viewAlpha = it }

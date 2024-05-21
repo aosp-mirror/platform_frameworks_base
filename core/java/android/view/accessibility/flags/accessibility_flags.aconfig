@@ -124,6 +124,7 @@ flag {
     namespace: "accessibility"
     name: "add_type_window_control"
     is_exported: true
+    is_fixed_read_only: true
     description: "adds new TYPE_WINDOW_CONTROL to AccessibilityWindowInfo for detecting Window Decorations"
     bug: "320445550"
 }

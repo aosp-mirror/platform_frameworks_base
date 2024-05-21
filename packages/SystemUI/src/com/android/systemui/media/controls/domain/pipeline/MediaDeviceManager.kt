@@ -102,7 +102,8 @@ constructor(
                 return
             }
             val controller = data.token?.let { controllerFactory.create(it) }
-            val localMediaManager = localMediaManagerFactory.create(data.packageName)
+            val localMediaManager =
+                localMediaManagerFactory.create(data.packageName, controller?.sessionToken)
             val muteAwaitConnectionManager =
                 muteAwaitConnectionManagerFactory.create(localMediaManager)
             entry = Entry(key, oldKey, controller, localMediaManager, muteAwaitConnectionManager)
@@ -224,9 +225,9 @@ constructor(
         }
 
         @WorkerThread
-        override fun onAudioInfoChanged(info: MediaController.PlaybackInfo?) {
-            val newPlaybackType = info?.playbackType ?: PLAYBACK_TYPE_UNKNOWN
-            val newPlaybackVolumeControlId = info?.volumeControlId
+        override fun onAudioInfoChanged(info: MediaController.PlaybackInfo) {
+            val newPlaybackType = info.playbackType
+            val newPlaybackVolumeControlId = info.volumeControlId
             if (
                 newPlaybackType == playbackType &&
                     newPlaybackVolumeControlId == playbackVolumeControlId

@@ -40,6 +40,7 @@ import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
+import static android.media.session.MediaController.PlaybackInfo;
 
 import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
 
@@ -51,6 +52,8 @@ import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
 import android.os.Build;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -135,19 +138,28 @@ public abstract class InfoMediaManager {
     @NonNull protected final UserHandle mUserHandle;
     private final Collection<MediaDeviceCallback> mCallbacks = new CopyOnWriteArrayList<>();
     private MediaDevice mCurrentConnectedDevice;
+    private MediaController mMediaController;
+    private PlaybackInfo mLastKnownPlaybackInfo;
     private final LocalBluetoothManager mBluetoothManager;
     private final Map<String, RouteListingPreference.Item> mPreferenceItemMap =
             new ConcurrentHashMap<>();
+
+    private final MediaController.Callback mMediaControllerCallback = new MediaControllerCallback();
 
     /* package */ InfoMediaManager(
             @NonNull Context context,
             @NonNull String packageName,
             @NonNull UserHandle userHandle,
-            @NonNull LocalBluetoothManager localBluetoothManager) {
+            @NonNull LocalBluetoothManager localBluetoothManager,
+            @Nullable MediaController mediaController) {
         mContext = context;
         mBluetoothManager = localBluetoothManager;
         mPackageName = packageName;
         mUserHandle = userHandle;
+        mMediaController = mediaController;
+        if (mediaController != null) {
+            mLastKnownPlaybackInfo = mediaController.getPlaybackInfo();
+        }
     }
 
     /**
@@ -159,12 +171,19 @@ public abstract class InfoMediaManager {
      *     speakers, as opposed to app-specific routing (for example, casting to another device).
      * @param userHandle The {@link UserHandle} of the user on which the app to control is running,
      *     or null if the caller does not need app-specific routing (see {@code packageName}).
+     * @param token The token of the associated {@link MediaSession} for which to do media routing.
      */
     public static InfoMediaManager createInstance(
             Context context,
             @Nullable String packageName,
             @Nullable UserHandle userHandle,
-            LocalBluetoothManager localBluetoothManager) {
+            LocalBluetoothManager localBluetoothManager,
+            @Nullable MediaSession.Token token) {
+        MediaController mediaController = null;
+
+        if (Flags.usePlaybackInfoForRoutingControls() && token != null) {
+            mediaController = new MediaController(context, token);
+        }
 
         // The caller is only interested in system routes (headsets, built-in speakers, etc), and is
         // not interested in a specific app's routing. The media routing APIs still require a
@@ -180,16 +199,16 @@ public abstract class InfoMediaManager {
         if (Flags.useMediaRouter2ForInfoMediaManager()) {
             try {
                 return new RouterInfoMediaManager(
-                        context, packageName, userHandle, localBluetoothManager);
+                        context, packageName, userHandle, localBluetoothManager, mediaController);
             } catch (PackageNotAvailableException ex) {
                 // TODO: b/293578081 - Propagate this exception to callers for proper handling.
                 Log.w(TAG, "Returning a no-op InfoMediaManager for package " + packageName);
                 return new NoOpInfoMediaManager(
-                        context, packageName, userHandle, localBluetoothManager);
+                        context, packageName, userHandle, localBluetoothManager, mediaController);
             }
         } else {
             return new ManagerInfoMediaManager(
-                    context, packageName, userHandle, localBluetoothManager);
+                    context, packageName, userHandle, localBluetoothManager, mediaController);
         }
     }
 
@@ -310,6 +329,9 @@ public abstract class InfoMediaManager {
             if (wasEmpty) {
                 mMediaDevices.clear();
                 registerRouter();
+                if (mMediaController != null) {
+                    mMediaController.registerCallback(mMediaControllerCallback);
+                }
                 updateRouteListingPreference();
                 refreshDevices();
             }
@@ -323,6 +345,9 @@ public abstract class InfoMediaManager {
      */
     public final void unregisterCallback(@NonNull MediaDeviceCallback callback) {
         if (mCallbacks.remove(callback) && mCallbacks.isEmpty()) {
+            if (mMediaController != null) {
+                mMediaController.unregisterCallback(mMediaControllerCallback);
+            }
             unregisterRouter();
         }
     }
@@ -389,7 +414,34 @@ public abstract class InfoMediaManager {
     private RoutingSessionInfo getActiveRoutingSession() {
         // List is never empty.
         final List<RoutingSessionInfo> sessions = getRoutingSessionsForPackage();
-        return sessions.get(sessions.size() - 1);
+        RoutingSessionInfo activeSession = sessions.get(sessions.size() - 1);
+
+        // Logic from MediaRouter2Manager#getRoutingSessionForMediaController
+        if (!Flags.usePlaybackInfoForRoutingControls() || mMediaController == null) {
+            return activeSession;
+        }
+
+        PlaybackInfo playbackInfo = mMediaController.getPlaybackInfo();
+        if (playbackInfo.getPlaybackType() == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
+            // Return system session.
+            return sessions.get(0);
+        }
+
+        // For PLAYBACK_TYPE_REMOTE.
+        String volumeControlId = playbackInfo.getVolumeControlId();
+        for (RoutingSessionInfo session : sessions) {
+            if (TextUtils.equals(volumeControlId, session.getId())) {
+                return session;
+            }
+            // Workaround for provider not being able to know the unique session ID.
+            if (TextUtils.equals(volumeControlId, session.getOriginalId())
+                    && TextUtils.equals(
+                            mMediaController.getPackageName(), session.getOwnerPackageName())) {
+                return session;
+            }
+        }
+
+        return activeSession;
     }
 
     boolean isRoutingSessionAvailableForVolumeControl() {
@@ -806,6 +858,25 @@ public abstract class InfoMediaManager {
                 routeListingPreference.getItems().forEach((item) ->
                         preferenceItemMap.put(item.getRouteId(), item));
             }
+        }
+    }
+
+    private final class MediaControllerCallback extends MediaController.Callback {
+        @Override
+        public void onSessionDestroyed() {
+            mMediaController = null;
+            refreshDevices();
+        }
+
+        @Override
+        public void onAudioInfoChanged(@NonNull PlaybackInfo info) {
+            if (info.getPlaybackType() != mLastKnownPlaybackInfo.getPlaybackType()
+                    || !TextUtils.equals(
+                            info.getVolumeControlId(),
+                            mLastKnownPlaybackInfo.getVolumeControlId())) {
+                refreshDevices();
+            }
+            mLastKnownPlaybackInfo = info;
         }
     }
 }

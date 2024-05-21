@@ -155,11 +155,16 @@ constructor(
         return false
     }
 
-    fun startMediaOutputDialog(expandable: Expandable, packageName: String) {
+    fun startMediaOutputDialog(
+        expandable: Expandable,
+        packageName: String,
+        token: MediaSession.Token? = null
+    ) {
         mediaOutputDialogManager.createAndShowWithController(
             packageName,
             true,
-            expandable.dialogController()
+            expandable.dialogController(),
+            token = token,
         )
     }
 

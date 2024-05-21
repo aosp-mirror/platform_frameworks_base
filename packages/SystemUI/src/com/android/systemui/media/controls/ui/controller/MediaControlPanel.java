@@ -743,7 +743,8 @@ public class MediaControlPanel {
                                     mPackageName,
                                     /* aboveStatusBar */ true,
                                     mMediaViewHolder.getSeamlessButton(),
-                                    UserHandle.getUserHandleForUid(mUid));
+                                    UserHandle.getUserHandleForUid(mUid),
+                                    mToken);
                         }
                     } else {
                         mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
@@ -775,7 +776,8 @@ public class MediaControlPanel {
                                     mPackageName,
                                     /* aboveStatusBar */ true,
                                     mMediaViewHolder.getSeamlessButton(),
-                                    UserHandle.getUserHandleForUid(mUid));
+                                    UserHandle.getUserHandleForUid(mUid),
+                                    mToken);
                         }
                     }
                 });

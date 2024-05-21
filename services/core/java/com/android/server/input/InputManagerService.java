@@ -960,12 +960,6 @@ public class InputManagerService extends IInputManager.Stub
 
     // Binder call
     @Override
-    public boolean isInputDeviceEnabled(int deviceId) {
-        return mNative.isInputDeviceEnabled(deviceId);
-    }
-
-    // Binder call
-    @Override
     public void enableInputDevice(int deviceId) {
         if (!checkCallingPermission(android.Manifest.permission.DISABLE_INPUT_DEVICE,
                 "enableInputDevice()")) {

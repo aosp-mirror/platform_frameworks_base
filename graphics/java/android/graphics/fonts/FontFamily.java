@@ -25,6 +25,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.text.FontConfig;
 import android.util.SparseIntArray;
 
@@ -151,6 +152,7 @@ public final class FontFamily {
          * @return A variable font family. null if a variable font cannot be built from the given
          *         fonts.
          */
+        @SuppressLint("BuilderSetStyle")
         @FlaggedApi(FLAG_NEW_FONTS_FALLBACK_XML)
         public @Nullable FontFamily buildVariableFamily() {
             int variableFamilyType = analyzeAndResolveVariableType(mFonts);

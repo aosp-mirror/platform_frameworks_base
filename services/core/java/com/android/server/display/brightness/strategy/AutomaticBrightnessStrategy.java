@@ -165,9 +165,8 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
     public boolean isAutoBrightnessValid() {
         boolean isValid = false;
         if (isAutoBrightnessEnabled()) {
-            float brightness = (mAutomaticBrightnessController != null)
-                    ? mAutomaticBrightnessController.getAutomaticScreenBrightness(null)
-                    : PowerManager.BRIGHTNESS_INVALID_FLOAT;
+            float brightness = getAutomaticScreenBrightness(null,
+                    /* isAutomaticBrightnessAdjusted = */ false);
             if (BrightnessUtils.isValidBrightnessValue(brightness)
                     || brightness == PowerManager.BRIGHTNESS_OFF_FLOAT) {
                 isValid = true;
@@ -274,7 +273,12 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
         BrightnessReason brightnessReason = new BrightnessReason();
         brightnessReason.setReason(BrightnessReason.REASON_AUTOMATIC);
         BrightnessEvent brightnessEvent = mInjector.getBrightnessEvent(mDisplayId);
-        float brightness = getAutomaticScreenBrightness(brightnessEvent);
+
+        // AutoBrightness adjustments were already applied while checking the validity of this
+        // strategy. Reapplying them again will result in incorrect adjustment reason flags as we
+        // might end up assuming no adjustments are applied
+        float brightness = getAutomaticScreenBrightness(brightnessEvent,
+                /* isAutomaticBrightnessAdjusted = */ true);
         return new DisplayBrightnessState.Builder()
                 .setBrightness(brightness)
                 .setSdrBrightness(brightness)
@@ -355,11 +359,14 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
      * @param brightnessEvent Event object to populate with details about why the specific
      *                        brightness was chosen.
      */
-    public float getAutomaticScreenBrightness(BrightnessEvent brightnessEvent) {
+    public float getAutomaticScreenBrightness(BrightnessEvent brightnessEvent,
+            boolean isAutomaticBrightnessAdjusted) {
         float brightness = (mAutomaticBrightnessController != null)
                 ? mAutomaticBrightnessController.getAutomaticScreenBrightness(brightnessEvent)
                 : PowerManager.BRIGHTNESS_INVALID_FLOAT;
-        adjustAutomaticBrightnessStateIfValid(brightness);
+        if (!isAutomaticBrightnessAdjusted) {
+            adjustAutomaticBrightnessStateIfValid(brightness);
+        }
         return brightness;
     }
 

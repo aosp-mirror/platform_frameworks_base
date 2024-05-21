@@ -115,6 +115,16 @@ flag {
 }
 
 flag {
+  name: "hsum_unlock_notification_fix"
+  namespace: "enterprise"
+  description: "Using the right userId when starting the work profile unlock flow "
+  bug: "327350831"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "dumpsys_policy_engine_migration_enabled"
   namespace: "enterprise"
   description: "Update DumpSys to include information about migrated APIs in DPE"
@@ -318,6 +328,13 @@ flag {
 }
 
 flag {
+    name: "backup_connected_apps_settings"
+    namespace: "enterprise"
+    description: "backup and restore connected work and personal apps user settings across devices"
+    bug: "175067666"
+}
+
+flag {
     name: "headless_single_user_compatibility_fix"
     namespace: "enterprise"
     description: "Fix for compatibility issue introduced from using single_user mode on pre-Android V builds"
@@ -335,4 +352,14 @@ flag {
     metadata {
       purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+  name: "onboarding_consentless_bugreports"
+  namespace: "enterprise"
+  description: "Allow subsequent bugreports to skip user consent within a time frame"
+  bug: "340439309"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

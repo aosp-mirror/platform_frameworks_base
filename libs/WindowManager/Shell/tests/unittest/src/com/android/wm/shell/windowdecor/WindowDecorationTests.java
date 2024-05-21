@@ -49,7 +49,6 @@ import static org.mockito.quality.Strictness.LENIENT;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -134,7 +133,6 @@ public class WindowDecorationTests extends ShellTestCase {
     private SurfaceControl.Transaction mMockSurfaceControlFinishT;
     private SurfaceControl.Transaction mMockSurfaceControlAddWindowT;
     private WindowDecoration.RelayoutParams mRelayoutParams = new WindowDecoration.RelayoutParams();
-    private Configuration mWindowConfiguration = new Configuration();
     private int mCaptionMenuWidthId;
 
     @Before
@@ -303,7 +301,6 @@ public class WindowDecorationTests extends ShellTestCase {
         taskInfo.isFocused = true;
         // Density is 2. Shadow radius is 10px. Caption height is 64px.
         taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
-        mWindowConfiguration.densityDpi = taskInfo.configuration.densityDpi;
 
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
 
@@ -314,14 +311,16 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(mMockWindowContainerTransaction, never())
                 .removeInsetsSource(eq(taskInfo.token), any(), anyInt(), anyInt());
 
+        final SurfaceControl.Transaction t2 = mock(SurfaceControl.Transaction.class);
+        mMockSurfaceControlTransactions.add(t2);
         taskInfo.isVisible = false;
         windowDecor.relayout(taskInfo);
 
-        final InOrder releaseOrder = inOrder(t, mMockSurfaceControlViewHost);
+        final InOrder releaseOrder = inOrder(t2, mMockSurfaceControlViewHost);
         releaseOrder.verify(mMockSurfaceControlViewHost).release();
-        releaseOrder.verify(t).remove(captionContainerSurface);
-        releaseOrder.verify(t).remove(decorContainerSurface);
-        releaseOrder.verify(t).apply();
+        releaseOrder.verify(t2).remove(captionContainerSurface);
+        releaseOrder.verify(t2).remove(decorContainerSurface);
+        releaseOrder.verify(t2).apply();
         // Expect to remove two insets sources, the caption insets and the mandatory gesture insets.
         verify(mMockWindowContainerTransaction, Mockito.times(2))
                 .removeInsetsSource(eq(taskInfo.token), any(), anyInt(), anyInt());
@@ -836,7 +835,7 @@ public class WindowDecorationTests extends ShellTestCase {
 
     private TestWindowDecoration createWindowDecoration(ActivityManager.RunningTaskInfo taskInfo) {
         return new TestWindowDecoration(mContext, mMockDisplayController, mMockShellTaskOrganizer,
-                taskInfo, mMockTaskSurface, mWindowConfiguration,
+                taskInfo, mMockTaskSurface,
                 new MockObjectSupplier<>(mMockSurfaceControlBuilders,
                         () -> createMockSurfaceControlBuilder(mock(SurfaceControl.class))),
                 new MockObjectSupplier<>(mMockSurfaceControlTransactions,
@@ -877,16 +876,15 @@ public class WindowDecorationTests extends ShellTestCase {
         TestWindowDecoration(Context context, DisplayController displayController,
                 ShellTaskOrganizer taskOrganizer, ActivityManager.RunningTaskInfo taskInfo,
                 SurfaceControl taskSurface,
-                Configuration windowConfiguration,
                 Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
                 Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
                 Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
                 Supplier<SurfaceControl> surfaceControlSupplier,
                 SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
             super(context, displayController, taskOrganizer, taskInfo, taskSurface,
-                    windowConfiguration, surfaceControlBuilderSupplier,
-                    surfaceControlTransactionSupplier, windowContainerTransactionSupplier,
-                    surfaceControlSupplier, surfaceControlViewHostFactory);
+                    surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
+                    windowContainerTransactionSupplier, surfaceControlSupplier,
+                    surfaceControlViewHostFactory);
         }
 
         @Override

@@ -225,7 +225,7 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
             @NonNull TimeConfiguration requestedConfiguration, boolean bypassUserPolicyChecks) {
         Objects.requireNonNull(requestedConfiguration);
 
-        TimeCapabilitiesAndConfig capabilitiesAndConfig = getCurrentUserConfigurationInternal()
+        TimeCapabilitiesAndConfig capabilitiesAndConfig = getConfigurationInternal(userId)
                 .createCapabilitiesAndConfig(bypassUserPolicyChecks);
         TimeCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
         TimeConfiguration oldConfiguration = capabilitiesAndConfig.getConfiguration();

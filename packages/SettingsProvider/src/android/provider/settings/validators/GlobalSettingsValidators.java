@@ -51,6 +51,9 @@ public class GlobalSettingsValidators {
     public static final Map<String, Validator> VALIDATORS = new ArrayMap<>();
 
     static {
+        VALIDATORS.put(Global.CONNECTED_APPS_ALLOWED_PACKAGES, new PackageNameListValidator((",")));
+        VALIDATORS.put(Global.CONNECTED_APPS_DISALLOWED_PACKAGES,
+                new PackageNameListValidator((",")));
         VALIDATORS.put(Global.APPLY_RAMPING_RINGER, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.BUGREPORT_IN_POWER_MENU, BOOLEAN_VALIDATOR);
         VALIDATORS.put(

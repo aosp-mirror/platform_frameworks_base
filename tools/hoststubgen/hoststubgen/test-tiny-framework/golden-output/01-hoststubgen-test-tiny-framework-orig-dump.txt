@@ -644,9 +644,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnota
           suffix="_host"
         )
 
-  public static int nativeAddThree_host(int);
+  private static int nativeAddThree_host(int);
     descriptor: (I)I
-    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    flags: (0x000a) ACC_PRIVATE, ACC_STATIC
     Code:
       stack=2, locals=1, args_size=1
          x: iload_0
