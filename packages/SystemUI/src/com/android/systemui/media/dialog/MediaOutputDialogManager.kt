@@ -17,6 +17,7 @@
 package com.android.systemui.media.dialog
 
 import android.content.Context
+import android.media.session.MediaSession
 import android.os.UserHandle
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
@@ -49,7 +50,8 @@ constructor(
         packageName: String,
         aboveStatusBar: Boolean,
         view: View? = null,
-        userHandle: UserHandle? = null
+        userHandle: UserHandle? = null,
+        token: MediaSession.Token? = null
     ) {
         createAndShowWithController(
             packageName,
@@ -65,6 +67,7 @@ constructor(
                     )
                 },
             userHandle = userHandle,
+            token = token,
         )
     }
 
@@ -77,6 +80,7 @@ constructor(
         aboveStatusBar: Boolean,
         controller: DialogTransitionAnimator.Controller?,
         userHandle: UserHandle? = null,
+        token: MediaSession.Token? = null,
     ) {
         createAndShow(
             packageName,
@@ -84,6 +88,7 @@ constructor(
             dialogTransitionAnimatorController = controller,
             includePlaybackAndAppMetadata = true,
             userHandle = userHandle,
+            token = token,
         )
     }
 
@@ -108,11 +113,12 @@ constructor(
         dialogTransitionAnimatorController: DialogTransitionAnimator.Controller?,
         includePlaybackAndAppMetadata: Boolean = true,
         userHandle: UserHandle? = null,
+        token: MediaSession.Token? = null,
     ) {
         // Dismiss the previous dialog, if any.
         mediaOutputDialog?.dismiss()
 
-        val controller = mediaOutputControllerFactory.create(packageName, userHandle)
+        val controller = mediaOutputControllerFactory.create(packageName, userHandle, token)
 
         val mediaOutputDialog =
             MediaOutputDialog(

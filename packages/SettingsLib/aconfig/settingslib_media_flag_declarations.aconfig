@@ -31,3 +31,14 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "use_playback_info_for_routing_controls"
+    namespace: "media_solutions"
+    description: "Use app-provided playback info when providing media routing information."
+    bug: "333564788"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+

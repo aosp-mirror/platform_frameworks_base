@@ -128,6 +128,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
                         mContext,
                         TEST_PACKAGE,
                         mContext.getUser(),
+                        /* token */ null,
                         mMediaSessionManager,
                         mLocalBluetoothManager,
                         mStarter,

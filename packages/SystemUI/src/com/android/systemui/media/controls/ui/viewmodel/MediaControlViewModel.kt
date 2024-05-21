@@ -231,12 +231,20 @@ class MediaControlViewModel(
                         )
                     } else {
                         logger.logOpenOutputSwitcher(model.uid, model.packageName, model.instanceId)
-                        interactor.startMediaOutputDialog(expandable, model.packageName)
+                        interactor.startMediaOutputDialog(
+                            expandable,
+                            model.packageName,
+                            model.token
+                        )
                     }
                 } else {
                     logger.logOpenOutputSwitcher(model.uid, model.packageName, model.instanceId)
                     device?.intent?.let { interactor.startDeviceIntent(it) }
-                        ?: interactor.startMediaOutputDialog(expandable, model.packageName)
+                        ?: interactor.startMediaOutputDialog(
+                            expandable,
+                            model.packageName,
+                            model.token
+                        )
                 }
             }
         )

@@ -25,6 +25,7 @@ import android.media.MediaRouter2Manager;
 import android.media.RouteDiscoveryPreference;
 import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
+import android.media.session.MediaController;
 import android.os.UserHandle;
 import android.text.TextUtils;
 
@@ -71,9 +72,10 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
             Context context,
             @NonNull String packageName,
             @NonNull UserHandle userHandle,
-            LocalBluetoothManager localBluetoothManager)
+            LocalBluetoothManager localBluetoothManager,
+            @Nullable MediaController mediaController)
             throws PackageNotAvailableException {
-        super(context, packageName, userHandle, localBluetoothManager);
+        super(context, packageName, userHandle, localBluetoothManager, mediaController);
 
         MediaRouter2 router = null;
 

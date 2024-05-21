@@ -195,6 +195,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
                 eq(PACKAGE_NAME),
                 eq(true),
                 eq(dialogTransitionController),
+                eq(null),
                 eq(null)
             )
     }
