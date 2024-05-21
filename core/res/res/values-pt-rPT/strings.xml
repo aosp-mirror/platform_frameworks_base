@@ -313,7 +313,7 @@
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"aceder aos ficheiros no seu dispositivo"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Música e áudio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"aceder a música e áudio no seu dispositivo"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"fotos e vídeos"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos e vídeos"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"aceder a fotos e vídeos no seu dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfone"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"gravar áudio"</string>

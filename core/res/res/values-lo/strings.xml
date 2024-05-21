@@ -2339,7 +2339,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"ຕັ້ງໂຄງຮ່າງແປ້ນພິມເປັນ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… ແຕະເພື່ອປ່ຽນແປງ."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ຕັ້ງຄ່າແປ້ນພິມແທ້ແລ້ວ"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"ແຕະເພື່ອເບິ່ງແປ້ນພິມ"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"ສ່ວນຕົວ"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"ສ່ວນບຸກຄົນ"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"ໂຄລນ"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"ວຽກ"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"ວຽກ 2"</string>

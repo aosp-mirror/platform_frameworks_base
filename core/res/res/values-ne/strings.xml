@@ -844,30 +844,30 @@
     <item msgid="4537253139152229577">"घरको फ्याक्स"</item>
     <item msgid="6751245029698664340">"पेजर"</item>
     <item msgid="1692790665884224905">"अन्य"</item>
-    <item msgid="6216981255272016212">"आफू अनुकूल"</item>
+    <item msgid="6216981255272016212">" कस्टम"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="7786349763648997741">"गृह"</item>
     <item msgid="435564470865989199">"काम"</item>
     <item msgid="4199433197875490373">"अन्य"</item>
-    <item msgid="3233938986670468328">"आफू अनुकूल"</item>
+    <item msgid="3233938986670468328">" कस्टम"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="3861463339764243038">"गृह"</item>
     <item msgid="5472578890164979109">"काम"</item>
     <item msgid="5718921296646594739">"अन्य"</item>
-    <item msgid="5523122236731783179">"आफू अनुकूल"</item>
+    <item msgid="5523122236731783179">" कस्टम"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="588088543406993772">"गृह"</item>
     <item msgid="5503060422020476757">"काम"</item>
     <item msgid="2530391194653760297">"अन्य"</item>
-    <item msgid="7640927178025203330">"आफू अनुकूल"</item>
+    <item msgid="7640927178025203330">" कस्टम"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="6144047813304847762">"काम गर्नुहोस्"</item>
     <item msgid="7402720230065674193">"अन्य"</item>
-    <item msgid="808230403067569648">"आफू अनुकूल"</item>
+    <item msgid="808230403067569648">" कस्टम"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="7535761744432206400">"AIM"</item>
@@ -879,7 +879,7 @@
     <item msgid="4717545739447438044">"ICQ"</item>
     <item msgid="8293711853624033835">"Jabber"</item>
   </string-array>
-    <string name="phoneTypeCustom" msgid="5120365721260686814">"आफू अनुकूल"</string>
+    <string name="phoneTypeCustom" msgid="5120365721260686814">" कस्टम"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"गृह"</string>
     <string name="phoneTypeMobile" msgid="1178852541462086735">"मोबाइल"</string>
     <string name="phoneTypeWork" msgid="6604967163358864607">"काम"</string>
@@ -900,24 +900,24 @@
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"कार्य पेजर"</string>
     <string name="phoneTypeAssistant" msgid="757550783842231039">"सहायक"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
-    <string name="eventTypeCustom" msgid="3257367158986466481">"आफू अनुकूल"</string>
+    <string name="eventTypeCustom" msgid="3257367158986466481">" कस्टम"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"जन्मदिन"</string>
     <string name="eventTypeAnniversary" msgid="4684702412407916888">"वार्षिक समारोह"</string>
     <string name="eventTypeOther" msgid="530671238533887997">"अन्य"</string>
-    <string name="emailTypeCustom" msgid="1809435350482181786">"आफू अनुकूल"</string>
+    <string name="emailTypeCustom" msgid="1809435350482181786">" कस्टम"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"गृह"</string>
     <string name="emailTypeWork" msgid="2020095414401882111">"काम"</string>
     <string name="emailTypeOther" msgid="5131130857030897465">"अन्य"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"मोबाइल"</string>
-    <string name="postalTypeCustom" msgid="5645590470242939129">"आफू अनुकूल"</string>
+    <string name="postalTypeCustom" msgid="5645590470242939129">" कस्टम"</string>
     <string name="postalTypeHome" msgid="7562272480949727912">"गृह"</string>
     <string name="postalTypeWork" msgid="8553425424652012826">"काम"</string>
     <string name="postalTypeOther" msgid="7094245413678857420">"अन्य"</string>
-    <string name="imTypeCustom" msgid="5653384545085765570">"आफू अनुकूल"</string>
+    <string name="imTypeCustom" msgid="5653384545085765570">" कस्टम"</string>
     <string name="imTypeHome" msgid="6996507981044278216">"गृह"</string>
     <string name="imTypeWork" msgid="2099668940169903123">"काम"</string>
     <string name="imTypeOther" msgid="8068447383276219810">"अन्य"</string>
-    <string name="imProtocolCustom" msgid="4437878287653764692">"आफू अनुकूल"</string>
+    <string name="imProtocolCustom" msgid="4437878287653764692">" कस्टम"</string>
     <string name="imProtocolAim" msgid="4050198236506604378">"AIM"</string>
     <string name="imProtocolMsn" msgid="2257148557766499232">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="5373338758093392231">"Yahoo"</string>
@@ -929,8 +929,8 @@
     <string name="imProtocolNetMeeting" msgid="4985002408136148256">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="8684458700669564172">"काम"</string>
     <string name="orgTypeOther" msgid="5450675258408005553">"अन्य"</string>
-    <string name="orgTypeCustom" msgid="1126322047677329218">"आफू अनुकूल"</string>
-    <string name="relationTypeCustom" msgid="282938315217441351">"आफू अनुकूल"</string>
+    <string name="orgTypeCustom" msgid="1126322047677329218">" कस्टम"</string>
+    <string name="relationTypeCustom" msgid="282938315217441351">" कस्टम"</string>
     <string name="relationTypeAssistant" msgid="4057605157116589315">"सहायक"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"भाइ"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"सन्तान"</string>
@@ -945,7 +945,7 @@
     <string name="relationTypeRelative" msgid="3396498519818009134">"आफन्त"</string>
     <string name="relationTypeSister" msgid="3721676005094140671">"बहिनी"</string>
     <string name="relationTypeSpouse" msgid="6916682664436031703">"पति-पत्नी"</string>
-    <string name="sipAddressTypeCustom" msgid="6283889809842649336">"आफू अनुकूल"</string>
+    <string name="sipAddressTypeCustom" msgid="6283889809842649336">" कस्टम"</string>
     <string name="sipAddressTypeHome" msgid="5918441930656878367">"गृह"</string>
     <string name="sipAddressTypeWork" msgid="7873967986701216770">"काम गर्नुहोस्"</string>
     <string name="sipAddressTypeOther" msgid="6317012577345187275">"अन्य"</string>
