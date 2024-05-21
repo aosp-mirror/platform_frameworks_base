@@ -329,7 +329,7 @@ public final class DisplayManagerService extends SystemService {
             new HighBrightnessModeMetadataMapper();
 
     // List of all currently registered display adapters.
-    private final ArrayList<DisplayAdapter> mDisplayAdapters = new ArrayList<DisplayAdapter>();
+    private final ArrayList<DisplayAdapter> mDisplayAdapters = new ArrayList<>();
 
     /**
      * Repository of all active {@link DisplayDevice}s.
@@ -345,7 +345,7 @@ public final class DisplayManagerService extends SystemService {
 
     // List of all display transaction listeners.
     private final CopyOnWriteArrayList<DisplayTransactionListener> mDisplayTransactionListeners =
-            new CopyOnWriteArrayList<DisplayTransactionListener>();
+            new CopyOnWriteArrayList<>();
 
     /** List of all display group listeners. */
     private final CopyOnWriteArrayList<DisplayGroupListener> mDisplayGroupListeners =
