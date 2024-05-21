@@ -233,6 +233,7 @@ import java.util.function.Consumer;
  * avoid this by making all potentially reentrant out-calls asynchronous.
  * </p>
  */
+@SuppressWarnings("MissingPermission")
 public final class DisplayManagerService extends SystemService {
     private static final String TAG = "DisplayManagerService";
 
