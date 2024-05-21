@@ -118,6 +118,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.haptics.slider.HapticSliderViewBinder;
+import com.android.systemui.haptics.slider.SeekableSliderTrackerConfig;
 import com.android.systemui.haptics.slider.SeekbarHapticPlugin;
 import com.android.systemui.haptics.slider.SliderHapticFeedbackConfig;
 import com.android.systemui.media.dialog.MediaOutputDialogManager;
@@ -2619,6 +2620,13 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 /* upperBookendScale= */ 1f,
                 /* lowerBookendScale= */ 0.05f,
                 /* exponent= */ 1f / 0.89f);
+        private static final SeekableSliderTrackerConfig sSliderTrackerConfig =
+                new SeekableSliderTrackerConfig(
+                        /* waitTimeMillis= */100,
+                        /* jumpThreshold= */0.02f,
+                        /* lowerBookendThreshold= */0.01f,
+                        /* upperBookendThreshold= */0.99f
+                );
 
         private View view;
         private TextView header;
@@ -2661,7 +2669,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             mHapticPlugin = new SeekbarHapticPlugin(
                 vibratorHelper,
                 systemClock,
-                sSliderHapticFeedbackConfig);
+                sSliderHapticFeedbackConfig,
+                sSliderTrackerConfig);
         }
 
 
