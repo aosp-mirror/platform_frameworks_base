@@ -655,13 +655,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
          * device state and touch handling. The bouncer MUST have been notified that it is about to
          * show if any subsequent events are to be handled.
          */
-        if (beginShowingBouncer(event)) {
-            if (SceneContainerFlag.isEnabled()) {
-                mSceneInteractorLazy.get().changeScene(
-                        Scenes.Bouncer, "StatusBarKeyguardViewManager.onPanelExpansionChanged");
-            } else {
-                mPrimaryBouncerInteractor.show(/* isScrimmed= */false);
-            }
+        if (!SceneContainerFlag.isEnabled() && beginShowingBouncer(event)) {
+            mPrimaryBouncerInteractor.show(/* isScrimmed= */false);
         }
 
         if (!primaryBouncerIsOrWillBeShowing()) {
