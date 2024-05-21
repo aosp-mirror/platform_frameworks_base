@@ -196,7 +196,7 @@
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"\'ফেস আনলক\' সেট-আপ করুন"</string>
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"\'ফেস আনলক\' আবার সেট-আপ করতে, বর্তমানে থাকা আপনার ফেস মডেলটি মুছে ফেলা হবে।\n\nফেস ব্যবহার করে আপনার ফোন আনলক করার জন্য আপনাকে আবার এই ফিচার সেট-আপ করতে হবে।"</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"\'ফেস আনলক\' সেট-আপ করা যায়নি। আবার চেষ্টা করতে সেটিংসে যান।"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"আঙ্গুলের ছাপের সেন্সর স্পর্শ করুন"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ফিঙ্গারপ্রিন্ট সেন্সর টাচ করুন"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"চালিয়ে যেতে \'আনলক করুন\' আইকনে প্রেস করুন"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"মুখ চেনা যায়নি। পরিবর্তে ফিঙ্গারপ্রিন্ট ব্যবহার করুন।"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
