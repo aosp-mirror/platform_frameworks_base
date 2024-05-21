@@ -68,13 +68,17 @@ constructor(
     @Composable
     private fun Content(dialog: SystemUIDialog) {
         val isAvailable by viewModel.isAvailable.collectAsStateWithLifecycle(true)
-
         if (!isAvailable) {
             SideEffect { dialog.dismiss() }
             return
         }
 
         val slice by viewModel.popupSlice.collectAsStateWithLifecycle()
+        if (!viewModel.isClickable(slice)) {
+            SideEffect { dialog.dismiss() }
+            return
+        }
+
         SliceAndroidView(
             modifier = Modifier.fillMaxWidth(),
             slice = slice,
