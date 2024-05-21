@@ -4398,7 +4398,6 @@ public abstract class PackageManager {
      * Windows have title bars and can be moved and resized.
      */
     // If this feature is present, you also need to set
-    // com.android.internal.R.config_freeformWindowManagement to true in your configuration overlay.
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_FREEFORM_WINDOW_MANAGEMENT
             = "android.software.freeform_window_management";
