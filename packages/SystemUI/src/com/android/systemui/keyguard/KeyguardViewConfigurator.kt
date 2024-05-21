@@ -103,7 +103,6 @@ constructor(
     private val smartspaceViewModel: KeyguardSmartspaceViewModel,
     private val lockscreenContentViewModel: LockscreenContentViewModel,
     private val lockscreenSceneBlueprintsLazy: Lazy<Set<LockscreenSceneBlueprint>>,
-    private val keyguardBlueprintViewBinder: KeyguardBlueprintViewBinder,
     private val clockInteractor: KeyguardClockInteractor,
     private val keyguardViewMediator: KeyguardViewMediator,
 ) : CoreStartable {
@@ -150,7 +149,7 @@ constructor(
                 cs.connect(composeView.id, BOTTOM, PARENT_ID, BOTTOM)
                 keyguardRootView.addView(composeView)
             } else {
-                keyguardBlueprintViewBinder.bind(
+                KeyguardBlueprintViewBinder.bind(
                     keyguardRootView,
                     keyguardBlueprintViewModel,
                     keyguardClockViewModel,
@@ -197,12 +196,14 @@ constructor(
             KeyguardRootViewBinder.bind(
                 keyguardRootView,
                 keyguardRootViewModel,
+                keyguardBlueprintViewModel,
                 configuration,
                 occludingAppDeviceEntryMessageViewModel,
                 chipbarCoordinator,
                 screenOffAnimationController,
                 shadeInteractor,
                 clockInteractor,
+                keyguardClockViewModel,
                 interactionJankMonitor,
                 deviceEntryHapticsInteractor,
                 vibratorHelper,
