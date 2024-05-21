@@ -649,7 +649,7 @@ final class AttributedOp {
 
                 accessEvents.append(makeKey(event.getUidState(), event.getFlags()),
                         new AppOpsManager.NoteOpEvent(event.getStartTime(),
-                                now - event.getStartElapsedTime(),
+                                Math.max(now - event.getStartElapsedTime(), 0),
                                 event.getProxy()));
             }
         }
