@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
@@ -59,7 +58,6 @@ constructor(
     activeNotificationsInteractor: ActiveNotificationsInteractor,
     notificationStackInteractor: NotificationStackInteractor,
     private val headsUpNotificationInteractor: HeadsUpNotificationInteractor,
-    keyguardInteractor: KeyguardInteractor,
     remoteInputInteractor: RemoteInputInteractor,
     seenNotificationsInteractor: SeenNotificationsInteractor,
     shadeInteractor: ShadeInteractor,
@@ -277,11 +275,12 @@ constructor(
         if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
-            combine(keyguardInteractor.isKeyguardShowing, shadeInteractor.isShadeFullyExpanded) {
-                    (isKeyguardShowing, isShadeFullyExpanded) ->
-                    // TODO(b/325936094) use isShadeFullyCollapsed instead
-                    !isKeyguardShowing && !isShadeFullyExpanded
-                }
+            combine(
+                notificationStackInteractor.isShowingOnLockscreen,
+                shadeInteractor.isShadeFullyCollapsed
+            ) { (isKeyguardShowing, isShadeFullyCollapsed) ->
+                !isKeyguardShowing && isShadeFullyCollapsed
+            }
                 .dumpWhileCollecting("headsUpAnimationsEnabled")
         }
     }

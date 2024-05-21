@@ -607,7 +607,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
             val animationsEnabled by collectLastValue(underTest.headsUpAnimationsEnabled)
 
             shadeTestUtil.setQsExpansion(0.0f)
-            fakeKeyguardRepository.setKeyguardShowing(false)
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
             runCurrent()
 
             assertThat(animationsEnabled).isTrue()
@@ -620,7 +620,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
             val animationsEnabled by collectLastValue(underTest.headsUpAnimationsEnabled)
 
             shadeTestUtil.setQsExpansion(0.0f)
-            fakeKeyguardRepository.setKeyguardShowing(true)
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
             runCurrent()
 
             assertThat(animationsEnabled).isFalse()
