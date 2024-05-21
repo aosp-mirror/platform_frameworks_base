@@ -32,6 +32,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.WindowInsets.Type.InsetsType;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -268,6 +269,10 @@ public class InsetsSourceControl implements Parcelable {
         public Array() {
         }
 
+        public Array(@NonNull Array other) {
+            mControls = other.mControls;
+        }
+
         public Array(Parcel in) {
             readFromParcel(in);
         }
@@ -303,5 +308,22 @@ public class InsetsSourceControl implements Parcelable {
                 return new Array[size];
             }
         };
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            final InsetsSourceControl.Array other = (InsetsSourceControl.Array) o;
+            return Arrays.equals(mControls, other.mControls);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(mControls);
+        }
     }
 }

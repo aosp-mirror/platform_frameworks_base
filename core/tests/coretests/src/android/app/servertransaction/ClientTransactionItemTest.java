@@ -35,6 +35,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.MergedConfiguration;
 import android.view.IWindow;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
@@ -85,6 +86,7 @@ public class ClientTransactionItemTest {
     private ClientWindowFrames mFrames;
     private MergedConfiguration mMergedConfiguration;
     private ActivityWindowInfo mActivityWindowInfo;
+    private InsetsSourceControl.Array mActiveControls;
 
     @Before
     public void setup() {
@@ -97,6 +99,7 @@ public class ClientTransactionItemTest {
         mFrames = new ClientWindowFrames();
         mMergedConfiguration = new MergedConfiguration(mGlobalConfig, mConfiguration);
         mActivityWindowInfo = new ActivityWindowInfo();
+        mActiveControls = new InsetsSourceControl.Array();
 
         doReturn(mActivity).when(mHandler).getActivity(mActivityToken);
         doReturn(mActivitiesToBeDestroyed).when(mHandler).getActivitiesToBeDestroyed();
@@ -163,5 +166,14 @@ public class ClientTransactionItemTest {
                 true /* reportDraw */, mMergedConfiguration, mInsetsState, true /* forceLayout */,
                 true /* alwaysConsumeSystemBars */, 123 /* displayId */, 321 /* syncSeqId */,
                 true /* dragResizing */, mActivityWindowInfo);
+    }
+
+    @Test
+    public void testWindowStateInsetsControlChangeItem_execute() throws RemoteException {
+        final WindowStateInsetsControlChangeItem item = WindowStateInsetsControlChangeItem.obtain(
+                mWindow, mInsetsState, mActiveControls);
+        item.execute(mHandler, mPendingActions);
+
+        verify(mWindow).insetsControlChanged(mInsetsState, mActiveControls);
     }
 }
