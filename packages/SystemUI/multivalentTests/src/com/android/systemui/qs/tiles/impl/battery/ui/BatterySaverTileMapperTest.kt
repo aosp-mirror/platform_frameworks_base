@@ -254,6 +254,7 @@ class BatterySaverTileMapperTest : SysuiTestCase() {
         val label = context.getString(R.string.battery_detail_switch_title)
         return QSTileState(
             { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            iconRes,
             label,
             activationState,
             secondaryLabel,

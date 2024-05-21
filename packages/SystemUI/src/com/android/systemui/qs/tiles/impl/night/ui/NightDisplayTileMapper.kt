@@ -52,21 +52,14 @@ constructor(
 
             if (data.isActivated) {
                 activationState = QSTileState.ActivationState.ACTIVE
-                val loadedIcon =
-                    Icon.Loaded(
-                        resources.getDrawable(R.drawable.qs_nightlight_icon_on, theme),
-                        contentDescription = null
-                    )
-                icon = { loadedIcon }
+                iconRes = R.drawable.qs_nightlight_icon_on
             } else {
                 activationState = QSTileState.ActivationState.INACTIVE
-                val loadedIcon =
-                    Icon.Loaded(
-                        resources.getDrawable(R.drawable.qs_nightlight_icon_off, theme),
-                        contentDescription = null
-                    )
-                icon = { loadedIcon }
+                iconRes = R.drawable.qs_nightlight_icon_off
             }
+            val loadedIcon =
+                Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
+            icon = { loadedIcon }
 
             secondaryLabel = getSecondaryLabel(data, resources)
 

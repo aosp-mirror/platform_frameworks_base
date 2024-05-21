@@ -45,6 +45,7 @@ private constructor(failureMetadata: FailureMetadata, subject: QSTileState?) :
             other ?: return
         }
         check("icon").that(actual.icon()).isEqualTo(other.icon())
+        check("iconRes").that(actual.iconRes).isEqualTo(other.iconRes)
         check("label").that(actual.label).isEqualTo(other.label)
         check("activationState").that(actual.activationState).isEqualTo(other.activationState)
         check("secondaryLabel").that(actual.secondaryLabel).isEqualTo(other.secondaryLabel)

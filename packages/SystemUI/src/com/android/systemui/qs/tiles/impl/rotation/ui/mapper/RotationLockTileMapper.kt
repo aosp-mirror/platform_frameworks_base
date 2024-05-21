@@ -44,12 +44,7 @@ constructor(
             if (data.isRotationLocked) {
                 activationState = QSTileState.ActivationState.INACTIVE
                 this.secondaryLabel = EMPTY_SECONDARY_STRING
-                this.icon = {
-                    Icon.Loaded(
-                        resources.getDrawable(R.drawable.qs_auto_rotate_icon_off, theme),
-                        contentDescription = null
-                    )
-                }
+                iconRes = R.drawable.qs_auto_rotate_icon_off
             } else {
                 activationState = QSTileState.ActivationState.ACTIVE
                 this.secondaryLabel =
@@ -58,12 +53,10 @@ constructor(
                     } else {
                         EMPTY_SECONDARY_STRING
                     }
-                this.icon = {
-                    Icon.Loaded(
-                        resources.getDrawable(R.drawable.qs_auto_rotate_icon_on, theme),
-                        contentDescription = null
-                    )
-                }
+                this.iconRes = R.drawable.qs_auto_rotate_icon_on
+            }
+            this.icon = {
+                Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
             }
             if (isDeviceFoldable()) {
                 this.secondaryLabel = getSecondaryLabelWithPosture(this.activationState)
