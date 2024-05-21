@@ -3366,4 +3366,13 @@ interface ITelephony {
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void unregisterForCommunicationAllowedStateChanged(int subId,
             in ISatelliteCommunicationAllowedStateCallback callback);
+
+    /**
+     * This API can be used by only CTS to override the boolean configs used by the
+     * DatagramController module.
+     *
+     * @param enable Whether to enable boolean config.
+     * @return {@code true} if the boolean config is set successfully, {@code false} otherwise.
+     */
+    boolean setDatagramControllerBooleanConfig(boolean reset, int booleanType, boolean enable);
 }

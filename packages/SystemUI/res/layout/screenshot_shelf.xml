@@ -79,7 +79,6 @@
             android:layout_width="wrap_content"
             android:elevation="4dp"
             android:background="@drawable/shelf_action_chip_container_background"
-            android:layout_marginHorizontal="@dimen/overlay_action_container_minimum_edge_spacing"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toTopOf="@id/guideline"
             >
