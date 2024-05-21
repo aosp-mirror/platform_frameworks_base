@@ -47,7 +47,7 @@
     <string name="label_view" msgid="6815442985276363364">"Карап көрүү"</string>
     <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> туташып турганда, <xliff:g id="APPLICATION">%1$s</xliff:g> ар дайым ачык болсун"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> туташып турганда, <xliff:g id="APPLICATION">%1$s</xliff:g> ар дайым ачык болсун"</string>
-    <string name="usb_debugging_title" msgid="8274884945238642726">"USB аркылуу жөндөөгө уруксат берилсинби?"</string>
+    <string name="usb_debugging_title" msgid="8274884945238642726">"USB аркылуу жөндөөгө уруксат бересизби?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Компүтердин RSA ачкычынын контролдук суммасы:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Бул компүтерден дайыма уруксат берилсин"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Ооба"</string>
@@ -811,7 +811,7 @@
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Жок, рахмат"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Ооба, которулам"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Уруксат берүү сурамыңыз көрүнбөй калгандыктан, Параметрлер жообуңузду ырастай албай жатат."</string>
-    <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> колдонмосуна <xliff:g id="APP_2">%2$s</xliff:g> үлгүлөрүн көрсөтүүгө уруксат берилсинби?"</string>
+    <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> колдонмосуна <xliff:g id="APP_2">%2$s</xliff:g> үлгүлөрүн көрсөтүүгө уруксат бересизби?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- <xliff:g id="APP">%1$s</xliff:g> колдонмосунун маалыматын окуйт"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- <xliff:g id="APP">%1$s</xliff:g> колдонмосунда аракеттерди аткарат"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"<xliff:g id="APP">%1$s</xliff:g> бардык колдонмолордун үлгүлөрүн көрсөтүүгө уруксат берүү"</string>
