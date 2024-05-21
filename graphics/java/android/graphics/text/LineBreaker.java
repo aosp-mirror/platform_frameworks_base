@@ -368,8 +368,8 @@ public class LineBreaker {
      * @see LineBreaker#computeLineBreaks
      */
     public static class Result {
-        // Following two contstant must be synced with minikin's line breaker.
-        // TODO(nona): Remove these constatns by introducing native methods.
+        // Following two constants must be synced with minikin's line breaker.
+        // TODO(nona): Remove these constants by introducing native methods.
         private static final int TAB_MASK = 0x20000000;
         private static final int HYPHEN_MASK = 0xFF;
         private static final int START_HYPHEN_MASK = 0x18;  // 0b11000

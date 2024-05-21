@@ -44,6 +44,16 @@ flag {
 }
 
 flag {
+  name: "hsum_unlock_notification_fix"
+  namespace: "enterprise"
+  description: "Using the right userId when starting the work profile unlock flow "
+  bug: "327350831"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "dumpsys_policy_engine_migration_enabled"
   namespace: "enterprise"
   description: "Update DumpSys to include information about migrated APIs in DPE"

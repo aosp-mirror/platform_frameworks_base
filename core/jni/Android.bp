@@ -478,4 +478,8 @@ cc_library_shared {
         "libnativehelper",
         "libvintf",
     ],
+
+    required: [
+        "vintf",
+    ],
 }

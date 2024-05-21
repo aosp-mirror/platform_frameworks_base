@@ -127,7 +127,7 @@ public class FontListParser {
             parser.setInput(is, null);
             parser.nextTag();
             return readFamilies(parser, systemFontDir, oemCustomization, updatableFontMap,
-                    lastModifiedDate, configVersion, false /* filter out the non-exising files */);
+                    lastModifiedDate, configVersion, false /* filter out the non-existing files */);
         }
     }
 
@@ -254,7 +254,7 @@ public class FontListParser {
      * @param parser An XML parser.
      * @param fontDir a font directory name.
      * @param updatableFontMap a updated font file map.
-     * @param allowNonExistingFile true to allow font file that doesn't exists
+     * @param allowNonExistingFile true to allow font file that doesn't exist.
      * @return a FontFamily instance. null if no font files are available in this FontFamily.
      */
     public static @Nullable FontConfig.FontFamily readFamily(XmlPullParser parser, String fontDir,

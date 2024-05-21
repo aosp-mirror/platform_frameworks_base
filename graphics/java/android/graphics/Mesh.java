@@ -271,7 +271,7 @@ public class Mesh {
      * not have a uniform with that name or if the uniform is declared with a type other than int
      * or int[1] then an IllegalArgumentException is thrown.
      *
-     * @param uniformName name matching the int uniform delcared in the shader program.
+     * @param uniformName name matching the int uniform declared in the shader program.
      * @param value       value corresponding to the int uniform with the given name.
      */
     public void setIntUniform(@NonNull String uniformName, int value) {
@@ -283,7 +283,7 @@ public class Mesh {
      * not have a uniform with that name or if the uniform is declared with a type other than ivec2
      * or int[2] then an IllegalArgumentException is thrown.
      *
-     * @param uniformName name matching the int uniform delcared in the shader program.
+     * @param uniformName name matching the int uniform declared in the shader program.
      * @param value1      first value corresponding to the int uniform with the given name.
      * @param value2      second value corresponding to the int uniform with the given name.
      */
@@ -296,7 +296,7 @@ public class Mesh {
      * not have a uniform with that name or if the uniform is declared with a type other than ivec3
      * or int[3] then an IllegalArgumentException is thrown.
      *
-     * @param uniformName name matching the int uniform delcared in the shader program.
+     * @param uniformName name matching the int uniform declared in the shader program.
      * @param value1      first value corresponding to the int uniform with the given name.
      * @param value2      second value corresponding to the int uniform with the given name.
      * @param value3      third value corresponding to the int uniform with the given name.
@@ -310,7 +310,7 @@ public class Mesh {
      * not have a uniform with that name or if the uniform is declared with a type other than ivec4
      * or int[4] then an IllegalArgumentException is thrown.
      *
-     * @param uniformName name matching the int uniform delcared in the shader program.
+     * @param uniformName name matching the int uniform declared in the shader program.
      * @param value1      first value corresponding to the int uniform with the given name.
      * @param value2      second value corresponding to the int uniform with the given name.
      * @param value3      third value corresponding to the int uniform with the given name.
@@ -327,7 +327,7 @@ public class Mesh {
      * int (for N=1), ivecN, or int[N], where N is the length of the values param, then an
      * IllegalArgumentException is thrown.
      *
-     * @param uniformName name matching the int uniform delcared in the shader program.
+     * @param uniformName name matching the int uniform declared in the shader program.
      * @param values      int values corresponding to the vec4 int uniform with the given name.
      */
     public void setIntUniform(@NonNull String uniformName, @NonNull int[] values) {
