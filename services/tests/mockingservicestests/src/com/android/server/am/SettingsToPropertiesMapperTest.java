@@ -24,7 +24,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import android.content.ContentResolver;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.provider.DeviceConfig.Properties;
 import android.text.TextUtils;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
@@ -43,7 +42,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Test SettingsToPropertiesMapper.
@@ -63,7 +61,6 @@ public class SettingsToPropertiesMapperTest {
 
     private HashMap<String, String> mSystemSettingsMap;
     private HashMap<String, String> mGlobalSettingsMap;
-    private HashMap<String, String> mConfigSettingsMap;
 
     @Before
     public void setUp() throws Exception {
@@ -74,11 +71,9 @@ public class SettingsToPropertiesMapperTest {
                         .spyStatic(SystemProperties.class)
                         .spyStatic(Settings.Global.class)
                         .spyStatic(SettingsToPropertiesMapper.class)
-                        .spyStatic(Settings.Config.class)
                         .startMocking();
         mSystemSettingsMap = new HashMap<>();
         mGlobalSettingsMap = new HashMap<>();
-        mConfigSettingsMap = new HashMap<>();
 
         // Mock SystemProperties setter and various getters
         doAnswer((Answer<Void>) invocationOnMock -> {
@@ -105,21 +100,6 @@ public class SettingsToPropertiesMapperTest {
                     return mGlobalSettingsMap.get(key);
                 }
         ).when(() -> Settings.Global.getString(any(), anyString()));
-
-        // Mock Settings.Config getstrings method
-        doAnswer((Answer<Map<String, String>>) invocationOnMock -> {
-                    String namespace = invocationOnMock.getArgument(0);
-                    List<String> flags = invocationOnMock.getArgument(1);
-                    HashMap<String, String> values = new HashMap<>();
-                    for (String flag : flags) {
-                      String value = mConfigSettingsMap.get(namespace + "/" + flag);
-                      if (value != null) {
-                        values.put(flag, value);
-                      }
-                    }
-                    return values;
-                }
-        ).when(() -> Settings.Config.getStrings(anyString(), any()));
 
         mTestMapper = new SettingsToPropertiesMapper(
             mMockContentResolver, TEST_MAPPING, new String[] {}, new String[] {});
@@ -259,39 +239,4 @@ public class SettingsToPropertiesMapperTest {
         Assert.assertTrue(categories.contains("category2"));
         Assert.assertTrue(categories.contains("category3"));
     }
-
-  @Test
-  public void testGetStagedFlagsWithValueChange() {
-    // mock up what is in the setting already
-    mConfigSettingsMap.put("namespace_1/flag_1", "true");
-    mConfigSettingsMap.put("namespace_1/flag_2", "true");
-
-    // mock up input
-    String namespace = "staged";
-    Map<String, String> keyValueMap = new HashMap<>();
-    // case 1: existing prop, stage the same value
-    keyValueMap.put("namespace_1*flag_1", "true");
-    // case 2: existing prop, stage a different value
-    keyValueMap.put("namespace_1*flag_2", "false");
-    // case 3: new prop
-    keyValueMap.put("namespace_2*flag_1", "true");
-    Properties props = new Properties(namespace, keyValueMap);
-
-    HashMap<String, HashMap<String, String>> toStageProps =
-        SettingsToPropertiesMapper.getStagedFlagsWithValueChange(props);
-
-    HashMap<String, String> namespace_1_to_stage = toStageProps.get("namespace_1");
-    HashMap<String, String> namespace_2_to_stage = toStageProps.get("namespace_2");
-    Assert.assertTrue(namespace_1_to_stage != null);
-    Assert.assertTrue(namespace_2_to_stage != null);
-
-    String namespace_1_flag_1 = namespace_1_to_stage.get("flag_1");
-    String namespace_1_flag_2 = namespace_1_to_stage.get("flag_2");
-    String namespace_2_flag_1 = namespace_2_to_stage.get("flag_1");
-    Assert.assertTrue(namespace_1_flag_1 == null);
-    Assert.assertTrue(namespace_1_flag_2 != null);
-    Assert.assertTrue(namespace_2_flag_1 != null);
-    Assert.assertTrue(namespace_1_flag_2.equals("false"));
-    Assert.assertTrue(namespace_2_flag_1.equals("true"));
-  }
 }
