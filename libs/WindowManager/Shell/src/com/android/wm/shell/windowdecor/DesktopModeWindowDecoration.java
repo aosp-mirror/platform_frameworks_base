@@ -140,13 +140,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
-            Configuration windowDecorConfig,
             Handler handler,
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             ResizeHandleSizeRepository resizeHandleSizeRepository) {
-        this (context, displayController, taskOrganizer, taskInfo, taskSurface, windowDecorConfig,
+        this (context, displayController, taskOrganizer, taskInfo, taskSurface,
                 handler, choreographer, syncQueue, rootTaskDisplayAreaOrganizer,
                 resizeHandleSizeRepository, SurfaceControl.Builder::new,
                 SurfaceControl.Transaction::new, WindowContainerTransaction::new,
@@ -159,7 +158,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
-            Configuration windowDecorConfig,
             Handler handler,
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
@@ -170,7 +168,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
             Supplier<SurfaceControl> surfaceControlSupplier,
             SurfaceControlViewHostFactory surfaceControlViewHostFactory) {
-        super(context, displayController, taskOrganizer, taskInfo, taskSurface, windowDecorConfig,
+        super(context, displayController, taskOrganizer, taskInfo, taskSurface,
                 surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                 windowContainerTransactionSupplier, surfaceControlSupplier,
                 surfaceControlViewHostFactory);
@@ -964,17 +962,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 SyncTransactionQueue syncQueue,
                 RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
                 ResizeHandleSizeRepository resizeHandleSizeRepository) {
-            final Configuration windowDecorConfig =
-                    DesktopModeStatus.isDesktopDensityOverrideSet()
-                    ? context.getResources().getConfiguration() // Use system context
-                    : taskInfo.configuration; // Use task configuration
             return new DesktopModeWindowDecoration(
                     context,
                     displayController,
                     taskOrganizer,
                     taskInfo,
                     taskSurface,
-                    windowDecorConfig,
                     handler,
                     choreographer,
                     syncQueue,
