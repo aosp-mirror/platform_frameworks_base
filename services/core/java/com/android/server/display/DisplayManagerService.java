@@ -274,7 +274,7 @@ public final class DisplayManagerService extends SystemService {
     private WindowManagerInternal mWindowManagerInternal;
     private InputManagerInternal mInputManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
-    private UidImportanceListener mUidImportanceListener = new UidImportanceListener();
+    private final UidImportanceListener mUidImportanceListener = new UidImportanceListener();
     @Nullable
     private IMediaProjectionManager mProjectionService;
     private DeviceStateManagerInternal mDeviceStateManager;
