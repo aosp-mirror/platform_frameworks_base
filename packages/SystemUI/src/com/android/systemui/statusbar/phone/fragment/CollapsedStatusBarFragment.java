@@ -548,6 +548,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     private StatusBarVisibilityModel calculateInternalModel(
             StatusBarVisibilityModel externalModel) {
+        // TODO(b/328393714) use HeadsUpNotificationInteractor.showHeadsUpStatusBar instead.
         boolean headsUpVisible =
                 mStatusBarFragmentComponent.getHeadsUpAppearanceController().shouldBeVisible();
 

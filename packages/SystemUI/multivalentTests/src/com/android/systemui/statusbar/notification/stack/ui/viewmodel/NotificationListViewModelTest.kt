@@ -524,9 +524,9 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
             // WHEN there are no pinned rows
             val rows =
                 arrayListOf(
-                    fakeHeadsUpRowRepository(key = "0"),
-                    fakeHeadsUpRowRepository(key = "1"),
-                    fakeHeadsUpRowRepository(key = "2"),
+                    FakeHeadsUpRowRepository(key = "0"),
+                    FakeHeadsUpRowRepository(key = "1"),
+                    FakeHeadsUpRowRepository(key = "2"),
                 )
             headsUpRepository.setNotifications(
                 rows,
@@ -565,8 +565,8 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
             val hasPinnedHeadsUpRow by collectLastValue(underTest.hasPinnedHeadsUpRow)
 
             headsUpRepository.setNotifications(
-                fakeHeadsUpRowRepository(key = "0", isPinned = true),
-                fakeHeadsUpRowRepository(key = "1")
+                FakeHeadsUpRowRepository(key = "0", isPinned = true),
+                FakeHeadsUpRowRepository(key = "1")
             )
             runCurrent()
 
@@ -580,8 +580,8 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
             val hasPinnedHeadsUpRow by collectLastValue(underTest.hasPinnedHeadsUpRow)
 
             headsUpRepository.setNotifications(
-                fakeHeadsUpRowRepository(key = "0"),
-                fakeHeadsUpRowRepository(key = "1"),
+                FakeHeadsUpRowRepository(key = "0"),
+                FakeHeadsUpRowRepository(key = "1"),
             )
             runCurrent()
 
@@ -624,10 +624,5 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
             runCurrent()
 
             assertThat(animationsEnabled).isFalse()
-        }
-
-    private fun fakeHeadsUpRowRepository(key: String, isPinned: Boolean = false) =
-        FakeHeadsUpRowRepository(key = key, elementKey = Any()).apply {
-            this.isPinned.value = isPinned
         }
 }

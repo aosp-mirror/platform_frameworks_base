@@ -354,6 +354,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
      * since the headsUp manager might not have notified us yet of the state change.
      *
      * @return if the heads up status bar view should be shown
+     * @deprecated use HeadsUpNotificationInteractor.showHeadsUpStatusBar instead.
      */
     public boolean shouldBeVisible() {
         boolean notificationsShown = !mWakeUpCoordinator.getNotificationsFullyHidden();
