@@ -1388,7 +1388,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
          */
         public Builder scheme(String scheme) {
             if (scheme != null) {
-                this.scheme = scheme.replaceAll("://", "");
+                this.scheme = scheme.replace("://", "");
             } else {
                 this.scheme = null;
             }
