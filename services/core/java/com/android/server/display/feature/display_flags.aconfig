@@ -266,15 +266,3 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
-
-flag {
-    name: "enable_synthetic_60hz_modes"
-    namespace: "display_manager"
-    description: "Feature flag for DisplayManager to enable synthetic 60Hz modes for vrr displays"
-    bug: "338183249"
-    is_fixed_read_only: true
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
-}
-

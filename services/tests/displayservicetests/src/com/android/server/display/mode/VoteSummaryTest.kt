@@ -154,7 +154,7 @@ class VoteSummaryTest {
     }
 }
 private fun createMode(modeId: Int, refreshRate: Float, vsyncRate: Float): Display.Mode {
-    return Display.Mode(modeId, 600, 800, refreshRate, vsyncRate, false,
+    return Display.Mode(modeId, 600, 800, refreshRate, vsyncRate,
             FloatArray(0), IntArray(0))
 }
 

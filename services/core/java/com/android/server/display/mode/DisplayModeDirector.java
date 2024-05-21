@@ -147,9 +147,6 @@ public class DisplayModeDirector {
 
     // A map from the display ID to the supported modes on that display.
     private SparseArray<Display.Mode[]> mSupportedModesByDisplay;
-    // A map from the display ID to the app supported modes on that display, might be different from
-    // mSupportedModesByDisplay for VRR displays, used in app mode requests.
-    private SparseArray<Display.Mode[]> mAppSupportedModesByDisplay;
     // A map from the display ID to the default mode of that display.
     private SparseArray<Display.Mode> mDefaultModeByDisplay;
     // a map from display id to display device config
@@ -225,7 +222,6 @@ public class DisplayModeDirector {
         mVotesStatsReporter = injector.getVotesStatsReporter(
                 displayManagerFlags.isRefreshRateVotingTelemetryEnabled());
         mSupportedModesByDisplay = new SparseArray<>();
-        mAppSupportedModesByDisplay = new SparseArray<>();
         mDefaultModeByDisplay = new SparseArray<>();
         mAppRequestObserver = new AppRequestObserver(displayManagerFlags);
         mConfigParameterProvider = new DeviceConfigParameterProvider(injector.getDeviceConfig());
@@ -577,12 +573,6 @@ public class DisplayModeDirector {
                 final Display.Mode[] modes = mSupportedModesByDisplay.valueAt(i);
                 pw.println("    " + id + " -> " + Arrays.toString(modes));
             }
-            pw.println("  mAppSupportedModesByDisplay:");
-            for (int i = 0; i < mAppSupportedModesByDisplay.size(); i++) {
-                final int id = mAppSupportedModesByDisplay.keyAt(i);
-                final Display.Mode[] modes = mAppSupportedModesByDisplay.valueAt(i);
-                pw.println("    " + id + " -> " + Arrays.toString(modes));
-            }
             pw.println("  mDefaultModeByDisplay:");
             for (int i = 0; i < mDefaultModeByDisplay.size(); i++) {
                 final int id = mDefaultModeByDisplay.keyAt(i);
@@ -645,11 +635,6 @@ public class DisplayModeDirector {
     @VisibleForTesting
     void injectSupportedModesByDisplay(SparseArray<Display.Mode[]> supportedModesByDisplay) {
         mSupportedModesByDisplay = supportedModesByDisplay;
-    }
-
-    @VisibleForTesting
-    void injectAppSupportedModesByDisplay(SparseArray<Display.Mode[]> appSupportedModesByDisplay) {
-        mAppSupportedModesByDisplay = appSupportedModesByDisplay;
     }
 
     @VisibleForTesting
@@ -1291,7 +1276,7 @@ public class DisplayModeDirector {
             Display.Mode[] modes;
             Display.Mode defaultMode;
             synchronized (mLock) {
-                modes = mAppSupportedModesByDisplay.get(displayId);
+                modes = mSupportedModesByDisplay.get(displayId);
                 defaultMode = mDefaultModeByDisplay.get(displayId);
             }
             for (int i = 0; i < modes.length; i++) {
@@ -1304,7 +1289,7 @@ public class DisplayModeDirector {
         }
 
         private void setAppRequestedModeLocked(int displayId, int modeId) {
-            final Display.Mode requestedMode = findAppModeByIdLocked(displayId, modeId);
+            final Display.Mode requestedMode = findModeByIdLocked(displayId, modeId);
             if (Objects.equals(requestedMode, mAppRequestedModeByDisplay.get(displayId))) {
                 return;
             }
@@ -1312,17 +1297,10 @@ public class DisplayModeDirector {
             final Vote sizeVote;
             if (requestedMode != null) {
                 mAppRequestedModeByDisplay.put(displayId, requestedMode);
+                baseModeRefreshRateVote =
+                        Vote.forBaseModeRefreshRate(requestedMode.getRefreshRate());
                 sizeVote = Vote.forSize(requestedMode.getPhysicalWidth(),
                         requestedMode.getPhysicalHeight());
-                if (requestedMode.isSynthetic()) {
-                    // TODO: for synthetic mode we should not limit frame rate, we must ensure
-                    // that frame rate is reachable within other Votes constraints
-                    baseModeRefreshRateVote = Vote.forRenderFrameRates(
-                            requestedMode.getRefreshRate(), requestedMode.getRefreshRate());
-                } else {
-                    baseModeRefreshRateVote =
-                            Vote.forBaseModeRefreshRate(requestedMode.getRefreshRate());
-                }
             } else {
                 mAppRequestedModeByDisplay.remove(displayId);
                 baseModeRefreshRateVote = null;
@@ -1366,8 +1344,8 @@ public class DisplayModeDirector {
                     vote);
         }
 
-        private Display.Mode findAppModeByIdLocked(int displayId, int modeId) {
-            Display.Mode[] modes = mAppSupportedModesByDisplay.get(displayId);
+        private Display.Mode findModeByIdLocked(int displayId, int modeId) {
+            Display.Mode[] modes = mSupportedModesByDisplay.get(displayId);
             if (modes == null) {
                 return null;
             }
@@ -1446,14 +1424,12 @@ public class DisplayModeDirector {
 
             // Populate existing displays
             SparseArray<Display.Mode[]> modes = new SparseArray<>();
-            SparseArray<Display.Mode[]> appModes = new SparseArray<>();
             SparseArray<Display.Mode> defaultModes = new SparseArray<>();
             Display[] displays = mInjector.getDisplays();
             for (Display d : displays) {
                 final int displayId = d.getDisplayId();
                 DisplayInfo info = getDisplayInfo(displayId);
                 modes.put(displayId, info.supportedModes);
-                appModes.put(displayId, info.appsSupportedModes);
                 defaultModes.put(displayId, info.getDefaultMode());
             }
             DisplayDeviceConfig defaultDisplayConfig = mDisplayDeviceConfigProvider
@@ -1462,7 +1438,6 @@ public class DisplayModeDirector {
                 final int size = modes.size();
                 for (int i = 0; i < size; i++) {
                     mSupportedModesByDisplay.put(modes.keyAt(i), modes.valueAt(i));
-                    mAppSupportedModesByDisplay.put(appModes.keyAt(i), appModes.valueAt(i));
                     mDefaultModeByDisplay.put(defaultModes.keyAt(i), defaultModes.valueAt(i));
                 }
                 mDisplayDeviceConfigByDisplay.put(Display.DEFAULT_DISPLAY, defaultDisplayConfig);
@@ -1484,7 +1459,6 @@ public class DisplayModeDirector {
         public void onDisplayRemoved(int displayId) {
             synchronized (mLock) {
                 mSupportedModesByDisplay.remove(displayId);
-                mAppSupportedModesByDisplay.remove(displayId);
                 mDefaultModeByDisplay.remove(displayId);
                 mDisplayDeviceConfigByDisplay.remove(displayId);
                 mSettingsObserver.removeRefreshRateSetting(displayId);
@@ -1643,11 +1617,6 @@ public class DisplayModeDirector {
             synchronized (mLock) {
                 if (!Arrays.equals(mSupportedModesByDisplay.get(displayId), info.supportedModes)) {
                     mSupportedModesByDisplay.put(displayId, info.supportedModes);
-                    changed = true;
-                }
-                if (!Arrays.equals(mAppSupportedModesByDisplay.get(displayId),
-                        info.appsSupportedModes)) {
-                    mAppSupportedModesByDisplay.put(displayId, info.appsSupportedModes);
                     changed = true;
                 }
                 if (!Objects.equals(mDefaultModeByDisplay.get(displayId), info.getDefaultMode())) {
