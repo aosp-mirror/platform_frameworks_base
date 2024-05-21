@@ -1164,9 +1164,7 @@ public final class DisplayManagerService extends SystemService {
                 device.setUserPreferredDisplayModeLocked(mode);
             });
         } else {
-            mLogicalDisplayMapper.forEachLocked((LogicalDisplay display) -> {
-                configurePreferredDisplayModeLocked(display);
-            });
+            mLogicalDisplayMapper.forEachLocked(this::configurePreferredDisplayModeLocked);
         }
     }
 
