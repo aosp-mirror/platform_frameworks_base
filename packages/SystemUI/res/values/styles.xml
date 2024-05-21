@@ -1667,6 +1667,10 @@
         <item name="android:colorBackground">@color/transparent</item>
     </style>
 
+    <style name="ShortcutHelperBottomSheet" parent="@style/Widget.Material3.BottomSheet">
+        <item name="backgroundTint">?colorSurfaceContainer</item>
+    </style>
+
     <style name="ShortcutHelperAnimation" parent="@android:style/Animation.Activity">
         <item name="android:activityOpenEnterAnimation">@anim/shortcut_helper_launch_anim</item>
         <item name="android:taskOpenEnterAnimation">@anim/shortcut_helper_launch_anim</item>

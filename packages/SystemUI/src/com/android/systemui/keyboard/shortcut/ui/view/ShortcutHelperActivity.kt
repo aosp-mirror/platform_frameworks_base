@@ -23,9 +23,12 @@ import android.view.WindowInsets
 import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.updatePadding
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.android.compose.theme.PlatformTheme
+import com.android.systemui.keyboard.shortcut.ui.composable.ShortcutHelper
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutHelperViewModel
 import com.android.systemui.res.R
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -58,12 +61,28 @@ constructor(
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_keyboard_shortcut_helper)
         setUpBottomSheetWidth()
+        expandBottomSheet()
         setUpInsets()
         setUpPredictiveBack()
         setUpSheetDismissListener()
         setUpDismissOnTouchOutside()
+        setUpComposeView()
         observeFinishRequired()
     }
+
+    private fun setUpComposeView() {
+        requireViewById<ComposeView>(R.id.shortcut_helper_compose_container).apply {
+            setContent {
+                PlatformTheme {
+                    ShortcutHelper(
+                        onKeyboardSettingsClicked = ::onKeyboardSettingsClicked,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun onKeyboardSettingsClicked() {}
 
     override fun onDestroy() {
         super.onDestroy()
@@ -100,7 +119,8 @@ constructor(
         bottomSheetContainer.setOnApplyWindowInsetsListener { _, insets ->
             val safeDrawingInsets = insets.safeDrawing
             // Make sure the bottom sheet is not covered by the status bar.
-            bottomSheetContainer.updatePadding(top = safeDrawingInsets.top)
+            bottomSheetBehavior.maxHeight =
+                resources.displayMetrics.heightPixels - safeDrawingInsets.top
             // Make sure the contents inside of the bottom sheet are not hidden by system bars, or
             // cutouts.
             bottomSheet.updatePadding(
@@ -170,7 +190,6 @@ constructor(
 private val WindowInsets.safeDrawing
     get() =
         getInsets(WindowInsets.Type.systemBars())
-            .union(getInsets(WindowInsets.Type.ime()))
             .union(getInsets(WindowInsets.Type.displayCutout()))
 
 private fun Insets.union(insets: Insets): Insets = Insets.max(this, insets)
