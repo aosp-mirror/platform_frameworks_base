@@ -102,26 +102,33 @@ final class AutofillSuggestionsController {
             boolean touchExplorationEnabled) {
         clearPendingInlineSuggestionsRequest();
         mInlineSuggestionsRequestCallback = callback;
-        final InputMethodInfo imi = mService.queryInputMethodForCurrentUserLocked(
-                mService.getSelectedMethodIdLocked());
 
-        if (userId == mService.getCurrentImeUserIdLocked()
-                && imi != null && isInlineSuggestionsEnabled(imi, touchExplorationEnabled)) {
-            mPendingInlineSuggestionsRequest = new CreateInlineSuggestionsRequest(
-                    requestInfo, callback, imi.getPackageName());
-            if (mService.getCurMethodLocked() != null) {
-                // In the normal case when the IME is connected, we can make the request here.
-                performOnCreateInlineSuggestionsRequest();
-            } else {
-                // Otherwise, the next time the IME connection is established,
-                // InputMethodBindingController.mMainConnection#onServiceConnected() will call
-                // into #performOnCreateInlineSuggestionsRequestLocked() to make the request.
-                if (DEBUG) {
-                    Slog.d(TAG, "IME not connected. Delaying inline suggestions request.");
-                }
-            }
-        } else {
+        if (userId != mService.getCurrentImeUserIdLocked()) {
             callback.onInlineSuggestionsUnsupported();
+            return;
+        }
+
+        // Note that current user ID is guaranteed to be userId.
+        final var imeId = mService.getSelectedMethodIdLocked();
+        final InputMethodInfo imi = InputMethodSettingsRepository.get(userId).getMethodMap()
+                .get(imeId);
+        if (imi == null || !isInlineSuggestionsEnabled(imi, touchExplorationEnabled)) {
+            callback.onInlineSuggestionsUnsupported();
+            return;
+        }
+
+        mPendingInlineSuggestionsRequest = new CreateInlineSuggestionsRequest(
+                requestInfo, callback, imi.getPackageName());
+        if (mService.getCurMethodLocked() != null) {
+            // In the normal case when the IME is connected, we can make the request here.
+            performOnCreateInlineSuggestionsRequest();
+        } else {
+            // Otherwise, the next time the IME connection is established,
+            // InputMethodBindingController.mMainConnection#onServiceConnected() will call
+            // into #performOnCreateInlineSuggestionsRequestLocked() to make the request.
+            if (DEBUG) {
+                Slog.d(TAG, "IME not connected. Delaying inline suggestions request.");
+            }
         }
     }
 
