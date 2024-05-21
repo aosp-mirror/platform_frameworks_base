@@ -994,7 +994,15 @@ void CanvasContext::destroyHardwareResources() {
 }
 
 void CanvasContext::onContextDestroyed() {
-    destroyHardwareResources();
+    // We don't want to destroyHardwareResources as that will invalidate display lists which
+    // the client may not be expecting. Instead just purge all scratch resources
+    if (mRenderPipeline->isContextReady()) {
+        freePrefetchedLayers();
+        for (const sp<RenderNode>& node : mRenderNodes) {
+            node->destroyLayers();
+        }
+        mRenderPipeline->onDestroyHardwareResources();
+    }
 }
 
 DeferredLayerUpdater* CanvasContext::createTextureLayer() {

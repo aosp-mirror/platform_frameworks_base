@@ -1180,7 +1180,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             updateDisabledForQuickstep(newConfig);
         }
 
-        // TODO(b/243765256): Disable this logging once b/243765256 is fixed.
+        // TODO(b/332635834): Disable this logging once b/332635834 is fixed.
         Log.i(DEBUG_MISSING_GESTURE_TAG, "Config changed: newConfig=" + newConfig
                 + " lastReportedConfig=" + mLastReportedConfig);
         mLastReportedConfig.updateFrom(newConfig);
