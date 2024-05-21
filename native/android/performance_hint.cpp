@@ -60,7 +60,7 @@ public:
 
     APerformanceHintSession* createSession(const int32_t* threadIds, size_t size,
                                            int64_t initialTargetWorkDurationNanos,
-                                           hal::SessionTag tag = hal::SessionTag::OTHER);
+                                           hal::SessionTag tag = hal::SessionTag::APP);
     int64_t getPreferredRateNanos() const;
 
 private:
