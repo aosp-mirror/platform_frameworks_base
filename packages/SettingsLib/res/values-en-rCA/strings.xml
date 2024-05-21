@@ -103,6 +103,8 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> battery."</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Left: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> battery"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Right: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> battery"</string>
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"Left <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"Right <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Active"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Saved"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Active (left only)"</string>
@@ -706,7 +708,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Physical keyboard"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Choose keyboard layout"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Default"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Turn screen on"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"Screen turn-on control"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Allow turning the screen on"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Allow an app to turn the screen on. If granted, the app may turn on the screen at any time without your explicit intent."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Stop broadcasting <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

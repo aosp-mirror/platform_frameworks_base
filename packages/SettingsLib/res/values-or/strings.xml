@@ -94,7 +94,7 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"ସଂଯୁକ୍ତ ନାହିଁ (ଫୋନ୍ ନୁହେଁ), ବ୍ୟାଟେରୀ<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"ସଂଯୁକ୍ତ ହେଲା (ମିଡିଆ ନୁହେଁ), ବ୍ୟାଟେରୀ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"ସଂଯୁକ୍ତ ହେଲା (ଫୋନ୍ କିମ୍ବା ମେଡିଆ ନୁହେଁ), ବ୍ୟାଟେରୀ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"ସକ୍ରିୟ ଅଛନ୍ତି। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ।"</string>
+    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"ସକ୍ରିୟ ଅଛି। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ।"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"ସକ୍ରିୟ ଅଛନ୍ତି। ବାମ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ଡାହାଣ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ବେଟେରୀ।"</string>
     <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"ସକ୍ରିୟ ଅଛି। ବାମ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ।"</string>
     <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"ସକ୍ରିୟ ଅଛି। ଡାହାଣ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ।"</string>
@@ -103,6 +103,10 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"ବାମ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ଡାହାଣ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ବେଟେରୀ।"</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"ବାମ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"ଡାହାଣ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ"</string>
+    <!-- no translation found for tv_bluetooth_battery_level_untethered_left (337629670583744410) -->
+    <skip />
+    <!-- no translation found for tv_bluetooth_battery_level_untethered_right (8610019317279155595) -->
+    <skip />
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"ସକ୍ରିୟ"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"ସେଭ କରାଯାଇଛି"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"ସକ୍ରିୟ (କେବଳ ବାମ)"</string>
@@ -121,7 +125,7 @@
     <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"ସକ୍ରିୟ (କେବଳ ମିଡିଆ), କେବଳ ଡାହାଣ"</string>
     <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"ସକ୍ରିୟ (କେବଳ ମିଡିଆ), ବାମ ଏବଂ ଡାହାଣ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"ମିଡିଆ ଅଡିଓ"</string>
-    <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ଫୋନ୍‌ କଲ୍‌‌ଗୁଡ଼ିକ"</string>
+    <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ଫୋନ କଲ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ଫାଇଲ୍‌ ଟ୍ରାନ୍ସଫର୍‌"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ଇନ୍‌ପୁଟ୍‌ ଡିଭାଇସ୍"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ଇଣ୍ଟରନେଟ ଆକ୍ସେସ"</string>
@@ -706,7 +710,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ଫିଜିକାଲ କୀବୋର୍ଡ"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"କୀବୋର୍ଡ ଲେଆଉଟ ବାଛନ୍ତୁ"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ଡିଫଲ୍ଟ"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"ସ୍କ୍ରିନକୁ ଚାଲୁ କରନ୍ତୁ"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"ସ୍କ୍ରିନ ଚାଲୁ କରିବା ପାଇଁ ନିୟନ୍ତ୍ରଣ"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ସ୍କ୍ରିନକୁ ଚାଲୁ କରିବା ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ସ୍କ୍ରିନକୁ ଚାଲୁ କରିବା ପାଇଁ ଏକ ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ଯଦି ଅନୁମତି ଦିଆଯାଏ, ତେବେ ଆପଟି ଆପଣଙ୍କ ଏକ୍ସପ୍ଲିସିଟ ଇଣ୍ଟେଣ୍ଟ ବିନା ଯେ କୌଣସି ସମୟରେ ସ୍କ୍ରିନକୁ ଚାଲୁ କରିପାରେ।"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବ୍ରଡକାଷ୍ଟ କରିବା ବନ୍ଦ କରିବେ?"</string>

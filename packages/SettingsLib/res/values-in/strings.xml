@@ -103,6 +103,10 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"Baterai L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Kiri: Baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Kanan: Baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for tv_bluetooth_battery_level_untethered_left (337629670583744410) -->
+    <skip />
+    <!-- no translation found for tv_bluetooth_battery_level_untethered_right (8610019317279155595) -->
+    <skip />
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktif"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Disimpan"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktif (hanya kiri)"</string>
@@ -490,10 +494,10 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> lagi sampai penuh"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pengisian daya dioptimalkan"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - Mengisi daya"</string>
-    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - Penuh dalam <xliff:g id="TIME">%3$s</xliff:g>"</string>
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - Penuh pukul <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - Baterai terisi penuh dalam <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"Baterai terisi penuh dalam <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"Penuh dalam <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"Penuh pukul <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Tidak diketahui"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Mengisi daya"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Mengisi daya cepat"</string>
@@ -706,7 +710,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Keyboard fisik"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Pilih tata letak keyboard"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Default"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Pengaktifan layar"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"Kontrol pengaktifan layar"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Izinkan pengaktifan layar"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Mengizinkan aplikasi mengaktifkan layar. Jika diizinkan, aplikasi dapat mengaktifkan layar kapan saja tanpa izin Anda."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Hentikan siaran <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

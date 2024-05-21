@@ -103,6 +103,10 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"L aldearen bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>. R aldearen bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Ezkerreko aldearen bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Eskuineko aldearen bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for tv_bluetooth_battery_level_untethered_left (337629670583744410) -->
+    <skip />
+    <!-- no translation found for tv_bluetooth_battery_level_untethered_right (8610019317279155595) -->
+    <skip />
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktibo"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Gordeta"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktibo (ezkerrekoa soilik)"</string>
@@ -120,7 +124,7 @@
     <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Aktibo (multimedia-edukia soilik); ezkerreko aldea soilik"</string>
     <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Aktibo (multimedia-edukia soilik); eskuineko aldea soilik"</string>
     <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Aktibo (multimedia-edukia soilik); ezkerreko eta eskuineko aldeak"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Euskarriaren audioa"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Multimedia-audioa"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefono-deiak"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Fitxategi-transferentzia"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Sarrera-gailua"</string>
@@ -706,7 +710,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teklatu fisikoa"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Aukeratu teklatuaren diseinua"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Lehenetsia"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Piztu pantaila"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"Pantaila pizteko modua kontrolatzeko aukera"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Eman pantaila pizteko baimena"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Eman pantaila pizteko baimena aplikazioei. Baimena emanez gero, aplikazioek edonoiz piztu ahal izango dute pantaila, zuk halako asmorik izan ez arren."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren audioa igortzeari utzi nahi diozu?"</string>

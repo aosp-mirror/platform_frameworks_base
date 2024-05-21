@@ -103,6 +103,8 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"ຊ: ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ຂ: ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"ຊ້າຍ: ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"ຂວາ: ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"ຊ້າຍ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"ຂວາ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"ອອນລາຍ"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"ບັນທຶກແລ້ວ"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"ນຳໃຊ້ຢູ່ (ຊ້າຍເທົ່ານັ້ນ)"</string>
@@ -120,7 +122,7 @@
     <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"ນຳໃຊ້ຢູ່ (ມີເດຍເທົ່ານັ້ນ), ຊ້າຍເທົ່ານັ້ນ"</string>
     <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"ນຳໃຊ້ຢູ່ (ມີເດຍເທົ່ານັ້ນ), ຂວາເທົ່ານັ້ນ"</string>
     <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"ນຳໃຊ້ຢູ່ (ມີເດຍເທົ່ານັ້ນ), ຊ້າຍ ແລະ ຂວາ"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"ສຽງ"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"ສຽງມີເດຍ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ການໂທ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ການໂອນຍ້າຍໄຟລ໌"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ອຸປະກອນປ້ອນຂໍ້ມູນ"</string>
@@ -706,7 +708,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ແປ້ນພິມພາຍນອກ"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"ເລືອກຮູບແບບແປ້ນພິມ"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ຄ່າເລີ່ມຕົ້ນ"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"ເປີດໜ້າຈໍ"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"ການຄວບຄຸມການເປີດໜ້າຈໍ"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ອະນຸຍາດໃຫ້ເປີດໜ້າຈໍ"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ອະນຸຍາດໃຫ້ແອັບເປີດໜ້າຈໍໄດ້. ຫາກອະນຸມັດ, ແອັບຈະສາມາດເປີດໜ້າຈໍຕອນໃດກໍໄດ້ໂດຍທີ່ທ່ານບໍ່ຕ້ອງມີເຈດຕະນາຢ່າງຈະແຈ້ງ."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"ຢຸດການອອກອາກາດ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
