@@ -64,7 +64,7 @@ public class BaseIWindow extends IWindow.Stub {
 
     @Override
     public void insetsControlChanged(InsetsState insetsState,
-            InsetsSourceControl[] activeControls) {
+            InsetsSourceControl.Array activeControls) {
     }
 
     @Override

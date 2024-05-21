@@ -11258,10 +11258,10 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void insetsControlChanged(InsetsState insetsState,
-                InsetsSourceControl[] activeControls) {
+                InsetsSourceControl.Array activeControls) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.dispatchInsetsControlChanged(insetsState, activeControls);
+                viewAncestor.dispatchInsetsControlChanged(insetsState, activeControls.get());
             }
         }
 
