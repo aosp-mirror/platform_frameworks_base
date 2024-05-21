@@ -1329,12 +1329,14 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
 
         @Override
         public IBinder getBinderForSetQueue() throws RemoteException {
-            return new ParcelableListBinder<QueueItem>((list) -> {
-                synchronized (mLock) {
-                    mQueue = list;
-                }
-                mHandler.post(MessageHandler.MSG_UPDATE_QUEUE);
-            });
+            return new ParcelableListBinder<QueueItem>(
+                    QueueItem.class,
+                    (list) -> {
+                        synchronized (mLock) {
+                            mQueue = list;
+                        }
+                        mHandler.post(MessageHandler.MSG_UPDATE_QUEUE);
+                    });
         }
 
         @Override
