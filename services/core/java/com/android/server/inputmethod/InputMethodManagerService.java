@@ -2635,7 +2635,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (mMenuController.getSwitchingDialogLocked() != null) return false;
         // When we are switching IMEs, the IME switcher button should be hidden.
         final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
-        if (!Objects.equals(userData.mBindingController.getCurId(), getSelectedMethodIdLocked())) {
+        final var bindingController = userData.mBindingController;
+        if (!Objects.equals(bindingController.getCurId(),
+                bindingController.getSelectedMethodId())) {
             return false;
         }
         if (mWindowManagerInternal.isKeyguardShowingAndNotOccluded()
