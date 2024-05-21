@@ -275,6 +275,10 @@ public class TrustManagerService extends SystemService {
             return KeyStoreAuthorization.getInstance();
         }
 
+        AlarmManager getAlarmManager() {
+            return mContext.getSystemService(AlarmManager.class);
+        }
+
         Looper getLooper() {
             return Looper.myLooper();
         }
@@ -293,7 +297,7 @@ public class TrustManagerService extends SystemService {
         mLockPatternUtils = injector.getLockPatternUtils();
         mKeyStoreAuthorization = injector.getKeyStoreAuthorization();
         mStrongAuthTracker = new StrongAuthTracker(context, injector.getLooper());
-        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        mAlarmManager = injector.getAlarmManager();
     }
 
     @Override
