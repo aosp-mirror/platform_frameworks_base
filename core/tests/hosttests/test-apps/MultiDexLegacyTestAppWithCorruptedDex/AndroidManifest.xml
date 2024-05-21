@@ -5,7 +5,7 @@
      android:versionCode="1"
      android:versionName="1.0">
 
-    <uses-sdk android:minSdkVersion="19"
+    <uses-sdk android:minSdkVersion="21"
          android:targetSdkVersion="19"/>
 
     <application android:name="androidx.multidex.MultiDexApplication"
