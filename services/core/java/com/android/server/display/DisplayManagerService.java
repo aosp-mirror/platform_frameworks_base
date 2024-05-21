@@ -280,6 +280,7 @@ public final class DisplayManagerService extends SystemService {
     private DeviceStateManagerInternal mDeviceStateManager;
     @GuardedBy("mSyncRoot")
     private int[] mUserDisabledHdrTypes = {};
+    @Display.HdrCapabilities.HdrType
     private int[] mSupportedHdrOutputType;
     @GuardedBy("mSyncRoot")
     private boolean mAreUserDisabledHdrTypesAllowed = true;
@@ -3438,6 +3439,7 @@ public final class DisplayManagerService extends SystemService {
                     autoHdrTypes);
         }
 
+        @Display.HdrCapabilities.HdrType
         int[] getSupportedHdrOutputTypes() {
             return DisplayControl.getSupportedHdrOutputTypes();
         }
