@@ -64,6 +64,7 @@ import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
@@ -81,6 +82,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
     // Allow PIP to resize to a slightly bigger state upon touch
     private boolean mEnableResize;
     private final Context mContext;
+    private final ShellCommandHandler mShellCommandHandler;
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     @NonNull private final PipBoundsState mPipBoundsState;
     @NonNull private final PipTransitionState mPipTransitionState;
@@ -170,6 +172,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
     @SuppressLint("InflateParams")
     public PipTouchHandler(Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             PhonePipMenuController menuController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
@@ -182,6 +185,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             ShellExecutor mainExecutor,
             Optional<PipPerfHintController> pipPerfHintControllerOptional) {
         mContext = context;
+        mShellCommandHandler = shellCommandHandler;
         mMainExecutor = mainExecutor;
         mPipPerfHintController = pipPerfHintControllerOptional.orElse(null);
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
@@ -235,6 +239,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mEnableResize = res.getBoolean(R.bool.config_pipEnableResizeForMenu);
         reloadResources();
 
+        mShellCommandHandler.addDumpCallback(this::dump, this);
         mMotionHelper.init();
         mPipResizeGestureHandler.init();
         mPipDismissTargetHandler.init();

@@ -514,6 +514,20 @@ public class PipResizeGestureHandler implements
         switch (newState) {
             case PipTransitionState.SCHEDULED_BOUNDS_CHANGE:
                 if (!extra.getBoolean(RESIZE_BOUNDS_CHANGE)) break;
+
+                if (mPipBoundsState.getBounds().equals(mLastResizeBounds)) {
+                    // If the bounds are invariant move the destination bounds by a single pixel
+                    // to top/bottom to avoid a no-op transition. This trick helps keep the
+                    // animation a part of the transition.
+                    float snapFraction = mPipBoundsAlgorithm.getSnapFraction(
+                            mPipBoundsState.getBounds());
+
+                    // Move to the top if closer to the bottom edge and vice versa.
+                    boolean inTopHalf = snapFraction < 1.5 || snapFraction > 3.5;
+                    int offsetY = inTopHalf ? 1 : -1;
+                    mLastResizeBounds.offset(0 /* dx */, offsetY);
+                }
+
                 mWaitingForBoundsChangeTransition = true;
                 mPipScheduler.scheduleAnimateResizePip(mLastResizeBounds);
                 break;
@@ -527,17 +541,14 @@ public class PipResizeGestureHandler implements
                         PipTransition.PIP_START_TX, SurfaceControl.Transaction.class);
                 Rect destinationBounds = extra.getParcelable(
                         PipTransition.PIP_DESTINATION_BOUNDS, Rect.class);
-                startTx.setPosition(mPipTransitionState.mPinnedTaskLeash,
-                        destinationBounds.left, destinationBounds.top);
                 startTx.apply();
 
                 // All motion operations have actually finished, so make bounds cache updates.
+                mUpdateResizeBoundsCallback.accept(destinationBounds);
                 cleanUpHighPerfSessionMaybe();
 
                 // Setting state to CHANGED_PIP_BOUNDS applies finishTx and notifies Core.
                 mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
-
-                mUpdateResizeBoundsCallback.accept(destinationBounds);
                 break;
         }
     }

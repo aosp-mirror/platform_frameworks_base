@@ -46,6 +46,7 @@ import com.android.wm.shell.pip2.phone.PipTouchHandler;
 import com.android.wm.shell.pip2.phone.PipTransition;
 import com.android.wm.shell.pip2.phone.PipTransitionState;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
@@ -82,6 +83,7 @@ public abstract class Pip2Module {
     @Provides
     static Optional<PipController> providePipController(Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ShellController shellController,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
@@ -97,9 +99,10 @@ public abstract class Pip2Module {
             return Optional.empty();
         } else {
             return Optional.ofNullable(PipController.create(
-                    context, shellInit, shellController, displayController, displayInsetsController,
-                    pipBoundsState, pipBoundsAlgorithm, pipDisplayLayoutState, pipScheduler,
-                    taskStackListener, shellTaskOrganizer, pipTransitionState, mainExecutor));
+                    context, shellInit, shellCommandHandler, shellController, displayController,
+                    displayInsetsController, pipBoundsState, pipBoundsAlgorithm,
+                    pipDisplayLayoutState, pipScheduler, taskStackListener, shellTaskOrganizer,
+                    pipTransitionState, mainExecutor));
         }
     }
 
@@ -129,6 +132,7 @@ public abstract class Pip2Module {
     @Provides
     static PipTouchHandler providePipTouchHandler(Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             PhonePipMenuController menuPhoneController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
@@ -140,10 +144,10 @@ public abstract class Pip2Module {
             PipUiEventLogger pipUiEventLogger,
             @ShellMainThread ShellExecutor mainExecutor,
             Optional<PipPerfHintController> pipPerfHintControllerOptional) {
-        return new PipTouchHandler(context, shellInit, menuPhoneController, pipBoundsAlgorithm,
-                pipBoundsState, pipTransitionState, pipScheduler, sizeSpecSource, pipMotionHelper,
-                floatingContentCoordinator, pipUiEventLogger, mainExecutor,
-                pipPerfHintControllerOptional);
+        return new PipTouchHandler(context, shellInit, shellCommandHandler, menuPhoneController,
+                pipBoundsAlgorithm, pipBoundsState, pipTransitionState, pipScheduler,
+                sizeSpecSource, pipMotionHelper, floatingContentCoordinator, pipUiEventLogger,
+                mainExecutor, pipPerfHintControllerOptional);
     }
 
     @WMSingleton
@@ -163,7 +167,7 @@ public abstract class Pip2Module {
 
     @WMSingleton
     @Provides
-    static PipTransitionState providePipStackListenerController() {
-        return new PipTransitionState();
+    static PipTransitionState providePipTransitionState(@ShellMainThread Handler handler) {
+        return new PipTransitionState(handler);
     }
 }
