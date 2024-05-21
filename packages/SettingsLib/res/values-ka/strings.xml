@@ -558,7 +558,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"გამორთვამდე"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ახლახან"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ეს ტელეფონი"</string>
-    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ეს ტაბლეტი"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ამ ტაბლეტზე"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"სამაგრის დინამიკი"</string>
