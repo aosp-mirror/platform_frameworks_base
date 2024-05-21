@@ -63,7 +63,7 @@
     <string name="archive_application_text_all_users" msgid="3151229641681672580">"Αρχειοθέτηση αυτής της εφαρμογής για όλους τους χρήστες; Τα προσωπικά δεδομένα σας θα αποθηκευτούν"</string>
     <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Αρχειοθέτηση αυτής της εφαρμογής στο προφίλ εργασίας σας; Τα προσωπικά δεδομένα σας θα αποθηκευτούν"</string>
     <string name="archive_application_text_user" msgid="2586558895535581451">"Αρχειοθέτηση αυτής της εφαρμογής για τον χρήστη <xliff:g id="USERNAME">%1$s</xliff:g>; Τα προσωπικά δεδομένα σας θα αποθηκευτούν"</string>
-    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Θέλετε να αρχειοθετήσετε αυτή την εφαρμογή από τον απόρρητο χώρο σας; Τα προσωπικά δεδομένα σας θα αποθηκευτούν"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Θέλετε να αρχειοθετήσετε αυτή την εφαρμογή από τον ιδιωτικό χώρο σας; Τα προσωπικά δεδομένα σας θα αποθηκευτούν"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Θέλετε να απεγκαταστήσετε αυτή την εφαρμογή για "<b>"όλους"</b>" τους χρήστες; Η εφαρμογή και τα δεδομένα της θα καταργηθούν από "<b>"όλους"</b>" τους χρήστες στη συσκευή."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Θέλετε να απεγκαταστήσετε αυτή την εφαρμογή για τον χρήστη <xliff:g id="USERNAME">%1$s</xliff:g>;"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Θέλετε να καταργήσετε την εγκατάσταση αυτής της εφαρμογής από το προφίλ εργασίας σας;"</string>
