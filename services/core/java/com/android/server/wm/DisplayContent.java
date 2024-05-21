@@ -5707,7 +5707,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // VR virtual display will be used to run and render 2D app within a VR experience.
                 && mDisplayId != mWmService.mVr2dDisplayId
                 // Do not show system decorations on untrusted virtual display.
-                && isTrusted();
+                && isTrusted()
+                // No system decoration on rear display.
+                && (mDisplay.getFlags() & Display.FLAG_REAR) == 0;
     }
 
     /**
