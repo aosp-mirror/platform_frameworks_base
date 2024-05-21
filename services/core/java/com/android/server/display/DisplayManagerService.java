@@ -313,8 +313,7 @@ public final class DisplayManagerService extends SystemService {
     public boolean mSafeMode;
 
     // All callback records indexed by calling process id.
-    public final SparseArray<CallbackRecord> mCallbacks =
-            new SparseArray<CallbackRecord>();
+    private final SparseArray<CallbackRecord> mCallbacks = new SparseArray<>();
 
     /**
      *  All {@link IVirtualDevice} and {@link DisplayWindowPolicyController}s indexed by
@@ -463,12 +462,12 @@ public final class DisplayManagerService extends SystemService {
 
     // Temporary callback list, used when sending display events to applications.
     // May be used outside of the lock but only on the handler thread.
-    private final ArrayList<CallbackRecord> mTempCallbacks = new ArrayList<CallbackRecord>();
+    private final ArrayList<CallbackRecord> mTempCallbacks = new ArrayList<>();
 
     // Pending callback records indexed by calling process uid and pid.
-    // Must be used outside of the lock mSyncRoot and should be selflocked.
+    // Must be used outside of the lock mSyncRoot and should be self-locked.
     @GuardedBy("mPendingCallbackSelfLocked")
-    public final SparseArray<SparseArray<PendingCallback>> mPendingCallbackSelfLocked =
+    private final SparseArray<SparseArray<PendingCallback>> mPendingCallbackSelfLocked =
             new SparseArray<>();
 
     // Temporary viewports, used when sending new viewport information to the
