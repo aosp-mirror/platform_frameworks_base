@@ -1322,7 +1322,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             mPresenter.expandTaskFragment(wct, container);
         } else {
             // Put activity into a new expanded container.
-            final TaskFragmentContainer newContainer = newContainer(activity, getTaskId(activity));
+            final TaskFragmentContainer newContainer =
+                    new TaskFragmentContainer.Builder(this, getTaskId(activity), activity)
+                            .setPendingAppearedActivity(activity).build();
             mPresenter.expandActivity(wct, newContainer.getTaskFragmentToken(), activity);
         }
     }
@@ -1738,9 +1740,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // Can't find any activity in the Task that we can use as the owner activity.
             return null;
         }
-        final TaskFragmentContainer container = newContainer(null /* pendingAppearedActivity */,
-                intent, activityInTask, taskId, null /* pairedPrimaryContainer*/, overlayTag,
-                launchOptions, associateLaunchingActivity);
+        final TaskFragmentContainer container =
+                new TaskFragmentContainer.Builder(this, taskId, activityInTask)
+                        .setPendingAppearedIntent(intent)
+                        .setOverlayTag(overlayTag)
+                        .setLaunchOptions(launchOptions)
+                        .setAssociatedActivity(associateLaunchingActivity ? activityInTask : null)
+                        .build();
         final IBinder taskFragmentToken = container.getTaskFragmentToken();
         // Note that taskContainer will not exist before calling #newContainer if the container
         // is the first embedded TF in the task.
@@ -1816,74 +1822,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             }
         }
         return null;
-    }
-
-    @GuardedBy("mLock")
-    TaskFragmentContainer newContainer(@NonNull Activity pendingAppearedActivity, int taskId) {
-        return newContainer(pendingAppearedActivity, pendingAppearedActivity, taskId);
-    }
-
-    @GuardedBy("mLock")
-    TaskFragmentContainer newContainer(@NonNull Activity pendingAppearedActivity,
-            @NonNull Activity activityInTask, int taskId) {
-        return newContainer(pendingAppearedActivity, null /* pendingAppearedIntent */,
-                activityInTask, taskId, null /* pairedPrimaryContainer */, null /* tag */,
-                null /* launchOptions */, false /* associateLaunchingActivity */);
-    }
-
-    @GuardedBy("mLock")
-    TaskFragmentContainer newContainer(@NonNull Intent pendingAppearedIntent,
-            @NonNull Activity activityInTask, int taskId) {
-        return newContainer(null /* pendingAppearedActivity */, pendingAppearedIntent,
-                activityInTask, taskId, null /* pairedPrimaryContainer */, null /* tag */,
-                null /* launchOptions */, false /* associateLaunchingActivity */);
-    }
-
-    @GuardedBy("mLock")
-    TaskFragmentContainer newContainer(@NonNull Intent pendingAppearedIntent,
-            @NonNull Activity activityInTask, int taskId,
-            @NonNull TaskFragmentContainer pairedPrimaryContainer) {
-        return newContainer(null /* pendingAppearedActivity */, pendingAppearedIntent,
-                activityInTask, taskId, pairedPrimaryContainer, null /* tag */,
-                null /* launchOptions */, false /* associateLaunchingActivity */);
-    }
-
-    /**
-     * Creates and registers a new organized container with an optional activity that will be
-     * re-parented to it in a WCT.
-     *
-     * @param pendingAppearedActivity the activity that will be reparented to the TaskFragment.
-     * @param pendingAppearedIntent   the Intent that will be started in the TaskFragment.
-     * @param activityInTask          activity in the same Task so that we can get the Task bounds
-     *                                if needed.
-     * @param taskId                  parent Task of the new TaskFragment.
-     * @param pairedContainer  the paired primary {@link TaskFragmentContainer}. When it is
-     *                                set, the new container will be added right above it.
-     * @param overlayTag              The tag for the new created overlay container. It must be
-     *                                needed if {@code isOverlay} is {@code true}. Otherwise,
-     *                                it should be {@code null}.
-     * @param launchOptions           The launch options bundle to create a container. Must be
-     *                                specified for overlay container.
-     * @param associateLaunchingActivity {@code true} to indicate this overlay container
-     *                                   should associate with launching activity.
-     */
-    @GuardedBy("mLock")
-    TaskFragmentContainer newContainer(@Nullable Activity pendingAppearedActivity,
-            @Nullable Intent pendingAppearedIntent, @NonNull Activity activityInTask, int taskId,
-            @Nullable TaskFragmentContainer pairedContainer, @Nullable String overlayTag,
-            @Nullable Bundle launchOptions, boolean associateLaunchingActivity) {
-        if (activityInTask == null) {
-            throw new IllegalArgumentException("activityInTask must not be null,");
-        }
-        if (!mTaskContainers.contains(taskId)) {
-            mTaskContainers.put(taskId, new TaskContainer(taskId, activityInTask));
-            mDividerPresenters.put(taskId, new DividerPresenter(taskId, this, mExecutor));
-        }
-        final TaskContainer taskContainer = mTaskContainers.get(taskId);
-        final TaskFragmentContainer container = new TaskFragmentContainer(pendingAppearedActivity,
-                pendingAppearedIntent, taskContainer, this, pairedContainer, overlayTag,
-                launchOptions, associateLaunchingActivity ? activityInTask : null);
-        return container;
     }
 
     /**
@@ -2579,6 +2517,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     TaskContainer getTaskContainer(int taskId) {
         return mTaskContainers.get(taskId);
+    }
+
+    @GuardedBy("mLock")
+    void addTaskContainer(int taskId, TaskContainer taskContainer) {
+        mTaskContainers.put(taskId, taskContainer);
+        mDividerPresenters.put(taskId, new DividerPresenter(taskId, this, mExecutor));
     }
 
     Handler getHandler() {

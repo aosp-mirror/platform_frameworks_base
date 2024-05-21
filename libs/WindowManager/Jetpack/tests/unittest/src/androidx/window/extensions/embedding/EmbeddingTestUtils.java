@@ -248,4 +248,17 @@ public class EmbeddingTestUtils {
         return new SplitPlaceholderRule.Builder(placeholderIntent, activityPredicate,
                 intentPredicate, windowMetricsPredicate);
     }
+
+    @NonNull
+    static TaskFragmentContainer createTfContainer(
+            @NonNull SplitController splitController, @NonNull Activity activity) {
+        return createTfContainer(splitController, TASK_ID, activity);
+    }
+
+    @NonNull
+    static TaskFragmentContainer createTfContainer(
+            @NonNull SplitController splitController, int taskId, @NonNull Activity activity) {
+        return new TaskFragmentContainer.Builder(splitController, taskId, activity)
+                .setPendingAppearedActivity(activity).build();
+    }
 }
