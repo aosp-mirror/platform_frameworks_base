@@ -2767,7 +2767,7 @@ public final class DisplayManagerService extends SystemService {
             // If HDR conversion introduces latency, disable that in case minimal
             // post-processing is requested
             boolean disableHdrConversionForLatency =
-                    mppRequest ? hdrConversionIntroducesLatencyLocked() : false;
+                    mppRequest && hdrConversionIntroducesLatencyLocked();
 
             if (display.getRequestedMinimalPostProcessingLocked() != mppRequest) {
                 display.setRequestedMinimalPostProcessingLocked(mppRequest);
