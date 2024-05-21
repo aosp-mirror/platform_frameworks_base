@@ -869,10 +869,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mMetricLogger.logInteractionUnmute(device);
     }
 
-    String getPackageName() {
-        return mPackageName;
-    }
-
     boolean hasAdjustVolumeUserRestriction() {
         if (RestrictedLockUtilsInternal.checkIfRestrictionEnforced(
                 mContext, UserManager.DISALLOW_ADJUST_VOLUME, UserHandle.myUserId()) != null) {
@@ -1060,7 +1056,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     boolean isBroadcastSupported() {
         LocalBluetoothLeBroadcast broadcast =
                 mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
-        return broadcast != null ? true : false;
+        return broadcast != null;
     }
 
     boolean isBluetoothLeBroadcastEnabled() {
@@ -1192,13 +1188,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         }
         Log.d(TAG, "Unregister LE broadcast assistant callback");
         assistant.unregisterServiceCallBack(callback);
-    }
-
-    private boolean isPlayBackInfoLocal() {
-        return mMediaController != null
-                && mMediaController.getPlaybackInfo() != null
-                && mMediaController.getPlaybackInfo().getPlaybackType()
-                == MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL;
     }
 
     boolean isPlaying() {
