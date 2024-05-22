@@ -479,10 +479,10 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - chargée à 100 %% dans <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Recharge optimisée"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - En charge"</string>
-    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - Complètement chargé dans <xliff:g id="TIME">%3$s</xliff:g>"</string>
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - Complètement chargé d\'ici <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - Complètement chargé dans <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"Complètement chargé dans <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"Complètement chargé dans <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"Complètement chargé d\'ici <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Inconnu"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Batterie en charge"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Charge rapide"</string>

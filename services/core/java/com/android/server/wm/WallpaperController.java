@@ -166,7 +166,7 @@ class WallpaperController {
                             || (w.mActivityRecord != null && !w.mActivityRecord.fillsParent());
                 }
             } else if (w.hasWallpaper() && mService.mPolicy.isKeyguardHostWindow(w.mAttrs)
-                    && w.mTransitionController.isTransitionOnDisplay(mDisplayContent)) {
+                    && w.mTransitionController.hasTransientLaunch(mDisplayContent)) {
                 // If we have no candidates at all, notification shade is allowed to be the target
                 // of last resort even if it has not been made visible yet.
                 if (DEBUG_WALLPAPER) Slog.v(TAG, "Found keyguard as wallpaper target: " + w);

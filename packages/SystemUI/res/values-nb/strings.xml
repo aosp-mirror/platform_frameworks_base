@@ -837,8 +837,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"På/av-meny"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Side <xliff:g id="ID_1">%1$d</xliff:g> av <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Låseskjerm"</string>
-    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Se vedlikeholdstrinnene"</string>
-    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Se vedlikeholdstrinnene"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Se hva du kan gjøre"</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Se hva du kan gjøre"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Koble fra enheten"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Enheten begynner å bli varm nær ladeporten. Hvis den er koblet til en lader eller et USB-tilbehør, må du koble den fra. Vær forsiktig da kabelen også kan være varm."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Se vedlikeholdstrinnene"</string>

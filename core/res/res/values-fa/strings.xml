@@ -477,7 +477,7 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"‏به برنامه اجازه می‌دهد گزارش‌های تماس در دستگاه Android TV را تغییر دهد، ازجمله داده‌های مربوط به تماس‎های ورودی و خروجی. برنامه‌های مخرب می‌توانند از این مجوز برای پاک کردن یا تغییر دادن گزارش تماس شما استفاده کنند."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"‏به برنامه اجازه می‌دهد گزارشات تماس تلفنی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب ممکن است از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
     <string name="permlab_bodySensors" msgid="662918578601619569">"دسترسی به داده‌های حسگر بدن، مثل ضربان قلب، درحین استفاده"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"به برنامه اجازه می‌دهد تا زمانی که درحال استفاده است، به داده‌های حسگر بدن، مثل ضربان قلب، دما، و درصد اکسیژن خون دسترسی داشته باشد."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"هنگامی که از برنامه استفاده می‌شود به برنامه اجازه می‌دهد به داده‌های حسگر بدن مانند ضربان قلب، دما، و درصد اکسیژن خون دسترسی داشته باشد."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"دسترسی به داده‌های حسگر بدن، مثل ضربان قلب، درحین اجرا در پس‌زمینه"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"به برنامه اجازه می‌دهد تا زمانی که در پس‌زمینه درحال اجرا است، به داده‌های حسگر بدن، مثل ضربان قلب، دما، و درصد اکسیژن خون دسترسی داشته باشد."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"خواندن رویدادها و جزئیات تقویم"</string>
@@ -499,17 +499,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"تغییر تنظیمات صوتی"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"به برنامه امکان می‌دهد تنظیمات صوتی کلی مانند میزان صدا و بلندگوی مورد استفاده برای پخش صدا را تغییر دهد."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ضبط صدا"</string>
-    <string name="permdesc_recordAudio" msgid="5857246765327514062">"این برنامه وقتی درحال استفاده است، می‌تواند بااستفاده از میکروفون صدا ضبط کند."</string>
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"هنگامی که از برنامه استفاده می‌شود، این برنامه می‌تواند بااستفاده از میکروفون صدا ضبط کند."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ضبط صدا در پس‌زمینه"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"این برنامه می‌تواند در هرزمانی با استفاده از میکروفون صدا ضبط کند."</string>
     <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"تشخیص ضبط صفحه‌نمایش از پنجره برنامه‌ها"</string>
-    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"وقتی نماگرفتی درحین استفاده از برنامه گرفته می‌شود، به این برنامه اطلاع داده می‌شود."</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"درحین گرفتن نماگرفت، هنگامی که از برنامه استفاده می‌شود، به این برنامه اطلاع داده می‌شود."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ارسال فرمان به سیم کارت"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"به برنامه اجازه ارسال دستورات به سیم کارت را می‌دهد. این بسیار خطرناک است."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"تشخیص فعالیت فیزیکی"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"این برنامه نمی‌تواند فعالیت فیزیکی‌تان را تشخیص دهد."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"عکسبرداری و فیلمبرداری"</string>
-    <string name="permdesc_camera" msgid="5240801376168647151">"این برنامه وقتی درحال استفاده است، می‌تواند بااستفاده از دوربین عکس و فیلم بگیرد."</string>
+    <string name="permdesc_camera" msgid="5240801376168647151">"هنگامی که از برنامه استفاده می‌شود، این برنامه می‌تواند بااستفاده از دوربین عکس و فیلم بگیرد."</string>
     <string name="permlab_backgroundCamera" msgid="7549917926079731681">"گرفتن عکس و فیلم در پس‌زمینه"</string>
     <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"این برنامه می‌تواند در هرزمانی با استفاده از دوربین عکس و فیلم بگیرد."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"به برنامه یا سرویسی اجازه دهید برای عکس‌برداری و فیلم‌برداری به دوربین‌های سیستم دسترسی داشته باشد"</string>

@@ -106,7 +106,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktibo, ezkerrekoa soilik"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktibo, eskuinekoa soilik"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktibo, ezkerreko eta eskuineko audifonoak"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Euskarriaren audioa"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Multimedia-audioa"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefono-deiak"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Fitxategi-transferentzia"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Sarrera-gailua"</string>
