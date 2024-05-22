@@ -138,10 +138,13 @@ fun MotionTestRule<ComposeToolkit>.recordTransition(
     toScene: SceneKey = TestScenes.SceneB,
 ): RecordedMotion {
     val state =
-        MutableSceneTransitionLayoutState(
-            fromScene,
-            transitions { from(fromScene, to = toScene, builder = transition) }
-        )
+        toolkit.composeContentTestRule.runOnUiThread {
+            MutableSceneTransitionLayoutState(
+                fromScene,
+                transitions { from(fromScene, to = toScene, builder = transition) }
+            )
+        }
+
     return recordMotion(
         content = { play ->
             LaunchedEffect(play) {
