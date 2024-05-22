@@ -402,9 +402,6 @@ public final class MediaRouter2Manager {
     @Nullable
     public RoutingSessionInfo getRoutingSessionForMediaController(MediaController mediaController) {
         MediaController.PlaybackInfo playbackInfo = mediaController.getPlaybackInfo();
-        if (playbackInfo == null) {
-            return null;
-        }
         if (playbackInfo.getPlaybackType() == MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
             return getSystemRoutingSession(mediaController.getPackageName());
         }
@@ -959,10 +956,6 @@ public final class MediaRouter2Manager {
     private boolean areSessionsMatched(MediaController mediaController,
             RoutingSessionInfo sessionInfo) {
         MediaController.PlaybackInfo playbackInfo = mediaController.getPlaybackInfo();
-        if (playbackInfo == null) {
-            return false;
-        }
-
         String volumeControlId = playbackInfo.getVolumeControlId();
         if (volumeControlId == null) {
             return false;
