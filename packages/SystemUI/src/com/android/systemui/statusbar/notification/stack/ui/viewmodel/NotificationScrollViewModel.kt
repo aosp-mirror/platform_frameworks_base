@@ -147,8 +147,6 @@ constructor(
      */
     val currentGestureOverscrollConsumer: (Boolean) -> Unit =
         stackAppearanceInteractor::setCurrentGestureOverscroll
-    /** Receives the height of the heads up notification. */
-    val headsUpHeightConsumer: (Float) -> Unit = stackAppearanceInteractor::setHeadsUpHeight
 
     /** Whether the notification stack is scrollable or not. */
     val isScrollable: Flow<Boolean> =

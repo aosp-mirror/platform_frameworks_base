@@ -65,9 +65,6 @@ constructor(
             }
             .distinctUntilChanged()
 
-    /** The height in px of the contents of the HUN. */
-    val headsUpHeight: StateFlow<Float> = viewHeightRepository.headsUpHeight.asStateFlow()
-
     /** The alpha of the Notification Stack for the brightness mirror */
     val alphaForBrightnessMirror: StateFlow<Float> =
         placeholderRepository.alphaForBrightnessMirror.asStateFlow()
@@ -108,11 +105,6 @@ constructor(
     fun setShadeScrimBounds(bounds: ShadeScrimBounds?) {
         check(bounds == null || bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
         placeholderRepository.shadeScrimBounds.value = bounds
-    }
-
-    /** Sets the height of heads up notification. */
-    fun setHeadsUpHeight(height: Float) {
-        viewHeightRepository.headsUpHeight.value = height
     }
 
     /** Sets whether the notification stack is scrolled to the top. */

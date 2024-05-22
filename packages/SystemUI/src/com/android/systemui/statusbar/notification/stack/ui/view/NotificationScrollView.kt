@@ -32,6 +32,9 @@ interface NotificationScrollView {
      */
     val intrinsicStackHeight: Int
 
+    /** Height in pixels required to display the top HeadsUp Notification. */
+    val topHeadsUpHeight: Int
+
     /**
      * Since this is an interface rather than a literal View, this provides cast-like access to the
      * underlying view.
@@ -72,9 +75,18 @@ interface NotificationScrollView {
     /** Sets whether the view is displayed in doze mode. */
     fun setDozing(dozing: Boolean)
 
-    /** Sets a listener to be notified, when the stack height might have changed. */
+    /** Adds a listener to be notified, when the stack height might have changed. */
     fun addStackHeightChangedListener(runnable: Runnable)
 
     /** @see addStackHeightChangedListener */
     fun removeStackHeightChangedListener(runnable: Runnable)
+
+    /**
+     * Adds a listener to be notified, when the height of the top heads up notification might have
+     * changed.
+     */
+    fun addHeadsUpHeightChangedListener(runnable: Runnable)
+
+    /** @see addHeadsUpHeightChangedListener */
+    fun removeHeadsUpHeightChangedListener(runnable: Runnable)
 }
