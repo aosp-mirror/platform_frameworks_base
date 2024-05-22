@@ -30,7 +30,7 @@ object NotificationViewFlipperBinder {
         viewFlipper: ViewFlipper,
         viewModel: NotificationViewFlipperViewModel,
     ): DisposableHandle {
-        if (viewFlipper.isAutoStart) {
+        if (!viewFlipper.isAutoStart) {
             // If the ViewFlipper is not set to AutoStart, the pause binding is meaningless
             return DisposableHandle {}
         }
