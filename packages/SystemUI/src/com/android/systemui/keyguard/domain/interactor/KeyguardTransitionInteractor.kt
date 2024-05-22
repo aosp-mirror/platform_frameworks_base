@@ -223,6 +223,17 @@ constructor(
         }
     }
 
+    fun transitionValue(
+        scene: SceneKey,
+        stateWithoutSceneContainer: KeyguardState,
+    ): Flow<Float> {
+        return if (SceneContainerFlag.isEnabled) {
+            sceneInteractor.get().transitionProgress(scene)
+        } else {
+            transitionValue(stateWithoutSceneContainer)
+        }
+    }
+
     /**
      * The amount of transition into or out of the given [KeyguardState].
      *
@@ -232,6 +243,10 @@ constructor(
     fun transitionValue(
         state: KeyguardState,
     ): Flow<Float> {
+        if (SceneContainerFlag.isEnabled && state != state.mapToSceneContainerState()) {
+            Log.e(TAG, "SceneContainer is enabled but a deprecated state $state is used.")
+            return transitionValue(state.mapToSceneContainerScene()!!, state)
+        }
         return getTransitionValueFlow(state)
     }
 
