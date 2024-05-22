@@ -19,6 +19,7 @@ package android.app;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.StrictMode.vmIncorrectContextUseEnabled;
+import static android.permission.flags.Flags.shouldRegisterAttributionSource;
 import static android.view.WindowManager.LayoutParams.WindowType;
 
 import android.Manifest;
@@ -3157,7 +3158,8 @@ class ContextImpl extends Context {
             int deviceId = vdm.getDeviceIdForDisplayId(displayId);
             if (deviceId != mDeviceId) {
                 mDeviceId = deviceId;
-                mAttributionSource = mAttributionSource.withDeviceId(mDeviceId);
+                mAttributionSource =
+                        createAttributionSourceWithDeviceId(mAttributionSource, mDeviceId);
                 notifyOnDeviceChangedListeners(mDeviceId);
             }
         }
@@ -3180,6 +3182,7 @@ class ContextImpl extends Context {
 
         if (mDeviceId != updatedDeviceId) {
             mDeviceId = updatedDeviceId;
+            mAttributionSource = createAttributionSourceWithDeviceId(mAttributionSource, mDeviceId);
             notifyOnDeviceChangedListeners(updatedDeviceId);
         }
     }
@@ -3548,8 +3551,22 @@ class ContextImpl extends Context {
                 deviceId, nextAttributionSource);
         // If we want to access protected data on behalf of another app we need to
         // tell the OS that we opt in to participate in the attribution chain.
-        if (nextAttributionSource != null || shouldRegister) {
-            attributionSource = getSystemService(PermissionManager.class)
+        return registerAttributionSourceIfNeeded(attributionSource, shouldRegister);
+    }
+
+    private @NonNull AttributionSource createAttributionSourceWithDeviceId(
+            @NonNull AttributionSource oldSource, int deviceId) {
+        boolean shouldRegister = false;
+        if (shouldRegisterAttributionSource()) {
+            shouldRegister = mParams.shouldRegisterAttributionSource();
+        }
+        return registerAttributionSourceIfNeeded(oldSource.withDeviceId(deviceId), shouldRegister);
+    }
+
+    private @NonNull AttributionSource registerAttributionSourceIfNeeded(
+            @NonNull AttributionSource attributionSource, boolean shouldRegister) {
+        if (shouldRegister || attributionSource.getNext() != null) {
+            return getSystemService(PermissionManager.class)
                     .registerAttributionSource(attributionSource);
         }
         return attributionSource;
