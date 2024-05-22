@@ -14,23 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.shared.model
+package com.android.systemui.qs.panels.domain.interactor
 
-/**
- * Grid type for a QS grid layout.
- *
- * Used to inject grid layouts with Dagger and the [GridLayoutTypeKey] annotation.
- */
-interface GridLayoutType
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.qs.panels.ui.compose.PartitionedGridLayout
 
-/** Grid type representing a scrollable vertical grid. */
-data object InfiniteGridLayoutType : GridLayoutType
-
-/**
- * Grid type representing a scrollable vertical grid where tiles will stretch to fill in empty
- * spaces.
- */
-data object StretchedGridLayoutType : GridLayoutType
-
-/** Grid type grouping large tiles on top and icon tiles at the bottom. */
-data object PartitionedGridLayoutType : GridLayoutType
+val Kosmos.partitionedGridLayout by
+    Kosmos.Fixture { PartitionedGridLayout(iconTilesInteractor, infiniteGridSizeInteractor) }

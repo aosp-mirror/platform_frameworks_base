@@ -23,8 +23,8 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.panels.data.repository.IconTilesRepository
 import com.android.systemui.qs.panels.data.repository.gridLayoutTypeRepository
 import com.android.systemui.qs.panels.data.repository.iconTilesRepository
-import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
+import com.android.systemui.qs.panels.shared.model.PartitionedGridLayoutType
 import com.android.systemui.qs.pipeline.data.repository.tileSpecRepository
 import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
@@ -45,8 +45,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidTestingRunner::class)
 class GridConsistencyInteractorTest : SysuiTestCase() {
 
-    data object TestGridLayoutType : GridLayoutType
-
     private val iconOnlyTiles =
         MutableStateFlow(
             setOf(
@@ -65,17 +63,13 @@ class GridConsistencyInteractorTest : SysuiTestCase() {
                     override val iconTilesSpecs: StateFlow<Set<TileSpec>>
                         get() = iconOnlyTiles.asStateFlow()
                 }
-            gridConsistencyInteractorsMap =
-                mapOf(
-                    Pair(InfiniteGridLayoutType, infiniteGridConsistencyInteractor),
-                    Pair(TestGridLayoutType, noopGridConsistencyInteractor)
-                )
         }
 
     private val underTest = with(kosmos) { gridConsistencyInteractor }
 
     @Before
     fun setUp() {
+        // Mostly testing InfiniteGridConsistencyInteractor because it reorders tiles
         with(kosmos) { gridLayoutTypeRepository.setLayout(InfiniteGridLayoutType) }
         underTest.start()
     }
@@ -86,7 +80,7 @@ class GridConsistencyInteractorTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 // Using the no-op grid consistency interactor
-                gridLayoutTypeRepository.setLayout(TestGridLayoutType)
+                gridLayoutTypeRepository.setLayout(PartitionedGridLayoutType)
 
                 // Setting an invalid layout with holes
                 // [ Large A ] [ sa ]
