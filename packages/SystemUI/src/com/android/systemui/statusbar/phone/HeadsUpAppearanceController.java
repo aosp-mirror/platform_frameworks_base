@@ -159,7 +159,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
             public void onLayoutChange(View v, int left, int top, int right, int bottom,
                     int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 if (shouldBeVisible()) {
-                    updateTopEntry();
+                    updateTopEntry("onLayoutChange");
 
                     // trigger scroller to notify the latest panel translation
                     mStackScrollerController.requestLayout();
@@ -220,7 +220,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
 
     @Override
     public void onHeadsUpPinned(NotificationEntry entry) {
-        updateTopEntry();
+        updateTopEntry("onHeadsUpPinned");
         updateHeader(entry);
         updateHeadsUpAndPulsingRoundness(entry);
     }
@@ -231,7 +231,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
         mPhoneStatusBarTransitions.onHeadsUpStateChanged(isHeadsUp);
     }
 
-    private void updateTopEntry() {
+    private void updateTopEntry(String reason) {
         NotificationEntry newEntry = null;
         if (shouldBeVisible()) {
             newEntry = mHeadsUpManager.getTopEntry();
@@ -369,7 +369,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
 
     @Override
     public void onHeadsUpUnPinned(NotificationEntry entry) {
-        updateTopEntry();
+        updateTopEntry("onHeadsUpUnPinned");
         updateHeader(entry);
         updateHeadsUpAndPulsingRoundness(entry);
     }
@@ -387,7 +387,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
             updateHeadsUpHeaders();
         }
         if (isExpanded() != oldIsExpanded) {
-            updateTopEntry();
+            updateTopEntry("setAppearFraction");
         }
     }
 
@@ -461,11 +461,11 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     }
 
     public void onStateChanged() {
-        updateTopEntry();
+        updateTopEntry("onStateChanged");
     }
 
     @Override
     public void onFullyHiddenChanged(boolean isFullyHidden) {
-        updateTopEntry();
+        updateTopEntry("onFullyHiddenChanged");
     }
 }
