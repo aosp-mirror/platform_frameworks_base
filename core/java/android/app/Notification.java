@@ -1632,6 +1632,7 @@ public class Notification implements Parcelable
     private Icon mSmallIcon;
     @UnsupportedAppUsage
     private Icon mLargeIcon;
+    private Icon mAppIcon;
 
     @UnsupportedAppUsage
     private String mChannelId;
@@ -3109,16 +3110,17 @@ public class Notification implements Parcelable
     }
 
     /**
+     * Get the resource ID of the app icon from application info.
      * @hide
      */
-    public int loadHeaderAppIconRes(Context context) {
+    public int getHeaderAppIconRes(Context context) {
         ApplicationInfo info = null;
         if (extras.containsKey(EXTRA_BUILDER_APPLICATION_INFO)) {
             info = extras.getParcelable(
                     EXTRA_BUILDER_APPLICATION_INFO,
                     ApplicationInfo.class);
         }
-        if (info == null) {
+        if (info == null && context != null) {
             info = context.getApplicationInfo();
         }
         if (info != null) {
@@ -3128,6 +3130,7 @@ public class Notification implements Parcelable
     }
 
     /**
+     * Load the app icon drawable from the package manager. This could result in a binder call.
      * @hide
      */
     public Drawable loadHeaderAppIcon(Context context) {
@@ -4143,6 +4146,52 @@ public class Notification implements Parcelable
     @UnsupportedAppUsage
     public void setSmallIcon(Icon icon) {
         mSmallIcon = icon;
+    }
+
+    /**
+     * The colored app icon that can replace the small icon in the notification starting in V.
+     *
+     * Before using this value, you should first check whether it's actually being used by the
+     * notification by calling {@link Notification#shouldUseAppIcon()}.
+     *
+     * @hide
+     */
+    public Icon getAppIcon() {
+        if (mAppIcon != null) {
+            return mAppIcon;
+        }
+        // If the app icon hasn't been loaded yet, check if we can load it without a context.
+        if (extras.containsKey(EXTRA_BUILDER_APPLICATION_INFO)) {
+            final ApplicationInfo info = extras.getParcelable(
+                    EXTRA_BUILDER_APPLICATION_INFO,
+                    ApplicationInfo.class);
+            if (info != null) {
+                int appIconRes = info.icon;
+                if (appIconRes == 0) {
+                    Log.w(TAG, "Failed to get the app icon: no icon in application info");
+                    return null;
+                }
+                mAppIcon = Icon.createWithResource(info.packageName, appIconRes);
+                return mAppIcon;
+            } else {
+                Log.e(TAG, "Failed to get the app icon: "
+                        + "there's an EXTRA_BUILDER_APPLICATION_INFO in extras but it's null");
+            }
+        } else {
+            Log.w(TAG, "Failed to get the app icon: no application info in extras");
+        }
+        return null;
+    }
+
+    /**
+     * Whether the notification is using the app icon instead of the small icon.
+     * @hide
+     */
+    public boolean shouldUseAppIcon() {
+        if (Flags.notificationsUseAppIconInRow()) {
+            return getAppIcon() != null;
+        }
+        return false;
     }
 
     /**
@@ -6134,16 +6183,30 @@ public class Notification implements Parcelable
             if (Flags.notificationsUseAppIcon()) {
                 // Override small icon with app icon
                 mN.mSmallIcon = Icon.createWithResource(mContext,
-                        mN.loadHeaderAppIconRes(mContext));
+                        mN.getHeaderAppIconRes(mContext));
             } else if (mN.mSmallIcon == null && mN.icon != 0) {
                 mN.mSmallIcon = Icon.createWithResource(mContext, mN.icon);
             }
 
-            contentView.setImageViewIcon(R.id.icon, mN.mSmallIcon);
+            boolean usingAppIcon = false;
+            if (Flags.notificationsUseAppIconInRow()) {
+                // Use the app icon in the view
+                int appIconRes = mN.getHeaderAppIconRes(mContext);
+                if (appIconRes != 0) {
+                    mN.mAppIcon = Icon.createWithResource(mContext, appIconRes);
+                    contentView.setImageViewIcon(R.id.icon, mN.mAppIcon);
+                    usingAppIcon = true;
+                } else {
+                    Log.w(TAG, "bindSmallIcon: could not get the app icon");
+                }
+            }
+            if (!usingAppIcon) {
+                contentView.setImageViewIcon(R.id.icon, mN.mSmallIcon);
+            }
             contentView.setInt(R.id.icon, "setImageLevel", mN.iconLevel);
 
             // Don't change color if we're using the app icon.
-            if (!Flags.notificationsUseAppIcon()) {
+            if (!Flags.notificationsUseAppIcon() && !usingAppIcon) {
                 processSmallIconColor(mN.mSmallIcon, contentView, p);
             }
         }

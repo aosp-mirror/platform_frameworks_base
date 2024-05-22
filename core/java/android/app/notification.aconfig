@@ -52,10 +52,19 @@ flag {
   bug: "281044385"
 }
 
+# vvv Prototypes for using app icons in notifications vvv
+
 flag {
   name: "notifications_use_app_icon"
   namespace: "systemui"
-  description: "Experiment to replace the small icon in a notification with the app icon."
+  description: "Experiment to replace the small icon in a notification with the app icon. This includes the status bar, AOD, shelf and notification row itself."
+  bug: "335211019"
+}
+
+flag {
+  name: "notifications_use_app_icon_in_row"
+  namespace: "systemui"
+  description: "Experiment to replace the small icon in a notification row with the app icon."
   bug: "335211019"
 }
 
@@ -65,6 +74,8 @@ flag {
   description: "Experiment to replace the notification icon in the status bar and shelf with the monochrome app icon, if available."
   bug: "335211019"
 }
+
+# ^^^ Prototypes for using app icons in notifications ^^^
 
 flag {
   name: "notification_expansion_optional"
