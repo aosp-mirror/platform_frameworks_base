@@ -27,7 +27,6 @@ import android.util.ArraySet;
 
 import com.android.internal.R;
 import com.android.internal.pm.pkg.parsing.ParsingPackage;
-import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -81,9 +80,6 @@ public class InstallConstraintsTagParser {
                 }
                 return input.success(prefixes);
             } else if (type == XmlPullParser.START_TAG) {
-                if (ParsingPackageUtils.getAconfigFlags().skipCurrentElement(parser)) {
-                    continue;
-                }
                 if (parser.getName().equals(TAG_FINGERPRINT_PREFIX)) {
                     ParseResult<String> parsedPrefix =
                             readFingerprintPrefixValue(input, res, parser);

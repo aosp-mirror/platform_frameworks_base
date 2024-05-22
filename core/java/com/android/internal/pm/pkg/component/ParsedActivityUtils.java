@@ -393,9 +393,6 @@ public class ParsedActivityUtils {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
-            if (ParsingPackageUtils.getAconfigFlags().skipCurrentElement(parser)) {
-                continue;
-            }
 
             final ParseResult result;
             if (parser.getName().equals("intent-filter")) {
