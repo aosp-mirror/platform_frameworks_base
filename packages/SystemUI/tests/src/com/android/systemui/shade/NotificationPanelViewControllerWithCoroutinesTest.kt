@@ -79,10 +79,9 @@ class NotificationPanelViewControllerWithCoroutinesTest :
 
         verify(mView, atLeastOnce()).addView(viewCaptor.capture(), anyInt())
         val userSwitcherStub =
-            CollectionUtils.find(
-                viewCaptor.getAllValues(),
-                { view -> view.getId() == R.id.keyguard_user_switcher_stub }
-            )
+            CollectionUtils.find(viewCaptor.allValues) { view ->
+                view.id == R.id.keyguard_user_switcher_stub
+            }
         assertThat(userSwitcherStub).isNotNull()
         assertThat(userSwitcherStub).isInstanceOf(ViewStub::class.java)
     }
