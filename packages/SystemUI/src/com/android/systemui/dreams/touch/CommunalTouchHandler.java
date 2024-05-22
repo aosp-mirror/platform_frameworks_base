@@ -98,7 +98,7 @@ public class CommunalTouchHandler implements TouchHandler {
         // Notification shade window has its own logic to be visible if the hub is open, no need to
         // do anything here other than send touch events over.
         session.registerInputListener(ev -> {
-            surfaces.handleDreamTouch((MotionEvent) ev);
+            surfaces.handleCommunalHubTouch((MotionEvent) ev);
             if (ev != null && ((MotionEvent) ev).getAction() == MotionEvent.ACTION_UP) {
                 var unused = session.pop();
             }

@@ -138,6 +138,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor;
 import com.android.systemui.shade.CameraLauncher;
+import com.android.systemui.shade.GlanceableHubContainerController;
 import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
@@ -341,6 +342,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private KeyboardShortcuts mKeyboardShortcuts;
     @Mock private KeyboardShortcutListSearch mKeyboardShortcutListSearch;
     @Mock private PackageManager mPackageManager;
+    @Mock private GlanceableHubContainerController mGlanceableHubContainerController;
 
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
@@ -591,7 +593,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mUserTracker,
                 () -> mFingerprintManager,
                 mActivityStarter,
-                mBrightnessMirrorShowingInteractor
+                mBrightnessMirrorShowingInteractor,
+                mGlanceableHubContainerController
         );
         mScreenLifecycle.addObserver(mCentralSurfaces.mScreenObserver);
         mCentralSurfaces.initShadeVisibilityListener();
