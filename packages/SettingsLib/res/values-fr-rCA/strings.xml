@@ -111,7 +111,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transfert de fichier"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Périphérique d\'entrée"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Accès Internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Autoriser accès : contacts et hist. d\'app."</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Autoriser accès : contacts et hist. d\'appels"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Ces infos seront utilisées pour les annonces d\'appels et plus"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Partage de connexion Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Messages texte"</string>

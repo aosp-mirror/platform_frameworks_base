@@ -194,11 +194,11 @@
     <string name="tts_install_data_title" msgid="1829942496472751703">"Instal·la dades de veu"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"Instal·la les dades de veu necessàries per a la síntesi de veu"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Pot ser que aquest motor de síntesi de parla pugui recopilar tot el text que s\'enunciarà, incloses les dades personals, com ara les contrasenyes i els números de les targetes de crèdit. Ve del motor <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Vols activar l\'ús d\'aquest motor de síntesi de parla?"</string>
-    <string name="tts_engine_network_required" msgid="8722087649733906851">"Aquest idioma requereix una connexió a la xarxa activa per a la sortida de text a parla."</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"Aquest idioma requereix una connexió de xarxa activa per a la sortida de text a parla."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"Això és un exemple de síntesi de veu"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"Estat de l\'idioma predeterminat"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> és totalment compatible"</string>
-    <string name="tts_status_requires_network" msgid="8327617638884678896">"Es necessita una connexió a la xarxa per a <xliff:g id="LOCALE">%1$s</xliff:g>"</string>
+    <string name="tts_status_requires_network" msgid="8327617638884678896">"Es necessita una connexió de xarxa per a <xliff:g id="LOCALE">%1$s</xliff:g>"</string>
     <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> no és compatible"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"S\'està comprovant…"</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"Configuració de: <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
