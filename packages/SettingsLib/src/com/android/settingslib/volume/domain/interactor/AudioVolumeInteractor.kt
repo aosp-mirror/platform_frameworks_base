@@ -50,11 +50,13 @@ class AudioVolumeInteractor(
     suspend fun setVolume(audioStream: AudioStream, volume: Int) {
         val streamModel = getAudioStream(audioStream).first()
         val oldVolume = streamModel.volume
-        audioRepository.setVolume(audioStream, volume)
-        when {
-            volume == streamModel.minVolume -> setMuted(audioStream, true)
-            oldVolume == streamModel.minVolume && volume > streamModel.minVolume ->
-                setMuted(audioStream, false)
+        if (volume != oldVolume) {
+            audioRepository.setVolume(audioStream, volume)
+            when {
+                volume == streamModel.minVolume -> setMuted(audioStream, true)
+                oldVolume == streamModel.minVolume && volume > streamModel.minVolume ->
+                    setMuted(audioStream, false)
+            }
         }
     }
 
@@ -89,9 +91,6 @@ class AudioVolumeInteractor(
             notificationsSoundPolicyInteractor.isZenMuted(audioStream).map { !it }
         }
     }
-
-    suspend fun isAffectedByMute(audioStream: AudioStream): Boolean =
-        audioRepository.isAffectedByMute(audioStream)
 
     private suspend fun processVolume(
         audioStreamModel: AudioStreamModel,
