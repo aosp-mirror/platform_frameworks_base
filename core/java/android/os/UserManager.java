@@ -5957,19 +5957,22 @@ public class UserManager {
     /**
      * Returns the string used to represent the profile associated with the given userId. This
      * string typically includes the profile name used by accessibility services like TalkBack.
-     * @hide
      *
      * @return String representing the accessibility label for the given profile user.
      *
      * @throws android.content.res.Resources.NotFoundException if the user does not have a label
      * defined.
+     *
+     * @see #getBadgedLabelForUser(CharSequence, UserHandle)
+     *
+     * @hide
      */
     @UserHandleAware(
             requiresAnyOfPermissionsIfNotCallerProfileGroup = {
                     Manifest.permission.MANAGE_USERS,
                     Manifest.permission.QUERY_USERS,
                     Manifest.permission.INTERACT_ACROSS_USERS})
-    public String getProfileAccessibilityString(int userId) {
+    public String getProfileAccessibilityString(@UserIdInt int userId) {
         if (isManagedProfile(mUserId)) {
             DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
             dpm.getResources().getString(
@@ -5979,7 +5982,7 @@ public class UserManager {
         return getProfileAccessibilityLabel(userId);
     }
 
-    private String getProfileAccessibilityLabel(int userId) {
+    private String getProfileAccessibilityLabel(@UserIdInt int userId) {
         try {
             final int resourceId = mService.getProfileAccessibilityLabelResId(userId);
             return Resources.getSystem().getString(resourceId);

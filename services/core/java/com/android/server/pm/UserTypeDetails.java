@@ -164,7 +164,7 @@ public final class UserTypeDetails {
      * Resource ID ({@link StringRes}) of the accessibility string that describes the user type.
      * This is used by accessibility services like Talkback.
      */
-    private final @Nullable int mAccessibilityString;
+    private final @StringRes int mAccessibilityString;
 
     /**
      * The default {@link UserProperties} for the user type.
@@ -183,7 +183,7 @@ public final class UserTypeDetails {
             @Nullable Bundle defaultSystemSettings,
             @Nullable Bundle defaultSecureSettings,
             @Nullable List<DefaultCrossProfileIntentFilter> defaultCrossProfileIntentFilters,
-            @Nullable int accessibilityString,
+            @StringRes int accessibilityString,
             @NonNull UserProperties defaultUserProperties) {
         this.mName = name;
         this.mEnabled = enabled;
