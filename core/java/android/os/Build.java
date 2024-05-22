@@ -36,6 +36,8 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.View;
 
+import com.android.internal.ravenwood.RavenwoodEnvironment;
+
 import dalvik.system.VMRuntime;
 
 import java.util.ArrayList;
@@ -49,6 +51,10 @@ import java.util.stream.Collectors;
  */
 @RavenwoodKeepWholeClass
 public class Build {
+    static {
+        // Set up the default system properties.
+        RavenwoodEnvironment.ensureRavenwoodInitialized();
+    }
     private static final String TAG = "Build";
 
     /** Value used for when a build property is unknown. */

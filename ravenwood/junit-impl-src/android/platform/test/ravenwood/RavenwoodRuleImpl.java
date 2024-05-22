@@ -100,10 +100,11 @@ public class RavenwoodRuleImpl {
 
         android.os.Process.init$ravenwood(rule.mUid, rule.mPid);
         android.os.Binder.init$ravenwood();
-        android.os.SystemProperties.init$ravenwood(
-                rule.mSystemProperties.getValues(),
-                rule.mSystemProperties.getKeyReadablePredicate(),
-                rule.mSystemProperties.getKeyWritablePredicate());
+//        android.os.SystemProperties.init$ravenwood(
+//                rule.mSystemProperties.getValues(),
+//                rule.mSystemProperties.getKeyReadablePredicate(),
+//                rule.mSystemProperties.getKeyWritablePredicate());
+        setSystemProperties(rule.mSystemProperties);
 
         ServiceManager.init$ravenwood();
         LocalServices.removeAllServicesForTest();
@@ -157,7 +158,7 @@ public class RavenwoodRuleImpl {
         LocalServices.removeAllServicesForTest();
         ServiceManager.reset$ravenwood();
 
-        android.os.SystemProperties.reset$ravenwood();
+        setSystemProperties(RavenwoodSystemProperties.DEFAULT_VALUES);
         android.os.Binder.reset$ravenwood();
         android.os.Process.reset$ravenwood();
 
@@ -290,5 +291,17 @@ public class RavenwoodRuleImpl {
         if (clazz.getSuperclass() != null) {
             collectMethods(clazz.getSuperclass(), result);
         }
+    }
+
+    /**
+     * Set the current configuration to the actual SystemProperties.
+     */
+    public static void setSystemProperties(RavenwoodSystemProperties ravenwoodSystemProperties) {
+        var clone = new RavenwoodSystemProperties(ravenwoodSystemProperties, true);
+
+        android.os.SystemProperties.init$ravenwood(
+                clone.getValues(),
+                clone.getKeyReadablePredicate(),
+                clone.getKeyWritablePredicate());
     }
 }

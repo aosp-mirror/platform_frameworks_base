@@ -22,7 +22,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-class RavenwoodSystemProperties {
+public class RavenwoodSystemProperties {
+    private volatile boolean mIsImmutable;
+
     private final Map<String, String> mValues = new HashMap<>();
 
     /** Set of additional keys that should be considered readable */
@@ -101,15 +103,23 @@ class RavenwoodSystemProperties {
         setValue("ro.debuggable", "1");
     }
 
-    Map<String, String> getValues() {
+    /** Copy constructor */
+    public RavenwoodSystemProperties(RavenwoodSystemProperties source, boolean immutable) {
+        this.mKeyReadable.addAll(source.mKeyReadable);
+        this.mKeyWritable.addAll(source.mKeyWritable);
+        this.mValues.putAll(source.mValues);
+        this.mIsImmutable = immutable;
+    }
+
+    public Map<String, String> getValues() {
         return new HashMap<>(mValues);
     }
 
-    Predicate<String> getKeyReadablePredicate() {
+    public Predicate<String> getKeyReadablePredicate() {
         return mKeyReadablePredicate;
     }
 
-    Predicate<String> getKeyWritablePredicate() {
+    public Predicate<String> getKeyWritablePredicate() {
         return mKeyWritablePredicate;
     }
 
@@ -123,12 +133,20 @@ class RavenwoodSystemProperties {
             "vendor_dlkm",
     };
 
+    private void ensureNotImmutable() {
+        if (mIsImmutable) {
+            throw new RuntimeException("Unable to update immutable instance");
+        }
+    }
+
     /**
      * Set the given property for all possible partitions where it could be defined. For
      * example, the value of {@code ro.build.type} is typically also mirrored under
      * {@code ro.system.build.type}, etc.
      */
     private void setValueForPartitions(String key, String value) {
+        ensureNotImmutable();
+
         setValue("ro." + key, value);
         for (String partition : PARTITIONS) {
             setValue("ro." + partition + "." + key, value);
@@ -136,6 +154,8 @@ class RavenwoodSystemProperties {
     }
 
     public void setValue(String key, Object value) {
+        ensureNotImmutable();
+
         final String valueString = (value == null) ? null : String.valueOf(value);
         if ((valueString == null) || valueString.isEmpty()) {
             mValues.remove(key);
@@ -145,16 +165,19 @@ class RavenwoodSystemProperties {
     }
 
     public void setAccessNone(String key) {
+        ensureNotImmutable();
         mKeyReadable.remove(key);
         mKeyWritable.remove(key);
     }
 
     public void setAccessReadOnly(String key) {
+        ensureNotImmutable();
         mKeyReadable.add(key);
         mKeyWritable.remove(key);
     }
 
     public void setAccessReadWrite(String key) {
+        ensureNotImmutable();
         mKeyReadable.add(key);
         mKeyWritable.add(key);
     }
@@ -172,4 +195,11 @@ class RavenwoodSystemProperties {
             return key;
         }
     }
+
+    /**
+     * Return an immutable, default instance.
+     */
+    // Create a default instance, and make an immutable copy of it.
+    public static final RavenwoodSystemProperties DEFAULT_VALUES =
+            new RavenwoodSystemProperties(new RavenwoodSystemProperties(), true);
 }
