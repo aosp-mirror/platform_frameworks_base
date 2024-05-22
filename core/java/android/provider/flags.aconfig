@@ -2,9 +2,9 @@ package: "android.provider"
 container: "system"
 
 flag {
-    name: "a11y_standalone_fab_enabled"
+    name: "a11y_standalone_gesture_enabled"
     namespace: "accessibility"
-    description: "Separating a11y software shortcut and floating a11y button"
+    description: "Separating a11y software shortcut and gesture shortcut"
     bug: "297544054"
 }
 
