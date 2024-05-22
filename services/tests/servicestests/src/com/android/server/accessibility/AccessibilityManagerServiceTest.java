@@ -1707,6 +1707,64 @@ public class AccessibilityManagerServiceTest {
                 .containsExactlyElementsIn(expected);
     }
 
+    @Test
+    @EnableFlags({
+            android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SHORTCUT_TARGET_SERVICE,
+            Flags.FLAG_CLEAR_DEFAULT_FROM_A11Y_SHORTCUT_TARGET_SERVICE_RESTORE})
+    public void restoreA11yShortcutTargetService_alreadyHadDefaultService_doesNotClear() {
+        final String serviceDefault = TARGET_STANDARD_A11Y_SERVICE.flattenToString();
+        mTestableContext.getOrCreateTestableResources().addOverride(
+                R.string.config_defaultAccessibilityService, serviceDefault);
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+        setupShortcutTargetServices(userState);
+
+        broadcastSettingRestored(
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
+                /*previousValue=*/serviceDefault,
+                /*newValue=*/serviceDefault);
+
+        final Set<String> expected = Set.of(serviceDefault);
+        assertThat(readStringsFromSetting(
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE))
+                .containsExactlyElementsIn(expected);
+        assertThat(mA11yms.mUserStates.get(UserHandle.USER_SYSTEM)
+                .getShortcutTargetsLocked(UserShortcutType.HARDWARE))
+                .containsExactlyElementsIn(expected);
+    }
+
+    @Test
+    @EnableFlags({
+            android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SHORTCUT_TARGET_SERVICE,
+            Flags.FLAG_CLEAR_DEFAULT_FROM_A11Y_SHORTCUT_TARGET_SERVICE_RESTORE})
+    public void restoreA11yShortcutTargetService_didNotHaveDefaultService_clearsDefaultService() {
+        final String serviceDefault = TARGET_STANDARD_A11Y_SERVICE.flattenToString();
+        final String serviceRestored = TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString();
+        // Restored value from the broadcast contains both default and non-default service.
+        final String combinedRestored = String.join(":", serviceDefault, serviceRestored);
+        mTestableContext.getOrCreateTestableResources().addOverride(
+                R.string.config_defaultAccessibilityService, serviceDefault);
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+        setupShortcutTargetServices(userState);
+
+        broadcastSettingRestored(
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
+                /*previousValue=*/null,
+                /*newValue=*/combinedRestored);
+
+        // The default service is cleared from the final restored value.
+        final Set<String> expected = Set.of(serviceRestored);
+        assertThat(readStringsFromSetting(
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE))
+                .containsExactlyElementsIn(expected);
+        assertThat(mA11yms.mUserStates.get(UserHandle.USER_SYSTEM)
+                .getShortcutTargetsLocked(UserShortcutType.HARDWARE))
+                .containsExactlyElementsIn(expected);
+    }
+
     private Set<String> readStringsFromSetting(String setting) {
         final Set<String> result = new ArraySet<>();
         mA11yms.readColonDelimitedSettingToSet(

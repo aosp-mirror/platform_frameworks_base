@@ -2098,14 +2098,36 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     /**
      * Merges the old and restored value of
      * {@link Settings.Secure#ACCESSIBILITY_SHORTCUT_TARGET_SERVICE}.
+     *
+     * <p>Also clears out {@link R.string#config_defaultAccessibilityService} from
+     * the merged set if it was not present before restoring.
      */
     private void restoreAccessibilityShortcutTargetService(
             String oldValue, String restoredValue) {
         final Set<String> targetsFromSetting = new ArraySet<>();
         readColonDelimitedStringToSet(oldValue, str -> str,
                 targetsFromSetting, /*doMerge=*/false);
+        final String defaultService =
+                mContext.getString(R.string.config_defaultAccessibilityService);
+        final ComponentName defaultServiceComponent = TextUtils.isEmpty(defaultService)
+                ? null : ComponentName.unflattenFromString(defaultService);
+        boolean shouldClearDefaultService = defaultServiceComponent != null
+                && !stringSetContainsComponentName(targetsFromSetting, defaultServiceComponent);
         readColonDelimitedStringToSet(restoredValue, str -> str,
                 targetsFromSetting, /*doMerge=*/true);
+        if (Flags.clearDefaultFromA11yShortcutTargetServiceRestore()) {
+            if (shouldClearDefaultService && stringSetContainsComponentName(
+                    targetsFromSetting, defaultServiceComponent)) {
+                Slog.i(LOG_TAG, "Removing default service " + defaultService
+                        + " from restore of "
+                        + Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE);
+                targetsFromSetting.removeIf(str ->
+                        defaultServiceComponent.equals(ComponentName.unflattenFromString(str)));
+            }
+            if (targetsFromSetting.isEmpty()) {
+                return;
+            }
+        }
         synchronized (mLock) {
             final AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
             final Set<String> shortcutTargets =
@@ -2118,6 +2140,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             scheduleNotifyClientsOfServicesStateChangeLocked(userState);
             onUserStateChangedLocked(userState);
         }
+    }
+
+    /**
+     * Returns {@code true} if the set contains the provided non-null {@link ComponentName}.
+     *
+     * <p>This ignores values in the set that are not valid {@link ComponentName}s.
+     */
+    private boolean stringSetContainsComponentName(Set<String> set,
+            @NonNull ComponentName componentName) {
+        return componentName != null && set.stream()
+                .map(ComponentName::unflattenFromString)
+                .anyMatch(componentName::equals);
     }
 
     private int getClientStateLocked(AccessibilityUserState userState) {
