@@ -177,11 +177,9 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     @CallSuper
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskAppeared: taskId=%d taskParent=%d rootTask=%d "
-                        + "taskActivity=%s",
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskAppeared: task=%d taskParent=%d rootTask=%d",
                 taskInfo.taskId, taskInfo.parentTaskId,
-                mRootTaskInfo != null ? mRootTaskInfo.taskId : -1,
-                taskInfo.baseActivity);
+                mRootTaskInfo != null ? mRootTaskInfo.taskId : -1);
         if (mRootTaskInfo == null) {
             mRootLeash = leash;
             mRootTaskInfo = taskInfo;
@@ -215,8 +213,6 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     @CallSuper
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskInfoChanged: taskId=%d taskAct=%s",
-                taskInfo.taskId, taskInfo.baseActivity);
         mWindowDecorViewModel.ifPresent(viewModel -> viewModel.onTaskInfoChanged(taskInfo));
         if (mRootTaskInfo.taskId == taskInfo.taskId) {
             // Inflates split decor view only when the root task is visible.

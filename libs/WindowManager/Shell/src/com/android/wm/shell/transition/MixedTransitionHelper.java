@@ -23,15 +23,11 @@ import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
-import static com.android.wm.shell.shared.TransitionUtil.isOpeningMode;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_CHILD_TASK_ENTER_PIP;
 import static com.android.wm.shell.transition.DefaultMixedHandler.subCopy;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 
@@ -48,9 +44,8 @@ public class MixedTransitionHelper {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,
-            @NonNull Transitions player, @NonNull MixedTransitionHandler mixedHandler,
-            @NonNull PipTransitionController pipHandler, @NonNull StageCoordinator splitHandler,
-            boolean replacingPip) {
+            @NonNull Transitions player, @NonNull DefaultMixedHandler mixedHandler,
+            @NonNull PipTransitionController pipHandler, @NonNull StageCoordinator splitHandler) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Animating a mixed transition for "
                 + "entering PIP while Split-Screen is foreground.");
         TransitionInfo.Change pipChange = null;
@@ -104,7 +99,7 @@ public class MixedTransitionHelper {
             // we need a separate one to send over to launcher.
             SurfaceControl.Transaction otherStartT = new SurfaceControl.Transaction();
             @SplitScreen.StageType int topStageToKeep = STAGE_TYPE_UNDEFINED;
-            if (splitHandler.isSplitScreenVisible() && !replacingPip) {
+            if (splitHandler.isSplitScreenVisible()) {
                 // The non-going home case, we could be pip-ing one of the split stages and keep
                 // showing the other
                 for (int i = info.getChanges().size() - 1; i >= 0; --i) {
@@ -120,12 +115,11 @@ public class MixedTransitionHelper {
                         break;
                     }
                 }
-
-                // Let split update internal state for dismiss.
-                splitHandler.prepareDismissAnimation(topStageToKeep,
-                        EXIT_REASON_CHILD_TASK_ENTER_PIP, everythingElse, otherStartT,
-                        finishTransaction);
             }
+            // Let split update internal state for dismiss.
+            splitHandler.prepareDismissAnimation(topStageToKeep,
+                    EXIT_REASON_CHILD_TASK_ENTER_PIP, everythingElse, otherStartT,
+                    finishTransaction);
 
             // We are trying to accommodate launcher's close animation which can't handle the
             // divider-bar, so if split-handler is closing the divider-bar, just hide it and
@@ -156,44 +150,6 @@ public class MixedTransitionHelper {
                     mixed.mTransition, info, startTransaction, finishTransaction, finishCB);
         }
         return true;
-    }
-
-    /**
-     * Check to see if we're only closing split to enter pip or if we're replacing pip with
-     * another task. If we are replacing, this will return the change for the task we are replacing
-     * pip with
-     *
-     * @param info Any number of changes
-     * @param pipChange TransitionInfo.Change indicating the task that is being pipped
-     * @param splitMainStageRootId MainStage's rootTaskInfo's id
-     * @param splitSideStageRootId SideStage's rootTaskInfo's id
-     * @param lastPipSplitStage The last stage that {@param pipChange} was in
-     * @return The change from {@param info} that is replacing the {@param pipChange}, {@code null}
-     *         otherwise
-     */
-    @Nullable
-    public static TransitionInfo.Change getPipReplacingChange(TransitionInfo info,
-            TransitionInfo.Change pipChange, int splitMainStageRootId, int splitSideStageRootId,
-            @SplitScreen.StageType int lastPipSplitStage) {
-        int lastPipParentTask = -1;
-        if (lastPipSplitStage == STAGE_TYPE_MAIN) {
-            lastPipParentTask = splitMainStageRootId;
-        } else if (lastPipSplitStage == STAGE_TYPE_SIDE) {
-            lastPipParentTask = splitSideStageRootId;
-        }
-
-        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
-            TransitionInfo.Change change = info.getChanges().get(i);
-            if (change == pipChange || !isOpeningMode(change.getMode())) {
-                // Ignore the change/task that's going into Pip or not opening
-                continue;
-            }
-
-            if (change.getTaskInfo().parentTaskId == lastPipParentTask) {
-                return change;
-            }
-        }
-        return null;
     }
 
     private static boolean isHomeOpening(@NonNull TransitionInfo.Change change) {

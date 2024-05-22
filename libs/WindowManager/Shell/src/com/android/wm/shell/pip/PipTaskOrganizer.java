@@ -843,8 +843,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipUiEventLoggerLogger.log(uiEventEnum);
 
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "onTaskAppeared: %s, state=%s, taskId=%s", mTaskInfo.topActivity,
-                mPipTransitionState, mTaskInfo.taskId);
+                "onTaskAppeared: %s, state=%s", mTaskInfo.topActivity, mPipTransitionState);
         if (mPipTransitionState.getInSwipePipToHomeTransition()) {
             if (!mWaitForFixedRotation) {
                 onEndOfSwipePipToHomeTransition();
