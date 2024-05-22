@@ -49,6 +49,7 @@ import androidx.compose.ui.util.lerp
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.ui.util.lerp
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 /** An element on screen, that can be composed in one or more scenes. */
@@ -81,11 +82,13 @@ internal class Element(val key: ElementKey) {
 
         /** The last state this element had in this scene. */
         var lastOffset = Offset.Unspecified
+        var lastSize = SizeUnspecified
         var lastScale = Scale.Unspecified
         var lastAlpha = AlphaUnspecified
 
         /** The state of this element in this scene right before the last interruption (if any). */
         var offsetBeforeInterruption = Offset.Unspecified
+        var sizeBeforeInterruption = SizeUnspecified
         var scaleBeforeInterruption = Scale.Unspecified
         var alphaBeforeInterruption = AlphaUnspecified
 
@@ -96,6 +99,7 @@ internal class Element(val key: ElementKey) {
          * they nicely animate from their values down to 0.
          */
         var offsetInterruptionDelta = Offset.Zero
+        var sizeInterruptionDelta = IntSize.Zero
         var scaleInterruptionDelta = Scale.Zero
         var alphaInterruptionDelta = 0f
 
@@ -127,7 +131,14 @@ internal fun Modifier.element(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     key: ElementKey,
-): Modifier = this.then(ElementModifier(layoutImpl, scene, key)).testTag(key.testTag)
+): Modifier {
+    // Make sure that we read the current transitions during composition and not during
+    // layout/drawing.
+    // TODO(b/341072461): Revert this and read the current transitions in ElementNode directly once
+    // we can ensure that SceneTransitionLayoutImpl will compose new scenes first.
+    val currentTransitions = layoutImpl.state.currentTransitions
+    return then(ElementModifier(layoutImpl, currentTransitions, scene, key)).testTag(key.testTag)
+}
 
 /**
  * An element associated to [ElementNode]. Note that this element does not support updates as its
@@ -135,18 +146,20 @@ internal fun Modifier.element(
  */
 private data class ElementModifier(
     private val layoutImpl: SceneTransitionLayoutImpl,
+    private val currentTransitions: List<TransitionState.Transition>,
     private val scene: Scene,
     private val key: ElementKey,
 ) : ModifierNodeElement<ElementNode>() {
-    override fun create(): ElementNode = ElementNode(layoutImpl, scene, key)
+    override fun create(): ElementNode = ElementNode(layoutImpl, currentTransitions, scene, key)
 
     override fun update(node: ElementNode) {
-        node.update(layoutImpl, scene, key)
+        node.update(layoutImpl, currentTransitions, scene, key)
     }
 }
 
 internal class ElementNode(
     private var layoutImpl: SceneTransitionLayoutImpl,
+    private var currentTransitions: List<TransitionState.Transition>,
     private var scene: Scene,
     private var key: ElementKey,
 ) : Modifier.Node(), DrawModifierNode, ApproachLayoutModifierNode {
@@ -202,10 +215,13 @@ internal class ElementNode(
 
     fun update(
         layoutImpl: SceneTransitionLayoutImpl,
+        currentTransitions: List<TransitionState.Transition>,
         scene: Scene,
         key: ElementKey,
     ) {
         check(layoutImpl == this.layoutImpl && scene == this.scene)
+        this.currentTransitions = currentTransitions
+
         removeNodeFromSceneState()
 
         val prevElement = this.element
@@ -236,7 +252,7 @@ internal class ElementNode(
         measurable: Measurable,
         constraints: Constraints,
     ): MeasureResult {
-        val transitions = layoutImpl.state.currentTransitions
+        val transitions = currentTransitions
         val transition = elementTransition(element, transitions)
 
         // If this element is not supposed to be laid out now, either because it is not part of any
@@ -251,11 +267,13 @@ internal class ElementNode(
             sceneState.lastAlpha = Element.AlphaUnspecified
 
             val placeable = measurable.measure(constraints)
+            sceneState.lastSize = placeable.size()
             return layout(placeable.width, placeable.height) {}
         }
 
         val placeable =
             measure(layoutImpl, scene, element, transition, sceneState, measurable, constraints)
+        sceneState.lastSize = placeable.size()
         return layout(placeable.width, placeable.height) {
             place(
                 layoutImpl,
@@ -270,7 +288,7 @@ internal class ElementNode(
     }
 
     override fun ContentDrawScope.draw() {
-        val transition = elementTransition(element, layoutImpl.state.currentTransitions)
+        val transition = elementTransition(element, currentTransitions)
         val drawScale = getDrawScale(layoutImpl, scene, element, transition, sceneState)
         if (drawScale == Scale.Default) {
             drawContent()
@@ -365,12 +383,14 @@ private fun prepareInterruption(element: Element) {
     }
 
     val lastOffset = lastUniqueState?.lastOffset ?: Offset.Unspecified
+    val lastSize = lastUniqueState?.lastSize ?: Element.SizeUnspecified
     val lastScale = lastUniqueState?.lastScale ?: Scale.Unspecified
     val lastAlpha = lastUniqueState?.lastAlpha ?: Element.AlphaUnspecified
 
     // Store the state of the element before the interruption and reset the deltas.
     sceneStates.forEach { sceneState ->
         sceneState.offsetBeforeInterruption = lastOffset
+        sceneState.sizeBeforeInterruption = lastSize
         sceneState.scaleBeforeInterruption = lastScale
         sceneState.alphaBeforeInterruption = lastAlpha
 
@@ -380,6 +400,7 @@ private fun prepareInterruption(element: Element) {
 
 private fun Element.SceneState.clearInterruptionDeltas() {
     offsetInterruptionDelta = Offset.Zero
+    sizeInterruptionDelta = IntSize.Zero
     scaleInterruptionDelta = Scale.Zero
     alphaInterruptionDelta = 0f
 }
@@ -615,7 +636,6 @@ private fun interruptedAlpha(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 private fun ApproachMeasureScope.measure(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
@@ -637,8 +657,6 @@ private fun ApproachMeasureScope.measure(
     // once.
     var maybePlaceable: Placeable? = null
 
-    fun Placeable.size() = IntSize(width, height)
-
     val targetSize =
         computeValue(
             layoutImpl,
@@ -653,14 +671,43 @@ private fun ApproachMeasureScope.measure(
             ::lerp,
         )
 
-    return maybePlaceable
-        ?: measurable.measure(
-            Constraints.fixed(
-                targetSize.width.coerceAtLeast(0),
-                targetSize.height.coerceAtLeast(0),
-            )
+    // The measurable was already measured, so we can't take interruptions into account here given
+    // that we are not allowed to measure the same measurable twice.
+    maybePlaceable?.let { placeable ->
+        sceneState.sizeBeforeInterruption = Element.SizeUnspecified
+        sceneState.sizeInterruptionDelta = IntSize.Zero
+        return placeable
+    }
+
+    val interruptedSize =
+        computeInterruptedValue(
+            layoutImpl,
+            transition,
+            value = targetSize,
+            unspecifiedValue = Element.SizeUnspecified,
+            zeroValue = IntSize.Zero,
+            getValueBeforeInterruption = { sceneState.sizeBeforeInterruption },
+            setValueBeforeInterruption = { sceneState.sizeBeforeInterruption = it },
+            getInterruptionDelta = { sceneState.sizeInterruptionDelta },
+            setInterruptionDelta = { sceneState.sizeInterruptionDelta = it },
+            diff = { a, b -> IntSize(a.width - b.width, a.height - b.height) },
+            add = { a, b, bProgress ->
+                IntSize(
+                    (a.width + b.width * bProgress).roundToInt(),
+                    (a.height + b.height * bProgress).roundToInt(),
+                )
+            },
         )
+
+    return measurable.measure(
+        Constraints.fixed(
+            interruptedSize.width.coerceAtLeast(0),
+            interruptedSize.height.coerceAtLeast(0),
+        )
+    )
 }
+
+private fun Placeable.size(): IntSize = IntSize(width, height)
 
 private fun ContentDrawScope.getDrawScale(
     layoutImpl: SceneTransitionLayoutImpl,
