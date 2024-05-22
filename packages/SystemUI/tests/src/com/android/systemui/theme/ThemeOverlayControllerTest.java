@@ -64,6 +64,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.monet.DynamicColors;
 import com.android.systemui.monet.Style;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -997,7 +998,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         // All fixed colors were added once
         // All custom dynamic tokens added twice
         verify(dynamic, times(
-                DynamicColors.allDynamicColorsMapped(false).size() * 2
+                DynamicColors.getAllDynamicColorsMapped(false).size() * 2
                         + DynamicColors.getFixedColorsMapped(false).size()
                         + DynamicColors.getCustomColorsMapped(false).size() * 2)
         ).setResourceValue(any(String.class), eq(TYPE_INT_COLOR_ARGB8), anyInt(), eq(null));
