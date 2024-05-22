@@ -2057,8 +2057,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         // Potentially override the selected input method if the new display belongs to a virtual
         // device with a custom IME.
-        String selectedMethodId = getSelectedMethodIdLocked();
-        final String deviceMethodId = computeCurrentDeviceMethodIdLocked(selectedMethodId);
+        String selectedMethodId = bindingController.getSelectedMethodId();
+        final String deviceMethodId = computeCurrentDeviceMethodIdLocked(bindingController.mUserId,
+                selectedMethodId);
         if (deviceMethodId == null) {
             mVisibilityStateComputer.getImePolicy().setImeHiddenByDisplayPolicy(true);
         } else if (!Objects.equals(deviceMethodId, selectedMethodId)) {
@@ -2164,7 +2165,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * <p>4. Otherwise keep the current imeId.</p>
      */
     @GuardedBy("ImfLock.class")
-    private String computeCurrentDeviceMethodIdLocked(String currentMethodId) {
+    private String computeCurrentDeviceMethodIdLocked(@UserIdInt int userId,
+            String currentMethodId) {
         if (mVdmInternal == null) {
             mVdmInternal = LocalServices.getService(VirtualDeviceManagerInternal.class);
         }
@@ -2172,7 +2174,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             return currentMethodId;
         }
 
-        final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
+        final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         final int oldDeviceId = mDeviceIdToShowIme;
         mDeviceIdToShowIme = mVdmInternal.getDeviceIdForDisplayId(mDisplayIdToShowIme);
         if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
