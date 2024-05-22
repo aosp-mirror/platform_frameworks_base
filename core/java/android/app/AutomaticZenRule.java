@@ -119,6 +119,7 @@ public final class AutomaticZenRule implements Parcelable {
     @IntDef(flag = true, prefix = { "FIELD_" }, value = {
             FIELD_NAME,
             FIELD_INTERRUPTION_FILTER,
+            FIELD_ICON
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ModifiableField {}
@@ -133,6 +134,11 @@ public final class AutomaticZenRule implements Parcelable {
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_INTERRUPTION_FILTER = 1 << 1;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_ICON = 1 << 2;
 
     private boolean enabled;
     private String name;
@@ -578,6 +584,9 @@ public final class AutomaticZenRule implements Parcelable {
         }
         if ((bitmask & FIELD_INTERRUPTION_FILTER) != 0) {
             modified.add("FIELD_INTERRUPTION_FILTER");
+        }
+        if ((bitmask & FIELD_ICON) != 0) {
+            modified.add("FIELD_ICON");
         }
         return "{" + String.join(",", modified) + "}";
     }

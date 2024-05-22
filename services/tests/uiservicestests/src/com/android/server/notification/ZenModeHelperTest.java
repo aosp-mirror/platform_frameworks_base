@@ -4361,7 +4361,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 azrBase, UPDATE_ORIGIN_APP, "reason", Process.SYSTEM_UID);
         AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(ruleId);
 
-        // Modifies the filter, zen policy, and device effects
+        // Modifies the filter, icon, zen policy, and device effects
         ZenPolicy policy = new ZenPolicy.Builder(rule.getZenPolicy())
                 .allowPriorityChannels(false)
                 .build();
@@ -4371,6 +4371,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                         .build();
         AutomaticZenRule azrUpdate = new AutomaticZenRule.Builder(rule)
                 .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
+                .setIconResId(ICON_RES_ID)
                 .setZenPolicy(policy)
                 .setDeviceEffects(deviceEffects)
                 .build();
@@ -4382,6 +4383,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // UPDATE_ORIGIN_USER should change the bitmask and change the values.
         assertThat(rule.getInterruptionFilter()).isEqualTo(INTERRUPTION_FILTER_PRIORITY);
+        assertThat(rule.getIconResId()).isEqualTo(ICON_RES_ID);
         assertThat(rule.getZenPolicy().getPriorityChannelsAllowed()).isEqualTo(
                 ZenPolicy.STATE_DISALLOW);
 
@@ -4389,7 +4391,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         ZenRule storedRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
         assertThat(storedRule.userModifiedFields)
-                .isEqualTo(AutomaticZenRule.FIELD_INTERRUPTION_FILTER);
+                .isEqualTo(Flags.modesUi()
+                        ? AutomaticZenRule.FIELD_INTERRUPTION_FILTER | AutomaticZenRule.FIELD_ICON
+                        : AutomaticZenRule.FIELD_INTERRUPTION_FILTER);
         assertThat(storedRule.zenPolicyUserModifiedFields)
                 .isEqualTo(ZenPolicy.FIELD_ALLOW_CHANNELS);
         assertThat(storedRule.zenDeviceEffectsUserModifiedFields)
@@ -4414,7 +4418,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 azrBase, UPDATE_ORIGIN_APP, "reason", Process.SYSTEM_UID);
         AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(ruleId);
 
-        // Modifies the zen policy and device effects
+        // Modifies the icon, zen policy and device effects
         ZenPolicy policy = new ZenPolicy.Builder(rule.getZenPolicy())
                 .allowReminders(true)
                 .build();
@@ -4424,6 +4428,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                         .build();
         AutomaticZenRule azrUpdate = new AutomaticZenRule.Builder(rule)
                 .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
+                .setIconResId(ICON_RES_ID)
                 .setZenPolicy(policy)
                 .setDeviceEffects(deviceEffects)
                 .build();
@@ -4434,6 +4439,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         rule = mZenModeHelper.getAutomaticZenRule(ruleId);
 
         // UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI should change the value but NOT update the bitmask.
+        assertThat(rule.getIconResId()).isEqualTo(ICON_RES_ID);
         assertThat(rule.getZenPolicy().getPriorityCategoryReminders())
                 .isEqualTo(ZenPolicy.STATE_ALLOW);
         assertThat(rule.getDeviceEffects().shouldDisplayGrayscale()).isTrue();
