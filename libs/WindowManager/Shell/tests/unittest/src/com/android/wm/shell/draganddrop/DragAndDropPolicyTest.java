@@ -66,6 +66,7 @@ import android.graphics.Insets;
 import android.os.RemoteException;
 import android.view.DisplayInfo;
 import android.view.DragEvent;
+import android.view.View;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -115,6 +116,7 @@ public class DragAndDropPolicyTest extends ShellTestCase {
     private DragAndDropPolicy mPolicy;
 
     private ClipData mActivityClipData;
+    private PendingIntent mLaunchableIntentPendingIntent;
     private ClipData mLaunchableIntentClipData;
     private ClipData mNonResizeableActivityClipData;
     private ClipData mTaskClipData;
@@ -151,7 +153,10 @@ public class DragAndDropPolicyTest extends ShellTestCase {
 
         mPolicy = spy(new DragAndDropPolicy(mContext, mSplitScreenStarter, mSplitScreenStarter));
         mActivityClipData = createAppClipData(MIMETYPE_APPLICATION_ACTIVITY);
-        mLaunchableIntentClipData = createIntentClipData();
+        mLaunchableIntentPendingIntent = mock(PendingIntent.class);
+        when(mLaunchableIntentPendingIntent.getCreatorUserHandle())
+                .thenReturn(android.os.Process.myUserHandle());
+        mLaunchableIntentClipData = createIntentClipData(mLaunchableIntentPendingIntent);
         mNonResizeableActivityClipData = createAppClipData(MIMETYPE_APPLICATION_ACTIVITY);
         setClipDataResizeable(mNonResizeableActivityClipData, false);
         mTaskClipData = createAppClipData(MIMETYPE_APPLICATION_TASK);
@@ -202,16 +207,13 @@ public class DragAndDropPolicyTest extends ShellTestCase {
     /**
      * Creates an intent-based clip data that is by default resizeable.
      */
-    private ClipData createIntentClipData() {
+    private ClipData createIntentClipData(PendingIntent intent) {
         ClipDescription clipDescription = new ClipDescription("Intent",
                 new String[] { MIMETYPE_TEXT_INTENT });
-        PendingIntent intent = mock(PendingIntent.class);
-        when(intent.getCreatorUserHandle()).thenReturn(android.os.Process.myUserHandle());
         ClipData.Item item = new ClipData.Item.Builder()
                 .setIntentSender(intent.getIntentSender())
                 .build();
         ClipData data = new ClipData(clipDescription, item);
-        when(DragUtils.getLaunchIntent((ClipData) any())).thenReturn(intent);
         return data;
     }
 
@@ -259,16 +261,22 @@ public class DragAndDropPolicyTest extends ShellTestCase {
 
     @Test
     public void testDragIntentOverFullscreenHome_expectOnlyFullscreenTarget() {
+        when(DragUtils.getLaunchIntent((ClipData) any(), anyInt())).thenReturn(
+                mLaunchableIntentPendingIntent);
         dragOverFullscreenHome_expectOnlyFullscreenTarget(mLaunchableIntentClipData);
     }
 
     @Test
     public void testDragIntentOverFullscreenApp_expectSplitScreenTargets() {
+        when(DragUtils.getLaunchIntent((ClipData) any(), anyInt())).thenReturn(
+                mLaunchableIntentPendingIntent);
         dragOverFullscreenApp_expectSplitScreenTargets(mLaunchableIntentClipData);
     }
 
     @Test
     public void testDragIntentOverFullscreenAppPhone_expectVerticalSplitScreenTargets() {
+        when(DragUtils.getLaunchIntent((ClipData) any(), anyInt())).thenReturn(
+                mLaunchableIntentPendingIntent);
         dragOverFullscreenAppPhone_expectVerticalSplitScreenTargets(mLaunchableIntentClipData);
     }
 
@@ -276,7 +284,7 @@ public class DragAndDropPolicyTest extends ShellTestCase {
         doReturn(true).when(mSplitScreenStarter).isLeftRightSplit();
         setRunningTask(mHomeTask);
         DragSession dragSession = new DragSession(mActivityTaskManager,
-                mLandscapeDisplayLayout, data);
+                mLandscapeDisplayLayout, data, 0 /* dragFlags */);
         dragSession.update();
         mPolicy.start(dragSession, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
@@ -291,7 +299,7 @@ public class DragAndDropPolicyTest extends ShellTestCase {
         doReturn(true).when(mSplitScreenStarter).isLeftRightSplit();
         setRunningTask(mFullscreenAppTask);
         DragSession dragSession = new DragSession(mActivityTaskManager,
-                mLandscapeDisplayLayout, data);
+                mLandscapeDisplayLayout, data, 0 /* dragFlags */);
         dragSession.update();
         mPolicy.start(dragSession, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
@@ -311,7 +319,7 @@ public class DragAndDropPolicyTest extends ShellTestCase {
         doReturn(false).when(mSplitScreenStarter).isLeftRightSplit();
         setRunningTask(mFullscreenAppTask);
         DragSession dragSession = new DragSession(mActivityTaskManager,
-                mPortraitDisplayLayout, data);
+                mPortraitDisplayLayout, data, 0 /* dragFlags */);
         dragSession.update();
         mPolicy.start(dragSession, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
@@ -331,7 +339,7 @@ public class DragAndDropPolicyTest extends ShellTestCase {
     public void testTargetHitRects() {
         setRunningTask(mFullscreenAppTask);
         DragSession dragSession = new DragSession(mActivityTaskManager,
-                mLandscapeDisplayLayout, mActivityClipData);
+                mLandscapeDisplayLayout, mActivityClipData, 0 /* dragFlags */);
         dragSession.update();
         mPolicy.start(dragSession, mLoggerSessionId);
         ArrayList<Target> targets = mPolicy.getTargets(mInsets);
@@ -343,6 +351,11 @@ public class DragAndDropPolicyTest extends ShellTestCase {
             assertTrue(mPolicy.getTargetAtLocation(t.hitRegion.left, t.hitRegion.bottom - 1)
                     == t);
         }
+    }
+
+    @Test
+    public void testDisallowLaunchIntentWithoutDelegationFlag() {
+        assertTrue(DragUtils.getLaunchIntent(mLaunchableIntentClipData, 0) == null);
     }
 
     private Target filterTargetByType(ArrayList<Target> targets, int type) {
