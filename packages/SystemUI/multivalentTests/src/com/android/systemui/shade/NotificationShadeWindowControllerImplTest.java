@@ -129,7 +129,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         // Preferred refresh rate is equal to the first displayMode's refresh rate
-        mPreferredRefreshRate = mContext.getDisplay().getSupportedModes()[0].getRefreshRate();
+        mPreferredRefreshRate = mContext.getDisplay().getSystemSupportedModes()[0].getRefreshRate();
         overrideResource(
                 R.integer.config_keyguardRefreshRate,
                 (int) mPreferredRefreshRate
