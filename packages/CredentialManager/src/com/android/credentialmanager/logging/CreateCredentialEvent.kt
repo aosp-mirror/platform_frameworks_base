@@ -17,7 +17,6 @@ package com.android.credentialmanager.logging
 
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
-import com.android.internal.logging.UiEventLogger.UiEventEnum.RESERVE_NEW_UI_EVENT_ID
 
 enum class CreateCredentialEvent(private val id: Int) : UiEventLogger.UiEventEnum {
 
@@ -56,7 +55,7 @@ enum class CreateCredentialEvent(private val id: Int) : UiEventLogger.UiEventEnu
     CREDMAN_CREATE_CRED_MORE_ABOUT_PASSKEYS_INTRO(1328),
 
     @UiEvent(doc = "The single tap biometric flow is launched.")
-    CREDMAN_CREATE_CRED_BIOMETRIC_FLOW_LAUNCHED(RESERVE_NEW_UI_EVENT_ID);
+    CREDMAN_CREATE_CRED_BIOMETRIC_FLOW_LAUNCHED(1800);
 
     override fun getId(): Int {
         return this.id

@@ -230,7 +230,7 @@ private fun runBiometricFlow(
         val cryptoOpId = getCryptoOpId(biometricDisplayInfo)
         if (cryptoOpId != null) {
             biometricPrompt.authenticate(
-                BiometricPrompt.CryptoObject(cryptoOpId.toLong()),
+                BiometricPrompt.CryptoObject(cryptoOpId),
                 cancellationSignal, executor, callback)
         } else {
             biometricPrompt.authenticate(cancellationSignal, executor, callback)
@@ -243,7 +243,7 @@ private fun runBiometricFlow(
     return true
 }
 
-private fun getCryptoOpId(biometricDisplayInfo: BiometricDisplayInfo): Int? {
+private fun getCryptoOpId(biometricDisplayInfo: BiometricDisplayInfo): Long? {
     return biometricDisplayInfo.biometricRequestInfo.opId
 }
 
