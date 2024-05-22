@@ -129,7 +129,7 @@ public class AnrTimerTest {
      */
     private class TestAnrTimer extends AnrTimer<TestArg> {
         private TestAnrTimer(Handler h, int key, String tag) {
-            super(h, key, tag, false, new TestInjector());
+            super(h, key, tag, new AnrTimer.Args().injector(new TestInjector()));
         }
 
         TestAnrTimer(Helper helper) {
