@@ -16,17 +16,51 @@
 
 package com.android.systemui.statusbar.chips.screenrecord.domain.interactor
 
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.res.R
+import com.android.systemui.screenrecord.data.model.ScreenRecordModel
+import com.android.systemui.screenrecord.data.repository.ScreenRecordRepository
 import com.android.systemui.statusbar.chips.domain.interactor.OngoingActivityChipInteractor
 import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
+import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /** Interactor for the screen recording chip shown in the status bar. */
 @SysUISingleton
-open class ScreenRecordChipInteractor @Inject constructor() : OngoingActivityChipInteractor {
-    // TODO(b/332662551): Implement this flow.
+open class ScreenRecordChipInteractor
+@Inject
+constructor(
+    @Application scope: CoroutineScope,
+    screenRecordRepository: ScreenRecordRepository,
+    val systemClock: SystemClock,
+) : OngoingActivityChipInteractor {
     override val chip: StateFlow<OngoingActivityChipModel> =
-        MutableStateFlow(OngoingActivityChipModel.Hidden)
+        screenRecordRepository.screenRecordState
+            .map { state ->
+                when (state) {
+                    is ScreenRecordModel.DoingNothing,
+                    // TODO(b/332662551): Implement the 3-2-1 countdown chip.
+                    is ScreenRecordModel.Starting -> OngoingActivityChipModel.Hidden
+                    is ScreenRecordModel.Recording ->
+                        OngoingActivityChipModel.Shown(
+                            // TODO(b/332662551): Also provide a content description.
+                            icon =
+                                Icon.Resource(
+                                    R.drawable.stat_sys_screen_record,
+                                    contentDescription = null
+                                ),
+                            startTimeMs = systemClock.elapsedRealtime()
+                        ) {
+                            // TODO(b/332662551): Implement the pause dialog.
+                        }
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
 }

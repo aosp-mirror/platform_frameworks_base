@@ -24,6 +24,8 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.screenrecord.data.model.ScreenRecordModel
+import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -38,7 +40,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     @Test
     fun chip_allHidden_hidden() =
         kosmos.testScope.runTest {
-            kosmos.screenRecordChipInteractor.chip.value = OngoingActivityChipModel.Hidden
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.DoingNothing
             kosmos.callChipInteractor.chip.value = OngoingActivityChipModel.Hidden
 
             val latest by collectLastValue(underTest.chip)
@@ -49,28 +51,18 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     @Test
     fun chip_screenRecordShow_restHidden_screenRecordShown() =
         kosmos.testScope.runTest {
-            val screenRecordChip =
-                OngoingActivityChipModel.Shown(
-                    Icon.Resource(R.drawable.ic_cake, ContentDescription.Loaded("icon")),
-                    startTimeMs = 500L,
-                ) {}
-            kosmos.screenRecordChipInteractor.chip.value = screenRecordChip
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.Recording
             kosmos.callChipInteractor.chip.value = OngoingActivityChipModel.Hidden
 
             val latest by collectLastValue(underTest.chip)
 
-            assertThat(latest).isEqualTo(screenRecordChip)
+            assertIsScreenRecordChip(latest)
         }
 
     @Test
     fun chip_screenRecordShowAndCallShow_screenRecordShown() =
         kosmos.testScope.runTest {
-            val screenRecordChip =
-                OngoingActivityChipModel.Shown(
-                    Icon.Resource(R.drawable.ic_cake, ContentDescription.Loaded("icon")),
-                    startTimeMs = 500L,
-                ) {}
-            kosmos.screenRecordChipInteractor.chip.value = screenRecordChip
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.Recording
 
             val callChip =
                 OngoingActivityChipModel.Shown(
@@ -81,13 +73,13 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
             val latest by collectLastValue(underTest.chip)
 
-            assertThat(latest).isEqualTo(screenRecordChip)
+            assertIsScreenRecordChip(latest)
         }
 
     @Test
     fun chip_screenRecordHideAndCallShown_callShown() =
         kosmos.testScope.runTest {
-            kosmos.screenRecordChipInteractor.chip.value = OngoingActivityChipModel.Hidden
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.DoingNothing
 
             val callChip =
                 OngoingActivityChipModel.Shown(
@@ -111,34 +103,24 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
                     startTimeMs = 600L,
                 ) {}
             kosmos.callChipInteractor.chip.value = callChip
-            kosmos.screenRecordChipInteractor.chip.value = OngoingActivityChipModel.Hidden
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.DoingNothing
 
             val latest by collectLastValue(underTest.chip)
 
             assertThat(latest).isEqualTo(callChip)
 
             // WHEN the higher priority screen record chip is added
-            val screenRecordChip =
-                OngoingActivityChipModel.Shown(
-                    Icon.Resource(R.drawable.ic_cake, ContentDescription.Loaded("icon")),
-                    startTimeMs = 500L,
-                ) {}
-            kosmos.screenRecordChipInteractor.chip.value = screenRecordChip
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.Recording
 
             // THEN the higher priority screen record chip is used
-            assertThat(latest).isEqualTo(screenRecordChip)
+            assertIsScreenRecordChip(latest)
         }
 
     @Test
     fun chip_highestPriorityChipRemoved_showsNextPriorityChip() =
         kosmos.testScope.runTest {
             // Start with both the higher priority screen record chip and lower priority call chip
-            val screenRecordChip =
-                OngoingActivityChipModel.Shown(
-                    Icon.Resource(R.drawable.ic_cake, ContentDescription.Loaded("icon")),
-                    startTimeMs = 500L,
-                ) {}
-            kosmos.screenRecordChipInteractor.chip.value = screenRecordChip
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.Recording
 
             val callChip =
                 OngoingActivityChipModel.Shown(
@@ -149,12 +131,18 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
             val latest by collectLastValue(underTest.chip)
 
-            assertThat(latest).isEqualTo(screenRecordChip)
+            assertIsScreenRecordChip(latest)
 
             // WHEN the higher priority screen record is removed
-            kosmos.screenRecordChipInteractor.chip.value = OngoingActivityChipModel.Hidden
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.DoingNothing
 
             // THEN the lower priority call is used
             assertThat(latest).isEqualTo(callChip)
         }
+
+    private fun assertIsScreenRecordChip(latest: OngoingActivityChipModel?) {
+        assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+        val icon = (latest as OngoingActivityChipModel.Shown).icon
+        assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.stat_sys_screen_record)
+    }
 }
