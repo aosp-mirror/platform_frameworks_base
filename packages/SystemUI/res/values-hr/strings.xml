@@ -760,10 +760,10 @@
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Stranica <xliff:g id="ID_1">%1$d</xliff:g> od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključani zaslon"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Pročitajte upute za održavanje"</string>
-    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Pročitajte upute za održavanje"</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Pročitajte što trebate učiniti"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Iskopčajte uređaj"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Vaš se uređaj zagrijava u blizini priključka za punjenje. Ako je priključen u punjač ili USB uređaj, iskopčajte ga. Pazite jer se i kabel možda zagrijao."</string>
-    <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Pogledajte upute za održavanje"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Pogledajte što trebate učiniti"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Lijevi prečac"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Desni prečac"</string>
     <string name="lockscreen_unlock_left" msgid="1417801334370269374">"Lijevi prečac također otključava"</string>
