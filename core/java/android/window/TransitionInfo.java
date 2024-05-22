@@ -1107,6 +1107,7 @@ public final class TransitionInfo implements Parcelable {
 
         private int mType;
         private @AnimRes int mEnterResId = DEFAULT_ANIMATION_RESOURCES_ID;
+        private @AnimRes int mChangeResId = DEFAULT_ANIMATION_RESOURCES_ID;
         private @AnimRes int mExitResId = DEFAULT_ANIMATION_RESOURCES_ID;
         private boolean mOverrideTaskTransition;
         private String mPackageName;
@@ -1126,6 +1127,7 @@ public final class TransitionInfo implements Parcelable {
         private AnimationOptions(Parcel in) {
             mType = in.readInt();
             mEnterResId = in.readInt();
+            mChangeResId = in.readInt();
             mExitResId = in.readInt();
             mBackgroundColor = in.readInt();
             mOverrideTaskTransition = in.readBoolean();
@@ -1189,9 +1191,27 @@ public final class TransitionInfo implements Parcelable {
         public static AnimationOptions makeCustomAnimOptions(@NonNull String packageName,
                 @AnimRes int enterResId, @AnimRes int exitResId, @ColorInt int backgroundColor,
                 boolean overrideTaskTransition) {
+            return makeCustomAnimOptions(packageName, enterResId, DEFAULT_ANIMATION_RESOURCES_ID,
+                    exitResId, backgroundColor, overrideTaskTransition);
+        }
+
+        /**
+         * Creates a {@link android.app.ActivityOptions#ANIM_CUSTOM} {@link AnimationOptions}.
+         *
+         * @param packageName the package name that includes the animation resources.
+         * @param enterResId the resources ID of open animation.
+         * @param changeResId the resources ID of change animation.
+         * @param exitResId the resources ID of close animation.
+         * @param overrideTaskTransition indicates whether to override task transition.
+         */
+        @NonNull
+        public static AnimationOptions makeCustomAnimOptions(@NonNull String packageName,
+                @AnimRes int enterResId, @AnimRes int changeResId, @AnimRes int exitResId,
+                @ColorInt int backgroundColor, boolean overrideTaskTransition) {
             AnimationOptions options = new AnimationOptions(ANIM_CUSTOM);
             options.mPackageName = packageName;
             options.mEnterResId = enterResId;
+            options.mChangeResId = changeResId;
             options.mExitResId = exitResId;
             options.mBackgroundColor = backgroundColor;
             options.mOverrideTaskTransition = overrideTaskTransition;
@@ -1251,6 +1271,11 @@ public final class TransitionInfo implements Parcelable {
         }
 
         @AnimRes
+        public int getChangeResId() {
+            return mChangeResId;
+        }
+
+        @AnimRes
         public int getExitResId() {
             return mExitResId;
         }
@@ -1292,6 +1317,7 @@ public final class TransitionInfo implements Parcelable {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(mType);
             dest.writeInt(mEnterResId);
+            dest.writeInt(mChangeResId);
             dest.writeInt(mExitResId);
             dest.writeInt(mBackgroundColor);
             dest.writeBoolean(mOverrideTaskTransition);
@@ -1351,6 +1377,9 @@ public final class TransitionInfo implements Parcelable {
             }
             if (mEnterResId != DEFAULT_ANIMATION_RESOURCES_ID) {
                 sb.append(" enterResId=").append(mEnterResId);
+            }
+            if (mChangeResId != DEFAULT_ANIMATION_RESOURCES_ID) {
+                sb.append(" changeResId=").append(mChangeResId);
             }
             if (mExitResId != DEFAULT_ANIMATION_RESOURCES_ID) {
                 sb.append(" exitResId=").append(mExitResId);
