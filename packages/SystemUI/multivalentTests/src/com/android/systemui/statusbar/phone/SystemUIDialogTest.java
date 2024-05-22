@@ -21,8 +21,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.BroadcastReceiver;
 import android.content.Intent;
@@ -41,6 +43,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogTransitionAnimator;
+import com.android.systemui.animation.back.BackAnimationSpec;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.model.SysUiState;
 
@@ -78,6 +81,8 @@ public class SystemUIDialogTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mDependency.injectTestDependency(BroadcastDispatcher.class, mBroadcastDispatcher);
+        when(mDelegate.getBackAnimationSpec(ArgumentMatchers.any()))
+                .thenReturn(mock(BackAnimationSpec.class));
     }
 
     @Test

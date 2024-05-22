@@ -19,7 +19,10 @@ package com.android.systemui.statusbar.phone
 import android.app.Dialog
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.ViewRootImpl
+import com.android.systemui.animation.back.BackAnimationSpec
+import com.android.systemui.animation.back.floatingSystemSurfacesForSysUi
 
 /**
  * A delegate class that should be implemented in place of subclassing [Dialog].
@@ -49,4 +52,7 @@ interface DialogDelegate<T : Dialog> {
     fun getWidth(dialog: T): Int = SystemUIDialog.getDefaultDialogWidth(dialog)
 
     fun getHeight(dialog: T): Int = SystemUIDialog.getDefaultDialogHeight()
+
+    fun getBackAnimationSpec(displayMetricsProvider: () -> DisplayMetrics): BackAnimationSpec =
+        BackAnimationSpec.floatingSystemSurfacesForSysUi(displayMetricsProvider)
 }

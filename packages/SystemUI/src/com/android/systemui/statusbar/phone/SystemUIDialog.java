@@ -269,9 +269,12 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             mOnCreateRunnables.get(i).run();
         }
         if (predictiveBackAnimateDialogs()) {
+            View targetView = getWindow().getDecorView();
             DialogKt.registerAnimationOnBackInvoked(
                     /* dialog = */ this,
-                    /* targetView = */ getWindow().getDecorView()
+                    /* targetView = */ targetView,
+                    /* backAnimationSpec= */mDelegate.getBackAnimationSpec(
+                            () -> targetView.getResources().getDisplayMetrics())
             );
         }
     }
