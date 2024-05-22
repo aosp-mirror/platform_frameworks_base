@@ -43,7 +43,7 @@ flag {
 }
 
 flag {
-   name: "notification_view_flipper_pausing"
+   name: "notification_view_flipper_pausing_v2"
    namespace: "systemui"
    description: "Pause ViewFlippers inside Notification custom layouts when the shade is closed."
    bug: "309146176"
