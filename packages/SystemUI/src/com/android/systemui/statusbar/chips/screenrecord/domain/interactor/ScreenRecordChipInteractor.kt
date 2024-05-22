@@ -17,8 +17,8 @@
 package com.android.systemui.statusbar.chips.screenrecord.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.domain.interactor.OngoingActivityChipInteractor
+import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

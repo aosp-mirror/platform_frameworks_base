@@ -24,7 +24,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

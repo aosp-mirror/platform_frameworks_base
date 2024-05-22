@@ -19,8 +19,8 @@ package com.android.systemui.statusbar.chips.ui.viewmodel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.chips.call.domain.interactor.CallChipInteractor
+import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
-import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
