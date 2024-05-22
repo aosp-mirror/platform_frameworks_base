@@ -3029,6 +3029,10 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutUser user = getUserShortcutsLocked(userId);
             final ShortcutPackage p = user.getPackageShortcutsIfExists(packageName);
             if (p == null) {
+                if (DEBUG_REBOOT) {
+                    Log.d(TAG, "getShortcutsInnerLocked() returned empty results because "
+                            + packageName + " isn't loaded");
+                }
                 return; // No need to instantiate ShortcutPackage.
             }
 
