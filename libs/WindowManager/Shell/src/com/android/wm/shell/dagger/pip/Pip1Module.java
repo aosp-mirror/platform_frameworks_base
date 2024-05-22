@@ -60,6 +60,7 @@ import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 
 import dagger.Module;
@@ -192,11 +193,12 @@ public abstract class Pip1Module {
             PipBoundsState pipBoundsState, PipDisplayLayoutState pipDisplayLayoutState,
             PipTransitionState pipTransitionState, PhonePipMenuController pipMenuController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
+            HomeTransitionObserver homeTransitionObserver,
             Optional<SplitScreenController> splitScreenOptional) {
         return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
                 pipBoundsState, pipDisplayLayoutState, pipTransitionState, pipMenuController,
                 pipBoundsAlgorithm, pipAnimationController, pipSurfaceTransactionHelper,
-                splitScreenOptional);
+                homeTransitionObserver, splitScreenOptional);
     }
 
     @WMSingleton
