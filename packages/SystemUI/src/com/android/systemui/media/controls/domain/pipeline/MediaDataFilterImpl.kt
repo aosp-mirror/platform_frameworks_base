@@ -213,7 +213,7 @@ constructor(
         listeners.forEach { it.onSmartspaceMediaDataLoaded(key, data, shouldPrioritizeMutable) }
     }
 
-    override fun onMediaDataRemoved(key: String) {
+    override fun onMediaDataRemoved(key: String, userInitiated: Boolean) {
         mediaFilterRepository.removeMediaEntry(key)?.let { mediaData ->
             val instanceId = mediaData.instanceId
             mediaFilterRepository.removeSelectedUserMediaEntry(instanceId)?.let {
@@ -221,7 +221,7 @@ constructor(
                     MediaDataLoadingModel.Removed(instanceId)
                 )
                 // Only notify listeners if something actually changed
-                listeners.forEach { it.onMediaDataRemoved(key) }
+                listeners.forEach { it.onMediaDataRemoved(key, userInitiated) }
             }
         }
     }
@@ -270,7 +270,7 @@ constructor(
                 mediaFilterRepository.addMediaDataLoadingState(
                     MediaDataLoadingModel.Removed(data.instanceId)
                 )
-                listeners.forEach { listener -> listener.onMediaDataRemoved(key) }
+                listeners.forEach { listener -> listener.onMediaDataRemoved(key, false) }
             }
         }
     }
@@ -288,7 +288,7 @@ constructor(
                 MediaDataLoadingModel.Removed(instanceId)
             )
             getKey(instanceId)?.let {
-                listenersCopy.forEach { listener -> listener.onMediaDataRemoved(it) }
+                listenersCopy.forEach { listener -> listener.onMediaDataRemoved(it, false) }
             }
         }
 

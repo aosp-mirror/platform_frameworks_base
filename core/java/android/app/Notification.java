@@ -114,6 +114,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
+import com.android.internal.util.NewlineNormalizer;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -3190,7 +3191,7 @@ public class Notification implements Parcelable
             return charSequence;
         }
 
-        return charSequence.toString().replaceAll("[\r\n]+", "\n");
+        return NewlineNormalizer.normalizeNewlines(charSequence.toString());
     }
 
     private static CharSequence removeTextSizeSpans(CharSequence charSequence) {
@@ -5703,6 +5704,7 @@ public class Notification implements Parcelable
             p.headerless(resId == getBaseLayoutResource()
                     || resId == getHeadsUpBaseLayoutResource()
                     || resId == getCompactHeadsUpBaseLayoutResource()
+                    || resId == getMessagingCompactHeadsUpLayoutResource()
                     || resId == getMessagingLayoutResource()
                     || resId == R.layout.notification_template_material_media);
             RemoteViews contentView = new BuilderRemoteViews(mContext.getApplicationInfo(), resId);
@@ -6490,6 +6492,12 @@ public class Notification implements Parcelable
         // visual regressions.
         @SuppressWarnings("AndroidFrameworkCompatChange")
         private boolean bigContentViewRequired() {
+            if (Flags.notificationExpansionOptional()) {
+                // Notifications without a bigContentView, style, or actions do not need to expand
+                boolean exempt = mN.bigContentView == null
+                        && mStyle == null && mActions.size() == 0;
+                return !exempt;
+            }
             if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S) {
                 return true;
             }
@@ -6593,12 +6601,12 @@ public class Notification implements Parcelable
          * @hide
          */
         public RemoteViews createCompactHeadsUpContentView() {
-            // TODO(b/336225281): re-evaluate custom view usage.
-            if (useExistingRemoteView(mN.headsUpContentView)) {
-                return fullyCustomViewRequiresDecoration(false /* fromStyle */)
-                        ? minimallyDecoratedHeadsUpContentView(mN.headsUpContentView)
-                        : mN.headsUpContentView;
-            } else if (mStyle != null) {
+            // Don't show compact heads up for FSI notifications.
+            if (mN.fullScreenIntent != null) {
+                return createHeadsUpContentView(/* increasedHeight= */ false);
+            }
+
+            if (mStyle != null) {
                 final RemoteViews styleView = mStyle.makeCompactHeadsUpContentView();
                 if (styleView != null) {
                     return styleView;
@@ -6611,7 +6619,7 @@ public class Notification implements Parcelable
             // Notification text is shown as secondary header text
             // for the minimal hun when it is provided.
             // Time(when and chronometer) is not shown for the minimal hun.
-            p.headerTextSecondary(p.mText).text(null).hideTime(true);
+            p.headerTextSecondary(p.mText).text(null).hideTime(true).summaryText("");
 
             return applyStandardTemplate(
                     getCompactHeadsUpBaseLayoutResource(), p,
@@ -7153,13 +7161,7 @@ public class Notification implements Parcelable
             // Adds any new extras provided by the user.
             if (mUserExtras != null) {
                 final Bundle saveExtras = (Bundle) mUserExtras.clone();
-                if (SystemProperties.getBoolean(
-                        "persist.sysui.notification.builder_extras_override", false)) {
-                    mN.extras.putAll(saveExtras);
-                } else {
-                    saveExtras.putAll(mN.extras);
-                    mN.extras = saveExtras;
-                }
+                mN.extras.putAll(saveExtras);
             }
 
             if (!Flags.sortSectionByTime()) {
@@ -7296,6 +7298,10 @@ public class Notification implements Parcelable
 
         private int getCompactHeadsUpBaseLayoutResource() {
             return R.layout.notification_template_material_compact_heads_up_base;
+        }
+
+        private int getMessagingCompactHeadsUpLayoutResource() {
+            return R.layout.notification_template_material_messaging_compact_heads_up;
         }
 
         private int getBigBaseLayoutResource() {
@@ -8886,6 +8892,62 @@ public class Notification implements Parcelable
             }
         }
 
+        private void fixTitleAndTextForCompactMessaging(StandardTemplateParams p) {
+            Message m = findLatestIncomingMessage();
+            final CharSequence text = (m == null) ? null : m.mText;
+            CharSequence sender = m == null ? null
+                    : m.mSender == null || TextUtils.isEmpty(m.mSender.getName())
+                            ? mUser.getName() : m.mSender.getName();
+
+            CharSequence conversationTitle = mIsGroupConversation ? mConversationTitle : null;
+
+            // we want to have colon for possible title for conversation.
+            final BidiFormatter bidi = BidiFormatter.getInstance();
+            if (sender != null) {
+                sender = mBuilder.mContext.getString(
+                        com.android.internal.R.string.notification_messaging_title_template,
+                        bidi.unicodeWrap(sender), "");
+            } else if (conversationTitle != null) {
+                conversationTitle = mBuilder.mContext.getString(
+                        com.android.internal.R.string.notification_messaging_title_template,
+                        bidi.unicodeWrap(conversationTitle), "");
+            }
+
+            if (Flags.cleanUpSpansAndNewLines()) {
+                conversationTitle = stripStyling(conversationTitle);
+                sender = stripStyling(sender);
+            }
+
+            final boolean showOnlySenderName = showOnlySenderName();
+
+            final CharSequence title;
+            boolean isConversationTitleAvailable = !showOnlySenderName && conversationTitle != null;
+            if (isConversationTitleAvailable) {
+                title = conversationTitle;
+            } else {
+                title = sender;
+            }
+
+            p.title(title);
+            // when the conversation title is available, use headerTextSecondary for sender and
+            // summaryText for text
+            if (isConversationTitleAvailable) {
+                p.headerTextSecondary(sender);
+                p.summaryText(text);
+            } else {
+                // when it is not, use headerTextSecondary for text and don't use summaryText
+                p.headerTextSecondary(text);
+                p.summaryText(null);
+            }
+        }
+
+        /** developer settings to always show sender name */
+        private boolean showOnlySenderName() {
+            return SystemProperties.getBoolean(
+                    "persist.compact_heads_up_notification.show_only_sender_name",
+                    false);
+        }
+
         /**
          * @hide
          */
@@ -9170,9 +9232,87 @@ public class Notification implements Parcelable
         @Nullable
         @Override
         public RemoteViews makeCompactHeadsUpContentView() {
-            // TODO(b/336229954): Apply minimal HUN treatment to Messaging Notifications.
-            return makeHeadsUpContentView(false);
+            final boolean isConversationLayout = mConversationType != CONVERSATION_TYPE_LEGACY;
+            Icon conversationIcon = null;
+            Notification.Action remoteInputAction = null;
+            if (isConversationLayout) {
+
+                conversationIcon = mShortcutIcon;
+
+                // conversation icon is m
+                // Extract the conversation icon for one to one conversations from
+                // the latest incoming message since
+                // fixTitleAndTextExtras also uses it as data source for title and text
+                if (conversationIcon == null && !mIsGroupConversation) {
+                    final Message message = findLatestIncomingMessage();
+                    if (message != null) {
+                        final Person sender = message.mSender;
+                        if (sender != null) {
+                            conversationIcon = sender.getIcon();
+                        }
+                    }
+                }
+
+                if (Flags.compactHeadsUpNotificationReply()) {
+                    // Get the first non-contextual inline reply action.
+                    final List<Notification.Action> nonContextualActions =
+                            mBuilder.getNonContextualActions();
+                    for (int i = 0; i < nonContextualActions.size(); i++) {
+                        final Notification.Action action = nonContextualActions.get(i);
+                        if (mBuilder.hasValidRemoteInput(action)) {
+                            remoteInputAction = action;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            final StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
+                    .highlightExpander(isConversationLayout)
+                    .fillTextsFrom(mBuilder)
+                    .hideTime(true);
+
+            fixTitleAndTextForCompactMessaging(p);
+            TemplateBindResult bindResult = new TemplateBindResult();
+
+            RemoteViews contentView = mBuilder.applyStandardTemplate(
+                    mBuilder.getMessagingCompactHeadsUpLayoutResource(), p, bindResult);
+            contentView.setViewVisibility(R.id.header_text_secondary_divider, View.GONE);
+            contentView.setViewVisibility(R.id.header_text_divider, View.GONE);
+            if (conversationIcon != null) {
+                contentView.setViewVisibility(R.id.icon, View.GONE);
+                contentView.setViewVisibility(R.id.conversation_face_pile, View.GONE);
+                contentView.setViewVisibility(R.id.conversation_icon, View.VISIBLE);
+                contentView.setBoolean(R.id.conversation_icon, "setApplyCircularCrop", true);
+                contentView.setImageViewIcon(R.id.conversation_icon, conversationIcon);
+            } else if (mIsGroupConversation) {
+                contentView.setViewVisibility(R.id.icon, View.GONE);
+                contentView.setViewVisibility(R.id.conversation_icon, View.GONE);
+                contentView.setInt(R.id.status_bar_latest_event_content,
+                        "setNotificationBackgroundColor", mBuilder.getBackgroundColor(p));
+                contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
+                        mBuilder.getSmallIconColor(p));
+                contentView.setBundle(R.id.status_bar_latest_event_content, "setGroupFacePile",
+                        mBuilder.mN.extras);
+            }
+
+            if (remoteInputAction != null) {
+                contentView.setViewVisibility(R.id.reply_action_container, View.VISIBLE);
+
+                final RemoteViews inlineReplyButton =
+                        mBuilder.generateActionButton(remoteInputAction, false, p);
+                // Clear the drawable
+                inlineReplyButton.setInt(R.id.action0, "setBackgroundResource", 0);
+                inlineReplyButton.setTextViewText(R.id.action0,
+                        mBuilder.mContext.getString(R.string.notification_compact_heads_up_reply));
+                contentView.addView(R.id.reply_action_container, inlineReplyButton);
+            } else {
+                contentView.setViewVisibility(R.id.reply_action_container, View.GONE);
+            }
+            return contentView;
         }
+
 
         /**
          * @hide
@@ -10355,7 +10495,7 @@ public class Notification implements Parcelable
         @Nullable
         @Override
         public RemoteViews makeCompactHeadsUpContentView() {
-            // TODO(b/336228700): Apply minimal HUN treatment for Call Style.
+            // Use existing heads up for call style.
             return makeHeadsUpContentView(false);
         }
 

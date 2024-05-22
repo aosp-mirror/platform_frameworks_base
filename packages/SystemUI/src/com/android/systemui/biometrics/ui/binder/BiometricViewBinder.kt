@@ -230,7 +230,7 @@ object BiometricViewBinder {
             }
 
             lifecycleScope.launch {
-                viewModel.showBpWithoutIconForCredential.collect { showWithoutIcon ->
+                viewModel.hideSensorIcon.collect { showWithoutIcon ->
                     if (!showWithoutIcon) {
                         PromptIconViewBinder.bind(
                             iconView,

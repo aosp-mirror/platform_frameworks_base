@@ -114,7 +114,6 @@ public class BackProgressAnimator {
      *                 dispatches as the progress animation updates.
      */
     public void onBackStarted(BackMotionEvent event, ProgressCallback callback) {
-        reset();
         mLastBackEvent = event;
         mCallback = callback;
         mBackAnimationInProgress = true;

@@ -18,11 +18,19 @@
 set -e
 
 # Output files
-stats=/tmp/ravenwood-stats-all.csv
-apis=/tmp/ravenwood-apis-all.csv
+out_dir=/tmp/ravenwood
+stats=$out_dir/ravenwood-stats-all.csv
+apis=$out_dir/ravenwood-apis-all.csv
+keep_all_dir=$out_dir/ravenwood-keep-all/
+
+rm -fr $out_dir
+mkdir -p $out_dir
+mkdir -p $keep_all_dir
 
 # Where the input files are.
 path=$ANDROID_BUILD_TOP/out/host/linux-x86/testcases/ravenwood-stats-checker/x86_64/
+
+timestamp="$(date --iso-8601=seconds)"
 
 m() {
     ${ANDROID_BUILD_TOP}/build/soong/soong_ui.bash --make-mode "$@"
@@ -39,15 +47,15 @@ dump() {
     local jar=$1
     local file=$2
 
-    # Use sed to remove the header + prepend the jar filename.
-    sed -e '1d' -e "s/^/$jar,/" $file
+    # Remove the header row, and prepend the columns.
+    sed -e '1d' -e "s/^/$jar,$timestamp,/" $file
 }
 
 collect_stats() {
     local out="$1"
     {
         # Copy the header, with the first column appended.
-        echo -n "Jar,"
+        echo -n "Jar,Generated Date,"
         head -n 1 hoststubgen_framework-minus-apex_stats.csv
 
         dump "framework-minus-apex" hoststubgen_framework-minus-apex_stats.csv
@@ -61,7 +69,7 @@ collect_apis() {
     local out="$1"
     {
         # Copy the header, with the first column appended.
-        echo -n "Jar,"
+        echo -n "Jar,Generated Date,"
         head -n 1 hoststubgen_framework-minus-apex_apis.csv
 
         dump "framework-minus-apex"  hoststubgen_framework-minus-apex_apis.csv
@@ -74,3 +82,7 @@ collect_apis() {
 
 collect_stats $stats
 collect_apis $apis
+
+cp *keep_all.txt $keep_all_dir
+echo "Keep all files created at:"
+find $keep_all_dir -type f

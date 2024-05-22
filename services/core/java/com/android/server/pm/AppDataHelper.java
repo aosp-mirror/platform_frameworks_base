@@ -504,9 +504,12 @@ public class AppDataHelper {
         } else {
             storageFlags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
         }
-        List<String> deferPackages = reconcileAppsDataLI(StorageManager.UUID_PRIVATE_INTERNAL,
-                UserHandle.USER_SYSTEM, storageFlags, true /* migrateAppData */,
-                true /* onlyCoreApps */);
+        final List<String> deferPackages;
+        synchronized (mPm.mInstallLock) {
+           deferPackages = reconcileAppsDataLI(StorageManager.UUID_PRIVATE_INTERNAL,
+                    UserHandle.USER_SYSTEM, storageFlags, true /* migrateAppData */,
+                    true /* onlyCoreApps */);
+        }
         Future<?> prepareAppDataFuture = SystemServerInitThreadPool.submit(() -> {
             TimingsTraceLog traceLog = new TimingsTraceLog("SystemServerTimingAsync",
                     Trace.TRACE_TAG_PACKAGE_MANAGER);

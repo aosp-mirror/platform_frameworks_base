@@ -18,11 +18,9 @@ package com.android.systemui.volume.panel.component.spatial.domain.interactor
 
 import android.media.AudioDeviceAttributes
 import android.media.AudioDeviceInfo
-import com.android.settingslib.media.BluetoothMediaDevice
-import com.android.settingslib.media.MediaDevice
-import com.android.settingslib.media.PhoneMediaDevice
 import com.android.settingslib.media.domain.interactor.SpatializerInteractor
-import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
+import com.android.systemui.volume.domain.interactor.AudioOutputInteractor
+import com.android.systemui.volume.domain.model.AudioOutputDevice
 import com.android.systemui.volume.panel.component.spatial.domain.model.SpatialAudioAvailabilityModel
 import com.android.systemui.volume.panel.component.spatial.domain.model.SpatialAudioEnabledModel
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
@@ -46,16 +44,20 @@ import kotlinx.coroutines.flow.stateIn
 class SpatialAudioComponentInteractor
 @Inject
 constructor(
-    mediaOutputInteractor: MediaOutputInteractor,
+    audioOutputInteractor: AudioOutputInteractor,
     private val spatializerInteractor: SpatializerInteractor,
     @VolumePanelScope private val coroutineScope: CoroutineScope,
 ) {
 
     private val changes = MutableSharedFlow<Unit>()
     private val currentAudioDeviceAttributes: StateFlow<AudioDeviceAttributes?> =
-        mediaOutputInteractor.currentConnectedDevice
-            .map { mediaDevice ->
-                if (mediaDevice == null) builtinSpeaker else mediaDevice.getAudioDeviceAttributes()
+        audioOutputInteractor.currentAudioDevice
+            .map { audioDevice ->
+                if (audioDevice is AudioOutputDevice.Unknown) {
+                    builtinSpeaker
+                } else {
+                    audioDevice.getAudioDeviceAttributes()
+                }
             }
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), builtinSpeaker)
 
@@ -135,36 +137,35 @@ constructor(
         changes.emit(Unit)
     }
 
-    private suspend fun MediaDevice.getAudioDeviceAttributes(): AudioDeviceAttributes? {
+    private suspend fun AudioOutputDevice.getAudioDeviceAttributes(): AudioDeviceAttributes? {
         when (this) {
-            is PhoneMediaDevice -> return builtinSpeaker
-            is BluetoothMediaDevice -> {
-                val device = cachedDevice ?: return null
+            is AudioOutputDevice.BuiltIn -> return builtinSpeaker
+            is AudioOutputDevice.Bluetooth -> {
                 return listOf(
                         AudioDeviceAttributes(
                             AudioDeviceAttributes.ROLE_OUTPUT,
                             AudioDeviceInfo.TYPE_BLE_HEADSET,
-                            device.address,
+                            cachedBluetoothDevice.address,
                         ),
                         AudioDeviceAttributes(
                             AudioDeviceAttributes.ROLE_OUTPUT,
                             AudioDeviceInfo.TYPE_BLE_SPEAKER,
-                            device.address,
+                            cachedBluetoothDevice.address,
                         ),
                         AudioDeviceAttributes(
                             AudioDeviceAttributes.ROLE_OUTPUT,
                             AudioDeviceInfo.TYPE_BLE_BROADCAST,
-                            device.address,
+                            cachedBluetoothDevice.address,
                         ),
                         AudioDeviceAttributes(
                             AudioDeviceAttributes.ROLE_OUTPUT,
                             AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
-                            device.address,
+                            cachedBluetoothDevice.address,
                         ),
                         AudioDeviceAttributes(
                             AudioDeviceAttributes.ROLE_OUTPUT,
                             AudioDeviceInfo.TYPE_HEARING_AID,
-                            device.address,
+                            cachedBluetoothDevice.address,
                         )
                     )
                     .firstOrNull { spatializerInteractor.isSpatialAudioAvailable(it) }

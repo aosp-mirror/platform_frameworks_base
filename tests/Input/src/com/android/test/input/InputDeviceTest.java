@@ -61,6 +61,7 @@ public class InputDeviceTest {
         assertEquals(device.getMotionRanges().size(), outDevice.getMotionRanges().size());
         assertEquals(device.getHostUsiVersion(), outDevice.getHostUsiVersion());
         assertEquals(device.getAssociatedDisplayId(), outDevice.getAssociatedDisplayId());
+        assertEquals(device.isEnabled(), outDevice.isEnabled());
 
         KeyCharacterMap keyCharacterMap = device.getKeyCharacterMap();
         KeyCharacterMap outKeyCharacterMap = outDevice.getKeyCharacterMap();
@@ -100,7 +101,9 @@ public class InputDeviceTest {
                 .setKeyboardLanguageTag("en-US")
                 .setKeyboardLayoutType("qwerty")
                 .setUsiVersion(new HostUsiVersion(2, 0))
-                .setShouldSmoothScroll(true);
+                .setShouldSmoothScroll(true)
+                .setAssociatedDisplayId(Display.DEFAULT_DISPLAY)
+                .setEnabled(false);
 
         for (int i = 0; i < 30; i++) {
             deviceBuilder.addMotionRange(

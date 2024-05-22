@@ -38,10 +38,30 @@ flag{
 }
 
 flag{
+    name: "enforce_main_user"
+    namespace: "vcn"
+    description: "Enforce main user to make VCN HSUM compatible"
+    bug: "310310661"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag{
     name: "handle_seq_num_leap"
     namespace: "vcn"
     description: "Do not report bad network when there is a suspected sequence number leap"
     bug: "332598276"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag{
+    name: "allow_disable_ipsec_loss_detector"
+    namespace: "vcn"
+    description: "Allow disabling IPsec packet loss detector"
+    bug: "336638836"
     metadata {
       purpose: PURPOSE_BUGFIX
     }

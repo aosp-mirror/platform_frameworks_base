@@ -33,6 +33,18 @@ data class SubscriptionModel(
      */
     val isOpportunistic: Boolean = false,
 
+    /**
+     * True if this subscription **only** supports non-terrestrial networks (NTN) and false
+     * otherwise. (non-terrestrial == satellite)
+     *
+     * Note that we intend to filter these subscriptions out, because these connections are actually
+     * supported by
+     * [com.android.systemui.statusbar.pipeline.satellite.data.DeviceBasedSatelliteRepository]. See
+     * [com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor] for
+     * the filtering.
+     */
+    val isExclusivelyNonTerrestrial: Boolean = false,
+
     /** Subscriptions in the same group may be filtered or treated as a single subscription */
     val groupUuid: ParcelUuid? = null,
 

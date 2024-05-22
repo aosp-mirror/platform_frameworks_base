@@ -16,10 +16,10 @@
 package com.android.systemui.qs.tiles.dialog
 
 import android.util.Log
-import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -47,14 +47,14 @@ constructor(
     }
 
     /**
-     * Creates a [InternetDialogDelegate]. The dialog will be animated from [view] if it is not
-     * null.
+     * Creates a [InternetDialogDelegate]. The dialog will be animated from [expandable] if it is
+     * not null.
      */
     fun create(
         aboveStatusBar: Boolean,
         canConfigMobileData: Boolean,
         canConfigWifi: Boolean,
-        view: View?
+        expandable: Expandable?
     ) {
         if (dialog != null) {
             if (DEBUG) {
@@ -67,20 +67,18 @@ constructor(
                 dialogFactory
                     .create(aboveStatusBar, canConfigMobileData, canConfigWifi, coroutineScope)
                     .createDialog()
-            if (view != null) {
-                dialogTransitionAnimator.showFromView(
-                    dialog!!,
-                    view,
-                    animateBackgroundBoundsChange = true,
-                    cuj =
-                        DialogCuj(
-                            InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                            INTERACTION_JANK_TAG
-                        )
+            val controller =
+                expandable?.dialogTransitionController(
+                    DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG)
                 )
-            } else {
-                dialog!!.show()
+            controller?.let {
+                dialogTransitionAnimator.show(
+                    dialog!!,
+                    controller,
+                    animateBackgroundBoundsChange = true
+                )
             }
+                ?: dialog?.show()
         }
     }
 

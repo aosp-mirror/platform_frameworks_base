@@ -175,7 +175,7 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"प्याटर्न मिलेन"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"पासवर्ड मिलेन"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"अत्यन्तै धेरै पटक गलत प्रयास गरिए। \n <xliff:g id="NUMBER">%d</xliff:g>सेकेन्ड पछि पुनः प्रयास गर्नुहोस्।"</string>
-    <string name="work_challenge_emergency_button_text" msgid="8946588434515599288">"आपत्कालीन"</string>
+    <string name="work_challenge_emergency_button_text" msgid="8946588434515599288">"आपत्‌कालीन"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"फेरि प्रयास गर्नुहोस्। <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> मध्ये <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> प्रयास।"</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"तपाईंको डेटा मेटाइने छ"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"तपाईंले अर्को पटक पनि गलत ढाँचा प्रविष्टि गर्नुभयो भने यो डिभाइसको डेटा मेटाइने छ।"</string>
@@ -203,10 +203,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"फेस अनलक सेटअप गर्न सकिएन। फेरि प्रयास गर्न सेटिङमा जानुहोस्।"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"फिंगरप्रिन्ट सेन्सरमा छुनुहोस्‌"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"जारी राख्न अनलक आइकनमा थिच्नुहोस्"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"अनुहार पहिचान गर्न सकिएन। बरु फिंगरप्रिन्ट प्रयोग गर्नुहोस्।"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"अनुहार मिलेन। बरु फिंगरप्रिन्ट प्रयोग गर्नुहोस्।"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <string name="keyguard_face_failed" msgid="2346762871330729634">"अनुहार पहिचान गर्न सकिएन"</string>
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"अनुहार मिलेन"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"बरु फिंगरप्रिन्ट प्रयोग गर्नुहोस्"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"फेस अनलक उपलब्ध छैन"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ब्लुटुथ जडान भयो।"</string>
@@ -447,6 +447,8 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"विजेटहरू कस्टमाइज गर्न केही बेरसम्म थिच्नुहोस्"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"विजेटहरू कस्टमाइज गर्नुहोस्"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"अफ गरिएको विजेटको एप जनाउने आइकन"</string>
+    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"विजेट सम्पादन गर्नुहोस्"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"हटाउनुहोस्"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"विजेट हाल्नुहोस्"</string>
@@ -461,6 +463,8 @@
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"विजेटहरू कस्टमाइज गर्नुहोस्"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"लक स्क्रिनमा भएका विजेटहरू"</string>
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"विजेट चयन गर्नुहोस्"</string>
+    <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"विजेट हटाउनुहोस्"</string>
+    <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"चयन गरिएका विजेटका लागि ठाउँ चयन गर्नुहोस्"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"प्रयोगकर्ता फेर्नुहोस्"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"पुलडाउन मेनु"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"यो सत्रमा भएका सबै एपहरू र डेटा मेटाइने छ।"</string>
@@ -625,12 +629,17 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"आउटपुटसम्बन्धी सेटिङमा जानुहोस्"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"भोल्युम स्लाइडरहरू एक्स्पान्ड गरिएका छन्"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"भोल्युम स्लाइडरहरू कोल्याप्स गरिएका छन्"</string>
-    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"%s म्युट गर्नुहोस्"</string>
-    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"%s अनम्युट गर्नुहोस्"</string>
+    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> प्ले गरिँदै छ"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"अडियो यसमा प्ले हुने छ"</string>
-    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
-    <skip />
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"कल चलिरहेको छ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"सिस्टम UI ट्युनर"</string>
     <string name="status_bar" msgid="4357390266055077437">"स्थिति पट्टी"</string>
     <string name="demo_mode" msgid="263484519766901593">"सिस्टम UI को डेमो मोड"</string>

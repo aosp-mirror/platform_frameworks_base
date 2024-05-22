@@ -252,18 +252,14 @@ public final class MediaController {
         return 0;
     }
 
-    /**
-     * Get the current playback info for this session.
-     *
-     * @return The current playback info or null.
-     */
-    public @Nullable PlaybackInfo getPlaybackInfo() {
+    /** Returns the current playback info for this session. */
+    @NonNull
+    public PlaybackInfo getPlaybackInfo() {
         try {
             return mSessionBinder.getVolumeAttributes();
-        } catch (RemoteException e) {
-            Log.wtf(TAG, "Error calling getAudioInfo.", e);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -618,12 +614,11 @@ public final class MediaController {
         }
 
         /**
-         * Override to handle changes to the audio info.
+         * Signals a change in the session's {@link PlaybackInfo PlaybackInfo}.
          *
-         * @param info The current audio info for this session.
+         * @param playbackInfo The latest known state of the session's playback info.
          */
-        public void onAudioInfoChanged(PlaybackInfo info) {
-        }
+        public void onAudioInfoChanged(@NonNull PlaybackInfo playbackInfo) {}
     }
 
     /**
@@ -1186,7 +1181,7 @@ public final class MediaController {
         }
 
         @Override
-        public void onVolumeInfoChanged(PlaybackInfo info) {
+        public void onVolumeInfoChanged(@NonNull PlaybackInfo info) {
             MediaController controller = mController.get();
             if (controller != null) {
                 controller.postMessage(MSG_UPDATE_VOLUME, info, null);

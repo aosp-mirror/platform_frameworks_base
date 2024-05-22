@@ -19,6 +19,9 @@ import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_BACKGROUND;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_ALLOW;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_DENY_ADMIN;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_DENY_USER;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_RESTRICTED;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_STANDBY;
@@ -28,6 +31,9 @@ import static android.net.NetworkPolicyManager.ALLOWED_REASON_NONE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_BACKGROUND;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_METERED_ALLOW;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_METERED_DENY_ADMIN;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_METERED_DENY_USER;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_POWERSAVE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_RESTRICTED;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_STANDBY;
@@ -379,7 +385,7 @@ public class NetworkPolicyLogger {
         return "Interfaces of netId=" + netId + " changed to " + newIfaces;
     }
 
-    private static String getFirewallChainName(int chain) {
+    static String getFirewallChainName(int chain) {
         switch (chain) {
             case FIREWALL_CHAIN_DOZABLE:
                 return FIREWALL_CHAIN_NAME_DOZABLE;
@@ -393,6 +399,12 @@ public class NetworkPolicyLogger {
                 return FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY;
             case FIREWALL_CHAIN_BACKGROUND:
                 return FIREWALL_CHAIN_NAME_BACKGROUND;
+            case FIREWALL_CHAIN_METERED_ALLOW:
+                return FIREWALL_CHAIN_NAME_METERED_ALLOW;
+            case FIREWALL_CHAIN_METERED_DENY_USER:
+                return FIREWALL_CHAIN_NAME_METERED_DENY_USER;
+            case FIREWALL_CHAIN_METERED_DENY_ADMIN:
+                return FIREWALL_CHAIN_NAME_METERED_DENY_ADMIN;
             default:
                 return String.valueOf(chain);
         }

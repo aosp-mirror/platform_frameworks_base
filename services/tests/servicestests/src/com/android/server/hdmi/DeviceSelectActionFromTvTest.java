@@ -29,7 +29,9 @@ import static com.android.server.hdmi.DeviceSelectActionFromTv.STATE_WAIT_FOR_RE
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -131,6 +133,11 @@ public class DeviceSelectActionFromTvTest {
                     @Override
                     boolean isPowerStandby() {
                         return false;
+                    }
+
+                    @Override
+                    protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                        // do nothing
                     }
                 };
 

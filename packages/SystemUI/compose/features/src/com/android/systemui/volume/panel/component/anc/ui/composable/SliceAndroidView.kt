@@ -16,11 +16,12 @@
 
 package com.android.systemui.volume.panel.component.anc.ui.composable
 
-import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Bundle
 import android.view.ContextThemeWrapper
-import android.view.MotionEvent
 import android.view.View
+import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -33,29 +34,31 @@ fun SliceAndroidView(
     slice: Slice?,
     modifier: Modifier = Modifier,
     onWidthChanged: ((Int) -> Unit)? = null,
-    onClick: (() -> Unit)? = null,
+    enableAccessibility: Boolean = true,
 ) {
     AndroidView(
         modifier = modifier,
         factory = { context: Context ->
-            ClickableSliceView(
+            ComposeSliceView(
                     ContextThemeWrapper(context, R.style.Widget_SliceView_VolumePanel),
-                    onClick,
                 )
                 .apply {
                     mode = SliceView.MODE_LARGE
                     isScrollable = false
                     importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                     setShowTitleItems(true)
-                    if (onWidthChanged != null) {
-                        addOnLayoutChangeListener(OnWidthChangedLayoutListener(onWidthChanged))
-                    }
-                    if (onClick != null) {
-                        setOnClickListener { onClick() }
-                    }
                 }
         },
-        update = { sliceView: SliceView -> sliceView.slice = slice }
+        update = { sliceView: ComposeSliceView ->
+            sliceView.slice = slice
+            sliceView.layoutListener = onWidthChanged?.let(::OnWidthChangedLayoutListener)
+            sliceView.enableAccessibility = enableAccessibility
+        },
+        onRelease = { sliceView: ComposeSliceView ->
+            sliceView.layoutListener = null
+            sliceView.slice = null
+            sliceView.enableAccessibility = true
+        },
     )
 }
 
@@ -81,27 +84,39 @@ class OnWidthChangedLayoutListener(private val widthChanged: (Int) -> Unit) :
     }
 }
 
-/**
- * [SliceView] that prioritises [onClick] when its clicked instead of passing the event to the slice
- * first.
- */
-@SuppressLint("ViewConstructor") // only used in this class
-private class ClickableSliceView(
-    context: Context,
-    private val onClick: (() -> Unit)?,
-) : SliceView(context) {
+private class ComposeSliceView(context: Context) : SliceView(context) {
 
-    init {
-        if (onClick != null) {
-            setOnClickListener {}
+    var enableAccessibility: Boolean = true
+    var layoutListener: OnLayoutChangeListener? = null
+        set(value) {
+            field?.let { removeOnLayoutChangeListener(it) }
+            field = value
+            field?.let { addOnLayoutChangeListener(it) }
+        }
+
+    override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo?) {
+        if (enableAccessibility) {
+            super.onInitializeAccessibilityNodeInfo(info)
         }
     }
 
-    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
-        return (isSliceViewClickable && onClick != null) || super.onInterceptTouchEvent(ev)
+    override fun onInitializeAccessibilityEvent(event: AccessibilityEvent?) {
+        if (enableAccessibility) {
+            super.onInitializeAccessibilityEvent(event)
+        }
     }
 
-    override fun onClick(v: View?) {
-        onClick?.takeIf { isSliceViewClickable }?.let { it() } ?: super.onClick(v)
+    override fun performAccessibilityAction(action: Int, arguments: Bundle?): Boolean {
+        return if (enableAccessibility) {
+            super.performAccessibilityAction(action, arguments)
+        } else {
+            false
+        }
+    }
+
+    override fun addChildrenForAccessibility(outChildren: ArrayList<View>?) {
+        if (enableAccessibility) {
+            super.addChildrenForAccessibility(outChildren)
+        }
     }
 }

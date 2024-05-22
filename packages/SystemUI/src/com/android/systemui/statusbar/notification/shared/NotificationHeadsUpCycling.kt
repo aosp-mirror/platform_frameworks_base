@@ -23,8 +23,8 @@ import com.android.systemui.flags.RefactorFlagUtils
 /** Helper for reading or using the heads-up cycling flag state. */
 @Suppress("NOTHING_TO_INLINE")
 object NotificationHeadsUpCycling {
-    /** The aconfig flag name */
-    const val FLAG_NAME = Flags.FLAG_NOTIFICATION_HEADS_UP_CYCLING
+    /** The aconfig flag name - enable this feature when FLAG_NOTIFICATION_THROTTLE_HUN is on. */
+    const val FLAG_NAME = Flags.FLAG_NOTIFICATION_THROTTLE_HUN
 
     /** A token used for dependency declaration */
     val token: FlagToken
@@ -33,7 +33,12 @@ object NotificationHeadsUpCycling {
     /** Is the heads-up cycling animation enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.notificationContentAlphaOptimization()
+        get() = Flags.notificationThrottleHun()
+
+    /** Whether to animate the bottom line when transiting from a tall HUN to a short HUN */
+    @JvmStatic
+    inline val animateTallToShort
+        get() = false
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the

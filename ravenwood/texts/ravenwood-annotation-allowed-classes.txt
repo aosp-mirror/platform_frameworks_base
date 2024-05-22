@@ -1,5 +1,7 @@
 # Only classes listed here can use the Ravenwood annotations.
 
+com.android.internal.ravenwood.*
+
 com.android.internal.display.BrightnessSynchronizer
 com.android.internal.util.ArrayUtils
 com.android.internal.logging.MetricsLogger
@@ -237,6 +239,8 @@ android.text.TextUtils$SimpleStringSplitter
 android.accounts.Account
 
 android.graphics.Bitmap$Config
+android.graphics.Color
+android.graphics.ColorSpace
 android.graphics.Insets
 android.graphics.Interpolator
 android.graphics.Matrix

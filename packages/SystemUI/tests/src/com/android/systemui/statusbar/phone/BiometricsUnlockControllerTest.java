@@ -37,11 +37,11 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.UserHandle;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestableResources;
 import android.view.ViewRootImpl;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
@@ -77,7 +77,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 public class BiometricsUnlockControllerTest extends SysuiTestCase {
 

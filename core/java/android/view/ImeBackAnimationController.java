@@ -38,6 +38,8 @@ import android.window.OnBackAnimationCallback;
 
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 
+import java.io.PrintWriter;
+
 /**
  * Controller for IME predictive back animation
  *
@@ -134,7 +136,9 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
 
     @Override
     public void onBackInvoked() {
-        if (!isBackAnimationAllowed()) {
+        if (!isBackAnimationAllowed() || !mIsPreCommitAnimationInProgress) {
+            // play regular hide animation if back-animation is not allowed or if insets control has
+            // been cancelled by the system (this can happen in split screen for example)
             mInsetsController.hide(ime());
             return;
         }
@@ -206,18 +210,9 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
             mInsetsController.setPredictiveBackImeHideAnimInProgress(true);
             notifyHideIme();
         }
-        if (mStartRootScrollY != 0) {
-            // RootView is panned, ensure that it is scrolled back to the intended scroll position
-            if (triggerBack) {
-                // requesting ime as invisible
-                mInsetsController.setRequestedVisibleTypes(0, ime());
-                // changes the animation state and notifies RootView of changed insets, which
-                // causes it to reset its scrollY to 0f (animated)
-                mInsetsController.onAnimationStateChanged(ime(), /*running*/ true);
-            } else {
-                // This causes RootView to update its scroll back to the panned position
-                mInsetsController.getHost().notifyInsetsChanged();
-            }
+        if (mStartRootScrollY != 0 && !triggerBack) {
+            // This causes RootView to update its scroll back to the panned position
+            mInsetsController.getHost().notifyInsetsChanged();
         }
     }
 
@@ -233,6 +228,12 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
         // the IME away
         mInsetsController.getHost().getInputMethodManager()
                 .notifyImeHidden(mInsetsController.getHost().getWindowToken(), statsToken);
+
+        // requesting IME as invisible during post-commit
+        mInsetsController.setRequestedVisibleTypes(0, ime());
+        // Changes the animation state. This also notifies RootView of changed insets, which causes
+        // it to reset its scrollY to 0f (animated) if it was panned
+        mInsetsController.onAnimationStateChanged(ime(), /*running*/ true);
     }
 
     private void reset() {
@@ -267,6 +268,26 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
 
     private boolean isHideAnimationInProgress() {
         return mPostCommitAnimator != null && mTriggerBack;
+    }
+
+    /**
+     * Dump information about this ImeBackAnimationController
+     *
+     * @param prefix the prefix that will be prepended to each line of the produced output
+     * @param writer the writer that will receive the resulting text
+     */
+    public void dump(String prefix, PrintWriter writer) {
+        final String innerPrefix = prefix + "    ";
+        writer.println(prefix + "ImeBackAnimationController:");
+        writer.println(innerPrefix + "mLastProgress=" + mLastProgress);
+        writer.println(innerPrefix + "mTriggerBack=" + mTriggerBack);
+        writer.println(innerPrefix + "mIsPreCommitAnimationInProgress="
+                + mIsPreCommitAnimationInProgress);
+        writer.println(innerPrefix + "mStartRootScrollY=" + mStartRootScrollY);
+        writer.println(innerPrefix + "isBackAnimationAllowed=" + isBackAnimationAllowed());
+        writer.println(innerPrefix + "isAdjustPan=" + isAdjustPan());
+        writer.println(innerPrefix + "isHideAnimationInProgress="
+                + isHideAnimationInProgress());
     }
 
 }

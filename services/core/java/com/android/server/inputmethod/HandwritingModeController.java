@@ -330,14 +330,10 @@ final class HandwritingModeController {
         mHandwritingSurface.startIntercepting(imePid, imeUid);
 
         // Unset the pointer icon for the stylus in case the app had set it.
-        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
-            Objects.requireNonNull(mContext.getSystemService(InputManager.class)).setPointerIcon(
-                    PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_NOT_SPECIFIED),
-                    downEvent.getDisplayId(), downEvent.getDeviceId(), downEvent.getPointerId(0),
-                    mHandwritingSurface.getInputChannel().getToken());
-        } else {
-            InputManagerGlobal.getInstance().setPointerIconType(PointerIcon.TYPE_NOT_SPECIFIED);
-        }
+        Objects.requireNonNull(mContext.getSystemService(InputManager.class)).setPointerIcon(
+                PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_NOT_SPECIFIED),
+                downEvent.getDisplayId(), downEvent.getDeviceId(), downEvent.getPointerId(0),
+                mHandwritingSurface.getInputChannel().getToken());
 
         return new HandwritingSession(mCurrentRequestId, mHandwritingSurface.getInputChannel(),
                 mHandwritingBuffer);

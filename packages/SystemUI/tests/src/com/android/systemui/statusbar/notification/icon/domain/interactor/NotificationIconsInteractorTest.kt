@@ -15,7 +15,7 @@
 
 package com.android.systemui.statusbar.notification.icon.domain.interactor
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysUITestComponent
 import com.android.systemui.SysUITestModule
@@ -52,7 +52,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class NotificationIconsInteractorTest : SysuiTestCase() {
 
     private val bubbles: Bubbles = mock()
@@ -151,7 +151,7 @@ class NotificationIconsInteractorTest : SysuiTestCase() {
 }
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class AlwaysOnDisplayNotificationIconsInteractorTest : SysuiTestCase() {
 
     private val bubbles: Bubbles = mock()
@@ -256,7 +256,7 @@ class AlwaysOnDisplayNotificationIconsInteractorTest : SysuiTestCase() {
 }
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class StatusBarNotificationIconsInteractorTest : SysuiTestCase() {
 
     private val bubbles: Bubbles = mock()

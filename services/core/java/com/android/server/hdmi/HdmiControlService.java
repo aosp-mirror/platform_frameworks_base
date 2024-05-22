@@ -40,6 +40,7 @@ import static com.android.server.power.ShutdownThread.SHUTDOWN_ACTION_PROPERTY;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -303,6 +304,10 @@ public class HdmiControlService extends SystemService {
 
     // Make sure HdmiCecConfig is instantiated and the XMLs are read.
     private HdmiCecConfig mHdmiCecConfig;
+
+    // Timeout value for start ARC action after an established eARC connection was terminated,
+    // e.g. because eARC was disabled in Settings.
+    private static final int EARC_TRIGGER_START_ARC_ACTION_DELAY = 500;
 
     /**
      * Interface to report send result.
@@ -1641,6 +1646,13 @@ public class HdmiControlService extends SystemService {
             case Constants.MESSAGE_ROUTING_CHANGE:
             case Constants.MESSAGE_SET_STREAM_PATH:
             case Constants.MESSAGE_TEXT_VIEW_ON:
+                // RequestActiveSourceAction is started after the TV finished logical address
+                // allocation. This action is used by the TV to get the active source from the CEC
+                // network. If the TV sent a source changing CEC message, this action does not have
+                // to continue anymore.
+                if (isTvDeviceEnabled()) {
+                    tv().removeAction(RequestActiveSourceAction.class);
+                }
                 sendCecCommandWithRetries(command, callback);
                 break;
             default:
@@ -4388,8 +4400,7 @@ public class HdmiControlService extends SystemService {
         assertRunOnServiceThread();
         Intent intent = new Intent(HdmiControlManager.ACTION_OSD_MESSAGE);
         intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_ID, messageId);
-        getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
-                HdmiControlService.PERMISSION);
+        sendBroadcastAsUser(intent);
     }
 
     @ServiceThreadOnly
@@ -4398,8 +4409,17 @@ public class HdmiControlService extends SystemService {
         Intent intent = new Intent(HdmiControlManager.ACTION_OSD_MESSAGE);
         intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_ID, messageId);
         intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_EXTRA_PARAM1, extra);
-        getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
-                HdmiControlService.PERMISSION);
+        sendBroadcastAsUser(intent);
+    }
+
+    // This method is used such that we can override it inside unit tests to avoid a
+    // SecurityException.
+    @ServiceThreadOnly
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+    protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+        assertRunOnServiceThread();
+        getContext().sendBroadcastAsUser(intent, UserHandle.ALL, HdmiControlService.PERMISSION);
     }
 
     @VisibleForTesting
@@ -5041,7 +5061,12 @@ public class HdmiControlService extends SystemService {
             // AudioService here that the eARC connection is terminated.
             HdmiLogger.debug("eARC state change [new: HDMI_EARC_STATUS_ARC_PENDING(2)]");
             notifyEarcStatusToAudioService(false, new ArrayList<>());
-            startArcAction(true, null);
+            mHandler.postDelayed( new Runnable() {
+                @Override
+                public void run() {
+                    startArcAction(true, null);
+                }
+            }, EARC_TRIGGER_START_ARC_ACTION_DELAY);
             getAtomWriter().earcStatusChanged(isEarcSupported(), isEarcEnabled(),
                     oldEarcStatus, status, HdmiStatsEnums.LOG_REASON_EARC_STATUS_CHANGED);
         } else {

@@ -47,7 +47,7 @@ import platform.test.runner.parameterized.Parameters
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(ParameterizedAndroidJunit4::class)
-class KeyguardStatusBarViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class KeyguardStatusBarViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
@@ -66,7 +66,7 @@ class KeyguardStatusBarViewModelTest(flags: FlagsParameterization?) : SysuiTestC
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before

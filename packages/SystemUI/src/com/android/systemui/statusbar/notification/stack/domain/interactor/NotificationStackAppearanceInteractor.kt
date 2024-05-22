@@ -65,25 +65,12 @@ constructor(
             }
             .distinctUntilChanged()
 
-    /**
-     * The height in px of the contents of notification stack. Depending on the number of
-     * notifications, this can exceed the space available on screen to show notifications, at which
-     * point the notification stack should become scrollable.
-     */
-    val stackHeight: StateFlow<Float> = viewHeightRepository.stackHeight.asStateFlow()
-
     /** The height in px of the contents of the HUN. */
     val headsUpHeight: StateFlow<Float> = viewHeightRepository.headsUpHeight.asStateFlow()
 
     /** The alpha of the Notification Stack for the brightness mirror */
     val alphaForBrightnessMirror: StateFlow<Float> =
         placeholderRepository.alphaForBrightnessMirror.asStateFlow()
-
-    /** The y-coordinate in px of top of the contents of the notification stack. */
-    val stackTop: StateFlow<Float> = placeholderRepository.stackTop.asStateFlow()
-
-    /** The y-coordinate in px of bottom of the contents of the notification stack. */
-    val stackBottom: StateFlow<Float> = placeholderRepository.stackBottom.asStateFlow()
 
     /** The height of the keyguard's available space bounds */
     val constrainedAvailableSpace: StateFlow<Int> =
@@ -105,6 +92,13 @@ constructor(
      */
     val syntheticScroll: Flow<Float> = viewHeightRepository.syntheticScroll.asStateFlow()
 
+    /**
+     * Whether the current touch gesture is overscroll. If true, it means the NSSL has already
+     * consumed part of the gesture.
+     */
+    val isCurrentGestureOverscroll: Flow<Boolean> =
+        viewHeightRepository.isCurrentGestureOverscroll.asStateFlow()
+
     /** Sets the alpha to apply to the NSSL for the brightness mirror */
     fun setAlphaForBrightnessMirror(alpha: Float) {
         placeholderRepository.alphaForBrightnessMirror.value = alpha
@@ -116,24 +110,9 @@ constructor(
         placeholderRepository.shadeScrimBounds.value = bounds
     }
 
-    /** Sets the height of the contents of the notification stack. */
-    fun setStackHeight(height: Float) {
-        viewHeightRepository.stackHeight.value = height
-    }
-
     /** Sets the height of heads up notification. */
     fun setHeadsUpHeight(height: Float) {
         viewHeightRepository.headsUpHeight.value = height
-    }
-
-    /** Sets the y-coord in px of the top of the contents of the notification stack. */
-    fun setStackTop(stackTop: Float) {
-        placeholderRepository.stackTop.value = stackTop
-    }
-
-    /** Sets the y-coord in px of the bottom of the contents of the notification stack. */
-    fun setStackBottom(stackBottom: Float) {
-        placeholderRepository.stackBottom.value = stackBottom
     }
 
     /** Sets whether the notification stack is scrolled to the top. */
@@ -144,6 +123,11 @@ constructor(
     /** Sets the amount (px) that the notification stack should scroll due to internal expansion. */
     fun setSyntheticScroll(delta: Float) {
         viewHeightRepository.syntheticScroll.value = delta
+    }
+
+    /** Sets whether the current touch gesture is overscroll. */
+    fun setCurrentGestureOverscroll(isOverscroll: Boolean) {
+        viewHeightRepository.isCurrentGestureOverscroll.value = isOverscroll
     }
 
     fun setConstrainedAvailableSpace(height: Int) {

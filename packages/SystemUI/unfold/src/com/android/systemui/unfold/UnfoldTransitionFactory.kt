@@ -77,6 +77,7 @@ fun createRemoteUnfoldSharedComponent(
         mainExecutor: Executor,
         mainHandler: Handler,
         singleThreadBgExecutor: Executor,
+        bgHandler: Handler,
         tracingTagPrefix: String,
         displayManager: DisplayManager,
         ): RemoteUnfoldSharedComponent =
@@ -87,6 +88,7 @@ fun createRemoteUnfoldSharedComponent(
                         mainExecutor,
                         mainHandler,
                         singleThreadBgExecutor,
+                        bgHandler,
                         displayManager,
                         tracingTagPrefix,
                 )

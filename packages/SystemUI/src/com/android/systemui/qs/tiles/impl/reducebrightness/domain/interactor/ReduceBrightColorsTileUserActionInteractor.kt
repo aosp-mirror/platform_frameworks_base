@@ -44,7 +44,7 @@ constructor(
                 }
                 is QSTileUserAction.LongClick -> {
                     qsTileIntentUserActionHandler.handle(
-                        action.view,
+                        action.expandable,
                         Intent(Settings.ACTION_REDUCE_BRIGHT_COLORS_SETTINGS)
                     )
                 }

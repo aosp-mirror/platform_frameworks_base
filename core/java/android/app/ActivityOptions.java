@@ -103,7 +103,8 @@ public class ActivityOptions extends ComponentOptions {
     @IntDef(prefix = {"MODE_BACKGROUND_ACTIVITY_START_"}, value = {
             MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED,
             MODE_BACKGROUND_ACTIVITY_START_ALLOWED,
-            MODE_BACKGROUND_ACTIVITY_START_DENIED})
+            MODE_BACKGROUND_ACTIVITY_START_DENIED,
+            MODE_BACKGROUND_ACTIVITY_START_COMPAT})
     public @interface BackgroundActivityStartMode {}
     /**
      * No explicit value chosen. The system will decide whether to grant privileges.
@@ -117,6 +118,13 @@ public class ActivityOptions extends ComponentOptions {
      * Deny the {@link PendingIntent} to use the background activity start privileges.
      */
     public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED = 2;
+    /**
+     * Special behavior for compatibility.
+     * Similar to {@link #MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED}
+     *
+     * @hide
+     */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_COMPAT = -1;
 
     /**
      * The package name that created the options.

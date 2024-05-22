@@ -49,6 +49,11 @@ constructor(
     private val uiEventLogger: UiEventLogger,
 ) : SliderViewModel {
 
+    private val streamsAffectedByRing =
+        setOf(
+            AudioManager.STREAM_RING,
+            AudioManager.STREAM_NOTIFICATION,
+        )
     private val audioStream = audioStreamWrapper.audioStream
     private val iconsByStream =
         mapOf(
@@ -125,15 +130,42 @@ constructor(
         isEnabled: Boolean,
         ringerMode: RingerMode,
     ): State {
+        val label =
+            labelsByStream[audioStream]?.let(context::getString)
+                ?: error("No label for the stream: $audioStream")
         return State(
             value = volume.toFloat(),
             valueRange = volumeRange.first.toFloat()..volumeRange.last.toFloat(),
             icon = getIcon(ringerMode),
-            label = labelsByStream[audioStream]?.let(context::getString)
-                    ?: error("No label for the stream: $audioStream"),
+            label = label,
             disabledMessage = disabledTextByStream[audioStream]?.let(context::getString),
             isEnabled = isEnabled,
             a11yStep = volumeRange.step,
+            a11yClickDescription =
+                context.getString(
+                    if (isMuted) {
+                        R.string.volume_panel_hint_unmute
+                    } else {
+                        R.string.volume_panel_hint_mute
+                    },
+                    label,
+                ),
+            a11yStateDescription =
+                if (volume == volumeRange.first) {
+                    context.getString(
+                        if (audioStream.value in streamsAffectedByRing) {
+                            if (ringerMode.value == AudioManager.RINGER_MODE_VIBRATE) {
+                                R.string.volume_panel_hint_vibrate
+                            } else {
+                                R.string.volume_panel_hint_muted
+                            }
+                        } else {
+                            R.string.volume_panel_hint_muted
+                        }
+                    )
+                } else {
+                    null
+                },
             audioStreamModel = this,
             isMutable = audioVolumeInteractor.isAffectedByMute(audioStream),
         )
@@ -143,27 +175,14 @@ constructor(
         val isMutedOrNoVolume = isMuted || volume == minVolume
         val iconRes =
             if (isMutedOrNoVolume) {
-                when (audioStream.value) {
-                    AudioManager.STREAM_MUSIC -> R.drawable.ic_volume_off
-                    AudioManager.STREAM_BLUETOOTH_SCO -> R.drawable.ic_volume_off
-                    AudioManager.STREAM_VOICE_CALL -> R.drawable.ic_volume_off
-                    AudioManager.STREAM_RING ->
-                        if (ringerMode.value == AudioManager.RINGER_MODE_VIBRATE) {
-                            R.drawable.ic_volume_ringer_vibrate
-                        } else {
-                            R.drawable.ic_volume_off
-                        }
-                    AudioManager.STREAM_NOTIFICATION ->
-                        if (ringerMode.value == AudioManager.RINGER_MODE_VIBRATE) {
-                            R.drawable.ic_volume_ringer_vibrate
-                        } else {
-                            R.drawable.ic_volume_off
-                        }
-                    AudioManager.STREAM_ALARM -> R.drawable.ic_volume_off
-                    else -> {
-                        Log.wtf(TAG, "No icon for the stream: $audioStream")
+                if (audioStream.value in streamsAffectedByRing) {
+                    if (ringerMode.value == AudioManager.RINGER_MODE_VIBRATE) {
+                        R.drawable.ic_volume_ringer_vibrate
+                    } else {
                         R.drawable.ic_volume_off
                     }
+                } else {
+                    R.drawable.ic_volume_off
                 }
             } else {
                 iconsByStream[audioStream]
@@ -186,6 +205,8 @@ constructor(
         override val disabledMessage: String?,
         override val isEnabled: Boolean,
         override val a11yStep: Int,
+        override val a11yClickDescription: String?,
+        override val a11yStateDescription: String?,
         override val isMutable: Boolean,
         val audioStreamModel: AudioStreamModel,
     ) : SliderState

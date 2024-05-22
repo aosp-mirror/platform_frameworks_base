@@ -17,12 +17,12 @@
 package com.android.systemui.bluetooth.qsdialog
 
 import android.bluetooth.BluetoothAdapter
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
@@ -30,6 +30,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.flags.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.FakeSharedPreferences
@@ -63,6 +64,7 @@ import org.mockito.junit.MockitoRule
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
+@EnableFlags(Flags.FLAG_BLUETOOTH_QS_TILE_DIALOG_AUTO_ON_TOGGLE)
 class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
@@ -76,6 +78,8 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     @Mock private lateinit var audioSharingInteractor: AudioSharingInteractor
 
     @Mock private lateinit var deviceItemInteractor: DeviceItemInteractor
+
+    @Mock private lateinit var deviceItemActionInteractor: DeviceItemActionInteractor
 
     @Mock private lateinit var activityStarter: ActivityStarter
 
@@ -100,6 +104,8 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     @Mock private lateinit var bluetoothTileDialogDelegate: BluetoothTileDialogDelegate
 
     @Mock private lateinit var sysuiDialog: SystemUIDialog
+    @Mock private lateinit var expandable: Expandable
+    @Mock private lateinit var controller: DialogTransitionAnimator.Controller
 
     private val sharedPreferences = FakeSharedPreferences()
 
@@ -109,13 +115,13 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_BLUETOOTH_QS_TILE_DIALOG_AUTO_ON_TOGGLE)
         scheduler = TestCoroutineScheduler()
         dispatcher = UnconfinedTestDispatcher(scheduler)
         testScope = TestScope(dispatcher)
         bluetoothTileDialogViewModel =
             BluetoothTileDialogViewModel(
                 deviceItemInteractor,
+                deviceItemActionInteractor,
                 BluetoothStateInteractor(
                     localBluetoothManager,
                     bluetoothTileDialogLogger,
@@ -157,6 +163,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
             .thenReturn(getMutableStateFlow(false))
         whenever(audioSharingInteractor.audioSharingButtonStateUpdate)
             .thenReturn(getMutableStateFlow(AudioSharingButtonState.Gone))
+        whenever(expandable.dialogTransitionController(any())).thenReturn(controller)
     }
 
     @Test
@@ -164,16 +171,16 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         testScope.runTest {
             bluetoothTileDialogViewModel.showDialog(null)
 
-            verify(mDialogTransitionAnimator, never()).showFromView(any(), any(), any(), any())
+            verify(mDialogTransitionAnimator, never()).show(any(), any(), any())
         }
     }
 
     @Test
     fun testShowDialog_animated() {
         testScope.runTest {
-            bluetoothTileDialogViewModel.showDialog(LinearLayout(mContext))
+            bluetoothTileDialogViewModel.showDialog(expandable)
 
-            verify(mDialogTransitionAnimator).showFromView(any(), any(), nullable(), anyBoolean())
+            verify(mDialogTransitionAnimator).show(any(), any(), anyBoolean())
         }
     }
 
@@ -181,10 +188,9 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     fun testShowDialog_animated_callInBackgroundThread() {
         testScope.runTest {
             backgroundExecutor.execute {
-                bluetoothTileDialogViewModel.showDialog(LinearLayout(mContext))
+                bluetoothTileDialogViewModel.showDialog(expandable)
 
-                verify(mDialogTransitionAnimator)
-                    .showFromView(any(), any(), nullable(), anyBoolean())
+                verify(mDialogTransitionAnimator).show(any(), any(), anyBoolean())
             }
         }
     }

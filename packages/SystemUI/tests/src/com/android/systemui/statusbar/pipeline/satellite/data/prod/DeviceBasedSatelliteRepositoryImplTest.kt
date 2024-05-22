@@ -156,7 +156,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
                     verify(satelliteManager).registerForNtnSignalStrengthChanged(any(), capture())
                 }
 
-            assertThat(latest).isNull()
+            assertThat(latest).isEqualTo(0)
 
             callback.onNtnSignalStrengthChanged(NtnSignalStrength(1))
             assertThat(latest).isEqualTo(1)

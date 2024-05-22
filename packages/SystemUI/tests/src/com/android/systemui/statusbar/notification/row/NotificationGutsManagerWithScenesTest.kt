@@ -31,11 +31,11 @@ import android.os.fakeExecutorHandler
 import android.os.userManager
 import android.provider.Settings
 import android.service.notification.NotificationListenerService.Ranking
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.util.ArraySet
 import android.view.View
 import android.view.accessibility.accessibilityManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.internal.logging.MetricsLogger
@@ -91,7 +91,7 @@ import org.mockito.invocation.InvocationOnMock
 
 /** Tests for [NotificationGutsManager] with the scene container enabled. */
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 @EnableSceneContainer
 class NotificationGutsManagerWithScenesTest : SysuiTestCase() {

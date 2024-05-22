@@ -34,6 +34,7 @@ import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +43,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.sync.Mutex
 
 /**
  * The source of truth for all keyguard transitions.
@@ -89,6 +91,12 @@ interface KeyguardTransitionRepository {
     suspend fun startTransition(info: TransitionInfo): UUID?
 
     /**
+     * Emits STARTED and FINISHED transition steps to the given state. This is used during boot to
+     * seed the repository with the appropriate initial state.
+     */
+    suspend fun emitInitialStepsFromOff(to: KeyguardState)
+
+    /**
      * Allows manual control of a transition. When calling [startTransition], the consumer must pass
      * in a null animator. In return, it will get a unique [UUID] that will be validated to allow
      * further updates.
@@ -123,12 +131,13 @@ constructor(
     private var lastStep: TransitionStep = TransitionStep()
     private var lastAnimator: ValueAnimator? = null
 
+    private val _currentTransitionMutex = Mutex()
     private val _currentTransitionInfo: MutableStateFlow<TransitionInfo> =
         MutableStateFlow(
             TransitionInfo(
                 ownerName = "",
                 from = KeyguardState.OFF,
-                to = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.OFF,
                 animator = null
             )
         )
@@ -140,17 +149,40 @@ constructor(
      */
     private var updateTransitionId: UUID? = null
 
+    // Only used in a test environment
+    var forceDelayForRaceConditionTest = false
+
     init {
-        // Seed with transitions signaling a boot into lockscreen state. If updating this, please
-        // also update FakeKeyguardTransitionRepository.
-        initialTransitionSteps.forEach(::emitTransition)
+        // Start with a FINISHED transition in OFF. KeyguardBootInteractor will transition from OFF
+        // to either GONE or LOCKSCREEN once we're booted up and can determine which state we should
+        // start in.
+        emitTransition(
+            TransitionStep(
+                KeyguardState.OFF,
+                KeyguardState.OFF,
+                1f,
+                TransitionState.FINISHED,
+            )
+        )
     }
 
     override suspend fun startTransition(info: TransitionInfo): UUID? {
         _currentTransitionInfo.value = info
+        Log.d(TAG, "(Internal) Setting current transition info: $info")
+
+        // There is no fairness guarantee with 'withContext', which means that transitions could
+        // be processed out of order. Use a Mutex to guarantee ordering.
+        _currentTransitionMutex.lock()
+
+        // Only used in a test environment
+        if (forceDelayForRaceConditionTest) {
+            delay(50L)
+        }
 
         // Animators must be started on the main thread.
         return withContext("$TAG#startTransition", mainDispatcher) {
+            _currentTransitionMutex.unlock()
+
             if (lastStep.from == info.from && lastStep.to == info.to) {
                 Log.i(TAG, "Duplicate call to start the transition, rejecting: $info")
                 return@withContext null
@@ -233,7 +265,7 @@ constructor(
         state: TransitionState
     ) {
         if (updateTransitionId != transitionId) {
-            Log.wtf(TAG, "Attempting to update with old/invalid transitionId: $transitionId")
+            Log.w(TAG, "Attempting to update with old/invalid transitionId: $transitionId")
             return
         }
 
@@ -249,6 +281,36 @@ constructor(
         logAndTrace(nextStep, isManual)
         _transitions.tryEmit(nextStep)
         lastStep = nextStep
+    }
+
+    override suspend fun emitInitialStepsFromOff(to: KeyguardState) {
+        _currentTransitionInfo.value =
+            TransitionInfo(
+                ownerName = "KeyguardTransitionRepository(boot)",
+                from = KeyguardState.OFF,
+                to = to,
+                animator = null
+            )
+
+        emitTransition(
+            TransitionStep(
+                KeyguardState.OFF,
+                to,
+                0f,
+                TransitionState.STARTED,
+                ownerName = "KeyguardTransitionRepository(boot)",
+            )
+        )
+
+        emitTransition(
+            TransitionStep(
+                KeyguardState.OFF,
+                to,
+                1f,
+                TransitionState.FINISHED,
+                ownerName = "KeyguardTransitionRepository(boot)",
+            ),
+        )
     }
 
     private fun logAndTrace(step: TransitionStep, isManual: Boolean) {
@@ -271,31 +333,5 @@ constructor(
 
     companion object {
         private const val TAG = "KeyguardTransitionRepository"
-
-        /**
-         * Transition steps to seed the repository with, so that all of the transition interactor
-         * flows emit reasonable initial values.
-         */
-        val initialTransitionSteps: List<TransitionStep> =
-            listOf(
-                TransitionStep(
-                    KeyguardState.OFF,
-                    KeyguardState.OFF,
-                    1f,
-                    TransitionState.FINISHED,
-                ),
-                TransitionStep(
-                    KeyguardState.OFF,
-                    KeyguardState.LOCKSCREEN,
-                    0f,
-                    TransitionState.STARTED,
-                ),
-                TransitionStep(
-                    KeyguardState.OFF,
-                    KeyguardState.LOCKSCREEN,
-                    1f,
-                    TransitionState.FINISHED,
-                ),
-            )
     }
 }

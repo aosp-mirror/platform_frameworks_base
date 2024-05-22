@@ -130,10 +130,6 @@ constructor(
     val maxAlpha: Flow<Float> =
         stackAppearanceInteractor.alphaForBrightnessMirror.dumpValue("maxAlpha")
 
-    /** The y-coordinate in px of top of the contents of the notification stack. */
-    val stackTop: Flow<Float> = stackAppearanceInteractor.stackTop.dumpValue("stackTop")
-    /** The y-coordinate in px of bottom of the contents of the notification stack. */
-    val stackBottom: Flow<Float> = stackAppearanceInteractor.stackBottom.dumpValue("stackBottom")
     /**
      * Whether the notification stack is scrolled to the top; i.e., it cannot be scrolled down any
      * further.
@@ -145,8 +141,12 @@ constructor(
 
     /** Receives the amount (px) that the stack should scroll due to internal expansion. */
     val syntheticScrollConsumer: (Float) -> Unit = stackAppearanceInteractor::setSyntheticScroll
-    /** Receives the height of the contents of the notification stack. */
-    val stackHeightConsumer: (Float) -> Unit = stackAppearanceInteractor::setStackHeight
+    /**
+     * Receives whether the current touch gesture is overscroll as it has already been consumed by
+     * the stack.
+     */
+    val currentGestureOverscrollConsumer: (Boolean) -> Unit =
+        stackAppearanceInteractor::setCurrentGestureOverscroll
     /** Receives the height of the heads up notification. */
     val headsUpHeightConsumer: (Float) -> Unit = stackAppearanceInteractor::setHeadsUpHeight
 

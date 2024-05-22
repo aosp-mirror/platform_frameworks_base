@@ -30,6 +30,7 @@ import com.android.app.tracing.coroutines.launch
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.qs.tileimpl.QSTileViewImpl
 import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.flow.filterNotNull
 
 object QSLongPressEffectViewBinder {
 
@@ -49,63 +50,55 @@ object QSLongPressEffectViewBinder {
                 launch({ "${tileSpec ?: "unknownTileSpec"}#LongPressEffect#action" }) {
                     var effectAnimator: ValueAnimator? = null
 
-                    qsLongPressEffect.actionType.collect { action ->
-                        action?.let {
-                            when (it) {
-                                QSLongPressEffect.ActionType.CLICK -> {
-                                    tile.performClick()
-                                    qsLongPressEffect.clearActionType()
-                                }
-                                QSLongPressEffect.ActionType.LONG_PRESS -> {
-                                    tile.prepareForLaunch()
-                                    tile.performLongClick()
-                                    qsLongPressEffect.clearActionType()
-                                }
-                                QSLongPressEffect.ActionType.RESET_AND_LONG_PRESS -> {
-                                    tile.resetLongPressEffectProperties()
-                                    tile.performLongClick()
-                                    qsLongPressEffect.clearActionType()
-                                }
-                                QSLongPressEffect.ActionType.START_ANIMATOR -> {
-                                    if (effectAnimator?.isRunning != true) {
-                                        effectAnimator =
-                                            ValueAnimator.ofFloat(0f, 1f).apply {
-                                                this.duration =
-                                                    qsLongPressEffect.effectDuration.toLong()
-                                                interpolator = AccelerateDecelerateInterpolator()
+                    qsLongPressEffect.actionType.filterNotNull().collect { action ->
+                        when (action) {
+                            QSLongPressEffect.ActionType.CLICK -> {
+                                tile.performClick()
+                                qsLongPressEffect.clearActionType()
+                            }
+                            QSLongPressEffect.ActionType.LONG_PRESS -> {
+                                tile.prepareForLaunch()
+                                tile.performLongClick()
+                                qsLongPressEffect.clearActionType()
+                            }
+                            QSLongPressEffect.ActionType.RESET_AND_LONG_PRESS -> {
+                                tile.resetLongPressEffectProperties()
+                                tile.performLongClick()
+                                qsLongPressEffect.clearActionType()
+                            }
+                            QSLongPressEffect.ActionType.START_ANIMATOR -> {
+                                if (effectAnimator?.isRunning != true) {
+                                    effectAnimator =
+                                        ValueAnimator.ofFloat(0f, 1f).apply {
+                                            this.duration =
+                                                qsLongPressEffect.effectDuration.toLong()
+                                            interpolator = AccelerateDecelerateInterpolator()
 
-                                                doOnStart {
-                                                    qsLongPressEffect.handleAnimationStart()
+                                            doOnStart { qsLongPressEffect.handleAnimationStart() }
+                                            addUpdateListener {
+                                                val value = animatedValue as Float
+                                                if (value == 0f) {
+                                                    tile.bringToFront()
+                                                } else {
+                                                    tile.updateLongPressEffectProperties(value)
                                                 }
-                                                addUpdateListener {
-                                                    val value = animatedValue as Float
-                                                    if (value == 0f) {
-                                                        tile.bringToFront()
-                                                    } else {
-                                                        tile.updateLongPressEffectProperties(value)
-                                                    }
-                                                }
-                                                doOnEnd {
-                                                    qsLongPressEffect.handleAnimationComplete()
-                                                }
-                                                doOnCancel {
-                                                    qsLongPressEffect.handleAnimationCancel()
-                                                }
-                                                start()
                                             }
-                                    }
+                                            doOnEnd { qsLongPressEffect.handleAnimationComplete() }
+                                            doOnCancel { qsLongPressEffect.handleAnimationCancel() }
+                                            start()
+                                        }
                                 }
-                                QSLongPressEffect.ActionType.REVERSE_ANIMATOR -> {
-                                    effectAnimator?.let {
-                                        val pausedProgress = it.animatedFraction
-                                        qsLongPressEffect.playReverseHaptics(pausedProgress)
-                                        it.reverse()
-                                    }
+                            }
+                            QSLongPressEffect.ActionType.REVERSE_ANIMATOR -> {
+                                effectAnimator?.let {
+                                    val pausedProgress = it.animatedFraction
+                                    qsLongPressEffect.playReverseHaptics(pausedProgress)
+                                    it.reverse()
                                 }
-                                QSLongPressEffect.ActionType.CANCEL_ANIMATOR -> {
-                                    tile.resetLongPressEffectProperties()
-                                    effectAnimator?.cancel()
-                                }
+                            }
+                            QSLongPressEffect.ActionType.CANCEL_ANIMATOR -> {
+                                tile.resetLongPressEffectProperties()
+                                effectAnimator?.cancel()
                             }
                         }
                     }

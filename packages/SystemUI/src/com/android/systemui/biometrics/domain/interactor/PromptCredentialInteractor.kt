@@ -16,10 +16,8 @@
 
 package com.android.systemui.biometrics.domain.interactor
 
-import android.hardware.biometrics.PromptInfo
 import com.android.internal.widget.LockPatternView
 import com.android.internal.widget.LockscreenCredential
-import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.data.repository.PromptRepository
 import com.android.systemui.biometrics.domain.model.BiometricOperationInfo
 import com.android.systemui.biometrics.domain.model.BiometricPromptRequest
@@ -41,12 +39,6 @@ import kotlinx.coroutines.withContext
 /**
  * Business logic for BiometricPrompt's CredentialViews, which primarily includes checking a users
  * PIN, pattern, or password credential instead of a biometric.
- *
- * This is used to cache the calling app's options that were given to the underlying authenticate
- * APIs and should be set before any UI is shown to the user.
- *
- * There can be at most one request active at a given time. Use [resetPrompt] when no request is
- * active to clear the cache.
  *
  * Views that use any biometric should use [PromptSelectorInteractor] instead.
  */
@@ -74,13 +66,13 @@ constructor(
                 biometricPromptRepository.promptInfo,
                 biometricPromptRepository.challenge,
                 biometricPromptRepository.userId,
-                biometricPromptRepository.kind
-            ) { promptInfo, challenge, userId, kind ->
+                biometricPromptRepository.promptKind
+            ) { promptInfo, challenge, userId, promptKind ->
                 if (promptInfo == null || userId == null || challenge == null) {
                     return@combine null
                 }
 
-                when (kind) {
+                when (promptKind) {
                     PromptKind.Pin ->
                         BiometricPromptRequest.Credential.Pin(
                             info = promptInfo,
@@ -136,28 +128,6 @@ constructor(
     /** Most recent error due to [verifyCredential]. */
     private val _verificationError = MutableStateFlow<CredentialStatus.Fail?>(null)
     val verificationError: Flow<CredentialStatus.Fail?> = _verificationError.asStateFlow()
-
-    /** Update the current request to use credential-based authentication instead of biometrics. */
-    fun useCredentialsForAuthentication(
-        promptInfo: PromptInfo,
-        @Utils.CredentialType kind: Int,
-        userId: Int,
-        challenge: Long,
-        opPackageName: String,
-    ) {
-        biometricPromptRepository.setPrompt(
-            promptInfo,
-            userId,
-            challenge,
-            kind.asBiometricPromptCredential(),
-            opPackageName,
-        )
-    }
-
-    /** Unset the current authentication request. */
-    fun resetPrompt() {
-        biometricPromptRepository.unsetPrompt()
-    }
 
     /**
      * Check a credential and return the attestation token (HAT) if successful.
@@ -231,13 +201,3 @@ constructor(
         _verificationError.value = null
     }
 }
-
-// TODO(b/251476085): remove along with Utils.CredentialType
-/** Convert a [Utils.CredentialType] to the corresponding [PromptKind]. */
-private fun @receiver:Utils.CredentialType Int.asBiometricPromptCredential(): PromptKind =
-    when (this) {
-        Utils.CREDENTIAL_PIN -> PromptKind.Pin
-        Utils.CREDENTIAL_PASSWORD -> PromptKind.Password
-        Utils.CREDENTIAL_PATTERN -> PromptKind.Pattern
-        else -> PromptKind.Biometric()
-    }

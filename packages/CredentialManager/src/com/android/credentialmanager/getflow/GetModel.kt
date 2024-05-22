@@ -292,12 +292,12 @@ private fun toGetScreenState(
         providerDisplayInfo.remoteEntry == null &&
         providerDisplayInfo.authenticationEntryList.all { it.isUnlockedAndEmpty })
         GetScreenState.UNLOCKED_AUTH_ENTRIES_ONLY
+    else if (isRequestForAllOptions)
+        GetScreenState.ALL_SIGN_IN_OPTIONS_ONLY
     else if (providerDisplayInfo.sortedUserNameToCredentialEntryList.isEmpty() &&
         providerDisplayInfo.authenticationEntryList.isEmpty() &&
         providerDisplayInfo.remoteEntry != null)
         GetScreenState.REMOTE_ONLY
-    else if (isRequestForAllOptions)
-        GetScreenState.ALL_SIGN_IN_OPTIONS_ONLY
     else if (isBiometricFlow(providerDisplayInfo, isFlowAutoSelectable(providerDisplayInfo)))
         GetScreenState.BIOMETRIC_SELECTION
     else GetScreenState.PRIMARY_SELECTION

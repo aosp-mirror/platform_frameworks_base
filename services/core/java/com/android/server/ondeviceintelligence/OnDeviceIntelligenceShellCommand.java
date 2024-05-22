@@ -17,6 +17,7 @@
 package com.android.server.ondeviceintelligence;
 
 import android.annotation.NonNull;
+import android.os.Binder;
 import android.os.ShellCommand;
 
 import java.io.PrintWriter;
@@ -43,6 +44,10 @@ final class OnDeviceIntelligenceShellCommand extends ShellCommand {
                 return setTemporaryServices();
             case "get-services":
                 return getConfiguredServices();
+            case "set-model-broadcasts":
+                return setBroadcastKeys();
+            case "set-deviceconfig-namespace":
+                return setDeviceConfigNamespace();
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -62,14 +67,26 @@ final class OnDeviceIntelligenceShellCommand extends ShellCommand {
         pw.println("    To reset, call without any arguments.");
 
         pw.println("  get-services To get the names of services that are currently being used.");
+        pw.println(
+                "  set-model-broadcasts [ModelLoadedBroadcastKey] [ModelUnloadedBroadcastKey] "
+                        + "[ReceiverPackageName] "
+                        + "[DURATION] To set the names of broadcast intent keys that are to be "
+                        + "emitted for cts tests.");
+        pw.println(
+                "  set-deviceconfig-namespace [DeviceConfigNamespace] "
+                        + "[DURATION] To set the device config namespace "
+                        + "to use for cts tests.");
     }
 
     private int setTemporaryServices() {
         final PrintWriter out = getOutPrintWriter();
         final String intelligenceServiceName = getNextArg();
         final String inferenceServiceName = getNextArg();
+
         if (getRemainingArgsCount() == 0 && intelligenceServiceName == null
                 && inferenceServiceName == null) {
+            OnDeviceIntelligenceManagerService.enforceShellOnly(Binder.getCallingUid(),
+                    "resetTemporaryServices");
             mService.resetTemporaryServices();
             out.println("OnDeviceIntelligenceManagerService temporary reset. ");
             return 0;
@@ -79,7 +96,8 @@ final class OnDeviceIntelligenceShellCommand extends ShellCommand {
         Objects.requireNonNull(inferenceServiceName);
         final int duration = Integer.parseInt(getNextArgRequired());
         mService.setTemporaryServices(
-                new String[]{intelligenceServiceName, inferenceServiceName}, duration);
+                new String[]{intelligenceServiceName, inferenceServiceName},
+                duration);
         out.println("OnDeviceIntelligenceService temporarily set to " + intelligenceServiceName
                 + " \n and \n OnDeviceTrustedInferenceService set to " + inferenceServiceName
                 + " for " + duration + "ms");
@@ -93,4 +111,34 @@ final class OnDeviceIntelligenceShellCommand extends ShellCommand {
                 + " \n and \n OnDeviceTrustedInferenceService set to : " + services[1]);
         return 0;
     }
+
+    private int setBroadcastKeys() {
+        final PrintWriter out = getOutPrintWriter();
+        final String modelLoadedKey = getNextArgRequired();
+        final String modelUnloadedKey = getNextArgRequired();
+        final String receiverPackageName = getNextArg();
+
+        final int duration = Integer.parseInt(getNextArgRequired());
+        mService.setModelBroadcastKeys(
+                new String[]{modelLoadedKey, modelUnloadedKey}, receiverPackageName, duration);
+        out.println("OnDeviceIntelligence Model Loading broadcast keys temporarily set to "
+                + modelLoadedKey
+                + " \n and \n OnDeviceTrustedInferenceService set to " + modelUnloadedKey
+                + "\n and Package name set to : " + receiverPackageName
+                + " for " + duration + "ms");
+        return 0;
+    }
+
+    private int setDeviceConfigNamespace() {
+        final PrintWriter out = getOutPrintWriter();
+        final String configNamespace = getNextArg();
+
+        final int duration = Integer.parseInt(getNextArgRequired());
+        mService.setTemporaryDeviceConfigNamespace(configNamespace, duration);
+        out.println("OnDeviceIntelligence DeviceConfig Namespace temporarily set to "
+                + configNamespace
+                + " for " + duration + "ms");
+        return 0;
+    }
+
 }

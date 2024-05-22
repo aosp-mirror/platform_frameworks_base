@@ -159,7 +159,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Peru"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Laiteparin muodostaminen mahdollistaa yhteystietojen ja soittohistorian käyttämisen yhteyden aikana."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Laiteparin muodostaminen laitteeseen <xliff:g id="DEVICE_NAME">%1$s</xliff:g> epäonnistui."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Laiteparia (<xliff:g id="DEVICE_NAME">%1$s</xliff:g>) ei voitu muodostaa, koska PIN tai avain oli väärä."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Laiteparia (<xliff:g id="DEVICE_NAME">%1$s</xliff:g>) ei voitu muodostaa, koska PIN tai avainkoodi oli väärä."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Ei yhteyttä laitteeseen <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Laite <xliff:g id="DEVICE_NAME">%1$s</xliff:g> torjui laitepariyhteyden."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Tietokone"</string>
@@ -593,7 +593,7 @@
     <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Sisäiset kaiuttimet"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Yhteysvirhe. Sammuta laite ja käynnistä se uudelleen."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Langallinen äänilaite"</string>
-    <string name="help_label" msgid="3528360748637781274">"Ohje ja palaute"</string>
+    <string name="help_label" msgid="3528360748637781274">"Ohjeet ja palaute"</string>
     <string name="storage_category" msgid="2287342585424631813">"Tallennustila"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Jaettu data"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Katso ja muokkaa jaettua dataa"</string>

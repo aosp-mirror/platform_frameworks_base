@@ -21,7 +21,9 @@ import static com.android.server.hdmi.ResendCecCommandAction.SEND_COMMAND_RETRY_
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
@@ -70,6 +72,11 @@ public class ResendCecCommandActionPlaybackTest {
 
             @Override
             protected void writeStringSystemProperty(String key, String value) {
+                // do nothing
+            }
+
+            @Override
+            protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
                 // do nothing
             }
         };

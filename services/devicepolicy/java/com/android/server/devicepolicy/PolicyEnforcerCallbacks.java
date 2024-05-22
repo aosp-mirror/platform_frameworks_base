@@ -37,11 +37,13 @@ import android.app.admin.flags.Flags;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -172,6 +174,29 @@ final class PolicyEnforcerCallbacks {
         return true;
     }
 
+
+    /**
+     * Application restrictions are stored and retrieved from DPMS, so no enforcing (aka pushing
+     * it to UMS) is required. Only need to send broadcast to the target user here as we rely on
+     * the inheritable policy propagation logic in PolicyEngine to apply this policy to multiple
+     * profiles. The broadcast should only be sent when an application restriction is set, so we
+     * rely on the POLICY_FLAG_SKIP_ENFORCEMENT_IF_UNCHANGED flag so DPE only invokes this callback
+     * when the policy is set, and not during system boot or other situations.
+     */
+    static boolean setApplicationRestrictions(Bundle bundle, Context context, Integer userId,
+            PolicyKey policyKey) {
+        Binder.withCleanCallingIdentity(() -> {
+            PackagePolicyKey key = (PackagePolicyKey) policyKey;
+            String packageName = key.getPackageName();
+            Objects.requireNonNull(packageName);
+            Intent changeIntent = new Intent(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
+            changeIntent.setPackage(packageName);
+            changeIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            context.sendBroadcastAsUser(changeIntent, UserHandle.of(userId));
+        });
+        return true;
+    }
+
     private static class BlockingCallback {
         private final CountDownLatch mLatch = new CountDownLatch(1);
         private final AtomicReference<Boolean> mValue = new AtomicReference<>();
@@ -196,19 +221,27 @@ final class PolicyEnforcerCallbacks {
         Binder.withCleanCallingIdentity(() -> {
             PackageManagerInternal pmi =
                     LocalServices.getService(PackageManagerInternal.class);
+            AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
+
             pmi.setOwnerProtectedPackages(userId,
                     packages == null ? null : packages.stream().toList());
             LocalServices.getService(UsageStatsManagerInternal.class)
                     .setAdminProtectedPackages(
                             packages == null ? null : new ArraySet<>(packages), userId);
 
-            if (Flags.disallowUserControlBgUsageFix()) {
-                if (packages == null) {
-                    return;
+            if (packages == null || packages.isEmpty()) {
+                return;
+            }
+
+            for (int user : resolveUsers(userId)) {
+                if (Flags.disallowUserControlBgUsageFix()) {
+                    setBgUsageAppOp(packages, pmi, user, appOpsManager);
                 }
-                final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
-                resolveUsers(userId).forEach(
-                        user -> setBgUsageAppOp(packages, pmi, user, appOpsManager));
+                if (Flags.disallowUserControlStoppedStateFix()) {
+                    for (String packageName : packages) {
+                        pmi.setPackageStoppedState(packageName, false, user);
+                    }
+                }
             }
         });
         return true;
@@ -375,6 +408,7 @@ final class PolicyEnforcerCallbacks {
     private static void suspendPersonalAppsInPackageManager(Context context, int userId) {
         final String[] appsToSuspend = PersonalAppsSuspensionHelper.forUser(context, userId)
                 .getPersonalAppsForSuspension();
+        Slogf.i(LOG_TAG, "Suspending personal apps: %s", String.join(",", appsToSuspend));
         final String[] failedApps = LocalServices.getService(PackageManagerInternal.class)
                 .setPackagesSuspendedByAdmin(userId, appsToSuspend, true);
         if (!ArrayUtils.isEmpty(failedApps)) {

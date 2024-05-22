@@ -32,6 +32,7 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.plugins.qs.QSFactory
+import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.footer.domain.interactor.FooterActionsInteractorImpl
 import com.android.systemui.qs.footer.foregroundServicesRepository
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
@@ -48,7 +49,7 @@ val Kosmos.qsEventLogger: QsEventLoggerFake by Fixture {
     QsEventLoggerFake(uiEventLoggerFake, instanceIdSequenceFake)
 }
 
-var Kosmos.qsTileFactory by Fixture<QSFactory>()
+var Kosmos.qsTileFactory by Fixture<QSFactory> { FakeQSFactory(::tileCreator) }
 
 val Kosmos.fgsManagerController by Fixture { FakeFgsManagerController() }
 
@@ -97,4 +98,8 @@ val Kosmos.footerActionsViewModelFactory by Fixture {
         activityStarter,
         showPowerButton = true,
     )
+}
+
+private fun tileCreator(spec: String): QSTile {
+    return FakeQSTile(0).apply { tileSpec = spec }
 }

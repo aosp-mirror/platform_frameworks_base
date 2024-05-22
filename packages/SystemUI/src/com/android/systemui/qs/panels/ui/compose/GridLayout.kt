@@ -18,12 +18,22 @@ package com.android.systemui.qs.panels.ui.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
+import com.android.systemui.qs.pipeline.shared.TileSpec
 
 interface GridLayout {
     @Composable
     fun TileGrid(
         tiles: List<TileViewModel>,
         modifier: Modifier,
+    )
+
+    @Composable
+    fun EditTileGrid(
+        tiles: List<EditTileViewModel>,
+        modifier: Modifier,
+        onAddTile: (TileSpec, Int) -> Unit,
+        onRemoveTile: (TileSpec) -> Unit,
     )
 }

@@ -285,6 +285,8 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Голос. підказки"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Блокування"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
+    <skip />
     <string name="notification_hidden_text" msgid="2835519769868187223">"Нове сповіщення"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Фізична клавіатура"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Безпека"</string>
@@ -2146,10 +2148,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Сповіщення про програму"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Режим енергозбереження ввімкнено"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Заряд використовується економно, щоб подовжити час роботи акумулятора"</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"Режим енергозбереження ввімкнено"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"Увімкнено режим енергозбереження, щоб збільшити час роботи акумулятора"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Режим енергозбереження"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Режим енергозбереження вимкнено."</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Телефон має достатньо заряду акумулятора. Функції вже не обмежено."</string>
@@ -2405,14 +2405,10 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Робочий профіль 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Тестовий профіль"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Спільний профіль"</string>
-    <!-- no translation found for accessibility_label_managed_profile (3366526886209832641) -->
-    <skip />
-    <!-- no translation found for accessibility_label_private_profile (1436459319135548969) -->
-    <skip />
-    <!-- no translation found for accessibility_label_clone_profile (7579118375042398784) -->
-    <skip />
-    <!-- no translation found for accessibility_label_communal_profile (1437173163111334791) -->
-    <skip />
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"Робочий профіль"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Приватний простір"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Копія профілю"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Спільний профіль"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Чутливий вміст сповіщення приховано"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"З міркувань безпеки вміст додатка приховано під час показу екрана"</string>
@@ -2421,4 +2417,15 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Відкрийте Повідомлення"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Як це працює"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Обробка…"</string>
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Налаштуйте розблокування відбитком пальця повторно"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
+    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"Відбиток \"<xliff:g id="FINGERPRINT">%s</xliff:g>\" працював неналежним чином, і його видалено. Налаштуйте його ще раз, щоб розблоковувати телефон за допомогою відбитка пальця."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"Відбитки \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" і \"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\" працювали неналежним чином, і їх видалено. Налаштуйте їх ще раз, щоб розблоковувати телефон за допомогою відбитка пальця."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"Налаштуйте фейс-контроль повторно"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Модель обличчя працювала неналежним чином, і її видалено. Налаштуйте її ще раз, щоб розблоковувати телефон за допомогою фейс-контролю."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Налаштувати"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Не зараз"</string>
 </resources>

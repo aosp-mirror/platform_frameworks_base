@@ -19,12 +19,13 @@ package com.android.systemui.keyboard
 
 import com.android.systemui.keyboard.data.repository.KeyboardRepository
 import com.android.systemui.keyboard.data.repository.KeyboardRepositoryImpl
+import com.android.systemui.keyboard.shortcut.ShortcutHelperModule
 import com.android.systemui.keyboard.stickykeys.data.repository.StickyKeysRepository
 import com.android.systemui.keyboard.stickykeys.data.repository.StickyKeysRepositoryImpl
 import dagger.Binds
 import dagger.Module
 
-@Module
+@Module(includes = [ShortcutHelperModule::class])
 abstract class KeyboardModule {
 
     @Binds

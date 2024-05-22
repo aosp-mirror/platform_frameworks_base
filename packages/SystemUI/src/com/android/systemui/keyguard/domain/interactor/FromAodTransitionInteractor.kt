@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.shared.model.BiometricUnlockMode.Companion.
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.Utils.Companion.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -185,6 +186,7 @@ constructor(
      * PRIMARY_BOUNCER.
      */
     private fun listenForAodToPrimaryBouncer() {
+        if (SceneContainerFlag.isEnabled) return
         scope.launch("$TAG#listenForAodToPrimaryBouncer") {
             keyguardInteractor.primaryBouncerShowing
                 .filterRelevantKeyguardStateAnd { primaryBouncerShowing -> primaryBouncerShowing }

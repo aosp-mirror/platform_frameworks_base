@@ -746,6 +746,20 @@
                     minOccurs="0" maxOccurs="1">
             <xs:annotation name="final"/>
         </xs:element>
+        <!-- list of supported modes for low power. Each point corresponds to one mode.
+          Mode format is : first = refreshRate, second = vsyncRate. E.g. :
+          <lowPowerSupportedModes>
+              <point>
+                  <first>60</first>   // refreshRate
+                  <second>60</second> //vsyncRate
+              </point>
+              ....
+          </lowPowerSupportedModes>
+           -->
+        <xs:element type="nonNegativeFloatToFloatMap" name="lowPowerSupportedModes" minOccurs="0">
+            <xs:annotation name="nullable"/>
+            <xs:annotation name="final"/>
+        </xs:element>
     </xs:complexType>
 
     <xs:complexType name="refreshRateZoneProfiles">

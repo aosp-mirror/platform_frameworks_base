@@ -32,12 +32,11 @@ import com.android.compose.animation.scene.NestedScrollBehavior.EdgeWithPreview
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
-import com.android.compose.animation.scene.TransitionState.Idle
 import com.android.compose.animation.scene.TransitionState.Transition
+import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.MonotonicClockTestScope
 import com.android.compose.test.runMonotonicClockTest
 import com.google.common.truth.Truth.assertThat
-import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
@@ -103,12 +102,16 @@ class DraggableHandlerTest {
         val draggableHandler = layoutImpl.draggableHandler(Orientation.Vertical)
         val horizontalDraggableHandler = layoutImpl.draggableHandler(Orientation.Horizontal)
 
-        fun nestedScrollConnection(nestedScrollBehavior: NestedScrollBehavior) =
+        fun nestedScrollConnection(
+            nestedScrollBehavior: NestedScrollBehavior,
+            isExternalOverscrollGesture: Boolean = false
+        ) =
             NestedScrollHandlerImpl(
                     layoutImpl = layoutImpl,
                     orientation = draggableHandler.orientation,
                     topOrLeftBehavior = nestedScrollBehavior,
                     bottomOrRightBehavior = nestedScrollBehavior,
+                    isExternalOverscrollGesture = { isExternalOverscrollGesture }
                 )
                 .connection
 
@@ -145,10 +148,8 @@ class DraggableHandlerTest {
         }
 
         fun assertIdle(currentScene: SceneKey) {
-            assertThat(transitionState).isInstanceOf(Idle::class.java)
-            assertWithMessage("currentScene does not match")
-                .that(transitionState.currentScene)
-                .isEqualTo(currentScene)
+            assertThat(transitionState).isIdle()
+            assertThat(transitionState).hasCurrentScene(currentScene)
         }
 
         fun assertTransition(
@@ -158,34 +159,12 @@ class DraggableHandlerTest {
             progress: Float? = null,
             isUserInputOngoing: Boolean? = null
         ) {
-            assertThat(transitionState).isInstanceOf(Transition::class.java)
-            val transition = transitionState as Transition
-
-            if (currentScene != null)
-                assertWithMessage("currentScene does not match")
-                    .that(transition.currentScene)
-                    .isEqualTo(currentScene)
-
-            if (fromScene != null)
-                assertWithMessage("fromScene does not match")
-                    .that(transition.fromScene)
-                    .isEqualTo(fromScene)
-
-            if (toScene != null)
-                assertWithMessage("toScene does not match")
-                    .that(transition.toScene)
-                    .isEqualTo(toScene)
-
-            if (progress != null)
-                assertWithMessage("progress does not match")
-                    .that(transition.progress)
-                    .isWithin(0f) // returns true when comparing 0.0f with -0.0f
-                    .of(progress)
-
-            if (isUserInputOngoing != null)
-                assertWithMessage("isUserInputOngoing does not match")
-                    .that(transition.isUserInputOngoing)
-                    .isEqualTo(isUserInputOngoing)
+            val transition = assertThat(transitionState).isTransition()
+            currentScene?.let { assertThat(transition).hasCurrentScene(it) }
+            fromScene?.let { assertThat(transition).hasFromScene(it) }
+            toScene?.let { assertThat(transition).hasToScene(it) }
+            progress?.let { assertThat(transition).hasProgress(it) }
+            isUserInputOngoing?.let { assertThat(transition).hasIsUserInputOngoing(it) }
         }
 
         fun onDragStarted(
@@ -798,6 +777,26 @@ class DraggableHandlerTest {
         // wait for the stop animation
         advanceUntilIdle()
         assertIdle(currentScene = SceneC)
+    }
+
+    @Test
+    fun flingAfterScrollStartedByExternalOverscrollGesture() = runGestureTest {
+        val nestedScroll =
+            nestedScrollConnection(
+                nestedScrollBehavior = EdgeWithPreview,
+                isExternalOverscrollGesture = true
+            )
+
+        // scroll not consumed in child
+        nestedScroll.scroll(
+            available = downOffset(fractionOfScreen = 0.1f),
+        )
+
+        // scroll offsetY10 is all available for parents
+        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
+        assertTransition(SceneA)
+
+        nestedScroll.preFling(available = Velocity(0f, velocityThreshold))
     }
 
     @Test

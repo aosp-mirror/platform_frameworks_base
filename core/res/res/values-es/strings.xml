@@ -158,7 +158,7 @@
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Cifrado, notificaciones sobre redes no cifradas"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Se ha accedido al ID del dispositivo"</string>
     <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"A las <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una red cercana registró el ID único de tu dispositivo (IMSI o IMEI) mientras usabas la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"A las <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una red cercana registró el ID único de tu dispositivo (IMSI o IMEI) mientras usabas la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>.\n\nEsto significa que se ha registrado tu ubicación, actividad o identidad. Se trata de una práctica habitual, pero puede ser un problema para aquellos a quienes les preocupa su privacidad."</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"A las <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una red cercana registró el ID único de tu dispositivo (IMSI o IMEI) mientras usabas la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>.\n\nEsto significa que se ha registrado tu ubicación, actividad o identidad. Se trata de una práctica habitual, pero puede ser un problema para quienes les preocupa su privacidad."</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Conectado a la red cifrada <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Ahora, la conexión con la SIM de <xliff:g id="NETWORK_NAME">%1$s</xliff:g> es más segura"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Conectado a una red no cifrada"</string>
@@ -284,6 +284,8 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Asistente voz"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Bloqueo de seguridad"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"&gt; 999"</string>
+    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
+    <skip />
     <string name="notification_hidden_text" msgid="2835519769868187223">"Notificación nueva"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Teclado físico"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Seguridad"</string>
@@ -1402,7 +1404,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Se ha detectado un accesorio de audio analógico"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"El dispositivo adjunto no es compatible con este teléfono. Toca para obtener más información."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Depuración por USB activa"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca para desactivar la depuración USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca para desactivar la depuración por USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Seleccionar para inhabilitar la depuración por USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Depuración inalámbrica conectada"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Toca para desactivar la depuración inalámbrica"</string>
@@ -2145,10 +2147,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación sobre el modo rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Ahorro de batería activado"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Reduciendo el uso de batería para prolongar su duración"</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"Ahorro de batería activado"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"Se ha activado Ahorro de batería para prolongar la duración de la batería"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Ahorro de batería"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Ahorro de batería desactivado"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"El teléfono tiene suficiente batería. Las funciones ya no están restringidas."</string>
@@ -2416,4 +2416,15 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abre Mensajes"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cómo funciona"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendiente..."</string>
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configura Desbloqueo con huella digital de nuevo"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
+    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> no funcionaba correctamente y se ha eliminado. Configúrala de nuevo para desbloquear el teléfono con la huella digital."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> y <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> no funcionaban correctamente y se han eliminado. Configúralas de nuevo para desbloquear el teléfono con la huella digital."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"Configura Desbloqueo facial de nuevo"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Tu modelo facial no funcionaba correctamente y se ha eliminado. Configúralo de nuevo para desbloquear el teléfono con la cara."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configurar"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ahora no"</string>
 </resources>

@@ -156,6 +156,7 @@ class DialogTransitionAnimatorTest : SysuiTestCase() {
     fun testActivityLaunchWhenLockedWithoutAlternateAuth() {
         val dialogTransitionAnimator =
                 fakeDialogTransitionAnimator(
+                        mainExecutor = mContext.mainExecutor,
                         isUnlocked = false,
                         isShowingAlternateAuthOnUnlock = false,
                         interactionJankMonitor = kosmos.interactionJankMonitor)
@@ -166,6 +167,7 @@ class DialogTransitionAnimatorTest : SysuiTestCase() {
     @Test
     fun testActivityLaunchWhenLockedWithAlternateAuth() {
         val dialogTransitionAnimator = fakeDialogTransitionAnimator(
+                mainExecutor = mContext.mainExecutor,
                 isUnlocked = false,
                 isShowingAlternateAuthOnUnlock = true,
                 interactionJankMonitor = kosmos.interactionJankMonitor

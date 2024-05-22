@@ -81,6 +81,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
 
     MediaRoute2ProviderServiceProxy(
             @NonNull Context context,
+            @NonNull Looper looper,
             @NonNull ComponentName componentName,
             boolean isSelfScanOnlyProvider,
             int userId) {
@@ -88,7 +89,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         mContext = Objects.requireNonNull(context, "Context must not be null.");
         mIsSelfScanOnlyProvider = isSelfScanOnlyProvider;
         mUserId = userId;
-        mHandler = new Handler(Looper.myLooper());
+        mHandler = new Handler(looper);
     }
 
     public void setManagerScanning(boolean managerScanning) {

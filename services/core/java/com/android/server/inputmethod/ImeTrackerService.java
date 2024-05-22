@@ -133,6 +133,13 @@ public final class ImeTrackerService extends IImeTracker.Stub {
         }
     }
 
+    @Override
+    public void onDispatched(@NonNull ImeTracker.Token statsToken) {
+        synchronized (mLock) {
+            mHistory.setFinished(statsToken, ImeTracker.STATUS_SUCCESS, ImeTracker.PHASE_NOT_SET);
+        }
+    }
+
     /**
      * Updates the IME request tracking token with new information available in IMMS.
      *

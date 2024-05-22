@@ -20,7 +20,6 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.media.AudioManager
-import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.BluetoothCallback
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
@@ -52,7 +51,6 @@ constructor(
     private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter(),
     private val localBluetoothManager: LocalBluetoothManager?,
     private val systemClock: SystemClock,
-    private val uiEventLogger: UiEventLogger,
     private val logger: BluetoothTileDialogLogger,
     @Application private val coroutineScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
@@ -167,38 +165,6 @@ constructor(
                     mostRecentlyConnectedDevices?.indexOf(it.cachedBluetoothDevice.device) ?: 0
                 }
         )
-    }
-
-    internal suspend fun updateDeviceItemOnClick(deviceItem: DeviceItem) {
-        withContext(backgroundDispatcher) {
-            logger.logDeviceClick(deviceItem.cachedBluetoothDevice.address, deviceItem.type)
-
-            deviceItem.cachedBluetoothDevice.apply {
-                when (deviceItem.type) {
-                    DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE -> {
-                        disconnect()
-                        uiEventLogger.log(BluetoothTileDialogUiEvent.ACTIVE_DEVICE_DISCONNECT)
-                    }
-                    DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE -> {
-                        uiEventLogger.log(BluetoothTileDialogUiEvent.AUDIO_SHARING_DEVICE_CLICKED)
-                    }
-                    DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE -> {
-                        setActive()
-                        uiEventLogger.log(BluetoothTileDialogUiEvent.CONNECTED_DEVICE_SET_ACTIVE)
-                    }
-                    DeviceItemType.CONNECTED_BLUETOOTH_DEVICE -> {
-                        disconnect()
-                        uiEventLogger.log(
-                            BluetoothTileDialogUiEvent.CONNECTED_OTHER_DEVICE_DISCONNECT
-                        )
-                    }
-                    DeviceItemType.SAVED_BLUETOOTH_DEVICE -> {
-                        connect()
-                        uiEventLogger.log(BluetoothTileDialogUiEvent.SAVED_DEVICE_CONNECT)
-                    }
-                }
-            }
-        }
     }
 
     internal fun setDeviceItemFactoryListForTesting(list: List<DeviceItemFactory>) {

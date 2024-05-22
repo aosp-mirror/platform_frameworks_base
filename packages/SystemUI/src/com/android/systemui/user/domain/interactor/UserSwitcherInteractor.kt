@@ -533,7 +533,7 @@ constructor(
                 targetUserId = targetUserId,
                 ::showDialog,
                 ::dismissDialog,
-                ::selectUser,
+                ::switchUser
             )
         }
     }

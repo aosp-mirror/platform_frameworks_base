@@ -98,7 +98,7 @@ public class BubblePositioner {
 
     private boolean mShowingInBubbleBar;
     private BubbleBarLocation mBubbleBarLocation = BubbleBarLocation.DEFAULT;
-    private final Rect mBubbleBarBounds = new Rect();
+    private int mBubbleBarTopOnScreen;
 
     public BubblePositioner(Context context, WindowManager windowManager) {
         mContext = context;
@@ -322,6 +322,11 @@ public class BubblePositioner {
             return getScreenRect().bottom - getImeHeight() - getInsets().bottom;
         }
         return 0;
+    }
+
+    /** Returns whether the IME is visible. */
+    public boolean getIsImeVisible() {
+        return mImeVisible;
     }
 
     /** Sets whether the IME is visible. **/
@@ -841,17 +846,17 @@ public class BubblePositioner {
     }
 
     /**
-     * Sets the position of the bubble bar in display coordinates.
+     * Set top coordinate of bubble bar on screen
      */
-    public void setBubbleBarBounds(Rect bubbleBarBounds) {
-        mBubbleBarBounds.set(bubbleBarBounds);
+    public void setBubbleBarTopOnScreen(int topOnScreen) {
+        mBubbleBarTopOnScreen = topOnScreen;
     }
 
     /**
-     * Returns the display coordinates of the bubble bar.
+     * Returns the top coordinate of bubble bar on screen
      */
-    public Rect getBubbleBarBounds() {
-        return mBubbleBarBounds;
+    public int getBubbleBarTopOnScreen() {
+        return mBubbleBarTopOnScreen;
     }
 
     /**
@@ -903,7 +908,7 @@ public class BubblePositioner {
 
     /** The bottom position of the expanded view when showing above the bubble bar. */
     public int getExpandedViewBottomForBubbleBar() {
-        return mBubbleBarBounds.top - mExpandedViewPadding;
+        return mBubbleBarTopOnScreen - mExpandedViewPadding;
     }
 
     /**

@@ -80,8 +80,8 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
             LaunchParamsController.LaunchParams outParams) {
 
         if (!canEnterDesktopMode(mContext)) {
-            appendLog("desktop mode is not enabled, continuing");
-            return RESULT_CONTINUE;
+            appendLog("desktop mode is not enabled, skipping");
+            return RESULT_SKIP;
         }
 
         if (task == null) {

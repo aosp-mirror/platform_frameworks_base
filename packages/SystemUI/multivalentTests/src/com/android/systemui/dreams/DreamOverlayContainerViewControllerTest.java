@@ -27,11 +27,15 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.DreamManager;
 import android.content.res.Resources;
 import android.graphics.Region;
 import android.os.Handler;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.AttachedSurfaceControl;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
@@ -41,12 +45,15 @@ import androidx.test.filters.SmallTest;
 
 import com.android.dream.lowlight.LowLightTransitionCoordinator;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.ambient.touch.scrim.BouncerlessScrimController;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
+import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.complication.ComplicationHostViewController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.BlurUtils;
 
 import kotlinx.coroutines.CoroutineDispatcher;
@@ -91,6 +98,9 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     ViewGroup mDreamOverlayContentView;
 
     @Mock
+    View mHubGestureIndicatorView;
+
+    @Mock
     Handler mHandler;
 
     @Mock
@@ -115,6 +125,12 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     DreamOverlayStateController mStateController;
     @Mock
     KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    @Mock
+    ShadeInteractor mShadeInteractor;
+    @Mock
+    CommunalInteractor mCommunalInteractor;
+    @Mock
+    private DreamManager mDreamManager;
 
     DreamOverlayContainerViewController mController;
 
@@ -133,6 +149,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 mDreamOverlayContainerView,
                 mComplicationHostViewController,
                 mDreamOverlayContentView,
+                mHubGestureIndicatorView,
                 mDreamOverlayStatusBarViewController,
                 mLowLightTransitionCoordinator,
                 mBlurUtils,
@@ -146,7 +163,22 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 mAnimationsController,
                 mStateController,
                 mBouncerlessScrimController,
-                mKeyguardTransitionInteractor);
+                mKeyguardTransitionInteractor,
+                mShadeInteractor,
+                mCommunalInteractor,
+                mDreamManager);
+    }
+
+    @DisableFlags(Flags.FLAG_COMMUNAL_HUB)
+    @Test
+    public void testHubGestureIndicatorGoneWhenFlagOff() {
+        verify(mHubGestureIndicatorView, never()).setVisibility(View.VISIBLE);
+    }
+
+    @EnableFlags({Flags.FLAG_COMMUNAL_HUB, Flags.FLAG_GLANCEABLE_HUB_GESTURE_HANDLE})
+    @Test
+    public void testHubGestureIndicatorVisibleWhenFlagOn() {
+        verify(mHubGestureIndicatorView).setVisibility(View.VISIBLE);
     }
 
     @Test
@@ -170,7 +202,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     @Test
     public void testBurnInProtectionStopsWhenContentViewDetached() {
         mController.onViewDetached();
-        verify(mHandler).removeCallbacks(any(Runnable.class));
+        verify(mHandler).removeCallbacksAndMessages(null);
     }
 
     @Test
@@ -280,5 +312,17 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
         mController.onViewDetached();
 
         verify(mAnimationsController).cancelAnimations();
+    }
+
+    @Test
+    public void onViewAttached_addsScrimExpansionCallback() {
+        mController.onViewAttached();
+        verify(mBouncerlessScrimController).addCallback(any());
+    }
+
+    @Test
+    public void onViewDetached_removesScrimExpansionCallback() {
+        mController.onViewDetached();
+        verify(mBouncerlessScrimController).removeCallback(any());
     }
 }

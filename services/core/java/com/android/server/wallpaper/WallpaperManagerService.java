@@ -3646,7 +3646,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
             // System wallpaper does not support multiple displays, attach this display to
             // the fallback wallpaper.
-            if (mFallbackWallpaper != null) {
+            if (mFallbackWallpaper != null && mFallbackWallpaper
+                        .connection != null) {
                 final DisplayConnector connector = mFallbackWallpaper
                         .connection.getDisplayConnectorOrCreate(displayId);
                 if (connector == null) return;

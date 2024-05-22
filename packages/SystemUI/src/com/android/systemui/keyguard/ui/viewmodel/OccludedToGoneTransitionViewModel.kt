@@ -17,8 +17,11 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,11 +36,14 @@ constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
 ) {
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = DEFAULT_DURATION,
-            from = KeyguardState.OCCLUDED,
-            to = KeyguardState.GONE,
-        )
+        animationFlow
+            .setup(
+                duration = DEFAULT_DURATION,
+                edge = Edge.create(from = OCCLUDED, to = Scenes.Gone),
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = OCCLUDED, to = GONE),
+            )
 
     fun notificationAlpha(viewState: ViewStateAccessor): Flow<Float> {
         var currentAlpha = 0f

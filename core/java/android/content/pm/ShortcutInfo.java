@@ -1492,12 +1492,12 @@ public final class ShortcutInfo implements Parcelable {
         /**
          * Sets which surfaces a shortcut will be excluded from.
          *
-         * If the shortcut is set to be excluded from {@link #SURFACE_LAUNCHER}, shortcuts will be
-         * excluded from the search result of {@link android.content.pm.LauncherApps#getShortcuts(
-         * android.content.pm.LauncherApps.ShortcutQuery, UserHandle)} nor
-         * {@link android.content.pm.ShortcutManager#getShortcuts(int)}. This generally means the
-         * shortcut would not be displayed by a launcher app (e.g. in Long-Press menu), while
-         * remain visible in other surfaces such as assistant or on-device-intelligence.
+         * This API is reserved for future extension. Currently, marking a shortcut to be
+         * excluded from {@link #SURFACE_LAUNCHER} will not publish the shortcut, thus
+         * the following operations will be a no-op:
+         * {@link android.content.pm.ShortcutManager#pushDynamicShortcut(android.content.pm.ShortcutInfo)},
+         * {@link android.content.pm.ShortcutManager#addDynamicShortcuts(List)}, and
+         * {@link android.content.pm.ShortcutManager#setDynamicShortcuts(List)}.
          */
         @NonNull
         public Builder setExcludedFromSurfaces(final int surfaces) {

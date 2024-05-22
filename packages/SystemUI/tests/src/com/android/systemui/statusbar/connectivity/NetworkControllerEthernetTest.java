@@ -19,9 +19,9 @@ package com.android.systemui.statusbar.connectivity;
 import static junit.framework.Assert.assertEquals;
 
 import android.net.NetworkCapabilities;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
@@ -30,7 +30,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 public class NetworkControllerEthernetTest extends NetworkControllerBaseTest {
 

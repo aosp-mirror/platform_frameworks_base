@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.service.dreams.Flags.dismissDreamOnKeyguardDismiss;
 import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_APPEARING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_OCCLUDING;
@@ -83,6 +84,7 @@ public class KeyguardTransitionHandler
      * @see KeyguardTransitions
      */
     private IRemoteTransition mExitTransition = null;
+    private IRemoteTransition mAppearTransition = null;
     private IRemoteTransition mOccludeTransition = null;
     private IRemoteTransition mOccludeByDreamTransition = null;
     private IRemoteTransition mUnoccludeTransition = null;
@@ -170,26 +172,28 @@ public class KeyguardTransitionHandler
 
         // Choose a transition applicable for the changes and keyguard state.
         if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) {
-            return startAnimation(mExitTransition,
-                    "going-away",
+            return startAnimation(mExitTransition, "going-away",
                     transition, info, startTransaction, finishTransaction, finishCallback);
         }
+
+        if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_APPEARING) != 0) {
+            return startAnimation(mAppearTransition, "appearing",
+                    transition, info, startTransaction, finishTransaction, finishCallback);
+        }
+
 
         // Occlude/unocclude animations are only played if the keyguard is locked.
         if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
             if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_OCCLUDING) != 0) {
                 if (hasOpeningDream(info)) {
-                    return startAnimation(mOccludeByDreamTransition,
-                            "occlude-by-dream",
+                    return startAnimation(mOccludeByDreamTransition, "occlude-by-dream",
                             transition, info, startTransaction, finishTransaction, finishCallback);
                 } else {
-                    return startAnimation(mOccludeTransition,
-                            "occlude",
+                    return startAnimation(mOccludeTransition, "occlude",
                             transition, info, startTransaction, finishTransaction, finishCallback);
                 }
             } else if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_UNOCCLUDING) != 0) {
-                return startAnimation(mUnoccludeTransition,
-                        "unocclude",
+                return startAnimation(mUnoccludeTransition, "unocclude",
                         transition, info, startTransaction, finishTransaction, finishCallback);
             }
         }
@@ -359,11 +363,13 @@ public class KeyguardTransitionHandler
         @Override
         public void register(
                 IRemoteTransition exitTransition,
+                IRemoteTransition appearTransition,
                 IRemoteTransition occludeTransition,
                 IRemoteTransition occludeByDreamTransition,
                 IRemoteTransition unoccludeTransition) {
             mMainExecutor.execute(() -> {
                 mExitTransition = exitTransition;
+                mAppearTransition = appearTransition;
                 mOccludeTransition = occludeTransition;
                 mOccludeByDreamTransition = occludeByDreamTransition;
                 mUnoccludeTransition = unoccludeTransition;

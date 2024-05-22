@@ -47,8 +47,7 @@ class PointerController : public PointerControllerInterface {
 public:
     static std::shared_ptr<PointerController> create(
             const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-            SpriteController& spriteController, bool enabled,
-            ControllerType type = ControllerType::LEGACY);
+            SpriteController& spriteController, ControllerType type);
 
     ~PointerController() override;
 
@@ -56,17 +55,18 @@ public:
     void move(float deltaX, float deltaY) override;
     void setPosition(float x, float y) override;
     FloatPoint getPosition() const override;
-    int32_t getDisplayId() const override;
+    ui::LogicalDisplayId getDisplayId() const override;
     void fade(Transition transition) override;
     void unfade(Transition transition) override;
     void setDisplayViewport(const DisplayViewport& viewport) override;
 
     void setPresentation(Presentation presentation) override;
     void setSpots(const PointerCoords* spotCoords, const uint32_t* spotIdToIndex,
-                  BitSet32 spotIdBits, int32_t displayId) override;
+                  BitSet32 spotIdBits, ui::LogicalDisplayId displayId) override;
     void clearSpots() override;
     void updatePointerIcon(PointerIconStyle iconId) override;
     void setCustomPointerIcon(const SpriteIcon& icon) override;
+    void setSkipScreenshot(ui::LogicalDisplayId displayId, bool skip) override;
 
     virtual void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void doInactivityTimeout();
@@ -86,12 +86,12 @@ protected:
 
     // Constructor used to test WindowInfosListener registration.
     PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-                      SpriteController& spriteController, bool enabled,
+                      SpriteController& spriteController,
                       const WindowListenerRegisterConsumer& registerListener,
                       WindowListenerUnregisterConsumer unregisterListener);
 
     PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-                      SpriteController& spriteController, bool enabled);
+                      SpriteController& spriteController);
 
 private:
     friend PointerControllerContext::LooperCallback;
@@ -103,18 +103,17 @@ private:
     // we use the DisplayInfoListener's lock in PointerController.
     std::mutex& getLock() const;
 
-    const bool mEnabled;
-
     PointerControllerContext mContext;
 
     MouseCursorController mCursorController;
 
     struct Locked {
         Presentation presentation;
-        int32_t pointerDisplayId = ADISPLAY_ID_NONE;
+        ui::LogicalDisplayId pointerDisplayId = ui::LogicalDisplayId::INVALID;
 
         std::vector<gui::DisplayInfo> mDisplayInfos;
-        std::unordered_map<int32_t /* displayId */, TouchSpotController> spotControllers;
+        std::unordered_map<ui::LogicalDisplayId, TouchSpotController> spotControllers;
+        std::unordered_set<ui::LogicalDisplayId> displaysToSkipScreenshot;
     } mLocked GUARDED_BY(getLock());
 
     class DisplayInfoListener : public gui::WindowInfosListener {
@@ -133,7 +132,8 @@ private:
     sp<DisplayInfoListener> mDisplayInfoListener;
     const WindowListenerUnregisterConsumer mUnregisterWindowInfosListener;
 
-    const ui::Transform& getTransformForDisplayLocked(int displayId) const REQUIRES(getLock());
+    const ui::Transform& getTransformForDisplayLocked(ui::LogicalDisplayId displayId) const
+            REQUIRES(getLock());
 
     void clearSpotsLocked() REQUIRES(getLock());
 };
@@ -142,15 +142,14 @@ class MousePointerController : public PointerController {
 public:
     /** A version of PointerController that controls one mouse pointer. */
     MousePointerController(const sp<PointerControllerPolicyInterface>& policy,
-                           const sp<Looper>& looper, SpriteController& spriteController,
-                           bool enabled);
+                           const sp<Looper>& looper, SpriteController& spriteController);
 
     ~MousePointerController() override;
 
     void setPresentation(Presentation) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
-    void setSpots(const PointerCoords*, const uint32_t*, BitSet32, int32_t) override {
+    void setSpots(const PointerCoords*, const uint32_t*, BitSet32, ui::LogicalDisplayId) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
     void clearSpots() override {
@@ -162,8 +161,7 @@ class TouchPointerController : public PointerController {
 public:
     /** A version of PointerController that controls touch spots. */
     TouchPointerController(const sp<PointerControllerPolicyInterface>& policy,
-                           const sp<Looper>& looper, SpriteController& spriteController,
-                           bool enabled);
+                           const sp<Looper>& looper, SpriteController& spriteController);
 
     ~TouchPointerController() override;
 
@@ -179,7 +177,7 @@ public:
     FloatPoint getPosition() const override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
-    int32_t getDisplayId() const override {
+    ui::LogicalDisplayId getDisplayId() const override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
     void fade(Transition) override {
@@ -208,15 +206,14 @@ class StylusPointerController : public PointerController {
 public:
     /** A version of PointerController that controls one stylus pointer. */
     StylusPointerController(const sp<PointerControllerPolicyInterface>& policy,
-                            const sp<Looper>& looper, SpriteController& spriteController,
-                            bool enabled);
+                            const sp<Looper>& looper, SpriteController& spriteController);
 
     ~StylusPointerController() override;
 
     void setPresentation(Presentation) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
-    void setSpots(const PointerCoords*, const uint32_t*, BitSet32, int32_t) override {
+    void setSpots(const PointerCoords*, const uint32_t*, BitSet32, ui::LogicalDisplayId) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
     void clearSpots() override {

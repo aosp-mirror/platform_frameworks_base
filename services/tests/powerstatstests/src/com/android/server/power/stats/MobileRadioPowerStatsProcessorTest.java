@@ -114,6 +114,11 @@ public class MobileRadioPowerStatsProcessorTest {
                 }
 
                 @Override
+                public long getPowerStatsCollectionThrottlePeriod(String powerComponentName) {
+                    return 0;
+                }
+
+                @Override
                 public PackageManager getPackageManager() {
                     return mPackageManager;
                 }
@@ -186,7 +191,7 @@ public class MobileRadioPowerStatsProcessorTest {
         aggregatedStats.setUidState(APP_UID, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND, 0);
         aggregatedStats.setUidState(APP_UID2, STATE_PROCESS_STATE, PROCESS_STATE_CACHED, 0);
 
-        MobileRadioPowerStatsCollector collector = new MobileRadioPowerStatsCollector(mInjector, 0);
+        MobileRadioPowerStatsCollector collector = new MobileRadioPowerStatsCollector(mInjector);
         collector.setEnabled(true);
 
         // Initial empty ModemActivityInfo.
@@ -305,79 +310,9 @@ public class MobileRadioPowerStatsProcessorTest {
     }
 
     @Test
-    public void measuredEnergyModel() {
-        // PowerStats hardware is available
-        when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.MOBILE_RADIO))
-                .thenReturn(new int[] {MOBILE_RADIO_ENERGY_CONSUMER_ID});
-
-        mStatsRule.setTestPowerProfile("power_profile_test_legacy_modem")
-                .initMeasuredEnergyStatsLocked();
-
-        MobileRadioPowerStatsProcessor processor =
-                new MobileRadioPowerStatsProcessor(mStatsRule.getPowerProfile());
-
-        AggregatedPowerStatsConfig.PowerComponent config =
-                new AggregatedPowerStatsConfig.PowerComponent(
-                        BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
-                        .trackDeviceStates(STATE_POWER, STATE_SCREEN)
-                        .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE)
-                        .setProcessor(processor);
-
+    public void energyConsumerModel() {
         PowerComponentAggregatedPowerStats aggregatedStats =
-                new PowerComponentAggregatedPowerStats(
-                        new AggregatedPowerStats(mock(AggregatedPowerStatsConfig.class)), config);
-
-        aggregatedStats.setState(STATE_POWER, POWER_STATE_OTHER, 0);
-        aggregatedStats.setState(STATE_SCREEN, SCREEN_STATE_ON, 0);
-        aggregatedStats.setUidState(APP_UID, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND, 0);
-        aggregatedStats.setUidState(APP_UID2, STATE_PROCESS_STATE, PROCESS_STATE_CACHED, 0);
-
-        MobileRadioPowerStatsCollector collector = new MobileRadioPowerStatsCollector(mInjector, 0);
-        collector.setEnabled(true);
-
-        // Initial empty ModemActivityInfo.
-        mockModemActivityInfo(new ModemActivityInfo(0L, 0L, 0L, new int[5], 0L));
-
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(
-                new int[]{MOBILE_RADIO_ENERGY_CONSUMER_ID}))
-                .thenReturn(new long[]{0});
-
-        // Establish a baseline
-        aggregatedStats.addPowerStats(collector.collectStats(), 0);
-
-        // Turn the screen off after 2.5 seconds
-        aggregatedStats.setState(STATE_SCREEN, SCREEN_STATE_OTHER, 2500);
-        aggregatedStats.setUidState(APP_UID, STATE_PROCESS_STATE, PROCESS_STATE_BACKGROUND, 2500);
-        aggregatedStats.setUidState(APP_UID, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND_SERVICE,
-                5000);
-
-        // Note application network activity
-        NetworkStats networkStats = mockNetworkStats(10000, 1,
-                mockNetworkStatsEntry("cellular", APP_UID, 0, 0,
-                        METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO, 10000, 1500, 20000, 300, 100),
-                mockNetworkStatsEntry("cellular", APP_UID2, 0, 0,
-                        METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO, 5000, 500, 3000, 100, 111));
-
-        when(mNetworkStatsSupplier.get()).thenReturn(networkStats);
-
-        ModemActivityInfo mai = new ModemActivityInfo(10000, 2000, 3000,
-                new int[]{100, 200, 300, 400, 500}, 600);
-        mockModemActivityInfo(mai);
-
-        mStatsRule.setTime(10_000, 10_000);
-
-        long energyUws = 10_000_000L * VOLTAGE_MV / 1000L;
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(
-                new int[]{MOBILE_RADIO_ENERGY_CONSUMER_ID})).thenReturn(new long[]{energyUws});
-
-        when(mCallDurationSupplier.getAsLong()).thenReturn(200L);
-        when(mScanDurationSupplier.getAsLong()).thenReturn(5555L);
-
-        PowerStats powerStats = collector.collectStats();
-
-        aggregatedStats.addPowerStats(powerStats, 10_000);
-
-        processor.finish(aggregatedStats);
+                prepareAggregatedStats_energyConsumerModel();
 
         MobileRadioPowerStatsLayout statsLayout =
                 new MobileRadioPowerStatsLayout(
@@ -446,6 +381,102 @@ public class MobileRadioPowerStatsProcessorTest {
         // 3/4 of total packets were sent by APP_UID so 75% of total RX/TX power is attributed to it
         assertThat(uidPower1 / (uidPower1 + uidPower2))
                 .isWithin(PRECISION).of(0.75);
+    }
+
+    @Test
+    public void test_toString() {
+        PowerComponentAggregatedPowerStats stats = prepareAggregatedStats_energyConsumerModel();
+        String string = stats.toString();
+        assertThat(string).contains("(pwr-other scr-on)"
+                + " sleep: 500 idle: 750 scan: 1388 call: 50 energy: 2500000 power: 0.672");
+        assertThat(string).contains("(pwr-other scr-other)"
+                + " sleep: 1500 idle: 2250 scan: 4166 call: 150 energy: 7500000 power: 2.02");
+        assertThat(string).contains("(pwr-other scr-on other)"
+                + " rx: 150 tx: [25, 50, 75, 100, 125]");
+        assertThat(string).contains("(pwr-other scr-other other)"
+                + " rx: 450 tx: [75, 150, 225, 300, 375]");
+        assertThat(string).contains("(pwr-other scr-on fg)"
+                + " rx-pkts: 375 rx-B: 2500 tx-pkts: 75 tx-B: 5000 power: 0.198");
+        assertThat(string).contains("(pwr-other scr-other bg)"
+                + " rx-pkts: 375 rx-B: 2500 tx-pkts: 75 tx-B: 5000 power: 0.198");
+        assertThat(string).contains("(pwr-other scr-other fgs)"
+                + " rx-pkts: 750 rx-B: 5000 tx-pkts: 150 tx-B: 10000 power: 0.396");
+    }
+
+    private PowerComponentAggregatedPowerStats prepareAggregatedStats_energyConsumerModel() {
+        // PowerStats hardware is available
+        when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.MOBILE_RADIO))
+                .thenReturn(new int[] {MOBILE_RADIO_ENERGY_CONSUMER_ID});
+
+        mStatsRule.setTestPowerProfile("power_profile_test_legacy_modem")
+                .initMeasuredEnergyStatsLocked();
+
+        MobileRadioPowerStatsProcessor processor =
+                new MobileRadioPowerStatsProcessor(mStatsRule.getPowerProfile());
+
+        AggregatedPowerStatsConfig.PowerComponent config =
+                new AggregatedPowerStatsConfig.PowerComponent(
+                        BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
+                        .trackDeviceStates(STATE_POWER, STATE_SCREEN)
+                        .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE)
+                        .setProcessor(processor);
+
+        PowerComponentAggregatedPowerStats aggregatedStats =
+                new PowerComponentAggregatedPowerStats(
+                        new AggregatedPowerStats(mock(AggregatedPowerStatsConfig.class)), config);
+
+        aggregatedStats.setState(STATE_POWER, POWER_STATE_OTHER, 0);
+        aggregatedStats.setState(STATE_SCREEN, SCREEN_STATE_ON, 0);
+        aggregatedStats.setUidState(APP_UID, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND, 0);
+        aggregatedStats.setUidState(APP_UID2, STATE_PROCESS_STATE, PROCESS_STATE_CACHED, 0);
+
+        MobileRadioPowerStatsCollector collector = new MobileRadioPowerStatsCollector(mInjector);
+        collector.setEnabled(true);
+
+        // Initial empty ModemActivityInfo.
+        mockModemActivityInfo(new ModemActivityInfo(0L, 0L, 0L, new int[5], 0L));
+
+        when(mConsumedEnergyRetriever.getConsumedEnergyUws(
+                new int[]{MOBILE_RADIO_ENERGY_CONSUMER_ID}))
+                .thenReturn(new long[]{0});
+
+        // Establish a baseline
+        aggregatedStats.addPowerStats(collector.collectStats(), 0);
+
+        // Turn the screen off after 2.5 seconds
+        aggregatedStats.setState(STATE_SCREEN, SCREEN_STATE_OTHER, 2500);
+        aggregatedStats.setUidState(APP_UID, STATE_PROCESS_STATE, PROCESS_STATE_BACKGROUND, 2500);
+        aggregatedStats.setUidState(APP_UID, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND_SERVICE,
+                5000);
+
+        // Note application network activity
+        NetworkStats networkStats = mockNetworkStats(10000, 1,
+                mockNetworkStatsEntry("cellular", APP_UID, 0, 0,
+                        METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO, 10000, 1500, 20000, 300, 100),
+                mockNetworkStatsEntry("cellular", APP_UID2, 0, 0,
+                        METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO, 5000, 500, 3000, 100, 111));
+
+        when(mNetworkStatsSupplier.get()).thenReturn(networkStats);
+
+        ModemActivityInfo mai = new ModemActivityInfo(10000, 2000, 3000,
+                new int[]{100, 200, 300, 400, 500}, 600);
+        mockModemActivityInfo(mai);
+
+        mStatsRule.setTime(10_000, 10_000);
+
+        long energyUws = 10_000_000L * VOLTAGE_MV / 1000L;
+        when(mConsumedEnergyRetriever.getConsumedEnergyUws(
+                new int[]{MOBILE_RADIO_ENERGY_CONSUMER_ID})).thenReturn(new long[]{energyUws});
+
+        when(mCallDurationSupplier.getAsLong()).thenReturn(200L);
+        when(mScanDurationSupplier.getAsLong()).thenReturn(5555L);
+
+        PowerStats powerStats = collector.collectStats();
+
+        aggregatedStats.addPowerStats(powerStats, 10_000);
+
+        processor.finish(aggregatedStats);
+        return aggregatedStats;
     }
 
     private int[] states(int... states) {

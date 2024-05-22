@@ -21,7 +21,6 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.ReadOnlyComposable
 
 /**
  * The Material 3 Theme for Settings.
@@ -29,24 +28,15 @@ import androidx.compose.runtime.ReadOnlyComposable
 @Composable
 fun SettingsTheme(content: @Composable () -> Unit) {
     val isDarkTheme = isSystemInDarkTheme()
-    val settingsColorScheme = settingsColorScheme(isDarkTheme)
-    val colorScheme = materialColorScheme(isDarkTheme).copy(
-        background = settingsColorScheme.background,
-    )
 
-    MaterialTheme(colorScheme = colorScheme, typography = rememberSettingsTypography()) {
+    MaterialTheme(
+        colorScheme = materialColorScheme(isDarkTheme),
+        typography = rememberSettingsTypography(),
+    ) {
         CompositionLocalProvider(
-            LocalColorScheme provides settingsColorScheme(isDarkTheme),
             LocalContentColor provides MaterialTheme.colorScheme.onSurface,
         ) {
             content()
         }
     }
-}
-
-object SettingsTheme {
-    val colorScheme: SettingsColorScheme
-        @Composable
-        @ReadOnlyComposable
-        get() = LocalColorScheme.current
 }

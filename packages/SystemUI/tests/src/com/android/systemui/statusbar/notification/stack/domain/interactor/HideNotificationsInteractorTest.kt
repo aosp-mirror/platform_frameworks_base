@@ -17,10 +17,10 @@ package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import android.content.res.Configuration
 import android.graphics.Rect
-import android.testing.AndroidTestingRunner
 import android.view.Surface
 import android.view.Surface.ROTATION_0
 import android.view.Surface.ROTATION_90
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
@@ -52,7 +52,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 open class HideNotificationsInteractorTest : SysuiTestCase() {
 
     private val testScope = TestScope()

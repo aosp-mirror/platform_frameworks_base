@@ -20,13 +20,13 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.Flags
@@ -40,16 +40,19 @@ import com.android.systemui.notifications.ui.composable.ConstrainedNotificationS
 import com.android.systemui.res.R
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
+import dagger.Lazy
 import javax.inject.Inject
 
 @SysUISingleton
 class NotificationSection
 @Inject
 constructor(
+    private val stackScrollView: Lazy<NotificationScrollView>,
     private val viewModel: NotificationsPlaceholderViewModel,
     private val aodBurnInViewModel: AodBurnInViewModel,
     sharedNotificationContainer: SharedNotificationContainer,
@@ -88,9 +91,9 @@ constructor(
     @Composable
     fun SceneScope.Notifications(burnInParams: BurnInParameters?, modifier: Modifier = Modifier) {
         val shouldUseSplitNotificationShade by
-            lockscreenContentViewModel.shouldUseSplitNotificationShade.collectAsState()
+            lockscreenContentViewModel.shouldUseSplitNotificationShade.collectAsStateWithLifecycle()
         val areNotificationsVisible by
-            lockscreenContentViewModel.areNotificationsVisible.collectAsState()
+            lockscreenContentViewModel.areNotificationsVisible.collectAsStateWithLifecycle()
         val splitShadeTopMargin: Dp =
             if (Flags.centralizedStatusBarHeightFix()) {
                 LargeScreenHeaderHelper.getLargeScreenHeaderHeight(LocalContext.current).dp
@@ -103,6 +106,7 @@ constructor(
         }
 
         ConstrainedNotificationStack(
+            stackScrollView = stackScrollView.get(),
             viewModel = viewModel,
             modifier =
                 modifier

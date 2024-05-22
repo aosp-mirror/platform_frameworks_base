@@ -21,11 +21,11 @@ import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
-import android.view.View;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.InstanceId;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.plugins.annotations.DependsOn;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 import com.android.systemui.plugins.qs.QSTile.Callback;
@@ -58,23 +58,23 @@ public interface QSTile {
     /**
      * The tile was clicked.
      *
-     * @param view The view that was clicked.
+     * @param expandable {@link Expandable} that was clicked.
      */
-    void click(@Nullable View view);
+    void click(@Nullable Expandable expandable);
 
     /**
      * The tile secondary click was triggered.
      *
-     * @param view The view that was clicked.
+     * @param expandable {@link Expandable} that was clicked.
      */
-    void secondaryClick(@Nullable View view);
+    void secondaryClick(@Nullable Expandable expandable);
 
     /**
      * The tile was long clicked.
      *
-     * @param view The view that was clicked.
+     * @param expandable {@link Expandable} that was clicked.
      */
-    void longClick(@Nullable View view);
+    void longClick(@Nullable Expandable expandable);
 
     void userSwitch(int currentUser);
 

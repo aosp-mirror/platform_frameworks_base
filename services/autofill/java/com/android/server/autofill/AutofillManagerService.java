@@ -1625,13 +1625,13 @@ public final class AutofillManagerService
     final class AutoFillManagerServiceStub extends IAutoFillManager.Stub {
         @Override
         public void addClient(IAutoFillManagerClient client, ComponentName componentName,
-                int userId, IResultReceiver receiver) {
+                int userId, IResultReceiver receiver, boolean credmanRequested) {
             int flags = 0;
             try {
                 synchronized (mLock) {
                     final int enabledFlags =
                             getServiceForUserWithLocalBinderIdentityLocked(userId)
-                            .addClientLocked(client, componentName);
+                            .addClientLocked(client, componentName, credmanRequested);
                     if (enabledFlags != 0) {
                         flags |= enabledFlags;
                     }
@@ -1644,7 +1644,7 @@ public final class AutofillManagerService
                 }
             } catch (Exception ex) {
                 // Don't do anything, send back default flags
-                Log.wtf(TAG, "addClient(): failed " + ex.toString());
+                Log.wtf(TAG, "addClient(): failed " + ex.toString(), ex);
             } finally {
                 send(receiver, flags);
             }
@@ -1991,6 +1991,19 @@ public final class AutofillManagerService
                         peekServiceForUserWithLocalBinderIdentityLocked(userId);
                 if (service != null) {
                     service.setAutofillFailureLocked(sessionId, getCallingUid(), ids);
+                } else if (sVerbose) {
+                    Slog.v(TAG, "setAutofillFailure(): no service for " + userId);
+                }
+            }
+        }
+
+        @Override
+        public void setViewAutofilled(int sessionId, @NonNull AutofillId id, int userId) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
+                if (service != null) {
+                    service.setViewAutofilled(sessionId, getCallingUid(), id);
                 } else if (sVerbose) {
                     Slog.v(TAG, "setAutofillFailure(): no service for " + userId);
                 }

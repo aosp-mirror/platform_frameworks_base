@@ -17,6 +17,8 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.app.StatusBarManager
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.keyguard.KeyguardSecurityModel
@@ -26,10 +28,13 @@ import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.dock.DockManager
 import com.android.systemui.dock.fakeDockManager
+import com.android.systemui.flags.BrokenWithSceneContainer
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -46,7 +51,8 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
-import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.commandQueue
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
@@ -61,13 +67,14 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 /**
  * Class for testing user journeys through the interactors. They will all be activated during setup,
@@ -75,8 +82,8 @@ import org.mockito.MockitoAnnotations
  */
 @ExperimentalCoroutinesApi
 @SmallTest
-@RunWith(JUnit4::class)
-class KeyguardTransitionScenariosTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
             fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository())
@@ -84,33 +91,52 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
     private val testScope = kosmos.testScope
 
-    private val keyguardRepository = kosmos.fakeKeyguardRepository
-    private val bouncerRepository = kosmos.fakeKeyguardBouncerRepository
+    private val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
+    private val bouncerRepository by lazy { kosmos.fakeKeyguardBouncerRepository }
     private var commandQueue = kosmos.fakeCommandQueue
-    private val shadeRepository = kosmos.fakeShadeRepository
-    private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
+    private val transitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
     private lateinit var featureFlags: FakeFeatureFlags
 
     // Used to verify transition requests for test output
     @Mock private lateinit var keyguardSecurityModel: KeyguardSecurityModel
 
-    private val fromLockscreenTransitionInteractor = kosmos.fromLockscreenTransitionInteractor
-    private val fromDreamingTransitionInteractor = kosmos.fromDreamingTransitionInteractor
-    private val fromDozingTransitionInteractor = kosmos.fromDozingTransitionInteractor
-    private val fromOccludedTransitionInteractor = kosmos.fromOccludedTransitionInteractor
-    private val fromGoneTransitionInteractor = kosmos.fromGoneTransitionInteractor
-    private val fromAodTransitionInteractor = kosmos.fromAodTransitionInteractor
-    private val fromAlternateBouncerTransitionInteractor =
+    private val fromLockscreenTransitionInteractor by lazy {
+        kosmos.fromLockscreenTransitionInteractor
+    }
+    private val fromDreamingTransitionInteractor by lazy { kosmos.fromDreamingTransitionInteractor }
+    private val fromDozingTransitionInteractor by lazy { kosmos.fromDozingTransitionInteractor }
+    private val fromOccludedTransitionInteractor by lazy { kosmos.fromOccludedTransitionInteractor }
+    private val fromGoneTransitionInteractor by lazy { kosmos.fromGoneTransitionInteractor }
+    private val fromAodTransitionInteractor by lazy { kosmos.fromAodTransitionInteractor }
+    private val fromAlternateBouncerTransitionInteractor by lazy {
         kosmos.fromAlternateBouncerTransitionInteractor
-    private val fromPrimaryBouncerTransitionInteractor =
+    }
+    private val fromPrimaryBouncerTransitionInteractor by lazy {
         kosmos.fromPrimaryBouncerTransitionInteractor
-    private val fromDreamingLockscreenHostedTransitionInteractor =
+    }
+    private val fromDreamingLockscreenHostedTransitionInteractor by lazy {
         kosmos.fromDreamingLockscreenHostedTransitionInteractor
-    private val fromGlanceableHubTransitionInteractor = kosmos.fromGlanceableHubTransitionInteractor
+    }
+    private val fromGlanceableHubTransitionInteractor by lazy {
+        kosmos.fromGlanceableHubTransitionInteractor
+    }
 
-    private val powerInteractor = kosmos.powerInteractor
-    private val communalInteractor = kosmos.communalInteractor
-    private val dockManager = kosmos.fakeDockManager
+    private val powerInteractor by lazy { kosmos.powerInteractor }
+    private val communalInteractor by lazy { kosmos.communalInteractor }
+    private val dockManager by lazy { kosmos.fakeDockManager }
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
 
     @Before
     fun setUp() {
@@ -119,9 +145,11 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         whenever(keyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(PIN)
 
         mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
-        mSetFlagsRule.disableFlags(
-            Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR,
-        )
+        if (!SceneContainerFlag.isEnabled) {
+            mSetFlagsRule.disableFlags(
+                Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR,
+            )
+        }
         featureFlags = FakeFeatureFlags()
 
         fromLockscreenTransitionInteractor.start()
@@ -137,6 +165,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun lockscreenToPrimaryBouncerViaBouncerShowingCall() =
         testScope.runTest {
             // GIVEN a prior transition has run to LOCKSCREEN
@@ -210,6 +239,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun lockscreenToDreaming() =
         testScope.runTest {
             // GIVEN a device that is not dreaming or dozing
@@ -238,6 +268,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun lockscreenToDreamingLockscreenHosted() =
         testScope.runTest {
             // GIVEN a device that is not dreaming or dozing
@@ -348,6 +379,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun dreamingLockscreenHostedToGone() =
         testScope.runTest {
             // GIVEN a prior transition has run to DREAMING_LOCKSCREEN_HOSTED
@@ -374,6 +406,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun dreamingLockscreenHostedToPrimaryBouncer() =
         testScope.runTest {
             // GIVEN a device dreaming with lockscreen hosted dream and not dozing
@@ -527,6 +560,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun dozingToGoneWithUnlock() =
         testScope.runTest {
             // GIVEN a prior transition has run to DOZING
@@ -600,12 +634,13 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
     /** This handles security method NONE and screen off with lock timeout */
     @Test
+    @DisableSceneContainer
     fun dreamingToGoneWithKeyguardNotShowing() =
         testScope.runTest {
             // GIVEN a prior transition has run to DREAMING
             keyguardRepository.setDreamingWithOverlay(true)
             runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.DREAMING)
-            runCurrent()
+            advanceTimeBy(60L)
 
             // WHEN the device wakes up without a keyguard
             keyguardRepository.setKeyguardShowing(false)
@@ -656,6 +691,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun goneToDozing() =
         testScope.runTest {
             // GIVEN a device with AOD not available
@@ -681,6 +717,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun goneToAod() =
         testScope.runTest {
             // GIVEN a device with AOD available
@@ -706,6 +743,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun goneToLockscreen() =
         testScope.runTest {
             // GIVEN a prior transition has run to GONE
@@ -727,6 +765,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun goneToDreaming() =
         testScope.runTest {
             // GIVEN a device that is not dreaming or dozing
@@ -755,6 +794,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun goneToGlanceableHub() =
         testScope.runTest {
             // GIVEN a prior transition has run to GONE
@@ -784,6 +824,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun alternateBouncerToPrimaryBouncer() =
         testScope.runTest {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
@@ -897,6 +938,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun alternateBouncerToGone() =
         testScope.runTest {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
@@ -959,6 +1001,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun primaryBouncerToAod() =
         testScope.runTest {
             // GIVEN aod available
@@ -989,6 +1032,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun primaryBouncerToDozing() =
         testScope.runTest {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
@@ -1017,6 +1061,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun primaryBouncerToLockscreen() =
         testScope.runTest {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
@@ -1040,6 +1085,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun primaryBouncerToGlanceableHub() =
         testScope.runTest {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
@@ -1071,6 +1117,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun primaryBouncerToGlanceableHubWhileDreaming() =
         testScope.runTest {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
@@ -1106,6 +1153,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun primaryBouncerToDreamingLockscreenHosted() =
         testScope.runTest {
             // GIVEN device dreaming with the lockscreen hosted dream and not dozing
@@ -1135,6 +1183,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun occludedToGone() =
         testScope.runTest {
             // GIVEN a device on lockscreen
@@ -1165,6 +1214,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun occludedToLockscreen() =
         testScope.runTest {
             // GIVEN a device on lockscreen
@@ -1193,6 +1243,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun occludedToGlanceableHub() =
         testScope.runTest {
             // GIVEN a device on lockscreen
@@ -1229,23 +1280,23 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun occludedToGlanceableHubWhenDocked() =
+    @BrokenWithSceneContainer(339465026)
+    fun occludedToGlanceableHubWhenInitiallyOnHub() =
         testScope.runTest {
-            // GIVEN a device on lockscreen
+            // GIVEN a device on lockscreen and communal is available
             keyguardRepository.setKeyguardShowing(true)
+            kosmos.setCommunalAvailable(true)
             runCurrent()
 
-            // GIVEN a prior transition has run to OCCLUDED
+            // GIVEN a prior transition has run to OCCLUDED from GLANCEABLE_HUB
             runTransitionAndSetWakefulness(KeyguardState.GLANCEABLE_HUB, KeyguardState.OCCLUDED)
             keyguardRepository.setKeyguardOccluded(true)
             runCurrent()
 
-            // GIVEN device is docked/communal is available
-            dockManager.setIsDocked(true)
-            dockManager.setDockEvent(DockManager.STATE_DOCKED)
+            // GIVEN on blank scene
             val idleTransitionState =
                 MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(CommunalScenes.Communal)
+                    ObservableTransitionState.Idle(CommunalScenes.Blank)
                 )
             communalInteractor.setTransitionState(idleTransitionState)
             runCurrent()
@@ -1315,6 +1366,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun primaryBouncerToOccluded() =
         testScope.runTest {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
@@ -1340,6 +1392,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun dozingToOccluded() =
         testScope.runTest {
             // GIVEN a prior transition has run to DOZING
@@ -1365,6 +1418,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun dreamingToOccluded() =
         testScope.runTest {
             // GIVEN a prior transition has run to DREAMING
@@ -1386,6 +1440,39 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     ownerName = "FromDreamingTransitionInteractor(Occluded but no longer dreaming)",
                     from = KeyguardState.DREAMING,
                     to = KeyguardState.OCCLUDED,
+                    animatorAssertion = { it.isNotNull() },
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    @BrokenWithSceneContainer(339465026)
+    @EnableFlags(Flags.FLAG_RESTART_DREAM_ON_UNOCCLUDE)
+    fun dreamingToOccludedToDreaming() =
+        testScope.runTest {
+            // GIVEN a device on lockscreen
+            keyguardRepository.setKeyguardShowing(true)
+            runCurrent()
+
+            // Given a device that is dreaming
+            keyguardRepository.setDreaming(true)
+
+            // GIVEN a prior transition has run to OCCLUDED
+            runTransitionAndSetWakefulness(KeyguardState.DREAMING, KeyguardState.OCCLUDED)
+            keyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+
+            // WHEN occlusion ends
+            keyguardRepository.setKeyguardOccluded(false)
+            runCurrent()
+
+            // THEN a transition to DREAMING should occur
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = FromOccludedTransitionInteractor::class.simpleName,
+                    from = KeyguardState.OCCLUDED,
+                    to = KeyguardState.DREAMING,
                     animatorAssertion = { it.isNotNull() },
                 )
 
@@ -1446,6 +1533,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun dreamingToGlanceableHub() =
         testScope.runTest {
             // GIVEN a prior transition has run to DREAMING
@@ -1485,6 +1573,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun lockscreenToOccluded() =
         testScope.runTest {
             // GIVEN a prior transition has run to LOCKSCREEN
@@ -1508,6 +1597,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun aodToOccluded() =
         testScope.runTest {
             // GIVEN a prior transition has run to AOD
@@ -1531,6 +1621,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun aodToPrimaryBouncer() =
         testScope.runTest {
             // GIVEN a prior transition has run to AOD
@@ -1554,6 +1645,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun lockscreenToOccluded_fromCameraGesture() =
         testScope.runTest {
             // GIVEN a prior transition has run to LOCKSCREEN
@@ -1577,7 +1669,9 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // THEN a transition from DOZING => OCCLUDED should occur
             assertThat(transitionRepository)
                 .startedTransition(
-                    ownerName = "FromDozingTransitionInteractor",
+                    ownerName =
+                        "FromDozingTransitionInteractor" +
+                            "(keyguardInteractor.onCameraLaunchDetected)",
                     from = KeyguardState.DOZING,
                     to = KeyguardState.OCCLUDED,
                     animatorAssertion = { it.isNotNull() },
@@ -1587,6 +1681,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun lockscreenToPrimaryBouncerDragging() =
         testScope.runTest {
             // GIVEN a prior transition has run to LOCKSCREEN
@@ -1596,8 +1691,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // GIVEN the keyguard is showing locked
             keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
             runCurrent()
-            shadeRepository.setLegacyShadeTracking(true)
-            shadeRepository.setLegacyShadeExpansion(.9f)
+            shadeTestUtil.setTracking(true)
+            shadeTestUtil.setShadeExpansion(.9f)
             runCurrent()
 
             // THEN a transition from LOCKSCREEN => PRIMARY_BOUNCER should occur
@@ -1614,8 +1709,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // WHEN the user stops dragging and shade is back to expanded
             clearInvocations(transitionRepository)
             runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.PRIMARY_BOUNCER)
-            shadeRepository.setLegacyShadeTracking(false)
-            shadeRepository.setLegacyShadeExpansion(1f)
+            shadeTestUtil.setTracking(false)
+            shadeTestUtil.setShadeExpansion(1f)
             runCurrent()
 
             // THEN a transition from LOCKSCREEN => PRIMARY_BOUNCER should occur
@@ -1630,6 +1725,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun lockscreenToGlanceableHub() =
         testScope.runTest {
             // GIVEN a prior transition has run to LOCKSCREEN
@@ -1687,6 +1783,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun glanceableHubToLockscreen() =
         testScope.runTest {
             // GIVEN a prior transition has run to GLANCEABLE_HUB
@@ -1741,6 +1838,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun glanceableHubToDozing() =
         testScope.runTest {
             // GIVEN a prior transition has run to GLANCEABLE_HUB
@@ -1762,6 +1860,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun glanceableHubToPrimaryBouncer() =
         testScope.runTest {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
@@ -1783,6 +1882,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun glanceableHubToAlternateBouncer() =
         testScope.runTest {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
@@ -1804,6 +1904,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun glanceableHubToOccluded() =
         testScope.runTest {
             // GIVEN a prior transition has run to GLANCEABLE_HUB
@@ -1834,6 +1935,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun glanceableHubToGone() =
         testScope.runTest {
             // GIVEN a prior transition has run to GLANCEABLE_HUB
@@ -1855,6 +1957,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun glanceableHubToDreaming() =
         testScope.runTest {
             // GIVEN that we are dreaming and not dozing

@@ -339,6 +339,7 @@ import android.app.admin.ManagedProfileProvisioningParams;
 import android.app.admin.ManagedSubscriptionsPolicy;
 import android.app.admin.NetworkEvent;
 import android.app.admin.PackagePolicy;
+import android.app.admin.PackageSetPolicyValue;
 import android.app.admin.ParcelableGranteeMap;
 import android.app.admin.ParcelableResource;
 import android.app.admin.PasswordMetrics;
@@ -350,7 +351,6 @@ import android.app.admin.PreferentialNetworkServiceConfig;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.app.admin.StartInstallingUpdateCallback;
-import android.app.admin.StringSetPolicyValue;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.UnsafeStateException;
@@ -455,10 +455,10 @@ import android.security.IKeyChainAliasCallback;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
-import android.security.KeyStore;
 import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keystore.AttestationUtils;
 import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.telecom.TelecomManager;
@@ -1985,11 +1985,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             CryptoTestHelper.runAndLogSelfTest();
         }
 
-        public String[] getPersonalAppsForSuspension(@UserIdInt int userId) {
-            return PersonalAppsSuspensionHelper.forUser(mContext, userId)
-                    .getPersonalAppsForSuspension();
-        }
-
         public long systemCurrentTimeMillis() {
             return System.currentTimeMillis();
         }
@@ -2723,6 +2718,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     mDevicePolicyEngine.getResolvedPolicy(
                             PolicyDefinition.SECURITY_LOGGING, UserHandle.USER_ALL));
             setLoggingConfiguration(securityLoggingEnabled, auditLoggingEnabled);
+            mInjector.runCryptoSelfTest();
         } else {
             synchronized (getLockObject()) {
                 mSecurityLogMonitor.start(getSecurityLoggingEnabledUser());
@@ -3355,7 +3351,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 break;
             case SystemService.PHASE_SYSTEM_SERVICES_READY:
                 synchronized (getLockObject()) {
-                    mDevicePolicyEngine.reapplyAllPoliciesLocked();
+                    mDevicePolicyEngine.reapplyAllPoliciesOnBootLocked();
                 }
                 break;
             case SystemService.PHASE_ACTIVITY_MANAGER_READY:
@@ -6248,7 +6244,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try (KeyChainConnection keyChainConnection =
                          KeyChain.bindAsUser(mContext, caller.getUserHandle())) {
                 IKeyChainService keyChain = keyChainConnection.getService();
-                if (!keyChain.installKeyPair(privKey, cert, chain, alias, KeyStore.UID_SELF)) {
+                if (!keyChain.installKeyPair(privKey, cert, chain, alias, KeyProperties.UID_SELF)) {
                     logInstallKeyPairFailure(caller, isCredentialManagementApp);
                     return false;
                 }
@@ -6583,7 +6579,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         // As the caller will be granted access to the key, ensure no UID was specified, as
         // it will not have the desired effect.
-        if (keySpec.getUid() != KeyStore.UID_SELF) {
+        if (keySpec.getUid() != KeyProperties.UID_SELF) {
             Slogf.e(LOG_TAG, "Only the caller can be granted access to the generated keypair.");
             logGenerateKeyPairFailure(caller, isCredentialManagementApp);
             return false;
@@ -11447,7 +11443,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             setBackwardsCompatibleAppRestrictions(
                     caller, packageName, restrictions, caller.getUserHandle());
-        } else if (Flags.dmrhCanSetAppRestriction()) {
+        } else if (Flags.dmrhSetAppRestrictions()) {
             final boolean isRoleHolder;
             if (who != null) {
                 // DO or PO
@@ -11488,10 +11484,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             new BundlePolicyValue(restrictions),
                             affectedUserId);
                 }
-                Intent changeIntent = new Intent(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
-                changeIntent.setPackage(packageName);
-                changeIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                mContext.sendBroadcastAsUser(changeIntent, UserHandle.of(affectedUserId));
             } else {
                 mInjector.binderWithCleanCallingIdentity(() -> {
                     mUserManager.setApplicationRestrictions(packageName, restrictions,
@@ -12078,7 +12070,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mDevicePolicyEngine.setLocalPolicy(
                         PolicyDefinition.PERMITTED_INPUT_METHODS,
                         admin,
-                        new StringSetPolicyValue(new HashSet<>(packageList)),
+                        new PackageSetPolicyValue(new HashSet<>(packageList)),
                         userId);
             }
         }
@@ -12849,7 +12841,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return Bundle.EMPTY;
             }
             return policies.get(enforcingAdmin).getValue();
-        } else if (Flags.dmrhCanSetAppRestriction()) {
+        } else if (Flags.dmrhSetAppRestrictions()) {
             final boolean isRoleHolder;
             if (who != null) {
                 // Caller is DO or PO. They cannot call this on parent
@@ -15177,10 +15169,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (statusBarService != null) {
                 int flags1 = disabled ? STATUS_BAR_DISABLE_MASK : StatusBarManager.DISABLE_NONE;
                 int flags2 = disabled ? STATUS_BAR_DISABLE2_MASK : StatusBarManager.DISABLE2_NONE;
-                StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo(flags1,
-                        flags2);
-                statusBarService.disableForUser(info, mToken, mContext.getPackageName(), userId,
-                        "setStatusBarDisabledInternal");
+                statusBarService.disableForUser(flags1, mToken, mContext.getPackageName(), userId);
+                statusBarService.disable2ForUser(flags2, mToken, mContext.getPackageName(), userId);
                 return true;
             }
         } catch (RemoteException e) {
@@ -15776,8 +15766,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             PolicyDefinition.APPLICATION_RESTRICTIONS(packageName),
                             userId);
             List<Bundle> restrictions = new ArrayList<>();
-            for (EnforcingAdmin admin : policies.keySet()) {
-                restrictions.add(policies.get(admin).getValue());
+            for (PolicyValue<Bundle> policyValue: policies.values()) {
+                Bundle value = policyValue.getValue();
+                // Probably not necessary since setApplicationRestrictions only sets non-empty
+                // Bundle, but just in case.
+                if (value != null && !value.isEmpty()) {
+                    restrictions.add(value);
+                }
             }
 
             return mInjector.binderWithCleanCallingIdentity(() -> {
@@ -20363,12 +20358,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mDevicePolicyEngine.setGlobalPolicy(
                     PolicyDefinition.USER_CONTROLLED_DISABLED_PACKAGES,
                     enforcingAdmin,
-                    new StringSetPolicyValue(packages));
+                    new PackageSetPolicyValue(packages));
         } else {
             mDevicePolicyEngine.setLocalPolicy(
                     PolicyDefinition.USER_CONTROLLED_DISABLED_PACKAGES,
                     enforcingAdmin,
-                    new StringSetPolicyValue(packages),
+                    new PackageSetPolicyValue(packages),
                     caller.getUserId());
         }
     }
@@ -21610,9 +21605,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
             }
 
-            if (Flags.headlessSingleUserFixes() && mInjector.userManagerIsHeadlessSystemUserMode()
-                    && isSingleUserMode && !mInjector.isChangeEnabled(
-                    PROVISION_SINGLE_USER_MODE, deviceAdmin.getPackageName(), caller.getUserId())) {
+            if (Flags.headlessSingleMinTargetSdk()
+                    && mInjector.userManagerIsHeadlessSystemUserMode()
+                    && isSingleUserMode
+                    && !mInjector.isChangeEnabled(
+                            PROVISION_SINGLE_USER_MODE, deviceAdmin.getPackageName(),
+                    caller.getUserId())) {
                 throw new IllegalStateException("Device admin is not targeting Android V.");
             }
 
@@ -24047,7 +24045,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         mDevicePolicyEngine.setLocalPolicy(
                                 PolicyDefinition.PERMITTED_INPUT_METHODS,
                                 enforcingAdmin,
-                                new StringSetPolicyValue(
+                                new PackageSetPolicyValue(
                                         new HashSet<>(admin.permittedInputMethods)),
                                 admin.getUserHandle().getIdentifier());
                     }
@@ -24056,7 +24054,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         mDevicePolicyEngine.setLocalPolicy(
                                 PolicyDefinition.PERMITTED_INPUT_METHODS,
                                 enforcingAdmin,
-                                new StringSetPolicyValue(
+                                new PackageSetPolicyValue(
                                         new HashSet<>(admin.getParentActiveAdmin()
                                                 .permittedInputMethods)),
                                 getProfileParentId(admin.getUserHandle().getIdentifier()));
@@ -24112,12 +24110,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         mDevicePolicyEngine.setGlobalPolicy(
                                 PolicyDefinition.USER_CONTROLLED_DISABLED_PACKAGES,
                                 enforcingAdmin,
-                                new StringSetPolicyValue(new HashSet<>(admin.protectedPackages)));
+                                new PackageSetPolicyValue(
+                                        new HashSet<>(admin.protectedPackages)));
                     } else {
                         mDevicePolicyEngine.setLocalPolicy(
                                 PolicyDefinition.USER_CONTROLLED_DISABLED_PACKAGES,
                                 enforcingAdmin,
-                                new StringSetPolicyValue(new HashSet<>(admin.protectedPackages)),
+                                new PackageSetPolicyValue(
+                                        new HashSet<>(admin.protectedPackages)),
                                 admin.getUserHandle().getIdentifier());
                     }
                 }

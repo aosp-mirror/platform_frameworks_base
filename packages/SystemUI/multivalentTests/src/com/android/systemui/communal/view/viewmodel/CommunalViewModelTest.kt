@@ -44,7 +44,6 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.POPUP_AUTO_HIDE_TIMEOUT_MS
 import com.android.systemui.communal.ui.viewmodel.PopupType
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -52,6 +51,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
@@ -90,7 +90,7 @@ import platform.test.runner.parameterized.Parameters
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class CommunalViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
     @Mock private lateinit var user: UserInfo
     @Mock private lateinit var providerInfo: AppWidgetProviderInfo
@@ -111,7 +111,7 @@ class CommunalViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private lateinit var underTest: CommunalViewModel
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before
@@ -142,10 +142,10 @@ class CommunalViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
                 testScope,
                 context.resources,
                 kosmos.keyguardTransitionInteractor,
+                kosmos.keyguardInteractor,
                 kosmos.communalInteractor,
                 kosmos.communalTutorialInteractor,
                 kosmos.shadeInteractor,
-                kosmos.deviceEntryInteractor,
                 mediaHost,
                 logcatLogBuffer("CommunalViewModelTest"),
             )
@@ -186,12 +186,12 @@ class CommunalViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
             // Widgets available.
             val widgets =
                 listOf(
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 0,
                         priority = 30,
                         providerInfo = providerInfo,
                     ),
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         priority = 20,
                         providerInfo = providerInfo,
@@ -245,7 +245,7 @@ class CommunalViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
 
             widgetRepository.setCommunalWidgets(
                 listOf(
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         priority = 1,
                         providerInfo = providerInfo,

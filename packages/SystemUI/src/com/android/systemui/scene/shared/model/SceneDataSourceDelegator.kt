@@ -56,6 +56,12 @@ class SceneDataSourceDelegator(
         )
     }
 
+    override fun snapToScene(toScene: SceneKey) {
+        delegateMutable.value.snapToScene(
+            toScene = toScene,
+        )
+    }
+
     /**
      * Binds the current, dependency injection provided [SceneDataSource] to the given object.
      *
@@ -77,5 +83,7 @@ class SceneDataSourceDelegator(
             MutableStateFlow(initialSceneKey).asStateFlow()
 
         override fun changeScene(toScene: SceneKey, transitionKey: TransitionKey?) = Unit
+
+        override fun snapToScene(toScene: SceneKey) = Unit
     }
 }

@@ -336,6 +336,7 @@ cc_defaults {
         "jni/android_graphics_animation_NativeInterpolatorFactory.cpp",
         "jni/android_graphics_animation_RenderNodeAnimator.cpp",
         "jni/android_graphics_Canvas.cpp",
+        "jni/android_graphics_Color.cpp",
         "jni/android_graphics_ColorSpace.cpp",
         "jni/android_graphics_drawable_AnimatedVectorDrawable.cpp",
         "jni/android_graphics_drawable_VectorDrawable.cpp",

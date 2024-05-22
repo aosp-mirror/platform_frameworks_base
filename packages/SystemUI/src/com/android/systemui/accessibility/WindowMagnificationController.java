@@ -240,7 +240,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private boolean mEditSizeEnable = false;
     private boolean mSettingsPanelVisibility = false;
     @VisibleForTesting
-    WindowMagnificationSizePrefs mWindowMagnificationSizePrefs;
+    WindowMagnificationFrameSizePrefs mWindowMagnificationFrameSizePrefs;
 
     @Nullable
     private final MirrorWindowControl mMirrorWindowControl;
@@ -270,7 +270,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mSysUiState = sysUiState;
         mScvhSupplier = scvhSupplier;
         mConfiguration = new Configuration(context.getResources().getConfiguration());
-        mWindowMagnificationSizePrefs = new WindowMagnificationSizePrefs(mContext);
+        mWindowMagnificationFrameSizePrefs = new WindowMagnificationFrameSizePrefs(mContext);
 
         final Display display = mContext.getDisplay();
         mDisplayId = mContext.getDisplayId();
@@ -457,7 +457,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
         if (!enable) {
             // Keep the magnifier size when exiting edit mode
-            mWindowMagnificationSizePrefs.saveSizeForCurrentDensity(
+            mWindowMagnificationFrameSizePrefs.saveSizeForCurrentDensity(
                     new Size(mMagnificationFrame.width(), mMagnificationFrame.height()));
         }
     }
@@ -944,7 +944,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     private void setMagnificationFrame(int width, int height, int centerX, int centerY) {
-        mWindowMagnificationSizePrefs.saveSizeForCurrentDensity(new Size(width, height));
+        mWindowMagnificationFrameSizePrefs.saveSizeForCurrentDensity(new Size(width, height));
 
         // Sets the initial frame area for the mirror and place it to the given center on the
         // display.
@@ -954,11 +954,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     private Size restoreMagnificationWindowFrameSizeIfPossible() {
-        if (!mWindowMagnificationSizePrefs.isPreferenceSavedForCurrentDensity()) {
+        if (!mWindowMagnificationFrameSizePrefs.isPreferenceSavedForCurrentDensity()) {
             return getDefaultMagnificationWindowFrameSize();
         }
 
-        return mWindowMagnificationSizePrefs.getSizeForCurrentDensity();
+        return mWindowMagnificationFrameSizePrefs.getSizeForCurrentDensity();
     }
 
     private Size getDefaultMagnificationWindowFrameSize() {

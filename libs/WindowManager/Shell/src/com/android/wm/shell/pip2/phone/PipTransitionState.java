@@ -19,6 +19,7 @@ package com.android.wm.shell.pip2.phone;
 import android.annotation.IntDef;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.SurfaceControl;
 import android.window.WindowContainerToken;
 
@@ -26,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.util.Preconditions;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -71,17 +73,21 @@ public class PipTransitionState {
     // State for app finishing drawing in PiP mode as a final step in enter PiP flow.
     public static final int ENTERED_PIP = 3;
 
-    // State for scheduling a transition to change PiP bounds.
-    public static final int CHANGING_PIP_BOUNDS = 4;
+    // State to indicate we have scheduled a PiP bounds change transition.
+    public static final int SCHEDULED_BOUNDS_CHANGE = 4;
 
-    // State for app potentially finishing drawing in new PiP bounds after resize is complete.
-    public static final int CHANGED_PIP_BOUNDS = 5;
+    // State for the start of playing a transition to change PiP bounds. At this point, WM Core
+    // is aware of the new PiP bounds, but Shell might still be continuing animating.
+    public static final int CHANGING_PIP_BOUNDS = 5;
+
+    // State for finishing animating into new PiP bounds after resize is complete.
+    public static final int CHANGED_PIP_BOUNDS = 6;
 
     // State for starting exiting PiP.
-    public static final int EXITING_PIP = 6;
+    public static final int EXITING_PIP = 7;
 
     // State for finishing exit PiP flow.
-    public static final int EXITED_PIP = 7;
+    public static final int EXITED_PIP = 8;
 
     private static final int FIRST_CUSTOM_STATE = 1000;
 
@@ -92,6 +98,7 @@ public class PipTransitionState {
             SWIPING_TO_PIP,
             ENTERING_PIP,
             ENTERED_PIP,
+            SCHEDULED_BOUNDS_CHANGE,
             CHANGING_PIP_BOUNDS,
             CHANGED_PIP_BOUNDS,
             EXITING_PIP,
@@ -102,6 +109,13 @@ public class PipTransitionState {
 
     @TransitionState
     private int mState;
+
+    //
+    // Dependencies
+    //
+
+    @ShellMainThread
+    private final Handler mMainHandler;
 
     //
     // Swipe up to enter PiP related state
@@ -144,6 +158,10 @@ public class PipTransitionState {
 
     private final List<PipTransitionStateChangedListener> mCallbacks = new ArrayList<>();
 
+    public PipTransitionState(@ShellMainThread Handler handler) {
+        mMainHandler = handler;
+    }
+
     /**
      * @return the state of PiP in the context of transitions.
      */
@@ -165,15 +183,42 @@ public class PipTransitionState {
      * @param extra a bundle passed to the subscribed listeners to resolve/cache extra info.
      */
     public void setState(@TransitionState int state, @Nullable Bundle extra) {
-        if (state == ENTERING_PIP || state == SWIPING_TO_PIP) {
-            // Whenever we are entering PiP caller must provide extra state to set as well.
+        if (state == ENTERING_PIP || state == SWIPING_TO_PIP
+                || state == SCHEDULED_BOUNDS_CHANGE || state == CHANGING_PIP_BOUNDS) {
+            // States listed above require extra bundles to be provided.
             Preconditions.checkArgument(extra != null && !extra.isEmpty(),
-                    "No extra bundle for either ENTERING_PIP or SWIPING_TO_PIP state.");
+                    "No extra bundle for " + stateToString(state) + " state.");
         }
         if (mState != state) {
             dispatchPipTransitionStateChanged(mState, state, extra);
             mState = state;
         }
+    }
+
+    /**
+     * Posts the state update for PiP in the context of transitions onto the main handler.
+     *
+     * <p>This is done to guarantee that any callback dispatches for the present state are
+     * complete. This is relevant for states that have multiple listeners, such as
+     * <code>SCHEDULED_BOUNDS_CHANGE</code> that helps turn off touch interactions along with
+     * the actual transition scheduling.</p>
+     */
+    public void postState(@TransitionState int state) {
+        postState(state, null /* extra */);
+    }
+
+    /**
+     * Posts the state update for PiP in the context of transitions onto the main handler.
+     *
+     * <p>This is done to guarantee that any callback dispatches for the present state are
+     * complete. This is relevant for states that have multiple listeners, such as
+     * <code>SCHEDULED_BOUNDS_CHANGE</code> that helps turn off touch interactions along with
+     * the actual transition scheduling.</p>
+     *
+     * @param extra a bundle passed to the subscribed listeners to resolve/cache extra info.
+     */
+    public void postState(@TransitionState int state, @Nullable Bundle extra) {
+        mMainHandler.post(() -> setState(state, extra));
     }
 
     private void dispatchPipTransitionStateChanged(@TransitionState int oldState,
@@ -254,22 +299,24 @@ public class PipTransitionState {
         return ++mPrevCustomState;
     }
 
-    private String stateToString() {
-        switch (mState) {
+    private static String stateToString(int state) {
+        switch (state) {
             case UNDEFINED: return "undefined";
+            case SWIPING_TO_PIP: return "swiping_to_pip";
             case ENTERING_PIP: return "entering-pip";
             case ENTERED_PIP: return "entered-pip";
+            case SCHEDULED_BOUNDS_CHANGE: return "scheduled_bounds_change";
             case CHANGING_PIP_BOUNDS: return "changing-bounds";
             case CHANGED_PIP_BOUNDS: return "changed-bounds";
             case EXITING_PIP: return "exiting-pip";
             case EXITED_PIP: return "exited-pip";
         }
-        throw new IllegalStateException("Unknown state: " + mState);
+        throw new IllegalStateException("Unknown state: " + state);
     }
 
     @Override
     public String toString() {
         return String.format("PipTransitionState(mState=%s, mInSwipePipToHomeTransition=%b)",
-                stateToString(), mInSwipePipToHomeTransition);
+                stateToString(mState), mInSwipePipToHomeTransition);
     }
 }

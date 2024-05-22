@@ -15,7 +15,11 @@
  */
 package com.android.systemui.qs.external;
 
+import static android.os.PowerWhitelistManager.REASON_TILE_ONCLICK;
+import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
 import static android.service.quicksettings.TileService.START_ACTIVITY_NEEDS_PENDING_INTENT;
+
+import static com.android.systemui.Flags.qsCustomTileClickGuaranteedBugFix;
 
 import android.app.ActivityManager;
 import android.app.compat.CompatChanges;
@@ -31,8 +35,10 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IDeviceIdleController;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.TileService;
@@ -84,12 +90,15 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private static final int MSG_ON_REMOVED = 1;
     private static final int MSG_ON_CLICK = 2;
     private static final int MSG_ON_UNLOCK_COMPLETE = 3;
+    private static final int MSG_ON_STOP_LISTENING = 4;
 
     // Bind retry control.
     private static final int MAX_BIND_RETRIES = 5;
     private static final long DEFAULT_BIND_RETRY_DELAY = 5 * DateUtils.SECOND_IN_MILLIS;
     private static final long LOW_MEMORY_BIND_RETRY_DELAY = 20 * DateUtils.SECOND_IN_MILLIS;
-
+    private static final long TILE_SERVICE_ONCLICK_ALLOW_LIST_DEFAULT_DURATION_MS = 15_000;
+    private static final String PROPERTY_TILE_SERVICE_ONCLICK_ALLOW_LIST_DURATION =
+            "property_tile_service_onclick_allow_list_duration";
     // Shared prefs that hold tile lifecycle info.
     private static final String TILES = "tiles_prefs";
 
@@ -102,6 +111,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private final PackageManagerAdapter mPackageManagerAdapter;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final ActivityManager mActivityManager;
+    private final IDeviceIdleController mDeviceIdleController;
 
     private Set<Integer> mQueuedMessages = new ArraySet<>();
     @NonNull
@@ -120,12 +130,15 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private TileChangeListener mChangeListener;
     // Return value from bindServiceAsUser, determines whether safe to call unbind.
     private AtomicBoolean mIsBound = new AtomicBoolean(false);
+    private long mTempAllowFgsLaunchDuration = TILE_SERVICE_ONCLICK_ALLOW_LIST_DEFAULT_DURATION_MS;
+    private final DeviceConfig.OnPropertiesChangedListener mDeviceConfigChangedListener;
+    private AtomicBoolean mDeviceConfigChangedListenerRegistered = new AtomicBoolean(false);
 
     @AssistedInject
     TileLifecycleManager(@Main Handler handler, Context context, IQSService service,
             PackageManagerAdapter packageManagerAdapter, BroadcastDispatcher broadcastDispatcher,
             @Assisted Intent intent, @Assisted UserHandle user, ActivityManager activityManager,
-            @Background DelayableExecutor executor) {
+            IDeviceIdleController deviceIdleController, @Background DelayableExecutor executor) {
         mContext = context;
         mHandler = handler;
         mIntent = intent;
@@ -136,6 +149,16 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         mPackageManagerAdapter = packageManagerAdapter;
         mBroadcastDispatcher = broadcastDispatcher;
         mActivityManager = activityManager;
+        mDeviceIdleController = deviceIdleController;
+        mDeviceConfigChangedListener = properties -> {
+            if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(properties.getNamespace())) {
+                return;
+            }
+            mTempAllowFgsLaunchDuration = properties.getLong(
+                    PROPERTY_TILE_SERVICE_ONCLICK_ALLOW_LIST_DURATION,
+                    TILE_SERVICE_ONCLICK_ALLOW_LIST_DEFAULT_DURATION_MS);
+        };
+
         if (mDebug) Log.d(TAG, "Creating " + mIntent + " " + mUser);
     }
 
@@ -211,6 +234,13 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         }
         mBound.set(bind);
         if (bind) {
+            if (mDeviceConfigChangedListenerRegistered.compareAndSet(false, true)) {
+                DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_SYSTEMUI, mExecutor,
+                        mDeviceConfigChangedListener);
+                mTempAllowFgsLaunchDuration = DeviceConfig.getLong(NAMESPACE_SYSTEMUI,
+                        PROPERTY_TILE_SERVICE_ONCLICK_ALLOW_LIST_DURATION,
+                        TILE_SERVICE_ONCLICK_ALLOW_LIST_DEFAULT_DURATION_MS);
+            }
             if (mBindTryCount == MAX_BIND_RETRIES) {
                 // Too many failures, give up on this tile until an update.
                 startPackageListening();
@@ -341,6 +371,16 @@ public class TileLifecycleManager extends BroadcastReceiver implements
                 onUnlockComplete();
             }
         }
+        if (qsCustomTileClickGuaranteedBugFix()) {
+            if (queue.contains(MSG_ON_STOP_LISTENING)) {
+                if (mDebug) Log.d(TAG, "Handling pending onStopListening " + getComponent());
+                if (mListening) {
+                    onStopListening();
+                } else {
+                    Log.w(TAG, "Trying to stop listening when not listening " + getComponent());
+                }
+            }
+        }
         if (queue.contains(MSG_ON_REMOVED)) {
             if (mDebug) Log.d(TAG, "Handling pending onRemoved " + getComponent());
             if (mListening) {
@@ -363,6 +403,9 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             stopPackageListening();
         }
         mChangeListener = null;
+        if (mDeviceConfigChangedListener != null) {
+            DeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigChangedListener);
+        }
     }
 
     /**
@@ -556,17 +599,32 @@ public class TileLifecycleManager extends BroadcastReceiver implements
 
     @Override
     public void onStopListening() {
-        if (mDebug) Log.d(TAG, "onStopListening " + getComponent());
-        mListening = false;
-        if (isNotNullAndFailedAction(mOptionalWrapper, QSTileServiceWrapper::onStopListening)) {
-            handleDeath();
+        if (qsCustomTileClickGuaranteedBugFix() && hasPendingClick()) {
+            Log.d(TAG, "Enqueue stop listening");
+            queueMessage(MSG_ON_STOP_LISTENING);
+        } else {
+            if (mDebug) Log.d(TAG, "onStopListening " + getComponent());
+            mListening = false;
+            if (isNotNullAndFailedAction(mOptionalWrapper, QSTileServiceWrapper::onStopListening)) {
+                handleDeath();
+            }
         }
     }
 
     @Override
     public void onClick(IBinder iBinder) {
         if (mDebug) Log.d(TAG, "onClick " + iBinder + " " + getComponent() + " " + mUser);
-        if (isNullOrFailedAction(mOptionalWrapper, (wrapper) -> wrapper.onClick(iBinder))) {
+        if (isNullOrFailedAction(mOptionalWrapper, (wrapper) -> {
+            final String packageName = mIntent.getComponent().getPackageName();
+            try {
+                mDeviceIdleController.addPowerSaveTempWhitelistApp(packageName,
+                        mTempAllowFgsLaunchDuration, mUser.getIdentifier(), REASON_TILE_ONCLICK,
+                        "tile onclick");
+            } catch (RemoteException e) {
+                Log.d(TAG, "Caught exception trying to add client package to temp allow list", e);
+            }
+            return wrapper.onClick(iBinder);
+        })) {
             mClickBinder = iBinder;
             queueMessage(MSG_ON_CLICK);
             handleDeath();

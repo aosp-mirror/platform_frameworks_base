@@ -69,6 +69,15 @@ class QSTileIntentUserInputHandlerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testPassesIntentToStarter_dismissShadeAndShowOverLockScreenWhenLocked() {
+        val intent = Intent("test.ACTION")
+
+        underTest.handle(null, intent, true)
+
+        verify(activityStarter).startActivity(eq(intent), eq(true), any(), eq(true))
+    }
+
+    @Test
     fun testPassesActivityPendingIntentToStarterAsPendingIntent() {
         val pendingIntent = mock<PendingIntent> { whenever(isActivity).thenReturn(true) }
 

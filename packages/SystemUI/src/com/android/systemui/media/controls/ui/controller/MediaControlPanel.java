@@ -743,7 +743,8 @@ public class MediaControlPanel {
                                     mPackageName,
                                     /* aboveStatusBar */ true,
                                     mMediaViewHolder.getSeamlessButton(),
-                                    UserHandle.getUserHandleForUid(mUid));
+                                    UserHandle.getUserHandleForUid(mUid),
+                                    mToken);
                         }
                     } else {
                         mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
@@ -775,7 +776,8 @@ public class MediaControlPanel {
                                     mPackageName,
                                     /* aboveStatusBar */ true,
                                     mMediaViewHolder.getSeamlessButton(),
-                                    UserHandle.getUserHandleForUid(mUid));
+                                    UserHandle.getUserHandleForUid(mUid),
+                                    mToken);
                         }
                     }
                 });
@@ -786,10 +788,11 @@ public class MediaControlPanel {
             if (mKey != null) {
                 closeGuts();
                 if (!mMediaDataManagerLazy.get().dismissMediaData(mKey,
-                        MediaViewController.GUTS_ANIMATION_DURATION + 100)) {
+                        /* delay */ MediaViewController.GUTS_ANIMATION_DURATION + 100,
+                        /* userInitiated */ true)) {
                     Log.w(TAG, "Manager failed to dismiss media " + mKey);
                     // Remove directly from carousel so user isn't stuck with defunct controls
-                    mMediaCarouselController.removePlayer(mKey, false, false);
+                    mMediaCarouselController.removePlayer(mKey, false, false, true);
                 }
             } else {
                 Log.w(TAG, "Dismiss media with null notification. Token uid="

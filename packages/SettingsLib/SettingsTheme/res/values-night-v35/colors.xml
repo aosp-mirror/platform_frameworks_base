@@ -37,8 +37,11 @@
     <!-- Material next track off color-->
     <color name="settingslib_track_off_color">@color/settingslib_materialColorSurfaceContainerHighest</color>
 
+    <!-- Dialog text button color. -->
+    <color name="settingslib_dialog_accent">@color/settingslib_materialColorPrimary</color>
+
     <!-- Dialog background color. -->
-    <color name="settingslib_dialog_background">@color/settingslib_materialColorSurfaceInverse</color>
+    <color name="settingslib_dialog_background">@color/settingslib_materialColorSurfaceContainerHigh</color>
 
     <color name="settingslib_colorSurfaceHeader">@color/settingslib_materialColorSurfaceVariant</color>
 

@@ -16,17 +16,18 @@
 
 package com.android.systemui.volume.panel.component.anc.ui.composable
 
+import android.view.Gravity
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.slice.Slice
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.Expandable
@@ -47,9 +48,10 @@ constructor(
 ) {
 
     /** Shows a popup with the [expandable] animation. */
-    fun show(expandable: Expandable?) {
+    fun show(expandable: Expandable?, horizontalGravity: Int) {
         uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_ANC_POPUP_SHOWN)
-        volumePanelPopup.show(expandable, { Title() }, { Content(it) })
+        val gravity = horizontalGravity or Gravity.BOTTOM
+        volumePanelPopup.show(expandable, gravity, { Title() }, { Content(it) })
     }
 
     @Composable
@@ -65,14 +67,18 @@ constructor(
 
     @Composable
     private fun Content(dialog: SystemUIDialog) {
-        val isAvailable by viewModel.isAvailable.collectAsState(true)
-
+        val isAvailable by viewModel.isAvailable.collectAsStateWithLifecycle(true)
         if (!isAvailable) {
             SideEffect { dialog.dismiss() }
             return
         }
 
-        val slice by viewModel.popupSlice.collectAsState()
+        val slice by viewModel.popupSlice.collectAsStateWithLifecycle()
+        if (!viewModel.isClickable(slice)) {
+            SideEffect { dialog.dismiss() }
+            return
+        }
+
         SliceAndroidView(
             modifier = Modifier.fillMaxWidth(),
             slice = slice,

@@ -1,0 +1,59 @@
+# Ravenwood "policy" file for framework-minus-apex.
+
+# Keep all AIDL interfaces
+class :aidl keepclass
+
+# Keep all feature flag implementations
+class :feature_flags keepclass
+
+# Keep all sysprops generated code implementations
+class :sysprops keepclass
+
+# Exported to Mainline modules; cannot use annotations
+class com.android.internal.util.FastXmlSerializer keepclass
+class com.android.internal.util.FileRotator keepclass
+class com.android.internal.util.HexDump keepclass
+class com.android.internal.util.IndentingPrintWriter keepclass
+class com.android.internal.util.LocalLog keepclass
+class com.android.internal.util.MessageUtils keepclass
+class com.android.internal.util.TokenBucket keepclass
+class android.os.HandlerExecutor keepclass
+class android.util.BackupUtils keepclass
+class android.util.IndentingPrintWriter keepclass
+class android.util.LocalLog keepclass
+class android.util.Pair keepclass
+class android.util.Rational keepclass
+
+# From modules-utils; cannot use annotations
+class com.android.internal.util.Preconditions keepclass
+class com.android.internal.logging.InstanceId keepclass
+class com.android.internal.logging.InstanceIdSequence keepclass
+class com.android.internal.logging.UiEvent keepclass
+class com.android.internal.logging.UiEventLogger keepclass
+
+# From modules-utils; cannot use annotations
+class com.android.modules.utils.BinaryXmlPullParser keepclass
+class com.android.modules.utils.BinaryXmlSerializer keepclass
+class com.android.modules.utils.FastDataInput keepclass
+class com.android.modules.utils.FastDataOutput keepclass
+class com.android.modules.utils.ModifiedUtf8 keepclass
+class com.android.modules.utils.TypedXmlPullParser keepclass
+class com.android.modules.utils.TypedXmlSerializer keepclass
+
+# Uri
+class android.net.Uri keepclass
+class android.net.UriCodec keepclass
+
+# Telephony
+class android.telephony.PinResult keepclass
+
+# Just enough to support mocking, no further functionality
+class android.content.BroadcastReceiver keep
+    method <init> ()V keep
+class android.content.Context keep
+    method <init> ()V keep
+    method getSystemService (Ljava/lang/Class;)Ljava/lang/Object; keep
+class android.content.pm.PackageManager keep
+    method <init> ()V keep
+class android.text.ClipboardManager keep
+    method <init> ()V keep

@@ -27,16 +27,18 @@
     <!-- Whether to reset Battery Stats on unplug if the battery was significantly charged -->
     <bool name="config_batteryStatsResetOnUnplugAfterSignificantCharge">true</bool>
 
-    <!-- CPU power stats collection throttle period in milliseconds.  Since power stats collection
-    is a relatively expensive operation, this throttle period may need to be adjusted for low-power
-    devices-->
-    <integer name="config_defaultPowerStatsThrottlePeriodCpu">60000</integer>
+    <!-- Power stats collection throttle periods in milliseconds.  Since power stats collection
+    is a relatively expensive operation, these throttle period may need to be adjusted for low-power
+    devices.
 
-    <!-- Mobile Radio power stats collection throttle period in milliseconds. -->
-    <integer name="config_defaultPowerStatsThrottlePeriodMobileRadio">3600000</integer>
-
-    <!-- Mobile Radio power stats collection throttle period in milliseconds. -->
-    <integer name="config_defaultPowerStatsThrottlePeriodWifi">3600000</integer>
+    The syntax of this config string is as follows:
+    <pre>
+       power-component-name1:throttle-period-millis1 power-component-name2:throttle-period-ms2 ...
+    </pre>
+    Use "*" for the power-component-name to represent the default for all power components
+    not mentioned by name.
+    -->
+    <string name="config_powerStatsThrottlePeriods">cpu:60000 *:300000</string>
 
     <!-- PowerStats aggregation period in milliseconds. This is the interval at which the power
     stats aggregation procedure is performed and the results stored in PowerStatsStore. -->

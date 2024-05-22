@@ -23,7 +23,9 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsIntera
 import com.android.systemui.keyguard.domain.interactor.FromOccludedTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.res.R
@@ -56,8 +58,7 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_LOCKSCREEN_DURATION,
-            from = KeyguardState.OCCLUDED,
-            to = KeyguardState.LOCKSCREEN,
+            edge = Edge.create(from = OCCLUDED, to = LOCKSCREEN),
         )
 
     /** Lockscreen views y-translation */
@@ -101,7 +102,7 @@ constructor(
                 .filter { (wasOccluded, isOccluded) ->
                     wasOccluded &&
                         !isOccluded &&
-                        keyguardTransitionInteractor.getCurrentState() == KeyguardState.OCCLUDED
+                        keyguardTransitionInteractor.getCurrentState() == OCCLUDED
                 }
                 .map { 0f }
         )

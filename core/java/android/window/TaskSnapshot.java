@@ -16,6 +16,7 @@
 
 package android.window;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -31,6 +32,11 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.view.Surface;
 import android.view.WindowInsetsController;
+
+import com.android.window.flags.Flags;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Represents a task snapshot.
@@ -68,6 +74,21 @@ public class TaskSnapshot implements Parcelable {
     private final boolean mHasImeSurface;
     // Must be one of the named color spaces, otherwise, always use SRGB color space.
     private final ColorSpace mColorSpace;
+    private int mInternalReferences;
+
+    /** This snapshot object is being broadcast. */
+    public static final int REFERENCE_BROADCAST = 1;
+    /** This snapshot object is in the cache. */
+    public static final int REFERENCE_CACHE = 1 << 1;
+    /** This snapshot object is being persistent. */
+    public static final int REFERENCE_PERSIST = 1 << 2;
+    @IntDef(flag = true, prefix = { "REFERENCE_" }, value = {
+            REFERENCE_BROADCAST,
+            REFERENCE_CACHE,
+            REFERENCE_PERSIST
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ReferenceFlags {}
 
     public TaskSnapshot(long id, long captureTime,
             @NonNull ComponentName topActivityComponent, HardwareBuffer snapshot,
@@ -296,7 +317,29 @@ public class TaskSnapshot implements Parcelable {
                 + " mWindowingMode=" + mWindowingMode
                 + " mAppearance=" + mAppearance
                 + " mIsTranslucent=" + mIsTranslucent
-                + " mHasImeSurface=" + mHasImeSurface;
+                + " mHasImeSurface=" + mHasImeSurface
+                + " mInternalReferences=" + mInternalReferences;
+    }
+
+    /**
+     * Adds a reference when the object is held somewhere.
+     * Only used in core.
+     */
+    public synchronized void addReference(@ReferenceFlags int usage) {
+        mInternalReferences |= usage;
+    }
+
+    /**
+     * Removes a reference when the object is not held from somewhere. The snapshot will be closed
+     * once the reference becomes zero.
+     * Only used in core.
+     */
+    public synchronized void removeReference(@ReferenceFlags int usage) {
+        mInternalReferences &= ~usage;
+        if (Flags.releaseSnapshotAggressively() && mInternalReferences == 0 && mSnapshot != null
+                && !mSnapshot.isClosed()) {
+            mSnapshot.close();
+        }
     }
 
     public static final @NonNull Creator<TaskSnapshot> CREATOR = new Creator<TaskSnapshot>() {

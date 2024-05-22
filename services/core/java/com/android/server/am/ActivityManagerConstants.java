@@ -1115,17 +1115,17 @@ final class ActivityManagerConstants extends ContentObserver {
 
     /**
      * If a service of a timeout-enforced type doesn't finish within this duration after its
-     * timeout, then we'll declare an ANR.
+     * timeout, then we'll crash the app.
      * i.e. if the time limit for a type is 1 hour, and this extra duration is 10 seconds, then
-     * the app will be ANR'ed 1 hour and 10 seconds after it started.
+     * the app will crash 1 hour and 10 seconds after it started.
      */
-    private static final String KEY_FGS_ANR_EXTRA_WAIT_DURATION = "fgs_anr_extra_wait_duration";
+    private static final String KEY_FGS_CRASH_EXTRA_WAIT_DURATION = "fgs_crash_extra_wait_duration";
 
-    /** @see #KEY_FGS_ANR_EXTRA_WAIT_DURATION */
-    static final long DEFAULT_FGS_ANR_EXTRA_WAIT_DURATION = 10_000;
+    /** @see #KEY_FGS_CRASH_EXTRA_WAIT_DURATION */
+    static final long DEFAULT_FGS_CRASH_EXTRA_WAIT_DURATION = 10_000;
 
-    /** @see #KEY_FGS_ANR_EXTRA_WAIT_DURATION */
-    public volatile long mFgsAnrExtraWaitDuration = DEFAULT_FGS_ANR_EXTRA_WAIT_DURATION;
+    /** @see #KEY_FGS_CRASH_EXTRA_WAIT_DURATION */
+    public volatile long mFgsCrashExtraWaitDuration = DEFAULT_FGS_CRASH_EXTRA_WAIT_DURATION;
 
     /** @see #KEY_USE_TIERED_CACHED_ADJ */
     public boolean USE_TIERED_CACHED_ADJ = DEFAULT_USE_TIERED_CACHED_ADJ;
@@ -1315,8 +1315,8 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION:
                                 updateShortFgsAnrExtraWaitDuration();
                                 break;
-                            case KEY_FGS_ANR_EXTRA_WAIT_DURATION:
-                                updateFgsAnrExtraWaitDuration();
+                            case KEY_FGS_CRASH_EXTRA_WAIT_DURATION:
+                                updateFgsCrashExtraWaitDuration();
                                 break;
                             case KEY_PROACTIVE_KILLS_ENABLED:
                                 updateProactiveKillsEnabled();
@@ -2199,11 +2199,11 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_DATA_SYNC_FGS_TIMEOUT_DURATION);
     }
 
-    private void updateFgsAnrExtraWaitDuration() {
-        mFgsAnrExtraWaitDuration = DeviceConfig.getLong(
+    private void updateFgsCrashExtraWaitDuration() {
+        mFgsCrashExtraWaitDuration = DeviceConfig.getLong(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                KEY_FGS_ANR_EXTRA_WAIT_DURATION,
-                DEFAULT_FGS_ANR_EXTRA_WAIT_DURATION);
+                KEY_FGS_CRASH_EXTRA_WAIT_DURATION,
+                DEFAULT_FGS_CRASH_EXTRA_WAIT_DURATION);
     }
 
     private void updateEnableWaitForFinishAttachApplication() {
@@ -2456,8 +2456,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mMediaProcessingFgsTimeoutDuration);
         pw.print("  "); pw.print(KEY_DATA_SYNC_FGS_TIMEOUT_DURATION);
         pw.print("="); pw.println(mDataSyncFgsTimeoutDuration);
-        pw.print("  "); pw.print(KEY_FGS_ANR_EXTRA_WAIT_DURATION);
-        pw.print("="); pw.println(mFgsAnrExtraWaitDuration);
+        pw.print("  "); pw.print(KEY_FGS_CRASH_EXTRA_WAIT_DURATION);
+        pw.print("="); pw.println(mFgsCrashExtraWaitDuration);
 
         pw.print("  "); pw.print(KEY_USE_TIERED_CACHED_ADJ);
         pw.print("="); pw.println(USE_TIERED_CACHED_ADJ);

@@ -29,7 +29,7 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
-import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
+import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
@@ -63,7 +63,7 @@ constructor(
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
     sceneBackInteractor: SceneBackInteractor,
-    val mediaDataManager: MediaDataManager,
+    val mediaCarouselInteractor: MediaCarouselInteractor,
 ) {
     private val backScene: StateFlow<SceneKey> =
         sceneBackInteractor.backScene
@@ -79,13 +79,13 @@ constructor(
         combine(
                 deviceEntryInteractor.isUnlocked,
                 deviceEntryInteractor.canSwipeToEnter,
-                qsSceneAdapter.isCustomizing,
+                qsSceneAdapter.isCustomizerShowing,
                 backScene,
-            ) { isUnlocked, canSwipeToDismiss, isCustomizing, backScene ->
+            ) { isUnlocked, canSwipeToDismiss, isCustomizerShowing, backScene ->
                 destinationScenes(
                     isUnlocked,
                     canSwipeToDismiss,
-                    isCustomizing,
+                    isCustomizerShowing,
                     backScene,
                 )
             }
@@ -96,10 +96,12 @@ constructor(
                     destinationScenes(
                         isUnlocked = deviceEntryInteractor.isUnlocked.value,
                         canSwipeToDismiss = deviceEntryInteractor.canSwipeToEnter.value,
-                        isCustomizing = qsSceneAdapter.isCustomizing.value,
+                        isCustomizing = qsSceneAdapter.isCustomizerShowing.value,
                         backScene = backScene.value,
                     ),
             )
+
+    val isMediaVisible: StateFlow<Boolean> = mediaCarouselInteractor.hasAnyMediaOrRecommendation
 
     private fun destinationScenes(
         isUnlocked: Boolean,
@@ -142,10 +144,5 @@ constructor(
             footerActionsController.init()
         }
         return footerActionsViewModelFactory.create(lifecycleOwner)
-    }
-
-    fun isMediaVisible(): Boolean {
-        // TODO(b/328207006): use new pipeline to handle updates while visible
-        return mediaDataManager.hasAnyMediaOrRecommendation()
     }
 }

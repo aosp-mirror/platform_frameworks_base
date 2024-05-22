@@ -66,7 +66,7 @@ import platform.test.runner.parameterized.Parameters
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 @TestableLooper.RunWithLooper
-class KeyguardBypassControllerTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class KeyguardBypassControllerTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val featureFlags = FakeFeatureFlags()
@@ -92,7 +92,7 @@ class KeyguardBypassControllerTest(flags: FlagsParameterization?) : SysuiTestCas
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Captor

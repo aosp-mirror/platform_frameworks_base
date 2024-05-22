@@ -5123,13 +5123,6 @@ public final class Settings {
         public static final String SCREEN_BRIGHTNESS = "screen_brightness";
 
         /**
-         * The screen backlight brightness between 0.0f and 1.0f.
-         * @hide
-         */
-        @Readable
-        public static final String SCREEN_BRIGHTNESS_FLOAT = "screen_brightness_float";
-
-        /**
          * Control whether to enable automatic brightness mode.
          */
         @Readable
@@ -6273,7 +6266,6 @@ public final class Settings {
             PUBLIC_SETTINGS.add(DIM_SCREEN);
             PUBLIC_SETTINGS.add(SCREEN_OFF_TIMEOUT);
             PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS);
-            PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS_FLOAT);
             PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS_MODE);
             PUBLIC_SETTINGS.add(MODE_RINGER_STREAMS_AFFECTED);
             PUBLIC_SETTINGS.add(MUTE_STREAMS_AFFECTED);
@@ -11181,6 +11173,35 @@ public final class Settings {
                 "visual_query_accessibility_detection_enabled";
 
         /**
+         * Timeout to be used for unbinding to the configured remote
+         * {@link android.service.ondeviceintelligence.OnDeviceIntelligenceService} if there are no
+         * requests in the queue. A value of -1 represents to never unbind.
+         *
+         * @hide
+         */
+        public static final String ON_DEVICE_INTELLIGENCE_UNBIND_TIMEOUT_MS =
+                "on_device_intelligence_unbind_timeout_ms";
+
+
+        /**
+         * Timeout that represents maximum idle time before which a callback should be populated.
+         *
+         * @hide
+         */
+        public static final String ON_DEVICE_INTELLIGENCE_IDLE_TIMEOUT_MS =
+                "on_device_intelligence_idle_timeout_ms";
+
+        /**
+         * Timeout to be used for unbinding to the configured remote
+         * {@link android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService} if there
+         * are no requests in the queue. A value of -1 represents to never unbind.
+         *
+         * @hide
+         */
+        public static final String ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS =
+                "on_device_inference_unbind_timeout_ms";
+
+        /**
          * Control whether Night display is currently activated.
          * @hide
          */
@@ -14917,6 +14938,17 @@ public final class Settings {
         public static final String DROPBOX_TAG_PREFIX = "dropbox:";
 
         /**
+         * Lines of kernel logs to include with system crash/ANR/etc. reports, as a
+         * prefix of the dropbox tag of the report type. For example,
+         * "kernel_logs_for_system_server_anr" controls the lines of kernel logs
+         * captured with system server ANR reports. 0 to disable.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String ERROR_KERNEL_LOG_PREFIX = "kernel_logs_for_";
+
+        /**
          * Lines of logcat to include with system crash/ANR/etc. reports, as a
          * prefix of the dropbox tag of the report type. For example,
          * "logcat_for_system_server_anr" controls the lines of logcat captured
@@ -16999,6 +17031,28 @@ public final class Settings {
          * @hide
          */
         public static final String ENABLE_BACK_ANIMATION = "enable_back_animation";
+
+        /**
+         * An allow list of packages for which the user has granted the permission to communicate
+         * across profiles.
+         *
+         * @hide
+         */
+        @Readable
+        @FlaggedApi(android.app.admin.flags.Flags.FLAG_BACKUP_CONNECTED_APPS_SETTINGS)
+        public static final String CONNECTED_APPS_ALLOWED_PACKAGES =
+                "connected_apps_allowed_packages";
+
+        /**
+         * A block list of packages for which the user has denied the permission to communicate
+         * across profiles.
+         *
+         * @hide
+         */
+        @Readable
+        @FlaggedApi(android.app.admin.flags.Flags.FLAG_BACKUP_CONNECTED_APPS_SETTINGS)
+        public static final String CONNECTED_APPS_DISALLOWED_PACKAGES =
+                "connected_apps_disallowed_packages";
 
         /** @hide */ public static String zenModeToString(int mode) {
             if (mode == ZEN_MODE_IMPORTANT_INTERRUPTIONS) return "ZEN_MODE_IMPORTANT_INTERRUPTIONS";

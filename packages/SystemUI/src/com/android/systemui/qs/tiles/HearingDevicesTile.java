@@ -20,13 +20,13 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
-import android.view.View;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Flags;
 import com.android.systemui.accessibility.hearingaid.HearingDevicesDialogManager;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -72,8 +72,8 @@ public class HearingDevicesTile extends QSTileImpl<State> {
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
-        mUiHandler.post(() -> mDialogManager.showDialog(view));
+    protected void handleClick(@Nullable Expandable expandable) {
+        mUiHandler.post(() -> mDialogManager.showDialog(expandable));
     }
 
     @Override

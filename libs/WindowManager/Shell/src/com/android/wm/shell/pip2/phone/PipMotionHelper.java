@@ -31,7 +31,9 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.Debug;
+import android.view.SurfaceControl;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
@@ -39,6 +41,7 @@ import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 import com.android.wm.shell.common.pip.PipAppOpsListener;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipSnapAlgorithm;
@@ -55,8 +58,10 @@ import java.util.function.Consumer;
  * A helper to animate and manipulate the PiP.
  */
 public class PipMotionHelper implements PipAppOpsListener.Callback,
-        FloatingContentCoordinator.FloatingContent {
+        FloatingContentCoordinator.FloatingContent,
+        PipTransitionState.PipTransitionStateChangedListener {
     private static final String TAG = "PipMotionHelper";
+    private static final String FLING_BOUNDS_CHANGE = "fling_bounds_change";
     private static final boolean DEBUG = false;
 
     private static final int SHRINK_STACK_FROM_MENU_DURATION = 250;
@@ -72,7 +77,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     private final Context mContext;
     private @NonNull PipBoundsState mPipBoundsState;
-
+    private @NonNull PipBoundsAlgorithm mPipBoundsAlgorithm;
+    private @NonNull PipScheduler mPipScheduler;
+    private @NonNull PipTransitionState mPipTransitionState;
     private PhonePipMenuController mMenuController;
     private PipSnapAlgorithm mSnapAlgorithm;
 
@@ -145,6 +152,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     private boolean mDismissalPending = false;
 
     /**
+     * Set to true if bounds change transition has been scheduled from PipMotionHelper.
+     */
+    private boolean mWaitingForBoundsChangeTransition = false;
+
+    /**
      * Gets set in {@link #animateToExpandedState(Rect, Rect, Rect, Runnable)}, this callback is
      * used to show menu activity when the expand animation is completed.
      */
@@ -152,22 +164,25 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     public PipMotionHelper(Context context, @NonNull PipBoundsState pipBoundsState,
             PhonePipMenuController menuController, PipSnapAlgorithm snapAlgorithm,
-            FloatingContentCoordinator floatingContentCoordinator,
-            Optional<PipPerfHintController> pipPerfHintControllerOptional) {
+            FloatingContentCoordinator floatingContentCoordinator, PipScheduler pipScheduler,
+            Optional<PipPerfHintController> pipPerfHintControllerOptional,
+            PipBoundsAlgorithm pipBoundsAlgorithm, PipTransitionState pipTransitionState) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
+        mPipBoundsAlgorithm = pipBoundsAlgorithm;
+        mPipScheduler = pipScheduler;
         mMenuController = menuController;
         mSnapAlgorithm = snapAlgorithm;
         mFloatingContentCoordinator = floatingContentCoordinator;
         mPipPerfHintController = pipPerfHintControllerOptional.orElse(null);
         mResizePipUpdateListener = (target, values) -> {
             if (mPipBoundsState.getMotionBoundsState().isInMotion()) {
-                /*
-                mPipTaskOrganizer.scheduleUserResizePip(getBounds(),
-                        mPipBoundsState.getMotionBoundsState().getBoundsInMotion(), null);
-                 */
+                mPipScheduler.scheduleUserResizePip(
+                        mPipBoundsState.getMotionBoundsState().getBoundsInMotion());
             }
         };
+        mPipTransitionState = pipTransitionState;
+        mPipTransitionState.addPipTransitionStateChangedListener(this);
     }
 
     void init() {
@@ -236,12 +251,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 mPipBoundsState.setBounds(toBounds);
             } else {
                 mPipBoundsState.getMotionBoundsState().setBoundsInMotion(toBounds);
-                /*
-                mPipTaskOrganizer.scheduleUserResizePip(getBounds(), toBounds,
-                        (Rect newBounds) -> {
-                                mMenuController.updateMenuLayout(newBounds);
-                        });
-                 */
+                mPipScheduler.scheduleUserResizePip(toBounds);
             }
         } else {
             // If PIP is 'catching up' after being stuck in the dismiss target, update the animation
@@ -552,11 +562,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     /** Set new fling configs whose min/max values respect the given movement bounds. */
     private void rebuildFlingConfigs() {
         mFlingConfigX = new PhysicsAnimator.FlingConfig(DEFAULT_FRICTION,
-                mPipBoundsState.getMovementBounds().left,
-                mPipBoundsState.getMovementBounds().right);
+                mPipBoundsAlgorithm.getMovementBounds(getBounds()).left,
+                mPipBoundsAlgorithm.getMovementBounds(getBounds()).right);
         mFlingConfigY = new PhysicsAnimator.FlingConfig(DEFAULT_FRICTION,
-                mPipBoundsState.getMovementBounds().top,
-                mPipBoundsState.getMovementBounds().bottom);
+                mPipBoundsAlgorithm.getMovementBounds(getBounds()).top,
+                mPipBoundsAlgorithm.getMovementBounds(getBounds()).bottom);
         final Rect insetBounds = mPipBoundsState.getDisplayLayout().stableInsets();
         mStashConfigX = new PhysicsAnimator.FlingConfig(
                 DEFAULT_FRICTION,
@@ -623,22 +633,15 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     private void onBoundsPhysicsAnimationEnd() {
         // The physics animation ended, though we may not necessarily be done animating, such as
         // when we're still dragging after moving out of the magnetic target.
-        if (!mDismissalPending
-                && !mSpringingToTouch
-                && !mMagnetizedPip.getObjectStuckToTarget()) {
-            // All motion operations have actually finished.
-            mPipBoundsState.setBounds(
-                    mPipBoundsState.getMotionBoundsState().getBoundsInMotion());
-            mPipBoundsState.getMotionBoundsState().onAllAnimationsEnded();
-            if (!mDismissalPending) {
-                // do not schedule resize if PiP is dismissing, which may cause app re-open to
-                // mBounds instead of its normal bounds.
-                // mPipTaskOrganizer.scheduleFinishResizePip(getBounds());
-            }
+        if (!mDismissalPending && !mSpringingToTouch && !mMagnetizedPip.getObjectStuckToTarget()) {
+            // do not schedule resize if PiP is dismissing, which may cause app re-open to
+            // mBounds instead of its normal bounds.
+            Bundle extra = new Bundle();
+            extra.putBoolean(FLING_BOUNDS_CHANGE, true);
+            mPipTransitionState.setState(PipTransitionState.SCHEDULED_BOUNDS_CHANGE, extra);
+            return;
         }
-        mPipBoundsState.getMotionBoundsState().onPhysicsAnimationEnded();
-        mSpringingToTouch = false;
-        mDismissalPending = false;
+        settlePipBoundsAfterPhysicsAnimation(true /* animatingAfter */);
         cleanUpHighPerfSessionMaybe();
     }
 
@@ -662,7 +665,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                             + " callers=\n%s", TAG, toBounds, Debug.getCallers(5, "    "));
         }
         if (!toBounds.equals(getBounds())) {
-            // mPipTaskOrganizer.scheduleResizePip(toBounds, mUpdateBoundsCallback);
+            mPipScheduler.scheduleAnimateResizePip(toBounds);
         }
     }
 
@@ -683,6 +686,74 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         // mPipTaskOrganizer.scheduleAnimateResizePip(toBounds, duration,
         //         TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND, null /* updateBoundsCallback */);
         // setAnimatingToBounds(toBounds);
+    }
+
+    @Override
+    public void onPipTransitionStateChanged(@PipTransitionState.TransitionState int oldState,
+            @PipTransitionState.TransitionState int newState,
+            @Nullable Bundle extra) {
+        switch (newState) {
+            case PipTransitionState.SCHEDULED_BOUNDS_CHANGE:
+                if (!extra.getBoolean(FLING_BOUNDS_CHANGE)) break;
+
+                if (mPipBoundsState.getBounds().equals(
+                        mPipBoundsState.getMotionBoundsState().getBoundsInMotion())) {
+                    // Avoid scheduling transitions for bounds that don't change, such transition is
+                    // a no-op and would be aborted.
+                    settlePipBoundsAfterPhysicsAnimation(false /* animatingAfter */);
+                    cleanUpHighPerfSessionMaybe();
+                    // SCHEDULED_BOUNDS_CHANGE can have multiple active listeners making
+                    // actual changes (e.g. PipTouchHandler). So post state update onto handler,
+                    // to run after synchronous dispatch is complete.
+                    mPipTransitionState.postState(PipTransitionState.CHANGED_PIP_BOUNDS);
+                    break;
+                }
+
+                // If touch is turned off and we are in a fling animation, schedule a transition.
+                mWaitingForBoundsChangeTransition = true;
+                mPipScheduler.scheduleAnimateResizePip(
+                        mPipBoundsState.getMotionBoundsState().getBoundsInMotion());
+                break;
+            case PipTransitionState.CHANGING_PIP_BOUNDS:
+                if (!mWaitingForBoundsChangeTransition) break;
+
+                // If bounds change transition was scheduled from this class, handle leash updates.
+                mWaitingForBoundsChangeTransition = false;
+                SurfaceControl.Transaction startTx = extra.getParcelable(
+                        PipTransition.PIP_START_TX, SurfaceControl.Transaction.class);
+                Rect destinationBounds = extra.getParcelable(
+                        PipTransition.PIP_DESTINATION_BOUNDS, Rect.class);
+                startTx.setPosition(mPipTransitionState.mPinnedTaskLeash,
+                        destinationBounds.left, destinationBounds.top);
+                startTx.apply();
+
+                // All motion operations have actually finished, so make bounds cache updates.
+                settlePipBoundsAfterPhysicsAnimation(false /* animatingAfter */);
+                cleanUpHighPerfSessionMaybe();
+
+                // Setting state to CHANGED_PIP_BOUNDS applies finishTx and notifies Core.
+                mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
+                break;
+            case PipTransitionState.EXITING_PIP:
+                // We need to force finish any local animators if about to leave PiP, to avoid
+                // breaking the state (e.g. leashes are cleaned up upon exit).
+                if (!mPipBoundsState.getMotionBoundsState().isInMotion()) break;
+                cancelPhysicsAnimation();
+                settlePipBoundsAfterPhysicsAnimation(false /* animatingAfter */);
+        }
+    }
+
+    private void settlePipBoundsAfterPhysicsAnimation(boolean animatingAfter) {
+        if (!animatingAfter) {
+            // The physics animation ended, though we may not necessarily be done animating, such as
+            // when we're still dragging after moving out of the magnetic target. Only set the final
+            // bounds state and clear motion bounds completely if the whole animation is over.
+            mPipBoundsState.setBounds(mPipBoundsState.getMotionBoundsState().getBoundsInMotion());
+            mPipBoundsState.getMotionBoundsState().onAllAnimationsEnded();
+        }
+        mPipBoundsState.getMotionBoundsState().onPhysicsAnimationEnded();
+        mSpringingToTouch = false;
+        mDismissalPending = false;
     }
 
     /**

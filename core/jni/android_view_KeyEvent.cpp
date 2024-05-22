@@ -135,8 +135,8 @@ KeyEvent android_view_KeyEvent_obtainAsCopy(JNIEnv* env, jobject eventObj) {
     jlong eventTime = env->GetLongField(eventObj, gKeyEventClassInfo.mEventTime);
 
     KeyEvent event;
-    event.initialize(id, deviceId, source, displayId, *hmac, action, flags, keyCode, scanCode,
-                     metaState, repeatCount, downTime, eventTime);
+    event.initialize(id, deviceId, source, ui::LogicalDisplayId{displayId}, *hmac, action, flags,
+                     keyCode, scanCode, metaState, repeatCount, downTime, eventTime);
     return event;
 }
 

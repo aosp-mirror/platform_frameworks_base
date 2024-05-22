@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.notification.row
 
 import android.app.Flags
+import android.os.SystemProperties
+import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
 import javax.inject.Inject
 
 /**
@@ -27,11 +29,19 @@ interface HeadsUpStyleProvider {
     fun shouldApplyCompactStyle(): Boolean
 }
 
-class HeadsUpStyleProviderImpl @Inject constructor() : HeadsUpStyleProvider {
+class HeadsUpStyleProviderImpl
+@Inject
+constructor(private val statusBarModeRepositoryStore: StatusBarModeRepositoryStore) :
+    HeadsUpStyleProvider {
 
-    /**
-     * TODO(b/270709257) This feature is under development. This method returns Compact when the
-     *   flag is enabled for fish fooding purpose.
-     */
-    override fun shouldApplyCompactStyle(): Boolean = Flags.compactHeadsUpNotification()
+    override fun shouldApplyCompactStyle(): Boolean {
+        return Flags.compactHeadsUpNotification() && (isInImmersiveMode() || alwaysShow())
+    }
+
+    private fun isInImmersiveMode() =
+        statusBarModeRepositoryStore.defaultDisplay.isInFullscreenMode.value
+
+    /** developer setting to always show Minimal HUN, even if the device is not in full screen */
+    private fun alwaysShow() =
+        SystemProperties.getBoolean("persist.compact_heads_up_notification.always_show", false)
 }

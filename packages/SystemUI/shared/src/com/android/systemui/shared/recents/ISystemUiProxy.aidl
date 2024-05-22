@@ -162,5 +162,10 @@ interface ISystemUiProxy {
     oneway void setOverrideHomeButtonLongPress(long duration, float slopMultiplier, boolean haptic)
             = 55;
 
-    // Next id = 56
+    /**
+     * Notifies to toggle quick settings panel.
+     */
+    oneway void toggleQuickSettingsPanel() = 56;
+
+    // Next id = 57
 }

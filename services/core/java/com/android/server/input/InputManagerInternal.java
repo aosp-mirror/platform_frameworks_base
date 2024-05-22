@@ -84,29 +84,6 @@ public abstract class InputManagerInternal {
             @NonNull IBinder toChannelToken);
 
     /**
-     * Sets the display id that the MouseCursorController will be forced to target. Pass
-     * {@link android.view.Display#INVALID_DISPLAY} to clear the override.
-     *
-     * Note: This method generally blocks until the pointer display override has propagated.
-     * When setting a new override, the caller should ensure that an input device that can control
-     * the mouse pointer is connected. If a new override is set when no such input device is
-     * connected, the caller may be blocked for an arbitrary period of time.
-     *
-     * @return true if the pointer displayId was set successfully, or false if it fails.
-     *
-     * @deprecated TODO(b/293587049): Not needed - remove after Pointer Icon Refactor is complete.
-     */
-    public abstract boolean setVirtualMousePointerDisplayId(int pointerDisplayId);
-
-    /**
-     * Gets the display id that the MouseCursorController is being forced to target. Returns
-     * {@link android.view.Display#INVALID_DISPLAY} if there is no override
-     *
-     * @deprecated TODO(b/293587049): Not needed - remove after Pointer Icon Refactor is complete.
-     */
-    public abstract int getVirtualMousePointerDisplayId();
-
-    /**
      * Gets the current position of the mouse cursor.
      *
      * Returns NaN-s as the coordinates if the cursor is not available.
@@ -241,4 +218,13 @@ public abstract class InputManagerInternal {
      * display, external peripherals, fingerprint sensor, etc.
      */
     public abstract void notifyUserActivity();
+
+    /**
+     * Get the device ID of the {@link InputDevice} that used most recently.
+     *
+     * @return the last used input device ID, or
+     *     {@link android.os.IInputConstants#INVALID_INPUT_DEVICE_ID} if no device has been used
+     *     since boot.
+     */
+    public abstract int getLastUsedInputDeviceId();
 }

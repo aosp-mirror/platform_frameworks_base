@@ -57,7 +57,6 @@ import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
-import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksLimiter;
@@ -77,6 +76,7 @@ import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
+import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.shared.annotations.ShellAnimationThread;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
@@ -100,6 +100,7 @@ import com.android.wm.shell.unfold.qualifier.UnfoldShellTransition;
 import com.android.wm.shell.unfold.qualifier.UnfoldTransition;
 import com.android.wm.shell.windowdecor.CaptionWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel;
+import com.android.wm.shell.windowdecor.ResizeHandleSizeRepository;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import dagger.Binds;
@@ -220,8 +221,9 @@ public abstract class WMShellModule {
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
-        if (DesktopModeStatus.isEnabled()) {
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            ResizeHandleSizeRepository resizeHandleSizeRepository) {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
                     mainExecutor,
@@ -237,7 +239,8 @@ public abstract class WMShellModule {
                     syncQueue,
                     transitions,
                     desktopTasksController,
-                    rootTaskDisplayAreaOrganizer);
+                    rootTaskDisplayAreaOrganizer,
+                    resizeHandleSizeRepository);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -247,7 +250,8 @@ public abstract class WMShellModule {
                 displayController,
                 rootTaskDisplayAreaOrganizer,
                 syncQueue,
-                transitions);
+                transitions,
+                resizeHandleSizeRepository);
     }
 
     //
@@ -278,8 +282,8 @@ public abstract class WMShellModule {
         ShellInit init = FreeformComponents.isFreeformEnabled(context)
                 ? shellInit
                 : null;
-        return new FreeformTaskListener(init, shellTaskOrganizer, desktopModeTaskRepository,
-                windowDecorViewModel);
+        return new FreeformTaskListener(context, init, shellTaskOrganizer,
+                desktopModeTaskRepository, windowDecorViewModel);
     }
 
     @WMSingleton
@@ -529,16 +533,19 @@ public abstract class WMShellModule {
                 exitDesktopTransitionHandler, toggleResizeDesktopTaskTransitionHandler,
                 dragToDesktopTransitionHandler, desktopModeTaskRepository,
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
-                recentsTransitionHandler, multiInstanceHelper, mainExecutor, desktopTasksLimiter);
+                recentsTransitionHandler, multiInstanceHelper,
+                mainExecutor, desktopTasksLimiter);
     }
 
     @WMSingleton
     @Provides
     static Optional<DesktopTasksLimiter> provideDesktopTasksLimiter(
+            Context context,
             Transitions transitions,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             ShellTaskOrganizer shellTaskOrganizer) {
-        if (!DesktopModeStatus.isEnabled() || !Flags.enableDesktopWindowingTaskLimit()) {
+        if (!DesktopModeStatus.canEnterDesktopMode(context)
+                || !Flags.enableDesktopWindowingTaskLimit()) {
             return Optional.empty();
         }
         return Optional.of(
@@ -592,29 +599,38 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static Optional<DesktopTasksTransitionObserver> provideDesktopTasksTransitionObserver(
+            Context context,
             Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
             Transitions transitions,
             ShellInit shellInit
     ) {
         return desktopModeTaskRepository.flatMap(repository ->
-                Optional.of(new DesktopTasksTransitionObserver(repository, transitions, shellInit))
+                Optional.of(new DesktopTasksTransitionObserver(
+                        context, repository, transitions, shellInit))
         );
     }
 
     @WMSingleton
     @Provides
     static DesktopModeLoggerTransitionObserver provideDesktopModeLoggerTransitionObserver(
+            Context context,
             ShellInit shellInit,
             Transitions transitions,
             DesktopModeEventLogger desktopModeEventLogger) {
         return new DesktopModeLoggerTransitionObserver(
-                shellInit, transitions, desktopModeEventLogger);
+                context, shellInit, transitions, desktopModeEventLogger);
     }
 
     @WMSingleton
     @Provides
     static DesktopModeEventLogger provideDesktopModeEventLogger() {
         return new DesktopModeEventLogger();
+    }
+
+    @WMSingleton
+    @Provides
+    static ResizeHandleSizeRepository provideResizeHandleSizeRepository() {
+        return new ResizeHandleSizeRepository();
     }
 
     //

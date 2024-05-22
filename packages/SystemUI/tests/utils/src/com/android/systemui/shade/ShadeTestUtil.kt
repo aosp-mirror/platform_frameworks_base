@@ -59,10 +59,32 @@ class ShadeTestUtil constructor(val delegate: ShadeTestUtilDelegate) {
         delegate.setLockscreenShadeExpansion(lockscreenShadeExpansion)
     }
 
-    /** Sets whether the user is moving the shade with touch input. */
+    /** Sets whether the user is moving the shade with touch input on Lockscreen. */
     fun setLockscreenShadeTracking(lockscreenShadeTracking: Boolean) {
         delegate.assertFlagValid()
         delegate.setLockscreenShadeTracking(lockscreenShadeTracking)
+    }
+
+    /** Sets whether the user is moving the shade with touch input. */
+    fun setTracking(tracking: Boolean) {
+        delegate.assertFlagValid()
+        delegate.setTracking(tracking)
+    }
+
+    /** Sets the shade to half collapsed with no touch input. */
+    fun programmaticCollapseShade() {
+        delegate.assertFlagValid()
+        delegate.programmaticCollapseShade()
+    }
+
+    fun setQsFullscreen(qsFullscreen: Boolean) {
+        delegate.assertFlagValid()
+        delegate.setQsFullscreen(qsFullscreen)
+    }
+
+    fun setLegacyExpandedOrAwaitingInputTransfer(legacyExpandedOrAwaitingInputTransfer: Boolean) {
+        delegate.assertFlagValid()
+        delegate.setLegacyExpandedOrAwaitingInputTransfer(legacyExpandedOrAwaitingInputTransfer)
     }
 }
 
@@ -80,11 +102,21 @@ interface ShadeTestUtilDelegate {
     /** Sets whether the user is moving the shade with touch input. */
     fun setLockscreenShadeTracking(lockscreenShadeTracking: Boolean)
 
+    /** Sets whether the user is moving the shade with touch input. */
+    fun setTracking(tracking: Boolean)
+
     /** Sets shade expansion to a value between 0-1. */
     fun setShadeExpansion(shadeExpansion: Float)
 
     /** Sets QS expansion to a value between 0-1. */
     fun setQsExpansion(qsExpansion: Float)
+
+    /** Sets the shade to half collapsed with no touch input. */
+    fun programmaticCollapseShade()
+
+    fun setQsFullscreen(qsFullscreen: Boolean)
+
+    fun setLegacyExpandedOrAwaitingInputTransfer(legacyExpandedOrAwaitingInputTransfer: Boolean)
 }
 
 /** Sets up shade state for tests when the scene container flag is disabled. */
@@ -104,6 +136,10 @@ class ShadeTestUtilLegacyImpl(val testScope: TestScope, val shadeRepository: Fak
         shadeRepository.setLegacyLockscreenShadeTracking(lockscreenShadeTracking)
     }
 
+    override fun setTracking(tracking: Boolean) {
+        shadeRepository.setLegacyShadeTracking(tracking)
+    }
+
     override fun assertFlagValid() {
         Assert.assertFalse(SceneContainerFlag.isEnabled)
     }
@@ -119,6 +155,19 @@ class ShadeTestUtilLegacyImpl(val testScope: TestScope, val shadeRepository: Fak
         shadeRepository.setQsExpansion(qsExpansion)
         testScope.runCurrent()
     }
+
+    override fun programmaticCollapseShade() {
+        shadeRepository.setLegacyShadeExpansion(.5f)
+        testScope.runCurrent()
+    }
+
+    override fun setQsFullscreen(qsFullscreen: Boolean) {
+        shadeRepository.legacyQsFullscreen.value = true
+    }
+
+    override fun setLegacyExpandedOrAwaitingInputTransfer(expanded: Boolean) {
+        shadeRepository.setLegacyExpandedOrAwaitingInputTransfer(expanded)
+    }
 }
 
 /** Sets up shade state for tests when the scene container flag is enabled. */
@@ -127,14 +176,16 @@ class ShadeTestUtilSceneImpl(val testScope: TestScope, val sceneInteractor: Scen
     val isUserInputOngoing = MutableStateFlow(true)
 
     override fun setShadeAndQsExpansion(shadeExpansion: Float, qsExpansion: Float) {
-        if (shadeExpansion == 0f) {
-            setTransitionProgress(Scenes.Lockscreen, Scenes.QuickSettings, qsExpansion)
-        } else if (qsExpansion == 0f) {
-            setTransitionProgress(Scenes.Lockscreen, Scenes.Shade, shadeExpansion)
-        } else if (shadeExpansion == 1f) {
+        if (shadeExpansion == 1f) {
             setIdleScene(Scenes.Shade)
         } else if (qsExpansion == 1f) {
             setIdleScene(Scenes.QuickSettings)
+        } else if (shadeExpansion == 0f && qsExpansion == 0f) {
+            setIdleScene(Scenes.Lockscreen)
+        } else if (shadeExpansion == 0f) {
+            setTransitionProgress(Scenes.Lockscreen, Scenes.QuickSettings, qsExpansion)
+        } else if (qsExpansion == 0f) {
+            setTransitionProgress(Scenes.Lockscreen, Scenes.Shade, shadeExpansion)
         } else {
             setTransitionProgress(Scenes.Shade, Scenes.QuickSettings, qsExpansion)
         }
@@ -150,6 +201,20 @@ class ShadeTestUtilSceneImpl(val testScope: TestScope, val sceneInteractor: Scen
         setShadeAndQsExpansion(0f, qsExpansion)
     }
 
+    override fun programmaticCollapseShade() {
+        setTransitionProgress(Scenes.Shade, Scenes.Lockscreen, .5f, false)
+    }
+
+    override fun setQsFullscreen(qsFullscreen: Boolean) {
+        setQsExpansion(1f)
+    }
+
+    override fun setLegacyExpandedOrAwaitingInputTransfer(
+        legacyExpandedOrAwaitingInputTransfer: Boolean
+    ) {
+        setShadeExpansion(.1f)
+    }
+
     override fun setLockscreenShadeExpansion(lockscreenShadeExpansion: Float) {
         if (lockscreenShadeExpansion == 0f) {
             setIdleScene(Scenes.Lockscreen)
@@ -161,7 +226,11 @@ class ShadeTestUtilSceneImpl(val testScope: TestScope, val sceneInteractor: Scen
     }
 
     override fun setLockscreenShadeTracking(lockscreenShadeTracking: Boolean) {
-        isUserInputOngoing.value = lockscreenShadeTracking
+        setTracking(lockscreenShadeTracking)
+    }
+
+    override fun setTracking(tracking: Boolean) {
+        isUserInputOngoing.value = tracking
     }
 
     private fun setIdleScene(scene: SceneKey) {
@@ -172,7 +241,12 @@ class ShadeTestUtilSceneImpl(val testScope: TestScope, val sceneInteractor: Scen
         testScope.runCurrent()
     }
 
-    private fun setTransitionProgress(from: SceneKey, to: SceneKey, progress: Float) {
+    private fun setTransitionProgress(
+        from: SceneKey,
+        to: SceneKey,
+        progress: Float,
+        isInitiatedByUserInput: Boolean = true
+    ) {
         sceneInteractor.changeScene(from, "test")
         val transitionState =
             MutableStateFlow<ObservableTransitionState>(
@@ -181,7 +255,7 @@ class ShadeTestUtilSceneImpl(val testScope: TestScope, val sceneInteractor: Scen
                     toScene = to,
                     currentScene = flowOf(to),
                     progress = MutableStateFlow(progress),
-                    isInitiatedByUserInput = true,
+                    isInitiatedByUserInput = isInitiatedByUserInput,
                     isUserInputOngoing = isUserInputOngoing,
                 )
             )

@@ -30,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,11 +46,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Easings
 import com.android.compose.modifiers.thenIf
 import com.android.internal.R
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternDotViewModel
+import com.android.systemui.compose.modifiers.sysuiResTag
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -85,14 +86,15 @@ internal fun PatternBouncer(
     val lineStrokeWidth = with(density) { LINE_STROKE_WIDTH_DP.dp.toPx() }
 
     // All dots that should be rendered on the grid.
-    val dots: List<PatternDotViewModel> by viewModel.dots.collectAsState()
+    val dots: List<PatternDotViewModel> by viewModel.dots.collectAsStateWithLifecycle()
     // The most recently selected dot, if the user is currently dragging.
-    val currentDot: PatternDotViewModel? by viewModel.currentDot.collectAsState()
+    val currentDot: PatternDotViewModel? by viewModel.currentDot.collectAsStateWithLifecycle()
     // The dots selected so far, if the user is currently dragging.
-    val selectedDots: List<PatternDotViewModel> by viewModel.selectedDots.collectAsState()
-    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
-    val isAnimationEnabled: Boolean by viewModel.isPatternVisible.collectAsState()
-    val animateFailure: Boolean by viewModel.animateFailure.collectAsState()
+    val selectedDots: List<PatternDotViewModel> by
+        viewModel.selectedDots.collectAsStateWithLifecycle()
+    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsStateWithLifecycle()
+    val isAnimationEnabled: Boolean by viewModel.isPatternVisible.collectAsStateWithLifecycle()
+    val animateFailure: Boolean by viewModel.animateFailure.collectAsStateWithLifecycle()
 
     // Map of animatables for the scale of each dot, keyed by dot.
     val dotScalingAnimatables = remember(dots) { dots.associateWith { Animatable(1f) } }
@@ -234,6 +236,7 @@ internal fun PatternBouncer(
 
     Canvas(
         modifier
+            .sysuiResTag("bouncer_pattern_root")
             // Because the width also includes spacing to the left and right of the leftmost and
             // rightmost dots in the grid and because UX mocks specify the width without that
             // spacing, the actual width needs to be defined slightly bigger than the UX mock width.

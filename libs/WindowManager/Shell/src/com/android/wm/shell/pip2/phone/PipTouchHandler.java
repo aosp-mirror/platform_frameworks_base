@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.pip2.phone;
 
+import static android.view.WindowManager.INPUT_CONSUMER_PIP;
+
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.PIP_STASHING;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.PIP_STASH_MINIMUM_VELOCITY_THRESHOLD;
 import static com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_LEFT;
@@ -30,18 +32,19 @@ import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_PICTURE_
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.provider.DeviceConfig;
 import android.util.Size;
 import android.view.DisplayCutout;
 import android.view.InputEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -61,6 +64,7 @@ import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
@@ -70,7 +74,7 @@ import java.util.Optional;
  * Manages all the touch handling for PIP on the Phone, including moving, dismissing and expanding
  * the PIP.
  */
-public class PipTouchHandler {
+public class PipTouchHandler implements PipTransitionState.PipTransitionStateChangedListener {
 
     private static final String TAG = "PipTouchHandler";
     private static final float DEFAULT_STASH_VELOCITY_THRESHOLD = 18000.f;
@@ -78,8 +82,11 @@ public class PipTouchHandler {
     // Allow PIP to resize to a slightly bigger state upon touch
     private boolean mEnableResize;
     private final Context mContext;
+    private final ShellCommandHandler mShellCommandHandler;
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     @NonNull private final PipBoundsState mPipBoundsState;
+    @NonNull private final PipTransitionState mPipTransitionState;
+    @NonNull private final PipScheduler mPipScheduler;
     @NonNull private final SizeSpecSource mSizeSpecSource;
     private final PipUiEventLogger mPipUiEventLogger;
     private final PipDismissTargetHandler mPipDismissTargetHandler;
@@ -125,6 +132,7 @@ public class PipTouchHandler {
     private final FloatingContentCoordinator mFloatingContentCoordinator;
     private PipMotionHelper mMotionHelper;
     private PipTouchGesture mGesture;
+    private PipInputConsumer mPipInputConsumer;
 
     // Temp vars
     private final Rect mTmpBounds = new Rect();
@@ -164,9 +172,12 @@ public class PipTouchHandler {
     @SuppressLint("InflateParams")
     public PipTouchHandler(Context context,
             ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             PhonePipMenuController menuController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
+            @NonNull PipTransitionState pipTransitionState,
+            @NonNull PipScheduler pipScheduler,
             @NonNull SizeSpecSource sizeSpecSource,
             PipMotionHelper pipMotionHelper,
             FloatingContentCoordinator floatingContentCoordinator,
@@ -174,11 +185,16 @@ public class PipTouchHandler {
             ShellExecutor mainExecutor,
             Optional<PipPerfHintController> pipPerfHintControllerOptional) {
         mContext = context;
+        mShellCommandHandler = shellCommandHandler;
         mMainExecutor = mainExecutor;
         mPipPerfHintController = pipPerfHintControllerOptional.orElse(null);
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipBoundsState = pipBoundsState;
+
+        mPipTransitionState = pipTransitionState;
+        mPipTransitionState.addPipTransitionStateChangedListener(this::onPipTransitionStateChanged);
+        mPipScheduler = pipScheduler;
         mSizeSpecSource = sizeSpecSource;
         mMenuController = menuController;
         mPipUiEventLogger = pipUiEventLogger;
@@ -204,10 +220,10 @@ public class PipTouchHandler {
                 },
                 menuController::hideMenu,
                 mainExecutor);
-        mPipResizeGestureHandler =
-                new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
-                        mTouchState, this::updateMovementBounds, pipUiEventLogger,
-                        menuController, mainExecutor, mPipPerfHintController);
+        mPipResizeGestureHandler = new PipResizeGestureHandler(context, pipBoundsAlgorithm,
+                pipBoundsState, mTouchState, mPipScheduler, mPipTransitionState,
+                this::updateMovementBounds, pipUiEventLogger, menuController, mainExecutor,
+                mPipPerfHintController);
         mPipBoundsState.addOnAspectRatioChangedCallback(this::updateMinMaxSize);
 
         if (PipUtils.isPip2ExperimentEnabled()) {
@@ -223,9 +239,15 @@ public class PipTouchHandler {
         mEnableResize = res.getBoolean(R.bool.config_pipEnableResizeForMenu);
         reloadResources();
 
+        mShellCommandHandler.addDumpCallback(this::dump, this);
         mMotionHelper.init();
         mPipResizeGestureHandler.init();
         mPipDismissTargetHandler.init();
+
+        mPipInputConsumer = new PipInputConsumer(WindowManagerGlobal.getWindowManagerService(),
+                INPUT_CONSUMER_PIP, mMainExecutor);
+        mPipInputConsumer.setInputListener(this::handleTouchEvent);
+        mPipInputConsumer.setRegistrationListener(this::onRegistrationChanged);
 
         mEnableStash = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -294,19 +316,17 @@ public class PipTouchHandler {
 
     void onActivityPinned() {
         mPipDismissTargetHandler.createOrUpdateDismissTarget();
-
         mPipResizeGestureHandler.onActivityPinned();
         mFloatingContentCoordinator.onContentAdded(mMotionHelper);
+        mPipInputConsumer.registerInputConsumer();
     }
 
-    void onActivityUnpinned(ComponentName topPipActivity) {
-        if (topPipActivity == null) {
-            // Clean up state after the last PiP activity is removed
-            mPipDismissTargetHandler.cleanUpDismissTarget();
-
-            mFloatingContentCoordinator.onContentRemoved(mMotionHelper);
-        }
+    void onActivityUnpinned() {
+        // Clean up state after the last PiP activity is removed
+        mPipDismissTargetHandler.cleanUpDismissTarget();
+        mFloatingContentCoordinator.onContentRemoved(mMotionHelper);
         mPipResizeGestureHandler.onActivityUnpinned();
+        mPipInputConsumer.unregisterInputConsumer();
     }
 
     void onPinnedStackAnimationEnded(
@@ -512,6 +532,7 @@ public class PipTouchHandler {
             return true;
         }
 
+        /*
         if ((ev.getAction() == MotionEvent.ACTION_DOWN || mTouchState.isUserInteracting())
                 && mPipDismissTargetHandler.maybeConsumeMotionEvent(ev)) {
             // If the first touch event occurs within the magnetic field, pass the ACTION_DOWN event
@@ -528,11 +549,13 @@ public class PipTouchHandler {
             return true;
         }
 
-        if (!mTouchState.isUserInteracting()) {
+        // Ignore the motion event When the entry animation is waiting to be started
+        if (!mTouchState.isUserInteracting() && mPipTaskOrganizer.isEntryScheduled()) {
             ProtoLog.wtf(WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Waiting to start the entry animation, skip the motion event.", TAG);
             return true;
         }
+         */
 
         // Update the touch state
         mTouchState.onTouchEvent(ev);
@@ -808,7 +831,7 @@ public class PipTouchHandler {
             mMovementWithinDismiss = touchState.getDownTouchPosition().y
                     >= mPipBoundsState.getMovementBounds().bottom;
             mMotionHelper.setSpringingToTouch(false);
-            // mPipDismissTargetHandler.setTaskLeash(mPipTaskOrganizer.getSurfaceControl());
+            mPipDismissTargetHandler.setTaskLeash(mPipTransitionState.mPinnedTaskLeash);
 
             // If the menu is still visible then just poke the menu
             // so that it will timeout after the user stops touching it
@@ -880,7 +903,8 @@ public class PipTouchHandler {
                 // Reset the touch state on up before the fling settles
                 mTouchState.reset();
                 if (mEnableStash && shouldStash(vel, getPossiblyMotionBounds())) {
-                    mMotionHelper.stashToEdge(vel.x, vel.y, this::stashEndAction /* endAction */);
+                    // mMotionHelper.stashToEdge(vel.x, vel.y,
+                    //      this::stashEndAction /* endAction */);
                 } else {
                     if (mPipBoundsState.isStashed()) {
                         // Reset stashed state if previously stashed
@@ -1057,6 +1081,28 @@ public class PipTouchHandler {
 
     void setOhmOffset(int offset) {
         mPipResizeGestureHandler.setOhmOffset(offset);
+    }
+
+    @Override
+    public void onPipTransitionStateChanged(@PipTransitionState.TransitionState int oldState,
+            @PipTransitionState.TransitionState int newState,
+            @Nullable Bundle extra) {
+        switch (newState) {
+            case PipTransitionState.ENTERED_PIP:
+                onActivityPinned();
+                mTouchState.setAllowInputEvents(true);
+                break;
+            case PipTransitionState.EXITED_PIP:
+                mTouchState.setAllowInputEvents(false);
+                onActivityUnpinned();
+                break;
+            case PipTransitionState.SCHEDULED_BOUNDS_CHANGE:
+                mTouchState.setAllowInputEvents(false);
+                break;
+            case PipTransitionState.CHANGED_PIP_BOUNDS:
+                mTouchState.setAllowInputEvents(true);
+                break;
+        }
     }
 
     /**

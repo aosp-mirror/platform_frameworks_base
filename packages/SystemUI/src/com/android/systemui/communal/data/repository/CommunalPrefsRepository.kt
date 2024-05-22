@@ -126,7 +126,7 @@ constructor(
 
     private fun observeCtaDismissState(user: UserInfo): Flow<Boolean> =
         getSharedPrefsForUser(user)
-            .observe(CTA_DISMISSED_STATE)
+            .observe()
             // Emit at the start of collection to ensure we get an initial value
             .onStart { emit(Unit) }
             .map { getCtaDismissedState() }

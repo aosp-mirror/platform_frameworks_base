@@ -27,6 +27,8 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactory
 import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactoryImpl
+import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaControllerInteractor
+import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaControllerInteractorImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -40,6 +42,11 @@ interface MediaDevicesModule {
     fun bindLocalMediaRepositoryFactory(
         impl: LocalMediaRepositoryFactoryImpl
     ): LocalMediaRepositoryFactory
+
+    @Binds
+    fun bindMediaControllerInteractor(
+        impl: MediaControllerInteractorImpl
+    ): MediaControllerInteractor
 
     companion object {
 

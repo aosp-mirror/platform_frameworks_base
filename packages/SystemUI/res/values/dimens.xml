@@ -285,6 +285,9 @@
     the amount by the view is positioned above the screen before the animation starts. -->
     <dimen name="heads_up_appear_y_above_screen">32dp</dimen>
 
+    <!-- padding between the old and new heads up notifications for the hun cycling animation -->
+    <dimen name="heads_up_cycling_padding">8dp</dimen>
+
     <!-- padding between the heads up and the statusbar -->
     <dimen name="heads_up_status_bar_padding">8dp</dimen>
 
@@ -430,6 +433,7 @@
     <dimen name="overlay_button_corner_radius">16dp</dimen>
     <!-- Margin between successive chips -->
     <dimen name="overlay_action_chip_margin_start">8dp</dimen>
+    <dimen name="shelf_action_chip_margin_start">12dp</dimen>
     <dimen name="overlay_action_chip_padding_vertical">12dp</dimen>
     <dimen name="overlay_action_chip_icon_size">24sp</dimen>
     <!-- Padding on each side of the icon for icon-only chips -->
@@ -445,6 +449,8 @@
     <dimen name="overlay_preview_container_margin">8dp</dimen>
     <dimen name="overlay_action_container_margin_horizontal">8dp</dimen>
     <dimen name="overlay_action_container_margin_bottom">6dp</dimen>
+    <!-- minimum distance to the left, right or bottom edges. -->
+    <dimen name="overlay_action_container_minimum_edge_spacing">12dp</dimen>
     <dimen name="overlay_bg_protection_height">242dp</dimen>
     <dimen name="overlay_action_container_corner_radius">20dp</dimen>
     <dimen name="overlay_action_container_padding_vertical">8dp</dimen>
@@ -906,10 +912,6 @@
         Larger than the 16dp Launcher uses, to ensure consistency on the hub, where it's much more
         obvious when corner radii differ.-->
     <dimen name="communal_enforced_rounded_corner_max_radius">28dp</dimen>
-
-    <!-- Width and height used to filter widgets displayed in the communal widget picker -->
-    <dimen name="communal_widget_picker_desired_width">424dp</dimen>
-    <dimen name="communal_widget_picker_desired_height">282dp</dimen>
 
     <!-- The width/height of the unlock icon view on keyguard. -->
     <dimen name="keyguard_lock_height">42dp</dimen>
@@ -1707,12 +1709,12 @@
     <dimen name="wallet_button_horizontal_padding">24dp</dimen>
     <dimen name="wallet_button_vertical_padding">8dp</dimen>
 
-    <!-- Ongoing call chip -->
-    <dimen name="ongoing_call_chip_side_padding">12dp</dimen>
-    <dimen name="ongoing_call_chip_icon_size">16dp</dimen>
+    <!-- Ongoing activity chip -->
+    <dimen name="ongoing_activity_chip_side_padding">12dp</dimen>
+    <dimen name="ongoing_activity_chip_icon_size">16dp</dimen>
     <!-- The padding between the icon and the text. -->
-    <dimen name="ongoing_call_chip_icon_text_padding">4dp</dimen>
-    <dimen name="ongoing_call_chip_corner_radius">28dp</dimen>
+    <dimen name="ongoing_activity_chip_icon_text_padding">4dp</dimen>
+    <dimen name="ongoing_activity_chip_corner_radius">28dp</dimen>
 
     <!-- Status bar user chip -->
     <dimen name="status_bar_user_chip_avatar_size">16dp</dimen>
@@ -1956,15 +1958,6 @@
     <dimen name="broadcast_dialog_btn_text_size">16sp</dimen>
     <dimen name="broadcast_dialog_btn_minHeight">44dp</dimen>
     <dimen name="broadcast_dialog_margin">16dp</dimen>
-
-    <!-- Contrast dialog -->
-    <dimen name="contrast_dialog_button_total_size">90dp</dimen>
-    <dimen name="contrast_dialog_button_inner_size">82dp</dimen>
-    <dimen name="contrast_dialog_button_radius">20dp</dimen>
-    <dimen name="contrast_dialog_button_stroke_width">4dp</dimen>
-    <dimen name="contrast_dialog_button_text_size">14sp</dimen>
-    <dimen name="contrast_dialog_button_text_spacing">4dp</dimen>
-    <dimen name="contrast_dialog_button_horizontal_spacing">16dp</dimen>
 
     <!-- Shadow for dream overlay clock complication -->
     <dimen name="dream_overlay_clock_key_text_shadow_dx">0dp</dimen>

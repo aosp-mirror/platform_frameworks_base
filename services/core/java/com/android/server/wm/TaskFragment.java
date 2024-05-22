@@ -40,6 +40,8 @@ import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
@@ -320,9 +322,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     /** Organizer that organizing this TaskFragment. */
     @Nullable
     private ITaskFragmentOrganizer mTaskFragmentOrganizer;
-    @VisibleForTesting
+
     int mTaskFragmentOrganizerUid = INVALID_UID;
-    private @Nullable String mTaskFragmentOrganizerProcessName;
+    @Nullable String mTaskFragmentOrganizerProcessName;
 
     /** Client assigned unique token for this TaskFragment if this is created by an organizer. */
     @Nullable
@@ -354,12 +356,19 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     /**
      * Whether the activity navigation should be isolated. That is, Activities cannot be launched
-     * on an isolated TaskFragment, unless the activity is launched from an Activity in the same
-     * isolated TaskFragment, or explicitly requested to be launched to.
-     * <p>
-     * Note that only an embedded TaskFragment can be isolated.
+     * on an isolated TaskFragment unless explicitly requested to be launched to.
      */
     private boolean mIsolatedNav;
+
+    /**
+     * Whether the TaskFragment to be pinned.
+     * <p>
+     * If a TaskFragment is pinned, the TaskFragment should be the top-most TaskFragment among other
+     * sibling TaskFragments. Any newly launched and embeddable activity should not be placed in the
+     * pinned TaskFragment, unless the activity is launched from the pinned TaskFragment or
+     * explicitly requested to. Non-embeddable activities are not restricted to.
+     */
+    private boolean mPinned;
 
     /**
      * Whether the TaskFragment should move to bottom of task when any activity below it is
@@ -485,14 +494,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     @Nullable
     private WindowProcessController getOrganizerProcessIfDifferent(@Nullable ActivityRecord r) {
-        if ((r == null || mTaskFragmentOrganizerProcessName == null)
-                || (mTaskFragmentOrganizerProcessName.equals(r.processName)
-                && mTaskFragmentOrganizerUid == r.getUid())) {
-            // No organizer or the process is the same.
+        final Task task = getTask();
+        if (r == null || task == null || task.mTaskFragmentHostProcessName == null) {
             return null;
         }
-        return mAtmService.getProcessController(mTaskFragmentOrganizerProcessName,
-                mTaskFragmentOrganizerUid);
+        if (task.mTaskFragmentHostProcessName.equals(r.processName)
+                && task.mTaskFragmentHostUid == r.getUid()) {
+            return null;
+        }
+        return mAtmService.getProcessController(task.mTaskFragmentHostProcessName,
+                task.mTaskFragmentHostUid);
     }
 
     void setAnimationParams(@NonNull TaskFragmentAnimationParams animationParams) {
@@ -513,6 +524,18 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     /**
+     * Sets whether this TaskFragment {@link #isPinned()}.
+     * <p>
+     * Note that this is no-op if the TaskFragment is not {@link #isEmbedded() embedded}.
+     */
+    void setPinned(boolean pinned) {
+        if (!isEmbedded()) {
+            return;
+        }
+        mPinned = pinned;
+    }
+
+    /**
      * Sets whether transitions are allowed when the TaskFragment is empty. If {@code true},
      * transitions are allowed when the TaskFragment is empty. If {@code false}, transitions
      * will wait until the TaskFragment becomes non-empty or other conditions are met. Default
@@ -528,6 +551,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     /** @see #mIsolatedNav */
     boolean isIsolatedNav() {
         return isEmbedded() && mIsolatedNav;
+    }
+
+    /**
+     * Indicates whether this TaskFragment is pinned.
+     *
+     * @see android.window.TaskFragmentOperation#OP_TYPE_SET_PINNED
+     */
+    boolean isPinned() {
+        return isEmbedded() && mPinned;
     }
 
     TaskFragment getAdjacentTaskFragment() {
@@ -562,7 +594,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     void setResumedActivity(ActivityRecord r, String reason) {
-        warnForNonLeafTaskFragment("setResumedActivity");
         if (mResumedActivity == r) {
             return;
         }
@@ -848,15 +879,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return parentTaskFragment != null ? parentTaskFragment.getOrganizedTaskFragment() : null;
     }
 
-    /**
-     * Simply check and give warning logs if this is not operated on leaf {@link TaskFragment}.
-     */
-    private void warnForNonLeafTaskFragment(String func) {
-        if (!isLeafTaskFragment()) {
-            Slog.w(TAG, func + " on non-leaf task fragment " + this);
-        }
-    }
-
     boolean hasDirectChildActivities() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             if (mChildren.get(i).asActivityRecord() != null) {
@@ -933,7 +955,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     void onActivityStateChanged(ActivityRecord record, ActivityRecord.State state,
             String reason) {
-        warnForNonLeafTaskFragment("onActivityStateChanged");
         if (record == mResumedActivity && state != RESUMED) {
             setResumedActivity(null, reason + " - onActivityStateChanged");
         }
@@ -963,7 +984,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * @return {@code true} if the process of the pausing activity is died.
      */
     boolean handleAppDied(WindowProcessController app) {
-        warnForNonLeafTaskFragment("handleAppDied");
         boolean isPausingDied = false;
         if (mPausingActivity != null && mPausingActivity.app == app) {
             ProtoLog.v(WM_DEBUG_STATES, "App died while pausing: %s",
@@ -1221,7 +1241,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 // have any running activities, not starting one and not home stack.
                 shouldBeVisible = hasRunningActivities
                         || (starting != null && starting.isDescendantOf(this))
-                        || isActivityTypeHome();
+                        || (isActivityTypeHome() && !isEmbedded());
                 break;
             }
 
@@ -2204,7 +2224,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     static class ConfigOverrideHint {
         @Nullable DisplayInfo mTmpOverrideDisplayInfo;
         @Nullable ActivityRecord.CompatDisplayInsets mTmpCompatInsets;
-        boolean mUseOverrideInsetsForStableBounds;
+        boolean mUseOverrideInsetsForConfig;
     }
 
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
@@ -2237,11 +2257,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             @NonNull Configuration parentConfig, @Nullable ConfigOverrideHint overrideHint) {
         DisplayInfo overrideDisplayInfo = null;
         ActivityRecord.CompatDisplayInsets compatInsets = null;
-        boolean useOverrideInsetsForStableBounds = false;
+        boolean useOverrideInsetsForConfig = false;
         if (overrideHint != null) {
             overrideDisplayInfo = overrideHint.mTmpOverrideDisplayInfo;
             compatInsets = overrideHint.mTmpCompatInsets;
-            useOverrideInsetsForStableBounds = overrideHint.mUseOverrideInsetsForStableBounds;
+            useOverrideInsetsForConfig = overrideHint.mUseOverrideInsetsForConfig;
             if (overrideDisplayInfo != null) {
                 // Make sure the screen related configs can be computed by the provided
                 // display info.
@@ -2305,6 +2325,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             }
         }
 
+        boolean insetsOverrideApplied = false;
         if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED
                 || inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
             if (!customContainerPolicy && WindowConfiguration.isFloating(windowingMode)) {
@@ -2321,7 +2342,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 // The non decor inset are areas that could never be removed in Honeycomb. See
                 // {@link WindowManagerPolicy#getNonDecorInsetsLw}.
                 calculateInsetFrames(mTmpNonDecorBounds, mTmpStableBounds, mTmpFullBounds, di,
-                        useOverrideInsetsForStableBounds);
+                        useOverrideInsetsForConfig);
             } else {
                 // Apply the given non-decor and stable insets to calculate the corresponding bounds
                 // for screen size of configuration.
@@ -2338,8 +2359,21 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     intersectWithInsetsIfFits(mTmpStableBounds, mTmpBounds,
                             compatInsets.mStableInsets[rotation]);
                     outAppBounds.set(mTmpNonDecorBounds);
+                } else if (useOverrideInsetsForConfig) {
+                    final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+                    final int dw = rotated ? mDisplayContent.mBaseDisplayHeight
+                            : mDisplayContent.mBaseDisplayWidth;
+                    final int dh = rotated ? mDisplayContent.mBaseDisplayWidth
+                            : mDisplayContent.mBaseDisplayHeight;
+                    final DisplayPolicy.DecorInsets.Info decorInsets = mDisplayContent
+                            .getDisplayPolicy().getDecorInsetsInfo(rotation, dw, dh);
+                    mTmpStableBounds.set(outAppBounds);
+                    mTmpStableBounds.inset(decorInsets.mOverrideConfigInsets);
+                    outAppBounds.inset(decorInsets.mOverrideNonDecorInsets);
+                    mTmpNonDecorBounds.set(outAppBounds);
+                    // Record the override apply to avoid duplicated check.
+                    insetsOverrideApplied = true;
                 } else {
-                    // Set to app bounds because it excludes decor insets.
                     mTmpNonDecorBounds.set(outAppBounds);
                     mTmpStableBounds.set(outAppBounds);
                 }
@@ -2379,6 +2413,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         && insideParentBounds && !resolvedBounds.equals(parentBounds)) {
                     // For embedded TFs, the smallest width should be updated. Otherwise, inherit
                     // from the parent task would result in applications loaded wrong resource.
+                    inOutConfig.smallestScreenWidthDp =
+                            Math.min(inOutConfig.screenWidthDp, inOutConfig.screenHeightDp);
+                } else if (insetsOverrideApplied) {
+                    // The smallest width should also consider insets. If the insets are overridden,
+                    // use the overridden value.
                     inOutConfig.smallestScreenWidthDp =
                             Math.min(inOutConfig.screenWidthDp, inOutConfig.screenHeightDp);
                 }
@@ -2891,6 +2930,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     boolean shouldRemoveSelfOnLastChildRemoval() {
         return !mCreatedByOrganizer || mIsRemovalRequested;
+    }
+
+    /**
+     * Returns whether this TaskFragment is going to be removed.
+     */
+    boolean isRemovalRequested() {
+        return mIsRemovalRequested;
     }
 
     @Override

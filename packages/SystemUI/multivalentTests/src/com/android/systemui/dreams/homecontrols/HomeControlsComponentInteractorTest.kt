@@ -33,7 +33,6 @@ import com.android.systemui.controls.panels.SelectedComponentRepository
 import com.android.systemui.controls.panels.authorizedPanelsRepository
 import com.android.systemui.controls.panels.selectedComponentRepository
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor
 import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor.Companion.MAX_UPDATE_CORRELATION_DELAY
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.settings.fakeUserTracker
@@ -64,7 +63,7 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
 
-    private lateinit var underTest: HomeControlsComponentInteractor
+    private val underTest by lazy { kosmos.homeControlsComponentInteractor }
 
     @Before
     fun setUp() =
@@ -73,8 +72,7 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
             fakeUserRepository.setUserInfos(listOf(PRIMARY_USER, ANOTHER_USER))
             whenever(controlsComponent.getControlsListingController())
                 .thenReturn(Optional.of(controlsListingController))
-
-            underTest = homeControlsComponentInteractor
+            Unit
         }
 
     @Test

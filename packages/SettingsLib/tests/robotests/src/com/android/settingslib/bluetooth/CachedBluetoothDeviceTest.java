@@ -753,33 +753,70 @@ public class CachedBluetoothDeviceTest {
     }
 
     @Test
-    public void getConnectionSummary_testHearingAidBatteryWithoutInCall_returnActiveBattery() {
+    public void getConnectionSummary_testHearingAidLeftEarBatteryNotInCall_returnActiveBattery() {
         // Arrange:
-        //   1. Profile:       {HEARING_AID, Connected, Active}
+        //   1. Profile:       {HEARING_AID, Connected, Active, Left ear}
         //   2. Battery Level: 10
         //   3. Audio Manager: Normal (Without In Call)
         updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice.setHearingAidInfo(getLeftAshaHearingAidInfo());
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
         mBatteryLevel = 10;
 
         // Act & Assert:
-        //   Get "Active, 10% battery" result with Battery Level 10.
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, 10% battery");
+        //   Get "Active. L: 10% battery." result with Battery Level 10.
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active. L: 10% battery.");
     }
 
     @Test
-    public void getTvConnectionSummary_testHearingAidBatteryWithoutInCall_returnBattery() {
+    public void getTvConnectionSummary_testHearingAidLeftEarBatteryWithoutInCall_returnBattery() {
         // Arrange:
-        //   1. Profile:       {HEARING_AID, Connected, Active}
+        //   1. Profile:       {HEARING_AID, Connected, Active, Left ear}
         //   2. Battery Level: 10
         //   3. Audio Manager: Normal (Without In Call)
         updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice.setHearingAidInfo(getLeftAshaHearingAidInfo());
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
         mBatteryLevel = 10;
 
         // Act & Assert:
-        //   Get "Active, 10% battery" result with Battery Level 10.
-        assertThat(mCachedDevice.getTvConnectionSummary().toString()).isEqualTo("Battery 10%");
+        //   Get "Left 10%" result with Battery Level 10.
+        assertThat(mCachedDevice.getTvConnectionSummary().toString()).isEqualTo("Left 10%");
+    }
+
+    @Test
+    public void getConnectionSummary_testHearingAidLeftEarBatteryInCall_returnActiveBattery() {
+        // Arrange:
+        //   1. Profile:       {HEARING_AID, Connected, Active, Left ear}
+        //   2. Battery Level: 10
+        //   3. Audio Manager: In Call
+        updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice.setHearingAidInfo(getLeftAshaHearingAidInfo());
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
+        mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+        mBatteryLevel = 10;
+
+        // Act & Assert:
+        //   Get "Active. L: 10% battery." result with Battery Level 10.
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active. L: 10% battery.");
+    }
+
+    @Test
+    public void getTvConnectionSummary_testHearingAidLeftEarBatteryInCall_returnBattery() {
+        // Arrange:
+        //   1. Profile:       {HEARING_AID, Connected, Active, Left ear}
+        //   2. Battery Level: 10
+        //   3. Audio Manager: In Call
+        updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice.setHearingAidInfo(getLeftAshaHearingAidInfo());
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
+        mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+        mBatteryLevel = 10;
+
+        // Act & Assert:
+        //   Get "Left 10%" result with Battery Level 10.
+        assertThat(mCachedDevice.getTvConnectionSummary().toString()).isEqualTo(
+                "Left 10%");
     }
 
     @Test
@@ -851,35 +888,45 @@ public class CachedBluetoothDeviceTest {
     }
 
     @Test
-    public void getConnectionSummary_testHearingAidBatteryInCall_returnActiveBattery() {
+    public void getConnectionSummary_testHearingAidBothEarBattery_returnActiveBattery() {
         // Arrange:
-        //   1. Profile:       {HEARING_AID, Connected, Active}
+        //   1. Profile:       {HEARING_AID, Connected, Active, Both ear}
         //   2. Battery Level: 10
         //   3. Audio Manager: In Call
+        mCachedDevice.setHearingAidInfo(getRightAshaHearingAidInfo());
         updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        mSubCachedDevice.setHearingAidInfo(getLeftAshaHearingAidInfo());
+        updateSubDeviceProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice.setSubDevice(mSubCachedDevice);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
         mAudioManager.setMode(AudioManager.MODE_IN_CALL);
         mBatteryLevel = 10;
 
         // Act & Assert:
-        //   Get "Active, 10% battery" result with Battery Level 10.
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, 10% battery");
+        //   Get "Active. L: 10%, R: 10% battery." result with Battery Level 10.
+        assertThat(mCachedDevice.getConnectionSummary().toString())
+                .isEqualTo("Active. L: 10%, R: 10% battery.");
     }
 
     @Test
-    public void getTvConnectionSummary_testHearingAidBatteryInCall_returnBattery() {
+    public void getTvConnectionSummary_testHearingAidBothEarBattery_returnActiveBattery() {
         // Arrange:
-        //   1. Profile:       {HEARING_AID, Connected, Active}
+        //   1. Profile:       {HEARING_AID, Connected, Active, Both ear}
         //   2. Battery Level: 10
         //   3. Audio Manager: In Call
+        mCachedDevice.setHearingAidInfo(getRightAshaHearingAidInfo());
         updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        mSubCachedDevice.setHearingAidInfo(getLeftAshaHearingAidInfo());
+        updateSubDeviceProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice.setSubDevice(mSubCachedDevice);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
         mAudioManager.setMode(AudioManager.MODE_IN_CALL);
         mBatteryLevel = 10;
 
         // Act & Assert:
-        //   Get "Active, 10% battery" result with Battery Level 10.
-        assertThat(mCachedDevice.getTvConnectionSummary().toString()).isEqualTo("Battery 10%");
+        //   Get "Left 10% Right 10%" result with Battery Level 10.
+        assertThat(mCachedDevice.getTvConnectionSummary().toString())
+                .isEqualTo("Left 10% Right 10%");
     }
 
     @Test
@@ -1151,7 +1198,7 @@ public class CachedBluetoothDeviceTest {
         updateProfileStatus(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
         updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
         when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
-        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.A2DP);
         when(mDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET)).thenReturn(
                 "true".getBytes());
         when(mDevice.getMetadata(BluetoothDevice.METADATA_UNTETHERED_LEFT_BATTERY)).thenReturn(
@@ -1160,7 +1207,7 @@ public class CachedBluetoothDeviceTest {
                 TWS_BATTERY_RIGHT.getBytes());
 
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
-                "Active, L: 15% battery, R: 25% battery");
+                "Active. L: 15%, R: 25% battery.");
     }
 
     @Test
@@ -1169,7 +1216,7 @@ public class CachedBluetoothDeviceTest {
         updateProfileStatus(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
         updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
         when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
-        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.A2DP);
         when(mDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET)).thenReturn(
                 "true".getBytes());
         when(mDevice.getMetadata(BluetoothDevice.METADATA_UNTETHERED_LEFT_BATTERY)).thenReturn(
@@ -1214,11 +1261,7 @@ public class CachedBluetoothDeviceTest {
                 TWS_BATTERY_RIGHT.getBytes());
 
         assertThat(mCachedDevice.getTvConnectionSummary().toString())
-                .isEqualTo(
-                        mContext.getString(R.string.bluetooth_battery_level_untethered_left, "15%")
-                                + " "
-                                + mContext.getString(
-                                        R.string.bluetooth_battery_level_untethered_right, "25%"));
+                .isEqualTo("Left 15% Right 25%");
     }
 
     @Test
@@ -1235,10 +1278,8 @@ public class CachedBluetoothDeviceTest {
                 .thenReturn(TWS_BATTERY_RIGHT.getBytes());
 
         int lowBatteryColor = mContext.getColor(LOW_BATTERY_COLOR);
-        String leftBattery =
-                mContext.getString(R.string.bluetooth_battery_level_untethered_left, "15%");
-        String rightBattery =
-                mContext.getString(R.string.bluetooth_battery_level_untethered_right, "25%");
+        String leftBattery = "Left 15%";
+        String rightBattery = "Right 25%";
 
         // Default low battery threshold, only left battery is low
         CharSequence summary = mCachedDevice.getTvConnectionSummary(LOW_BATTERY_COLOR);
@@ -1703,6 +1744,30 @@ public class CachedBluetoothDeviceTest {
     }
 
     @Test
+    public void setName_memberDeviceNameIsSet() {
+        when(mDevice.getAlias()).thenReturn(DEVICE_NAME);
+        when(mSubDevice.getAlias()).thenReturn(DEVICE_NAME);
+
+        mCachedDevice.addMemberDevice(mSubCachedDevice);
+        mCachedDevice.setName(DEVICE_ALIAS);
+
+        verify(mDevice).setAlias(DEVICE_ALIAS);
+        verify(mSubDevice).setAlias(DEVICE_ALIAS);
+    }
+
+    @Test
+    public void setName_subDeviceNameIsSet() {
+        when(mDevice.getAlias()).thenReturn(DEVICE_NAME);
+        when(mSubDevice.getAlias()).thenReturn(DEVICE_NAME);
+
+        mCachedDevice.setSubDevice(mSubCachedDevice);
+        mCachedDevice.setName(DEVICE_ALIAS);
+
+        verify(mDevice).setAlias(DEVICE_ALIAS);
+        verify(mSubDevice).setAlias(DEVICE_ALIAS);
+    }
+
+    @Test
     public void getProfileConnectionState_nullProfile_returnDisconnected() {
         assertThat(mCachedDevice.getProfileConnectionState(null)).isEqualTo(
                 BluetoothProfile.STATE_DISCONNECTED);
@@ -1715,16 +1780,6 @@ public class CachedBluetoothDeviceTest {
 
         assertThat(mCachedDevice.getProfileConnectionState(mA2dpProfile)).isEqualTo(
                 BluetoothProfile.STATE_CONNECTED);
-    }
-
-    private void updateProfileStatus(LocalBluetoothProfile profile, int status) {
-        doReturn(status).when(profile).getConnectionStatus(mDevice);
-        mCachedDevice.onProfileStateChanged(profile, status);
-    }
-
-    private void updateSubDeviceProfileStatus(LocalBluetoothProfile profile, int status) {
-        doReturn(status).when(profile).getConnectionStatus(mSubDevice);
-        mSubCachedDevice.onProfileStateChanged(profile, status);
     }
 
     @Test
@@ -2004,6 +2059,29 @@ public class CachedBluetoothDeviceTest {
         when(mCachedDevice.getProfiles()).thenReturn(ImmutableList.of());
 
         assertThat(mCachedDevice.getConnectionSummary(false)).isNull();
+    }
+
+    private void updateProfileStatus(LocalBluetoothProfile profile, int status) {
+        doReturn(status).when(profile).getConnectionStatus(mDevice);
+        mCachedDevice.onProfileStateChanged(profile, status);
+        updateConnectionStatus(mCachedDevice);
+    }
+
+    private void updateSubDeviceProfileStatus(LocalBluetoothProfile profile, int status) {
+        doReturn(status).when(profile).getConnectionStatus(mSubDevice);
+        mSubCachedDevice.onProfileStateChanged(profile, status);
+        updateConnectionStatus(mSubCachedDevice);
+    }
+
+    private void updateConnectionStatus(CachedBluetoothDevice cachedBluetoothDevice) {
+        for (LocalBluetoothProfile profile : cachedBluetoothDevice.getProfiles()) {
+            int status = cachedBluetoothDevice.getProfileConnectionState(profile);
+            if (status == BluetoothProfile.STATE_CONNECTED) {
+                when(cachedBluetoothDevice.getDevice().isConnected()).thenReturn(true);
+                return;
+            }
+        }
+        when(cachedBluetoothDevice.getDevice().isConnected()).thenReturn(false);
     }
 
     private HearingAidInfo getLeftAshaHearingAidInfo() {

@@ -858,6 +858,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * {@link InsetsStateController#notifyInsetsChanged}.
      */
     boolean isReadyToDispatchInsetsState() {
+        if (mStartingData != null) {
+            // Starting window doesn't consider insets.
+            return false;
+        }
         final boolean visible = shouldCheckTokenVisibleRequested()
                 ? isVisibleRequested() : isVisible();
         return visible && mFrozenInsetsState == null;
@@ -1443,14 +1447,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " last=" + mWindowFrames.mLastFrame + " frame=" + mWindowFrames.mFrame);
         }
 
+        final boolean contentChanged = didFrameInsetsChange || configChanged
+                || dragResizingChanged || attachedFrameChanged;
+        // Cancel unchanged non-sync-buffer redraw request to avoid unnecessary reportResized().
+        if (!contentChanged && !mRedrawForSyncReported && mPrepareSyncSeqId <= 0
+                && mDrawHandlers.isEmpty()) {
+            mRedrawForSyncReported = true;
+        }
+
         // Add a window that is using blastSync to the resizing list if it hasn't been reported
         // already. This because the window is waiting on a finishDrawing from the client.
-        if (didFrameInsetsChange
-                || configChanged
-                || insetsChanged
-                || dragResizingChanged
-                || shouldSendRedrawForSync()
-                || attachedFrameChanged) {
+        if (contentChanged || insetsChanged || shouldSendRedrawForSync()) {
             ProtoLog.v(WM_DEBUG_RESIZE,
                         "Resize reasons for w=%s:  %s configChanged=%b didFrameInsetsChange=%b",
                         this, mWindowFrames.getInsetsChangedInfo(),
@@ -2355,18 +2362,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         final int type = mAttrs.type;
-        if (WindowManagerService.excludeWindowTypeFromTapOutTask(type)) {
-            dc.mTapExcludedWindows.remove(this);
-        }
 
         if (type == TYPE_PRESENTATION || type == TYPE_PRIVATE_PRESENTATION) {
             mWmService.mDisplayManagerInternal.onPresentation(dc.getDisplay().getDisplayId(),
                     /*isShown=*/ false);
         }
 
-        // Remove this window from mTapExcludeProvidingWindows. If it was not registered, this will
-        // not do anything.
-        dc.mTapExcludeProvidingWindows.remove(this);
         dc.getDisplayPolicy().removeWindowLw(this);
 
         disposeInputChannel();
@@ -5522,18 +5523,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Clear the tap excluded region if the region passed in is null or empty.
         if (region == null || region.isEmpty()) {
             mTapExcludeRegion.setEmpty();
-            // Remove this window from mTapExcludeProvidingWindows since it won't be providing
-            // tap exclude regions.
-            currentDisplay.mTapExcludeProvidingWindows.remove(this);
         } else {
             mTapExcludeRegion.set(region);
-            // Make sure that this window is registered as one that provides a tap exclude region
-            // for its containing display.
-            currentDisplay.mTapExcludeProvidingWindows.add(this);
         }
 
-        // Trigger touch exclude region update on current display.
-        currentDisplay.updateTouchExcludeRegion();
         // Trigger touchable region update for this window.
         currentDisplay.getInputMonitor().updateInputWindowsLw(true /* force */);
     }
@@ -6068,6 +6061,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public boolean cancelAndRedraw() {
         // Cancel any draw requests during a sync.
         return mPrepareSyncSeqId > 0;
+    }
+
+    public boolean isActivityWindow() {
+        return mActivityRecord != null;
     }
 
     void setSecureLocked(boolean isSecure) {

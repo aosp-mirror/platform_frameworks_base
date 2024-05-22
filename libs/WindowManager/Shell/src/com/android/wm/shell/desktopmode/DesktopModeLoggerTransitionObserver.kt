@@ -20,6 +20,7 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.app.TaskInfo
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
+import android.content.Context
 import android.os.IBinder
 import android.util.SparseArray
 import android.view.SurfaceControl
@@ -38,6 +39,7 @@ import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterRe
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
@@ -49,6 +51,7 @@ import com.android.wm.shell.util.KtProtoLog
  * and other transitions that originate both within and outside shell.
  */
 class DesktopModeLoggerTransitionObserver(
+    context: Context,
     shellInit: ShellInit,
     private val transitions: Transitions,
     private val desktopModeEventLogger: DesktopModeEventLogger
@@ -57,7 +60,8 @@ class DesktopModeLoggerTransitionObserver(
     private val idSequence: InstanceIdSequence by lazy { InstanceIdSequence(Int.MAX_VALUE) }
 
     init {
-        if (Transitions.ENABLE_SHELL_TRANSITIONS && DesktopModeStatus.isEnabled()) {
+        if (Transitions.ENABLE_SHELL_TRANSITIONS &&
+            DesktopModeStatus.canEnterDesktopMode(context)) {
             shellInit.addInitCallback(this::onInit, this)
         }
     }

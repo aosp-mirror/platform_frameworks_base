@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -37,9 +38,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
-
 import com.android.internal.os.SomeArgs;
-
 import java.lang.annotation.Retention;
 import java.util.List;
 
@@ -116,6 +115,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      */
     protected Handler mHandler;
 
+    @SuppressLint("OnNameExpected")
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);

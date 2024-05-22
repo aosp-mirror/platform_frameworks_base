@@ -1375,8 +1375,10 @@ class JobConcurrencyManager {
             final JobServiceContext jsc = mActiveServices.get(i);
             final JobStatus jobStatus = jsc.getRunningJobLocked();
 
-            if (jobStatus != null && !jsc.isWithinExecutionGuaranteeTime()
-                    && restriction.isJobRestricted(jobStatus)) {
+            if (jobStatus != null
+                    && !jsc.isWithinExecutionGuaranteeTime()
+                    && restriction.isJobRestricted(
+                            jobStatus, mService.evaluateJobBiasLocked(jobStatus))) {
                 jsc.cancelExecutingJobLocked(restriction.getStopReason(),
                         restriction.getInternalReason(),
                         JobParameters.getInternalReasonCodeDescription(

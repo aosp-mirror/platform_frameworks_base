@@ -47,7 +47,6 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.Process;
 import android.os.UserHandle;
@@ -208,8 +207,7 @@ public class ScreenshotController {
     @Nullable
     private final ScreenshotSoundController mScreenshotSoundController;
     private final PhoneWindow mWindow;
-    private final DisplayManager mDisplayManager;
-    private final int mDisplayId;
+    private final Display mDisplay;
     private final ScrollCaptureExecutor mScrollCaptureExecutor;
     private final ScreenshotNotificationSmartActionsProvider
             mScreenshotNotificationSmartActionsProvider;
@@ -249,7 +247,6 @@ public class ScreenshotController {
     @AssistedInject
     ScreenshotController(
             Context context,
-            DisplayManager displayManager,
             WindowManager windowManager,
             FeatureFlags flags,
             ScreenshotViewProxy.Factory viewProxyFactory,
@@ -271,12 +268,13 @@ public class ScreenshotController {
             AssistContentRequester assistContentRequester,
             MessageContainerController messageContainerController,
             Provider<ScreenshotSoundController> screenshotSoundController,
-            @Assisted int displayId,
+            @Assisted Display display,
             @Assisted boolean showUIOnExternalDisplay
     ) {
         mScreenshotSmartActions = screenshotSmartActions;
         mActionsProviderFactory = actionsProviderFactory;
-        mNotificationsController = screenshotNotificationsControllerFactory.create(displayId);
+        mNotificationsController = screenshotNotificationsControllerFactory.create(
+                display.getDisplayId());
         mUiEventLogger = uiEventLogger;
         mImageExporter = imageExporter;
         mImageCapture = imageCapture;
@@ -290,11 +288,9 @@ public class ScreenshotController {
         mScreenshotHandler = timeoutHandler;
         mScreenshotHandler.setDefaultTimeoutMillis(SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS);
 
-
-        mDisplayId = displayId;
-        mDisplayManager = displayManager;
+        mDisplay = display;
         mWindowManager = windowManager;
-        final Context displayContext = context.createDisplayContext(getDisplay());
+        final Context displayContext = context.createDisplayContext(display);
         mContext = (WindowContext) displayContext.createWindowContext(TYPE_SCREENSHOT, null);
         mFlags = flags;
         mActionIntentExecutor = actionIntentExecutor;
@@ -302,7 +298,7 @@ public class ScreenshotController {
         mMessageContainerController = messageContainerController;
         mAssistContentRequester = assistContentRequester;
 
-        mViewProxy = viewProxyFactory.getProxy(mContext, mDisplayId);
+        mViewProxy = viewProxyFactory.getProxy(mContext, mDisplay.getDisplayId());
 
         mScreenshotHandler.setOnTimeoutRunnable(() -> {
             if (DEBUG_UI) {
@@ -321,14 +317,14 @@ public class ScreenshotController {
         mConfigChanges.applyNewConfig(context.getResources());
         reloadAssets();
 
-        mActionExecutor = actionExecutorFactory.create(mWindow, mViewProxy.getScreenshotPreview(),
+        mActionExecutor = actionExecutorFactory.create(mWindow, mViewProxy,
                 () -> {
-                    requestDismissal(null);
+                    finishDismiss();
                     return Unit.INSTANCE;
                 });
 
         // Sound is only reproduced from the controller of the default display.
-        if (displayId == Display.DEFAULT_DISPLAY) {
+        if (mDisplay.getDisplayId() == Display.DEFAULT_DISPLAY) {
             mScreenshotSoundController = screenshotSoundController.get();
         } else {
             mScreenshotSoundController = null;
@@ -356,7 +352,7 @@ public class ScreenshotController {
         if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_FULLSCREEN
                 && screenshot.getBitmap() == null) {
             Rect bounds = getFullScreenRect();
-            screenshot.setBitmap(mImageCapture.captureDisplay(mDisplayId, bounds));
+            screenshot.setBitmap(mImageCapture.captureDisplay(mDisplay.getDisplayId(), bounds));
             screenshot.setScreenBounds(bounds);
         }
 
@@ -459,7 +455,7 @@ public class ScreenshotController {
     }
 
     private boolean shouldShowUi() {
-        return mDisplayId == Display.DEFAULT_DISPLAY || mShowUIOnExternalDisplay;
+        return mDisplay.getDisplayId() == Display.DEFAULT_DISPLAY || mShowUIOnExternalDisplay;
     }
 
     void prepareViewForNewScreenshot(@NonNull ScreenshotData screenshot, String oldPackageName) {
@@ -590,7 +586,11 @@ public class ScreenshotController {
                             if (mConfigChanges.applyNewConfig(mContext.getResources())) {
                                 // Hide the scroll chip until we know it's available in this
                                 // orientation
-                                mViewProxy.hideScrollChip();
+                                if (screenshotShelfUi2()) {
+                                    mActionsProvider.onScrollChipInvalidated();
+                                } else {
+                                    mViewProxy.hideScrollChip();
+                                }
                                 // Delay scroll capture eval a bit to allow the underlying activity
                                 // to set up in the new orientation.
                                 mScreenshotHandler.postDelayed(
@@ -618,14 +618,16 @@ public class ScreenshotController {
 
     private void requestScrollCapture(UserHandle owner) {
         mScrollCaptureExecutor.requestScrollCapture(
-                mDisplayId,
+                mDisplay.getDisplayId(),
                 mWindow.getDecorView().getWindowToken(),
                 (response) -> {
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_IMPRESSION,
                             0, response.getPackageName());
-                    if (screenshotShelfUi2() && mActionsProvider != null) {
-                        mActionsProvider.onScrollChipReady(
-                                () -> onScrollButtonClicked(owner, response));
+                    if (screenshotShelfUi2()) {
+                        if (mActionsProvider != null) {
+                            mActionsProvider.onScrollChipReady(
+                                    () -> onScrollButtonClicked(owner, response));
+                        }
                     } else {
                         mViewProxy.showScrollChip(response.getPackageName(),
                                 () -> onScrollButtonClicked(owner, response));
@@ -641,7 +643,8 @@ public class ScreenshotController {
         }
         mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_REQUESTED, 0,
                 response.getPackageName());
-        Bitmap newScreenshot = mImageCapture.captureDisplay(mDisplayId, getFullScreenRect());
+        Bitmap newScreenshot = mImageCapture.captureDisplay(mDisplay.getDisplayId(),
+                getFullScreenRect());
         if (newScreenshot == null) {
             Log.e(TAG, "Failed to capture current screenshot for scroll transition!");
             return;
@@ -656,9 +659,7 @@ public class ScreenshotController {
                 () -> {
                     final Intent intent = ActionIntentCreator.INSTANCE.createLongScreenshotIntent(
                             owner, mContext);
-                    mActionIntentExecutor.launchIntentAsync(intent, owner, true,
-                            ActivityOptions.makeCustomAnimation(mContext, 0, 0), null);
-
+                    mActionIntentExecutor.launchIntentAsync(intent, owner, true, null, null);
                 },
                 mViewProxy::restoreNonScrollingUi,
                 mViewProxy::startLongScreenshotTransition);
@@ -819,7 +820,8 @@ public class ScreenshotController {
     private void saveScreenshotInBackground(
             ScreenshotData screenshot, UUID requestId, Consumer<Uri> finisher) {
         ListenableFuture<ImageExporter.Result> future = mImageExporter.export(mBgExecutor,
-                requestId, screenshot.getBitmap(), screenshot.getUserOrDefault(), mDisplayId);
+                requestId, screenshot.getBitmap(), screenshot.getUserOrDefault(),
+                mDisplay.getDisplayId());
         future.addListener(() -> {
             try {
                 ImageExporter.Result result = future.get();
@@ -861,7 +863,7 @@ public class ScreenshotController {
         data.mActionsReadyListener = actionsReadyListener;
         data.mQuickShareActionsReadyListener = quickShareActionsReadyListener;
         data.owner = owner;
-        data.displayId = mDisplayId;
+        data.displayId = mDisplay.getDisplayId();
 
         if (mSaveInBgTask != null) {
             // just log success/failure for the pre-existing screenshot
@@ -986,13 +988,9 @@ public class ScreenshotController {
         }
     }
 
-    private Display getDisplay() {
-        return mDisplayManager.getDisplay(mDisplayId);
-    }
-
     private Rect getFullScreenRect() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        getDisplay().getRealMetrics(displayMetrics);
+        mDisplay.getRealMetrics(displayMetrics);
         return new Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
     }
 
@@ -1026,12 +1024,12 @@ public class ScreenshotController {
     @AssistedFactory
     public interface Factory {
         /**
-         * Creates an instance of the controller for that specific displayId.
+         * Creates an instance of the controller for that specific display.
          *
-         * @param displayId:               display to capture
-         * @param showUIOnExternalDisplay: Whether the UI should be shown if this is an external
-         *                                 display.
+         * @param display                 display to capture
+         * @param showUIOnExternalDisplay Whether the UI should be shown if this is an external
+         *                                display.
          */
-        ScreenshotController create(int displayId, boolean showUIOnExternalDisplay);
+        ScreenshotController create(Display display, boolean showUIOnExternalDisplay);
     }
 }

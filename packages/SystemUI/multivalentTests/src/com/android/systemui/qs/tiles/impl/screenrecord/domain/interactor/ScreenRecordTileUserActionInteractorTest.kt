@@ -18,12 +18,11 @@ package com.android.systemui.qs.tiles.impl.screenrecord.domain.interactor
 
 import android.app.Dialog
 import android.os.UserHandle
-import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
-import com.android.systemui.animation.dialogTransitionAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
@@ -138,12 +137,17 @@ class ScreenRecordTileUserActionInteractorTest : SysuiTestCase() {
      */
     @Test
     fun handleClickFromView_whenDoingNothing_whenKeyguardNotShowing_showDialogFromView() = runTest {
-        val view = mock<View>()
+        val expandable = mock<Expandable>()
+        val controller = mock<DialogTransitionAnimator.Controller>()
+        whenever(expandable.dialogTransitionController(any())).thenReturn(controller)
+
         kosmos.fakeKeyguardRepository.setKeyguardShowing(false)
 
         val recordingModel = ScreenRecordTileModel.DoingNothing
 
-        underTest.handleInput(QSTileInputTestKtx.click(recordingModel, UserHandle.CURRENT, view))
+        underTest.handleInput(
+            QSTileInputTestKtx.click(recordingModel, UserHandle.CURRENT, expandable)
+        )
         val onStartRecordingClickedCaptor = argumentCaptor<Runnable>()
         verify(recordingController)
             .createScreenRecordDialog(
@@ -158,6 +162,6 @@ class ScreenRecordTileUserActionInteractorTest : SysuiTestCase() {
         verify(keyguardDismissUtil)
             .executeWhenUnlocked(onDismissActionCaptor.capture(), eq(false), eq(true))
         onDismissActionCaptor.value.onDismiss()
-        verify(dialogTransitionAnimator).showFromView(eq(dialog), eq(view), any(), eq(true))
+        verify(dialogTransitionAnimator).show(eq(dialog), eq(controller), eq(true))
     }
 }

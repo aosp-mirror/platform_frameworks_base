@@ -131,7 +131,8 @@ public class DisplayModeDirectorTest {
             /* defaultRefreshRate= */ 0,
             /* defaultPeakRefreshRate= */ 0,
             /* defaultRefreshRateInHbmHdr= */ 0,
-            /* defaultRefreshRateInHbmSunlight= */ 0);
+            /* defaultRefreshRateInHbmSunlight= */ 0,
+            /* lowPowerSupportedModes =*/ List.of());
 
     public static Collection<Object[]> getAppRequestedSizeTestCases() {
         var appRequestedSizeTestCases = Arrays.asList(new Object[][] {
@@ -157,7 +158,7 @@ public class DisplayModeDirectorTest {
                                         APP_MODE_HIGH_90.getPhysicalHeight()),
                                 Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                                 Vote.forBaseModeRefreshRate(APP_MODE_HIGH_90.getRefreshRate()),
-                                Vote.PRIORITY_LOW_POWER_MODE,
+                                Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE,
                                 Vote.forSize(LIMIT_MODE_70.getPhysicalWidth(),
                                         LIMIT_MODE_70.getPhysicalHeight()))},
                 {/*expectedBaseModeId*/ LIMIT_MODE_70.getModeId(),
@@ -169,7 +170,7 @@ public class DisplayModeDirectorTest {
                                         APP_MODE_65.getPhysicalHeight()),
                                 Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                                 Vote.forBaseModeRefreshRate(APP_MODE_65.getRefreshRate()),
-                                Vote.PRIORITY_LOW_POWER_MODE,
+                                Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE,
                                 Vote.forSize(LIMIT_MODE_70.getPhysicalWidth(),
                                         LIMIT_MODE_70.getPhysicalHeight()))},
                 {/*expectedBaseModeId*/ LIMIT_MODE_70.getModeId(),
@@ -181,7 +182,7 @@ public class DisplayModeDirectorTest {
                                         APP_MODE_65.getPhysicalHeight()),
                                 Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                                 Vote.forBaseModeRefreshRate(APP_MODE_65.getRefreshRate()),
-                                Vote.PRIORITY_LOW_POWER_MODE,
+                                Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE,
                                 Vote.forSizeAndPhysicalRefreshRatesRange(
                                     0, 0,
                                     LIMIT_MODE_70.getPhysicalWidth(),
@@ -197,7 +198,7 @@ public class DisplayModeDirectorTest {
                                         APP_MODE_65.getPhysicalHeight()),
                                 Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                                 Vote.forBaseModeRefreshRate(APP_MODE_65.getRefreshRate()),
-                                Vote.PRIORITY_LOW_POWER_MODE,
+                                Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE,
                                 Vote.forSizeAndPhysicalRefreshRatesRange(
                                     0, 0,
                                     LIMIT_MODE_70.getPhysicalWidth(),
@@ -213,7 +214,7 @@ public class DisplayModeDirectorTest {
                                         APP_MODE_HIGH_90.getPhysicalHeight()),
                                 Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                                 Vote.forBaseModeRefreshRate(APP_MODE_HIGH_90.getRefreshRate()),
-                                Vote.PRIORITY_LOW_POWER_MODE,
+                                Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE,
                                 Vote.forSizeAndPhysicalRefreshRatesRange(
                                     0, 0,
                                     LIMIT_MODE_70.getPhysicalWidth(),
@@ -229,7 +230,7 @@ public class DisplayModeDirectorTest {
                                         APP_MODE_HIGH_90.getPhysicalHeight()),
                                 Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                                 Vote.forBaseModeRefreshRate(APP_MODE_HIGH_90.getRefreshRate()),
-                                Vote.PRIORITY_LOW_POWER_MODE,
+                                Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE,
                                 Vote.forSizeAndPhysicalRefreshRatesRange(
                                     0, 0,
                                     LIMIT_MODE_70.getPhysicalWidth(),
@@ -245,7 +246,7 @@ public class DisplayModeDirectorTest {
                                 Vote.PRIORITY_APP_REQUEST_SIZE,
                                 Vote.forSize(APP_MODE_65.getPhysicalWidth(),
                                         APP_MODE_65.getPhysicalHeight()),
-                                Vote.PRIORITY_LOW_POWER_MODE,
+                                Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE,
                                 Vote.forPhysicalRefreshRates(
                                         0, 64.99f))}});
 
@@ -598,7 +599,7 @@ public class DisplayModeDirectorTest {
                 < Vote.PRIORITY_APP_REQUEST_SIZE);
 
         assertTrue(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH
-                > Vote.PRIORITY_LOW_POWER_MODE);
+                > Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE);
 
         Display.Mode[] modes = new Display.Mode[4];
         modes[0] = new Display.Mode(
@@ -676,9 +677,9 @@ public class DisplayModeDirectorTest {
 
     @Test
     public void testLPMHasHigherPriorityThanUser() {
-        assertTrue(Vote.PRIORITY_LOW_POWER_MODE
+        assertTrue(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE
                 > Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE);
-        assertTrue(Vote.PRIORITY_LOW_POWER_MODE
+        assertTrue(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE
                 > Vote.PRIORITY_APP_REQUEST_SIZE);
 
         Display.Mode[] modes = new Display.Mode[4];
@@ -700,7 +701,7 @@ public class DisplayModeDirectorTest {
                 Vote.forBaseModeRefreshRate(appRequestedMode.getRefreshRate()));
         votes.put(Vote.PRIORITY_APP_REQUEST_SIZE, Vote.forSize(appRequestedMode.getPhysicalWidth(),
                 appRequestedMode.getPhysicalHeight()));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(60, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(60, 60));
         director.injectVotesByDisplay(votesByDisplay);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(2);
@@ -715,7 +716,7 @@ public class DisplayModeDirectorTest {
                 Vote.forBaseModeRefreshRate(appRequestedMode.getRefreshRate()));
         votes.put(Vote.PRIORITY_APP_REQUEST_SIZE, Vote.forSize(appRequestedMode.getPhysicalWidth(),
                 appRequestedMode.getPhysicalHeight()));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(90, 90));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(90, 90));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(4);
@@ -730,7 +731,7 @@ public class DisplayModeDirectorTest {
                 Vote.forBaseModeRefreshRate(appRequestedMode.getRefreshRate()));
         votes.put(Vote.PRIORITY_APP_REQUEST_SIZE, Vote.forSize(appRequestedMode.getPhysicalWidth(),
                 appRequestedMode.getPhysicalHeight()));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(60, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(60, 60));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(2);
@@ -745,7 +746,7 @@ public class DisplayModeDirectorTest {
                 Vote.forBaseModeRefreshRate(appRequestedMode.getRefreshRate()));
         votes.put(Vote.PRIORITY_APP_REQUEST_SIZE, Vote.forSize(appRequestedMode.getPhysicalWidth(),
                 appRequestedMode.getPhysicalHeight()));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(90, 90));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(90, 90));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.baseModeId).isEqualTo(4);
@@ -906,7 +907,7 @@ public class DisplayModeDirectorTest {
                 Vote.forBaseModeRefreshRate(appRequestedMode.getRefreshRate()));
         votes.put(Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE,
                 Vote.forRenderFrameRates(60, 60));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(0, 60));
         director.injectVotesByDisplay(votesByDisplay);
 
         assertThat(director.shouldAlwaysRespectAppRequestedMode()).isFalse();
@@ -946,7 +947,7 @@ public class DisplayModeDirectorTest {
         votesByDisplay.put(DISPLAY_ID, votes);
         votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
                 Vote.forRenderFrameRates(30, 90));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(0, 60));
 
         director.injectVotesByDisplay(votesByDisplay);
         assertThat(director.getModeSwitchingType())
@@ -987,7 +988,7 @@ public class DisplayModeDirectorTest {
         votesByDisplay.put(DISPLAY_ID, votes);
         votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
                 Vote.forRenderFrameRates(30, 90));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(0, 60));
 
         director.injectVotesByDisplay(votesByDisplay);
         assertThat(director.getModeSwitchingType())
@@ -1029,7 +1030,7 @@ public class DisplayModeDirectorTest {
         votesByDisplay.put(DISPLAY_ID, votes);
         votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
                 Vote.forRenderFrameRates(30, 90));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(0, 60));
 
         director.injectVotesByDisplay(votesByDisplay);
         assertThat(director.getModeSwitchingType())
@@ -1900,7 +1901,7 @@ public class DisplayModeDirectorTest {
         director.start(createMockSensorManager());
 
         SparseArray<Vote> votes = new SparseArray<>();
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 50f));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(0, 50f));
 
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(DISPLAY_ID_2, votes);
@@ -2298,7 +2299,7 @@ public class DisplayModeDirectorTest {
         votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
                 Vote.forRenderFrameRates(90, Float.POSITIVE_INFINITY));
         votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, Vote.forDisableRefreshRateSwitching());
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(0, 60));
         director.injectVotesByDisplay(votesByDisplay);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(50);
@@ -2311,7 +2312,7 @@ public class DisplayModeDirectorTest {
         votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
                 Vote.forRenderFrameRates(80, Float.POSITIVE_INFINITY));
         votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, Vote.forDisableRefreshRateSwitching());
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 90));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(0, 90));
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(80);
         assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(80);
@@ -2323,7 +2324,7 @@ public class DisplayModeDirectorTest {
         votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
                 Vote.forRenderFrameRates(80, Float.POSITIVE_INFINITY));
         votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, Vote.forDisableRefreshRateSwitching());
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 90));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(0, 90));
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
         assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(90);
@@ -2343,7 +2344,7 @@ public class DisplayModeDirectorTest {
         votesByDisplay.put(DISPLAY_ID, votes);
         votes.put(Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                 Vote.forBaseModeRefreshRate(70));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(0, 60));
         director.injectVotesByDisplay(votesByDisplay);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(0);
@@ -2360,7 +2361,7 @@ public class DisplayModeDirectorTest {
         votes.clear();
         votes.put(Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                 Vote.forBaseModeRefreshRate(55));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(0, 60));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(0);
@@ -2374,7 +2375,7 @@ public class DisplayModeDirectorTest {
                 Vote.forRenderFrameRates(0, 52));
         votes.put(Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                 Vote.forBaseModeRefreshRate(55));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(0, 60));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(0);
@@ -2392,7 +2393,7 @@ public class DisplayModeDirectorTest {
                 Vote.forRenderFrameRates(0, 58));
         votes.put(Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
                 Vote.forBaseModeRefreshRate(55));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(0, 60));
         director.injectVotesByDisplay(votesByDisplay);
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(0);
@@ -2521,7 +2522,7 @@ public class DisplayModeDirectorTest {
 
 
         votes.put(Vote.PRIORITY_UDFPS, Vote.forPhysicalRefreshRates(120, 120));
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(90, 90));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(90, 90));
         director.injectVotesByDisplay(votesByDisplay);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
         assertThat(desiredSpecs.appRequest.physical.min).isWithin(FLOAT_TOLERANCE).of(120);
@@ -2542,7 +2543,7 @@ public class DisplayModeDirectorTest {
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(DISPLAY_ID, votes);
 
-        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE, Vote.forRenderFrameRates(0, 60));
         votes.put(Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE,
                 Vote.forRenderFrameRates(0, 30));
         director.injectVotesByDisplay(votesByDisplay);
@@ -3168,7 +3169,8 @@ public class DisplayModeDirectorTest {
                 /* defaultRefreshRate= */ 60,
                 /* defaultPeakRefreshRate= */ 65,
                 /* defaultRefreshRateInHbmHdr= */ 65,
-                /* defaultRefreshRateInHbmSunlight= */ 75);
+                /* defaultRefreshRateInHbmSunlight= */ 75,
+                /* lowPowerSupportedModes= */ List.of());
         when(displayDeviceConfig.getRefreshRateData()).thenReturn(refreshRateData);
         when(displayDeviceConfig.getDefaultLowBlockingZoneRefreshRate()).thenReturn(50);
         when(displayDeviceConfig.getDefaultHighBlockingZoneRefreshRate()).thenReturn(55);
@@ -3390,9 +3392,10 @@ public class DisplayModeDirectorTest {
 
         ArgumentCaptor<DisplayListener> displayListenerCaptor =
                 ArgumentCaptor.forClass(DisplayListener.class);
-        verify(mInjector).registerDisplayListener(displayListenerCaptor.capture(),
+        verify(mInjector, atLeastOnce()).registerDisplayListener(displayListenerCaptor.capture(),
                 any(Handler.class));
-        DisplayListener displayListener = displayListenerCaptor.getValue();
+        // DisplayObserver should register first
+        DisplayListener displayListener = displayListenerCaptor.getAllValues().get(0);
 
         float refreshRate = 60;
         mInjector.mDisplayInfo.layoutLimitedRefreshRate =
@@ -3417,9 +3420,10 @@ public class DisplayModeDirectorTest {
 
         ArgumentCaptor<DisplayListener> displayListenerCaptor =
                 ArgumentCaptor.forClass(DisplayListener.class);
-        verify(mInjector).registerDisplayListener(displayListenerCaptor.capture(),
+        verify(mInjector, atLeastOnce()).registerDisplayListener(displayListenerCaptor.capture(),
                 any(Handler.class));
-        DisplayListener displayListener = displayListenerCaptor.getValue();
+        // DisplayObserver should register first
+        DisplayListener displayListener = displayListenerCaptor.getAllValues().get(0);
 
         mInjector.mDisplayInfo.layoutLimitedRefreshRate = new RefreshRateRange(10, 10);
         mInjector.mDisplayInfoValid = false;

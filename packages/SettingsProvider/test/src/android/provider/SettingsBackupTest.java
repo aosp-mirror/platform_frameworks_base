@@ -233,6 +233,7 @@ public class SettingsBackupTest {
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,
                     Settings.Global.ENABLE_16K_PAGES, // Added for 16K developer option
                     Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
+                    Settings.Global.ERROR_KERNEL_LOG_PREFIX,
                     Settings.Global.ERROR_LOGCAT_PREFIX,
                     Settings.Global.EUICC_PROVISIONED,
                     Settings.Global.EUICC_SUPPORTED_COUNTRIES,
@@ -935,7 +936,6 @@ public class SettingsBackupTest {
                         Settings.System.VOLUME_VOICE, // deprecated since API 2?
                         Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
                         Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
-                        Settings.System.SCREEN_BRIGHTNESS_FLOAT,
                         Settings.System.SCREEN_BRIGHTNESS_FOR_ALS,
                         Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE,
                         Settings.System.WEAR_TTS_PREWARM_ENABLED,

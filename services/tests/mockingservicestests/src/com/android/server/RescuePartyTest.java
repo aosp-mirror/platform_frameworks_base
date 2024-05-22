@@ -239,6 +239,9 @@ public class RescuePartyTest {
 
     @Test
     public void testBootLoopDetectionWithExecutionForAllRescueLevels() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         RescueParty.onSettingsProviderPublished(mMockContext);
         verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
                 any(Executor.class),
@@ -449,6 +452,9 @@ public class RescuePartyTest {
 
     @Test
     public void testNonPersistentAppCrashDetectionWithScopedResets() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         RescueParty.onSettingsProviderPublished(mMockContext);
         verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
                 any(Executor.class),
@@ -506,6 +512,9 @@ public class RescuePartyTest {
 
     @Test
     public void testNonDeviceConfigSettingsOnlyResetOncePerLevel() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         RescueParty.onSettingsProviderPublished(mMockContext);
         verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
                 any(Executor.class),
@@ -879,6 +888,9 @@ public class RescuePartyTest {
 
     @Test
     public void testBootLoopLevels() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
 
         assertEquals(observer.onBootLoop(0), PackageHealthObserverImpact.USER_IMPACT_LEVEL_0);

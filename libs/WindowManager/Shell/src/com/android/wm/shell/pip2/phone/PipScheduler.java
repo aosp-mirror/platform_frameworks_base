@@ -24,17 +24,21 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.view.SurfaceControl;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -155,5 +159,40 @@ public class PipScheduler {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setBounds(mPipTransitionState.mPipTaskToken, toBounds);
         mPipTransitionController.startResizeTransition(wct);
+    }
+
+    /**
+     * Directly perform a scaled matrix transformation on the leash. This will not perform any
+     * {@link WindowContainerTransaction}.
+     */
+    public void scheduleUserResizePip(Rect toBounds) {
+        scheduleUserResizePip(toBounds, 0f /* degrees */);
+    }
+
+    /**
+     * Directly perform a scaled matrix transformation on the leash. This will not perform any
+     * {@link WindowContainerTransaction}.
+     *
+     * @param degrees the angle to rotate the bounds to.
+     */
+    public void scheduleUserResizePip(Rect toBounds, float degrees) {
+        if (toBounds.isEmpty()) {
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Attempted to user resize PIP to empty bounds, aborting.", TAG);
+            return;
+        }
+        SurfaceControl leash = mPipTransitionState.mPinnedTaskLeash;
+        final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+
+        Matrix transformTensor = new Matrix();
+        final float[] mMatrixTmp = new float[9];
+        final float scale = (float) toBounds.width() / mPipBoundsState.getBounds().width();
+
+        transformTensor.setScale(scale, scale);
+        transformTensor.postTranslate(toBounds.left, toBounds.top);
+        transformTensor.postRotate(degrees, toBounds.centerX(), toBounds.centerY());
+
+        tx.setMatrix(leash, transformTensor, mMatrixTmp);
+        tx.apply();
     }
 }

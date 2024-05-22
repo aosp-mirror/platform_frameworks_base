@@ -20,6 +20,10 @@ import android.annotation.Nullable;
 import android.content.res.Resources;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * RefreshRates config for display
@@ -58,12 +62,17 @@ public class RefreshRateData {
      */
     public final int defaultRefreshRateInHbmSunlight;
 
+    public final List<SupportedModeData> lowPowerSupportedModes;
+
+    @VisibleForTesting
     public RefreshRateData(int defaultRefreshRate, int defaultPeakRefreshRate,
-            int defaultRefreshRateInHbmHdr, int defaultRefreshRateInHbmSunlight) {
+            int defaultRefreshRateInHbmHdr, int defaultRefreshRateInHbmSunlight,
+            List<SupportedModeData> lowPowerSupportedModes) {
         this.defaultRefreshRate = defaultRefreshRate;
         this.defaultPeakRefreshRate = defaultPeakRefreshRate;
         this.defaultRefreshRateInHbmHdr = defaultRefreshRateInHbmHdr;
         this.defaultRefreshRateInHbmSunlight = defaultRefreshRateInHbmSunlight;
+        this.lowPowerSupportedModes = Collections.unmodifiableList(lowPowerSupportedModes);
     }
 
 
@@ -71,9 +80,10 @@ public class RefreshRateData {
     public String toString() {
         return "RefreshRateData {"
                 + "defaultRefreshRate: " + defaultRefreshRate
-                + "defaultPeakRefreshRate: " + defaultPeakRefreshRate
-                + "defaultRefreshRateInHbmHdr: " + defaultRefreshRateInHbmHdr
-                + "defaultRefreshRateInHbmSunlight: " + defaultRefreshRateInHbmSunlight
+                + ", defaultPeakRefreshRate: " + defaultPeakRefreshRate
+                + ", defaultRefreshRateInHbmHdr: " + defaultRefreshRateInHbmHdr
+                + ", defaultRefreshRateInHbmSunlight: " + defaultRefreshRateInHbmSunlight
+                + ", lowPowerSupportedModes=" + lowPowerSupportedModes
                 + "} ";
     }
 
@@ -90,8 +100,13 @@ public class RefreshRateData {
         int defaultRefreshRateInHbmSunlight = loadDefaultRefreshRateInHbmSunlight(
                 refreshRateConfigs, resources);
 
+        NonNegativeFloatToFloatMap modes =
+                refreshRateConfigs == null ? null : refreshRateConfigs.getLowPowerSupportedModes();
+        List<SupportedModeData> lowPowerSupportedModes = SupportedModeData.load(modes);
+
         return new RefreshRateData(defaultRefreshRate, defaultPeakRefreshRate,
-                defaultRefreshRateInHbmHdr, defaultRefreshRateInHbmSunlight);
+                defaultRefreshRateInHbmHdr, defaultRefreshRateInHbmSunlight,
+                lowPowerSupportedModes);
     }
 
     private static int loadDefaultRefreshRate(

@@ -97,8 +97,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"左側邊界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"右側邊界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"已儲存在工作資料夾的「<xliff:g id="APP">%1$s</xliff:g>」中"</string>
-    <!-- no translation found for screenshot_private_profile_notification (1704440899154243171) -->
-    <skip />
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"已儲存在個人資料夾的「<xliff:g id="APP">%1$s</xliff:g>」"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"檔案"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"「<xliff:g id="APPNAME">%1$s</xliff:g>」偵測到這張螢幕截圖。"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"「<xliff:g id="APPNAME">%1$s</xliff:g>」和其他開啟的應用程式偵測到這張螢幕截圖。"</string>
@@ -448,6 +447,8 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"長按即可自訂小工具"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"自訂小工具"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"所停用小工具的應用程式圖示"</string>
+    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"編輯小工具"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"移除"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"新增小工具"</string>
@@ -461,8 +462,9 @@
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"關閉螢幕鎖定畫面上的小工具"</string>
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"自訂小工具"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"螢幕鎖定畫面上的小工具"</string>
-    <!-- no translation found for accessibility_action_label_select_widget (8897281501387398191) -->
-    <skip />
+    <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"選取小工具"</string>
+    <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"移除小工具"</string>
+    <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"放置所選小工具"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"切換使用者"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"下拉式選單"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"這個工作階段中的所有應用程式和資料都會刪除。"</string>
@@ -627,12 +629,17 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"進入輸出設定"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"音量滑桿已展開"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"音量滑桿已收合"</string>
-    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"將%s設為靜音"</string>
-    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"將%s取消靜音"</string>
+    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"正在播放「<xliff:g id="LABEL">%s</xliff:g>」的裝置："</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"音訊播放位置"</string>
-    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
-    <skip />
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"通話中"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"系統使用者介面調整精靈"</string>
     <string name="status_bar" msgid="4357390266055077437">"狀態列"</string>
     <string name="demo_mode" msgid="263484519766901593">"系統 UI 展示模式"</string>
@@ -660,8 +667,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"衛星，連線品質不佳"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"衛星，連線品質良好"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"衛星，可連線"</string>
-    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"緊急衛星連線"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"工作資料夾"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"有趣與否，見仁見智"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"系統使用者介面調整精靈可讓你透過其他方式，調整及自訂 Android 使用者介面。這些實驗性功能隨著版本更新可能會變更、損壞或消失，執行時請務必謹慎。"</string>
@@ -866,8 +872,7 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"新增圖塊"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"移至 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"新增到位置 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <!-- no translation found for accessibilit_qs_edit_tile_add_move_invalid_position (2858467994472624487) -->
-    <skip />
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"位置無效。"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"位置 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"已新增設定方塊"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"已移除設定方塊"</string>

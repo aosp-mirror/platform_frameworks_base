@@ -24,6 +24,7 @@ import static com.android.server.inputmethod.multisessiontest.TestRequestConstan
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Process;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -47,8 +48,9 @@ public final class MainActivity extends ConcurrentUserActivityBase {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v(TAG, "Create MainActivity as user " + getUserId() + " on display "
-                + getDisplayId());
+        Log.v(TAG, "Create MainActivity as user "
+                + Process.myUserHandle().getIdentifier() + " on display "
+                + getDisplay().getDisplayId());
         setContentView(R.layout.main_activity);
         mImm = getSystemService(InputMethodManager.class);
         mEditor = requireViewById(R.id.edit_text);

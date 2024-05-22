@@ -26,12 +26,12 @@ import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl
 import com.android.systemui.util.kotlin.SharedPreferencesExt.observe
+import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -63,8 +63,8 @@ constructor(
     ): Flow<SelectedComponentRepository.SelectedComponent?> {
         val prefs = getSharedPreferencesForUser(userHandle.identifier)
         return prefs
-            .observe(PREF_COMPONENT)
-            .onStart { emit(Unit) }
+            .observe()
+            .emitOnStart()
             .map { getSelectedComponent(userHandle) }
             .flowOn(bgDispatcher)
     }

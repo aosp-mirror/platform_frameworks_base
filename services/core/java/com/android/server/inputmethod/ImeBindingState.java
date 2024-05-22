@@ -21,7 +21,9 @@ import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_FOCU
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED;
 
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
 import android.view.WindowManager;
@@ -35,6 +37,9 @@ import com.android.server.wm.WindowManagerInternal;
  * Stores information related to one active IME client on one display.
  */
 final class ImeBindingState {
+
+    @UserIdInt
+    final int mUserId;
 
     /**
      * The last window token that we confirmed to be focused.  This is always updated upon
@@ -90,6 +95,7 @@ final class ImeBindingState {
 
     static ImeBindingState newEmptyState() {
         return new ImeBindingState(
+                /*userId=*/ UserHandle.USER_NULL,
                 /*focusedWindow=*/ null,
                 /*focusedWindowSoftInputMode=*/ SOFT_INPUT_STATE_UNSPECIFIED,
                 /*focusedWindowClient=*/ null,
@@ -97,10 +103,12 @@ final class ImeBindingState {
         );
     }
 
-    ImeBindingState(@Nullable IBinder focusedWindow,
+    ImeBindingState(@UserIdInt int userId,
+            @Nullable IBinder focusedWindow,
             @SoftInputModeFlags int focusedWindowSoftInputMode,
             @Nullable ClientState focusedWindowClient,
             @Nullable EditorInfo focusedWindowEditorInfo) {
+        mUserId = userId;
         mFocusedWindow = focusedWindow;
         mFocusedWindowSoftInputMode = focusedWindowSoftInputMode;
         mFocusedWindowClient = focusedWindowClient;

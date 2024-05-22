@@ -97,8 +97,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ਖੱਬੇ ਪਾਸੇ ਵਾਲੀ ਸੀਮਾ <xliff:g id="PERCENT">%1$d</xliff:g> ਫ਼ੀਸਦ"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"ਸੱਜੇ ਪਾਸੇ ਵਾਲੀ ਸੀਮਾ <xliff:g id="PERCENT">%1$d</xliff:g> ਫ਼ੀਸਦ"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਿੱਚ <xliff:g id="APP">%1$s</xliff:g> ਵਿੱਚ ਰੱਖਿਅਤ ਕੀਤਾ ਗਿਆ"</string>
-    <!-- no translation found for screenshot_private_profile_notification (1704440899154243171) -->
-    <skip />
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"<xliff:g id="APP">%1$s</xliff:g> ਦੇ ਨਿੱਜੀ ਪ੍ਰੋਫਾਈਲ ਵਿੱਚ ਰੱਖਿਅਤ ਕੀਤਾ ਗਿਆ"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ਫ਼ਾਈਲਾਂ"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ਨੂੰ ਇਸ ਸਕ੍ਰੀਨਸ਼ਾਟ ਦਾ ਪਤਾ ਲੱਗਿਆ ਹੈ।"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ਅਤੇ ਹੋਰ ਖੁੱਲ੍ਹੀਆਂ ਐਪਾਂ ਨੂੰ ਇਸ ਸਕ੍ਰੀਨਸ਼ਾਟ ਦਾ ਪਤਾ ਲੱਗਿਆ ਹੈ।"</string>
@@ -448,6 +447,8 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ਵਿਜੇਟਾਂ ਨੂੰ ਵਿਉਂਤਬੱਧ ਕਰਨ ਲਈ ਦਬਾਈ ਰੱਖੋ"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ਵਿਜੇਟ ਵਿਉਂਤਬੱਧ ਕਰੋ"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"ਬੰਦ ਵਿਜੇਟ ਲਈ ਐਪ ਪ੍ਰਤੀਕ"</string>
+    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"ਵਿਜੇਟ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ਹਟਾਓ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ਵਿਜੇਟ ਸ਼ਾਮਲ ਕਰੋ"</string>
@@ -461,8 +462,9 @@
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਵਿਜੇਟ ਬੰਦ ਕਰੋ"</string>
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"ਵਿਜੇਟ ਵਿਉਂਤਬੱਧ ਕਰੋ"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਵਿਜੇਟ"</string>
-    <!-- no translation found for accessibility_action_label_select_widget (8897281501387398191) -->
-    <skip />
+    <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"ਵਿਜੇਟ ਚੁਣੋ"</string>
+    <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"ਵਿਜੇਟ ਹਟਾਓ"</string>
+    <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"ਚੁਣੇ ਗਏ ਵਿਜੇਟ ਲਈ ਥਾਂ ਚੁਣੋ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ਵਰਤੋਂਕਾਰ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ਪੁੱਲਡਾਊਨ ਮੀਨੂ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ਇਸ ਸੈਸ਼ਨ ਵਿਚਲੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟੇ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
@@ -627,12 +629,17 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"ਆਊਟਪੁੱਟ ਸੈਟਿੰਗਾਂ ਦਾਖਲ ਕਰੋ"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"ਅਵਾਜ਼ ਸਲਾਈਡਰਾਂ ਵਿਸਤਾਰ ਕੀਤਾ ਗਿਆ"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"ਅਵਾਜ਼ ਸਲਾਈਡਰਾਂ ਨੂੰ ਸਮੇਟਿਆ ਗਿਆ"</string>
-    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"%s ਨੂੰ ਮਿਊਟ ਕਰੋ"</string>
-    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"%s ਨੂੰ ਅਣਮਿਊਟ ਕਰੋ"</string>
+    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> ਚਲਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"ਆਡੀਓ ਇਸ \'ਤੇ ਚੱਲੇਗੀ"</string>
-    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
-    <skip />
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"ਕਾਲ ਜਾਰੀ ਹੈ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI ਟਿਊਨਰ"</string>
     <string name="status_bar" msgid="4357390266055077437">"ਸਥਿਤੀ ਪੱਟੀ"</string>
     <string name="demo_mode" msgid="263484519766901593">"ਸਿਸਟਮ UI ਡੈਮੋ ਮੋਡ"</string>
@@ -660,8 +667,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"ਸੈਟੇਲਾਈਟ, ਕਨੈਕਸ਼ਨ ਖਰਾਬ ਹੈ"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ਸੈਟੇਲਾਈਟ, ਕਨੈਕਸ਼ਨ ਵਧੀਆ ਹੈ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ਸੈਟੇਲਾਈਟ, ਕਨੈਕਸ਼ਨ ਉਪਲਬਧ ਹੈ"</string>
-    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"ਸੈਟੇਲਾਈਟ SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ਕੁਝ ਵਾਸਤੇ ਤਾਂ ਮਜ਼ੇਦਾਰ ਹੈ ਲੇਕਿਨ ਸਾਰਿਆਂ ਵਾਸਤੇ ਨਹੀਂ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"ਸਿਸਟਮ UI ਟਿਊਨਰ ਤੁਹਾਨੂੰ Android ਵਰਤੋਂਕਾਰ ਇੰਟਰਫ਼ੇਸ ਤਬਦੀਲ ਕਰਨ ਅਤੇ ਵਿਉਂਤਬੱਧ ਕਰਨ ਲਈ ਵਾਧੂ ਤਰੀਕੇ ਦਿੰਦਾ ਹੈ। ਇਹ ਪ੍ਰਯੋਗਾਤਮਿਕ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਭਵਿੱਖ ਦੀ ਰੀਲੀਜ਼ ਵਿੱਚ ਬਦਲ ਸਕਦੀਆਂ ਹਨ, ਟੁੱਟ ਸਕਦੀਆਂ ਹਨ, ਜਾਂ ਅਲੋਪ ਹੋ ਸਕਦੀਆਂ ਹਨ। ਸਾਵਧਾਨੀ ਨਾਲ ਅੱਗੇ ਵੱਧੋ।"</string>
@@ -866,8 +872,7 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"ਟਾਇਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> \'ਤੇ ਲਿਜਾਓ"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> ਸਥਾਨ \'ਤੇ ਸ਼ਾਮਲ ਕਰੋ"</string>
-    <!-- no translation found for accessibilit_qs_edit_tile_add_move_invalid_position (2858467994472624487) -->
-    <skip />
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"ਮੌਜੂਦਾ ਥਾਂ ਅਵੈਧ ਹੈ।"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"ਸਥਾਨ <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"ਟਾਇਲ ਨੂੰ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"ਟਾਇਲ ਨੂੰ ਹਟਾ ਦਿੱਤਾ ਗਿਆ"</string>

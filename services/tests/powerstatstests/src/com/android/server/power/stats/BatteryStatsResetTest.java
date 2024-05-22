@@ -19,6 +19,7 @@ package com.android.server.power.stats;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.BatteryManager;
@@ -49,8 +50,8 @@ public class BatteryStatsResetTest {
     private static final int BATTERY_CHARGE_RATE_SECONDS_PER_LEVEL = 100;
 
     private MockClock mMockClock;
+    private BatteryStatsImpl.BatteryStatsConfig mConfig;
     private MockBatteryStatsImpl mBatteryStatsImpl;
-
 
     /**
      * Battery status. Must be one of the following:
@@ -91,8 +92,9 @@ public class BatteryStatsResetTest {
 
     @Before
     public void setUp() throws IOException {
+        mConfig = mock(BatteryStatsImpl.BatteryStatsConfig.class);
         mMockClock = new MockClock();
-        mBatteryStatsImpl = new MockBatteryStatsImpl(mMockClock,
+        mBatteryStatsImpl = new MockBatteryStatsImpl(mConfig, mMockClock,
                 Files.createTempDirectory("BatteryStatsResetTest").toFile());
         mBatteryStatsImpl.onSystemReady(mock(Context.class));
 
@@ -110,10 +112,7 @@ public class BatteryStatsResetTest {
 
     @Test
     public void testResetOnUnplug_highBatteryLevel() {
-        mBatteryStatsImpl.setBatteryStatsConfig(
-                new BatteryStatsImpl.BatteryStatsConfig.Builder()
-                        .setResetOnUnplugHighBatteryLevel(true)
-                        .build());
+        when(mConfig.shouldResetOnUnplugHighBatteryLevel()).thenReturn(true);
 
         long expectedResetTimeUs = 0;
 
@@ -137,10 +136,7 @@ public class BatteryStatsResetTest {
         assertThat(mBatteryStatsImpl.getStatsStartRealtime()).isEqualTo(expectedResetTimeUs);
 
         // disable high battery level reset on unplug.
-        mBatteryStatsImpl.setBatteryStatsConfig(
-                new BatteryStatsImpl.BatteryStatsConfig.Builder()
-                        .setResetOnUnplugHighBatteryLevel(false)
-                        .build());
+        when(mConfig.shouldResetOnUnplugHighBatteryLevel()).thenReturn(false);
 
         dischargeToLevel(60);
 
@@ -153,10 +149,7 @@ public class BatteryStatsResetTest {
 
     @Test
     public void testResetOnUnplug_significantCharge() {
-        mBatteryStatsImpl.setBatteryStatsConfig(
-                new BatteryStatsImpl.BatteryStatsConfig.Builder()
-                        .setResetOnUnplugAfterSignificantCharge(true)
-                        .build());
+        when(mConfig.shouldResetOnUnplugAfterSignificantCharge()).thenReturn(true);
         long expectedResetTimeUs = 0;
 
         unplugBattery();
@@ -186,10 +179,7 @@ public class BatteryStatsResetTest {
         assertThat(mBatteryStatsImpl.getStatsStartRealtime()).isEqualTo(expectedResetTimeUs);
 
         // disable reset on unplug after significant charge.
-        mBatteryStatsImpl.setBatteryStatsConfig(
-                new BatteryStatsImpl.BatteryStatsConfig.Builder()
-                        .setResetOnUnplugAfterSignificantCharge(false)
-                        .build());
+        when(mConfig.shouldResetOnUnplugAfterSignificantCharge()).thenReturn(false);
 
         // Battery level dropped below 20%.
         dischargeToLevel(15);
@@ -256,11 +246,9 @@ public class BatteryStatsResetTest {
     @Test
     public void testResetWhilePluggedIn_longPlugIn() {
         // disable high battery level reset on unplug.
-        mBatteryStatsImpl.setBatteryStatsConfig(
-                new BatteryStatsImpl.BatteryStatsConfig.Builder()
-                        .setResetOnUnplugHighBatteryLevel(false)
-                        .setResetOnUnplugAfterSignificantCharge(false)
-                        .build());
+        when(mConfig.shouldResetOnUnplugHighBatteryLevel()).thenReturn(false);
+        when(mConfig.shouldResetOnUnplugAfterSignificantCharge()).thenReturn(false);
+
         long expectedResetTimeUs = 0;
 
         plugBattery(BatteryManager.BATTERY_PLUGGED_USB);

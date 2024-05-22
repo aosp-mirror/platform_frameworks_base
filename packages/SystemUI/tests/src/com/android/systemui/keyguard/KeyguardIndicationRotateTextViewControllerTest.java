@@ -346,6 +346,24 @@ public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCas
     }
 
     @Test
+    public void testStartDozing_withMinShowTime() {
+        // GIVEN a biometric message is showing
+        mController.updateIndication(INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                new KeyguardIndication.Builder()
+                        .setMessage("test_message")
+                        .setMinVisibilityMillis(5000L)
+                        .setTextColor(ColorStateList.valueOf(Color.WHITE))
+                        .build(),
+                true);
+
+        // WHEN the device wants to hide the biometric message
+        mController.hideIndication(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+
+        // THEN switch to INDICATION_TYPE_NONE
+        verify(mView).switchIndication(null);
+    }
+
+    @Test
     public void testStoppedDozing() {
         // GIVEN we're dozing & we have an indication message
         mStatusBarStateListener.onDozingChanged(true);

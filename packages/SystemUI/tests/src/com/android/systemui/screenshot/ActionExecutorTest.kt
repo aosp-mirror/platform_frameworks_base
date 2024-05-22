@@ -21,14 +21,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.UserHandle
 import android.testing.AndroidTestingRunner
-import android.view.View
 import android.view.Window
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -50,13 +48,12 @@ class ActionExecutorTest : SysuiTestCase() {
 
     private val intentExecutor = mock<ActionIntentExecutor>()
     private val window = mock<Window>()
-    private val view = mock<View>()
+    private val viewProxy = mock<ScreenshotShelfViewProxy>()
     private val onDismiss = mock<(() -> Unit)>()
     private val pendingIntent = mock<PendingIntent>()
 
     private lateinit var actionExecutor: ActionExecutor
 
-    @Ignore // Fixed with newer mockito version (in main)
     @Test
     fun startSharedTransition_callsLaunchIntent() = runTest {
         actionExecutor = createActionExecutor()
@@ -72,16 +69,16 @@ class ActionExecutorTest : SysuiTestCase() {
     }
 
     @Test
-    fun sendPendingIntent_dismisses() = runTest {
+    fun sendPendingIntent_requestsDismissal() = runTest {
         actionExecutor = createActionExecutor()
 
         actionExecutor.sendPendingIntent(pendingIntent)
 
         verify(pendingIntent).send(any(Bundle::class.java))
-        verify(onDismiss).invoke()
+        verify(viewProxy).requestDismissal(null)
     }
 
     private fun createActionExecutor(): ActionExecutor {
-        return ActionExecutor(intentExecutor, testScope, window, view, onDismiss)
+        return ActionExecutor(intentExecutor, testScope, window, viewProxy, onDismiss)
     }
 }

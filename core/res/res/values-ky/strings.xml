@@ -156,13 +156,13 @@
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Мобилдик тармактын коопсуздугу"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Шифрлөө, шифрленбеген тармактар жөнүндө билдирмелер"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Түзмөктүн идентификатору колдонулду"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM картасын колдонуп жатканда жакын жердеги тармакта түзмөгүңүздүн өзгөчө идентификатору (IMSI же IMEI) жазылды"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM картасын колдонуп жатканда жакын жердеги тармакта түзмөгүңүздүн өзгөчө идентификатору (IMSI же IMEI) жазылды.\n\nЖүргөн жериңиз, аракеттериңиз же өздүгүңүз тууралуу маалымат катталды. Бул адаттагы көрүнүш болсо да, купуялыгы жөнүндө тынчсызданган адамдарга маселе жаратышы мүмкүн."</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Шифрленген тармакка (<xliff:g id="NETWORK_NAME">%1$s</xliff:g>) туташты"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"Саат <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM картасы колдонулуп жатканда, жакын жердеги тармак түзмөгүңүздүн өзгөчө идентификаторун (IMSI же IMEI) жазып алды."</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"Саат <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM картасы колдонулуп жатканда, жакын жердеги тармак түзмөгүңүздүн өзгөчө идентификаторун (IMSI же IMEI) жазып алды.\n\nТактап айтканда, жүргөн жериңиз, аракеттериңиз же өздүгүңүз катталды. Бул адаттагы көрүнүш болсо да, купуялыгы жөнүндө тынчсызданган адамдарга маселе жаратышы мүмкүн."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Шифрленген <xliff:g id="NETWORK_NAME">%1$s</xliff:g> тармагына туташты"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Эми <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM картасы менен туташуу коопсуз болуп калды"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Шифрленбеген тармакка туташты"</string>
     <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Учурда <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM картасын колдонсоңуз, чалууларга, билдирүүлөргө жана маалыматтарга коркунуч жаралышы мүмкүн"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Учурда <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM картасын колдонсоңуз, чалууларга, билдирүүлөргө жана маалыматтарга коркунуч жаралышы мүмкүн.\n\nТуташууңуз кайра шифрленгенде дагы бир билдирме аласыз."</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Учурда <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM картасын колдонсоңуз, чалууларга, билдирүүлөргө жана маалыматтарга коркунуч жаралышы мүмкүн.\n\nБайланышыңыз кайра шифрленгенде дагы бир билдирме аласыз."</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Мобилдик тармактын коопсуздук параметрлери"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Кеңири маалымат"</string>
     <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"Түшүндүм"</string>
@@ -283,6 +283,8 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Үн жардамчысы"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Бекем кулпулоо"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
+    <skip />
     <string name="notification_hidden_text" msgid="2835519769868187223">"Жаңы эскертме"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Аппараттык баскычтоп"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Коопсуздук"</string>
@@ -1334,7 +1336,7 @@
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
     <skip />
     <string name="wifi_no_internet" msgid="1386911698276448061">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> Интернетке туташуусу жок"</string>
-    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Параметрлерди ачуу үчүн таптап коюңуз"</string>
+    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Параметрлерди ачуу үчүн тийип коюңуз"</string>
     <string name="mobile_no_internet" msgid="4014455157529909781">"Мобилдик Интернет жок"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Тармактын Интернет жок"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Жеке DNS сервери жеткиликсиз"</string>
@@ -1396,7 +1398,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB аркылуу MIDI режими күйгүзүлдү"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Түзмөк веб-камера катары туташты"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB шайманы туташты"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Кошумча параметрлерди ачуу үчүн таптап коюңуз."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Кошумча параметрлерди ачуу үчүн тийип коюңуз."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Туташкан түзмөк кубатталууда. Дагы параметрлерди көрүү үчүн таптап коюңуз."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Аналогдук аудио жабдуу табылды"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Тиркелген түзмөк бул телефонго шайкеш келбейт. Көбүрөөк маалымат алуу үчүн таптап коюңуз."</string>
@@ -2144,10 +2146,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Режимдин адаттагы билдирмеси"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Батареяны үнөмдөгүч күйгүзүлдү"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Кубат үнөмдөлсө, батарея көбүрөөк убакытка жетет"</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"Батареяны үнөмдөгүч режими күйүк"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"Батареянын кубатынын мөөнөтүн узартуу үчүн Батареяны үнөмдөгүч режими күйгүзүлдү"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Батареяны үнөмдөгүч"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Батареяны үнөмдөө режими өчүк"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Телефондун кубаты жетиштүү. Функциялар мындан ары чектелбейт."</string>
@@ -2415,4 +2415,15 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Жазышуулар колдонмосун ачуу"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ал кантип иштейт"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Кезекте турат..."</string>
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Манжа изи менен ачуу функциясын кайра тууралаңыз"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
+    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ойдогудай иштебегендиктен, жок кылынды. Телефондо Манжа изи менен ачуу функциясын колдонуу үчүн аны кайра тууралаңыз."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> жана <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ойдогудай иштебегендиктен, жок кылынды. Телефонду манжа изи менен ачуу үчүн аларды кайра тууралаңыз."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"Жүзүнөн таанып ачуу функциясын кайрадан тууралаңыз"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Жүзүңүздүн үлгүсү ойдогудай иштебегендиктен, жок кылынды. Телефондо Жүзүнөн таанып ачуу функциясын колдонуу үчүн аны кайра тууралаңыз."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Тууралоо"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Азыр эмес"</string>
 </resources>

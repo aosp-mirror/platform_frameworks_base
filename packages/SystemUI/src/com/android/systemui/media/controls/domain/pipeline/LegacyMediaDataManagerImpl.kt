@@ -545,8 +545,8 @@ class LegacyMediaDataManagerImpl(
      * External listeners registered with [addListener] will be notified after the event propagates
      * through the internal listener pipeline.
      */
-    private fun notifyMediaDataRemoved(key: String) {
-        internalListeners.forEach { it.onMediaDataRemoved(key) }
+    private fun notifyMediaDataRemoved(key: String, userInitiated: Boolean = false) {
+        internalListeners.forEach { it.onMediaDataRemoved(key, userInitiated) }
     }
 
     /**
@@ -578,7 +578,7 @@ class LegacyMediaDataManagerImpl(
             if (it.active == !timedOut && !forceUpdate) {
                 if (it.resumption) {
                     if (DEBUG) Log.d(TAG, "timing out resume player $key")
-                    dismissMediaData(key, 0L /* delay */)
+                    dismissMediaData(key, delay = 0L, userInitiated = false)
                 }
                 return
             }
@@ -627,17 +627,17 @@ class LegacyMediaDataManagerImpl(
         }
     }
 
-    private fun removeEntry(key: String, logEvent: Boolean = true) {
+    private fun removeEntry(key: String, logEvent: Boolean = true, userInitiated: Boolean = false) {
         mediaEntries.remove(key)?.let {
             if (logEvent) {
                 logger.logMediaRemoved(it.appUid, it.packageName, it.instanceId)
             }
         }
-        notifyMediaDataRemoved(key)
+        notifyMediaDataRemoved(key, userInitiated)
     }
 
     /** Dismiss a media entry. Returns false if the key was not found. */
-    override fun dismissMediaData(key: String, delay: Long): Boolean {
+    override fun dismissMediaData(key: String, delay: Long, userInitiated: Boolean): Boolean {
         val existed = mediaEntries[key] != null
         backgroundExecutor.execute {
             mediaEntries[key]?.let { mediaData ->
@@ -649,7 +649,10 @@ class LegacyMediaDataManagerImpl(
                 }
             }
         }
-        foregroundExecutor.executeDelayed({ removeEntry(key) }, delay)
+        foregroundExecutor.executeDelayed(
+            { removeEntry(key = key, userInitiated = userInitiated) },
+            delay
+        )
         return existed
     }
 

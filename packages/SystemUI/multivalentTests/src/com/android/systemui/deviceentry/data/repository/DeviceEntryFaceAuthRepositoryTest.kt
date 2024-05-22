@@ -41,6 +41,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.domain.interactor.displayStateInteractor
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.coroutines.FlowValue
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
@@ -144,6 +145,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     private val testScope = kosmos.testScope
     private val fakeUserRepository = kosmos.fakeUserRepository
+    private val fakeExecutor = kosmos.fakeExecutor
     private lateinit var authStatus: FlowValue<FaceAuthenticationStatus?>
     private lateinit var detectStatus: FlowValue<FaceDetectionStatus?>
     private lateinit var authRunning: FlowValue<Boolean?>
@@ -220,12 +222,12 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             testScope.backgroundScope,
             testDispatcher,
             testDispatcher,
+            fakeExecutor,
             sessionTracker,
             uiEventLogger,
             FaceAuthenticationLogger(logcatLogBuffer("DeviceEntryFaceAuthRepositoryLog")),
             biometricSettingsRepository,
             deviceEntryFingerprintAuthRepository,
-            trustRepository,
             keyguardRepository,
             powerInteractor,
             keyguardInteractor,
@@ -292,6 +294,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     fun faceLockoutStatusIsPropagated() =
         testScope.runTest {
             initCollectors()
+            fakeExecutor.runAllReady()
             verify(faceManager).addLockoutResetCallback(faceLockoutResetCallback.capture())
             allPreconditionsToRunFaceAuthAreTrue()
 
@@ -1177,6 +1180,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     }
 
     private suspend fun TestScope.allPreconditionsToRunFaceAuthAreTrue() {
+        fakeExecutor.runAllReady()
         verify(faceManager, atLeastOnce())
             .addLockoutResetCallback(faceLockoutResetCallback.capture())
         trustRepository.setCurrentUserTrusted(false)

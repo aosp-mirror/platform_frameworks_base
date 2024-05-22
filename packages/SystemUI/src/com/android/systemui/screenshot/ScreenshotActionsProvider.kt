@@ -40,6 +40,7 @@ import dagger.assisted.AssistedInject
  */
 interface ScreenshotActionsProvider {
     fun onScrollChipReady(onClick: Runnable)
+    fun onScrollChipInvalidated()
     fun setCompletedScreenshot(result: ScreenshotSavedResult)
 
     /**
@@ -67,6 +68,8 @@ constructor(
     @Assisted val requestId: String,
     @Assisted val actionExecutor: ActionExecutor,
 ) : ScreenshotActionsProvider {
+    private var addedScrollChip = false
+    private var onScrollClick: Runnable? = null
     private var pendingAction: ((ScreenshotSavedResult) -> Unit)? = null
     private var result: ScreenshotSavedResult? = null
 
@@ -87,7 +90,8 @@ constructor(
                 AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_edit),
                 context.resources.getString(R.string.screenshot_edit_label),
                 context.resources.getString(R.string.screenshot_edit_description),
-            )
+            ),
+            showDuringEntrance = true,
         ) {
             debugLog(LogConfig.DEBUG_ACTIONS) { "Edit tapped" }
             uiEventLogger.log(SCREENSHOT_EDIT_TAPPED, 0, request.packageNameString)
@@ -105,7 +109,8 @@ constructor(
                 AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_share),
                 context.resources.getString(R.string.screenshot_share_label),
                 context.resources.getString(R.string.screenshot_share_description),
-            )
+            ),
+            showDuringEntrance = true,
         ) {
             debugLog(LogConfig.DEBUG_ACTIONS) { "Share tapped" }
             uiEventLogger.log(SCREENSHOT_SHARE_TAPPED, 0, request.packageNameString)
@@ -120,15 +125,24 @@ constructor(
     }
 
     override fun onScrollChipReady(onClick: Runnable) {
-        viewModel.addAction(
-            ActionButtonAppearance(
-                AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_scroll),
-                context.resources.getString(R.string.screenshot_scroll_label),
-                context.resources.getString(R.string.screenshot_scroll_label),
-            )
-        ) {
-            onClick.run()
+        onScrollClick = onClick
+        if (!addedScrollChip) {
+            viewModel.addAction(
+                ActionButtonAppearance(
+                    AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_scroll),
+                    context.resources.getString(R.string.screenshot_scroll_label),
+                    context.resources.getString(R.string.screenshot_scroll_label),
+                ),
+                showDuringEntrance = true,
+            ) {
+                onScrollClick?.run()
+            }
+            addedScrollChip = true
         }
+    }
+
+    override fun onScrollChipInvalidated() {
+        onScrollClick = null
     }
 
     override fun setCompletedScreenshot(result: ScreenshotSavedResult) {

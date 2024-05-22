@@ -40,6 +40,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.animation.Animator;
 import android.annotation.IdRes;
 import android.content.ContentResolver;
 import android.content.res.Configuration;
@@ -207,12 +208,15 @@ import kotlinx.coroutines.test.TestScope;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -387,9 +391,11 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
     protected FragmentHostManager.FragmentListener mFragmentListener;
 
+    @Rule(order = 200)
+    public MockitoRule mMockitoRule = MockitoJUnit.rule();
+
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         mFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false);
         mFeatureFlags.set(Flags.QS_USER_DETAIL_SHORTCUT, false);
 
@@ -446,6 +452,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mUiEventLogger,
                 () -> mKosmos.getInteractionJankMonitor(),
                 mJavaAdapter,
+                () -> mKeyguardTransitionInteractor,
                 () -> mShadeInteractor,
                 () -> mKosmos.getDeviceUnlockedInteractor(),
                 () -> mKosmos.getSceneInteractor(),
@@ -546,6 +553,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         }).when(mView).setOnTouchListener(any(NotificationPanelViewController.TouchHandler.class));
 
         // Dreaming->Lockscreen
+        when(mKeyguardTransitionInteractor.transition(any()))
+                .thenReturn(emptyFlow());
         when(mKeyguardTransitionInteractor.transition(any(), any()))
                 .thenReturn(emptyFlow());
         when(mDreamingToLockscreenTransitionViewModel.getLockscreenAlpha())
@@ -600,6 +609,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                                 new UiEventLoggerFake(),
                                 () -> mKosmos.getInteractionJankMonitor(),
                                 mJavaAdapter,
+                                () -> mKeyguardTransitionInteractor,
                                 () -> mShadeInteractor,
                                 () -> mKosmos.getDeviceUnlockedInteractor(),
                                 () -> mKosmos.getSceneInteractor(),
@@ -653,7 +663,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mView.getParent()).thenReturn(mViewParent);
         when(mQs.getHeader()).thenReturn(mQsHeader);
         when(mDownMotionEvent.getAction()).thenReturn(MotionEvent.ACTION_DOWN);
-        when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
+        when(mSysUiState.setFlag(anyLong(), anyBoolean())).thenReturn(mSysUiState);
 
         mMainHandler = new Handler(Looper.getMainLooper());
 
@@ -757,6 +767,9 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                     @Override
                     public void onOpenStarted() {}
                 });
+        // Create a set to which the class will add all animators used, so that we can
+        // verify that they are all stopped.
+        mNotificationPanelViewController.mTestSetOfAnimatorsUsed = new HashSet<>();
         ArgumentCaptor<View.OnAttachStateChangeListener> onAttachStateChangeListenerArgumentCaptor =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
         verify(mView, atLeast(1)).addOnAttachStateChangeListener(
@@ -818,12 +831,19 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
     @After
     public void tearDown() {
+        List<Animator> leakedAnimators = null;
         if (mNotificationPanelViewController != null) {
             mNotificationPanelViewController.mBottomAreaShadeAlphaAnimator.cancel();
             mNotificationPanelViewController.cancelHeightAnimator();
+            leakedAnimators = mNotificationPanelViewController.mTestSetOfAnimatorsUsed.stream()
+                    .filter(Animator::isRunning).toList();
+            mNotificationPanelViewController.mTestSetOfAnimatorsUsed.forEach(Animator::cancel);
         }
         if (mMainHandler != null) {
             mMainHandler.removeCallbacksAndMessages(null);
+        }
+        if (leakedAnimators != null) {
+            assertThat(leakedAnimators).isEmpty();
         }
     }
 

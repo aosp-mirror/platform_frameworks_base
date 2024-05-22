@@ -398,37 +398,4 @@ public class MobileRadioPowerStatsProcessor extends PowerStatsProcessor {
             }
         }
     }
-
-    @Override
-    String deviceStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
-        unpackPowerStatsDescriptor(descriptor);
-        return "idle: " + mStatsLayout.getDeviceIdleTime(stats)
-                + " sleep: " + mStatsLayout.getDeviceSleepTime(stats)
-                + " scan: " + mStatsLayout.getDeviceScanTime(stats)
-                + " power: " + mStatsLayout.getDevicePowerEstimate(stats);
-    }
-
-    @Override
-    String stateStatsToString(PowerStats.Descriptor descriptor, int key, long[] stats) {
-        unpackPowerStatsDescriptor(descriptor);
-        StringBuilder sb = new StringBuilder();
-        sb.append(descriptor.getStateLabel(key));
-        sb.append(" rx: ").append(mStatsLayout.getStateRxTime(stats));
-        sb.append(" tx: ");
-        for (int txLevel = 0; txLevel < ModemActivityInfo.getNumTxPowerLevels(); txLevel++) {
-            if (txLevel != 0) {
-                sb.append(", ");
-            }
-            sb.append(mStatsLayout.getStateTxTime(stats, txLevel));
-        }
-        return sb.toString();
-    }
-
-    @Override
-    String uidStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
-        unpackPowerStatsDescriptor(descriptor);
-        return "rx: " + mStatsLayout.getUidRxPackets(stats)
-                + " tx: " + mStatsLayout.getUidTxPackets(stats)
-                + " power: " + mStatsLayout.getUidPowerEstimate(stats);
-    }
 }

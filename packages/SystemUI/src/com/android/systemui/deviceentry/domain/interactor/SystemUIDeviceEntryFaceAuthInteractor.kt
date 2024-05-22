@@ -38,6 +38,7 @@ import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.DevicePosture
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
@@ -126,9 +127,9 @@ constructor(
             .launchIn(applicationScope)
 
         merge(
-                keyguardTransitionInteractor.transition(AOD, LOCKSCREEN),
-                keyguardTransitionInteractor.transition(OFF, LOCKSCREEN),
-                keyguardTransitionInteractor.transition(DOZING, LOCKSCREEN),
+                keyguardTransitionInteractor.transition(Edge.create(AOD, LOCKSCREEN)),
+                keyguardTransitionInteractor.transition(Edge.create(OFF, LOCKSCREEN)),
+                keyguardTransitionInteractor.transition(Edge.create(DOZING, LOCKSCREEN)),
             )
             .filter { it.transitionState == TransitionState.STARTED }
             .sample(powerInteractor.detailedWakefulness)

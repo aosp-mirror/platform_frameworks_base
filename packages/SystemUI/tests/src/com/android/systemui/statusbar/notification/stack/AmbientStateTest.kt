@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -33,7 +33,7 @@ import org.junit.runner.RunWith
 
 private const val MAX_PULSE_HEIGHT = 100000f
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class AmbientStateTest : SysuiTestCase() {
 

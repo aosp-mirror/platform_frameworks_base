@@ -1236,7 +1236,9 @@ public class TransitionTests extends WindowTestsBase {
         final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, "statusBar");
         makeWindowVisible(statusBar);
         mDisplayContent.getDisplayPolicy().addWindowLw(statusBar, statusBar.mAttrs);
-        final WindowState navBar = createWindow(null, TYPE_NAVIGATION_BAR, "navBar");
+        final WindowState navBar = createNavBarWithProvidedInsets(mDisplayContent);
+        final InsetsSourceProvider navBarInsetsProvider = navBar.getControllableInsetProvider();
+        assertNotNull(navBarInsetsProvider);
         final ActivityRecord app = createActivityRecord(mDisplayContent);
         final Transition transition = app.mTransitionController.createTransition(TRANSIT_OPEN);
         app.mTransitionController.requestStartTransition(transition, app.getTask(),
@@ -1282,11 +1284,15 @@ public class TransitionTests extends WindowTestsBase {
         onRotationTransactionReady(player, mWm.mTransactionFactory.get()).onTransactionCommitted();
         assertEquals(ROTATION_ANIMATION_SEAMLESS, player.mLastReady.getChange(
                 mDisplayContent.mRemoteToken.toWindowContainerToken()).getRotationAnimation());
+        spyOn(navBarInsetsProvider);
         player.finish();
 
         // The controller should be cleared if the target windows are drawn.
         statusBar.finishDrawing(mWm.mTransactionFactory.get(), Integer.MAX_VALUE);
         assertNull(mDisplayContent.getAsyncRotationController());
+        // The shouldFreezeInsetsPosition for navBar was true, so its insets position should be
+        // updated if the transition is done.
+        verify(navBarInsetsProvider).updateInsetsControlPosition(navBar);
     }
 
     private static void assertShouldFreezeInsetsPosition(AsyncRotationController controller,

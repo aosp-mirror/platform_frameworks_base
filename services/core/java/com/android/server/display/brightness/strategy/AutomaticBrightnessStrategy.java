@@ -17,6 +17,9 @@ package com.android.server.display.brightness.strategy;
 
 import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
 
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.BrightnessConfiguration;
@@ -33,6 +36,7 @@ import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.BrightnessUtils;
 import com.android.server.display.brightness.StrategyExecutionRequest;
 import com.android.server.display.brightness.StrategySelectionNotifyRequest;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.io.PrintWriter;
 
@@ -98,19 +102,24 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
 
     private Injector mInjector;
 
+    private DisplayManagerFlags mDisplayManagerFlags;
+
     @VisibleForTesting
-    AutomaticBrightnessStrategy(Context context, int displayId, Injector injector) {
+    AutomaticBrightnessStrategy(Context context, int displayId, Injector injector,
+            DisplayManagerFlags displayManagerFlags) {
         super(context, displayId);
         mContext = context;
         mDisplayId = displayId;
         mAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
         mPendingAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         mTemporaryAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        mDisplayManagerFlags  = displayManagerFlags;
         mInjector = (injector == null) ? new RealInjector() : injector;
     }
 
-    public AutomaticBrightnessStrategy(Context context, int displayId) {
-        this(context, displayId, null);
+    public AutomaticBrightnessStrategy(Context context, int displayId,
+            DisplayManagerFlags displayManagerFlags) {
+        this(context, displayId, null, displayManagerFlags);
     }
 
     /**
@@ -120,6 +129,7 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
     public void setAutoBrightnessState(int targetDisplayState,
             boolean allowAutoBrightnessWhileDozingConfig, int brightnessReason, int policy,
             float lastUserSetScreenBrightness, boolean userSetBrightnessChanged) {
+        switchMode(targetDisplayState);
         final boolean autoBrightnessEnabledInDoze =
                 allowAutoBrightnessWhileDozingConfig && policy == POLICY_DOZE;
         mIsAutoBrightnessEnabled = shouldUseAutoBrightness()
@@ -155,9 +165,8 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
     public boolean isAutoBrightnessValid() {
         boolean isValid = false;
         if (isAutoBrightnessEnabled()) {
-            float brightness = (mAutomaticBrightnessController != null)
-                    ? mAutomaticBrightnessController.getAutomaticScreenBrightness(null)
-                    : PowerManager.BRIGHTNESS_INVALID_FLOAT;
+            float brightness = getAutomaticScreenBrightness(null,
+                    /* isAutomaticBrightnessAdjusted = */ false);
             if (BrightnessUtils.isValidBrightnessValue(brightness)
                     || brightness == PowerManager.BRIGHTNESS_OFF_FLOAT) {
                 isValid = true;
@@ -264,7 +273,12 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
         BrightnessReason brightnessReason = new BrightnessReason();
         brightnessReason.setReason(BrightnessReason.REASON_AUTOMATIC);
         BrightnessEvent brightnessEvent = mInjector.getBrightnessEvent(mDisplayId);
-        float brightness = getAutomaticScreenBrightness(brightnessEvent);
+
+        // AutoBrightness adjustments were already applied while checking the validity of this
+        // strategy. Reapplying them again will result in incorrect adjustment reason flags as we
+        // might end up assuming no adjustments are applied
+        float brightness = getAutomaticScreenBrightness(brightnessEvent,
+                /* isAutomaticBrightnessAdjusted = */ true);
         return new DisplayBrightnessState.Builder()
                 .setBrightness(brightness)
                 .setSdrBrightness(brightness)
@@ -345,11 +359,14 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
      * @param brightnessEvent Event object to populate with details about why the specific
      *                        brightness was chosen.
      */
-    public float getAutomaticScreenBrightness(BrightnessEvent brightnessEvent) {
+    public float getAutomaticScreenBrightness(BrightnessEvent brightnessEvent,
+            boolean isAutomaticBrightnessAdjusted) {
         float brightness = (mAutomaticBrightnessController != null)
                 ? mAutomaticBrightnessController.getAutomaticScreenBrightness(brightnessEvent)
                 : PowerManager.BRIGHTNESS_INVALID_FLOAT;
-        adjustAutomaticBrightnessStateIfValid(brightness);
+        if (!isAutomaticBrightnessAdjusted) {
+            adjustAutomaticBrightnessStateIfValid(brightness);
+        }
         return brightness;
     }
 
@@ -476,6 +493,16 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
             // We take note if the user brightness point is still being used in the current
             // auto-brightness model.
             mIsShortTermModelActive = mAutomaticBrightnessController.hasUserDataPoints();
+        }
+    }
+
+
+    private void switchMode(int state) {
+        if (mDisplayManagerFlags.areAutoBrightnessModesEnabled()
+                && mAutomaticBrightnessController != null
+                && !mAutomaticBrightnessController.isInIdleMode()) {
+            mAutomaticBrightnessController.switchMode(Display.isDozeState(state)
+                    ? AUTO_BRIGHTNESS_MODE_DOZE : AUTO_BRIGHTNESS_MODE_DEFAULT);
         }
     }
 

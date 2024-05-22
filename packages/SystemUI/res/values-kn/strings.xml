@@ -97,8 +97,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ಎಡಭಾಗದ ಬೌಂಡರಿ ಶೇಕಡಾ <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"ಬಲಭಾಗದ ಬೌಂಡರಿ ಶೇಕಡಾ <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿನ <xliff:g id="APP">%1$s</xliff:g> ನಲ್ಲಿ ಸೇವ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <!-- no translation found for screenshot_private_profile_notification (1704440899154243171) -->
-    <skip />
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"ಖಾಸಗಿ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿನ <xliff:g id="APP">%1$s</xliff:g> ನಲ್ಲಿ ಸೇವ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ಫೈಲ್‌ಗಳು"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"ಈ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು <xliff:g id="APPNAME">%1$s</xliff:g> ಪತ್ತೆಹಚ್ಚಿದೆ."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ಹಾಗೂ ತೆರೆದಿರುವ ಇತರ ಆ್ಯಪ್‌ಗಳು ಈ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಪತ್ತೆಹಚ್ಚಿವೆ."</string>
@@ -369,7 +368,7 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"ಪ್ರಮಾಣಿತ"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"ಮಧ್ಯಮ"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"ಹೆಚ್ಚು"</string>
-    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"ಹಿಯರಿಂಗ್ ಸಾಧನಗಳು"</string>
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"ಶ್ರವಣ ಸಾಧನಗಳು"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"ಹಿಯರಿಂಗ್ ಸಾಧನಗಳು"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"ಹೊಸ ಸಾಧನವನ್ನು ಪೇರ್ ಮಾಡಿ"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"ಹೊಸ ಸಾಧನವನ್ನು ಜೋಡಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ"</string>
@@ -448,6 +447,8 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ವಿಜೆಟ್‌ಗಳನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ದೀರ್ಘಕಾಲ ಒತ್ತಿರಿ"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ವಿಜೆಟ್‌ಗಳನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಿ"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾದ ವಿಜೆಟ್‌ಗಾಗಿ ಆ್ಯಪ್ ಐಕಾನ್"</string>
+    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"ವಿಜೆಟ್ ಅನ್ನು ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ತೆಗೆದುಹಾಕಿ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ವಿಜೆಟ್ ಅನ್ನು ಸೇರಿಸಿ"</string>
@@ -461,8 +462,9 @@
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ವಿಜೆಟ್‌ಗಳನ್ನು ಮುಚ್ಚಿರಿ"</string>
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"ವಿಜೆಟ್‌ಗಳನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಿ"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ವಿಜೆಟ್‌ಗಳು"</string>
-    <!-- no translation found for accessibility_action_label_select_widget (8897281501387398191) -->
-    <skip />
+    <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"ವಿಜೆಟ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"</string>
+    <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"ವಿಜೆಟ್ ಅನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
+    <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"ಆಯ್ಕೆಮಾಡಿದ ವಿಜೆಟ್ ಅನ್ನು ಇರಿಸಿ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ಬಳಕೆದಾರರನ್ನು ಬದಲಿಸಿ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ಪುಲ್‌ಡೌನ್ ಮೆನು"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ಈ ಸೆಶನ್‌ನಲ್ಲಿನ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
@@ -592,9 +594,9 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ಬೇಡ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"ಆ್ಯಪ್ ಪಿನ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ಆ್ಯಪ್ ಅನ್‌ಪಿನ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"ಕರೆಮಾಡಿ"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"ಕರೆ ಮಾಡಿ"</string>
     <string name="stream_system" msgid="7663148785370565134">"ಸಿಸ್ಟಂ"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"ರಿಂಗ್"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"ರಿಂಗ್ ಮಾಡಿ"</string>
     <string name="stream_music" msgid="2188224742361847580">"ಮಾಧ್ಯಮ"</string>
     <string name="stream_alarm" msgid="16058075093011694">"ಅಲಾರಮ್"</string>
     <string name="stream_notification" msgid="7930294049046243939">"ನೋಟಿಫಿಕೇಶನ್"</string>
@@ -627,12 +629,17 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"ಔಟ್‌ಪುಟ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"ವಾಲ್ಯೂಮ್ ಸ್ಲೈಡರ್‌ಗಳನ್ನು ವಿಸ್ತೃತಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"ವಾಲ್ಯೂಮ್ ಸ್ಲೈಡರ್‌ಗಳನ್ನು ಕುಗ್ಗಿಸಲಾಗಿದೆ"</string>
-    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"%s ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
-    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"%s ಅನ್‌ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
+    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> ನಲ್ಲಿ ಪ್ಲೇ ಆಗು..."</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"ಇದರಲ್ಲಿ ಪ್ಲೇ ಆಗುತ್ತದೆ"</string>
-    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
-    <skip />
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"ಕರೆ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"ಸಿಸ್ಟಂ UI ಟ್ಯೂನರ್"</string>
     <string name="status_bar" msgid="4357390266055077437">"ಸ್ಥಿತಿ ಪಟ್ಟಿ"</string>
     <string name="demo_mode" msgid="263484519766901593">"ಸಿಸ್ಟಂ UI ಡೆಮೋ ಮೋಡ್"</string>
@@ -660,8 +667,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"ಸ್ಯಾಟಲೈಟ್‌, ಕನೆಕ್ಷನ್ ಕಳಪೆಯಾಗಿದೆ"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ಸ್ಯಾಟಲೈಟ್‌, ಕನೆಕ್ಷನ್ ಉತ್ತಮವಾಗಿದೆ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ಸ್ಯಾಟಲೈಟ್, ಕನೆಕ್ಷನ್ ಲಭ್ಯವಿದೆ"</string>
-    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"ಸ್ಯಾಟಲೈಟ್ SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ಕೆಲವರಿಗೆ ಮೋಜು ಆಗಿದೆ ಎಲ್ಲರಿಗೆ ಇಲ್ಲ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"ಸಿಸ್ಟಂ UI ಟ್ಯೂನರ್ ನಿಮಗೆ Android ಬಳಕೆದಾರ ಅಂತರಸಂಪರ್ಕವನ್ನು ಸರಿಪಡಿಸಲು ಮತ್ತು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ಹೆಚ್ಚುವರಿ ಮಾರ್ಗಗಳನ್ನು ನೀಡುತ್ತದೆ. ಈ ಪ್ರಾಯೋಗಿಕ ವೈಶಿಷ್ಟ್ಯಗಳು ಭವಿಷ್ಯದ ಬಿಡುಗಡೆಗಳಲ್ಲಿ ಬದಲಾಗಬಹುದು, ವಿರಾಮವಾಗಬಹುದು ಅಥವಾ ಕಾಣಿಸಿಕೊಳ್ಳದಿರಬಹುದು. ಎಚ್ಚರಿಕೆಯಿಂದ ಮುಂದುವರಿಯಿರಿ."</string>
@@ -866,8 +872,7 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"ಟೈಲ್ ಸೇರಿಸಿ"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"ಇಲ್ಲಿಗೆ ಸರಿಸಿ <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> ಸ್ಥಾನಕ್ಕೆ ಸೇರಿಸಿ"</string>
-    <!-- no translation found for accessibilit_qs_edit_tile_add_move_invalid_position (2858467994472624487) -->
-    <skip />
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"ಸ್ಥಾನವು ಅಮಾನ್ಯವಾಗಿದೆ."</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"ಸ್ಥಾನ <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"ಟೈಲ್ ಸೇರಿಸಲಾಗಿದೆ"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"ಟೈಲ್ ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>

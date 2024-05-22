@@ -64,6 +64,7 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.ScrimAlpha;
 import com.android.systemui.keyguard.shared.model.TransitionState;
@@ -71,6 +72,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
@@ -454,23 +456,32 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 };
 
         // PRIMARY_BOUNCER->GONE
-        collectFlow(behindScrim, mKeyguardTransitionInteractor.transition(PRIMARY_BOUNCER, GONE),
+        collectFlow(behindScrim, mKeyguardTransitionInteractor.transition(
+                Edge.Companion.create(PRIMARY_BOUNCER, GONE)),
                 mBouncerToGoneTransition, mMainDispatcher);
         collectFlow(behindScrim, mPrimaryBouncerToGoneTransitionViewModel.getScrimAlpha(),
                 mScrimAlphaConsumer, mMainDispatcher);
 
         // ALTERNATE_BOUNCER->GONE
-        collectFlow(behindScrim, mKeyguardTransitionInteractor.transition(ALTERNATE_BOUNCER, GONE),
+        collectFlow(behindScrim, mKeyguardTransitionInteractor.transition(
+                Edge.Companion.create(ALTERNATE_BOUNCER, Scenes.Gone),
+                Edge.Companion.create(ALTERNATE_BOUNCER, GONE)),
                 mBouncerToGoneTransition, mMainDispatcher);
         collectFlow(behindScrim, mAlternateBouncerToGoneTransitionViewModel.getScrimAlpha(),
                 mScrimAlphaConsumer, mMainDispatcher);
 
         // LOCKSCREEN<->GLANCEABLE_HUB
+        collectFlow(
+                behindScrim,
+                mKeyguardTransitionInteractor.transition(
+                        Edge.Companion.create(LOCKSCREEN, Scenes.Communal),
+                        Edge.Companion.create(LOCKSCREEN, GLANCEABLE_HUB)),
+                mGlanceableHubConsumer,
+                mMainDispatcher);
         collectFlow(behindScrim,
-                mKeyguardTransitionInteractor.transition(LOCKSCREEN, GLANCEABLE_HUB),
-                mGlanceableHubConsumer, mMainDispatcher);
-        collectFlow(behindScrim,
-                mKeyguardTransitionInteractor.transition(GLANCEABLE_HUB, LOCKSCREEN),
+                mKeyguardTransitionInteractor.transition(
+                        Edge.Companion.create(Scenes.Communal, LOCKSCREEN),
+                        Edge.Companion.create(GLANCEABLE_HUB, LOCKSCREEN)),
                 mGlanceableHubConsumer, mMainDispatcher);
     }
 
@@ -1642,6 +1653,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
     public void onScreenTurnedOff() {
         mScreenOn = false;
+    }
+
+    public boolean isScreenOn() {
+        return mScreenOn;
     }
 
     public void setExpansionAffectsAlpha(boolean expansionAffectsAlpha) {

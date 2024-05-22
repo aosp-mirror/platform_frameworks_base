@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.util.ArrayMap;
 import android.view.inputmethod.InputMethodInfo;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -74,5 +75,62 @@ final class InputMethodMap {
     @IntRange(from = 0)
     int size() {
         return mMap.size();
+    }
+
+    @AnyThread
+    @NonNull
+    public InputMethodMap applyAdditionalSubtypes(
+            @NonNull AdditionalSubtypeMap additionalSubtypeMap) {
+        if (additionalSubtypeMap.isEmpty()) {
+            return this;
+        }
+        final int size = size();
+        final ArrayMap<String, InputMethodInfo> newMethodMap = new ArrayMap<>(size);
+        boolean updated = false;
+        for (int i = 0; i < size; ++i) {
+            final var imi = valueAt(i);
+            final var imeId = imi.getId();
+            final var newAdditionalSubtypes = additionalSubtypeMap.get(imeId);
+            if (newAdditionalSubtypes == null || newAdditionalSubtypes.isEmpty()) {
+                newMethodMap.put(imi.getId(), imi);
+            } else {
+                newMethodMap.put(imi.getId(), new InputMethodInfo(imi, newAdditionalSubtypes));
+                updated = true;
+            }
+        }
+        return updated ? InputMethodMap.of(newMethodMap) : this;
+    }
+
+    /**
+     * Compares the given two {@link InputMethodMap} instances to see if they contain the same data
+     * or not.
+     *
+     * @param map1 {@link InputMethodMap} to be compared with
+     * @param map2 {@link InputMethodMap} to be compared with
+     * @return {@code true} if both {@link InputMethodMap} instances contain exactly the same data
+     */
+    @AnyThread
+    static boolean areSame(@NonNull InputMethodMap map1, @NonNull InputMethodMap map2) {
+        if (map1 == map2) {
+            return true;
+        }
+        final int size = map1.size();
+        if (size != map2.size()) {
+            return false;
+        }
+        for (int i = 0; i < size; ++i) {
+            final var imi1 = map1.valueAt(i);
+            final var imeId = imi1.getId();
+            final var imi2 = map2.get(imeId);
+            if (imi2 == null) {
+                return false;
+            }
+            final var marshaled1 = InputMethodInfoUtils.marshal(imi1);
+            final var marshaled2 = InputMethodInfoUtils.marshal(imi2);
+            if (!Arrays.equals(marshaled1, marshaled2)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

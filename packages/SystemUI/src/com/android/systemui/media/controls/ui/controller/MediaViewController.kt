@@ -709,12 +709,6 @@ constructor(
 
         // For Turbulence noise.
         val loadingEffectView = mediaViewHolder.loadingEffectView
-        turbulenceNoiseAnimationConfig =
-            createTurbulenceNoiseConfig(
-                loadingEffectView,
-                turbulenceNoiseView,
-                colorSchemeTransition
-            )
         noiseDrawCallback =
             object : PaintDrawCallback {
                 override fun onDraw(paint: Paint) {
@@ -809,6 +803,14 @@ constructor(
 
     fun setUpTurbulenceNoise() {
         if (!mediaFlags.isMediaControlsRefactorEnabled()) return
+        if (!this::turbulenceNoiseAnimationConfig.isInitialized) {
+            turbulenceNoiseAnimationConfig =
+                createTurbulenceNoiseConfig(
+                    mediaViewHolder.loadingEffectView,
+                    mediaViewHolder.turbulenceNoiseView,
+                    colorSchemeTransition
+                )
+        }
         if (Flags.shaderlibLoadingEffectRefactor()) {
             if (!this::loadingEffect.isInitialized) {
                 loadingEffect =

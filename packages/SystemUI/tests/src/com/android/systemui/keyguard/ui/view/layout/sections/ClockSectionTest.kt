@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardSmartspaceInteractor
 import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.ui.viewmodel.keyguardClockViewModel
+import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardSmartspaceViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
@@ -117,6 +118,7 @@ class ClockSectionTest : SysuiTestCase() {
                     context,
                     keyguardSmartspaceViewModel,
                     { keyguardBlueprintInteractor },
+                    keyguardRootViewModel,
                 )
         }
     }

@@ -51,7 +51,6 @@ import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManagerFacto
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -60,6 +59,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.any
@@ -71,6 +71,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.eq
 
 private const val KEY = "TEST_KEY"
 private const val KEY_OLD = "TEST_KEY_OLD"
@@ -158,7 +159,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
 
     @Test
     fun removeUnknown() {
-        manager.onMediaDataRemoved("unknown")
+        manager.onMediaDataRemoved("unknown", false)
+        verify(listener, never()).onKeyRemoved(eq(KEY), anyBoolean())
     }
 
     @Test
@@ -170,7 +172,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Test
     fun loadAndRemoveMediaData() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
-        manager.onMediaDataRemoved(KEY)
+        manager.onMediaDataRemoved(KEY, false)
         fakeBgExecutor.runAllReady()
         verify(lmm).unregisterCallback(any())
         verify(muteAwaitManager).stopListening()
@@ -386,9 +388,9 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     fun listenerReceivesKeyRemoved() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
         // WHEN the notification is removed
-        manager.onMediaDataRemoved(KEY)
+        manager.onMediaDataRemoved(KEY, true)
         // THEN the listener receives key removed event
-        verify(listener).onKeyRemoved(eq(KEY))
+        verify(listener).onKeyRemoved(eq(KEY), eq(true))
     }
 
     @Test

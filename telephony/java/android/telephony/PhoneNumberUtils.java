@@ -1283,6 +1283,8 @@ public class PhoneNumberUtils {
 
     private static final String JAPAN_ISO_COUNTRY_CODE = "JP";
 
+    private static final String SINGAPORE_ISO_COUNTRY_CODE = "SG";
+
     /**
      * Breaks the given number down and formats it according to the rules
      * for the country the number is from.
@@ -1667,6 +1669,17 @@ public class PhoneNumberUtils {
                 /**
                  * Need to reformat Japanese phone numbers (when user is in Japan) with the national
                  * dialing format.
+                 */
+                result = util.format(pn, PhoneNumberUtil.PhoneNumberFormat.NATIONAL);
+            } else if (Flags.removeCountryCodeFromLocalSingaporeCalls() &&
+                    (SINGAPORE_ISO_COUNTRY_CODE.equalsIgnoreCase(defaultCountryIso) &&
+                            pn.getCountryCode() ==
+                                    util.getCountryCodeForRegion(SINGAPORE_ISO_COUNTRY_CODE) &&
+                            (pn.getCountryCodeSource() ==
+                                    PhoneNumber.CountryCodeSource.FROM_NUMBER_WITH_PLUS_SIGN))) {
+                /*
+                 * Need to reformat Singaporean phone numbers (when the user is in Singapore)
+                 * with the country code (+65) removed to comply with Singaporean regulations.
                  */
                 result = util.format(pn, PhoneNumberUtil.PhoneNumberFormat.NATIONAL);
             } else {

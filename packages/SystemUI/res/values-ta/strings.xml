@@ -97,8 +97,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"இடது எல்லை <xliff:g id="PERCENT">%1$d</xliff:g> சதவீதம்"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"வலது எல்லை <xliff:g id="PERCENT">%1$d</xliff:g> சதவீதம்"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"பணிக் கணக்கில் உள்ள <xliff:g id="APP">%1$s</xliff:g> ஆப்ஸில் சேமிக்கப்பட்டது"</string>
-    <!-- no translation found for screenshot_private_profile_notification (1704440899154243171) -->
-    <skip />
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"தனிப்பட்ட சுயவிவரத்தில் உள்ள <xliff:g id="APP">%1$s</xliff:g> ஆப்ஸில் சேமிக்கப்பட்டது"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Files"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"இந்த ஸ்கிரீன்ஷாட்டை <xliff:g id="APPNAME">%1$s</xliff:g> கண்டறிந்துள்ளது."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"இந்த ஸ்கிரீன்ஷாட்டை <xliff:g id="APPNAME">%1$s</xliff:g> மற்றும் திறந்திருக்கும் பிற ஆப்ஸ் கண்டறிந்துள்ளன."</string>
@@ -276,7 +275,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"சேமிக்கப்பட்டது"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"இணைப்பு நீக்கும்"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"செயல்படுத்தும்"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"நாளைக்குத் தானாகவே மீண்டும் இயக்கப்படும்"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"நாளைக்குத் தானாகவே மீண்டும் இயக்கப்படுதல்"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"விரைவுப் பகிர்தல், Find My Device போன்ற அம்சங்கள் புளூடூத்தைப் பயன்படுத்துகின்றன"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"நாளை காலை புளூடூத் இயக்கப்படும்"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"ஆடியோ பகிர்வு"</string>
@@ -448,6 +447,8 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"விட்ஜெட்களைப் பிரத்தியேகமாக்க நீண்ட நேரம் அழுத்துக"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"விட்ஜெட்களைப் பிரத்தியேகமாக்குங்கள்"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"முடக்கப்பட்ட விட்ஜெட்டுக்கான ஆப்ஸ் ஐகான்"</string>
+    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"விட்ஜெட்டைத் திருத்து"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"அகற்றும்"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"விட்ஜெட்டைச் சேர்"</string>
@@ -461,8 +462,9 @@
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"பூட்டுத் திரையில் விட்ஜெட்களை மூடும்"</string>
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"விட்ஜெட்களைப் பிரத்தியேகமாக்கும்"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"பூட்டுத் திரையில் விட்ஜெட்கள்"</string>
-    <!-- no translation found for accessibility_action_label_select_widget (8897281501387398191) -->
-    <skip />
+    <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"விட்ஜெட்டைத் தேர்ந்தெடுக்கும்"</string>
+    <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"விட்ஜெட்டை அகற்றும்"</string>
+    <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"தேர்ந்தெடுத்த விட்ஜெட்டைக் காட்சிப்படுத்தும்"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"பயனரை மாற்று"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"கீழ் இழுக்கும் மெனு"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"இந்த அமர்வின் எல்லா ஆப்ஸும் தரவும் நீக்கப்படும்."</string>
@@ -627,12 +629,17 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"வெளியீட்டு அமைப்புகளுக்குச் செல்லும்"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"ஒலியளவு ஸ்லைடர்கள் விரிவாக்கப்பட்டன"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"ஒலியளவு ஸ்லைடர்கள் சுருக்கப்பட்டன"</string>
-    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"%s ஐ ஒலியடக்கும்"</string>
-    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"%s ஐ ஒலி இயக்கும்"</string>
+    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"இதில் <xliff:g id="LABEL">%s</xliff:g> பிளே ஆகிறது"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"ஆடியோ இதில் பிளே ஆகும்"</string>
-    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
-    <skip />
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"அழைப்பில் உள்ளது"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"நிலைப் பட்டி"</string>
     <string name="demo_mode" msgid="263484519766901593">"சிஸ்டம் பயனர் இடைமுக டெமோ பயன்முறை"</string>
@@ -660,8 +667,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"சாட்டிலைட், மோசமான இணைப்பு"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"சாட்டிலைட், நிலையான இணைப்பு"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"சாட்டிலைட், இணைப்பு கிடைக்கிறது"</string>
-    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"சாட்டிலைட் SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"பணிக் கணக்கு"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"சில வேடிக்கையாக இருந்தாலும் கவனம் தேவை"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner, Android பயனர் இடைமுகத்தை மாற்றவும் தனிப்பயனாக்கவும் கூடுதல் வழிகளை வழங்குகிறது. இந்தப் பரிசோதனைக்குரிய அம்சங்கள் எதிர்கால வெளியீடுகளில் மாற்றப்படலாம், இடைநிறுத்தப்படலாம் அல்லது தோன்றாமல் போகலாம். கவனத்துடன் தொடரவும்."</string>
@@ -866,8 +872,7 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"கட்டத்தைச் சேர்"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g>க்கு நகர்த்தும்"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g>ல் சேர்க்கும்"</string>
-    <!-- no translation found for accessibilit_qs_edit_tile_add_move_invalid_position (2858467994472624487) -->
-    <skip />
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"நிலை தவறானது."</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"இடம்: <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"கட்டம் சேர்க்கப்பட்டது"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"கட்டம் அகற்றப்பட்டது"</string>

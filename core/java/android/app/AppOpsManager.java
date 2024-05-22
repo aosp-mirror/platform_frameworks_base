@@ -482,7 +482,8 @@ public class AppOpsManager {
             UID_STATE_FOREGROUND_SERVICE,
             UID_STATE_FOREGROUND,
             UID_STATE_BACKGROUND,
-            UID_STATE_CACHED
+            UID_STATE_CACHED,
+            UID_STATE_NONEXISTENT
     })
     public @interface UidState {}
 
@@ -566,6 +567,12 @@ public class AppOpsManager {
     public static final int MIN_PRIORITY_UID_STATE = UID_STATE_CACHED;
 
     /**
+     * Special uid state: The UID is not running
+     * @hide
+     */
+    public static final int UID_STATE_NONEXISTENT = Integer.MAX_VALUE;
+
+    /**
      * Resolves the first unrestricted state given an app op.
      * @param op The op to resolve.
      * @return The last restricted UID state.
@@ -596,6 +603,7 @@ public class AppOpsManager {
             UID_STATE_FOREGROUND,
             UID_STATE_BACKGROUND,
             UID_STATE_CACHED
+            // UID_STATE_NONEXISTENT isn't a real UID state, so it is excluded
     };
 
     /** @hide */
@@ -615,6 +623,8 @@ public class AppOpsManager {
                 return "bg";
             case UID_STATE_CACHED:
                 return "cch";
+            case UID_STATE_NONEXISTENT:
+                return "gone";
             default:
                 return "unknown";
         }
@@ -3573,6 +3583,9 @@ public class AppOpsManager {
             return mAttributionTag;
         }
 
+        /**
+         * Persistent device Id of the proxy that noted the op
+         */
         @FlaggedApi(Flags.FLAG_DEVICE_ID_IN_OP_PROXY_INFO_ENABLED)
         public @Nullable String getDeviceId() { return mDeviceId; }
 

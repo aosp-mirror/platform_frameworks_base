@@ -117,6 +117,9 @@ sealed interface MutableSceneTransitionLayoutState : SceneTransitionLayoutState 
         coroutineScope: CoroutineScope,
         transitionKey: TransitionKey? = null,
     ): TransitionState.Transition?
+
+    /** Immediately snap to the given [scene]. */
+    fun snapToScene(scene: SceneKey)
 }
 
 /**
@@ -226,6 +229,9 @@ sealed interface TransitionState {
          * when flinging quickly during a swipe gesture.
          */
         abstract val progress: Float
+
+        /** The current velocity of [progress], in progress units. */
+        abstract val progressVelocity: Float
 
         /** Whether the transition was triggered by user input rather than being programmatic. */
         abstract val isInitiatedByUserInput: Boolean
@@ -422,13 +428,18 @@ internal abstract class BaseSceneTransitionLayoutState(
     }
 
     /**
-     * Start a new [transition], instantly interrupting any ongoing transition if there was one.
+     * Start a new [transition].
+     *
+     * If [chain] is `true`, then the transitions will simply be added to [currentTransitions] and
+     * will run in parallel to the current transitions. If [chain] is `false`, then the list of
+     * [currentTransitions] will be cleared and [transition] will be the only running transition.
      *
      * Important: you *must* call [finishTransition] once the transition is finished.
      */
     internal fun startTransition(
         transition: TransitionState.Transition,
         transitionKey: TransitionKey?,
+        chain: Boolean = true,
     ) {
         // Compute the [TransformationSpec] when the transition starts.
         val fromScene = transition.fromScene
@@ -471,26 +482,10 @@ internal abstract class BaseSceneTransitionLayoutState(
                     finishTransition(currentState, currentState.currentScene)
                 }
 
-                // Check that we don't have too many concurrent transitions.
-                if (transitionStates.size >= MAX_CONCURRENT_TRANSITIONS) {
-                    Log.wtf(
-                        TAG,
-                        buildString {
-                            appendLine("Potential leak detected in SceneTransitionLayoutState!")
-                            appendLine(
-                                "  Some transition(s) never called STLState.finishTransition()."
-                            )
-                            appendLine("  Transitions (size=${transitionStates.size}):")
-                            transitionStates.fastForEach { state ->
-                                val transition = state as TransitionState.Transition
-                                val from = transition.fromScene
-                                val to = transition.toScene
-                                val indicator =
-                                    if (finishedTransitions.contains(transition)) "x" else " "
-                                appendLine("  [$indicator] $from => $to ($transition)")
-                            }
-                        }
-                    )
+                val tooManyTransitions = transitionStates.size >= MAX_CONCURRENT_TRANSITIONS
+                val clearCurrentTransitions = !chain || tooManyTransitions
+                if (clearCurrentTransitions) {
+                    if (tooManyTransitions) logTooManyTransitions()
 
                     // Force finish all transitions.
                     while (currentTransitions.isNotEmpty()) {
@@ -509,6 +504,24 @@ internal abstract class BaseSceneTransitionLayoutState(
                 transitionStates.add(transition)
             }
         }
+    }
+
+    private fun logTooManyTransitions() {
+        Log.wtf(
+            TAG,
+            buildString {
+                appendLine("Potential leak detected in SceneTransitionLayoutState!")
+                appendLine("  Some transition(s) never called STLState.finishTransition().")
+                appendLine("  Transitions (size=${transitionStates.size}):")
+                transitionStates.fastForEach { state ->
+                    val transition = state as TransitionState.Transition
+                    val from = transition.fromScene
+                    val to = transition.toScene
+                    val indicator = if (finishedTransitions.contains(transition)) "x" else " "
+                    appendLine("  [$indicator] $from => $to ($transition)")
+                }
+            }
+        )
     }
 
     private fun cancelActiveTransitionLinks() {
@@ -734,6 +747,17 @@ internal class MutableSceneTransitionLayoutStateImpl(
 
     override fun CoroutineScope.onChangeScene(scene: SceneKey) {
         setTargetScene(scene, coroutineScope = this)
+    }
+
+    override fun snapToScene(scene: SceneKey) {
+        // Force finish all transitions.
+        while (currentTransitions.isNotEmpty()) {
+            val transition = transitionStates[0] as TransitionState.Transition
+            finishTransition(transition, transition.currentScene)
+        }
+
+        check(transitionStates.size == 1)
+        transitionStates[0] = TransitionState.Idle(scene)
     }
 }
 

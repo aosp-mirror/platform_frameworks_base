@@ -23,11 +23,13 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.milliseconds
@@ -50,11 +52,14 @@ class KeyguardTransitionAnimationFlowTest : SysuiTestCase() {
     @Before
     fun setUp() {
         underTest =
-            animationFlow.setup(
-                duration = 1000.milliseconds,
-                from = GONE,
-                to = DREAMING,
-            )
+            animationFlow
+                .setup(
+                    duration = 1000.milliseconds,
+                    edge = Edge.create(from = Scenes.Gone, to = DREAMING),
+                )
+                .setupWithoutSceneContainer(
+                    edge = Edge.create(from = GONE, to = DREAMING),
+                )
     }
 
     @Test(expected = IllegalArgumentException::class)

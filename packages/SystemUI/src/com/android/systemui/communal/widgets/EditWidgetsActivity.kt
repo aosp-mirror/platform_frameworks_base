@@ -44,6 +44,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
 import javax.inject.Inject
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** An Activity for editing the widgets that appear in hub mode. */
@@ -68,6 +69,8 @@ constructor(
     private val widgetConfigurator by lazy { widgetConfiguratorFactory.create(this) }
 
     private var shouldOpenWidgetPickerOnStart = false
+
+    private var lockOnDestroy = false
 
     private val addWidgetActivityLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(StartActivityForResult()) { result ->
@@ -149,15 +152,18 @@ constructor(
     }
 
     private fun onEditDone() {
-        try {
+        lifecycleScope.launch {
             communalViewModel.changeScene(
                 CommunalScenes.Communal,
                 CommunalTransitionKeys.SimpleFade
             )
-            checkNotNull(windowManagerService).lockNow(/* options */ null)
+
+            // Wait for the current scene to be idle on communal.
+            communalViewModel.isIdleOnCommunal.first { it }
+            // Then finish the activity (this helps to avoid a flash of lockscreen when locking
+            // in onDestroy()).
+            lockOnDestroy = true
             finish()
-        } catch (e: RemoteException) {
-            Log.e(TAG, "Couldn't lock the device as WindowManager is dead.")
         }
     }
 
@@ -190,5 +196,15 @@ constructor(
     override fun onDestroy() {
         super.onDestroy()
         communalViewModel.setEditModeOpen(false)
+
+        if (lockOnDestroy) lockNow()
+    }
+
+    private fun lockNow() {
+        try {
+            checkNotNull(windowManagerService).lockNow(/* options */ null)
+        } catch (e: RemoteException) {
+            Log.e(TAG, "Couldn't lock the device as WindowManager is dead.")
+        }
     }
 }

@@ -27,7 +27,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.After
 import org.junit.Before
@@ -38,12 +37,13 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito.any
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 
 private const val PACKAGE = "PKG"
 private const val KEY = "TEST_KEY"
@@ -165,10 +165,10 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
 
     @Test
     fun noMediaSession_removedEventNotFiltered() {
-        filter.onMediaDataRemoved(KEY)
+        filter.onMediaDataRemoved(KEY, false)
         bgExecutor.runAllReady()
         fgExecutor.runAllReady()
-        verify(mediaListener).onMediaDataRemoved(eq(KEY))
+        verify(mediaListener).onMediaDataRemoved(eq(KEY), eq(false))
     }
 
     @Test
@@ -193,11 +193,11 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
         whenever(mediaSessionManager.getActiveSessions(any())).thenReturn(controllers)
         sessionListener.onActiveSessionsChanged(controllers)
         // WHEN a removed event is received
-        filter.onMediaDataRemoved(KEY)
+        filter.onMediaDataRemoved(KEY, false)
         bgExecutor.runAllReady()
         fgExecutor.runAllReady()
         // THEN the event is not filtered
-        verify(mediaListener).onMediaDataRemoved(eq(KEY))
+        verify(mediaListener).onMediaDataRemoved(eq(KEY), eq(false))
     }
 
     @Test
@@ -294,7 +294,7 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
                 anyBoolean()
             )
         // AND there should be a removed event for key2
-        verify(mediaListener).onMediaDataRemoved(eq(key2))
+        verify(mediaListener).onMediaDataRemoved(eq(key2), eq(false))
     }
 
     @Test

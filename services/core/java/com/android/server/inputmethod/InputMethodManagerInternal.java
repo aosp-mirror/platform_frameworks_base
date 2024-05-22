@@ -25,7 +25,7 @@ import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
-import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
+import com.android.internal.inputmethod.InlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.server.LocalServices;
@@ -86,11 +86,11 @@ public abstract class InputMethodManagerInternal {
      *
      * @param userId      the user ID to be queried
      * @param requestInfo information needed to create an {@link InlineSuggestionsRequest}.
-     * @param cb          {@link IInlineSuggestionsRequestCallback} used to pass back the request
+     * @param cb          {@link InlineSuggestionsRequestCallback} used to pass back the request
      *                    object
      */
     public abstract void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
-            InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback cb);
+            InlineSuggestionsRequestInfo requestInfo, InlineSuggestionsRequestCallback cb);
 
     /**
      * Force switch to the enabled input method by {@code imeId} for current user. If the input
@@ -150,10 +150,11 @@ public abstract class InputMethodManagerInternal {
      *
      * @param sourceInputToken the source token.
      * @param displayId        the display hosting the IME window
+     * @param userId           the user ID this request is about
      * @return {@code true} if the transfer is successful
      */
     public abstract boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
-            int displayId);
+            int displayId, @UserIdInt int userId);
 
     /**
      * Reports that IME control has transferred to the given window token, or if null that
@@ -262,7 +263,7 @@ public abstract class InputMethodManagerInternal {
                 @Override
                 public void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
                         InlineSuggestionsRequestInfo requestInfo,
-                        IInlineSuggestionsRequestCallback cb) {
+                        InlineSuggestionsRequestCallback cb) {
                 }
 
                 @Override
@@ -287,7 +288,7 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
-                        int displayId) {
+                        int displayId, @UserIdInt int userId) {
                     return false;
                 }
 

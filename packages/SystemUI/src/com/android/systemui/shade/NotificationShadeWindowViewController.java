@@ -49,9 +49,11 @@ import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -136,11 +138,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final PanelExpansionInteractor mPanelExpansionInteractor;
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
 
-    /**
-     * If {@code true}, an external touch sent in {@link #handleExternalTouch(MotionEvent)} has been
-     * intercepted and all future touch events for the gesture should be processed by this view.
-     */
-    private boolean mExternalTouchIntercepted = false;
     private boolean mIsTrackingBarGesture = false;
     private boolean mIsOcclusionTransitionRunning = false;
     private DisableSubpixelTextTransitionListener mDisableSubpixelTextTransitionListener;
@@ -224,7 +221,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mDisableSubpixelTextTransitionListener = new DisableSubpixelTextTransitionListener(mView);
         bouncerViewBinder.bind(mView.findViewById(R.id.keyguard_bouncer_container));
 
-        collectFlow(mView, keyguardTransitionInteractor.transition(LOCKSCREEN, DREAMING),
+        collectFlow(mView, keyguardTransitionInteractor.transition(
+                Edge.Companion.create(LOCKSCREEN, DREAMING)),
                 mLockscreenToDreamingTransition);
         collectFlow(
                 mView,
@@ -257,28 +255,11 @@ public class NotificationShadeWindowViewController implements Dumpable {
     }
 
     /**
-     * Handle a touch event while dreaming or on the hub by forwarding the event to the content
-     * view.
-     * <p>
-     * Since important logic for handling touches lives in the dispatch/intercept phases, we
-     * simulate going through all of these stages before sending onTouchEvent if intercepted.
-     *
+     * Handle a touch event while dreaming by forwarding the event to the content view.
      * @param event The event to forward.
      */
-    public void handleExternalTouch(MotionEvent event) {
-        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            mExternalTouchIntercepted = false;
-        }
-
-        if (!mView.dispatchTouchEvent(event)) {
-            return;
-        }
-        if (!mExternalTouchIntercepted) {
-            mExternalTouchIntercepted = mView.onInterceptTouchEvent(event);
-        }
-        if (mExternalTouchIntercepted) {
-            mView.onTouchEvent(event);
-        }
+    public void handleDreamTouch(MotionEvent event) {
+        mView.dispatchTouchEvent(event);
     }
 
     /** Inflates the {@link R.layout#status_bar_expanded} layout and sets it up. */
@@ -357,7 +338,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 mFalsingCollector.onTouchEvent(ev);
                 mPulsingWakeupGestureHandler.onTouchEvent(ev);
 
-                if (mGlanceableHubContainerController.onTouchEvent(ev)) {
+                if (!SceneContainerFlag.isEnabled()
+                        && mGlanceableHubContainerController.onTouchEvent(ev)) {
+                    // GlanceableHubContainerController is only used pre-flexiglass.
                     return logDownDispatch(ev, "dispatched to glanceable hub container", true);
                 }
                 if (mDreamingWakeupGestureHandler != null
@@ -621,6 +604,10 @@ public class NotificationShadeWindowViewController implements Dumpable {
      * The layout lives in {@link R.id.communal_ui_stub}.
      */
     public void setupCommunalHubLayout() {
+        if (SceneContainerFlag.isEnabled()) {
+            // GlanceableHubContainerController is only used pre-flexiglass.
+            return;
+        }
         collectFlow(
                 mView,
                 mGlanceableHubContainerController.communalAvailable(),

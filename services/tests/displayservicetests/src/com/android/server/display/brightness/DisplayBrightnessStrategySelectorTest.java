@@ -46,6 +46,7 @@ import com.android.server.display.brightness.strategy.AutomaticBrightnessStrateg
 import com.android.server.display.brightness.strategy.BoostBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DozeBrightnessStrategy;
+import com.android.server.display.brightness.strategy.FallbackBrightnessStrategy;
 import com.android.server.display.brightness.strategy.FollowerBrightnessStrategy;
 import com.android.server.display.brightness.strategy.InvalidBrightnessStrategy;
 import com.android.server.display.brightness.strategy.OffloadBrightnessStrategy;
@@ -89,6 +90,8 @@ public final class DisplayBrightnessStrategySelectorTest {
     private OffloadBrightnessStrategy mOffloadBrightnessStrategy;
     @Mock
     private AutoBrightnessFallbackStrategy mAutoBrightnessFallbackStrategy;
+    @Mock
+    private FallbackBrightnessStrategy mFallbackBrightnessStrategy;
     @Mock
     private Resources mResources;
     @Mock
@@ -135,7 +138,7 @@ public final class DisplayBrightnessStrategySelectorTest {
 
                 @Override
                 AutomaticBrightnessStrategy getAutomaticBrightnessStrategy1(Context context,
-                        int displayId) {
+                        int displayId, DisplayManagerFlags displayManagerFlags) {
                     return mAutomaticBrightnessStrategy;
                 }
 
@@ -154,6 +157,11 @@ public final class DisplayBrightnessStrategySelectorTest {
                 @Override
                 AutoBrightnessFallbackStrategy getAutoBrightnessFallbackStrategy() {
                     return mAutoBrightnessFallbackStrategy;
+                }
+
+                @Override
+                FallbackBrightnessStrategy getFallbackBrightnessStrategy() {
+                    return mFallbackBrightnessStrategy;
                 }
             };
 
@@ -352,6 +360,25 @@ public final class DisplayBrightnessStrategySelectorTest {
                 mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_ON,
                                 0.1f, false)));
+    }
+
+    @Test
+    public void selectStrategy_selectsFallbackStrategyAsAnUltimateFallback() {
+        when(mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()).thenReturn(true);
+        mDisplayBrightnessStrategySelector = new DisplayBrightnessStrategySelector(mContext,
+                mInjector, DISPLAY_ID, mDisplayManagerFlags);
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
+                DisplayManagerInternal.DisplayPowerRequest.class);
+        displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT;
+        displayPowerRequest.screenBrightnessOverride = Float.NaN;
+        when(mFollowerBrightnessStrategy.getBrightnessToFollow()).thenReturn(Float.NaN);
+        when(mTemporaryBrightnessStrategy.getTemporaryScreenBrightness()).thenReturn(Float.NaN);
+        when(mAutomaticBrightnessStrategy.shouldUseAutoBrightness()).thenReturn(false);
+        when(mAutomaticBrightnessStrategy.isAutoBrightnessValid()).thenReturn(false);
+        assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(
+                        new StrategySelectionRequest(displayPowerRequest, Display.STATE_ON,
+                                0.1f, false)),
+                mFallbackBrightnessStrategy);
     }
 
     @Test

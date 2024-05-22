@@ -247,13 +247,11 @@
     <!-- Padding for the bubble popup view contents. -->
     <dimen name="bubble_popup_padding">24dp</dimen>
     <!-- The size of the caption bar inset at the top of bubble bar expanded view. -->
-    <dimen name="bubble_bar_expanded_view_caption_height">32dp</dimen>
+    <dimen name="bubble_bar_expanded_view_caption_height">36dp</dimen>
     <!-- The width of the caption bar at the top of bubble bar expanded view. -->
-    <dimen name="bubble_bar_expanded_view_caption_width">128dp</dimen>
-    <!-- The height of the dots shown for the caption menu in the bubble bar expanded view.. -->
-    <dimen name="bubble_bar_expanded_view_caption_dot_size">4dp</dimen>
-    <!-- The spacing between the dots for the caption menu in the bubble bar expanded view.. -->
-    <dimen name="bubble_bar_expanded_view_caption_dot_spacing">4dp</dimen>
+    <dimen name="bubble_bar_expanded_view_caption_width">80dp</dimen>
+    <!-- The height of the handle shown for the caption menu in the bubble bar expanded view. -->
+    <dimen name="bubble_bar_expanded_view_handle_height">4dp</dimen>
     <!-- Width of the expanded bubble bar view shown when the bubble is expanded. -->
     <dimen name="bubble_bar_expanded_view_width">412dp</dimen>
     <!-- Minimum width of the bubble bar manage menu. -->
@@ -274,6 +272,9 @@
     <dimen name="bubble_bar_expanded_view_corner_radius">16dp</dimen>
     <!-- Corner radius for expanded view while it is being dragged -->
     <dimen name="bubble_bar_expanded_view_corner_radius_dragged">28dp</dimen>
+    <!-- Corner radius for expanded view drop target -->
+    <dimen name="bubble_bar_expanded_view_drop_target_corner">28dp</dimen>
+    <dimen name="bubble_bar_expanded_view_drop_target_padding">24dp</dimen>
     <!-- Width of the box around bottom center of the screen where drag only leads to dismiss -->
     <dimen name="bubble_bar_dismiss_zone_width">192dp</dimen>
     <!-- Height of the box around bottom center of the screen where drag only leads to dismiss -->
@@ -463,6 +464,9 @@
 
     <!-- The height of the maximize menu in desktop mode. -->
     <dimen name="desktop_mode_maximize_menu_height">114dp</dimen>
+
+    <!-- The padding of the maximize menu in desktop mode. -->
+    <dimen name="desktop_mode_menu_padding">16dp</dimen>
 
     <!-- The height of the buttons in the maximize menu. -->
     <dimen name="desktop_mode_maximize_menu_button_height">52dp</dimen>

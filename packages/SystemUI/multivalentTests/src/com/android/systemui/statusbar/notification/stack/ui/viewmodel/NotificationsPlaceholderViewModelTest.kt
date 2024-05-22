@@ -44,13 +44,4 @@ class NotificationsPlaceholderViewModelTest : SysuiTestCase() {
                 collectLastValue(kosmos.notificationStackAppearanceInteractor.shadeScrimBounds)
             assertThat(stackBounds).isEqualTo(bounds)
         }
-
-    @Test
-    fun onStackBoundsChanged() =
-        kosmos.testScope.runTest {
-            underTest.onStackBoundsChanged(top = 5f, bottom = 500f)
-            assertThat(kosmos.notificationStackAppearanceInteractor.stackTop.value).isEqualTo(5f)
-            assertThat(kosmos.notificationStackAppearanceInteractor.stackBottom.value)
-                .isEqualTo(500f)
-        }
 }

@@ -119,6 +119,10 @@ class DragDetector {
         mTouchSlop = touchSlop;
     }
 
+    int getTouchSlop() {
+        return mTouchSlop;
+    }
+
     private void resetState() {
         mIsDragEvent = false;
         mInputDownPoint.set(0, 0);

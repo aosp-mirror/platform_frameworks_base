@@ -695,10 +695,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void show(Bundle options) {
         Trace.beginSection("StatusBarKeyguardViewManager#show");
         mNotificationShadeWindowController.setKeyguardShowing(true);
-        if (SceneContainerFlag.isEnabled()) {
-            mSceneInteractorLazy.get().changeScene(
-                    Scenes.Lockscreen, "StatusBarKeyguardViewManager.show");
-        }
         mKeyguardStateController.notifyKeyguardState(true, mKeyguardStateController.isOccluded());
         reset(true /* hideBouncerWhenShowing */);
         SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_STATE_CHANGED,
@@ -744,6 +740,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void showBouncer(boolean scrimmed) {
         if (DeviceEntryUdfpsRefactor.isEnabled()) {
             if (mAlternateBouncerInteractor.canShowAlternateBouncerForFingerprint()) {
+                Log.d(TAG, "showBouncer:alternateBouncer.forceShow()");
                 mAlternateBouncerInteractor.forceShow();
                 updateAlternateBouncerShowing(mAlternateBouncerInteractor.isVisibleState());
             } else {
@@ -869,6 +866,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     }
 
                     if (DeviceEntryUdfpsRefactor.isEnabled()) {
+                        Log.d(TAG, "dismissWithAction:alternateBouncer.forceShow()");
                         mAlternateBouncerInteractor.forceShow();
                         updateAlternateBouncerShowing(mAlternateBouncerInteractor.isVisibleState());
                     } else {
@@ -1546,7 +1544,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
 
         if (KeyguardWmStateRefactor.isEnabled()) {
-            mKeyguardTransitionInteractor.startDismissKeyguardTransition();
+            mKeyguardTransitionInteractor.startDismissKeyguardTransition(
+                    "SBKVM#keyguardAuthenticated");
         }
     }
 

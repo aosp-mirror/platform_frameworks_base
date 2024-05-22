@@ -18,7 +18,7 @@ package com.android.systemui.shade
 
 import android.graphics.Rect
 import android.os.PowerManager
-import android.platform.test.flag.junit.FlagsParameterization
+import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
 import android.view.MotionEvent
@@ -27,6 +27,7 @@ import android.widget.FrameLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
@@ -39,26 +40,22 @@ import com.android.systemui.communal.data.repository.fakeCommunalRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.ui.compose.CommunalContent
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.sceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -71,14 +68,12 @@ import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4
-import platform.test.runner.parameterized.Parameters
 
 @ExperimentalCoroutinesApi
-@RunWith(ParameterizedAndroidJunit4::class)
+@RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
-class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class GlanceableHubContainerControllerTest : SysuiTestCase() {
     private val kosmos: Kosmos =
         testKosmos().apply {
             // UnconfinedTestDispatcher makes testing simpler due to CommunalInteractor flows using
@@ -88,9 +83,9 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
 
     @Mock private lateinit var communalViewModel: CommunalViewModel
     @Mock private lateinit var powerManager: PowerManager
-    @Mock private lateinit var dialogFactory: SystemUIDialogFactory
     @Mock private lateinit var touchMonitor: TouchMonitor
     @Mock private lateinit var communalColors: CommunalColors
+    @Mock private lateinit var communalContent: CommunalContent
     private lateinit var ambientTouchComponentFactory: AmbientTouchComponent.Factory
 
     private lateinit var parentView: FrameLayout
@@ -99,10 +94,6 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
 
     private lateinit var communalRepository: FakeCommunalRepository
     private lateinit var underTest: GlanceableHubContainerController
-
-    init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
-    }
 
     @Before
     fun setUp() {
@@ -126,13 +117,12 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
                 GlanceableHubContainerController(
                     communalInteractor,
                     communalViewModel,
-                    dialogFactory,
-                    keyguardTransitionInteractor,
                     keyguardInteractor,
                     shadeInteractor,
                     powerManager,
                     communalColors,
                     ambientTouchComponentFactory,
+                    communalContent,
                     kosmos.sceneDataSourceDelegator,
                 )
         }
@@ -169,13 +159,12 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
                     GlanceableHubContainerController(
                         communalInteractor,
                         communalViewModel,
-                        dialogFactory,
-                        keyguardTransitionInteractor,
                         keyguardInteractor,
                         shadeInteractor,
                         powerManager,
                         communalColors,
                         ambientTouchComponentFactory,
+                        communalContent,
                         kosmos.sceneDataSourceDelegator,
                     )
 
@@ -216,13 +205,39 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
         }
 
     @Test
+    fun onTouchEvent_communalTransitioning_interceptsTouches() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is opening.
+                communalRepository.setTransitionState(
+                    flowOf(
+                        ObservableTransitionState.Transition(
+                            fromScene = CommunalScenes.Blank,
+                            toScene = CommunalScenes.Communal,
+                            currentScene = flowOf(CommunalScenes.Blank),
+                            progress = flowOf(0.5f),
+                            isInitiatedByUserInput = true,
+                            isUserInputOngoing = flowOf(true)
+                        )
+                    )
+                )
+                testableLooper.processAllMessages()
+
+                // Touch events are intercepted.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+                // User activity sent to PowerManager.
+                verify(powerManager).userActivity(any(), any(), any())
+            }
+        }
+
+    @Test
     fun onTouchEvent_communalOpen_interceptsTouches() =
         with(kosmos) {
             testScope.runTest {
                 // Communal is open.
                 goToScene(CommunalScenes.Communal)
 
-                // Touch events are intercepted outside of any gesture areas.
+                // Touch events are intercepted.
                 assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
                 // User activity sent to PowerManager.
                 verify(powerManager).userActivity(any(), any(), any())
@@ -288,13 +303,12 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
                 GlanceableHubContainerController(
                     communalInteractor,
                     communalViewModel,
-                    dialogFactory,
-                    keyguardTransitionInteractor,
                     keyguardInteractor,
                     shadeInteractor,
                     powerManager,
                     communalColors,
                     ambientTouchComponentFactory,
+                    communalContent,
                     kosmos.sceneDataSourceDelegator,
                 )
 
@@ -308,13 +322,12 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
                 GlanceableHubContainerController(
                     communalInteractor,
                     communalViewModel,
-                    dialogFactory,
-                    keyguardTransitionInteractor,
                     keyguardInteractor,
                     shadeInteractor,
                     powerManager,
                     communalColors,
                     ambientTouchComponentFactory,
+                    communalContent,
                     kosmos.sceneDataSourceDelegator,
                 )
 
@@ -501,13 +514,6 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
     }
 
     private fun goToScene(scene: SceneKey) {
-        if (SceneContainerFlag.isEnabled) {
-            if (scene == CommunalScenes.Communal) {
-                kosmos.sceneInteractor.changeScene(Scenes.Communal, "test")
-            } else {
-                kosmos.sceneInteractor.changeScene(Scenes.Lockscreen, "test")
-            }
-        }
         communalRepository.changeScene(scene)
         testableLooper.processAllMessages()
     }
@@ -536,11 +542,5 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
             MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, CONTAINER_WIDTH.toFloat(), 0f, 0)
         private val MOVE_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
         private val UP_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0)
-
-        @JvmStatic
-        @Parameters(name = "{0}")
-        fun getParams(): List<FlagsParameterization> {
-            return FlagsParameterization.allCombinationsOf().andSceneContainer()
-        }
     }
 }

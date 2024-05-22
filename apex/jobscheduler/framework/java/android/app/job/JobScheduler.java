@@ -491,8 +491,10 @@ public abstract class JobScheduler {
      * Returns a list of all currently-executing jobs.
      * @hide
      */
-    @SuppressWarnings("HiddenAbstractMethod")
-    public abstract List<JobInfo> getStartedJobs();
+    @Nullable
+    public List<JobInfo> getStartedJobs() {
+        return null;
+    }
 
     /**
      * <b>For internal system callers only!</b>
@@ -501,8 +503,10 @@ public abstract class JobScheduler {
      * <p class="note">This is a slow operation, so it should be called sparingly.
      * @hide
      */
-    @SuppressWarnings("HiddenAbstractMethod")
-    public abstract List<JobSnapshot> getAllJobSnapshots();
+    @Nullable
+    public List<JobSnapshot> getAllJobSnapshots() {
+        return null;
+    }
 
     /**
      * @hide
@@ -510,8 +514,8 @@ public abstract class JobScheduler {
     @RequiresPermission(allOf = {
             android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
             android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
-    @SuppressWarnings("HiddenAbstractMethod")
-    public abstract void registerUserVisibleJobObserver(@NonNull IUserVisibleJobObserver observer);
+    public void registerUserVisibleJobObserver(@NonNull IUserVisibleJobObserver observer) {
+    }
 
     /**
      * @hide
@@ -519,9 +523,10 @@ public abstract class JobScheduler {
     @RequiresPermission(allOf = {
             android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
             android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
-    @SuppressWarnings("HiddenAbstractMethod")
-    public abstract void unregisterUserVisibleJobObserver(
-            @NonNull IUserVisibleJobObserver observer);
+    public void unregisterUserVisibleJobObserver(
+            @NonNull IUserVisibleJobObserver observer) {
+
+    }
 
     /**
      * @hide
@@ -529,7 +534,7 @@ public abstract class JobScheduler {
     @RequiresPermission(allOf = {
             android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
             android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
-    @SuppressWarnings("HiddenAbstractMethod")
-    public abstract void notePendingUserRequestedAppStop(@NonNull String packageName, int userId,
-            @Nullable String debugReason);
+    public void notePendingUserRequestedAppStop(@NonNull String packageName, int userId,
+            @Nullable String debugReason) {
+    }
 }

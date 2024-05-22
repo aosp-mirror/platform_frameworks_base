@@ -28,10 +28,10 @@ interface IDesktopMode {
     /** Show apps on the desktop on the given display */
     void showDesktopApps(int displayId, in RemoteTransition remoteTransition);
 
-    /** Stash apps on the desktop to allow launching another app from home screen */
+    /** @deprecated use {@link #showDesktopApps} instead. */
     void stashDesktopApps(int displayId);
 
-    /** Hide apps that may be stashed */
+    /** @deprecated this is no longer supported. */
     void hideStashedDesktopApps(int displayId);
 
     /** Bring task with the given id to front */

@@ -1025,7 +1025,8 @@ public abstract class WallpaperService extends Service {
             mWallpaperDimAmount = (!mShouldDimByDefault) ? mCustomDimAmount
                     : Math.max(mDefaultDimAmount, mCustomDimAmount);
 
-            if (!ENABLE_WALLPAPER_DIMMING || mBbqSurfaceControl == null
+            if (!ENABLE_WALLPAPER_DIMMING
+                    || mBbqSurfaceControl == null || !mBbqSurfaceControl.isValid()
                     || mWallpaperDimAmount == mPreviousWallpaperDimAmount) {
                 return;
             }

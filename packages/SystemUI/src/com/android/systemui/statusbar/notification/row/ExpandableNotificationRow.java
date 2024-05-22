@@ -101,6 +101,7 @@ import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationCompactMessagingTemplateViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.shared.NotificationContentAlphaOptimization;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
@@ -375,6 +376,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             };
 
     private OnClickListener mOnClickListener;
+    @Nullable
+    private OnClickListener mBubbleClickListener;
     private OnDragSuccessListener mOnDragSuccessListener;
     private boolean mHeadsupDisappearRunning;
     private View mChildAfterViewWhenDismissed;
@@ -588,7 +591,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mMenuRow.setAppName(mAppName);
         }
         if (mIsSummaryWithChildren) {
-            if (!AsyncGroupHeaderViewInflation.isEnabled()) {
+            if (AsyncGroupHeaderViewInflation.isEnabled()) {
+                mChildrenContainer.updateGroupHeaderExpandState();
+            } else {
                 // We create the header from the background thread instead
                 mChildrenContainer.recreateNotificationHeader(mExpandClickListener,
                         isConversation());
@@ -840,6 +845,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mMustStayOnScreen = false;
     }
 
+    /**
+     *
+     * @return true when compact version of Heads Up is on the screen.
+     */
+    public boolean isCompactConversationHeadsUpOnScreen() {
+        final NotificationViewWrapper viewWrapper =
+                getVisibleNotificationViewWrapper();
+
+        return viewWrapper instanceof NotificationCompactMessagingTemplateViewWrapper;
+    }
     /**
      * @see NotificationChildrenContainer#setUntruncatedChildCount(int)
      */
@@ -1234,14 +1249,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /**
      * The click listener for the bubble button.
      */
+    @Nullable
     public View.OnClickListener getBubbleClickListener() {
-        return v -> {
-            if (mBubblesManagerOptional.isPresent()) {
-                mBubblesManagerOptional.get()
-                        .onUserChangedBubble(mEntry, !mEntry.isBubble() /* createBubble */);
-            }
-            mHeadsUpManager.removeNotification(mEntry.getKey(), true /* releaseImmediately */);
-        };
+        return mBubbleClickListener;
+    }
+
+    /**
+     * Sets the click listener for the bubble button.
+     */
+    public void setBubbleClickListener(@Nullable OnClickListener l) {
+        mBubbleClickListener = l;
+        // ensure listener is passed to the content views
+        mPrivateLayout.updateBubbleButton(mEntry);
+        mPublicLayout.updateBubbleButton(mEntry);
     }
 
     /**
@@ -2781,7 +2801,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    protected void expandNotification() {
+    /**
+     * Triggers expand click listener to expand the notification.
+     */
+    public void expandNotification() {
         mExpandClickListener.onClick(this);
     }
 
@@ -3069,7 +3092,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             boolean isHeadsUpAnimation,
             Runnable onStartedRunnable,
             Runnable onFinishedRunnable,
-            AnimatorListenerAdapter animationListener) {
+            AnimatorListenerAdapter animationListener, ClipSide clipSide) {
         if (mMenuRow != null && mMenuRow.isMenuVisible()) {
             Animator anim = getTranslateViewAnimator(0f, null /* listener */);
             if (anim != null) {
@@ -3085,7 +3108,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     public void onAnimationEnd(Animator animation) {
                         ExpandableNotificationRow.super.performRemoveAnimation(
                                 duration, delay, translationDirection, isHeadsUpAnimation,
-                                null, onFinishedRunnable, animationListener);
+                                null, onFinishedRunnable, animationListener, ClipSide.BOTTOM);
                     }
                 });
                 anim.start();
@@ -3093,7 +3116,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             }
         }
         return super.performRemoveAnimation(duration, delay, translationDirection,
-                isHeadsUpAnimation, onStartedRunnable, onFinishedRunnable, animationListener);
+                isHeadsUpAnimation, onStartedRunnable, onFinishedRunnable, animationListener,
+                clipSide);
     }
 
     @Override

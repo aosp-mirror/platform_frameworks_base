@@ -55,6 +55,18 @@ constructor(
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
 ) {
 
+    interface OnSceneAboutToChangeListener {
+
+        /**
+         * Notifies that the scene is about to change to [toScene].
+         *
+         * The implementation can choose to consume the [sceneState] to prepare the incoming scene.
+         */
+        fun onSceneAboutToChange(toScene: SceneKey, sceneState: Any?)
+    }
+
+    private val onSceneAboutToChangeListener = mutableSetOf<OnSceneAboutToChangeListener>()
+
     /**
      * The current scene.
      *
@@ -149,6 +161,10 @@ constructor(
         return repository.allSceneKeys()
     }
 
+    fun registerSceneStateProcessor(processor: OnSceneAboutToChangeListener) {
+        onSceneAboutToChangeListener.add(processor)
+    }
+
     /**
      * Requests a scene change to the given scene.
      *
@@ -161,20 +177,16 @@ constructor(
         toScene: SceneKey,
         loggingReason: String,
         transitionKey: TransitionKey? = null,
+        sceneState: Any? = null,
     ) {
-        if (!repository.allSceneKeys().contains(toScene)) {
-            return
-        }
-
-        check(
-            toScene != Scenes.Gone || deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked
-        ) {
-            "Cannot change to the Gone scene while the device is locked. Logging reason for scene" +
-                " change was: $loggingReason"
-        }
-
         val currentSceneKey = currentScene.value
-        if (currentSceneKey == toScene) {
+        if (
+            !validateSceneChange(
+                from = currentSceneKey,
+                to = toScene,
+                loggingReason = loggingReason,
+            )
+        ) {
             return
         }
 
@@ -182,9 +194,42 @@ constructor(
             from = currentSceneKey,
             to = toScene,
             reason = loggingReason,
+            isInstant = false,
         )
 
+        onSceneAboutToChangeListener.forEach { it.onSceneAboutToChange(toScene, sceneState) }
         repository.changeScene(toScene, transitionKey)
+    }
+
+    /**
+     * Requests a scene change to the given scene.
+     *
+     * The change is instantaneous and not animated; it will be observable in the next frame and
+     * there will be no transition animation.
+     */
+    fun snapToScene(
+        toScene: SceneKey,
+        loggingReason: String,
+    ) {
+        val currentSceneKey = currentScene.value
+        if (
+            !validateSceneChange(
+                from = currentSceneKey,
+                to = toScene,
+                loggingReason = loggingReason,
+            )
+        ) {
+            return
+        }
+
+        logger.logSceneChangeRequested(
+            from = currentSceneKey,
+            to = toScene,
+            reason = loggingReason,
+            isInstant = true,
+        )
+
+        repository.snapToScene(toScene)
     }
 
     /**
@@ -248,5 +293,33 @@ constructor(
         isRemoteUserInteractionOngoing: Boolean = repository.isRemoteUserInteractionOngoing.value,
     ): Boolean {
         return raw || isRemoteUserInteractionOngoing
+    }
+
+    /**
+     * Validates that the given scene change is allowed.
+     *
+     * Will throw a runtime exception for illegal states (for example, attempting to change to a
+     * scene that's not part of the current scene framework configuration).
+     *
+     * @param from The current scene being transitioned away from
+     * @param to The desired destination scene to transition to
+     * @param loggingReason The reason why the transition is requested, for logging purposes
+     * @return `true` if the scene change is valid; `false` if it shouldn't happen
+     */
+    private fun validateSceneChange(
+        from: SceneKey,
+        to: SceneKey,
+        loggingReason: String,
+    ): Boolean {
+        if (!repository.allSceneKeys().contains(to)) {
+            return false
+        }
+
+        check(to != Scenes.Gone || deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked) {
+            "Cannot change to the Gone scene while the device is locked. Logging reason for scene" +
+                " change was: $loggingReason"
+        }
+
+        return from != to
     }
 }

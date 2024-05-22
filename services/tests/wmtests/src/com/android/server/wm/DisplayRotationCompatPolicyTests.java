@@ -91,6 +91,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     private CameraManager mMockCameraManager;
     private Handler mMockHandler;
     private LetterboxConfiguration mLetterboxConfiguration;
+    private ActivityRefresher mActivityRefresher;
 
     private DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
     private CameraManager.AvailabilityCallback mCameraAvailabilityCallback;
@@ -132,8 +133,9 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
                 });
         CameraStateMonitor cameraStateMonitor =
                 new CameraStateMonitor(mDisplayContent, mMockHandler);
-        mDisplayRotationCompatPolicy =
-                new DisplayRotationCompatPolicy(mDisplayContent, mMockHandler, cameraStateMonitor);
+        mActivityRefresher = new ActivityRefresher(mDisplayContent.mWmService, mMockHandler);
+        mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(mDisplayContent,
+                cameraStateMonitor, mActivityRefresher);
 
         // Do not show the real toast.
         spyOn(mDisplayRotationCompatPolicy);
@@ -606,7 +608,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     private void assertActivityRefreshRequested(boolean refreshRequested,
                 boolean cycleThroughStop) throws Exception {
         verify(mActivity.mLetterboxUiController, times(refreshRequested ? 1 : 0))
-                .setIsRefreshAfterRotationRequested(true);
+                .setIsRefreshRequested(true);
 
         final RefreshCallbackItem refreshCallbackItem = RefreshCallbackItem.obtain(mActivity.token,
                 cycleThroughStop ? ON_STOP : ON_PAUSE);
@@ -628,7 +630,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     private void callOnActivityConfigurationChanging(
             ActivityRecord activity, boolean isDisplayRotationChanging) {
-        mDisplayRotationCompatPolicy.onActivityConfigurationChanging(activity,
+        mActivityRefresher.onActivityConfigurationChanging(activity,
                 /* newConfig */ createConfigurationWithDisplayRotation(ROTATION_0),
                 /* newConfig */ createConfigurationWithDisplayRotation(
                         isDisplayRotationChanging ? ROTATION_90 : ROTATION_0));

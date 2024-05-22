@@ -172,7 +172,7 @@ public class ShortcutService extends IShortcutService.Stub {
     static final boolean DEBUG = false; // STOPSHIP if true
     static final boolean DEBUG_LOAD = false; // STOPSHIP if true
     static final boolean DEBUG_PROCSTATE = false; // STOPSHIP if true
-    static final boolean DEBUG_REBOOT = false; // STOPSHIP if true
+    static final boolean DEBUG_REBOOT = true;
 
     @VisibleForTesting
     static final long DEFAULT_RESET_INTERVAL_SEC = 24 * 60 * 60; // 1 day
@@ -3798,24 +3798,36 @@ public class ShortcutService extends IShortcutService.Stub {
                 final boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
                 final boolean archival = intent.getBooleanExtra(Intent.EXTRA_ARCHIVAL, false);
 
+                Slog.d(TAG, "received package broadcast intent: " + intent);
                 switch (action) {
                     case Intent.ACTION_PACKAGE_ADDED:
                         if (replacing) {
+                            Slog.d(TAG, "replacing package: " + packageName + " userId" + userId);
                             handlePackageUpdateFinished(packageName, userId);
                         } else {
+                            Slog.d(TAG, "adding package: " + packageName + " userId" + userId);
                             handlePackageAdded(packageName, userId);
                         }
                         break;
                     case Intent.ACTION_PACKAGE_REMOVED:
                         if (!replacing || (replacing && archival)) {
+                            if (!replacing) {
+                                Slog.d(TAG, "removing package: "
+                                        + packageName + " userId" + userId);
+                            } else if (archival) {
+                                Slog.d(TAG, "archiving package: "
+                                        + packageName + " userId" + userId);
+                            }
                             handlePackageRemoved(packageName, userId);
                         }
                         break;
                     case Intent.ACTION_PACKAGE_CHANGED:
+                        Slog.d(TAG, "changing package: " + packageName + " userId" + userId);
                         handlePackageChanged(packageName, userId);
-
                         break;
                     case Intent.ACTION_PACKAGE_DATA_CLEARED:
+                        Slog.d(TAG, "clearing data for package: "
+                                + packageName + " userId" + userId);
                         handlePackageDataCleared(packageName, userId);
                         break;
                 }

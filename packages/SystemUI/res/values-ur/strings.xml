@@ -97,8 +97,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"بایاں احاطہ <xliff:g id="PERCENT">%1$d</xliff:g> فیصد"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"دایاں احاطہ <xliff:g id="PERCENT">%1$d</xliff:g> فیصد"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"دفتری پروفائل میں <xliff:g id="APP">%1$s</xliff:g> میں محفوظ کی گئی"</string>
-    <!-- no translation found for screenshot_private_profile_notification (1704440899154243171) -->
-    <skip />
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"نجی پروفائل میں <xliff:g id="APP">%1$s</xliff:g> میں محفوظ کیا گیا"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"فائلز"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"‫<xliff:g id="APPNAME">%1$s</xliff:g> نے اس اسکرین شاٹ کا پتا لگایا۔"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"‫<xliff:g id="APPNAME">%1$s</xliff:g> اور دیگر کھلی ایپس نے اس اسکرین شاٹ کا پتا لگایا۔"</string>
@@ -448,6 +447,8 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ویجٹس کو حسب ضرورت بنانے کے لیے لانگ پریس کریں"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ویجیٹس کو حسب ضرورت بنائیں"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"غیر فعال ویجیٹ کے لئے ایپ آئیکن"</string>
+    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"ویجیٹ میں ترمیم کریں"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ہٹائیں"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ویجیٹ شامل کریں"</string>
@@ -461,8 +462,9 @@
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"مقفل اسکرین پر ویجٹس بند کریں"</string>
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"ویجیٹس کو حسب ضرورت بنائیں"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"مقفل اسکرین پر ویجیٹس"</string>
-    <!-- no translation found for accessibility_action_label_select_widget (8897281501387398191) -->
-    <skip />
+    <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"ویجیٹ منتخب کریں"</string>
+    <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"ویجیٹ ہٹائیں"</string>
+    <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"منتخب ویجیٹ رکھیں"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"صارف سوئچ کریں"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"پل ڈاؤن مینیو"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"اس سیشن میں موجود سبھی ایپس اور ڈیٹا کو حذف کر دیا جائے گا۔"</string>
@@ -627,12 +629,17 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"آؤٹ پٹ کی ترتیبات درج کریں"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"والیوم سلائیڈرز کو پھیلا دیا گیا"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"والیوم سلائیڈرز سکیڑا گیا"</string>
-    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"‏%s خاموش کریں"</string>
-    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"‏%s غیر خاموش کریں"</string>
+    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> پر چل رہی ہے"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"آڈیو اس پر چلے گی"</string>
-    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
-    <skip />
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"کال کی جا رہی ہے"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"‏سسٹم UI ٹیونر"</string>
     <string name="status_bar" msgid="4357390266055077437">"اسٹیٹس بار"</string>
     <string name="demo_mode" msgid="263484519766901593">"‏سسٹم UI ڈیمو موڈ"</string>
@@ -660,8 +667,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"سیٹلائٹ، کنکشن خراب ہے"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"سیٹلائٹ، کنکشن اچھا ہے"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"سیٹلائٹ، کنکشن دستیاب ہے"</string>
-    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"‏سیٹلائٹ SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"دفتری پروفائل"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"کچھ کیلئے دلچسپ لیکن سبھی کیلئے نہیں"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"‏سسٹم UI ٹیونر Android صارف انٹر فیس میں ردوبدل کرنے اور اسے حسب ضرورت بنانے کیلئے آپ کو اضافی طریقے دیتا ہے۔ یہ تجرباتی خصوصیات مستقبل کی ریلیزز میں تبدیل ہو سکتی، رک سکتی یا غائب ہو سکتی ہیں۔ احتیاط کے ساتھ آگے بڑھیں۔"</string>
@@ -866,8 +872,7 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"ٹائل شامل کریں"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> میں منتقل کریں"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"پوزیشن <xliff:g id="POSITION">%1$d</xliff:g> میں شامل کریں"</string>
-    <!-- no translation found for accessibilit_qs_edit_tile_add_move_invalid_position (2858467994472624487) -->
-    <skip />
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"پوزیشن غلط ہے۔"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"پوزیشن <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"ٹائل کو شامل کیا گیا"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"ٹائل کو ہٹا دیا گیا"</string>

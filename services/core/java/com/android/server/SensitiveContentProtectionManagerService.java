@@ -27,6 +27,7 @@ import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_CONTENT_MEDI
 import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__START;
 import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_CONTENT_MEDIA_PROJECTION_SESSION__STATE__STOP;
 import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_NOTIFICATION_APP_PROTECTION_SESSION;
+import static com.android.server.wm.WindowManagerInternal.OnWindowRemovedListener;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -210,6 +211,12 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
                 }
             };
 
+    private final OnWindowRemovedListener mOnWindowRemovedListener = token -> {
+        synchronized (mSensitiveContentProtectionLock) {
+            mPackagesShowingSensitiveContent.removeIf(pkgInfo -> pkgInfo.getWindowToken() == token);
+        }
+    };
+
     public SensitiveContentProtectionManagerService(@NonNull Context context) {
         super(context);
         if (sensitiveNotificationAppProtection()) {
@@ -264,6 +271,10 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             } catch (RemoteException e) {
                 // Intra-process call, should never happen.
             }
+        }
+
+        if (sensitiveContentAppProtection()) {
+            mWindowManager.registerOnWindowRemovedListener(mOnWindowRemovedListener);
         }
     }
 

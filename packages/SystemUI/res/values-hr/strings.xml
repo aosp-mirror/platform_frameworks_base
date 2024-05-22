@@ -97,8 +97,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Lijevi rub <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Desni rub <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Spremljeno u aplikaciju <xliff:g id="APP">%1$s</xliff:g> u poslovnom profilu"</string>
-    <!-- no translation found for screenshot_private_profile_notification (1704440899154243171) -->
-    <skip />
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"Spremljeno u aplikaciju <xliff:g id="APP">%1$s</xliff:g> na privatnom profilu"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Datoteke"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"Aplikacija <xliff:g id="APPNAME">%1$s</xliff:g> otkrila je ovu snimku zaslona."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> i druge otvorene aplikacije otkrile su ovu snimku zaslona."</string>
@@ -370,8 +369,8 @@
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Srednji"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Visoki"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Slušna pomagala"</string>
-    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Slušni uređaji"</string>
-    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Uparivanje novog uređaja"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Slušna pomagala"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Uparite novi uređaj"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Kliknite da biste uparili novi uređaj"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Ažuriranje unaprijed definiranih postavki nije uspjelo"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Želite li deblokirati mikrofon uređaja?"</string>
@@ -448,6 +447,8 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Dugo pritisnite za prilagodbu widgeta"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Prilagodi widgete"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Ikona aplikacije za onemogućeni widget"</string>
+    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"Uredi widget"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Ukloni"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Dodaj widget"</string>
@@ -461,8 +462,9 @@
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"Zatvaranje widgeta na zaključanom zaslonu"</string>
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"Prilagodi widgete"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"Widgeti na zaključanom zaslonu"</string>
-    <!-- no translation found for accessibility_action_label_select_widget (8897281501387398191) -->
-    <skip />
+    <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"odaberi widget"</string>
+    <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"ukloni widget"</string>
+    <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"postavi odabrani widget"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Promjena korisnika"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"padajući izbornik"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Izbrisat će se sve aplikacije i podaci u ovoj sesiji."</string>
@@ -592,9 +594,9 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ne, hvala"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacija je prikvačena"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikacija je otkvačena"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Nazovi"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Poziv"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sustav"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Zvoni"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Zvonjenje"</string>
     <string name="stream_music" msgid="2188224742361847580">"Mediji"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarm"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Obavijest"</string>
@@ -627,12 +629,17 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"Unesite postavke izlaza"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"Proširivanje klizača za glasnoću"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"Sažimanje klizača za glasnoću"</string>
-    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"isključili zvuk za sljedeće: %s"</string>
-    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"uključili zvuk za sljedeće: %s"</string>
+    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> se reproducira na"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"Zvuk će se reproducirati na"</string>
-    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
-    <skip />
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"Pozivanje na uređaju"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Ugađanje korisničkog sučelja sustava"</string>
     <string name="status_bar" msgid="4357390266055077437">"Traka statusa"</string>
     <string name="demo_mode" msgid="263484519766901593">"Demo način korisničkog sučelja sustava"</string>
@@ -660,8 +667,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Satelit, slaba veza"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelit, dobra veza"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelit, veza je dostupna"</string>
-    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS putem satelita"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Poslovni profil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Zabava za neke, ali ne za sve"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Ugađanje korisničkog sučelja sustava pruža vam dodatne načine za prilagodbu korisničkog sučelja Androida. Te se eksperimentalne značajke mogu promijeniti, prekinuti ili nestati u budućim izdanjima. Nastavite uz oprez."</string>
@@ -866,8 +872,7 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Dodavanje kartice"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Premještanje u prostoriju <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Dodavanje na položaj <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <!-- no translation found for accessibilit_qs_edit_tile_add_move_invalid_position (2858467994472624487) -->
-    <skip />
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Položaj nije važeći."</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Položaj <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Kartica je dodana"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Kartica je uklonjena"</string>

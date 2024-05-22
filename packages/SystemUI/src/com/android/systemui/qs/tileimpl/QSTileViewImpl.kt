@@ -53,6 +53,7 @@ import com.android.settingslib.Utils
 import com.android.systemui.Flags
 import com.android.systemui.Flags.quickSettingsVisualHapticsLongpress
 import com.android.systemui.FontSizeUtils
+import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.LaunchableView
 import com.android.systemui.animation.LaunchableViewDelegate
 import com.android.systemui.haptics.qs.QSLongPressEffect
@@ -147,7 +148,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
      */
     protected var showRippleEffect = true
 
-    private lateinit var qsTileBackground: LayerDrawable
+    private lateinit var qsTileBackground: RippleDrawable
+    private lateinit var qsTileFocusBackground: Drawable
     private lateinit var backgroundDrawable: LayerDrawable
     private lateinit var backgroundBaseDrawable: Drawable
     private lateinit var backgroundOverlayDrawable: Drawable
@@ -185,7 +187,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private val locInScreen = IntArray(2)
 
     /** Visuo-haptic long-press effects */
-    private var haveLongPressPropertiesBeenReset = true
+    var haveLongPressPropertiesBeenReset = true
+        private set
     private var paddingForLaunch = Rect()
     private var initialLongPressProperties: QSLongPressProperties? = null
     private var finalLongPressProperties: QSLongPressProperties? = null
@@ -311,10 +314,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     private fun createTileBackground(): Drawable {
         qsTileBackground = if (Flags.qsTileFocusState()) {
-            mContext.getDrawable(R.drawable.qs_tile_background_flagged) as LayerDrawable
+            mContext.getDrawable(R.drawable.qs_tile_background_flagged) as RippleDrawable
         } else {
             mContext.getDrawable(R.drawable.qs_tile_background) as RippleDrawable
         }
+        qsTileFocusBackground = mContext.getDrawable(R.drawable.qs_tile_focused_background)!!
         backgroundDrawable =
             qsTileBackground.findDrawableByLayerId(R.id.background) as LayerDrawable
         backgroundBaseDrawable =
@@ -330,6 +334,17 @@ open class QSTileViewImpl @JvmOverloads constructor(
         updateHeight()
     }
 
+    override fun onFocusChanged(gainFocus: Boolean, direction: Int, previouslyFocusedRect: Rect?) {
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect)
+        if (Flags.qsTileFocusState()) {
+            if (gainFocus) {
+                qsTileFocusBackground.setBounds(0, 0, width, height)
+                overlay.add(qsTileFocusBackground)
+            } else {
+                overlay.clear()
+            }
+        }
+    }
     private fun updateHeight() {
         // TODO(b/332900989): Find a more robust way of resetting the tile if not reset by the
         //  launch animation.
@@ -364,10 +379,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     override fun init(tile: QSTile) {
+        val expandable = Expandable.fromView(this)
         init(
-                { v: View? -> tile.click(this) },
-                { view: View? ->
-                    tile.longClick(this)
+                { _: View? -> tile.click(expandable) },
+                { _: View? ->
+                    tile.longClick(expandable)
                     true
                 }
         )
@@ -770,7 +786,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
         }
     }
 
-    override fun onActivityLaunchAnimationEnd() = resetLongPressEffectProperties()
+    override fun onActivityLaunchAnimationEnd() {
+        if (longPressEffect != null && !haveLongPressPropertiesBeenReset) {
+            resetLongPressEffectProperties()
+        }
+    }
 
     fun prepareForLaunch() {
         val startingHeight = initialLongPressProperties?.height?.toInt() ?: 0
@@ -875,8 +895,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
         background.updateBounds(
             left = 0,
             top = 0,
-            right = initialLongPressProperties?.width?.toInt() ?: 0,
-            bottom = initialLongPressProperties?.height?.toInt() ?: 0,
+            right = initialLongPressProperties?.width?.toInt() ?: measuredWidth,
+            bottom = initialLongPressProperties?.height?.toInt() ?: measuredHeight,
         )
         changeCornerRadius(resources.getDimensionPixelSize(R.dimen.qs_corner_radius).toFloat())
         setAllColors(

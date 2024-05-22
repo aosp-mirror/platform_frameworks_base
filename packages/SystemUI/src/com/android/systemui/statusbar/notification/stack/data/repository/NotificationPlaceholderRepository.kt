@@ -38,16 +38,6 @@ class NotificationPlaceholderRepository @Inject constructor() {
      */
     val shadeScrimBounds = MutableStateFlow<ShadeScrimBounds?>(null)
 
-    /**
-     * The y-coordinate in px of top of the contents of the notification stack. This value can be
-     * negative, if the stack is scrolled such that its top extends beyond the top edge of the
-     * screen.
-     */
-    val stackTop = MutableStateFlow(0f)
-
-    /** the bottom-most acceptable y-position for the bottom of the stack / shelf */
-    val stackBottom = MutableStateFlow(0f)
-
     /** the y position of the top of the HUN area */
     val headsUpTop = MutableStateFlow(0f)
 

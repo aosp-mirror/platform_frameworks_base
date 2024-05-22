@@ -262,6 +262,7 @@ $(call add-clean-step, rm -rf $(SOONG_OUT_DIR)/.intermediates/frameworks/base/li
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/priv-app/InProcessTethering)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/app/OsuLogin)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system_other/system/app/OsuLogin)
+$(call add-clean-step, rm -rf $(OUT_DIR)/host/linux-x86/testcases/ravenwood-runtime)
 # ******************************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER
 # ******************************************************************

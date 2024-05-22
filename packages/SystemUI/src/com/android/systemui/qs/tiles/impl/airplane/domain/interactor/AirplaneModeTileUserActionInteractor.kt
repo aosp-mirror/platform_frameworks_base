@@ -45,7 +45,7 @@ constructor(
                         }
                         AirplaneModeInteractor.SetResult.BLOCKED_BY_ECM -> {
                             qsTileIntentUserActionHandler.handle(
-                                action.view,
+                                action.expandable,
                                 Intent(TelephonyManager.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS),
                             )
                         }
@@ -53,7 +53,7 @@ constructor(
                 }
                 is QSTileUserAction.LongClick -> {
                     qsTileIntentUserActionHandler.handle(
-                        action.view,
+                        action.expandable,
                         Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS)
                     )
                 }

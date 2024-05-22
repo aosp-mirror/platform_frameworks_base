@@ -36,25 +36,6 @@ static const uint32_t sGradientShaderFlags = SkGradientShader::kInterpolateColor
         return 0;                   \
     }
 
-static void Color_RGBToHSV(JNIEnv* env, jobject, jint red, jint green, jint blue, jfloatArray hsvArray)
-{
-    SkScalar hsv[3];
-    SkRGBToHSV(red, green, blue, hsv);
-
-    AutoJavaFloatArray  autoHSV(env, hsvArray, 3);
-    float* values = autoHSV.ptr();
-    for (int i = 0; i < 3; i++) {
-        values[i] = SkScalarToFloat(hsv[i]);
-    }
-}
-
-static jint Color_HSVToColor(JNIEnv* env, jobject, jint alpha, jfloatArray hsvArray)
-{
-    AutoJavaFloatArray  autoHSV(env, hsvArray, 3);
-    SkScalar* hsv = autoHSV.ptr();
-    return static_cast<jint>(SkHSVToColor(alpha, hsv));
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 static void Shader_safeUnref(SkShader* shader) {
@@ -409,11 +390,6 @@ static void RuntimeShader_updateShader(JNIEnv* env, jobject, jlong shaderBuilder
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static const JNINativeMethod gColorMethods[] = {
-    { "nativeRGBToHSV",    "(III[F)V", (void*)Color_RGBToHSV   },
-    { "nativeHSVToColor",  "(I[F)I",   (void*)Color_HSVToColor }
-};
-
 static const JNINativeMethod gShaderMethods[] = {
     { "nativeGetFinalizer",   "()J",    (void*)Shader_getNativeFinalizer },
 };
@@ -456,8 +432,6 @@ static const JNINativeMethod gRuntimeShaderMethods[] = {
 
 int register_android_graphics_Shader(JNIEnv* env)
 {
-    android::RegisterMethodsOrDie(env, "android/graphics/Color", gColorMethods,
-                                  NELEM(gColorMethods));
     android::RegisterMethodsOrDie(env, "android/graphics/Shader", gShaderMethods,
                                   NELEM(gShaderMethods));
     android::RegisterMethodsOrDie(env, "android/graphics/BitmapShader", gBitmapShaderMethods,

@@ -47,3 +47,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+  name: "messaging_child_request_layout"
+  namespace: "systemui"
+  description: "MessagingChild always needs to be measured during MessagingLinearLayout onMeasure."
+  bug: "324537506"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

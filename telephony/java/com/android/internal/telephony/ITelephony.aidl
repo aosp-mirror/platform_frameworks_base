@@ -1399,19 +1399,18 @@ interface ITelephony {
     oneway void requestModemActivityInfo(in ResultReceiver result);
 
     /**
-     * Get the service state on specified subscription
-     * @param subId Subscription id
+     * Get the service state on specified SIM slot.
+     * @param slotIndex of phone whose service state is returned
      * @param renounceFineLocationAccess Set this to true if the caller would not like to
      * receive fine location related information
      * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
      * receive coarse location related information
      * @param callingPackage The package making the call
      * @param callingFeatureId The feature in the package
-     * @return Service state on specified subscription.
+     * @return Service state on specified SIM slot.
      */
-    ServiceState getServiceStateForSubscriber(int subId, boolean renounceFineLocationAccess,
-            boolean renounceCoarseLocationAccess,
-            String callingPackage, String callingFeatureId);
+    ServiceState getServiceStateForSlot(int slotIndex, boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess, String callingPackage, String callingFeatureId);
 
     /**
      * Returns the URI for the per-account voicemail ringtone set in Phone settings.
@@ -3373,4 +3372,13 @@ interface ITelephony {
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void unregisterForCommunicationAllowedStateChanged(int subId,
             in ISatelliteCommunicationAllowedStateCallback callback);
+
+    /**
+     * This API can be used by only CTS to override the boolean configs used by the
+     * DatagramController module.
+     *
+     * @param enable Whether to enable boolean config.
+     * @return {@code true} if the boolean config is set successfully, {@code false} otherwise.
+     */
+    boolean setDatagramControllerBooleanConfig(boolean reset, int booleanType, boolean enable);
 }

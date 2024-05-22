@@ -1168,6 +1168,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return null;
     }
 
+    @GuardedBy("mLock")
     @Nullable
     private AutofillValue findValueFromThisSessionOnlyLocked(@NonNull AutofillId autofillId) {
         final ViewState state = mViewStates.get(autofillId);
@@ -1176,9 +1177,25 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return null;
         }
         AutofillValue value = state.getCurrentValue();
+
+        // Some app clears the form before navigating to another activities. In this case, use the
+        // cached value instead.
+        if (value == null || value.isEmpty()) {
+            AutofillValue candidateSaveValue = state.getCandidateSaveValue();
+            if (candidateSaveValue != null && !candidateSaveValue.isEmpty()) {
+                if (sDebug) {
+                    Slog.d(TAG, "findValueLocked(): current value for " + autofillId
+                            + " is empty, using candidateSaveValue instead.");
+                }
+                return candidateSaveValue;
+            }
+        }
         if (value == null) {
-            if (sDebug) Slog.d(TAG, "findValueLocked(): no current value for " + autofillId);
-            value = getValueFromContextsLocked(autofillId);
+            if (sDebug) {
+                Slog.d(TAG, "findValueLocked(): no current value for " + autofillId
+                        + ", checking value from previous fill contexts");
+                value = getValueFromContextsLocked(autofillId);
+            }
         }
         return value;
     }
@@ -1336,8 +1353,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mPresentationStatsEventLogger.maybeSetIsCredentialRequest(isCredmanRequested);
         mPresentationStatsEventLogger.maybeSetFieldClassificationRequestId(
                 mFieldClassificationIdSnapshot);
+        mPresentationStatsEventLogger.maybeSetAutofillServiceUid(getAutofillServiceUid());
         mFillRequestEventLogger.maybeSetRequestId(requestId);
         mFillRequestEventLogger.maybeSetAutofillServiceUid(getAutofillServiceUid());
+        mSaveEventLogger.maybeSetAutofillServiceUid(getAutofillServiceUid());
+        mSessionCommittedEventLogger.maybeSetAutofillServiceUid(getAutofillServiceUid());
         if (mSessionFlags.mInlineSupportedByService) {
             mFillRequestEventLogger.maybeSetInlineSuggestionHostUid(mContext, userId);
         }
@@ -1493,10 +1513,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         mCredentialAutofillService = getCredentialAutofillService(context);
 
-        ComponentName primaryServiceComponentName, secondaryServiceComponentName;
+        ComponentName primaryServiceComponentName, secondaryServiceComponentName = null;
         if (isPrimaryCredential) {
             primaryServiceComponentName = mCredentialAutofillService;
-            secondaryServiceComponentName = serviceComponentName;
+            if (serviceComponentName != null
+                    && !serviceComponentName.equals(mCredentialAutofillService)) {
+                // if service component name is credential autofill service, no need to initialize
+                // secondary provider. This happens if the user sets non-autofill provider as
+                // password provider.
+                secondaryServiceComponentName = serviceComponentName;
+            }
         } else {
             primaryServiceComponentName = serviceComponentName;
             secondaryServiceComponentName = mCredentialAutofillService;
@@ -1531,7 +1557,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mFillResponseEventLogger = FillResponseEventLogger.forSessionId(sessionId);
         mSessionCommittedEventLogger = SessionCommittedEventLogger.forSessionId(sessionId);
         mSessionCommittedEventLogger.maybeSetComponentPackageUid(uid);
-        mSaveEventLogger = SaveEventLogger.forSessionId(sessionId);
+        mSaveEventLogger = SaveEventLogger.forSessionId(sessionId, mLatencyBaseTime);
         mIsPrimaryCredential = isPrimaryCredential;
         mIgnoreViewStateResetToEmpty = AutofillFeatureFlags.shouldIgnoreViewStateResetToEmpty();
 
@@ -2440,9 +2466,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mSessionFlags.mShowingSaveUi = false;
             // Log onSaveRequest result.
             mSaveEventLogger.maybeSetIsSaved(true);
-            final long saveRequestFinishTimestamp =
-                SystemClock.elapsedRealtime() - mLatencyBaseTime;
-            mSaveEventLogger.maybeSetLatencySaveFinishMillis(saveRequestFinishTimestamp);
+            mSaveEventLogger.maybeSetLatencySaveFinishMillis();
             mSaveEventLogger.logAndEndEvent();
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onSaveRequestSuccess() rejected - session: "
@@ -2473,9 +2497,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         synchronized (mLock) {
             mSessionFlags.mShowingSaveUi = false;
             // Log onSaveRequest result.
-            final long saveRequestFinishTimestamp =
-                SystemClock.elapsedRealtime() - mLatencyBaseTime;
-            mSaveEventLogger.maybeSetLatencySaveFinishMillis(saveRequestFinishTimestamp);
+            mSaveEventLogger.maybeSetLatencySaveFinishMillis();
             mSaveEventLogger.logAndEndEvent();
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onSaveRequestFailure() rejected - session: "
@@ -2621,8 +2643,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
         }
-        final long saveRequestStartTimestamp = SystemClock.elapsedRealtime() - mLatencyBaseTime;
-        mSaveEventLogger.maybeSetLatencySaveRequestMillis(saveRequestStartTimestamp);
+        mSaveEventLogger.maybeSetLatencySaveRequestMillis();
         mHandler.sendMessage(obtainMessage(
                 AutofillManagerServiceImpl::handleSessionSave,
                 mService, this));
@@ -3713,19 +3734,34 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 AutofillValue value = viewState.getCurrentValue();
                 if (value == null || value.isEmpty()) {
-                    final AutofillValue initialValue = getValueFromContextsLocked(id);
-                    if (initialValue != null) {
-                        if (sDebug) {
-                            Slog.d(TAG, "Value of required field " + id + " didn't change; "
-                                    + "using initial value (" + initialValue + ") instead");
+                    // Some apps clear the form before navigating to other activities.
+                    // If current value is empty, consider fall back to last cached
+                    // non-empty result first.
+                    final AutofillValue candidateSaveValue =
+                            viewState.getCandidateSaveValue();
+                    if (candidateSaveValue != null && !candidateSaveValue.isEmpty()) {
+                        if (sVerbose) {
+                            Slog.v(TAG, "current value is empty, using cached last non-empty "
+                                    + "value instead");
                         }
-                        value = initialValue;
+                        value = candidateSaveValue;
                     } else {
-                        if (sDebug) {
-                            Slog.d(TAG, "empty value for required " + id );
+                        // If candidate save value is also empty, consider falling back to initial
+                        // value in context.
+                        final AutofillValue initialValue = getValueFromContextsLocked(id);
+                        if (initialValue != null) {
+                            if (sDebug) {
+                                Slog.d(TAG, "Value of required field " + id + " didn't change; "
+                                        + "using initial value (" + initialValue + ") instead");
+                            }
+                            value = initialValue;
+                        } else {
+                            if (sDebug) {
+                                Slog.d(TAG, "empty value for required " + id);
+                            }
+                            allRequiredAreNotEmpty = false;
+                            break;
                         }
-                        allRequiredAreNotEmpty = false;
-                        break;
                     }
                 }
 
@@ -3797,7 +3833,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         continue;
                     }
                     if ((viewState.getState() & ViewState.STATE_CHANGED) != 0) {
-                        final AutofillValue currentValue = viewState.getCurrentValue();
+                        AutofillValue currentValue = viewState.getCurrentValue();
+                        if (currentValue == null || currentValue.isEmpty()) {
+                            // Some apps clear the form before navigating to other activities.
+                            // If current value is empty, consider fall back to last cached
+                            // non-empty result instead.
+                            final AutofillValue candidateSaveValue =
+                                    viewState.getCandidateSaveValue();
+                            if (candidateSaveValue != null && !candidateSaveValue.isEmpty()) {
+                                if (sVerbose) {
+                                    Slog.v(TAG, "current value is empty, using cached last "
+                                            + "non-empty value instead");
+                                }
+                                currentValue = candidateSaveValue;
+                            }
+                        }
                         final AutofillValue value = getSanitizedValue(sanitizers, id, currentValue);
                         if (value == null) {
                             if (sDebug) {
@@ -3931,13 +3981,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
                             Event.NO_SAVE_UI_REASON_NONE);
                 }
-                final long saveUiDisplayStartTimestamp = SystemClock.elapsedRealtime();
                 getUiForShowing().showSaveUi(serviceLabel, serviceIcon,
                         mService.getServicePackageName(), saveInfo, this,
                         mComponentName, this, mContext,  mPendingSaveUi, isUpdate, mCompatMode,
                         response.getShowSaveDialogIcon(), mSaveEventLogger);
-                mSaveEventLogger.maybeSetLatencySaveUiDisplayMillis(
-                    SystemClock.elapsedRealtime()- saveUiDisplayStartTimestamp);
                 if (client != null) {
                     try {
                         client.setSaveUiState(id, true);
@@ -4668,6 +4715,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mFieldClassificationIdSnapshot);
         mPresentationStatsEventLogger.maybeSetAvailableCount(
                 response.getDatasets(), mCurrentViewId);
+        mPresentationStatsEventLogger.maybeSetFocusedId(mCurrentViewId);
     }
 
     @GuardedBy("mLock")
@@ -4712,14 +4760,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private void updateViewStateAndUiOnValueChangedLocked(AutofillId id, AutofillValue value,
             ViewState viewState, int flags) {
+        // Cache the last non-empty value for save purpose. Some apps clear the form before
+        // navigating to other activities.
         if (mIgnoreViewStateResetToEmpty && (value == null || value.isEmpty())
                 && viewState.getCurrentValue() != null && viewState.getCurrentValue().isText()
                 && viewState.getCurrentValue().getTextValue() != null
                 && viewState.getCurrentValue().getTextValue().length() > 1) {
             if (sVerbose) {
-                Slog.v(TAG, "Ignoring view state reset to empty on id " + id);
+                Slog.v(TAG, "value is resetting to empty, caching the last non-empty value");
             }
-            return;
+            viewState.setCandidateSaveValue(viewState.getCurrentValue());
+        } else {
+            viewState.setCandidateSaveValue(null);
         }
         final String textValue;
         if (value == null || !value.isText()) {
@@ -5380,7 +5432,20 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
         mPresentationStatsEventLogger.maybeSetViewFillFailureCounts(ids.size());
-        mPresentationStatsEventLogger.logAndEndEvent();
+    }
+
+    /**
+     * Sets the state of views that failed to autofill.
+     */
+    @GuardedBy("mLock")
+    void setViewAutofilled(@NonNull AutofillId id) {
+        if (sVerbose) {
+            Slog.v(TAG, "View autofilled: " + id);
+        }
+        if (id.getSessionId() == AutofillId.NO_SESSION) {
+            id.setSessionId(this.id);
+        }
+        mPresentationStatsEventLogger.maybeAddSuccessId(id);
     }
 
     @GuardedBy("mLock")
@@ -6588,7 +6653,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     if (sVerbose) {
                         Slog.v(TAG, "Total views to be autofilled: " + ids.size());
                     }
-                    mPresentationStatsEventLogger.maybeSetViewFillableCounts(ids.size());
+                    mPresentationStatsEventLogger.maybeSetViewFillablesAndCount(ids);
                     if (sDebug) Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
                     mClient.autofill(id, ids, values, hideHighlight);
                     if (dataset.getId() != null) {

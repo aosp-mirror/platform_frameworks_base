@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.PlatformSlider
 import com.android.systemui.brightness.shared.GammaBrightness
 import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel
@@ -107,10 +107,13 @@ fun BrightnessSliderContainer(
     viewModel: BrightnessSliderViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val gamma: Int by viewModel.currentBrightness.map { it.value }.collectAsState(initial = 0)
+    val gamma: Int by
+        viewModel.currentBrightness.map { it.value }.collectAsStateWithLifecycle(initialValue = 0)
     val coroutineScope = rememberCoroutineScope()
     val restriction by
-        viewModel.policyRestriction.collectAsState(initial = PolicyRestriction.NoRestriction)
+        viewModel.policyRestriction.collectAsStateWithLifecycle(
+            initialValue = PolicyRestriction.NoRestriction
+        )
 
     BrightnessSlider(
         gammaValue = gamma,

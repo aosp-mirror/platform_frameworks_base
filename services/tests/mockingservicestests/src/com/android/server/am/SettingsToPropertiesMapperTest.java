@@ -273,10 +273,8 @@ public class SettingsToPropertiesMapperTest {
     keyValueMap.put("namespace_1*flag_1", "true");
     // case 2: existing prop, stage a different value
     keyValueMap.put("namespace_1*flag_2", "false");
-    // case 3: new prop, stage the non default value
+    // case 3: new prop
     keyValueMap.put("namespace_2*flag_1", "true");
-    // case 4: new prop, stage the default value
-    keyValueMap.put("namespace_2*flag_2", "false");
     Properties props = new Properties(namespace, keyValueMap);
 
     HashMap<String, HashMap<String, String>> toStageProps =
@@ -290,11 +288,9 @@ public class SettingsToPropertiesMapperTest {
     String namespace_1_flag_1 = namespace_1_to_stage.get("flag_1");
     String namespace_1_flag_2 = namespace_1_to_stage.get("flag_2");
     String namespace_2_flag_1 = namespace_2_to_stage.get("flag_1");
-    String namespace_2_flag_2 = namespace_2_to_stage.get("flag_2");
     Assert.assertTrue(namespace_1_flag_1 == null);
     Assert.assertTrue(namespace_1_flag_2 != null);
     Assert.assertTrue(namespace_2_flag_1 != null);
-    Assert.assertTrue(namespace_2_flag_2 == null);
     Assert.assertTrue(namespace_1_flag_2.equals("false"));
     Assert.assertTrue(namespace_2_flag_1.equals("true"));
   }

@@ -65,7 +65,7 @@ oneway interface IOverviewProxy {
     /**
      * Sent when some system ui state changes.
      */
-    void onSystemUiStateChanged(int stateFlags) = 16;
+    void onSystemUiStateChanged(long stateFlags) = 16;
 
     /**
      * Sent when suggested rotation button could be shown

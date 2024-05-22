@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <com_android_input_flags.h>
 #include <flag_macros.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -29,8 +28,6 @@
 #include "mocks/MockSpriteController.h"
 
 namespace android {
-
-namespace input_flags = com::android::input::flags;
 
 enum TestCursorType {
     CURSOR_TYPE_DEFAULT = 0,
@@ -55,20 +52,19 @@ std::pair<float, float> getHotSpotCoordinatesForType(int32_t type) {
 
 class MockPointerControllerPolicyInterface : public PointerControllerPolicyInterface {
 public:
-    virtual void loadPointerIcon(SpriteIcon* icon, int32_t displayId) override;
-    virtual void loadPointerResources(PointerResources* outResources, int32_t displayId) override;
+    virtual void loadPointerIcon(SpriteIcon* icon, ui::LogicalDisplayId displayId) override;
+    virtual void loadPointerResources(PointerResources* outResources,
+                                      ui::LogicalDisplayId displayId) override;
     virtual void loadAdditionalMouseResources(
             std::map<PointerIconStyle, SpriteIcon>* outResources,
             std::map<PointerIconStyle, PointerAnimation>* outAnimationResources,
-            int32_t displayId) override;
+            ui::LogicalDisplayId displayId) override;
     virtual PointerIconStyle getDefaultPointerIconId() override;
     virtual PointerIconStyle getDefaultStylusIconId() override;
     virtual PointerIconStyle getCustomPointerIconId() override;
-    virtual void onPointerDisplayIdChanged(int32_t displayId, const FloatPoint& position) override;
 
     bool allResourcesAreLoaded();
     bool noResourcesAreLoaded();
-    std::optional<int32_t> getLastReportedPointerDisplayId() { return latestPointerDisplayId; }
 
 private:
     void loadPointerIconForType(SpriteIcon* icon, int32_t cursorType);
@@ -76,16 +72,15 @@ private:
     bool pointerIconLoaded{false};
     bool pointerResourcesLoaded{false};
     bool additionalMouseResourcesLoaded{false};
-    std::optional<int32_t /*displayId*/> latestPointerDisplayId;
 };
 
-void MockPointerControllerPolicyInterface::loadPointerIcon(SpriteIcon* icon, int32_t) {
+void MockPointerControllerPolicyInterface::loadPointerIcon(SpriteIcon* icon, ui::LogicalDisplayId) {
     loadPointerIconForType(icon, CURSOR_TYPE_DEFAULT);
     pointerIconLoaded = true;
 }
 
 void MockPointerControllerPolicyInterface::loadPointerResources(PointerResources* outResources,
-        int32_t) {
+                                                                ui::LogicalDisplayId) {
     loadPointerIconForType(&outResources->spotHover, CURSOR_TYPE_HOVER);
     loadPointerIconForType(&outResources->spotTouch, CURSOR_TYPE_TOUCH);
     loadPointerIconForType(&outResources->spotAnchor, CURSOR_TYPE_ANCHOR);
@@ -94,7 +89,7 @@ void MockPointerControllerPolicyInterface::loadPointerResources(PointerResources
 
 void MockPointerControllerPolicyInterface::loadAdditionalMouseResources(
         std::map<PointerIconStyle, SpriteIcon>* outResources,
-        std::map<PointerIconStyle, PointerAnimation>* outAnimationResources, int32_t) {
+        std::map<PointerIconStyle, PointerAnimation>* outAnimationResources, ui::LogicalDisplayId) {
     SpriteIcon icon;
     PointerAnimation anim;
 
@@ -146,12 +141,6 @@ void MockPointerControllerPolicyInterface::loadPointerIconForType(SpriteIcon* ic
     icon->hotSpotY = hotSpot.second;
 }
 
-void MockPointerControllerPolicyInterface::onPointerDisplayIdChanged(int32_t displayId,
-                                                                     const FloatPoint& /*position*/
-) {
-    latestPointerDisplayId = displayId;
-}
-
 class TestPointerController : public PointerController {
 public:
     TestPointerController(sp<android::gui::WindowInfosListener>& registeredListener,
@@ -159,7 +148,6 @@ public:
                           SpriteController& spriteController)
           : PointerController(
                     policy, looper, spriteController,
-                    /*enabled=*/true,
                     [&registeredListener](const sp<android::gui::WindowInfosListener>& listener)
                             -> std::vector<gui::DisplayInfo> {
                         // Register listener
@@ -178,7 +166,7 @@ protected:
     PointerControllerTest();
     ~PointerControllerTest();
 
-    void ensureDisplayViewportIsSet(int32_t displayId = ADISPLAY_ID_DEFAULT);
+    void ensureDisplayViewportIsSet(ui::LogicalDisplayId displayId = ui::LogicalDisplayId::DEFAULT);
 
     sp<MockSprite> mPointerSprite;
     sp<MockPointerControllerPolicyInterface> mPolicy;
@@ -217,7 +205,7 @@ PointerControllerTest::~PointerControllerTest() {
     mThread.join();
 }
 
-void PointerControllerTest::ensureDisplayViewportIsSet(int32_t displayId) {
+void PointerControllerTest::ensureDisplayViewportIsSet(ui::LogicalDisplayId displayId) {
     DisplayViewport viewport;
     viewport.displayId = displayId;
     viewport.logicalRight = 1600;
@@ -267,8 +255,7 @@ TEST_F(PointerControllerTest, useStylusTypeForStylusHover) {
     mPointerController->reloadPointerResources();
 }
 
-TEST_F_WITH_FLAGS(PointerControllerTest, setPresentationBeforeDisplayViewportDoesNotLoadResources,
-                  REQUIRES_FLAGS_ENABLED(ACONFIG_FLAG(input_flags, enable_pointer_choreographer))) {
+TEST_F(PointerControllerTest, setPresentationBeforeDisplayViewportDoesNotLoadResources) {
     // Setting the presentation mode before a display viewport is set will not load any resources.
     mPointerController->setPresentation(PointerController::Presentation::POINTER);
     ASSERT_TRUE(mPolicy->noResourcesAreLoaded());
@@ -278,26 +265,7 @@ TEST_F_WITH_FLAGS(PointerControllerTest, setPresentationBeforeDisplayViewportDoe
     ASSERT_TRUE(mPolicy->allResourcesAreLoaded());
 }
 
-TEST_F_WITH_FLAGS(PointerControllerTest, updatePointerIcon,
-                  REQUIRES_FLAGS_DISABLED(ACONFIG_FLAG(input_flags,
-                                                       enable_pointer_choreographer))) {
-    ensureDisplayViewportIsSet();
-    mPointerController->setPresentation(PointerController::Presentation::POINTER);
-    mPointerController->unfade(PointerController::Transition::IMMEDIATE);
-
-    int32_t type = CURSOR_TYPE_ADDITIONAL;
-    std::pair<float, float> hotspot = getHotSpotCoordinatesForType(type);
-    EXPECT_CALL(*mPointerSprite, setVisible(true));
-    EXPECT_CALL(*mPointerSprite, setAlpha(1.0f));
-    EXPECT_CALL(*mPointerSprite,
-                setIcon(AllOf(Field(&SpriteIcon::style, static_cast<PointerIconStyle>(type)),
-                              Field(&SpriteIcon::hotSpotX, hotspot.first),
-                              Field(&SpriteIcon::hotSpotY, hotspot.second))));
-    mPointerController->updatePointerIcon(static_cast<PointerIconStyle>(type));
-}
-
-TEST_F_WITH_FLAGS(PointerControllerTest, updatePointerIconWithChoreographer,
-                  REQUIRES_FLAGS_ENABLED(ACONFIG_FLAG(input_flags, enable_pointer_choreographer))) {
+TEST_F(PointerControllerTest, updatePointerIconWithChoreographer) {
     // When PointerChoreographer is enabled, the presentation mode is set before the viewport.
     mPointerController->setPresentation(PointerController::Presentation::POINTER);
     ensureDisplayViewportIsSet();
@@ -348,28 +316,43 @@ TEST_F(PointerControllerTest, doesNotGetResourcesBeforeSettingViewport) {
     ensureDisplayViewportIsSet();
 }
 
-TEST_F(PointerControllerTest, notifiesPolicyWhenPointerDisplayChanges) {
-    EXPECT_FALSE(mPolicy->getLastReportedPointerDisplayId())
-            << "A pointer display change does not occur when PointerController is created.";
+TEST_F(PointerControllerTest, updatesSkipScreenshotFlagForTouchSpots) {
+    ensureDisplayViewportIsSet();
 
-    ensureDisplayViewportIsSet(ADISPLAY_ID_DEFAULT);
+    PointerCoords testSpotCoords;
+    testSpotCoords.clear();
+    testSpotCoords.setAxisValue(AMOTION_EVENT_AXIS_X, 1);
+    testSpotCoords.setAxisValue(AMOTION_EVENT_AXIS_Y, 1);
+    BitSet32 testIdBits;
+    testIdBits.markBit(0);
+    std::array<uint32_t, MAX_POINTER_ID + 1> testIdToIndex;
 
-    const auto lastReportedPointerDisplayId = mPolicy->getLastReportedPointerDisplayId();
-    ASSERT_TRUE(lastReportedPointerDisplayId)
-            << "The policy is notified of a pointer display change when the viewport is first set.";
-    EXPECT_EQ(ADISPLAY_ID_DEFAULT, *lastReportedPointerDisplayId)
-            << "Incorrect pointer display notified.";
+    sp<MockSprite> testSpotSprite(new NiceMock<MockSprite>);
 
-    ensureDisplayViewportIsSet(42);
+    // By default sprite is not marked secure
+    EXPECT_CALL(*mSpriteController, createSprite).WillOnce(Return(testSpotSprite));
+    EXPECT_CALL(*testSpotSprite, setSkipScreenshot).With(testing::Args<0>(false));
 
-    EXPECT_EQ(42, *mPolicy->getLastReportedPointerDisplayId())
-            << "The policy is notified when the pointer display changes.";
+    // Update spots to sync state with sprite
+    mPointerController->setSpots(&testSpotCoords, testIdToIndex.cbegin(), testIdBits,
+                                 ui::LogicalDisplayId::DEFAULT);
+    testing::Mock::VerifyAndClearExpectations(testSpotSprite.get());
 
-    // Release the PointerController.
-    mPointerController = nullptr;
+    // Marking the display to skip screenshot should update sprite as well
+    mPointerController->setSkipScreenshot(ui::LogicalDisplayId::DEFAULT, true);
+    EXPECT_CALL(*testSpotSprite, setSkipScreenshot).With(testing::Args<0>(true));
 
-    EXPECT_EQ(ADISPLAY_ID_NONE, *mPolicy->getLastReportedPointerDisplayId())
-            << "The pointer display changes to invalid when PointerController is destroyed.";
+    // Update spots to sync state with sprite
+    mPointerController->setSpots(&testSpotCoords, testIdToIndex.cbegin(), testIdBits,
+                                 ui::LogicalDisplayId::DEFAULT);
+    testing::Mock::VerifyAndClearExpectations(testSpotSprite.get());
+
+    // Reset flag and verify again
+    mPointerController->setSkipScreenshot(ui::LogicalDisplayId::DEFAULT, false);
+    EXPECT_CALL(*testSpotSprite, setSkipScreenshot).With(testing::Args<0>(false));
+    mPointerController->setSpots(&testSpotCoords, testIdToIndex.cbegin(), testIdBits,
+                                 ui::LogicalDisplayId::DEFAULT);
+    testing::Mock::VerifyAndClearExpectations(testSpotSprite.get());
 }
 
 class PointerControllerWindowInfoListenerTest : public Test {};

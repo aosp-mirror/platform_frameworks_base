@@ -260,7 +260,7 @@ final class LetterboxUiController {
     // Whether activity "refresh" was requested but not finished in
     // ActivityRecord#activityResumedLocked following the camera compat force rotation in
     // DisplayRotationCompatPolicy.
-    private boolean mIsRefreshAfterRotationRequested;
+    private boolean mIsRefreshRequested;
 
     @NonNull
     private final OptProp mIgnoreRequestedOrientationOptProp;
@@ -571,15 +571,14 @@ final class LetterboxUiController {
     }
 
     /**
-     * Whether activity "refresh" was requested but not finished in {@link #activityResumedLocked}
-     * following the camera compat force rotation in {@link DisplayRotationCompatPolicy}.
+     * Whether activity "refresh" was requested but not finished in {@link #activityResumedLocked}.
      */
-    boolean isRefreshAfterRotationRequested() {
-        return mIsRefreshAfterRotationRequested;
+    boolean isRefreshRequested() {
+        return mIsRefreshRequested;
     }
 
-    void setIsRefreshAfterRotationRequested(boolean isRequested) {
-        mIsRefreshAfterRotationRequested = isRequested;
+    void setIsRefreshRequested(boolean isRequested) {
+        mIsRefreshRequested = isRequested;
     }
 
     boolean isOverrideRespectRequestedOrientationEnabled() {
@@ -989,6 +988,10 @@ final class LetterboxUiController {
         }
     }
 
+    boolean isLetterboxEducationEnabled() {
+        return mLetterboxConfiguration.getIsEducationEnabled();
+    }
+
     /**
      * Whether we use split screen aspect ratio for the activity when camera compat treatment
      * is active because the corresponding config is enabled and activity supports resizing.
@@ -1022,6 +1025,67 @@ final class LetterboxUiController {
         }
 
         return getSplitScreenAspectRatio();
+    }
+
+    /**
+     * @return {@value true} if the resulting app is letterboxed in a way defined as thin.
+     */
+    boolean isVerticalThinLetterboxed() {
+        final int thinHeight = mLetterboxConfiguration.getThinLetterboxHeightPx();
+        if (thinHeight < 0) {
+            return false;
+        }
+        final Task task = mActivityRecord.getTask();
+        if (task == null) {
+            return false;
+        }
+        final int padding = Math.abs(
+                task.getBounds().height() - mActivityRecord.getBounds().height()) / 2;
+        return padding <= thinHeight;
+    }
+
+    /**
+     * @return {@value true} if the resulting app is pillarboxed in a way defined as thin.
+     */
+    boolean isHorizontalThinLetterboxed() {
+        final int thinWidth = mLetterboxConfiguration.getThinLetterboxWidthPx();
+        if (thinWidth < 0) {
+            return false;
+        }
+        final Task task = mActivityRecord.getTask();
+        if (task == null) {
+            return false;
+        }
+        final int padding = Math.abs(
+                task.getBounds().width() - mActivityRecord.getBounds().width()) / 2;
+        return padding <= thinWidth;
+    }
+
+
+    /**
+     * @return {@value true} if the vertical reachability should be allowed in case of
+     * thin letteboxing
+     */
+    boolean allowVerticalReachabilityForThinLetterbox() {
+        if (!Flags.disableThinLetterboxingPolicy()) {
+            return true;
+        }
+        // When the flag is enabled we allow vertical reachability only if the
+        // app is not thin letterboxed vertically.
+        return !isVerticalThinLetterboxed();
+    }
+
+    /**
+     * @return {@value true} if the vertical reachability should be enabled in case of
+     * thin letteboxing
+     */
+    boolean allowHorizontalReachabilityForThinLetterbox() {
+        if (!Flags.disableThinLetterboxingPolicy()) {
+            return true;
+        }
+        // When the flag is enabled we allow horizontal reachability only if the
+        // app is not thin pillarboxed.
+        return !isHorizontalThinLetterboxed();
     }
 
     float getSplitScreenAspectRatio() {
@@ -1085,6 +1149,17 @@ final class LetterboxUiController {
     }
 
     boolean shouldApplyUserFullscreenOverride() {
+        // Do not override orientation to fullscreen for camera activities.
+        // Fixed-orientation activities are rarely tested in other orientations, and it often
+        // results in sideways or stretched previews. As the camera compat treatment targets
+        // fixed-orientation activities, overriding the orientation disables the treatment.
+        final DisplayContent displayContent = mActivityRecord.mDisplayContent;
+        if (displayContent != null && displayContent.mDisplayRotationCompatPolicy != null
+                && displayContent.mDisplayRotationCompatPolicy
+                .isCameraActive(mActivityRecord, /* mustBeFullscreen= */ true)) {
+            return false;
+        }
+
         if (isUserFullscreenOverrideEnabled()) {
             mUserAspectRatio = getUserMinAspectRatioOverrideCode();
 
@@ -1263,6 +1338,9 @@ final class LetterboxUiController {
      * </ul>
      */
     private boolean isHorizontalReachabilityEnabled(Configuration parentConfiguration) {
+        if (!allowHorizontalReachabilityForThinLetterbox()) {
+            return false;
+        }
         // Use screen resolved bounds which uses resolved bounds or size compat bounds
         // as activity bounds can sometimes be empty
         final Rect opaqueActivityBounds = hasInheritedLetterboxBehavior()
@@ -1298,6 +1376,9 @@ final class LetterboxUiController {
      * </ul>
      */
     private boolean isVerticalReachabilityEnabled(Configuration parentConfiguration) {
+        if (!allowVerticalReachabilityForThinLetterbox()) {
+            return false;
+        }
         // Use screen resolved bounds which uses resolved bounds or size compat bounds
         // as activity bounds can sometimes be empty
         final Rect opaqueActivityBounds = hasInheritedLetterboxBehavior()
@@ -1566,6 +1647,8 @@ final class LetterboxUiController {
         if (!shouldShowLetterboxUi) {
             return;
         }
+        pw.println(prefix + "  isVerticalThinLetterboxed=" + isVerticalThinLetterboxed());
+        pw.println(prefix + "  isHorizontalThinLetterboxed=" + isHorizontalThinLetterboxed());
         pw.println(prefix + "  letterboxBackgroundColor=" + Integer.toHexString(
                 getLetterboxBackgroundColor().toArgb()));
         pw.println(prefix + "  letterboxBackgroundType="

@@ -54,7 +54,6 @@ import android.graphics.Rect;
 import android.os.SystemClock;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 import android.util.MathUtils;
@@ -65,6 +64,7 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.BouncerPanelExpansionCalculator;
@@ -114,7 +114,7 @@ import java.util.function.Consumer;
  * Tests for {@link NotificationStackScrollLayout}.
  */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
@@ -207,6 +207,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 .thenReturn(mNotificationRoundnessManager);
         mStackScroller.setController(mStackScrollLayoutController);
         mStackScroller.setShelf(mNotificationShelf);
+        when(mStackScroller.getExpandHelper()).thenReturn(mExpandHelper);
 
         doNothing().when(mGroupExpansionManager).collapseGroups();
         doNothing().when(mExpandHelper).cancelImmediately();
@@ -1137,6 +1138,14 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // THEN headsUpAnimatingAway is false
         verify(headsUpAnimatingAwayListener).accept(false);
         assertFalse(mStackScroller.mHeadsUpAnimatingAway);
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void finishExpanding_sceneContainerEnabled() {
+        mStackScroller.startOverscrollAfterExpanding();
+        verify(mStackScroller.getExpandHelper()).finishExpanding();
+        assertTrue(mStackScroller.getIsBeingDragged());
     }
 
     private MotionEvent captureTouchSentToSceneFramework() {

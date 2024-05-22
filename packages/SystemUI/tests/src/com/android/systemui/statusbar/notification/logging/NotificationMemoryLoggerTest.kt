@@ -21,8 +21,8 @@ import android.app.StatsManager
 import android.graphics.Bitmap
 import android.graphics.drawable.Icon
 import android.stats.sysui.NotificationEnums
-import android.testing.AndroidTestingRunner
 import android.util.StatsEvent
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.assertLogsWtf
@@ -46,7 +46,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class NotificationMemoryLoggerTest : SysuiTestCase() {
 
     @Rule @JvmField val expect = Expect.create()

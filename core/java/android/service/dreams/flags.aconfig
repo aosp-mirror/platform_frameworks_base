@@ -39,8 +39,11 @@ flag {
 }
 
 flag {
-  name: "dream_tracks_focus"
+  name: "dream_handles_being_obscured"
   namespace: "communal"
-  description: "This flag enables the ability for dreams to track whether or not they have focus"
-  bug: "331798001"
+  description: "This flag enables the ability for dreams to handle being obscured"
+  bug: "337302237"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

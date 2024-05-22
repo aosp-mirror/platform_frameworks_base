@@ -30,6 +30,8 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -91,8 +93,11 @@ public class InstallInstalling extends Activity {
             // ContentResolver.SCHEME_FILE
             // STAGED_SESSION_ID extra contains an ID of a previously staged install session.
             final File sourceFile = new File(mPackageURI.getPath());
-            PackageUtil.AppSnippet as = getIntent()
-                    .getParcelableExtra(EXTRA_APP_SNIPPET, PackageUtil.AppSnippet.class);
+
+            // Dialogs displayed while changing update-owner have a blank icon. To fix this,
+            // fetch the appSnippet from the source file again
+            PackageUtil.AppSnippet as = PackageUtil.getAppSnippet(this, appInfo, sourceFile);
+            getIntent().putExtra(EXTRA_APP_SNIPPET, as);
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -244,6 +249,14 @@ public class InstallInstalling extends Activity {
         super.onDestroy();
     }
 
+    @Override
+    public void finish() {
+        if (mDialog != null) {
+            mDialog.dismiss();
+        }
+        super.finish();
+    }
+
     /**
      * Launch the appropriate finish activity (success or failed) for the installation result.
      *
@@ -299,7 +312,11 @@ public class InstallInstalling extends Activity {
                         PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
 
                 try {
-                    session.commit(pendingIntent.getIntentSender());
+                    // Delay committing the session by 100ms to fix a UI glitch while displaying the
+                    // Update-Owner change dialog on top of the Installing dialog
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        session.commit(pendingIntent.getIntentSender());
+                    }, 100);
                 } catch (Exception e) {
                     Log.e(LOG_TAG, "Cannot install package: ", e);
                     launchFailure(PackageInstaller.STATUS_FAILURE,

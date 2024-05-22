@@ -214,6 +214,10 @@
     <string name="bluetooth_battery_level_untethered_left">Left: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery</string>
     <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for the right part of the untethered headset. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_battery_level_untethered_right">Right: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected, showing remote device battery level for the left part of the untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="tv_bluetooth_battery_level_untethered_left">Left <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
+    <!-- Connected devices settings. Message when Bluetooth is connected, showing remote device battery level for the right part of the untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="tv_bluetooth_battery_level_untethered_right">Right <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
     <!-- Connected devices settings. Message when Bluetooth is connected and active but no battery information, showing remote device status. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_active_no_battery_level">Active</string>
     <!-- Connected devices settings. Message shown when bluetooth device is disconnected but is a known, previously connected device [CHAR LIMIT=NONE] -->
@@ -1712,7 +1716,7 @@
     <string name="keyboard_layout_default_label">Default</string>
 
     <!-- Special access > Title for managing turn screen on settings. [CHAR LIMIT=50] -->
-    <string name="turn_screen_on_title">Turn screen on</string>
+    <string name="turn_screen_on_title">Screen turn-on control</string>
     <!-- Label for a setting which controls whether an app can turn the screen on [CHAR LIMIT=45] -->
     <string name="allow_turn_screen_on">Allow turning the screen on</string>
     <!-- Description for a setting which controls whether an app can turn the screen on [CHAR LIMIT=NONE] -->

@@ -16,6 +16,7 @@
 
 #define LOG_TAG "PerformanceHintNativeTest"
 
+#include <aidl/android/hardware/power/ChannelConfig.h>
 #include <aidl/android/hardware/power/SessionConfig.h>
 #include <aidl/android/hardware/power/SessionTag.h>
 #include <aidl/android/hardware/power/WorkDuration.h>
@@ -54,6 +55,9 @@ public:
     MOCK_METHOD(ScopedAStatus, getHintSessionThreadIds,
                 (const std::shared_ptr<IHintSession>& hintSession, ::std::vector<int32_t>* tids),
                 (override));
+    MOCK_METHOD(ScopedAStatus, getSessionChannel,
+                (const ::ndk::SpAIBinder& in_token, hal::ChannelConfig* _aidl_return), (override));
+    MOCK_METHOD(ScopedAStatus, closeSessionChannel, (), (override));
     MOCK_METHOD(SpAIBinder, asBinder, (), (override));
     MOCK_METHOD(bool, isRemote, (), (override));
 };

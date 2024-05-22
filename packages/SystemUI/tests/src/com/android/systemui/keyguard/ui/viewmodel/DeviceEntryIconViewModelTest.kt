@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.accessibility.data.repository.fakeAccessibilityRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.coroutines.collectLastValue
@@ -26,7 +27,7 @@ import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintA
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.keyguardRepository
+import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel.Companion.UNLOCKED_DELAY_MS
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
@@ -108,6 +109,91 @@ class DeviceEntryIconViewModelTest : SysuiTestCase() {
 
             deviceEntryIconTransitionAlpha(.5f)
             assertThat(isVisible).isTrue()
+        }
+
+    @Test
+    fun iconType_fingerprint() =
+        testScope.runTest {
+            val iconType by collectLastValue(underTest.iconType)
+            keyguardRepository.setKeyguardDismissible(false)
+            fingerprintPropertyRepository.supportsUdfps()
+            fingerprintAuthRepository.setIsRunning(true)
+            assertThat(iconType).isEqualTo(DeviceEntryIconView.IconType.FINGERPRINT)
+        }
+
+    @Test
+    fun iconType_locked() =
+        testScope.runTest {
+            val iconType by collectLastValue(underTest.iconType)
+            keyguardRepository.setKeyguardDismissible(false)
+            fingerprintAuthRepository.setIsRunning(false)
+            assertThat(iconType).isEqualTo(DeviceEntryIconView.IconType.LOCK)
+        }
+
+    @Test
+    fun iconType_unlocked() =
+        testScope.runTest {
+            val iconType by collectLastValue(underTest.iconType)
+            keyguardRepository.setKeyguardDismissible(true)
+            advanceTimeBy(UNLOCKED_DELAY_MS * 2) // wait for unlocked delay
+            fingerprintAuthRepository.setIsRunning(false)
+            assertThat(iconType).isEqualTo(DeviceEntryIconView.IconType.UNLOCK)
+        }
+
+    @Test
+    fun iconType_none() =
+        testScope.runTest {
+            val iconType by collectLastValue(underTest.iconType)
+            keyguardRepository.setKeyguardDismissible(true)
+            advanceTimeBy(UNLOCKED_DELAY_MS * 2) // wait for unlocked delay
+            fingerprintPropertyRepository.supportsUdfps()
+            fingerprintAuthRepository.setIsRunning(true)
+            assertThat(iconType).isEqualTo(DeviceEntryIconView.IconType.NONE)
+        }
+
+    fun accessibilityDelegateHint_accessibilityNotEnabled() =
+        testScope.runTest {
+            val accessibilityDelegateHint by collectLastValue(underTest.accessibilityDelegateHint)
+            kosmos.fakeAccessibilityRepository.isEnabled.value = false
+            assertThat(accessibilityDelegateHint)
+                .isEqualTo(DeviceEntryIconView.AccessibilityHintType.NONE)
+        }
+
+    @Test
+    fun accessibilityDelegateHint_accessibilityEnabled_locked() =
+        testScope.runTest {
+            val accessibilityDelegateHint by collectLastValue(underTest.accessibilityDelegateHint)
+            kosmos.fakeAccessibilityRepository.isEnabled.value = true
+
+            // interactive lock icon
+            keyguardRepository.setKeyguardDismissible(false)
+            fingerprintPropertyRepository.supportsUdfps()
+
+            assertThat(accessibilityDelegateHint)
+                .isEqualTo(DeviceEntryIconView.AccessibilityHintType.AUTHENTICATE)
+
+            // non-interactive lock icon
+            keyguardRepository.setKeyguardDismissible(false)
+            fingerprintPropertyRepository.supportsRearFps()
+
+            assertThat(accessibilityDelegateHint)
+                .isEqualTo(DeviceEntryIconView.AccessibilityHintType.NONE)
+        }
+
+    @Test
+    fun accessibilityDelegateHint_accessibilityEnabled_unlocked() =
+        testScope.runTest {
+            val accessibilityDelegateHint by collectLastValue(underTest.accessibilityDelegateHint)
+            kosmos.fakeAccessibilityRepository.isEnabled.value = true
+
+            // interactive unlock icon
+            keyguardRepository.setKeyguardDismissible(true)
+            fingerprintPropertyRepository.supportsUdfps()
+            advanceTimeBy(UNLOCKED_DELAY_MS * 2) // wait for unlocked delay
+            runCurrent()
+
+            assertThat(accessibilityDelegateHint)
+                .isEqualTo(DeviceEntryIconView.AccessibilityHintType.ENTER)
         }
 
     private fun deviceEntryIconTransitionAlpha(alpha: Float) {

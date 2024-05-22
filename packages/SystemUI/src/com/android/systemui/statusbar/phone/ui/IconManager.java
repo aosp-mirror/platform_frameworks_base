@@ -37,6 +37,7 @@ import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.connectivity.ui.MobileContextProvider;
 import com.android.systemui.statusbar.phone.DemoStatusIcons;
 import com.android.systemui.statusbar.phone.StatusBarIconHolder;
+import com.android.systemui.statusbar.phone.StatusBarIconHolder.BindableIconHolder;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter;
 import com.android.systemui.statusbar.pipeline.mobile.ui.binder.MobileIconsBinder;
@@ -49,7 +50,9 @@ import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWi
 import com.android.systemui.util.Assert;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Turns info from StatusBarIconController into ImageViews in a ViewGroup.
@@ -60,6 +63,11 @@ public class IconManager implements DemoModeCommandReceiver {
     private final LocationBasedWifiViewModel mWifiViewModel;
     private final MobileIconsViewModel mMobileIconsViewModel;
 
+    /**
+     * Stores the list of bindable icons that have been added, keyed on slot name. This ensures
+     * we don't accidentally add the same bindable icon twice.
+     */
+    private final Map<String, BindableIconHolder> mBindableIcons = new HashMap<>();
     protected final Context mContext;
     protected int mIconSize;
     // Whether or not these icons show up in dumpsys
@@ -142,7 +150,7 @@ public class IconManager implements DemoModeCommandReceiver {
             case TYPE_MOBILE_NEW -> addNewMobileIcon(index, slot, holder.getTag());
             case TYPE_BINDABLE ->
                 // Safe cast, since only BindableIconHolders can set this tag on themselves
-                addBindableIcon((StatusBarIconHolder.BindableIconHolder) holder, index);
+                addBindableIcon((BindableIconHolder) holder, index);
             default -> null;
         };
     }
@@ -162,10 +170,14 @@ public class IconManager implements DemoModeCommandReceiver {
      * icon view, we can simply create the icon when requested and allow the
      * ViewBinder to control its visual state.
      */
-    protected StatusIconDisplayable addBindableIcon(StatusBarIconHolder.BindableIconHolder holder,
+    protected StatusIconDisplayable addBindableIcon(BindableIconHolder holder,
             int index) {
+        mBindableIcons.put(holder.getSlot(), holder);
         ModernStatusBarView view = holder.getInitializer().createAndBind(mContext);
         mGroup.addView(view, index, onCreateLayoutParams());
+        if (mIsInDemoMode) {
+            mDemoStatusIcons.addBindableIcon(holder);
+        }
         return view;
     }
 
@@ -278,6 +290,9 @@ public class IconManager implements DemoModeCommandReceiver {
         if (mDemoStatusIcons == null) {
             mDemoStatusIcons = createDemoStatusIcons();
             mDemoStatusIcons.addModernWifiView(mWifiViewModel);
+            for (BindableIconHolder holder : mBindableIcons.values()) {
+                mDemoStatusIcons.addBindableIcon(holder);
+            }
         }
         mDemoStatusIcons.onDemoModeStarted();
     }

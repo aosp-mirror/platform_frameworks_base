@@ -42,13 +42,13 @@ class SysUiStateExtTest : SysuiTestCase() {
     fun updateFlags() {
         underTest.updateFlags(
             Display.DEFAULT_DISPLAY,
-            1 to true,
-            2 to false,
-            3 to true,
+            1L to true,
+            2L to false,
+            3L to true,
         )
 
-        assertThat(underTest.flags and 1).isNotEqualTo(0)
-        assertThat(underTest.flags and 2).isEqualTo(0)
-        assertThat(underTest.flags and 3).isNotEqualTo(0)
+        assertThat(underTest.flags and 1L).isNotEqualTo(0L)
+        assertThat(underTest.flags and 2L).isEqualTo(0L)
+        assertThat(underTest.flags and 3L).isNotEqualTo(0L)
     }
 }

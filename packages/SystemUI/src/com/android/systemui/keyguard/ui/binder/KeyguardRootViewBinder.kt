@@ -36,7 +36,6 @@ import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
-import com.android.app.tracing.coroutines.launch
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.systemui.Flags.newAodTransition
@@ -237,7 +236,8 @@ object KeyguardRootViewBinder {
                                                 indicationArea,
                                                 startButton,
                                                 endButton,
-                                                lockIcon -> {
+                                                lockIcon,
+                                                deviceEntryIcon -> {
                                                     // Do not move these views
                                                 }
                                                 else -> childView.translationX = px
@@ -257,23 +257,6 @@ object KeyguardRootViewBinder {
                                         it.scaleX = scaleViewModel.scale
                                         it.scaleY = scaleViewModel.scale
                                     }
-                                    // Make sure to reset these views, or they will be invisible
-                                    if (childViews[burnInLayerId]?.scaleX != 1f) {
-                                        childViews[burnInLayerId]?.scaleX = 1f
-                                        childViews[burnInLayerId]?.scaleY = 1f
-                                        childViews[aodNotificationIconContainerId]?.scaleX = 1f
-                                        childViews[aodNotificationIconContainerId]?.scaleY = 1f
-                                        view.requestLayout()
-                                    }
-                                } else {
-                                    // For weather clock, large clock should have only scale
-                                    // transition with other parts in burnInLayer
-                                    childViews[burnInLayerId]?.scaleX = scaleViewModel.scale
-                                    childViews[burnInLayerId]?.scaleY = scaleViewModel.scale
-                                    childViews[aodNotificationIconContainerId]?.scaleX =
-                                        scaleViewModel.scale
-                                    childViews[aodNotificationIconContainerId]?.scaleY =
-                                        scaleViewModel.scale
                                 }
                             }
                         }
@@ -597,6 +580,7 @@ object KeyguardRootViewBinder {
     private val startButton = R.id.start_button
     private val endButton = R.id.end_button
     private val lockIcon = R.id.lock_icon_view
+    private val deviceEntryIcon = R.id.device_entry_icon_view
     private val nsslPlaceholderId = R.id.nssl_placeholder
 
     private const val ID = "occluding_app_device_entry_unlock_msg"

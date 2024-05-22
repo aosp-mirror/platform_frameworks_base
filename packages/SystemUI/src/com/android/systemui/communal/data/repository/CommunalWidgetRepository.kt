@@ -17,14 +17,13 @@
 package com.android.systemui.communal.data.repository
 
 import android.app.backup.BackupManager
-import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.os.UserHandle
-import androidx.annotation.WorkerThread
+import com.android.systemui.common.data.repository.PackageChangeRepository
+import com.android.systemui.common.shared.model.PackageInstallSession
 import com.android.systemui.communal.data.backup.CommunalBackupUtils
-import com.android.systemui.communal.data.db.CommunalItemRank
 import com.android.systemui.communal.data.db.CommunalWidgetDao
-import com.android.systemui.communal.data.db.CommunalWidgetItem
 import com.android.systemui.communal.nano.CommunalHubState
 import com.android.systemui.communal.proto.toCommunalHubState
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
@@ -36,13 +35,15 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
-import com.android.systemui.util.kotlin.getValue
-import java.util.Optional
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -88,7 +89,6 @@ interface CommunalWidgetRepository {
 class CommunalWidgetRepositoryImpl
 @Inject
 constructor(
-    appWidgetManagerOptional: Optional<AppWidgetManager>,
     private val appWidgetHost: CommunalAppWidgetHost,
     @Background private val bgScope: CoroutineScope,
     @Background private val bgDispatcher: CoroutineDispatcher,
@@ -97,6 +97,7 @@ constructor(
     @CommunalLog logBuffer: LogBuffer,
     private val backupManager: BackupManager,
     private val backupUtils: CommunalBackupUtils,
+    packageChangeRepository: PackageChangeRepository,
 ) : CommunalWidgetRepository {
     companion object {
         const val TAG = "CommunalWidgetRepository"
@@ -104,12 +105,39 @@ constructor(
 
     private val logger = Logger(logBuffer, TAG)
 
-    private val appWidgetManager by appWidgetManagerOptional
+    /** Widget metadata from database + matching [AppWidgetProviderInfo] if any. */
+    private val widgetEntries: Flow<List<CommunalWidgetEntry>> =
+        combine(
+            communalWidgetDao.getWidgets(),
+            communalWidgetHost.appWidgetProviders,
+        ) { entries, providers ->
+            entries.mapNotNull { (rank, widget) ->
+                CommunalWidgetEntry(
+                    appWidgetId = widget.widgetId,
+                    componentName = widget.componentName,
+                    priority = rank.rank,
+                    providerInfo = providers[widget.widgetId]
+                )
+            }
+        }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override val communalWidgets: Flow<List<CommunalWidgetContentModel>> =
-        communalWidgetDao
-            .getWidgets()
-            .map { it.mapNotNull(::mapToContentModel) }
+        widgetEntries
+            .flatMapLatest { widgetEntries ->
+                // If and only if any widget is missing provider info, combine with the package
+                // installer sessions flow to check whether they are pending installation. This can
+                // happen after widgets are freshly restored from a backup. In most cases, provider
+                // info is available to all widgets, and is unnecessary to involve an API call to
+                // the package installer.
+                if (widgetEntries.any { it.providerInfo == null }) {
+                    packageChangeRepository.packageInstallSessionsForPrimaryUser.map { sessions ->
+                        widgetEntries.mapNotNull { entry -> mapToContentModel(entry, sessions) }
+                    }
+                } else {
+                    flowOf(widgetEntries.map(::mapToContentModel))
+                }
+            }
             // As this reads from a database and triggers IPCs to AppWidgetManager,
             // it should be executed in the background.
             .flowOn(bgDispatcher)
@@ -245,6 +273,9 @@ constructor(
                 }
                 appWidgetHost.deleteAppWidgetId(widgetId)
             }
+
+            // Providers may have changed
+            communalWidgetHost.refreshProviders()
         }
     }
 
@@ -255,16 +286,57 @@ constructor(
         }
     }
 
-    @WorkerThread
-    private fun mapToContentModel(
-        entry: Map.Entry<CommunalItemRank, CommunalWidgetItem>
-    ): CommunalWidgetContentModel? {
-        val (_, widgetId) = entry.value
-        val providerInfo = appWidgetManager?.getAppWidgetInfo(widgetId) ?: return null
-        return CommunalWidgetContentModel(
-            appWidgetId = widgetId,
-            providerInfo = providerInfo,
-            priority = entry.key.rank,
+    /**
+     * Maps a [CommunalWidgetEntry] to a [CommunalWidgetContentModel] with the assumption that the
+     * [AppWidgetProviderInfo] of the entry is available.
+     */
+    private fun mapToContentModel(entry: CommunalWidgetEntry): CommunalWidgetContentModel {
+        return CommunalWidgetContentModel.Available(
+            appWidgetId = entry.appWidgetId,
+            providerInfo = entry.providerInfo!!,
+            priority = entry.priority,
         )
     }
+
+    /**
+     * Maps a [CommunalWidgetEntry] to a [CommunalWidgetContentModel] with a list of install
+     * sessions. If the [AppWidgetProviderInfo] of the entry is absent, and its package is in the
+     * install sessions, the entry is mapped to a pending widget.
+     */
+    private fun mapToContentModel(
+        entry: CommunalWidgetEntry,
+        installSessions: List<PackageInstallSession>,
+    ): CommunalWidgetContentModel? {
+        if (entry.providerInfo != null) {
+            return CommunalWidgetContentModel.Available(
+                appWidgetId = entry.appWidgetId,
+                providerInfo = entry.providerInfo!!,
+                priority = entry.priority,
+            )
+        }
+
+        val session =
+            installSessions.firstOrNull {
+                it.packageName ==
+                    ComponentName.unflattenFromString(entry.componentName)?.packageName
+            }
+        return if (session != null) {
+            CommunalWidgetContentModel.Pending(
+                appWidgetId = entry.appWidgetId,
+                priority = entry.priority,
+                packageName = session.packageName,
+                icon = session.icon,
+                user = session.user,
+            )
+        } else {
+            null
+        }
+    }
+
+    private data class CommunalWidgetEntry(
+        val appWidgetId: Int,
+        val componentName: String,
+        val priority: Int,
+        var providerInfo: AppWidgetProviderInfo? = null,
+    )
 }

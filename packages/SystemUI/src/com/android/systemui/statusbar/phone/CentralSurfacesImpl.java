@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.StatusBarManager.DISABLE_HOME;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowVisibleState;
@@ -26,10 +27,12 @@ import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_
 import static androidx.lifecycle.Lifecycle.State.RESUMED;
 
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
+import static com.android.systemui.Flags.keyboardShortcutHelperRewrite;
 import static com.android.systemui.Flags.lightRevealMigration;
 import static com.android.systemui.Flags.newAodTransition;
 import static com.android.systemui.Flags.truncatedStatusBarIconsFix;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
+import static com.android.systemui.flags.Flags.SHORTCUT_LIST_SEARCH_LAYOUT;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
@@ -289,7 +292,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private CentralSurfacesCommandQueueCallbacks mCommandQueueCallbacks;
     private float mTransitionToFullShadeProgress = 0f;
     private final NotificationListContainer mNotifListContainer;
-    private final boolean mIsShortcutListSearchEnabled;
 
     private final KeyguardStateController.Callback mKeyguardStateControllerCallback =
             new KeyguardStateController.Callback() {
@@ -789,7 +791,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStatusBarSignalPolicy = statusBarSignalPolicy;
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mFeatureFlags = featureFlags;
-        mIsShortcutListSearchEnabled = featureFlags.isEnabled(Flags.SHORTCUT_LIST_SEARCH_LAYOUT);
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mMainExecutor = delayableExecutor;
         mMessageRouter = messageRouter;
@@ -820,10 +821,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // TODO(b/190746471): Find a better home for this.
         DateTimeView.setReceiverHandler(timeTickHandler);
 
-        mMessageRouter.subscribeTo(KeyboardShortcutsMessage.class,
-                data -> toggleKeyboardShortcuts(data.mDeviceId));
-        mMessageRouter.subscribeTo(MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU,
-                id -> dismissKeyboardShortcuts());
+        if (!keyboardShortcutHelperRewrite()) {
+            mMessageRouter.subscribeTo(
+                    KeyboardShortcutsMessage.class,
+                    data -> toggleKeyboardShortcuts(data.mDeviceId));
+            mMessageRouter.subscribeTo(
+                    MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU, id -> dismissKeyboardShortcuts());
+        }
         mMessageRouter.subscribeTo(AnimateExpandSettingsPanelMessage.class,
                 data -> mCommandQueueCallbacks.animateExpandSettingsPanel(data.mSubpanel));
         mMessageRouter.subscribeTo(MSG_LAUNCH_TRANSITION_TIMEOUT,
@@ -1003,14 +1007,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 // this handling this post-init task. We force an update in this case, and use a new
                 // token to not conflict with any other disabled flags already requested by SysUI
                 Binder token = new Binder();
-                int userId = mContext.getUserId();
-                StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
-                info.setNavigationHomeDisabled(true);
-                mBarService.disableForUser(info, token, mContext.getPackageName(),
-                        userId, "set the initial view visibility");
-
-                mBarService.disableForUser(new StatusBarManager.DisableInfo(), token,
-                        mContext.getPackageName(), userId, "set the initial view visibility");
+                mBarService.disable(DISABLE_HOME, token, mContext.getPackageName());
+                mBarService.disable(0, token, mContext.getPackageName());
             } catch (RemoteException ex) {
                 ex.rethrowFromSystemServer();
             }
@@ -1872,10 +1870,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             String action = intent.getAction();
             String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
-                if (mIsShortcutListSearchEnabled && Utilities.isLargeScreen(mContext)) {
-                    KeyboardShortcutListSearch.dismiss();
-                } else {
-                    KeyboardShortcuts.dismiss();
+                if (!keyboardShortcutHelperRewrite()) {
+                    if (shouldUseTabletKeyboardShortcuts()) {
+                        KeyboardShortcutListSearch.dismiss();
+                    } else {
+                        KeyboardShortcuts.dismiss();
+                    }
                 }
                 mRemoteInputManager.closeRemoteInputs();
                 if (mLockscreenUserManager.isCurrentProfile(getSendingUserId())) {
@@ -2179,7 +2179,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
         if (mStatusBarStateController.leaveOpenOnKeyguardHide()) {
             if (!mStatusBarStateController.isKeyguardRequested()) {
-                mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
+                if (!MigrateClocksToBlueprint.isEnabled()) {
+                    mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
+                }
             }
             long delay = mKeyguardStateController.calculateGoingToFullShadeDelay();
             mLockscreenShadeTransitionController.onHideKeyguard(delay, previousState);
@@ -2345,6 +2347,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             } else if (mState == StatusBarState.KEYGUARD
                     && !mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing()
                     && mStatusBarKeyguardViewManager.isSecure()) {
+                Log.d(TAG, "showBouncerOrLockScreenIfKeyguard, showingBouncer");
                 mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
             }
         }
@@ -2802,7 +2805,16 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mScrimController.setExpansionAffectsAlpha(!unlocking);
 
         if (mAlternateBouncerInteractor.isVisibleState()) {
-            if (!DeviceEntryUdfpsRefactor.isEnabled()) {
+            if (DeviceEntryUdfpsRefactor.isEnabled()) {
+                if ((!mKeyguardStateController.isOccluded() || mShadeSurface.isPanelExpanded())
+                        && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
+                        || mTransitionToFullShadeProgress > 0f)) {
+                    // Assume scrim state for shade is already correct and do nothing
+                } else {
+                    // Safeguard which prevents the scrim from being stuck in the wrong state
+                    mScrimController.transitionTo(ScrimState.KEYGUARD);
+                }
+            } else {
                 if ((!mKeyguardStateController.isOccluded() || mShadeSurface.isPanelExpanded())
                         && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
                         || mTransitionToFullShadeProgress > 0f)) {
@@ -2811,7 +2823,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);
                 }
             }
-
             // This will cancel the keyguardFadingAway animation if it is running. We need to do
             // this as otherwise it can remain pending and leave keyguard in a weird state.
             mUnlockScrimCallback.onCancelled();
@@ -2929,8 +2940,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     };
 
     @Override
-    public void handleExternalShadeWindowTouch(MotionEvent event) {
-        getNotificationShadeWindowViewController().handleExternalTouch(event);
+    public void handleDreamTouch(MotionEvent event) {
+        getNotificationShadeWindowViewController().handleDreamTouch(event);
     }
 
     @Override
@@ -2945,7 +2956,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     protected void toggleKeyboardShortcuts(int deviceId) {
-        if (mIsShortcutListSearchEnabled && Utilities.isLargeScreen(mContext)) {
+        if (shouldUseTabletKeyboardShortcuts()) {
             KeyboardShortcutListSearch.toggle(mContext, deviceId);
         } else {
             KeyboardShortcuts.toggle(mContext, deviceId);
@@ -2953,11 +2964,16 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     protected void dismissKeyboardShortcuts() {
-        if (mIsShortcutListSearchEnabled && Utilities.isLargeScreen(mContext)) {
+        if (shouldUseTabletKeyboardShortcuts()) {
             KeyboardShortcutListSearch.dismiss();
         } else {
             KeyboardShortcuts.dismiss();
         }
+    }
+
+    private boolean shouldUseTabletKeyboardShortcuts() {
+        return mFeatureFlags.isEnabled(SHORTCUT_LIST_SEARCH_LAYOUT)
+                && Utilities.isLargeScreen(mContext);
     }
 
     private void clearNotificationEffects() {

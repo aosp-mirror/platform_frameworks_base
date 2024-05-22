@@ -18,12 +18,13 @@ package com.android.systemui.keyguard.ui.composable
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
@@ -51,7 +52,7 @@ constructor(
         modifier: Modifier = Modifier,
     ) {
         val coroutineScope = rememberCoroutineScope()
-        val blueprintId by viewModel.blueprintId(coroutineScope).collectAsState()
+        val blueprintId by viewModel.blueprintId(coroutineScope).collectAsStateWithLifecycle()
         val view = LocalView.current
         DisposableEffect(view) {
             clockInteractor.clockEventController.registerListeners(view)
@@ -60,6 +61,6 @@ constructor(
         }
 
         val blueprint = blueprintByBlueprintId[blueprintId] ?: return
-        with(blueprint) { Content(modifier) }
+        with(blueprint) { Content(modifier.sysuiResTag("keyguard_root_view")) }
     }
 }

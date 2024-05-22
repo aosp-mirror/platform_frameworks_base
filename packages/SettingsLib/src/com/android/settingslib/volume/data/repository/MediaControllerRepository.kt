@@ -21,6 +21,7 @@ import android.media.session.MediaSessionManager
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.bluetooth.headsetAudioModeChanges
 import com.android.settingslib.media.session.activeMediaChanges
+import com.android.settingslib.media.session.defaultRemoteSessionChanged
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
 import com.android.settingslib.volume.shared.model.AudioManagerEvent
 import kotlin.coroutines.CoroutineContext
@@ -59,6 +60,9 @@ class MediaControllerRepositoryImpl(
 
     override val activeSessions: StateFlow<List<MediaController>> =
         merge(
+                mediaSessionManager.defaultRemoteSessionChanged.map {
+                    mediaSessionManager.getActiveSessions(null)
+                },
                 mediaSessionManager.activeMediaChanges.filterNotNull(),
                 localBluetoothManager?.headsetAudioModeChanges?.map {
                     mediaSessionManager.getActiveSessions(null)

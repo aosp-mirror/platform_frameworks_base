@@ -487,6 +487,16 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // Flush EVENT_APPEARED.
         mController.dispatchPendingEvents();
 
+        // Even if the activity is not launched in an organized TaskFragment, it is still considered
+        // as the remote activity to the organizer process. Because when the task becomes visible,
+        // the organizer process needs to be interactive (unfrozen) to receive TaskFragment events.
+        activity.setVisibleRequested(true);
+        activity.setState(ActivityRecord.State.RESUMED, "test");
+        assertTrue(organizerProc.hasVisibleActivities());
+        activity.setVisibleRequested(false);
+        activity.setState(ActivityRecord.State.STOPPED, "test");
+        assertFalse(organizerProc.hasVisibleActivities());
+
         // Make sure the activity belongs to the same app, but it is in a different pid.
         activity.info.applicationInfo.uid = uid;
         doReturn(pid + 1).when(activity).getPid();
@@ -1884,11 +1894,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     public void testApplyTransaction_createTaskFragmentDecorSurface() {
         mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
 
-        // TODO(b/293654166) remove system organizer requirement once security review is cleared.
-        mController.unregisterOrganizer(mIOrganizer);
-        registerTaskFragmentOrganizer(mIOrganizer, true /* isSystemOrganizer */);
         final Task task = createTask(mDisplayContent);
-
         final TaskFragment tf = createTaskFragment(task);
         final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
                 OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE).build();
@@ -1903,9 +1909,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     public void testApplyTransaction_removeTaskFragmentDecorSurface() {
         mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
 
-        // TODO(b/293654166) remove system organizer requirement once security review is cleared.
-        mController.unregisterOrganizer(mIOrganizer);
-        registerTaskFragmentOrganizer(mIOrganizer, true /* isSystemOrganizer */);
         final Task task = createTask(mDisplayContent);
         final TaskFragment tf = createTaskFragment(task);
 

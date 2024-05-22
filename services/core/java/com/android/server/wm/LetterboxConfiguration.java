@@ -19,13 +19,13 @@ package com.android.server.wm;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.DimenRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Color;
 import android.provider.DeviceConfig;
-import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -33,6 +33,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.function.Function;
+import java.util.function.IntSupplier;
 
 /** Reads letterbox configs from resources and controls their overrides at runtime. */
 final class LetterboxConfiguration {
@@ -265,6 +266,12 @@ final class LetterboxConfiguration {
     // unresizable apps
     private boolean mIsDisplayAspectRatioEnabledForFixedOrientationLetterbox;
 
+    // Supplier for the value in pixel to consider when detecting vertical thin letterboxing
+    private final DimenPxIntSupplier mThinLetterboxWidthPxSupplier;
+
+    // Supplier for the value in pixel to consider when detecting horizontal thin letterboxing
+    private final DimenPxIntSupplier mThinLetterboxHeightPxSupplier;
+
     // Allows to enable letterboxing strategy for translucent activities ignoring flags.
     private boolean mTranslucentLetterboxingOverrideEnabled;
 
@@ -300,6 +307,34 @@ final class LetterboxConfiguration {
 
     // Flags dynamically updated with {@link android.provider.DeviceConfig}.
     @NonNull private final SynchedDeviceConfig mDeviceConfig;
+
+    // Cached version of IntSupplier customised to evaluate new dimen in pixels
+    // when density changes
+    private static class DimenPxIntSupplier implements IntSupplier {
+
+        @NonNull
+        private final Context mContext;
+
+        private final int mResourceId;
+
+        private float mLastDensity = Float.MIN_VALUE;
+        private int mValue = 0;
+
+        private DimenPxIntSupplier(@NonNull Context context, @DimenRes int resourceId) {
+            mContext = context;
+            mResourceId = resourceId;
+        }
+
+        @Override
+        public int getAsInt() {
+            final float newDensity = mContext.getResources().getDisplayMetrics().density;
+            if (newDensity != mLastDensity) {
+                mLastDensity = newDensity;
+                mValue = mContext.getResources().getDimensionPixelSize(mResourceId);
+            }
+            return mValue;
+        }
+    }
 
     LetterboxConfiguration(@NonNull final Context systemUiContext) {
         this(systemUiContext, new LetterboxConfigurationPersister(
@@ -358,6 +393,11 @@ final class LetterboxConfiguration {
                 R.bool.config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled);
         mIsPolicyForIgnoringRequestedOrientationEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsPolicyForIgnoringRequestedOrientationEnabled);
+
+        mThinLetterboxWidthPxSupplier = new DimenPxIntSupplier(mContext,
+                R.dimen.config_letterboxThinLetterboxWidthDp);
+        mThinLetterboxHeightPxSupplier = new DimenPxIntSupplier(mContext,
+                R.dimen.config_letterboxThinLetterboxHeightDp);
 
         mLetterboxConfigurationPersister = letterboxConfigurationPersister;
         mLetterboxConfigurationPersister.start();
@@ -1126,6 +1166,24 @@ final class LetterboxConfiguration {
      */
     boolean getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox() {
         return mIsDisplayAspectRatioEnabledForFixedOrientationLetterbox;
+    }
+
+    /**
+     * @return Width in pixel about the padding to use to understand if the letterbox for an
+     *         activity is thin. If the available space has width W and the app has width w, this
+     *         is the maximum value for (W - w) / 2 to be considered for a thin letterboxed app.
+     */
+    int getThinLetterboxWidthPx() {
+        return mThinLetterboxWidthPxSupplier.getAsInt();
+    }
+
+    /**
+     * @return Height in pixel about the padding to use to understand if a letterbox is thin.
+     *         If the available space has height H and the app has height h, this is the maximum
+     *         value for (H - h) / 2 to be considered for a thin letterboxed app.
+     */
+    int getThinLetterboxHeightPx() {
+        return mThinLetterboxHeightPxSupplier.getAsInt();
     }
 
     /**

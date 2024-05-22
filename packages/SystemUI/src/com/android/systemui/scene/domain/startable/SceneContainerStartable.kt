@@ -45,9 +45,11 @@ import com.android.systemui.model.updateFlags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.FalsingBeliefListener
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.data.model.asIterable
 import com.android.systemui.scene.domain.interactor.SceneBackInteractor
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.session.shared.SessionStorage
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.Scenes
@@ -116,6 +118,7 @@ constructor(
     private val shadeInteractor: ShadeInteractor,
     private val uiEventLogger: UiEventLogger,
     private val sceneBackInteractor: SceneBackInteractor,
+    private val shadeSessionStorage: SessionStorage,
 ) : CoreStartable {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
@@ -132,6 +135,7 @@ constructor(
             handleBouncerOverscroll()
             hydrateWindowController()
             hydrateBackStack()
+            resetShadeSessions()
         } else {
             sceneLogger.logFrameworkEnabled(
                 isEnabled = false,
@@ -149,6 +153,20 @@ constructor(
                 }
             }
         }
+
+    private fun resetShadeSessions() {
+        applicationScope.launch {
+            sceneBackInteractor.backStack
+                // We are in a session if either Shade or QuickSettings is on the back stack
+                .map { backStack ->
+                    backStack.asIterable().any { it == Scenes.Shade || it == Scenes.QuickSettings }
+                }
+                .distinctUntilChanged()
+                // Once a session has ended, clear the session storage.
+                .filter { inSession -> !inSession }
+                .collect { shadeSessionStorage.clear() }
+        }
+    }
 
     /** Updates the visibility of the scene container. */
     private fun hydrateVisibility() {
@@ -216,7 +234,7 @@ constructor(
             bouncerInteractor.onImeHiddenByUser.collectLatest {
                 if (sceneInteractor.currentScene.value == Scenes.Bouncer) {
                     sceneInteractor.changeScene(
-                        toScene = Scenes.Lockscreen,
+                        toScene = Scenes.Lockscreen, // TODO(b/336581871): add sceneState?
                         loggingReason = "IME hidden",
                     )
                 }
@@ -234,6 +252,7 @@ constructor(
                     when {
                         isAnySimLocked -> {
                             switchToScene(
+                                // TODO(b/336581871): add sceneState?
                                 targetSceneKey = Scenes.Bouncer,
                                 loggingReason = "Need to authenticate locked SIM card."
                             )
@@ -241,6 +260,7 @@ constructor(
                         unlockStatus.isUnlocked &&
                             deviceEntryInteractor.canSwipeToEnter.value == false -> {
                             switchToScene(
+                                // TODO(b/336581871): add sceneState?
                                 targetSceneKey = Scenes.Gone,
                                 loggingReason =
                                     "All SIM cards unlocked and device already unlocked and " +
@@ -249,6 +269,7 @@ constructor(
                         }
                         else -> {
                             switchToScene(
+                                // TODO(b/336581871): add sceneState?
                                 targetSceneKey = Scenes.Lockscreen,
                                 loggingReason =
                                     "All SIM cards unlocked and device still locked" +
@@ -347,6 +368,7 @@ constructor(
             powerInteractor.isAsleep.collect { isAsleep ->
                 if (isAsleep) {
                     switchToScene(
+                        // TODO(b/336581871): add sceneState?
                         targetSceneKey = Scenes.Lockscreen,
                         loggingReason = "device is starting to sleep",
                     )
@@ -537,6 +559,7 @@ constructor(
                                     Scenes.Lockscreen -> true
                                     Scenes.Bouncer -> false
                                     Scenes.Shade -> false
+                                    Scenes.NotificationsShade -> false
                                     else -> null
                                 }
                             }

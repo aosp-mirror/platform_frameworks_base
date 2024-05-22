@@ -50,9 +50,9 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
-import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -327,7 +327,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
 
     private boolean shouldEnableRunningTasksForDesktopMode() {
         return mPcFeatureEnabled
-                || (DesktopModeStatus.isEnabled() && enableDesktopWindowingTaskbarRunningApps());
+                || (DesktopModeStatus.canEnterDesktopMode(mContext)
+                && enableDesktopWindowingTaskbarRunningApps());
     }
 
     @VisibleForTesting
@@ -371,7 +372,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 continue;
             }
 
-            if (DesktopModeStatus.isEnabled() && mDesktopModeTaskRepository.isPresent()
+            if (DesktopModeStatus.canEnterDesktopMode(mContext)
+                    && mDesktopModeTaskRepository.isPresent()
                     && mDesktopModeTaskRepository.get().isActiveTask(taskInfo.taskId)) {
                 if (mDesktopModeTaskRepository.get().isMinimizedTask(taskInfo.taskId)) {
                     // Minimized freeform tasks should not be shown at all.

@@ -29,6 +29,7 @@ import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.shade.TouchLogger.Companion.logTouchesTo
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
+import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.transition.ScrimShadeTransitionController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
@@ -67,19 +68,24 @@ constructor(
     private fun hydrateShadeExpansionStateManager() {
         if (SceneContainerFlag.isEnabled) {
             combine(
-                panelExpansionInteractorProvider.get().legacyPanelExpansion,
-                sceneInteractorProvider.get().isTransitionUserInputOngoing,
-            ) { panelExpansion, tracking ->
-                shadeExpansionStateManager.onPanelExpansionChanged(
-                    fraction = panelExpansion,
-                    expanded = panelExpansion > 0f,
-                    tracking = tracking,
-                )
-            }.launchIn(applicationScope)
+                    panelExpansionInteractorProvider.get().legacyPanelExpansion,
+                    sceneInteractorProvider.get().isTransitionUserInputOngoing,
+                ) { panelExpansion, tracking ->
+                    shadeExpansionStateManager.onPanelExpansionChanged(
+                        fraction = panelExpansion,
+                        expanded = panelExpansion > 0f,
+                        tracking = tracking,
+                    )
+                }
+                .launchIn(applicationScope)
         }
     }
 
     private fun hydrateShadeMode() {
+        if (DualShade.isEnabled) {
+            shadeRepository.setShadeMode(ShadeMode.Dual)
+            return
+        }
         applicationScope.launch {
             configurationRepository.onAnyConfigurationChange
                 // Force initial collection.
@@ -90,11 +96,7 @@ constructor(
                 }
                 .collect { isSplitShade ->
                     shadeRepository.setShadeMode(
-                        if (isSplitShade) {
-                            ShadeMode.Split
-                        } else {
-                            ShadeMode.Single
-                        }
+                        if (isSplitShade) ShadeMode.Split else ShadeMode.Single
                     )
                 }
         }

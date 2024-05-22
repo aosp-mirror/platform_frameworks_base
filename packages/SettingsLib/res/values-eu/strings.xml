@@ -285,16 +285,16 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Onartu abiarazlea desblokeatzea"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM desblokeoa onartu nahi duzu?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ABISUA: ezarpen hau aktibatuta dagoen bitartean, gailua babesteko eginbideek ez dute gailu honetan funtzionatuko."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Hautatu kokapen faltsuen aplikazioa"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Hautatu asmatutako kokapenen aplikazioa"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ez da ezarri kokapen faltsuen aplikaziorik"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"Kokapen faltsuen aplikazioa: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"Asmatutako kokapenen aplikazioa: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Sareak"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Hari gabe bistaratzeko ziurtagiria"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Gaitu wifi-sareetan saioa hasteko modu xehatua"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wifi-sareen bilaketaren moteltzea"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wifi-konexioetan iraunkorrak ez diren MAC helbideak ausaz antolatzea"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Datu-konexioa beti aktibo"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Konexioa partekatzeko hardwarearen azelerazioa"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Konexioa partekatzeko hardwarearen bizkortzea"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Erakutsi Bluetooth bidezko gailuak izenik gabe"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Desgaitu bolumen absolutua"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gaitu Gabeldorsche"</string>
@@ -339,7 +339,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Onartu kokapen faltsuak"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Gaitu ikuspegiaren atributuak ikuskatzeko aukera"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mantendu datu-konexioa beti aktibo, baita wifi-konexioa aktibo dagoenean ere (sare batetik bestera bizkor aldatu ahal izateko)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Erabilgarri badago, erabili konexioa partekatzeko hardwarearen azelerazioa"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Erabilgarri badago, erabili konexioa partekatzeko hardwarearen bizkortzea"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB bidezko arazketa onartu?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB bidezko arazketa garapen-xedeetarako soilik dago diseinatuta. Erabil ezazu ordenagailuaren eta gailuaren artean datuak kopiatzeko, aplikazioak gailuan jakinarazi gabe instalatzeko eta erregistro-datuak irakurtzeko."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Hari gabeko arazketa baimendu nahi duzu?"</string>

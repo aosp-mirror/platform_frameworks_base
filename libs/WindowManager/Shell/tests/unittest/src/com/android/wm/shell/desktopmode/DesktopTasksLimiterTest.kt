@@ -27,10 +27,12 @@ import android.window.WindowContainerTransaction
 import android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito
+import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
+import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.transition.TransitionInfoBuilder
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.util.StubTransaction
@@ -41,6 +43,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.any
 import org.mockito.Mockito.`when`
 import org.mockito.quality.Strictness
 
@@ -69,7 +72,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     fun setUp() {
         mockitoSession = ExtendedMockito.mockitoSession().strictness(Strictness.LENIENT)
                 .spyStatic(DesktopModeStatus::class.java).startMocking()
-        `when`(DesktopModeStatus.isEnabled()).thenReturn(true)
+        doReturn(true).`when`{ DesktopModeStatus.canEnterDesktopMode(any()) }
 
         desktopTaskRepo = DesktopModeTaskRepository()
 

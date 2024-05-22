@@ -19,7 +19,6 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.BooleanPolicyValue;
-import android.app.admin.PolicyKey;
 import android.util.Log;
 
 import com.android.modules.utils.TypedXmlPullParser;
@@ -37,8 +36,7 @@ final class BooleanPolicySerializer extends PolicySerializer<Boolean> {
     private static final String TAG = "BooleanPolicySerializer";
 
     @Override
-    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer, @NonNull Boolean value)
-            throws IOException {
+    void saveToXml(TypedXmlSerializer serializer, @NonNull Boolean value) throws IOException {
         Objects.requireNonNull(value);
         serializer.attributeBoolean(/* namespace= */ null, ATTR_VALUE, value);
     }

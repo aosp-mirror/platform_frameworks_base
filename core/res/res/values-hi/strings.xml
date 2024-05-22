@@ -154,15 +154,15 @@
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित नहीं किया गया"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित नहीं किया गया"</string>
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"मोबाइल नेटवर्क की सुरक्षा"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"उन नेटवर्क के लिए सुरक्षा से जुड़ी सूचनाएं जो सुरक्षित नहीं हैं"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"एन्क्रिप्शन, असुरक्षित नेटवर्क के लिए सूचनाएं"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"डिवाइस आईडी को ऐक्सेस किया गया"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"आपके <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> सिम का इस्तेमाल करके, आस-पास के नेटवर्क ने <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> आपके डिवाइस का यूनीक आईडी (IMSI या IMEI) रिकॉर्ड किया"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"आपका <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> सिम इस्तेमाल करके, आस-पास के नेटवर्क ने <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> आपके डिवाइस का यूनीक आईडी (IMSI या IMEI) रिकॉर्ड किया.\n\nइसका मतलब है कि आपकी जगह की जानकारी, गतिविधि या निजी जानकारी को लॉग इन किया गया है. यह सामान्य तरीका है. हालांकि, यह उन लोगों के लिए समस्या की वजह हो सकता है जिन्हें अपनी निजी जानकारी को लेकर चिंता रहती है."</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"आपके <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> सिम के ज़रिए, आस-पास के नेटवर्क ने <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> पर आपके डिवाइस का यूनीक आईडी (IMSI या IMEI) रिकॉर्ड किया"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"आपके <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> सिम के ज़रिए, आस-पास के नेटवर्क ने <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> पर आपके डिवाइस का यूनीक आईडी (IMSI या IMEI) रिकॉर्ड किया.\n\nइसका मतलब है कि आपकी जगह की जानकारी, गतिविधि या निजी जानकारी को लॉग किया गया है. यह आम बात है. हालांकि, यह उन लोगों के लिए समस्या की वजह हो सकता है जिन्हें अपनी निजी जानकारी को लेकर चिंता रहती है."</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"एन्क्रिप्ट यानी सुरक्षित नेटवर्क <xliff:g id="NETWORK_NAME">%1$s</xliff:g> से कनेक्ट किया गया"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"अब <xliff:g id="NETWORK_NAME">%1$s</xliff:g> सिम का कनेक्शन ज़्यादा सुरक्षित है"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"अब <xliff:g id="NETWORK_NAME">%1$s</xliff:g> सिम का कनेक्शन ज़्यादा सुरक्षित हो गया है"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"ऐसे नेटवर्क से कनेक्ट किया गया जो सुरक्षित नहीं है"</string>
-    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> सिम का इस्तेमाल करने के दौरान, कॉल, मैसेज, और डेटा को ऐक्सेस किए जाने का खतरा हो सकता है"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> सिम का इस्तेमाल करने के दौरान, कॉल, मैसेज, और डेटा को ऐक्सेस किए जाने का खतरा हो सकता है.\n\nजब आपका कनेक्शन फिर से एन्क्रिप्ट यानी सुरक्षित हो जाएगा, तब आपको दोबारा सूचना भेजी जाएगी."</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> सिम का इस्तेमाल करने पर, कॉल, मैसेज, और डेटा ऐक्सेस किए जाने का खतरा हो सकता है"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> सिम का इस्तेमाल करने पर, कॉल, मैसेज, और डेटा ऐक्सेस किए जाने का खतरा हो सकता है.\n\nजब आपका कनेक्शन फिर से एन्क्रिप्ट यानी सुरक्षित हो जाएगा, तब आपको नई सूचना भेजी जाएगी."</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"मोबाइल नेटवर्क की सुरक्षा से जुड़ी सेटिंग"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"ज़्यादा जानें"</string>
     <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"ठीक है"</string>
@@ -283,6 +283,8 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"आवाज़ से डिवाइस का इस्तेमाल"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"लॉकडाउन"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
+    <skip />
     <string name="notification_hidden_text" msgid="2835519769868187223">"नई सूचना"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"सामान्य कीबोर्ड"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"सुरक्षा"</string>
@@ -666,7 +668,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"फ़िंगरप्रिंट की पहचान नहीं हो पाई"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"फ़िंगरप्रिंट की पहचान नहीं हो पाई"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"चेहरा नहीं पहचाना गया. फ़िंगरप्रिंट इस्तेमाल करें."</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"चेहरा की पहचान नहीं हो पाई. फ़िंगरप्रिंट का इस्तेमाल करें."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फ़िंगरप्रिंट की पुष्टि हो गई"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"चेहरे की पहचान की गई"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरे की पहचान की गई, कृपया पुष्टि बटन दबाएं"</string>
@@ -2144,10 +2146,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"रूटीन मोड जानकारी की सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"बैटरी सेवर चालू है"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"इससे बैटरी कम खर्च होती है और बैटरी लाइफ़ बढ़ती है"</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"बैटरी सेवर चालू है"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"बैटरी लाइफ़ बढ़ाने के लिए बैटरी सेवर चालू किया गया है"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"बैटरी सेवर"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"बैटरी सेवर बंद कर दिया गया है"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"फ़ोन में काफ़ी बैटरी बची है. सुविधाओं पर अब पाबंदी नहीं है."</string>
@@ -2396,21 +2396,17 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"कीबोर्ड का लेआउट <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… पर सेट कर दिया गया है. इसे बदलने के लिए टैप करें."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"फ़िज़िकल कीबोर्ड कॉन्फ़िगर किए गए"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"कीबोर्ड देखने के लिए टैप करें"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"निजी"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"प्राइवेट"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"क्लोन"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"ऑफ़िस"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"ऑफ़िस 2"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"ऑफ़िस 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"टेस्ट"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"कम्यूनिटी"</string>
-    <!-- no translation found for accessibility_label_managed_profile (3366526886209832641) -->
-    <skip />
-    <!-- no translation found for accessibility_label_private_profile (1436459319135548969) -->
-    <skip />
-    <!-- no translation found for accessibility_label_clone_profile (7579118375042398784) -->
-    <skip />
-    <!-- no translation found for accessibility_label_communal_profile (1437173163111334791) -->
-    <skip />
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"वर्क प्रोफ़ाइल"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"प्राइवेट स्पेस"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"क्लोन"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"कम्यूनिटी"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"संवेदनशील जानकारी वाली सूचना का कॉन्टेंट छिपा है"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"स्क्रीन शेयर करने के दौरान सुरक्षा के लिए, ऐप्लिकेशन का कॉन्टेंट छिपाया गया"</string>
@@ -2419,4 +2415,15 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ऐप्लिकेशन खोलें"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"यह सेटिंग कैसे काम करती है"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"प्रोसेस जारी है..."</string>
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"फ़िंगरप्रिंट अनलॉक की सुविधा दोबारा सेट अप करें"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
+    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"अच्छे से काम न करने की वजह से <xliff:g id="FINGERPRINT">%s</xliff:g> को मिटा दिया गया. फ़िंगरप्रिंट की मदद से फ़ोन अनलॉक करने के लिए, फ़िंगरप्रिंट अनलॉक की सुविधा को दोबारा सेट अप करें."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"अच्छे से काम न करने की वजह से, <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> और <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> को मिटा दिया गया. फ़िंगरप्रिंट की मदद से फ़ोन अनलॉक करने के लिए, फ़िंगरप्रिंट अनलॉक की सुविधा दोबारा सेट अप करें."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"फ़ेस अनलॉक की सुविधा को दोबारा सेट अप करें"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"अच्छे से काम न करने की वजह से, चेहरे का मॉडल मिटा दिया गया. फ़ेस अनलॉक की सुविधा की मदद से फ़ोन अनलॉक करने के लिए, इस सुविधा को दोबारा सेट अप करें."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"सेट अप करें"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"अभी नहीं"</string>
 </resources>

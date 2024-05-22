@@ -78,16 +78,7 @@ class TaskContainer {
     private TaskFragmentContainer mAlwaysOnTopOverlayContainer;
 
     @NonNull
-    private final Configuration mConfiguration;
-
-    private int mDisplayId;
-
-    private boolean mIsVisible;
-
-    private boolean mHasDirectActivity;
-
-    @Nullable
-    private TaskFragmentParentInfo mTaskFragmentParentInfo;
+    private TaskFragmentParentInfo mInfo;
 
     /**
      * TaskFragments that the organizer has requested to be closed. They should be removed when
@@ -131,12 +122,14 @@ class TaskContainer {
         mTaskId = taskId;
         final TaskProperties taskProperties = TaskProperties
                 .getTaskPropertiesFromActivity(activityInTask);
-        mConfiguration = taskProperties.getConfiguration();
-        mDisplayId = taskProperties.getDisplayId();
-        // Note that it is always called when there's a new Activity is started, which implies
-        // the host task is visible and has an activity in the task.
-        mIsVisible = true;
-        mHasDirectActivity = true;
+        mInfo = new TaskFragmentParentInfo(
+                taskProperties.getConfiguration(),
+                taskProperties.getDisplayId(),
+                // Note that it is always called when there's a new Activity is started, which
+                // implies the host task is visible and has an activity in the task.
+                true /* visible */,
+                true /* hasDirectActivity */,
+                null /* decorSurface */);
     }
 
     int getTaskId() {
@@ -144,39 +137,39 @@ class TaskContainer {
     }
 
     int getDisplayId() {
-        return mDisplayId;
+        return mInfo.getDisplayId();
     }
 
     boolean isVisible() {
-        return mIsVisible;
+        return mInfo.isVisible();
+    }
+
+    void setInvisible() {
+        mInfo = new TaskFragmentParentInfo(mInfo.getConfiguration(), mInfo.getDisplayId(),
+                false /* visible */, mInfo.hasDirectActivity(), mInfo.getDecorSurface());
     }
 
     boolean hasDirectActivity() {
-        return mHasDirectActivity;
+        return mInfo.hasDirectActivity();
     }
 
     @NonNull
     Rect getBounds() {
-        return mConfiguration.windowConfiguration.getBounds();
+        return mInfo.getConfiguration().windowConfiguration.getBounds();
     }
 
     @NonNull
     TaskProperties getTaskProperties() {
-        return new TaskProperties(mDisplayId, mConfiguration);
+        return new TaskProperties(mInfo.getDisplayId(), mInfo.getConfiguration());
     }
 
     void updateTaskFragmentParentInfo(@NonNull TaskFragmentParentInfo info) {
-        // TODO(b/293654166): cache the TaskFragmentParentInfo and remove these fields.
-        mConfiguration.setTo(info.getConfiguration());
-        mDisplayId = info.getDisplayId();
-        mIsVisible = info.isVisible();
-        mHasDirectActivity = info.hasDirectActivity();
-        mTaskFragmentParentInfo = info;
+        mInfo = info;
     }
 
-    @Nullable
+    @NonNull
     TaskFragmentParentInfo getTaskFragmentParentInfo() {
-        return mTaskFragmentParentInfo;
+        return mInfo;
     }
 
     /**
@@ -185,13 +178,15 @@ class TaskContainer {
     boolean shouldUpdateContainer(@NonNull TaskFragmentParentInfo info) {
         final Configuration configuration = info.getConfiguration();
 
-        return info.isVisible()
-                // No need to update presentation in PIP until the Task exit PIP.
-                && !isInPictureInPicture(configuration)
-                // If the task properties equals regardless of starting position, don't need to
-                // update the container.
-                && (mConfiguration.diffPublicOnly(configuration) != 0
-                || mDisplayId != info.getDisplayId());
+        if (isInPictureInPicture(configuration)) {
+            // No need to update presentation in PIP until the Task exit PIP.
+            return false;
+        }
+
+        // If the task properties equals regardless of starting position, don't
+        // need to update the container.
+        return mInfo.getConfiguration().diffPublicOnly(configuration) != 0
+                || mInfo.getDisplayId() != info.getDisplayId();
     }
 
     /**
@@ -218,7 +213,7 @@ class TaskContainer {
     }
 
     boolean isInPictureInPicture() {
-        return isInPictureInPicture(mConfiguration);
+        return isInPictureInPicture(mInfo.getConfiguration());
     }
 
     private static boolean isInPictureInPicture(@NonNull Configuration configuration) {
@@ -231,7 +226,7 @@ class TaskContainer {
 
     @WindowingMode
     private int getWindowingMode() {
-        return mConfiguration.windowConfiguration.getWindowingMode();
+        return mInfo.getConfiguration().windowConfiguration.getWindowingMode();
     }
 
     /** Whether there is any {@link TaskFragmentContainer} below this Task. */

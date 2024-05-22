@@ -439,6 +439,15 @@ public class NotificationChildrenContainer extends ViewGroup
         Trace.endSection();
     }
 
+    /**
+     * Update the expand state of the group header.
+     */
+    public void updateGroupHeaderExpandState() {
+        if (mGroupHeaderWrapper != null) {
+            mGroupHeaderWrapper.setExpanded(mChildrenExpanded);
+        }
+    }
+
     private void removeGroupHeader() {
         if (mGroupHeader == null) {
             return;

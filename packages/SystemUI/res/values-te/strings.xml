@@ -97,8 +97,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ఎడమ వైపు సరిహద్దు <xliff:g id="PERCENT">%1$d</xliff:g> శాతం"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"కుడి వైపు సరిహద్దు <xliff:g id="PERCENT">%1$d</xliff:g> శాతం"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"వర్క్ ప్రొఫైల్‌లోని <xliff:g id="APP">%1$s</xliff:g>‌లో సేవ్ చేయబడింది"</string>
-    <!-- no translation found for screenshot_private_profile_notification (1704440899154243171) -->
-    <skip />
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"ప్రైవేట్ ప్రొఫైల్‌లోని <xliff:g id="APP">%1$s</xliff:g>‌లో సేవ్ చేయబడింది"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ఫైల్స్"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g>, ఈ స్క్రీన్‌షాట్‌ను గుర్తించింది."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g>, ఇతర ఓపెన్ యాప్‌లు ఈ స్క్రీన్‌షాట్‌ను గుర్తించాయి."</string>
@@ -273,7 +272,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"బ్లూటూత్ వాడండి"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"కనెక్ట్ అయింది"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ఆడియో షేరింగ్"</string>
-    <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"సేవ్ చేయబడింది"</string>
+    <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"సేవ్ అయ్యింది"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"డిస్‌కనెక్ట్ చేయండి"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"యాక్టివేట్ చేయండి"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"రేపు మళ్లీ ఆటోమేటిక్‌గా ఆన్ చేస్తుంది"</string>
@@ -370,7 +369,7 @@
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"మధ్యస్థం"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"అధికం"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"వినికిడి పరికరాలు"</string>
-    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"వినికిడి పరికరం"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"వినికిడి పరికరాలు"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"కొత్త పరికరాన్ని పెయిర్ చేయండి"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"కొత్త పరికరాన్ని పెయిర్ చేయడానికి క్లిక్ చేయండి"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"ప్రీసెట్‌ను అప్‌డేట్ చేయడం సాధ్యపడలేదు"</string>
@@ -448,6 +447,8 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"విడ్జెట్‌లను అనుకూలీకరించడానికి, నొక్కి, ఉంచండి"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"విడ్జెట్‌లను అనుకూలంగా మార్చండి"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"డిజేబుల్ చేయబడిన విడ్జెట్ కోసం యాప్ చిహ్నం"</string>
+    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"విడ్జెట్‌ను ఎడిట్ చేయండి"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"తీసివేయండి"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"విడ్జెట్‌ను జోడించండి"</string>
@@ -461,8 +462,9 @@
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"లాక్ స్క్రీన్‌లో విడ్జెట్‌లను మూసివేయండి"</string>
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"విడ్జెట్‌లను అనుకూలంగా మార్చండి"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"లాక్ స్క్రీన్‌లో విడ్జెట్‌లు"</string>
-    <!-- no translation found for accessibility_action_label_select_widget (8897281501387398191) -->
-    <skip />
+    <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"విడ్జెట్‌ను ఎంచుకోండి"</string>
+    <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"విడ్జెట్‌ను తీసివేయండి"</string>
+    <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"ఎంచుకున్న విడ్జెట్ కోసం ప్లేస్‌ను ఎంచుకోండి"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"వినియోగదారుని మార్చు"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"పుల్‌డౌన్ మెనూ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ఈ సెషన్‌లోని అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
@@ -627,12 +629,17 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"అవుట్‌పుట్ సెట్టింగ్‌లను ఎంటర్ చేయండి"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"వాల్యూమ్ స్లయిడర్‌లు విస్తరించబడ్డాయి"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"వాల్యూమ్ స్లయిడర్‌లు కుదించబడ్డాయి"</string>
-    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"%sను మ్యూట్ చేయండి"</string>
-    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"%sను అన్‌మ్యూట్ చేయండి"</string>
+    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g>‌ ప్లే అయ్యే డివైజ్"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"ఆడియో ప్లే డివైజ్"</string>
-    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
-    <skip />
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"కాల్ ప్రోగ్రెస్‌లో ఉంది"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"సిస్టమ్ UI ట్యూనర్"</string>
     <string name="status_bar" msgid="4357390266055077437">"స్టేటస్‌ బార్‌"</string>
     <string name="demo_mode" msgid="263484519766901593">"సిస్టమ్ UI డెమో మోడ్"</string>
@@ -660,8 +667,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"శాటిలైట్, కనెక్షన్ సరిగా లేదు"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"శాటిలైట్, కనెక్షన్ బాగుంది"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"శాటిలైట్, కనెక్షన్ అందుబాటులో ఉంది"</string>
-    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"ఎమర్జెన్సీ శాటిలైట్ సహాయం"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ఆఫీస్ ప్రొఫైల్‌"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"కొందరికి సరదాగా ఉంటుంది కానీ అందరికీ అలాగే ఉండదు"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"సిస్టమ్ UI ట్యూనర్ Android వినియోగదారు ఇంటర్‌ఫేస్‌ను మెరుగుపరచడానికి మరియు అనుకూలంగా మార్చడానికి మీకు మరిన్ని మార్గాలను అందిస్తుంది. ఈ ప్రయోగాత్మక లక్షణాలు భవిష్యత్తు విడుదలల్లో మార్పుకు లోనవ్వచ్చు, తాత్కాలికంగా లేదా పూర్తిగా నిలిపివేయవచ్చు. జాగ్రత్తగా కొనసాగండి."</string>
@@ -866,8 +872,7 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"టైల్‌ను జోడించండి"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g>కు తరలించండి"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> స్థానానికి జోడించండి"</string>
-    <!-- no translation found for accessibilit_qs_edit_tile_add_move_invalid_position (2858467994472624487) -->
-    <skip />
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"ప్రస్తుత పొజిషన్ చెల్లదు."</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"స్థానం <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"టైల్ జోడించబడింది"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"టైల్ తీసివేయబడింది"</string>

@@ -59,8 +59,12 @@ constructor(
     /** The view that will be ghosted and from which the background will be extracted. */
     private val ghostedView: View,
 
-    /** The [CujType] associated to this animation. */
-    private val cujType: Int? = null,
+    /** The [CujType] associated to this launch animation. */
+    private val launchCujType: Int? = null,
+    override val transitionCookie: ActivityTransitionAnimator.TransitionCookie? = null,
+
+    /** The [CujType] associated to this return animation. */
+    private val returnCujType: Int? = null,
     private var interactionJankMonitor: InteractionJankMonitor =
         InteractionJankMonitor.getInstance(),
 ) : ActivityTransitionAnimator.Controller {
@@ -103,6 +107,15 @@ constructor(
      * then set back to its initial value at the end of the animation.
      */
     private val background: Drawable?
+
+    /** CUJ identifier accounting for whether this controller is for a launch or a return. */
+    private val cujType: Int?
+        get() =
+            if (isLaunching) {
+                launchCujType
+            } else {
+                returnCujType
+            }
 
     init {
         // Make sure the View we launch from implements LaunchableView to avoid visibility issues.

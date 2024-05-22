@@ -124,8 +124,10 @@ constructor(
             when (toScene) {
                 Scenes.Bouncer -> Classifier.BOUNCER_UNLOCK
                 Scenes.Gone -> Classifier.UNLOCK
+                Scenes.NotificationsShade -> Classifier.NOTIFICATION_DRAG_DOWN
                 Scenes.Shade -> Classifier.NOTIFICATION_DRAG_DOWN
                 Scenes.QuickSettings -> Classifier.QUICK_SETTINGS
+                Scenes.QuickSettingsShade -> Classifier.QUICK_SETTINGS
                 else -> null
             }
 

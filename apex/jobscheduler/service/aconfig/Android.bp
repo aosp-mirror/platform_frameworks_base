@@ -42,3 +42,16 @@ java_aconfig_library {
     name: "service-jobscheduler-alarm.flags-aconfig-java",
     aconfig_declarations: "alarm_flags",
 }
+
+// App Idle
+aconfig_declarations {
+    name: "app_idle_flags",
+    package: "com.android.server.usage",
+    container: "system",
+    srcs: ["app_idle.aconfig"],
+}
+
+java_aconfig_library {
+    name: "service-jobscheduler-appidle.flags-aconfig-java",
+    aconfig_declarations: "app_idle_flags",
+}

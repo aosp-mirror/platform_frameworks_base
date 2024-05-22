@@ -781,7 +781,7 @@ public interface WindowManager extends ViewManager {
      * <p>
      * The metrics describe the size of the area the window would occupy with
      * {@link LayoutParams#MATCH_PARENT MATCH_PARENT} width and height, and the {@link WindowInsets}
-     * such a window would have.
+     * such a window would have. The {@link WindowInsets} are not deducted from the bounds.
      * <p>
      * The value of this is based on the <b>current</b> windowing state of the system.
      *
@@ -811,7 +811,7 @@ public interface WindowManager extends ViewManager {
      * <p>
      * The metrics describe the size of the largest potential area the window might occupy with
      * {@link LayoutParams#MATCH_PARENT MATCH_PARENT} width and height, and the {@link WindowInsets}
-     * such a window would have.
+     * such a window would have. The {@link WindowInsets} are not deducted from the bounds.
      * <p>
      * Note that this might still be smaller than the size of the physical display if certain areas
      * of the display are not available to windows created in this {@link Context}.
@@ -4264,11 +4264,9 @@ public interface WindowManager extends ViewManager {
          *         no letterbox is applied."/>
          *
          * <p>
-         * A cutout in the corner is considered to be on the short edge: <br/>
-         * <img src="{@docRoot}reference/android/images/display_cutout/short_edge/fullscreen_corner_no_letterbox.png"
-         * height="720"
-         * alt="Screenshot of a fullscreen activity on a display with a cutout in the corner in
-         *         portrait, no letterbox is applied."/>
+         * A cutout in the corner can be considered to be on different edge in different device
+         * rotations. This behavior may vary from device to device. Use this flag is possible to
+         * letterbox your app if the display cutout is at corner.
          *
          * <p>
          * On the other hand, should the cutout be on the long edge of the display, a letterbox will
@@ -4365,7 +4363,8 @@ public interface WindowManager extends ViewManager {
         public static final int INPUT_FEATURE_SPY = 1 << 2;
 
         /**
-         * Input feature used to indicate that this window is sensitive for tracing.
+         * Input feature used to indicate that this window is privacy sensitive. This may be used
+         * to redact input interactions from tracing or screen mirroring.
          * <p>
          * A window that uses {@link LayoutParams#FLAG_SECURE} will automatically be treated as
          * a sensitive for input tracing, but this input feature can be set on windows that don't
@@ -4378,7 +4377,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
-        public static final int INPUT_FEATURE_SENSITIVE_FOR_TRACING = 1 << 3;
+        public static final int INPUT_FEATURE_SENSITIVE_FOR_PRIVACY = 1 << 3;
 
         /**
          * An internal annotation for flags that can be specified to {@link #inputFeatures}.
@@ -4392,7 +4391,7 @@ public interface WindowManager extends ViewManager {
                 INPUT_FEATURE_NO_INPUT_CHANNEL,
                 INPUT_FEATURE_DISABLE_USER_ACTIVITY,
                 INPUT_FEATURE_SPY,
-                INPUT_FEATURE_SENSITIVE_FOR_TRACING,
+                INPUT_FEATURE_SENSITIVE_FOR_PRIVACY,
         })
         public @interface InputFeatureFlags {
         }

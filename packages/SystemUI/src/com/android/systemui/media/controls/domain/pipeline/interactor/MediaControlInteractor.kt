@@ -21,9 +21,7 @@ import android.app.BroadcastOptions
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.media.session.MediaController
 import android.media.session.MediaSession
-import android.media.session.PlaybackState
 import android.provider.Settings
 import android.util.Log
 import com.android.internal.jank.Cuj
@@ -42,7 +40,6 @@ import com.android.systemui.media.dialog.MediaOutputDialogManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.kotlin.pairwiseBy
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
@@ -70,19 +67,6 @@ constructor(
             .map { entries -> entries[instanceId]?.let { toMediaControlModel(it) } }
             .distinctUntilChanged()
 
-    val isStartedPlaying: Flow<Boolean> =
-        mediaControl
-            .map { mediaControl ->
-                mediaControl?.token?.let { token ->
-                    MediaController(applicationContext, token).playbackState?.let {
-                        it.state == PlaybackState.STATE_PLAYING
-                    }
-                }
-                    ?: false
-            }
-            .pairwiseBy(initialValue = false) { wasPlaying, isPlaying -> !wasPlaying && isPlaying }
-            .distinctUntilChanged()
-
     val onAnyMediaConfigurationChange: Flow<Unit> = repository.onAnyMediaConfigurationChange
 
     fun removeMediaControl(
@@ -90,7 +74,8 @@ constructor(
         instanceId: InstanceId,
         delayMs: Long
     ): Boolean {
-        val dismissed = mediaDataProcessor.dismissMediaData(instanceId, delayMs)
+        val dismissed =
+            mediaDataProcessor.dismissMediaData(instanceId, delayMs, userInitiated = true)
         if (!dismissed) {
             Log.w(
                 TAG,
@@ -170,11 +155,16 @@ constructor(
         return false
     }
 
-    fun startMediaOutputDialog(expandable: Expandable, packageName: String) {
+    fun startMediaOutputDialog(
+        expandable: Expandable,
+        packageName: String,
+        token: MediaSession.Token? = null
+    ) {
         mediaOutputDialogManager.createAndShowWithController(
             packageName,
             true,
-            expandable.dialogController()
+            expandable.dialogController(),
+            token = token,
         )
     }
 

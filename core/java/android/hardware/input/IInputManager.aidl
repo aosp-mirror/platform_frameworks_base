@@ -55,7 +55,6 @@ interface IInputManager {
     int[] getInputDeviceIds();
 
     // Enable/disable input device.
-    boolean isInputDeviceEnabled(int deviceId);
     void enableInputDevice(int deviceId);
     void disableInputDevice(int deviceId);
 
@@ -148,8 +147,6 @@ interface IInputManager {
 
     IInputDeviceBatteryState getBatteryState(int deviceId);
 
-    void setPointerIconType(int typeId);
-    void setCustomPointerIcon(in PointerIcon icon);
     boolean setPointerIcon(in PointerIcon icon, int displayId, int deviceId, int pointerId,
             in IBinder inputToken);
 
@@ -173,9 +170,9 @@ interface IInputManager {
     void removeUniqueIdAssociationByDescriptor(in String inputDeviceDescriptor);
 
     // Add a runtime association between the input device and display, using device's port.
-    void addUniqueIdAssociation(in String inputPort, in String displayUniqueId);
+    void addUniqueIdAssociationByPort(in String inputPort, in String displayUniqueId);
     // Remove the runtime association between the input device and display, using device's port.
-    void removeUniqueIdAssociation(in String inputPort);
+    void removeUniqueIdAssociationByPort(in String inputPort);
 
     InputSensorInfo[] getSensorList(int deviceId);
 

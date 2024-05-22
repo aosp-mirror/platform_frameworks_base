@@ -19,8 +19,12 @@ package com.android.systemui.screenshot.ui.viewmodel
 import android.graphics.drawable.Drawable
 
 /** Data describing how an action should be shown to the user. */
-data class ActionButtonAppearance(
+data class ActionButtonAppearance
+@JvmOverloads
+constructor(
     val icon: Drawable?,
     val label: CharSequence?,
     val description: CharSequence,
+    val tint: Boolean = true,
+    val customBackground: Drawable? = null,
 )

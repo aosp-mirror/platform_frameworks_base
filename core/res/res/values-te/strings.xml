@@ -156,7 +156,7 @@
     <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"మొబైల్ నెట్‌వర్క్ సెక్యూరిటీ"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"ఎన్‌క్రిప్షన్, ఎన్‌క్రిప్ట్ చేయని నెట్‌వర్క్‌లకు సంబంధించిన నోటిఫికేషన్‌లు"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"పరికర IDని యాక్సెస్ చేశారు"</string>
-    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"మీ <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIMను ఉపయోగిస్తున్నప్పుడు, సమీపంలోని నెట్‌వర్క్ <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> సమయానికి మీ పరికర యూనిక్ ID (IMSI లేదా IMEI)ని రికార్డ్ చేసింది"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"మీ <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIMను వాడేటప్పుడు, <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>కి దగ్గర్లోని ఒక నెట్‌వర్క్, మీ పరికర యూనిక్ IDని (IMSI లేదా IMEI) రికార్డ్ చేసింది"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"మీ <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIMను ఉపయోగిస్తున్నప్పుడు, సమీపంలోని నెట్‌వర్క్ <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> సమయానికి మీ పరికర యూనిక్ ID (IMSI లేదా IMEI)ని రికార్డ్ చేసింది.\n\nమీ లొకేషన్, యాక్టివిటీ, లేదా గుర్తింపు లాగ్ అయ్యాయని దీని అర్థం. దీనిని తరచుగా అమలు చేస్తుంటారు, కానీ గోప్యత గురించి ఆందోళనపడే వ్యక్తులకు ఇది సమస్య కావచ్చు,"</string>
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"ఎన్‌క్రిప్ట్ చేసిన నెట్‌వర్క్ <xliff:g id="NETWORK_NAME">%1$s</xliff:g>‌కు కనెక్ట్ అయింది"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM కనెక్షన్ ఇప్పుడు మరింత సురక్షితంగా ఉంది"</string>
@@ -283,6 +283,8 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"వాయిస్ అసిస్టెంట్"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"లాక్ చేయండి"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <!-- no translation found for notification_compact_heads_up_reply (2425293958371284340) -->
+    <skip />
     <string name="notification_hidden_text" msgid="2835519769868187223">"కొత్త నోటిఫికేషన్"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"భౌతిక కీబోర్డ్"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"సెక్యూరిటీ"</string>
@@ -2144,10 +2146,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"రొటీన్ మోడ్ సమాచార నోటిఫికేషన్"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"బ్యాటరీ సేవర్ ఆన్ చేయబడింది"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"బ్యాటరీ జీవితకాలాన్ని పొడిగించడానికి బ్యాటరీ వినియోగాన్ని తగ్గించడం"</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"బ్యాటరీ సేవర్ ఆన్‌లో ఉంది"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"బ్యాటరీ లైఫ్‌ను పొడిగించడానికి బ్యాటరీ సేవర్ ఆన్ చేయబడింది"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"బ్యాటరీ సేవర్"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"బ్యాటరీ సేవర్ ఆఫ్ చేయబడింది"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ఫోన్‌కు తగినంత ఛార్జింగ్ ఉంది. ఫీచర్‌లు ఇప్పటి నుండి పరిమితం చేయబడవు."</string>
@@ -2403,14 +2403,10 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"ఆఫీస్ 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"పరీక్ష"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"కమ్యూనల్"</string>
-    <!-- no translation found for accessibility_label_managed_profile (3366526886209832641) -->
-    <skip />
-    <!-- no translation found for accessibility_label_private_profile (1436459319135548969) -->
-    <skip />
-    <!-- no translation found for accessibility_label_clone_profile (7579118375042398784) -->
-    <skip />
-    <!-- no translation found for accessibility_label_communal_profile (1437173163111334791) -->
-    <skip />
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"వర్క్ ప్రొఫైల్"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"ప్రైవేట్ స్పేస్"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"క్లోన్"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"కమ్యూనల్"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"గోప్యమైన నోటిఫికేషన్ కంటెంట్ దాచబడింది"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"సెక్యూరిటీ కోసం స్క్రీన్ షేర్ నుండి యాప్ కంటెంట్ దాచబడింది"</string>
@@ -2419,4 +2415,15 @@
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messagesను తెరవండి"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ఇది ఎలా పని చేస్తుంది"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"పెండింగ్‌లో ఉంది..."</string>
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"వేలిముద్ర అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి"</string>
+    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
+    <skip />
+    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
+    <skip />
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> సరిగ్గా పని చేయడం లేదు, తొలగించబడింది. వేలిముద్రతో మీ ఫోన్‌ను అన్‌లాక్ చేయడానికి దాన్ని మళ్లీ సెటప్ చేయండి."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> బాగా పని చేయడం లేదు, తొలగించబడ్డాయి. మీ వేలిముద్రతో మీ ఫోన్‌ను అన్‌లాక్ చేయడానికి వాటిని మళ్లీ సెటప్ చేయండి."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"ఫేస్ అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"మీ ఫేస్ మోడల్ సరిగ్గా పని చేయడం లేదు, తొలగించబడింది. ఫేస్‌తో మీ ఫోన్‌ను అన్‌లాక్ చేయడానికి దాన్ని మళ్లీ సెటప్ చేయండి."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"సెటప్ చేయండి"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ఇప్పుడు కాదు"</string>
 </resources>

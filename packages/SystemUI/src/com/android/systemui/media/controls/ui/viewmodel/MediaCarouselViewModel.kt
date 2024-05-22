@@ -26,21 +26,15 @@ import com.android.systemui.media.controls.domain.pipeline.interactor.factory.Me
 import com.android.systemui.media.controls.shared.model.MediaCommonModel
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
-import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.util.Utils
-import com.android.systemui.util.kotlin.pairwiseBy
-import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state and handles user inputs for media carousel */
@@ -60,52 +54,40 @@ constructor(
     private val mediaFlags: MediaFlags,
 ) {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val mediaItems: StateFlow<List<MediaCommonViewModel>> =
-        conflatedCallbackFlow {
-                val listener = OnReorderingAllowedListener { trySend(Unit) }
-                visualStabilityProvider.addPersistentReorderingAllowedListener(listener)
-                trySend(Unit)
-                awaitClose { visualStabilityProvider.removeReorderingAllowedListener(listener) }
-            }
-            .flatMapLatest {
-                combine(interactor.isMediaFromRec, interactor.sortedMedia) {
-                    isRecsToMedia,
-                    sortedItems ->
-                    buildList {
-                        shouldReorder = isRecsToMedia
-                        val reorderAllowed = isReorderingAllowed()
-                        sortedItems.forEach { commonModel ->
-                            if (!reorderAllowed || !modelsPendingRemoval.contains(commonModel)) {
-                                when (commonModel) {
-                                    is MediaCommonModel.MediaControl ->
-                                        add(toViewModel(commonModel))
-                                    is MediaCommonModel.MediaRecommendations ->
-                                        add(toViewModel(commonModel))
-                                }
+        interactor.currentMedia
+            .map { sortedItems ->
+                val mediaList = buildList {
+                    sortedItems.forEach { commonModel ->
+                        // When view is started we should make sure to clean models that are pending
+                        // removal.
+                        // This action should only be triggered once.
+                        if (!allowReorder || !modelsPendingRemoval.contains(commonModel)) {
+                            when (commonModel) {
+                                is MediaCommonModel.MediaControl -> add(toViewModel(commonModel))
+                                is MediaCommonModel.MediaRecommendations ->
+                                    add(toViewModel(commonModel))
                             }
-                        }
-                        if (reorderAllowed) {
-                            modelsPendingRemoval.clear()
                         }
                     }
                 }
-            }
-            .pairwiseBy { old, new ->
-                // This condition can only happen when view is attached. So the old emit is of the
-                // most recent list updated.
-                // If the old list is empty, it is okay to emit the new ordered list.
-                if (isReorderingAllowed() || shouldReorder || old.isEmpty()) {
-                    new
-                } else {
-                    old
+                if (allowReorder) {
+                    if (modelsPendingRemoval.size > 0) {
+                        updateHostVisibility()
+                    }
+                    modelsPendingRemoval.clear()
                 }
+                allowReorder = false
+
+                mediaList
             }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = emptyList(),
             )
+
+    var updateHostVisibility: () -> Unit = {}
 
     private val mediaControlByInstanceId =
         mutableMapOf<InstanceId, MediaCommonViewModel.MediaControl>()
@@ -114,11 +96,16 @@ constructor(
 
     private var modelsPendingRemoval: MutableSet<MediaCommonModel> = mutableSetOf()
 
-    private var shouldReorder = true
+    private var allowReorder = false
 
     fun onSwipeToDismiss() {
         logger.logSwipeDismiss()
         interactor.onSwipeToDismiss()
+    }
+
+    fun onReorderingAllowed() {
+        allowReorder = true
+        interactor.reorderMedia()
     }
 
     private fun toViewModel(
@@ -138,6 +125,7 @@ constructor(
                         mediaControlByInstanceId.remove(instanceId)
                     },
                     onUpdated = { onMediaControlAddedOrUpdated(it, commonModel) },
+                    isMediaFromRec = commonModel.isMediaFromRec
                 )
                 .also { mediaControlByInstanceId[instanceId] = it }
     }
@@ -213,7 +201,11 @@ constructor(
     ) {
         if (immediatelyRemove || isReorderingAllowed()) {
             interactor.dismissSmartspaceRecommendation(commonModel.recsLoadingModel.key, 0L)
-            // TODO if not immediate remove update host visibility
+            if (!immediatelyRemove) {
+                // Although it wasn't requested, we were able to process the removal
+                // immediately since reordering is allowed. So, notify hosts to update
+                updateHostVisibility()
+            }
         } else {
             modelsPendingRemoval.add(commonModel)
         }

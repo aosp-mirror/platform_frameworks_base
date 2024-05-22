@@ -174,9 +174,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private static final String TYPE_DISMISS = "dismiss";
     /** Volume dialog slider animation. */
     private static final String TYPE_UPDATE = "update";
-    static final int PROGRESS_HAPTICS_DISABLED = 0;
-    static final int PROGRESS_HAPTICS_EAGER = 1;
-    static final int PROGRESS_HAPTICS_ANIMATED = 2;
 
     /**
      *  TODO(b/290612381): remove lingering animations or tolerate them
@@ -285,7 +282,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     @GuardedBy("mSafetyWarningLock")
     private CsdWarningDialog mCsdDialog;
     private boolean mHovering = false;
-    private final boolean mShowActiveStreamOnly;
+    private final boolean mIsTv;
     private boolean mConfigChanged = false;
     private boolean mIsAnimatingDismiss = false;
     private boolean mHasSeenODICaptionsTooltip;
@@ -346,7 +343,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mConfigurationController = configurationController;
         mMediaOutputDialogManager = mediaOutputDialogManager;
         mCsdWarningDialogFactory = csdWarningDialogFactory;
-        mShowActiveStreamOnly = showActiveStreamOnly();
+        mIsTv = isTv();
         mHasSeenODICaptionsTooltip =
                 Prefs.getBoolean(context, Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, false);
         mShowLowMediaVolumeIcon =
@@ -1635,7 +1632,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         Trace.endSection();
     }
 
-    private boolean showActiveStreamOnly() {
+    private boolean isTv() {
         return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)
                 || mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEVISION);
     }
@@ -1647,7 +1644,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             return true;
         }
 
-        if (!mShowActiveStreamOnly) {
+        if (!mIsTv) {
             if (row.stream == AudioSystem.STREAM_ACCESSIBILITY) {
                 return mShowA11yStream;
             }
@@ -2092,6 +2089,11 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         }
         final int newProgress = getProgressFromVolume(row.ss, row.slider, vlevel);
         if (progress != newProgress) {
+            if (mIsTv) {
+                // don't animate slider on TVs
+                row.slider.setProgress(newProgress, false);
+                return;
+            }
             if (mShowing && rowVisible) {
                 // animate!
                 if (row.anim != null && row.anim.isRunning()
@@ -2112,7 +2114,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                     row.anim.setIntValues(progress, newProgress);
                     // The animator can't keep up with the volume changes so haptics need to be
                     // triggered here. This happens when the volume keys are continuously pressed.
-                    row.deliverOnProgressChangedHaptics(false, newProgress, PROGRESS_HAPTICS_EAGER);
+                    row.deliverOnProgressChangedHaptics(false, newProgress);
                 }
                 row.animTargetProgress = newProgress;
                 row.anim.setDuration(UPDATE_ANIMATION_DURATION);
@@ -2127,13 +2129,14 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         }
     }
 
-    @VisibleForTesting int progressHapticsForStream(int stream) {
+    @VisibleForTesting
+    boolean canDeliverProgressHapticsToStream(int stream, boolean fromUser, int progress) {
         for (VolumeRow row: mRows) {
             if (row.stream == stream) {
-                return row.mProgressHapticsType;
+                return row.deliverOnProgressChangedHaptics(fromUser, progress);
             }
         }
-        return PROGRESS_HAPTICS_DISABLED;
+        return false;
     }
 
     private void recheckH(VolumeRow row) {
@@ -2527,8 +2530,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 if (fromUser || mRow.animTargetProgress == progress) {
                     // Deliver user-generated slider haptics immediately, or when the animation
                     // completes
-                    mRow.deliverOnProgressChangedHaptics(
-                            fromUser, progress, PROGRESS_HAPTICS_ANIMATED);
+                    mRow.deliverOnProgressChangedHaptics(fromUser, progress);
                 }
             }
             if (D.BUG) Log.d(TAG, AudioSystem.streamToString(mRow.stream)
@@ -2641,7 +2643,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         private int animTargetProgress;
         private int lastAudibleLevel = 1;
         private SeekbarHapticPlugin mHapticPlugin;
-        private int mProgressHapticsType = PROGRESS_HAPTICS_DISABLED;
 
         void setIcon(int iconRes, Resources.Theme theme) {
             if (icon != null) {
@@ -2683,15 +2684,23 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             slider.setOnTouchListener(null);
         }
 
-        void deliverOnProgressChangedHaptics(boolean fromUser, int progress, int hapticsType) {
-            if (mHapticPlugin == null) return;
+        /**
+         * Deliver haptics when the progress of the slider has changed.
+         *
+         * @param fromUser True if the progress changed was caused by the user.
+         * @param progress The progress value of the slider.
+         * @return True if haptics were successfully delivered. False otherwise. This will happen
+         *   if mHapticPlugin is null
+         */
+        boolean deliverOnProgressChangedHaptics(boolean fromUser, int progress) {
+            if (mHapticPlugin == null) return false;
 
             mHapticPlugin.onProgressChanged(slider, progress, fromUser);
             if (!fromUser) {
                 // Consider a change from program as the volume key being continuously pressed
                 mHapticPlugin.onKeyDown();
             }
-            mProgressHapticsType = hapticsType;
+            return true;
         }
     }
 

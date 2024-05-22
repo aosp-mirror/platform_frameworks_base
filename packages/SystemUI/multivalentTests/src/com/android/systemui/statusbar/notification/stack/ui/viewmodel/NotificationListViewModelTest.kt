@@ -20,12 +20,13 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import android.app.NotificationManager.Policy
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
@@ -33,7 +34,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.res.R
-import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.data.repository.fakeRemoteInputRepository
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
@@ -56,11 +57,13 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @EnableFlags(FooterViewRefactor.FLAG_NAME)
-class NotificationListViewModelTest : SysuiTestCase() {
+class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
             fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
@@ -72,16 +75,30 @@ class NotificationListViewModelTest : SysuiTestCase() {
     private val fakeKeyguardRepository = kosmos.fakeKeyguardRepository
     private val fakePowerRepository = kosmos.fakePowerRepository
     private val fakeRemoteInputRepository = kosmos.fakeRemoteInputRepository
-    private val fakeShadeRepository = kosmos.fakeShadeRepository
     private val fakeUserSetupRepository = kosmos.fakeUserSetupRepository
     private val headsUpRepository = kosmos.headsUpNotificationRepository
     private val zenModeRepository = kosmos.zenModeRepository
 
-    val underTest = kosmos.notificationListViewModel
+    private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
+
+    private lateinit var underTest: NotificationListViewModel
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        underTest = kosmos.notificationListViewModel
     }
 
     @Test
@@ -163,7 +180,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
             // AND quick settings are expanded
-            fakeShadeRepository.legacyQsFullscreen.value = true
+            shadeTestUtil.setQsFullscreen(true)
             runCurrent()
 
             // THEN empty shade is not visible
@@ -178,9 +195,10 @@ class NotificationListViewModelTest : SysuiTestCase() {
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
             // AND quick settings are expanded
-            fakeShadeRepository.setQsExpansion(1f)
-            // AND split shade is enabled
+            shadeTestUtil.setQsExpansion(1f)
+            // AND split shade is expanded
             overrideResource(R.bool.config_use_split_notification_shade, true)
+            shadeTestUtil.setShadeExpansion(1f)
             fakeConfigurationController.notifyConfigurationChanged()
             runCurrent()
 
@@ -290,7 +308,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             activeNotificationListRepository.setActiveNotifs(count = 2)
             // AND shade is open
             fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            fakeShadeRepository.setLegacyShadeExpansion(1f)
+            shadeTestUtil.setShadeExpansion(1f)
             runCurrent()
 
             // THEN footer is visible
@@ -306,7 +324,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             activeNotificationListRepository.setActiveNotifs(count = 2)
             // AND shade is open on lockscreen
             fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
-            fakeShadeRepository.setLegacyShadeExpansion(1f)
+            shadeTestUtil.setShadeExpansion(1f)
             runCurrent()
 
             // THEN footer is visible
@@ -337,7 +355,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             activeNotificationListRepository.setActiveNotifs(count = 2)
             // AND shade is open
             fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            fakeShadeRepository.setLegacyShadeExpansion(1f)
+            shadeTestUtil.setShadeExpansion(1f)
             // AND user is not set up
             fakeUserSetupRepository.setUserSetUp(false)
             runCurrent()
@@ -355,7 +373,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             activeNotificationListRepository.setActiveNotifs(count = 2)
             // AND shade is open
             fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            fakeShadeRepository.setLegacyShadeExpansion(1f)
+            shadeTestUtil.setShadeExpansion(1f)
             // AND device is starting to go to sleep
             fakePowerRepository.updateWakefulness(WakefulnessState.STARTING_TO_SLEEP)
             runCurrent()
@@ -373,10 +391,10 @@ class NotificationListViewModelTest : SysuiTestCase() {
             activeNotificationListRepository.setActiveNotifs(count = 2)
             // AND shade is open
             fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            fakeShadeRepository.setLegacyShadeExpansion(1f)
+            shadeTestUtil.setShadeExpansion(1f)
             // AND quick settings are expanded
-            fakeShadeRepository.setQsExpansion(1f)
-            fakeShadeRepository.legacyQsFullscreen.value = true
+            shadeTestUtil.setQsExpansion(1f)
+            shadeTestUtil.setQsFullscreen(true)
             runCurrent()
 
             // THEN footer is not visible
@@ -390,11 +408,11 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
+            // AND quick settings are expanded
+            shadeTestUtil.setQsExpansion(1f)
             // AND shade is open
             fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            fakeShadeRepository.setLegacyShadeExpansion(1f)
-            // AND quick settings are expanded
-            fakeShadeRepository.setQsExpansion(1f)
+            shadeTestUtil.setShadeExpansion(1f)
             // AND split shade is enabled
             overrideResource(R.bool.config_use_split_notification_shade, true)
             fakeConfigurationController.notifyConfigurationChanged()
@@ -413,7 +431,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             activeNotificationListRepository.setActiveNotifs(count = 2)
             // AND shade is open
             fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            fakeShadeRepository.setLegacyShadeExpansion(1f)
+            shadeTestUtil.setShadeExpansion(1f)
             // AND remote input is active
             fakeRemoteInputRepository.isRemoteInputActive.value = true
             runCurrent()
@@ -431,7 +449,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             activeNotificationListRepository.setActiveNotifs(count = 2)
             // AND shade is open and fully expanded
             fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            fakeShadeRepository.setLegacyShadeExpansion(1f)
+            shadeTestUtil.setShadeExpansion(1f)
             runCurrent()
 
             // THEN footer visibility animates
@@ -447,7 +465,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             activeNotificationListRepository.setActiveNotifs(count = 2)
             // AND we are on the keyguard
             fakeKeyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
-            fakeShadeRepository.setLegacyShadeExpansion(1f)
+            shadeTestUtil.setShadeExpansion(1f)
             runCurrent()
 
             // THEN footer visibility does not animate
@@ -461,7 +479,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
             // WHEN shade is closed
             fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            fakeShadeRepository.setLegacyShadeExpansion(0f)
+            shadeTestUtil.setShadeExpansion(0f)
             runCurrent()
 
             // THEN footer is hidden
@@ -475,7 +493,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
             // WHEN shade is open
             fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            fakeShadeRepository.setLegacyShadeExpansion(1f)
+            shadeTestUtil.setShadeExpansion(1f)
             runCurrent()
 
             // THEN footer is hidden
@@ -489,8 +507,8 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
             // WHEN QS partially open
             fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            fakeShadeRepository.setQsExpansion(0.5f)
-            fakeShadeRepository.setLegacyShadeExpansion(0.5f)
+            shadeTestUtil.setQsExpansion(0.5f)
+            shadeTestUtil.setShadeExpansion(0.5f)
             runCurrent()
 
             // THEN footer is hidden
@@ -588,7 +606,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val animationsEnabled by collectLastValue(underTest.headsUpAnimationsEnabled)
 
-            fakeShadeRepository.setQsExpansion(0.0f)
+            shadeTestUtil.setQsExpansion(0.0f)
             fakeKeyguardRepository.setKeyguardShowing(false)
             runCurrent()
 
@@ -601,7 +619,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val animationsEnabled by collectLastValue(underTest.headsUpAnimationsEnabled)
 
-            fakeShadeRepository.setQsExpansion(0.0f)
+            shadeTestUtil.setQsExpansion(0.0f)
             fakeKeyguardRepository.setKeyguardShowing(true)
             runCurrent()
 

@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.content.Context
+import android.util.Log
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /**
@@ -96,10 +98,13 @@ constructor(
                     keyguardUpdateMonitor.isFingerprintDetectionRunning &&
                     keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed
             }
+            .onEach { Log.d(TAG, "showIndicatorForPrimaryBouncer updated: $it") }
 
     private val showIndicatorForAlternateBouncer: Flow<Boolean> =
         // Note: this interactor internally verifies that SideFPS is enabled and running.
-        alternateBouncerInteractor.isVisible
+        alternateBouncerInteractor.isVisible.onEach {
+            Log.d(TAG, "showIndicatorForAlternateBouncer updated: $it")
+        }
 
     /**
      * Indicates whether the primary or alternate bouncers request showing the side fingerprint
@@ -112,6 +117,7 @@ constructor(
                 showForPrimaryBouncer || showForAlternateBouncer
             }
             .distinctUntilChanged()
+            .onEach { Log.d(TAG, "showIndicatorForDeviceEntry updated: $it") }
 
     private fun isBouncerActive(): Boolean {
         if (SceneContainerFlag.isEnabled) {

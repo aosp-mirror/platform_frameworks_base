@@ -136,7 +136,8 @@
             <TextView
                 android:id="@+id/bluetooth_auto_on_toggle_title"
                 android:layout_width="0dp"
-                android:layout_height="68dp"
+                android:layout_height="wrap_content"
+                android:minHeight="68dp"
                 android:layout_marginBottom="20dp"
                 android:maxLines="2"
                 android:ellipsize="end"

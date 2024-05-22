@@ -44,14 +44,6 @@ flag {
 }
 
 flag {
-  name: "attribution_source_constructor"
-  is_exported: true
-  namespace: "permissions"
-  description: "enable AttributionSource(int, int, String, String, IBinder, String[], AttributionSource)"
-  bug: "304478648"
-}
-
-flag {
     name: "enhanced_confirmation_mode_apis_enabled"
     is_exported: true
     is_fixed_read_only: true
@@ -171,6 +163,16 @@ flag {
     namespace: "permissions"
     description: "Ignore activities that handle PROCESS_TEXT in TextView"
     bug: "325356776"
+}
+
+flag {
+    name: "finish_running_ops_for_killed_packages"
+    namespace: "permissions"
+    description: "Finish all appops for a dead app process"
+    bug: "234630570"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

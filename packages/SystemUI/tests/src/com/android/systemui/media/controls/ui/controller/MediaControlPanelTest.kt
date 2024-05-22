@@ -98,11 +98,6 @@ import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseAnimat
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseView
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.KotlinArgumentCaptor
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -125,6 +120,9 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 
 private const val KEY = "TEST_KEY"
 private const val PACKAGE = "PKG"
@@ -247,8 +245,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         // Set up package manager mocks
         val icon = context.getDrawable(R.drawable.ic_android)
         whenever(packageManager.getApplicationIcon(anyString())).thenReturn(icon)
-        whenever(packageManager.getApplicationIcon(any(ApplicationInfo::class.java)))
-            .thenReturn(icon)
+        whenever(packageManager.getApplicationIcon(any<ApplicationInfo>())).thenReturn(icon)
         whenever(packageManager.getApplicationInfo(eq(PACKAGE), anyInt()))
             .thenReturn(applicationInfo)
         whenever(packageManager.getApplicationLabel(any())).thenReturn(PACKAGE)
@@ -644,7 +641,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
 
-        verify(albumView).setImageDrawable(any(Drawable::class.java))
+        verify(albumView).setImageDrawable(any<Drawable>())
     }
 
     @Test
@@ -657,7 +654,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
 
-        verify(albumView).setImageDrawable(any(Drawable::class.java))
+        verify(albumView).setImageDrawable(any<Drawable>())
     }
 
     @Test
@@ -675,12 +672,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindPlayer(state0, PACKAGE)
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
-        verify(albumView).setImageDrawable(any(Drawable::class.java))
+        verify(albumView).setImageDrawable(any<Drawable>())
 
         // Run Metadata update so that later states don't update
         val captor = argumentCaptor<Animator.AnimatorListener>()
         verify(mockAnimator, times(2)).addListener(captor.capture())
-        captor.value.onAnimationEnd(mockAnimator)
+        captor.lastValue.onAnimationEnd(mockAnimator)
         assertThat(titleText.getText()).isEqualTo(TITLE)
         assertThat(artistText.getText()).isEqualTo(ARTIST)
 
@@ -696,13 +693,13 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindPlayer(state2, PACKAGE)
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
-        verify(albumView, times(2)).setImageDrawable(any(Drawable::class.java))
+        verify(albumView, times(2)).setImageDrawable(any<Drawable>())
 
         // Fourth binding to new image runs transition due to color scheme change
         player.bindPlayer(state3, PACKAGE)
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
-        verify(albumView, times(3)).setImageDrawable(any(Drawable::class.java))
+        verify(albumView, times(3)).setImageDrawable(any<Drawable>())
     }
 
     @Test
@@ -974,7 +971,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         val captor = argumentCaptor<SeekBarObserver>()
         verify(seekBarData).observeForever(captor.capture())
-        val seekBarObserver = captor.value!!
+        val seekBarObserver = captor.lastValue
 
         // Then the seekbar is set to animate
         assertThat(seekBarObserver.animationEnabled).isTrue()
@@ -1086,27 +1083,19 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(mockAvd0.isRunning()).thenReturn(false)
         val captor = ArgumentCaptor.forClass(Animatable2.AnimationCallback::class.java)
         verify(mockAvd0, times(1)).registerAnimationCallback(captor.capture())
-        verify(mockAvd1, never())
-            .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
-        verify(mockAvd2, never())
-            .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
+        verify(mockAvd1, never()).registerAnimationCallback(any<Animatable2.AnimationCallback>())
+        verify(mockAvd2, never()).registerAnimationCallback(any<Animatable2.AnimationCallback>())
         captor.getValue().onAnimationEnd(mockAvd0)
 
         // Validate correct state was bound
         assertThat(actionPlayPause.contentDescription).isEqualTo("loading")
         assertThat(actionPlayPause.getBackground()).isNull()
-        verify(mockAvd0, times(1))
-            .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
-        verify(mockAvd1, times(1))
-            .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
-        verify(mockAvd2, times(1))
-            .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
-        verify(mockAvd0, times(1))
-            .unregisterAnimationCallback(any(Animatable2.AnimationCallback::class.java))
-        verify(mockAvd1, times(1))
-            .unregisterAnimationCallback(any(Animatable2.AnimationCallback::class.java))
-        verify(mockAvd2, never())
-            .unregisterAnimationCallback(any(Animatable2.AnimationCallback::class.java))
+        verify(mockAvd0, times(1)).registerAnimationCallback(any<Animatable2.AnimationCallback>())
+        verify(mockAvd1, times(1)).registerAnimationCallback(any<Animatable2.AnimationCallback>())
+        verify(mockAvd2, times(1)).registerAnimationCallback(any<Animatable2.AnimationCallback>())
+        verify(mockAvd0, times(1)).unregisterAnimationCallback(any<Animatable2.AnimationCallback>())
+        verify(mockAvd1, times(1)).unregisterAnimationCallback(any<Animatable2.AnimationCallback>())
+        verify(mockAvd2, never()).unregisterAnimationCallback(any<Animatable2.AnimationCallback>())
     }
 
     @Test
@@ -1118,7 +1107,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         // Capture animation handler
         val captor = argumentCaptor<Animator.AnimatorListener>()
         verify(mockAnimator, times(2)).addListener(captor.capture())
-        val handler = captor.value
+        val handler = captor.lastValue
 
         // Validate text views unchanged but animation started
         assertThat(titleText.getText()).isEqualTo("")
@@ -1147,7 +1136,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         // Capture animation handler
         val captor = argumentCaptor<Animator.AnimatorListener>()
         verify(mockAnimator, times(2)).addListener(captor.capture())
-        val handler = captor.value
+        val handler = captor.lastValue
 
         // Validate text views unchanged but animation started
         assertThat(titleText.getText()).isEqualTo("")
@@ -1179,7 +1168,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         // Capture animation handler
         val captor = argumentCaptor<Animator.AnimatorListener>()
         verify(mockAnimator, times(2)).addListener(captor.capture())
-        val handler = captor.value
+        val handler = captor.lastValue
 
         handler.onAnimationEnd(mockAnimator)
         assertThat(artistText.getText()).isEqualTo("ARTIST_0")
@@ -1344,7 +1333,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(dismiss.isEnabled).isEqualTo(true)
         dismiss.callOnClick()
         verify(logger).logLongPressDismiss(anyInt(), eq(PACKAGE), eq(instanceId))
-        verify(mediaDataManager).dismissMediaData(eq(mediaKey), anyLong())
+        verify(mediaDataManager).dismissMediaData(eq(mediaKey), anyLong(), eq(true))
     }
 
     @Test
@@ -1360,7 +1349,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun player_dismissButtonClick_notInManager() {
         val mediaKey = "key for dismissal"
-        whenever(mediaDataManager.dismissMediaData(eq(mediaKey), anyLong())).thenReturn(false)
+        whenever(mediaDataManager.dismissMediaData(eq(mediaKey), anyLong(), eq(true)))
+            .thenReturn(false)
 
         player.attachPlayer(viewHolder)
         val state = mediaData.copy(notificationKey = KEY)
@@ -1369,8 +1359,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(dismiss.isEnabled).isEqualTo(true)
         dismiss.callOnClick()
 
-        verify(mediaDataManager).dismissMediaData(eq(mediaKey), anyLong())
-        verify(mediaCarouselController).removePlayer(eq(mediaKey), eq(false), eq(false))
+        verify(mediaDataManager).dismissMediaData(eq(mediaKey), anyLong(), eq(true))
+        verify(mediaCarouselController).removePlayer(eq(mediaKey), eq(false), eq(false), eq(true))
     }
 
     @Test
@@ -1774,10 +1764,9 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.attachPlayer(viewHolder)
         player.bindPlayer(mediaData, KEY)
 
-        val callback: () -> Unit = {}
-        val captor = KotlinArgumentCaptor(callback::class.java)
+        val captor = argumentCaptor<() -> Unit>()
         verify(seekBarViewModel).logSeek = captor.capture()
-        captor.value.invoke()
+        captor.lastValue.invoke()
 
         verify(logger).logSeek(anyInt(), eq(PACKAGE), eq(instanceId))
     }
@@ -1800,7 +1789,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         // THEN it sends the PendingIntent without dismissing keyguard first,
         // and does not use the Intent directly (see b/271845008)
         captor.value.onClick(viewHolder.player)
-        verify(pendingIntent).send(any(Bundle::class.java))
+        verify(pendingIntent).send(any<Bundle>())
         verify(pendingIntent, never()).getIntent()
         verify(activityStarter, never()).postStartActivityDismissingKeyguard(eq(clickIntent), any())
     }
@@ -2218,8 +2207,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         mainExecutor.runAllReady()
 
         verify(recCardTitle).setTextColor(any<Int>())
-        verify(recAppIconItem, times(3)).setImageDrawable(any(Drawable::class.java))
-        verify(coverItem, times(3)).setImageDrawable(any(Drawable::class.java))
+        verify(recAppIconItem, times(3)).setImageDrawable(any<Drawable>())
+        verify(coverItem, times(3)).setImageDrawable(any<Drawable>())
         verify(coverItem, times(3)).imageMatrix = any()
     }
 
@@ -2546,7 +2535,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         seamless.callOnClick()
 
         // Then we send the pending intent as is, without modifying the original intent
-        verify(pendingIntent).send(any(Bundle::class.java))
+        verify(pendingIntent).send(any<Bundle>())
         verify(pendingIntent, never()).getIntent()
     }
 
@@ -2578,13 +2567,16 @@ public class MediaControlPanelTest : SysuiTestCase() {
         return Icon.createWithBitmap(bmp)
     }
 
-    private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener =
-        withArgCaptor {
-            verify(seekBarViewModel).setScrubbingChangeListener(capture())
-        }
+    private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener {
+        val captor = argumentCaptor<SeekBarViewModel.ScrubbingChangeListener>()
+        verify(seekBarViewModel).setScrubbingChangeListener(captor.capture())
+        return captor.lastValue
+    }
 
-    private fun getEnabledChangeListener(): SeekBarViewModel.EnabledChangeListener = withArgCaptor {
-        verify(seekBarViewModel).setEnabledChangeListener(capture())
+    private fun getEnabledChangeListener(): SeekBarViewModel.EnabledChangeListener {
+        val captor = argumentCaptor<SeekBarViewModel.EnabledChangeListener>()
+        verify(seekBarViewModel).setEnabledChangeListener(captor.capture())
+        return captor.lastValue
     }
 
     /**

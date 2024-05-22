@@ -20,13 +20,13 @@ public class ComposePathEffect extends PathEffect {
 
     /**
      * Construct a PathEffect whose effect is to apply first the inner effect
-     * and the the outer pathEffect (e.g. outer(inner(path))).
+     * and the outer pathEffect (e.g. outer(inner(path))).
      */
     public ComposePathEffect(PathEffect outerpe, PathEffect innerpe) {
         native_instance = nativeCreate(outerpe.native_instance,
                                        innerpe.native_instance);
     }
-    
+
     private static native long nativeCreate(long nativeOuterpe,
                                             long nativeInnerpe);
 }

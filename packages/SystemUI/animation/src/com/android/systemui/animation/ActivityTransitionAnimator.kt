@@ -23,6 +23,7 @@ import android.app.TaskInfo
 import android.graphics.Matrix
 import android.graphics.Rect
 import android.graphics.RectF
+import android.os.Binder
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -36,7 +37,11 @@ import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.WindowManager.TRANSIT_CLOSE
+import android.view.WindowManager.TRANSIT_TO_BACK
 import android.view.animation.PathInterpolator
+import android.window.RemoteTransition
+import android.window.TransitionFilter
 import androidx.annotation.AnyThread
 import androidx.annotation.BinderThread
 import androidx.annotation.UiThread
@@ -44,6 +49,10 @@ import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.systemui.Flags.activityTransitionUseLargestWindow
+import com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary
+import com.android.wm.shell.shared.IShellTransitions
+import com.android.wm.shell.shared.ShellTransitions
+import java.util.concurrent.Executor
 import kotlin.math.roundToInt
 
 private const val TAG = "ActivityTransitionAnimator"
@@ -52,14 +61,22 @@ private const val TAG = "ActivityTransitionAnimator"
  * A class that allows activities to be started in a seamless way from a view that is transforming
  * nicely into the starting window.
  */
-class ActivityTransitionAnimator(
+class ActivityTransitionAnimator
+@JvmOverloads
+constructor(
+    /** The executor that runs on the main thread. */
+    private val mainExecutor: Executor,
+
+    /** The object used to register ephemeral returns and long-lived transitions. */
+    private val transitionRegister: TransitionRegister? = null,
+
     /** The animator used when animating a View into an app. */
-    private val transitionAnimator: TransitionAnimator = DEFAULT_TRANSITION_ANIMATOR,
+    private val transitionAnimator: TransitionAnimator = defaultTransitionAnimator(mainExecutor),
 
     /** The animator used when animating a Dialog into an app. */
     // TODO(b/218989950): Remove this animator and instead set the duration of the dim fade out to
     // TIMINGS.contentBeforeFadeOutDuration.
-    private val dialogToAppAnimator: TransitionAnimator = DEFAULT_DIALOG_TO_APP_ANIMATOR,
+    private val dialogToAppAnimator: TransitionAnimator = defaultDialogToAppAnimator(mainExecutor),
 
     /**
      * Whether we should disable the WindowManager timeout. This should be set to true in tests
@@ -68,6 +85,36 @@ class ActivityTransitionAnimator(
     // TODO(b/301385865): Remove this flag.
     private val disableWmTimeout: Boolean = false,
 ) {
+    @JvmOverloads
+    constructor(
+        mainExecutor: Executor,
+        shellTransitions: ShellTransitions,
+        transitionAnimator: TransitionAnimator = defaultTransitionAnimator(mainExecutor),
+        dialogToAppAnimator: TransitionAnimator = defaultDialogToAppAnimator(mainExecutor),
+        disableWmTimeout: Boolean = false,
+    ) : this(
+        mainExecutor,
+        TransitionRegister.fromShellTransitions(shellTransitions),
+        transitionAnimator,
+        dialogToAppAnimator,
+        disableWmTimeout,
+    )
+
+    @JvmOverloads
+    constructor(
+        mainExecutor: Executor,
+        iShellTransitions: IShellTransitions,
+        transitionAnimator: TransitionAnimator = defaultTransitionAnimator(mainExecutor),
+        dialogToAppAnimator: TransitionAnimator = defaultDialogToAppAnimator(mainExecutor),
+        disableWmTimeout: Boolean = false,
+    ) : this(
+        mainExecutor,
+        TransitionRegister.fromIShellTransitions(iShellTransitions),
+        transitionAnimator,
+        dialogToAppAnimator,
+        disableWmTimeout,
+    )
+
     companion object {
         /** The timings when animating a View into an app. */
         @JvmField
@@ -100,10 +147,6 @@ class ActivityTransitionAnimator(
         // TODO(b/288507023): Remove this flag.
         @JvmField val DEBUG_TRANSITION_ANIMATION = Build.IS_DEBUGGABLE
 
-        private val DEFAULT_TRANSITION_ANIMATOR = TransitionAnimator(TIMINGS, INTERPOLATORS)
-        private val DEFAULT_DIALOG_TO_APP_ANIMATOR =
-            TransitionAnimator(DIALOG_TIMINGS, INTERPOLATORS)
-
         /** Durations & interpolators for the navigation bar fading in & out. */
         private const val ANIMATION_DURATION_NAV_FADE_IN = 266L
         private const val ANIMATION_DURATION_NAV_FADE_OUT = 133L
@@ -121,6 +164,14 @@ class ActivityTransitionAnimator(
          * cancelled by WM.
          */
         private const val LONG_TRANSITION_TIMEOUT = 5_000L
+
+        private fun defaultTransitionAnimator(mainExecutor: Executor): TransitionAnimator {
+            return TransitionAnimator(mainExecutor, TIMINGS, INTERPOLATORS)
+        }
+
+        private fun defaultDialogToAppAnimator(mainExecutor: Executor): TransitionAnimator {
+            return TransitionAnimator(mainExecutor, DIALOG_TIMINGS, INTERPOLATORS)
+        }
     }
 
     /**
@@ -223,6 +274,10 @@ class ActivityTransitionAnimator(
             }
         }
 
+        if (animationAdapter != null && controller.transitionCookie != null) {
+            registerEphemeralReturnAnimation(controller, transitionRegister)
+        }
+
         val launchResult = intentStarter(animationAdapter)
 
         // Only animate if the app is not already on top and will be opened, unless we are on the
@@ -257,9 +312,7 @@ class ActivityTransitionAnimator(
 
     private fun Controller.callOnIntentStartedOnMainThread(willAnimate: Boolean) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            this.transitionContainer.context.mainExecutor.execute {
-                callOnIntentStartedOnMainThread(willAnimate)
-            }
+            mainExecutor.execute { callOnIntentStartedOnMainThread(willAnimate) }
         } else {
             if (DEBUG_TRANSITION_ANIMATION) {
                 Log.d(
@@ -292,6 +345,66 @@ class ActivityTransitionAnimator(
         startIntentWithAnimation(controller, animate, packageName, showOverLockscreen) {
             intentStarter.startPendingIntent(it)
         }
+    }
+
+    /**
+     * Uses [transitionRegister] to set up the return animation for the given [launchController].
+     *
+     * De-registration is set up automatically once the return animation is run.
+     *
+     * TODO(b/339194555): automatically de-register when the launchable is detached.
+     */
+    private fun registerEphemeralReturnAnimation(
+        launchController: Controller,
+        transitionRegister: TransitionRegister?
+    ) {
+        if (!returnAnimationFrameworkLibrary()) return
+
+        var cleanUpRunnable: Runnable? = null
+        val returnRunner =
+            createRunner(
+                object : DelegateTransitionAnimatorController(launchController) {
+                    override val isLaunching = false
+
+                    override fun onTransitionAnimationCancelled(
+                        newKeyguardOccludedState: Boolean?
+                    ) {
+                        super.onTransitionAnimationCancelled(newKeyguardOccludedState)
+                        cleanUp()
+                    }
+
+                    override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
+                        super.onTransitionAnimationEnd(isExpandingFullyAbove)
+                        cleanUp()
+                    }
+
+                    private fun cleanUp() {
+                        cleanUpRunnable?.run()
+                    }
+                }
+            )
+
+        // mTypeSet and mModes match back signals only, and not home. This is on purpose, because
+        // we only want ephemeral return animations triggered in these scenarios.
+        val filter =
+            TransitionFilter().apply {
+                mTypeSet = intArrayOf(TRANSIT_CLOSE, TRANSIT_TO_BACK)
+                mRequirements =
+                    arrayOf(
+                        TransitionFilter.Requirement().apply {
+                            mLaunchCookie = launchController.transitionCookie
+                            mModes = intArrayOf(TRANSIT_CLOSE, TRANSIT_TO_BACK)
+                        }
+                    )
+            }
+        val transition =
+            RemoteTransition(
+                RemoteAnimationRunnerCompat.wrap(returnRunner),
+                "${launchController.transitionCookie}_returnTransition"
+            )
+
+        transitionRegister?.register(filter, transition)
+        cleanUpRunnable = Runnable { transitionRegister?.unregister(transition) }
     }
 
     /** Add a [Listener] that can listen to transition animations. */
@@ -378,8 +491,14 @@ class ActivityTransitionAnimator(
              * Note: The background of [view] should be a (rounded) rectangle so that it can be
              * properly animated.
              */
+            @JvmOverloads
             @JvmStatic
-            fun fromView(view: View, cujType: Int? = null): Controller? {
+            fun fromView(
+                view: View,
+                cujType: Int? = null,
+                cookie: TransitionCookie? = null,
+                returnCujType: Int? = null
+            ): Controller? {
                 // Make sure the View we launch from implements LaunchableView to avoid visibility
                 // issues.
                 if (view !is LaunchableView) {
@@ -400,7 +519,7 @@ class ActivityTransitionAnimator(
                     return null
                 }
 
-                return GhostedViewTransitionAnimatorController(view, cujType)
+                return GhostedViewTransitionAnimatorController(view, cujType, cookie, returnCujType)
             }
         }
 
@@ -422,6 +541,17 @@ class ActivityTransitionAnimator(
          */
         val isBelowAnimatingWindow: Boolean
             get() = false
+
+        /**
+         * The cookie associated with the transition controlled by this [Controller].
+         *
+         * This should be defined for all return [Controller] (when [isLaunching] is false) and for
+         * their associated launch [Controller]s.
+         *
+         * For the recommended format, see [TransitionCookie].
+         */
+        val transitionCookie: TransitionCookie?
+            get() = null
 
         /**
          * The intent was started. If [willAnimate] is false, nothing else will happen and the
@@ -479,12 +609,10 @@ class ActivityTransitionAnimator(
         controller: Controller,
         callback: Callback,
         /** The animator to use to animate the window transition. */
-        transitionAnimator: TransitionAnimator = DEFAULT_TRANSITION_ANIMATOR,
+        transitionAnimator: TransitionAnimator,
         /** Listener for animation lifecycle events. */
         listener: Listener? = null
     ) : IRemoteAnimationRunner.Stub() {
-        private val context = controller.transitionContainer.context
-
         // This is being passed across IPC boundaries and cycles (through PendingIntentRecords,
         // etc.) are possible. So we need to make sure we drop any references that might
         // transitively cause leaks when we're done with animation.
@@ -493,11 +621,12 @@ class ActivityTransitionAnimator(
         init {
             delegate =
                 AnimationDelegate(
+                    mainExecutor,
                     controller,
                     callback,
                     DelegatingAnimationCompletionListener(listener, this::dispose),
                     transitionAnimator,
-                    disableWmTimeout
+                    disableWmTimeout,
                 )
         }
 
@@ -510,7 +639,7 @@ class ActivityTransitionAnimator(
             finishedCallback: IRemoteAnimationFinishedCallback?
         ) {
             val delegate = delegate
-            context.mainExecutor.execute {
+            mainExecutor.execute {
                 if (delegate == null) {
                     Log.i(TAG, "onAnimationStart called after completion")
                     // Animation started too late and timed out already. We need to still
@@ -525,7 +654,7 @@ class ActivityTransitionAnimator(
         @BinderThread
         override fun onAnimationCancelled() {
             val delegate = delegate
-            context.mainExecutor.execute {
+            mainExecutor.execute {
                 delegate ?: Log.wtf(TAG, "onAnimationCancelled called after completion")
                 delegate?.onAnimationCancelled()
             }
@@ -535,19 +664,21 @@ class ActivityTransitionAnimator(
         fun dispose() {
             // Drop references to animation controller once we're done with the animation
             // to avoid leaking.
-            context.mainExecutor.execute { delegate = null }
+            mainExecutor.execute { delegate = null }
         }
     }
 
     class AnimationDelegate
     @JvmOverloads
     constructor(
+        private val mainExecutor: Executor,
         private val controller: Controller,
         private val callback: Callback,
         /** Listener for animation lifecycle events. */
         private val listener: Listener? = null,
         /** The animator to use to animate the window transition. */
-        private val transitionAnimator: TransitionAnimator = DEFAULT_TRANSITION_ANIMATOR,
+        private val transitionAnimator: TransitionAnimator =
+            defaultTransitionAnimator(mainExecutor),
 
         /**
          * Whether we should disable the WindowManager timeout. This should be set to true in tests
@@ -643,7 +774,7 @@ class ActivityTransitionAnimator(
                 return
             }
 
-            val window = findRootTaskIfPossible(apps)
+            val window = findTargetWindowIfPossible(apps)
             if (window == null) {
                 Log.i(TAG, "Aborting the animation as no window is opening")
                 callback?.invoke()
@@ -667,7 +798,7 @@ class ActivityTransitionAnimator(
             startAnimation(window, navigationBar, callback)
         }
 
-        private fun findRootTaskIfPossible(
+        private fun findTargetWindowIfPossible(
             apps: Array<out RemoteAnimationTarget>?
         ): RemoteAnimationTarget? {
             if (apps == null) {
@@ -685,6 +816,19 @@ class ActivityTransitionAnimator(
             for (it in apps) {
                 if (it.mode == targetMode) {
                     if (activityTransitionUseLargestWindow()) {
+                        if (returnAnimationFrameworkLibrary()) {
+                            // If the controller contains a cookie, _only_ match if the candidate
+                            // contains the matching cookie.
+                            if (
+                                controller.transitionCookie != null &&
+                                    it.taskInfo
+                                        ?.launchCookies
+                                        ?.contains(controller.transitionCookie) != true
+                            ) {
+                                continue
+                            }
+                        }
+
                         if (
                             candidate == null ||
                                 !it.hasAnimatingParent && candidate.hasAnimatingParent
@@ -797,11 +941,7 @@ class ActivityTransitionAnimator(
                         progress: Float,
                         linearProgress: Float
                     ) {
-                        // Apply the state to the window only if it is visible, i.e. when the
-                        // expanding view is *not* visible.
-                        if (!state.visible) {
-                            applyStateToWindow(window, state, linearProgress)
-                        }
+                        applyStateToWindow(window, state, linearProgress)
                         navigationBar?.let { applyStateToNavigationBar(it, state, linearProgress) }
 
                         listener?.onTransitionAnimationProgress(linearProgress)
@@ -1039,4 +1179,72 @@ class ActivityTransitionAnimator(
             return (this.width() * this.height()) > (other.width() * other.height())
         }
     }
+
+    /**
+     * Wraps one of the two methods we have to register remote transitions with WM Shell:
+     * - for in-process registrations (e.g. System UI) we use [ShellTransitions]
+     * - for cross-process registrations (e.g. Launcher) we use [IShellTransitions]
+     *
+     * Important: each instance of this class must wrap exactly one of the two.
+     */
+    class TransitionRegister
+    private constructor(
+        private val shellTransitions: ShellTransitions? = null,
+        private val iShellTransitions: IShellTransitions? = null,
+    ) {
+        init {
+            assert((shellTransitions != null).xor(iShellTransitions != null))
+        }
+
+        companion object {
+            /** Provides a [TransitionRegister] instance wrapping [ShellTransitions]. */
+            fun fromShellTransitions(shellTransitions: ShellTransitions): TransitionRegister {
+                return TransitionRegister(shellTransitions = shellTransitions)
+            }
+
+            /** Provides a [TransitionRegister] instance wrapping [IShellTransitions]. */
+            fun fromIShellTransitions(iShellTransitions: IShellTransitions): TransitionRegister {
+                return TransitionRegister(iShellTransitions = iShellTransitions)
+            }
+        }
+
+        /** Register [remoteTransition] with WM Shell using the given [filter]. */
+        internal fun register(
+            filter: TransitionFilter,
+            remoteTransition: RemoteTransition,
+        ) {
+            shellTransitions?.registerRemote(filter, remoteTransition)
+            iShellTransitions?.registerRemote(filter, remoteTransition)
+        }
+
+        /** Unregister [remoteTransition] from WM Shell. */
+        internal fun unregister(remoteTransition: RemoteTransition) {
+            shellTransitions?.unregisterRemote(remoteTransition)
+            iShellTransitions?.unregisterRemote(remoteTransition)
+        }
+    }
+
+    /**
+     * A cookie used to uniquely identify a task launched using an
+     * [ActivityTransitionAnimator.Controller].
+     *
+     * The [String] encapsulated by this class should be formatted in such a way to be unique across
+     * the system, but reliably constant for the same associated launchable.
+     *
+     * Recommended naming scheme:
+     * - DO use the fully qualified name of the class that owns the instance of the launchable,
+     *   along with a concise and precise description of the purpose of the launchable in question.
+     * - DO NOT introduce uniqueness through the use of timestamps or other runtime variables that
+     *   will change if the instance is destroyed and re-created.
+     *
+     * Example: "com.not.the.real.class.name.ShadeController_openSettingsButton"
+     *
+     * Note that sometimes (e.g. in recycler views) there could be multiple instances of the same
+     * launchable, and no static knowledge to adequately differentiate between them using a single
+     * description. In this case, the recommendation is to append a unique identifier related to the
+     * contents of the launchable.
+     *
+     * Example: “com.not.the.real.class.name.ToastWebResult_launchAga_id143256”
+     */
+    data class TransitionCookie(private val cookie: String) : Binder()
 }

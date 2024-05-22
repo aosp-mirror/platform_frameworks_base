@@ -365,4 +365,23 @@
         <item>xcap</item>
     </string-array>
     <java-symbol type="array" name="config_force_cellular_transport_capabilities" />
+
+    <!-- The time duration in millis after which DemoSimulator will move to CONNECTED state from
+         NOT_CONNECTED state if the device is aligned to satellite.
+         -->
+    <integer name="config_demo_pointing_aligned_duration_millis">15000</integer>
+    <java-symbol type="integer" name="config_demo_pointing_aligned_duration_millis" />
+
+    <!-- The time duration in millis after which DemoSimulator will move to NOT_CONNECTED state from
+         CONNECTED state if the device is not aligned to satellite.
+         -->
+    <integer name="config_demo_pointing_not_aligned_duration_millis">30000</integer>
+    <java-symbol type="integer" name="config_demo_pointing_not_aligned_duration_millis" />
+
+    <!-- Boolean indicating whether Telephony should wait for device alignment with satellite
+         before sending or receiving datagrams in demo mode.
+         -->
+    <bool name="config_wait_for_device_alignment_in_demo_datagram">false</bool>
+    <java-symbol type="bool" name="config_wait_for_device_alignment_in_demo_datagram" />
+
 </resources>

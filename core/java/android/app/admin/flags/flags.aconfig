@@ -115,6 +115,16 @@ flag {
 }
 
 flag {
+  name: "hsum_unlock_notification_fix"
+  namespace: "enterprise"
+  description: "Using the right userId when starting the work profile unlock flow "
+  bug: "327350831"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "dumpsys_policy_engine_migration_enabled"
   namespace: "enterprise"
   description: "Update DumpSys to include information about migrated APIs in DPE"
@@ -217,6 +227,16 @@ flag {
 }
 
 flag {
+  name: "disallow_user_control_stopped_state_fix"
+  namespace: "enterprise"
+  description: "Ensure DPM.setUserControlDisabledPackages() clears FLAG_STOPPED for the app"
+  bug: "330688482"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "esim_management_ux_enabled"
   namespace: "enterprise"
   description: "Enable UX changes for esim management"
@@ -234,10 +254,13 @@ flag {
 }
 
 flag {
-  name: "dmrh_can_set_app_restriction"
+  name: "dmrh_set_app_restrictions"
   namespace: "enterprise"
   description: "Allow DMRH to set application restrictions (both on the profile and the parent)"
   bug: "328758346"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -302,4 +325,41 @@ flag {
     metadata {
       purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "backup_connected_apps_settings"
+    namespace: "enterprise"
+    description: "backup and restore connected work and personal apps user settings across devices"
+    bug: "175067666"
+}
+
+flag {
+    name: "headless_single_user_compatibility_fix"
+    namespace: "enterprise"
+    description: "Fix for compatibility issue introduced from using single_user mode on pre-Android V builds"
+    bug: "338050276"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "headless_single_min_target_sdk"
+    namespace: "enterprise"
+    description: "Only allow DPCs targeting Android V to provision into single user mode"
+    bug: "338588825"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+  name: "onboarding_consentless_bugreports"
+  namespace: "enterprise"
+  description: "Allow subsequent bugreports to skip user consent within a time frame"
+  bug: "340439309"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

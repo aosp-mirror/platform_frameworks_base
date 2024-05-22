@@ -164,3 +164,11 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "release_snapshot_aggressively"
+    namespace: "windowing_frontend"
+    description: "Actively release task snapshot memory"
+    bug: "238206323"
+    is_fixed_read_only: true
+}

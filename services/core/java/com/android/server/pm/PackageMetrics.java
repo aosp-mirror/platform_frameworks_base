@@ -358,6 +358,7 @@ final class PackageMetrics {
 
     public static class ComponentStateMetrics {
         public int mUid;
+        public int mCallingUid;
         public int mComponentOldState;
         public int mComponentNewState;
         public boolean mIsForWholeApp;
@@ -365,13 +366,14 @@ final class PackageMetrics {
         @Nullable private String mClassName;
 
         ComponentStateMetrics(@NonNull PackageManager.ComponentEnabledSetting setting, int uid,
-                int componentOldState) {
+                int componentOldState, int callingUid) {
             mUid = uid;
             mComponentOldState = componentOldState;
             mComponentNewState = setting.getEnabledState();
             mIsForWholeApp = !setting.isComponent();
             mPackageName = setting.getPackageName();
             mClassName = setting.getClassName();
+            mCallingUid = callingUid;
         }
 
         public boolean isSameComponent(ActivityInfo activityInfo) {
@@ -412,14 +414,15 @@ final class PackageMetrics {
                     componentStateMetrics.mComponentOldState,
                     componentStateMetrics.mComponentNewState,
                     isLauncher,
-                    componentStateMetrics.mIsForWholeApp);
+                    componentStateMetrics.mIsForWholeApp,
+                    componentStateMetrics.mCallingUid);
         }
     }
 
     private static void reportComponentStateChanged(int uid, int componentOldState,
-            int componentNewState, boolean isLauncher, boolean isForWholeApp) {
+            int componentNewState, boolean isLauncher, boolean isForWholeApp, int callingUid) {
         FrameworkStatsLog.write(FrameworkStatsLog.COMPONENT_STATE_CHANGED_REPORTED,
-                uid, componentOldState, componentNewState, isLauncher, isForWholeApp);
+                uid, componentOldState, componentNewState, isLauncher, isForWholeApp, callingUid);
     }
 
     private static List<ResolveInfo> getHomeActivitiesResolveInfoAsUser(@NonNull Computer computer,

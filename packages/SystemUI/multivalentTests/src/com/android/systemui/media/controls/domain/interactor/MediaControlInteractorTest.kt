@@ -27,12 +27,16 @@ import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.bluetooth.mockBroadcastDialogController
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.media.controls.data.repository.mediaDataRepository
 import com.android.systemui.media.controls.domain.pipeline.MediaDataFilterImpl
+import com.android.systemui.media.controls.domain.pipeline.MediaDataProcessor
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaControlInteractor
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaControlInteractor
 import com.android.systemui.media.controls.domain.pipeline.mediaDataFilter
+import com.android.systemui.media.controls.domain.pipeline.mediaDataProcessor
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.util.mediaInstanceId
 import com.android.systemui.media.mediaOutputDialogManager
@@ -41,16 +45,16 @@ import com.android.systemui.plugins.activityStarter
 import com.android.systemui.statusbar.notificationLockscreenUserManager
 import com.android.systemui.statusbar.policy.keyguardStateController
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -117,7 +121,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
         whenever(kosmos.activityIntentHelper.wouldPendingShowOverLockscreen(any(), any()))
             .thenReturn(true)
 
-        val clickIntent = mock<PendingIntent> { whenever(isActivity).thenReturn(true) }
+        val clickIntent = mock<PendingIntent> { whenever(it.isActivity).thenReturn(true) }
         val expandable = mock<Expandable>()
 
         underTest.startClickIntent(expandable, clickIntent)
@@ -129,7 +133,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
     fun startClickIntent_hideOverLockscreen() {
         whenever(keyguardStateController.isShowing).thenReturn(false)
 
-        val clickIntent = mock<PendingIntent> { whenever(isActivity).thenReturn(true) }
+        val clickIntent = mock<PendingIntent> { whenever(it.isActivity).thenReturn(true) }
         val expandable = mock<Expandable>()
         val activityController = mock<ActivityTransitionAnimator.Controller>()
         whenever(expandable.activityTransitionController(any())).thenReturn(activityController)
@@ -146,7 +150,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
         whenever(kosmos.activityIntentHelper.wouldPendingShowOverLockscreen(any(), any()))
             .thenReturn(true)
 
-        val deviceIntent = mock<PendingIntent> { whenever(isActivity).thenReturn(true) }
+        val deviceIntent = mock<PendingIntent> { whenever(it.isActivity).thenReturn(true) }
 
         underTest.startDeviceIntent(deviceIntent)
 
@@ -159,7 +163,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
         whenever(kosmos.activityIntentHelper.wouldPendingShowOverLockscreen(any(), any()))
             .thenReturn(true)
 
-        val deviceIntent = mock<PendingIntent> { whenever(isActivity).thenReturn(false) }
+        val deviceIntent = mock<PendingIntent> { whenever(it.isActivity).thenReturn(false) }
 
         underTest.startDeviceIntent(deviceIntent)
 
@@ -170,7 +174,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
     fun startDeviceIntent_hideOverLockscreen() {
         whenever(keyguardStateController.isShowing).thenReturn(false)
 
-        val deviceIntent = mock<PendingIntent> { whenever(isActivity).thenReturn(true) }
+        val deviceIntent = mock<PendingIntent> { whenever(it.isActivity).thenReturn(true) }
 
         underTest.startDeviceIntent(deviceIntent)
 
@@ -191,6 +195,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
                 eq(PACKAGE_NAME),
                 eq(true),
                 eq(dialogTransitionController),
+                eq(null),
                 eq(null)
             )
     }
@@ -209,6 +214,21 @@ class MediaControlInteractorTest : SysuiTestCase() {
                 eq(PACKAGE_NAME),
                 eq(dialogTransitionController)
             )
+    }
+
+    @Test
+    fun removeMediaControl() {
+        val listener = mock<MediaDataProcessor.Listener>()
+        kosmos.mediaDataProcessor.addInternalListener(listener)
+
+        var mediaData = MediaData(userId = USER_ID, instanceId = instanceId, artist = ARTIST)
+        kosmos.mediaDataRepository.addMediaEntry(KEY, mediaData)
+
+        underTest.removeMediaControl(null, instanceId, 0L)
+        kosmos.fakeExecutor.advanceClockToNext()
+        kosmos.fakeExecutor.runAllReady()
+
+        verify(listener).onMediaDataRemoved(eq(KEY), eq(true))
     }
 
     companion object {

@@ -24,8 +24,8 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Icon
 import android.stats.sysui.NotificationEnums
-import android.testing.AndroidTestingRunner
 import android.widget.RemoteViews
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.NotificationUtils
@@ -36,7 +36,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class NotificationMemoryMeterTest : SysuiTestCase() {
 
     @Test

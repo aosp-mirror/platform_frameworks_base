@@ -41,6 +41,8 @@ import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxyIm
 import com.android.systemui.statusbar.pipeline.mobile.util.SubscriptionManagerProxy
 import com.android.systemui.statusbar.pipeline.mobile.util.SubscriptionManagerProxyImpl
 import com.android.systemui.statusbar.pipeline.satellite.data.DeviceBasedSatelliteRepository
+import com.android.systemui.statusbar.pipeline.satellite.data.DeviceBasedSatelliteRepositorySwitcher
+import com.android.systemui.statusbar.pipeline.satellite.data.RealDeviceBasedSatelliteRepository
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.DeviceBasedSatelliteRepositoryImpl
 import com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel.DeviceBasedSatelliteViewModel
 import com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel.DeviceBasedSatelliteViewModelImpl
@@ -83,8 +85,13 @@ abstract class StatusBarPipelineModule {
     abstract fun connectivityRepository(impl: ConnectivityRepositoryImpl): ConnectivityRepository
 
     @Binds
-    abstract fun deviceBasedSatelliteRepository(
+    abstract fun realDeviceBasedSatelliteRepository(
         impl: DeviceBasedSatelliteRepositoryImpl
+    ): RealDeviceBasedSatelliteRepository
+
+    @Binds
+    abstract fun deviceBasedSatelliteRepository(
+        impl: DeviceBasedSatelliteRepositorySwitcher
     ): DeviceBasedSatelliteRepository
 
     @Binds
@@ -222,7 +229,7 @@ abstract class StatusBarPipelineModule {
         @SysUISingleton
         @OemSatelliteInputLog
         fun provideOemSatelliteInputLog(factory: LogBufferFactory): LogBuffer {
-            return factory.create("DeviceBasedSatelliteInputLog", 32)
+            return factory.create("DeviceBasedSatelliteInputLog", 150)
         }
 
         const val FIRST_MOBILE_SUB_SHOWING_NETWORK_TYPE_ICON =

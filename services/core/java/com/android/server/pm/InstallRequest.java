@@ -167,6 +167,8 @@ final class InstallRequest {
 
     private int mInstallerUidForInstallExisting = INVALID_UID;
 
+    private final boolean mHasAppMetadataFileFromInstaller;
+
     // New install
     InstallRequest(InstallingSession params) {
         mUserId = params.getUser().getIdentifier();
@@ -185,6 +187,7 @@ final class InstallRequest {
         mSessionId = params.mSessionId;
         mRequireUserAction = params.mRequireUserAction;
         mPreVerifiedDomains = params.mPreVerifiedDomains;
+        mHasAppMetadataFileFromInstaller = params.mHasAppMetadataFile;
     }
 
     // Install existing package as user
@@ -203,6 +206,7 @@ final class InstallRequest {
         mAppId = appId;
         mInstallerUidForInstallExisting = installerUid;
         mSystem = isSystem;
+        mHasAppMetadataFileFromInstaller = false;
     }
 
     // addForInit
@@ -224,6 +228,7 @@ final class InstallRequest {
         mSessionId = -1;
         mRequireUserAction = USER_ACTION_UNSPECIFIED;
         mDisabledPs = disabledPs;
+        mHasAppMetadataFileFromInstaller = false;
     }
 
     @Nullable
@@ -369,6 +374,10 @@ final class InstallRequest {
 
     public boolean isArchived() {
         return PackageInstallerSession.isArchivedInstallation(getInstallFlags());
+    }
+
+    public boolean hasAppMetadataFile() {
+        return mHasAppMetadataFileFromInstaller;
     }
 
     @Nullable

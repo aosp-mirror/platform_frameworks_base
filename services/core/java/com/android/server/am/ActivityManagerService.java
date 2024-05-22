@@ -372,6 +372,8 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.server.ServerProtoEnums;
 import android.sysprop.InitProperties;
+import android.system.Os;
+import android.system.OsConstants;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
@@ -597,6 +599,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Assumes logcat entries average around 100 bytes; that's not perfect stack traces count
     // as one line, but close enough for now.
     static final int RESERVED_BYTES_PER_LOGCAT_LINE = 100;
+
+    // How many seconds should the system wait before terminating the spawned logcat process.
+    static final int LOGCAT_TIMEOUT_SEC = 10;
 
     // Necessary ApplicationInfo flags to mark an app as persistent
     static final int PERSISTENT_MASK =
@@ -1670,7 +1675,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int BIND_APPLICATION_TIMEOUT_SOFT_MSG = 82;
     static final int BIND_APPLICATION_TIMEOUT_HARD_MSG = 83;
     static final int SERVICE_FGS_TIMEOUT_MSG = 84;
-    static final int SERVICE_FGS_ANR_TIMEOUT_MSG = 85;
+    static final int SERVICE_FGS_CRASH_TIMEOUT_MSG = 85;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -2041,8 +2046,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 case SERVICE_FGS_TIMEOUT_MSG: {
                     mServices.onFgsTimeout((ServiceRecord) msg.obj);
                 } break;
-                case SERVICE_FGS_ANR_TIMEOUT_MSG: {
-                    mServices.onFgsAnrTimeout((ServiceRecord) msg.obj);
+                case SERVICE_FGS_CRASH_TIMEOUT_MSG: {
+                    mServices.onFgsCrashTimeout((ServiceRecord) msg.obj);
                 } break;
             }
         }
@@ -4342,6 +4347,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             mServices.bringDownDisabledPackageServicesLocked(
                     packageName, null, userId, false, true, true);
+            mServices.onUidRemovedLocked(uid);
 
             if (mBooted) {
                 mAtmInternal.resumeTopActivities(true);
@@ -4372,9 +4378,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.w(TAG, "Can't force stop all processes of all users, that is insane!");
         }
 
+        final int uid = getPackageManagerInternal().getPackageUid(packageName,
+                            MATCH_DEBUG_TRIAGED_MISSING | MATCH_ANY_USER, UserHandle.USER_SYSTEM);
         if (appId < 0 && packageName != null) {
-            appId = UserHandle.getAppId(getPackageManagerInternal().getPackageUid(packageName,
-                    MATCH_DEBUG_TRIAGED_MISSING | MATCH_ANY_USER, UserHandle.USER_SYSTEM));
+            appId = UserHandle.getAppId(uid);
         }
 
         boolean didSomething;
@@ -4418,6 +4425,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             didSomething = true;
         }
+        mServices.onUidRemovedLocked(uid);
 
         if (packageName == null) {
             // Remove all sticky broadcasts from this user.
@@ -4778,7 +4786,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
             bindApplicationTimeMillis = SystemClock.uptimeMillis();
-            bindApplicationTimeNanos = SystemClock.elapsedRealtimeNanos();
+            bindApplicationTimeNanos = SystemClock.uptimeNanos();
             mAtmInternal.preBindApplication(app.getWindowProcessController());
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
             if (mPlatformCompat != null) {
@@ -4848,7 +4856,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             app.setBindApplicationTime(bindApplicationTimeMillis);
             mProcessList.getAppStartInfoTracker()
-                    .reportBindApplicationTimeNanos(app, bindApplicationTimeNanos);
+                    .addTimestampToStart(app, bindApplicationTimeNanos,
+                            ApplicationStartInfo.START_TIMESTAMP_BIND_APPLICATION);
 
             // Make app active after binding application or client may be running requests (e.g
             // starting activities) before it is ready.
@@ -5581,32 +5590,30 @@ public class ActivityManagerService extends IActivityManager.Stub
             // security checking for it above.
             userId = UserHandle.USER_CURRENT;
         }
-        try {
-            if (owningUid != 0 && owningUid != SYSTEM_UID) {
-                final int uid = AppGlobals.getPackageManager().getPackageUid(packageName,
-                        MATCH_DEBUG_TRIAGED_MISSING, UserHandle.getUserId(owningUid));
-                if (!UserHandle.isSameApp(owningUid, uid)) {
-                    String msg = "Permission Denial: getIntentSender() from pid="
-                            + Binder.getCallingPid()
-                            + ", uid=" + owningUid
-                            + ", (need uid=" + uid + ")"
-                            + " is not allowed to send as package " + packageName;
-                    Slog.w(TAG, msg);
-                    throw new SecurityException(msg);
-                }
-            }
 
-            if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
-                return mAtmInternal.getIntentSender(type, packageName, featureId, owningUid,
-                        userId, token, resultWho, requestCode, intents, resolvedTypes, flags,
-                        bOptions);
+        if (owningUid != 0 && owningUid != SYSTEM_UID) {
+            if (!getPackageManagerInternal().isSameApp(
+                    packageName,
+                    MATCH_DEBUG_TRIAGED_MISSING,
+                    owningUid,
+                    UserHandle.getUserId(owningUid))) {
+                String msg = "Permission Denial: getIntentSender() from pid="
+                        + Binder.getCallingPid()
+                        + ", uid=" + owningUid
+                        + " is not allowed to send as package " + packageName;
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
             }
-            return mPendingIntentController.getIntentSender(type, packageName, featureId,
-                    owningUid, userId, token, resultWho, requestCode, intents, resolvedTypes,
-                    flags, bOptions);
-        } catch (RemoteException e) {
-            throw new SecurityException(e);
         }
+
+        if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
+            return mAtmInternal.getIntentSender(type, packageName, featureId, owningUid,
+                    userId, token, resultWho, requestCode, intents, resolvedTypes, flags,
+                    bOptions);
+        }
+        return mPendingIntentController.getIntentSender(type, packageName, featureId,
+                owningUid, userId, token, resultWho, requestCode, intents, resolvedTypes,
+                flags, bOptions);
     }
 
     @Override
@@ -9904,6 +9911,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             sb.append("ErrorId: ").append(errorId.toString()).append("\n");
         }
         sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
+
+        // If device is not using 4KB pages, add the PageSize
+        long pageSize = Os.sysconf(OsConstants._SC_PAGESIZE);
+        if (pageSize != 4096) {
+            sb.append("PageSize: ").append(pageSize).append("\n");
+        }
+
         if (Debug.isDebuggerConnected()) {
             sb.append("Debugger: Connected\n");
         }
@@ -9935,126 +9949,70 @@ public class ActivityManagerService extends IActivityManager.Stub
         // If process is null, we are being called from some internal code
         // and may be about to die -- run this synchronously.
         final boolean runSynchronously = process == null;
-        Thread worker =
-                new Thread("Error dump: " + dropboxTag) {
-                    @Override
-                    public void run() {
-                        if (report != null) {
-                            sb.append(report);
+        Thread worker = new Thread("Error dump: " + dropboxTag) {
+            @Override
+            public void run() {
+                if (report != null) {
+                    sb.append(report);
+                }
+
+                String logcatSetting = Settings.Global.ERROR_LOGCAT_PREFIX + dropboxTag;
+                String kerLogSetting = Settings.Global.ERROR_KERNEL_LOG_PREFIX + dropboxTag;
+                String maxBytesSetting = Settings.Global.MAX_ERROR_BYTES_PREFIX + dropboxTag;
+                int logcatLines = Build.IS_USER
+                        ? 0
+                        : Settings.Global.getInt(mContext.getContentResolver(), logcatSetting, 0);
+                int kernelLogLines = Build.IS_USER
+                        ? 0
+                        : Settings.Global.getInt(mContext.getContentResolver(), kerLogSetting, 0);
+                int dropboxMaxSize = Settings.Global.getInt(
+                        mContext.getContentResolver(), maxBytesSetting, DROPBOX_DEFAULT_MAX_SIZE);
+
+                if (dataFile != null) {
+                    // Attach the stack traces file to the report so collectors can load them
+                    // by file if they have access.
+                    sb.append(DATA_FILE_PATH_HEADER)
+                            .append(dataFile.getAbsolutePath()).append('\n');
+
+                    int maxDataFileSize = dropboxMaxSize
+                            - sb.length()
+                            - logcatLines * RESERVED_BYTES_PER_LOGCAT_LINE
+                            - kernelLogLines * RESERVED_BYTES_PER_LOGCAT_LINE
+                            - DATA_FILE_PATH_FOOTER.length();
+
+                    if (maxDataFileSize > 0) {
+                        // Inline dataFile contents if there is room.
+                        try {
+                            sb.append(FileUtils.readTextFile(dataFile, maxDataFileSize,
+                                    "\n\n[[TRUNCATED]]\n"));
+                        } catch (IOException e) {
+                            Slog.e(TAG, "Error reading " + dataFile, e);
                         }
-
-                        String logcatSetting = Settings.Global.ERROR_LOGCAT_PREFIX + dropboxTag;
-                        String maxBytesSetting =
-                                Settings.Global.MAX_ERROR_BYTES_PREFIX + dropboxTag;
-                        int lines =
-                                Build.IS_USER
-                                        ? 0
-                                        : Settings.Global.getInt(
-                                                mContext.getContentResolver(), logcatSetting, 0);
-                        int dropboxMaxSize =
-                                Settings.Global.getInt(
-                                        mContext.getContentResolver(),
-                                        maxBytesSetting,
-                                        DROPBOX_DEFAULT_MAX_SIZE);
-
-                        if (dataFile != null) {
-                            // Attach the stack traces file to the report so collectors can load
-                            // them
-                            // by file if they have access.
-                            sb.append(DATA_FILE_PATH_HEADER)
-                                    .append(dataFile.getAbsolutePath())
-                                    .append('\n');
-
-                            int maxDataFileSize =
-                                    dropboxMaxSize
-                                            - sb.length()
-                                            - lines * RESERVED_BYTES_PER_LOGCAT_LINE
-                                            - DATA_FILE_PATH_FOOTER.length();
-
-                            if (maxDataFileSize > 0) {
-                                // Inline dataFile contents if there is room.
-                                try {
-                                    sb.append(
-                                            FileUtils.readTextFile(
-                                                    dataFile,
-                                                    maxDataFileSize,
-                                                    "\n\n[[TRUNCATED]]\n"));
-                                } catch (IOException e) {
-                                    Slog.e(TAG, "Error reading " + dataFile, e);
-                                }
-                            }
-
-                            // Always append the footer, even there wasn't enough space to inline
-                            // the
-                            // dataFile contents.
-                            sb.append(DATA_FILE_PATH_FOOTER);
-                        }
-
-                        if (crashInfo != null && crashInfo.stackTrace != null) {
-                            sb.append(crashInfo.stackTrace);
-                        }
-
-                        if (lines > 0 && !runSynchronously) {
-                            sb.append("\n");
-
-                            InputStreamReader input = null;
-                            try {
-                                java.lang.Process logcat =
-                                        new ProcessBuilder(
-                                                        // Time out after 10s of inactivity, but
-                                                        // kill logcat with SEGV
-                                                        // so we can investigate why it didn't
-                                                        // finish.
-                                                        "/system/bin/timeout",
-                                                        "-i",
-                                                        "-s",
-                                                        "SEGV",
-                                                        "10s",
-                                                        // Merge several logcat streams, and take
-                                                        // the last N lines.
-                                                        "/system/bin/logcat",
-                                                        "-v",
-                                                        "threadtime",
-                                                        "-b",
-                                                        "events",
-                                                        "-b",
-                                                        "system",
-                                                        "-b",
-                                                        "main",
-                                                        "-b",
-                                                        "crash",
-                                                        "-t",
-                                                        String.valueOf(lines))
-                                                .redirectErrorStream(true)
-                                                .start();
-
-                                try {
-                                    logcat.getOutputStream().close();
-                                } catch (IOException e) {
-                                }
-                                try {
-                                    logcat.getErrorStream().close();
-                                } catch (IOException e) {
-                                }
-                                input = new InputStreamReader(logcat.getInputStream());
-
-                                int num;
-                                char[] buf = new char[8192];
-                                while ((num = input.read(buf)) > 0) sb.append(buf, 0, num);
-                            } catch (IOException e) {
-                                Slog.e(TAG, "Error running logcat", e);
-                            } finally {
-                                if (input != null)
-                                    try {
-                                        input.close();
-                                    } catch (IOException e) {
-                                    }
-                            }
-                        }
-
-                        dbox.addText(dropboxTag, sb.toString());
                     }
-                };
+                    // Always append the footer, even there wasn't enough space to inline the
+                    // dataFile contents.
+                    sb.append(DATA_FILE_PATH_FOOTER);
+                }
+
+                if (crashInfo != null && crashInfo.stackTrace != null) {
+                    sb.append(crashInfo.stackTrace);
+                }
+                boolean shouldAddLogs = logcatLines > 0 || kernelLogLines > 0;
+                if (!runSynchronously && shouldAddLogs) {
+                    sb.append("\n");
+                    if (logcatLines > 0) {
+                        fetchLogcatBuffers(sb, logcatLines, LOGCAT_TIMEOUT_SEC,
+                                List.of("events", "system", "main", "crash"));
+                    }
+                    if (kernelLogLines > 0) {
+                        fetchLogcatBuffers(sb, kernelLogLines, LOGCAT_TIMEOUT_SEC / 2,
+                                List.of("kernel"));
+                    }
+                }
+
+                dbox.addText(dropboxTag, sb.toString());
+            }
+        };
 
         if (runSynchronously) {
             final int oldMask = StrictMode.allowThreadDiskWritesMask();
@@ -10314,6 +10272,67 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         mProcessList.mAppExitInfoTracker.setProcessStateSummary(Binder.getCallingUid(),
                 Binder.getCallingPid(), state);
+    }
+
+    /**
+     * Retrieves logs from specified logcat buffers and appends them to a StringBuilder
+     * in the supplied order. The method executes a logcat command to fetch specific
+     * log entries from the supplied buffers.
+     *
+     * @param sb the StringBuilder to append the logcat output to.
+     * @param lines the number of lines to retrieve.
+     * @param timeout the maximum allowed time in seconds for logcat to run before being terminated.
+     * @param buffers the list of log buffers from which to retrieve logs.
+     */
+    private static void fetchLogcatBuffers(StringBuilder sb, int lines,
+            int timeout, List<String> buffers) {
+
+        if (buffers.size() == 0 || lines <= 0 || timeout <= 0) {
+            return;
+        }
+
+        List<String> command = new ArrayList<>(10 + (2 * buffers.size()));
+        // Time out after 10s of inactivity, but kill logcat with SEGV
+        // so we can investigate why it didn't finish.
+        command.add("/system/bin/timeout");
+        command.add("-i");
+        command.add("-s");
+        command.add("SEGV");
+        command.add(timeout + "s");
+
+        // Merge several logcat streams, and take the last N lines.
+        command.add("/system/bin/logcat");
+        command.add("-v");
+        // This adds a timestamp and thread info to each log line.
+        command.add("threadtime");
+        for (String buffer : buffers) {
+            command.add("-b");
+            command.add(buffer);
+        }
+        // Limit the output to the last N lines.
+        command.add("-t");
+        command.add(String.valueOf(lines));
+
+        try {
+            java.lang.Process proc =
+                    new ProcessBuilder(command).redirectErrorStream(true).start();
+
+            // Close the output stream immediately as we do not send input to the process.
+            try {
+                proc.getOutputStream().close();
+            } catch (IOException e) {
+            }
+
+            try (InputStreamReader reader = new InputStreamReader(proc.getInputStream())) {
+                char[] buffer = new char[8192];
+                int numRead;
+                while ((numRead = reader.read(buffer, 0, buffer.length)) > 0) {
+                    sb.append(buffer, 0, numRead);
+                }
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Error running logcat", e);
+        }
     }
 
     /**
@@ -12322,8 +12341,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessList.SYSTEM_ADJ, ProcessList.PERSISTENT_PROC_ADJ,
             ProcessList.PERSISTENT_SERVICE_ADJ, ProcessList.FOREGROUND_APP_ADJ,
             ProcessList.VISIBLE_APP_ADJ,
-            ProcessList.PERCEPTIBLE_APP_ADJ, ProcessList.PERCEPTIBLE_LOW_APP_ADJ,
-            ProcessList.PERCEPTIBLE_MEDIUM_APP_ADJ,
+            ProcessList.PERCEPTIBLE_APP_ADJ,
+            ProcessList.PERCEPTIBLE_MEDIUM_APP_ADJ, ProcessList.PERCEPTIBLE_LOW_APP_ADJ,
             ProcessList.BACKUP_APP_ADJ, ProcessList.HEAVY_WEIGHT_APP_ADJ,
             ProcessList.SERVICE_ADJ, ProcessList.HOME_APP_ADJ,
             ProcessList.PREVIOUS_APP_ADJ, ProcessList.SERVICE_B_ADJ, ProcessList.CACHED_APP_MIN_ADJ
@@ -12331,7 +12350,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String[] DUMP_MEM_OOM_LABEL = new String[] {
             "Native",
             "System", "Persistent", "Persistent Service", "Foreground",
-            "Visible", "Perceptible", "Perceptible Low", "Perceptible Medium",
+            "Visible", "Perceptible", "Perceptible Medium", "Perceptible Low",
             "Backup", "Heavy Weight",
             "A Services", "Home",
             "Previous", "B Services", "Cached"
@@ -12339,7 +12358,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String[] DUMP_MEM_OOM_COMPACT_LABEL = new String[] {
             "native",
             "sys", "pers", "persvc", "fore",
-            "vis", "percept", "perceptl", "perceptm",
+            "vis", "percept", "perceptm", "perceptl",
             "backup", "heavy",
             "servicea", "home",
             "prev", "serviceb", "cached"
@@ -14314,7 +14333,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // activity manager to announce its creation.
     public boolean bindBackupAgent(String packageName, int backupMode, int targetUserId,
             @BackupDestination int backupDestination) {
-        long startTimeNs = SystemClock.elapsedRealtimeNanos();
+        long startTimeNs = SystemClock.uptimeNanos();
         if (DEBUG_BACKUP) {
             Slog.v(TAG, "bindBackupAgent: app=" + packageName + " mode=" + backupMode
                     + " targetUserId=" + targetUserId + " callingUid = " + Binder.getCallingUid()
@@ -19413,7 +19432,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // If the process is known as top app, set a hint so when the process is
                     // started, the top priority can be applied immediately to avoid cpu being
                     // preempted by other processes before attaching the process of top app.
-                    final long startTimeNs = SystemClock.elapsedRealtimeNanos();
                     HostingRecord hostingRecord =
                             new HostingRecord(hostingType, hostingName, isTop);
                     ProcessRecord rec = getProcessRecordLocked(processName, info.uid);
@@ -19950,6 +19968,40 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return !ActivityManagerService.this.mThemeOverlayReadyUsers.contains(userId);
             }
         }
+
+        @Override
+        public void addStartInfoTimestamp(int key, long timestampNs, int uid, int pid,
+                int userId) {
+            // For the simplification, we don't support USER_ALL nor USER_CURRENT here.
+            if (userId == UserHandle.USER_ALL || userId == UserHandle.USER_CURRENT) {
+                throw new IllegalArgumentException("Unsupported userId");
+            }
+
+            mUserController.handleIncomingUser(pid, uid, userId, true,
+                    ALLOW_NON_FULL, "addStartInfoTimestampSystem", null);
+
+            addStartInfoTimestampInternal(key, timestampNs, userId, uid);
+        }
+
+        @Override
+        public void killApplicationSync(String pkgName, int appId, int userId,
+                String reason, int exitInfoReason) {
+            if (pkgName == null) {
+                return;
+            }
+            // Make sure the uid is valid.
+            if (appId < 0) {
+                Slog.w(TAG, "Invalid appid specified for pkg : " + pkgName);
+                return;
+            }
+            synchronized (ActivityManagerService.this) {
+                ActivityManagerService.this.forceStopPackageLocked(pkgName, appId,
+                        /* callerWillRestart= */ false, /*purgeCache= */ false,
+                        /* doit= */ true, /* evenPersistent= */ false,
+                        /* uninstalling= */ false, /* packageStateStopped= */ false,
+                        userId, reason, exitInfoReason);
+            }
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, TimeoutRecord timeoutRecord) {
@@ -20266,7 +20318,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int userId = UserHandle.getCallingUserId();
         final long callingId = Binder.clearCallingIdentity();
         try {
-            if (uid == -1) {
+            if (uid == INVALID_UID) {
                 uid = mPackageManagerInt.getPackageUid(packageName, 0, userId);
             }
             mAppRestrictionController.noteAppRestrictionEnabled(packageName, uid, restrictionType,

@@ -52,9 +52,9 @@ class PanelExpansionInteractorImplTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor
-    private val sceneInteractor = kosmos.sceneInteractor
-    private val shadeAnimationInteractor = kosmos.shadeAnimationInteractor
+    private val deviceUnlockedInteractor by lazy { kosmos.deviceUnlockedInteractor }
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val shadeAnimationInteractor by lazy { kosmos.shadeAnimationInteractor }
     private val transitionState =
         MutableStateFlow<ObservableTransitionState>(
             ObservableTransitionState.Idle(Scenes.Lockscreen)

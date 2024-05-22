@@ -36,6 +36,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -184,6 +185,11 @@ class TaskFragmentContainer {
     private boolean mIsIsolatedNavigationEnabled;
 
     /**
+     * Whether this TaskFragment is pinned.
+     */
+    private boolean mIsPinned;
+
+    /**
      * Whether to apply dimming on the parent Task that was requested last.
      */
     private boolean mLastDimOnTask;
@@ -269,6 +275,15 @@ class TaskFragmentContainer {
             addPendingAppearedActivity(pendingAppearedActivity);
         }
         mPendingAppearedIntent = pendingAppearedIntent;
+
+        // Save the information necessary for restoring the overlay when needed.
+        if (Flags.fixPipRestoreToOverlay() && overlayTag != null && pendingAppearedIntent != null
+                && associatedActivity != null && !associatedActivity.isFinishing()) {
+            final IBinder associatedActivityToken = associatedActivity.getActivityToken();
+            final OverlayContainerRestoreParams params = new OverlayContainerRestoreParams(mToken,
+                    launchOptions, pendingAppearedIntent);
+            mController.mOverlayRestoreParams.put(associatedActivityToken, params);
+        }
     }
 
     /**
@@ -893,6 +908,34 @@ class TaskFragmentContainer {
         mIsIsolatedNavigationEnabled = isolatedNavigationEnabled;
     }
 
+    /**
+     * Returns whether this container is pinned.
+     *
+     * @see android.window.TaskFragmentOperation#OP_TYPE_SET_PINNED
+     */
+    boolean isPinned() {
+        return mIsPinned;
+    }
+
+    /**
+     * Sets whether to pin this container or not.
+     *
+     * @see #isPinned()
+     */
+    void setPinned(boolean pinned) {
+        mIsPinned = pinned;
+    }
+
+    /**
+     * Indicates to skip activity resolving if the activity is from this container.
+     *
+     * @see #isIsolatedNavigationEnabled()
+     * @see #isPinned()
+     */
+    boolean shouldSkipActivityResolving() {
+        return isIsolatedNavigationEnabled() || isPinned();
+    }
+
     /** Sets whether to apply dim on the parent Task. */
     void setLastDimOnTask(boolean lastDimOnTask) {
         mLastDimOnTask = lastDimOnTask;
@@ -1071,5 +1114,26 @@ class TaskFragmentContainer {
             }
         }
         return sb.append("]").toString();
+    }
+
+    static class OverlayContainerRestoreParams {
+        /** The token of the overlay container */
+        @NonNull
+        final IBinder mOverlayToken;
+
+        /** The launch options to create this container. */
+        @NonNull
+        final Bundle mOptions;
+
+        /** The Intent that used to be started in the overlay container. */
+        @NonNull
+        final Intent mIntent;
+
+        OverlayContainerRestoreParams(@NonNull IBinder overlayToken, @NonNull Bundle options,
+                @NonNull Intent intent) {
+            mOverlayToken = overlayToken;
+            mOptions = options;
+            mIntent = intent;
+        }
     }
 }

@@ -30,6 +30,7 @@ import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
@@ -61,6 +62,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -74,7 +76,7 @@ import platform.test.runner.parameterized.Parameters
 @RunWith(ParameterizedAndroidJunit4::class)
 // SharedNotificationContainerViewModel is only bound when FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT is on
 @EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     companion object {
         @JvmStatic
@@ -88,7 +90,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     val aodBurnInViewModel = mock(AodBurnInViewModel::class.java)
@@ -106,18 +108,25 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
     val testScope = kosmos.testScope
     val configurationRepository
         get() = kosmos.fakeConfigurationRepository
+
     val keyguardRepository
         get() = kosmos.fakeKeyguardRepository
+
     val keyguardInteractor
         get() = kosmos.keyguardInteractor
+
     val keyguardRootViewModel
         get() = kosmos.keyguardRootViewModel
+
     val keyguardTransitionRepository
         get() = kosmos.fakeKeyguardTransitionRepository
+
     val shadeTestUtil
         get() = kosmos.shadeTestUtil
+
     val sharedNotificationContainerInteractor
         get() = kosmos.sharedNotificationContainerInteractor
+
     val largeScreenHeaderHelper
         get() = kosmos.mockLargeScreenHeaderHelper
 
@@ -654,26 +663,25 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
             var notificationCount = 10
             val calculateSpace = { space: Float, useExtraShelfSpace: Boolean -> notificationCount }
             val maxNotifications by collectLastValue(underTest.getMaxNotifications(calculateSpace))
-
+            advanceTimeBy(50L)
             showLockscreen()
 
             overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
-            keyguardInteractor.setNotificationContainerBounds(
-                NotificationContainerBounds(top = 1f, bottom = 2f)
-            )
 
             assertThat(maxNotifications).isEqualTo(10)
 
             // Also updates when directly requested (as it would from NotificationStackScrollLayout)
             notificationCount = 25
             sharedNotificationContainerInteractor.notificationStackChanged()
+            advanceTimeBy(50L)
             assertThat(maxNotifications).isEqualTo(25)
 
             // Also ensure another collection starts with the same value. As an example, folding
             // then unfolding will restart the coroutine and it must get the last value immediately.
             val newMaxNotifications by
                 collectLastValue(underTest.getMaxNotifications(calculateSpace))
+            advanceTimeBy(50L)
             assertThat(newMaxNotifications).isEqualTo(25)
         }
 
@@ -683,14 +691,11 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
             var notificationCount = 10
             val calculateSpace = { space: Float, useExtraShelfSpace: Boolean -> notificationCount }
             val maxNotifications by collectLastValue(underTest.getMaxNotifications(calculateSpace))
-
+            advanceTimeBy(50L)
             showLockscreen()
 
             overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
-            keyguardInteractor.setNotificationContainerBounds(
-                NotificationContainerBounds(top = 1f, bottom = 2f)
-            )
 
             assertThat(maxNotifications).isEqualTo(10)
 
@@ -718,15 +723,13 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
         testScope.runTest {
             val calculateSpace = { space: Float, useExtraShelfSpace: Boolean -> 10 }
             val maxNotifications by collectLastValue(underTest.getMaxNotifications(calculateSpace))
+            advanceTimeBy(50L)
 
             // Show lockscreen with shade expanded
             showLockscreenWithShadeExpanded()
 
             overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
-            keyguardInteractor.setNotificationContainerBounds(
-                NotificationContainerBounds(top = 1f, bottom = 2f)
-            )
 
             // -1 means No Limit
             assertThat(maxNotifications).isEqualTo(-1)
@@ -819,6 +822,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
         }
 
     @Test
+    @BrokenWithSceneContainer(330311871)
     fun alphaDoesNotUpdateWhileGoneTransitionIsRunning() =
         testScope.runTest {
             val viewState = ViewStateAccessor()

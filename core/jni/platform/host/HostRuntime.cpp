@@ -89,6 +89,7 @@ extern int register_android_database_CursorWindow(JNIEnv* env);
 extern int register_android_database_SQLiteConnection(JNIEnv* env);
 extern int register_android_database_SQLiteGlobal(JNIEnv* env);
 extern int register_android_database_SQLiteDebug(JNIEnv* env);
+extern int register_android_database_SQLiteRawStatement(JNIEnv* env);
 extern int register_android_os_FileObserver(JNIEnv* env);
 extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_Parcel(JNIEnv* env);
@@ -128,6 +129,8 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
          REG_JNI(register_android_database_SQLiteConnection)},
         {"android.database.sqlite.SQLiteGlobal", REG_JNI(register_android_database_SQLiteGlobal)},
         {"android.database.sqlite.SQLiteDebug", REG_JNI(register_android_database_SQLiteDebug)},
+        {"android.database.sqlite.SQLiteRawStatement",
+         REG_JNI(register_android_database_SQLiteRawStatement)},
 #endif
         {"android.content.res.StringBlock", REG_JNI(register_android_content_StringBlock)},
         {"android.content.res.XmlBlock", REG_JNI(register_android_content_XmlBlock)},
@@ -329,7 +332,8 @@ static void init_keyboard(JNIEnv* env, const vector<string>& keyboardPaths) {
 
         InputDeviceInfo info = InputDeviceInfo();
         info.initialize(keyboardId, 0, 0, InputDeviceIdentifier(),
-                        "keyboard " + std::to_string(keyboardId), true, false, 0);
+                        "keyboard " + std::to_string(keyboardId), true, false,
+                        ui::LogicalDisplayId::DEFAULT);
         info.setKeyboardType(AINPUT_KEYBOARD_TYPE_ALPHABETIC);
         info.setKeyCharacterMap(*charMap);
 

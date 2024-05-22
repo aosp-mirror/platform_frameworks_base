@@ -18,7 +18,6 @@ package com.android.systemui.communal.data.repository
 
 import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL
-import android.appwidget.AppWidgetProviderInfo
 import android.content.IntentFilter
 import android.content.pm.UserInfo
 import android.provider.Settings
@@ -108,10 +107,9 @@ constructor(
             .onStart { emit(Unit) }
             .map {
                 CommunalWidgetCategories(
-                    // The default is to show only keyguard widgets.
                     secureSettings.getIntForUser(
                         GLANCEABLE_HUB_CONTENT_SETTING,
-                        AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
+                        CommunalWidgetCategories.defaultCategories,
                         user.id
                     )
                 )

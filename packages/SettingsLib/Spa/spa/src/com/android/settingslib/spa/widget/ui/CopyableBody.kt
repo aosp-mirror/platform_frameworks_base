@@ -37,7 +37,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.DpOffset
 import com.android.settingslib.spa.framework.theme.SettingsDimension
-import com.android.settingslib.spa.framework.theme.SettingsTheme
 
 @Composable
 fun CopyableBody(body: String) {
@@ -78,7 +77,7 @@ private fun DropdownMenuTitle(text: String) {
                 top = SettingsDimension.itemPaddingAround,
                 bottom = SettingsDimension.buttonPaddingVertical,
             ),
-        color = SettingsTheme.colorScheme.categoryTitle,
+        color = MaterialTheme.colorScheme.primary,
         style = MaterialTheme.typography.labelMedium,
     )
 }

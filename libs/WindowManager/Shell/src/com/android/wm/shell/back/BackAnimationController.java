@@ -646,7 +646,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     private void tryDispatchOnBackCancelled(IOnBackInvokedCallback callback) {
         if (!mOnBackStartDispatched) {
-            Log.e(TAG, "Skipping dispatching onBackCancelled. Start was never dispatched.");
+            Log.d(TAG, "Skipping dispatching onBackCancelled. Start was never dispatched.");
             return;
         }
         if (callback == null) {

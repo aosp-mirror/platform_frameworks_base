@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.Flags;
 import android.content.pm.PackageManager;
 
 import dalvik.system.CloseGuard;
@@ -76,8 +77,13 @@ final class PackageFreezer implements AutoCloseable {
             ps = mPm.mSettings.getPackageLPr(mPackageName);
         }
         if (ps != null) {
-            mPm.killApplication(ps.getPackageName(), ps.getAppId(), userId, killReason,
-                    exitInfoReason);
+            if (Flags.waitApplicationKilled()) {
+                mPm.killApplicationSync(ps.getPackageName(), ps.getAppId(), userId, killReason,
+                        exitInfoReason);
+            } else {
+                mPm.killApplication(ps.getPackageName(), ps.getAppId(), userId, killReason,
+                        exitInfoReason);
+            }
         }
         mCloseGuard.open("close");
     }

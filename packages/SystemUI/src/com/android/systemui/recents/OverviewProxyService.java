@@ -37,7 +37,6 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_F
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_TRACING_ENABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_WAKEFULNESS_TRANSITION;
 
@@ -74,6 +73,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 
+import com.android.compose.animation.scene.SceneKey;
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
@@ -103,16 +103,19 @@ import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
+import com.android.systemui.shade.shared.model.ShadeMode;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.systemui.shared.system.smartspace.ISysuiUnlockAnimationController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
-import com.android.wm.shell.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInterface;
 
 import dagger.Lazy;
@@ -155,6 +158,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final ScreenPinningRequest mScreenPinningRequest;
     private final NotificationShadeWindowController mStatusBarWinController;
     private final Provider<SceneInteractor> mSceneInteractor;
+    private final Provider<ShadeInteractor> mShadeInteractor;
 
     private final Runnable mConnectionRunnable = () ->
             internalConnectToCurrentUser("runnable: startConnectionToCurrentUser");
@@ -243,7 +247,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                             // Gesture was too short to be picked up by scene container touch
                             // handling; programmatically start the transition to shade scene.
                             mSceneInteractor.get().changeScene(
-                                    Scenes.Shade, "short launcher swipe");
+                                    getShadeSceneKey(),
+                                    "short launcher swipe"
+                            );
                         }
                     }
                     event.recycle();
@@ -261,7 +267,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                                 "trackpad swipe");
                     } else if (action == ACTION_UP) {
                         mSceneInteractor.get().changeScene(
-                                Scenes.Shade, "short trackpad swipe");
+                                getShadeSceneKey(),
+                                "short trackpad swipe"
+                        );
                     }
                     mStatusBarWinController.getWindowRootView().dispatchTouchEvent(event);
                 } else {
@@ -407,7 +415,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void toggleNotificationPanel() {
             verifyCallerAndClearCallingIdentityPostMain("toggleNotificationPanel", () ->
-                    mCommandQueue.togglePanel());
+                    mCommandQueue.toggleNotificationsPanel());
+        }
+
+        @Override
+        public void toggleQuickSettingsPanel() {
+            verifyCallerAndClearCallingIdentityPostMain("toggleQuickSettingsPanel", () ->
+                    mCommandQueue.toggleQuickSettingsPanel());
         }
 
         private boolean verifyCaller(String reason) {
@@ -618,6 +632,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             NotificationShadeWindowController statusBarWinController,
             SysUiState sysUiState,
             Provider<SceneInteractor> sceneInteractor,
+            Provider<ShadeInteractor> shadeInteractor,
             UserTracker userTracker,
             WakefulnessLifecycle wakefulnessLifecycle,
             UiEventLogger uiEventLogger,
@@ -644,6 +659,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mScreenPinningRequest = screenPinningRequest;
         mStatusBarWinController = statusBarWinController;
         mSceneInteractor = sceneInteractor;
+        mShadeInteractor = shadeInteractor;
         mUserTracker = userTracker;
         mConnectionBackoffAttempts = 0;
         mRecentsComponentName = ComponentName.unflattenFromString(context.getString(
@@ -691,15 +707,15 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             // Listen for tracing state changes
             @Override
             public void onTracingStateChanged(boolean enabled) {
-                mSysUiState.setFlag(SYSUI_STATE_TRACING_ENABLED, enabled)
-                        .commitUpdate(mContext.getDisplayId());
+                // TODO(b/286509643) Cleanup callers of this; Unused downstream
             }
 
             @Override
             public void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {
                 if (mOverviewProxy != null) {
                     try {
-                        if (DesktopModeStatus.isEnabled() && (sysUiState.getFlags()
+                        if (DesktopModeStatus.canEnterDesktopMode(mContext)
+                                && (sysUiState.getFlags()
                                 & SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE) != 0) {
                             return;
                         }
@@ -756,7 +772,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
-    private void notifySystemUiStateFlags(int flags) {
+    private void notifySystemUiStateFlags(@SystemUiStateFlags long flags) {
         if (SysUiState.DEBUG) {
             Log.d(TAG_OPS, "Notifying sysui state change to overview service: proxy="
                     + mOverviewProxy + " flags=" + flags);
@@ -907,6 +923,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             mOverviewProxy = null;
             notifyConnectionChanged();
         }
+    }
+
+    private SceneKey getShadeSceneKey() {
+        return mShadeInteractor.get().getShadeMode().getValue() == ShadeMode.dual()
+                ? Scenes.NotificationsShade
+                : Scenes.Shade;
     }
 
     private void notifyHomeRotationEnabled(boolean enabled) {

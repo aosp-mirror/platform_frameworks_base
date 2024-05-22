@@ -17,6 +17,7 @@
 package com.android.settingslib.statusbar.notification.data.repository
 
 import android.app.NotificationManager
+import android.provider.Settings
 import com.android.settingslib.statusbar.notification.data.model.ZenMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,9 +29,13 @@ class FakeNotificationsSoundPolicyRepository : NotificationsSoundPolicyRepositor
     override val notificationPolicy: StateFlow<NotificationManager.Policy?>
         get() = mutableNotificationPolicy.asStateFlow()
 
-    private val mutableZenMode = MutableStateFlow<ZenMode?>(null)
+    private val mutableZenMode = MutableStateFlow<ZenMode?>(ZenMode(Settings.Global.ZEN_MODE_OFF))
     override val zenMode: StateFlow<ZenMode?>
         get() = mutableZenMode.asStateFlow()
+
+    init {
+        updateNotificationPolicy()
+    }
 
     fun updateNotificationPolicy(policy: NotificationManager.Policy?) {
         mutableNotificationPolicy.value = policy
@@ -48,13 +53,14 @@ fun FakeNotificationsSoundPolicyRepository.updateNotificationPolicy(
     suppressedVisualEffects: Int = NotificationManager.Policy.SUPPRESSED_EFFECTS_UNSET,
     state: Int = NotificationManager.Policy.STATE_UNSET,
     priorityConversationSenders: Int = NotificationManager.Policy.CONVERSATION_SENDERS_NONE,
-) = updateNotificationPolicy(
-    NotificationManager.Policy(
-        priorityCategories,
-        priorityCallSenders,
-        priorityMessageSenders,
-        suppressedVisualEffects,
-        state,
-        priorityConversationSenders,
+) =
+    updateNotificationPolicy(
+        NotificationManager.Policy(
+            priorityCategories,
+            priorityCallSenders,
+            priorityMessageSenders,
+            suppressedVisualEffects,
+            state,
+            priorityConversationSenders,
+        )
     )
-)

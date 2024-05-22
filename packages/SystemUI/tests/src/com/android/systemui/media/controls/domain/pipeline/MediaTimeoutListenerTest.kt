@@ -31,10 +31,6 @@ import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -52,6 +48,10 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
+import org.mockito.kotlin.capture
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.whenever
 
 private const val KEY = "KEY"
 private const val PACKAGE = "PKG"
@@ -166,12 +166,12 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     @Test
     fun testOnMediaDataRemoved_unregistersPlaybackListener() {
         mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
-        mediaTimeoutListener.onMediaDataRemoved(KEY)
+        mediaTimeoutListener.onMediaDataRemoved(KEY, false)
         verify(mediaController).unregisterCallback(anyObject())
 
         // Ignores duplicate requests
         clearInvocations(mediaController)
-        mediaTimeoutListener.onMediaDataRemoved(KEY)
+        mediaTimeoutListener.onMediaDataRemoved(KEY, false)
         verify(mediaController, never()).unregisterCallback(anyObject())
     }
 
@@ -181,7 +181,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
         assertThat(executor.numPending()).isEqualTo(1)
         // WHEN the media is removed
-        mediaTimeoutListener.onMediaDataRemoved(KEY)
+        mediaTimeoutListener.onMediaDataRemoved(KEY, false)
         // THEN the timeout runnable is cancelled
         assertThat(executor.numPending()).isEqualTo(0)
     }
@@ -398,7 +398,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         // WHEN we have a resume control
         testOnMediaDataLoaded_resumption_registersTimeout()
         // AND the media is removed
-        mediaTimeoutListener.onMediaDataRemoved(PACKAGE)
+        mediaTimeoutListener.onMediaDataRemoved(PACKAGE, false)
 
         // THEN the timeout runnable is cancelled
         assertThat(executor.numPending()).isEqualTo(0)

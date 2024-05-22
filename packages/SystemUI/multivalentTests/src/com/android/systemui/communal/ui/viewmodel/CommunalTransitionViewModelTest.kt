@@ -86,4 +86,26 @@ class CommunalTransitionViewModelTest : SysuiTestCase() {
             )
             assertThat(isUmoOnCommunal).isFalse()
         }
+
+    @Test
+    fun testIsUmoOnCommunalDuringTransitionBetweenOccludedAndGlanceableHub() =
+        testScope.runTest {
+            val isUmoOnCommunal by collectLastValue(underTest.isUmoOnCommunal)
+            assertThat(isUmoOnCommunal).isNull()
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.OCCLUDED,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope
+            )
+            assertThat(isUmoOnCommunal).isTrue()
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.OCCLUDED,
+                testScope
+            )
+
+            assertThat(isUmoOnCommunal).isFalse()
+        }
 }

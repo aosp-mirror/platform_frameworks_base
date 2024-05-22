@@ -394,8 +394,20 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    fun resetViewStates_shadeCollapsed_emptyShadeViewBecomesTransparent() {
+        ambientState.expansionFraction = 0f
+        stackScrollAlgorithm.initView(context)
+        hostView.removeAllViews()
+        hostView.addView(emptyShadeView)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
+
+        assertThat(emptyShadeView.viewState.alpha).isEqualTo(0f)
+    }
+
+    @Test
     fun resetViewStates_isOnKeyguard_emptyShadeViewBecomesOpaque() {
-        ambientState.setStatusBarState(StatusBarState.SHADE)
+        ambientState.setStatusBarState(StatusBarState.KEYGUARD)
         ambientState.fractionToShade = 0.25f
         stackScrollAlgorithm.initView(context)
         hostView.removeAllViews()
@@ -403,7 +415,8 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
         stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
 
-        assertThat(emptyShadeView.viewState.alpha).isEqualTo(1f)
+        val expected = getContentAlpha(ambientState.fractionToShade)
+        assertThat(emptyShadeView.viewState.alpha).isEqualTo(expected)
     }
 
     @Test

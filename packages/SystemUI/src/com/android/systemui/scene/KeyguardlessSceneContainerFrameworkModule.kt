@@ -17,10 +17,12 @@
 package com.android.systemui.scene
 
 import com.android.systemui.CoreStartable
+import com.android.systemui.notifications.ui.composable.NotificationsShadeSessionModule
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.shared.flag.DualShade
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -33,6 +35,8 @@ import dagger.multibindings.IntoMap
         [
             EmptySceneModule::class,
             GoneSceneModule::class,
+            NotificationsShadeSceneModule::class,
+            NotificationsShadeSessionModule::class,
             QuickSettingsSceneModule::class,
             ShadeSceneModule::class,
         ],
@@ -59,18 +63,24 @@ interface KeyguardlessSceneContainerFrameworkModule {
                 // Note that this list is in z-order. The first one is the bottom-most and the
                 // last one is top-most.
                 sceneKeys =
-                    listOf(
+                    listOfNotNull(
                         Scenes.Gone,
-                        Scenes.QuickSettings,
-                        Scenes.Shade,
+                        Scenes.QuickSettings.takeUnless { DualShade.isEnabled },
+                        Scenes.QuickSettingsShade.takeIf { DualShade.isEnabled },
+                        Scenes.NotificationsShade.takeIf { DualShade.isEnabled },
+                        Scenes.Shade.takeUnless { DualShade.isEnabled },
                     ),
                 initialSceneKey = Scenes.Gone,
                 navigationDistances =
                     mapOf(
-                        Scenes.Gone to 0,
-                        Scenes.Shade to 1,
-                        Scenes.QuickSettings to 2,
-                    ),
+                            Scenes.Gone to 0,
+                            Scenes.NotificationsShade to 1.takeIf { DualShade.isEnabled },
+                            Scenes.Shade to 1.takeUnless { DualShade.isEnabled },
+                            Scenes.QuickSettingsShade to 2.takeIf { DualShade.isEnabled },
+                            Scenes.QuickSettings to 2.takeUnless { DualShade.isEnabled },
+                        )
+                        .filterValues { it != null }
+                        .mapValues { checkNotNull(it.value) }
             )
         }
     }

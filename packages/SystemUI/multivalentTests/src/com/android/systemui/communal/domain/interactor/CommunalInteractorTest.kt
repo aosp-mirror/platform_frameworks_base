@@ -23,6 +23,7 @@ import android.app.smartspace.SmartspaceTarget
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.pm.UserInfo
+import android.graphics.Bitmap
 import android.os.UserHandle
 import android.os.UserManager
 import android.os.userManager
@@ -57,6 +58,8 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.activityStarter
@@ -201,14 +204,14 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun isCommunalAvailable_whenDreaming_true() =
+    fun isCommunalAvailable_whenKeyguardShowing_true() =
         testScope.runTest {
             val isAvailable by collectLastValue(underTest.isCommunalAvailable)
             assertThat(isAvailable).isFalse()
 
             keyguardRepository.setIsEncryptedOrLockdown(false)
             userRepository.setSelectedUserInfo(mainUser)
-            keyguardRepository.setDreaming(true)
+            keyguardRepository.setKeyguardShowing(true)
 
             assertThat(isAvailable).isTrue()
         }
@@ -869,7 +872,14 @@ class CommunalInteractorTest : SysuiTestCase() {
             // One widget is filtered out and the remaining two link to main user id.
             assertThat(checkNotNull(widgetContent).size).isEqualTo(2)
             widgetContent!!.forEachIndexed { _, model ->
-                assertThat(model.providerInfo.profile?.identifier).isEqualTo(MAIN_USER_INFO.id)
+                assertThat(model is CommunalContentModel.WidgetContent.Widget).isTrue()
+                assertThat(
+                        (model as CommunalContentModel.WidgetContent.Widget)
+                            .providerInfo
+                            .profile
+                            ?.identifier
+                    )
+                    .isEqualTo(MAIN_USER_INFO.id)
             }
         }
 
@@ -1035,9 +1045,9 @@ class CommunalInteractorTest : SysuiTestCase() {
             runCurrent()
 
             val widgetContent by collectLastValue(underTest.widgetContent)
-            // Given three widgets, and one of them is associated with work profile.
+            // One available work widget, one pending work widget, and one regular available widget.
             val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
-            val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
+            val widget2 = createPendingWidgetForUser(2, userId = USER_INFO_WORK.id)
             val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
             val widgets = listOf(widget1, widget2, widget3)
             widgetRepository.setCommunalWidgets(widgets)
@@ -1047,11 +1057,9 @@ class CommunalInteractorTest : SysuiTestCase() {
                 DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL
             )
 
-            // Widget under work profile is filtered out and the remaining two link to main user id.
-            assertThat(widgetContent).hasSize(2)
-            widgetContent!!.forEach { model ->
-                assertThat(model.providerInfo.profile?.identifier).isEqualTo(MAIN_USER_INFO.id)
-            }
+            // Widgets under work profile are filtered out. Only the regular widget remains.
+            assertThat(widgetContent).hasSize(1)
+            assertThat(widgetContent?.get(0)?.appWidgetId).isEqualTo(3)
         }
 
     @Test
@@ -1074,7 +1082,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             val widgetContent by collectLastValue(underTest.widgetContent)
             // Given three widgets, and one of them is associated with work profile.
             val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
-            val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
+            val widget2 = createPendingWidgetForUser(2, userId = USER_INFO_WORK.id)
             val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
             val widgets = listOf(widget1, widget2, widget3)
             widgetRepository.setCommunalWidgets(widgets)
@@ -1084,10 +1092,83 @@ class CommunalInteractorTest : SysuiTestCase() {
                 DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE
             )
 
-            // Widget under work profile is available.
+            // Widgets under work profile are available.
             assertThat(widgetContent).hasSize(3)
-            assertThat(widgetContent!![0].providerInfo.profile?.identifier)
-                .isEqualTo(USER_INFO_WORK.id)
+            assertThat(widgetContent?.get(0)?.appWidgetId).isEqualTo(1)
+            assertThat(widgetContent?.get(1)?.appWidgetId).isEqualTo(2)
+            assertThat(widgetContent?.get(2)?.appWidgetId).isEqualTo(3)
+        }
+
+    @Test
+    fun showCommunalFromOccluded_enteredOccludedFromHub() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            val showCommunalFromOccluded by collectLastValue(underTest.showCommunalFromOccluded)
+            assertThat(showCommunalFromOccluded).isFalse()
+
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.OCCLUDED,
+                testScope
+            )
+
+            assertThat(showCommunalFromOccluded).isTrue()
+        }
+
+    @Test
+    fun showCommunalFromOccluded_enteredOccludedFromLockscreen() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            val showCommunalFromOccluded by collectLastValue(underTest.showCommunalFromOccluded)
+            assertThat(showCommunalFromOccluded).isFalse()
+
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.OCCLUDED,
+                testScope
+            )
+
+            assertThat(showCommunalFromOccluded).isFalse()
+        }
+
+    @Test
+    fun showCommunalFromOccluded_communalBecomesUnavailableWhileOccluded() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            val showCommunalFromOccluded by collectLastValue(underTest.showCommunalFromOccluded)
+            assertThat(showCommunalFromOccluded).isFalse()
+
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.OCCLUDED,
+                testScope
+            )
+            runCurrent()
+            kosmos.setCommunalAvailable(false)
+
+            assertThat(showCommunalFromOccluded).isFalse()
+        }
+
+    @Test
+    fun showCommunalFromOccluded_showBouncerWhileOccluded() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            val showCommunalFromOccluded by collectLastValue(underTest.showCommunalFromOccluded)
+            assertThat(showCommunalFromOccluded).isFalse()
+
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.OCCLUDED,
+                testScope
+            )
+            runCurrent()
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.OCCLUDED,
+                to = KeyguardState.PRIMARY_BOUNCER,
+                testScope
+            )
+
+            assertThat(showCommunalFromOccluded).isTrue()
         }
 
     private fun smartspaceTimer(id: String, timestamp: Long = 0L): SmartspaceTarget {
@@ -1108,8 +1189,11 @@ class CommunalInteractorTest : SysuiTestCase() {
         )
     }
 
-    private fun createWidgetForUser(appWidgetId: Int, userId: Int): CommunalWidgetContentModel =
-        mock<CommunalWidgetContentModel> {
+    private fun createWidgetForUser(
+        appWidgetId: Int,
+        userId: Int
+    ): CommunalWidgetContentModel.Available =
+        mock<CommunalWidgetContentModel.Available> {
             whenever(this.appWidgetId).thenReturn(appWidgetId)
             val providerInfo =
                 mock<AppWidgetProviderInfo>().apply {
@@ -1119,11 +1203,27 @@ class CommunalInteractorTest : SysuiTestCase() {
             whenever(this.providerInfo).thenReturn(providerInfo)
         }
 
+    private fun createPendingWidgetForUser(
+        appWidgetId: Int,
+        priority: Int = 0,
+        packageName: String = "",
+        icon: Bitmap? = null,
+        userId: Int = 0,
+    ): CommunalWidgetContentModel.Pending {
+        return CommunalWidgetContentModel.Pending(
+            appWidgetId = appWidgetId,
+            priority = priority,
+            packageName = packageName,
+            icon = icon,
+            user = UserHandle(userId),
+        )
+    }
+
     private fun createWidgetWithCategory(
         appWidgetId: Int,
         category: Int
     ): CommunalWidgetContentModel =
-        mock<CommunalWidgetContentModel> {
+        mock<CommunalWidgetContentModel.Available> {
             whenever(this.appWidgetId).thenReturn(appWidgetId)
             val providerInfo = mock<AppWidgetProviderInfo>().apply { widgetCategory = category }
             whenever(providerInfo.profile).thenReturn(UserHandle(MAIN_USER_INFO.id))

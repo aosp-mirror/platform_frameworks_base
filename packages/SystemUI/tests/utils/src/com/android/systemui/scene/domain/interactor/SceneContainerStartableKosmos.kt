@@ -32,6 +32,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
+import com.android.systemui.scene.session.shared.shadeSessionStorage
 import com.android.systemui.scene.shared.logger.sceneLogger
 import com.android.systemui.settings.displayTracker
 import com.android.systemui.shade.domain.interactor.shadeInteractor
@@ -65,5 +66,6 @@ val Kosmos.sceneContainerStartable by Fixture {
         shadeInteractor = shadeInteractor,
         uiEventLogger = uiEventLogger,
         sceneBackInteractor = sceneBackInteractor,
+        shadeSessionStorage = shadeSessionStorage,
     )
 }

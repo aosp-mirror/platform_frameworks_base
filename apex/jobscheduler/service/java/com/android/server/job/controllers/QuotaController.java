@@ -50,6 +50,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
@@ -2181,6 +2182,12 @@ public final class QuotaController extends StateController {
                     }
                     scheduleCutoff();
                 }
+            } else {
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
+                    Trace.instantForTrack(Trace.TRACE_TAG_SYSTEM_SERVER,
+                            JobSchedulerService.TRACE_TRACK_NAME,
+                            "QC/- " + mPkg);
+                }
             }
         }
 
@@ -2720,6 +2727,11 @@ public final class QuotaController extends StateController {
                         if (timeRemainingMs <= 50) {
                             // Less than 50 milliseconds left. Start process of shutting down jobs.
                             if (DEBUG) Slog.d(TAG, pkg + " has reached its quota.");
+                            if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
+                                Trace.instantForTrack(Trace.TRACE_TAG_SYSTEM_SERVER,
+                                        JobSchedulerService.TRACE_TRACK_NAME,
+                                        pkg + "#" + MSG_REACHED_TIME_QUOTA);
+                            }
                             mStateChangedListener.onControllerStateChanged(
                                     maybeUpdateConstraintForPkgLocked(
                                             sElapsedRealtimeClock.millis(),
@@ -2748,6 +2760,11 @@ public final class QuotaController extends StateController {
                                 pkg.userId, pkg.packageName);
                         if (timeRemainingMs <= 0) {
                             if (DEBUG) Slog.d(TAG, pkg + " has reached its EJ quota.");
+                            if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
+                                Trace.instantForTrack(Trace.TRACE_TAG_SYSTEM_SERVER,
+                                        JobSchedulerService.TRACE_TRACK_NAME,
+                                        pkg + "#" + MSG_REACHED_EJ_TIME_QUOTA);
+                            }
                             mStateChangedListener.onControllerStateChanged(
                                     maybeUpdateConstraintForPkgLocked(
                                             sElapsedRealtimeClock.millis(),
@@ -2770,6 +2787,12 @@ public final class QuotaController extends StateController {
                         UserPackage pkg = (UserPackage) msg.obj;
                         if (DEBUG) {
                             Slog.d(TAG, pkg + " has reached its count quota.");
+                        }
+
+                        if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
+                            Trace.instantForTrack(Trace.TRACE_TAG_SYSTEM_SERVER,
+                                    JobSchedulerService.TRACE_TRACK_NAME,
+                                    pkg + "#" + MSG_REACHED_COUNT_QUOTA);
                         }
 
                         mStateChangedListener.onControllerStateChanged(
@@ -2928,6 +2951,11 @@ public final class QuotaController extends StateController {
                             }
                             mTempAllowlistGraceCache.delete(uid);
                             mTopAppGraceCache.delete(uid);
+                            if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
+                                Trace.instantForTrack(Trace.TRACE_TAG_SYSTEM_SERVER,
+                                        JobSchedulerService.TRACE_TRACK_NAME,
+                                        "<" + uid + ">#" + MSG_END_GRACE_PERIOD);
+                            }
                             final ArraySet<String> packages = mService.getPackagesForUidLocked(uid);
                             if (packages != null) {
                                 final int userId = UserHandle.getUserId(uid);

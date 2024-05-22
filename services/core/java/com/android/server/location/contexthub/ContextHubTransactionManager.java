@@ -412,10 +412,15 @@ import java.util.concurrent.atomic.AtomicInteger;
     /* package */
     synchronized void addTransaction(
             ContextHubServiceTransaction transaction) throws IllegalStateException {
+        if (transaction == null) {
+            return;
+        }
+
         if (mTransactionQueue.size() == MAX_PENDING_REQUESTS) {
             throw new IllegalStateException("Transaction queue is full (capacity = "
                     + MAX_PENDING_REQUESTS + ")");
         }
+
         mTransactionQueue.add(transaction);
         mTransactionRecordDeque.add(new TransactionRecord(transaction.toString()));
 
@@ -517,7 +522,10 @@ import java.util.concurrent.atomic.AtomicInteger;
      * the caller has obtained a lock on this ContextHubTransactionManager object.
      */
     private void removeTransactionAndStartNext() {
-        mTimeoutFuture.cancel(false /* mayInterruptIfRunning */);
+        if (mTimeoutFuture != null) {
+            mTimeoutFuture.cancel(/* mayInterruptIfRunning= */ false);
+            mTimeoutFuture = null;
+        }
 
         ContextHubServiceTransaction transaction = mTransactionQueue.remove();
         transaction.setComplete();

@@ -47,7 +47,7 @@ public:
     void move(float deltaX, float deltaY);
     void setPosition(float x, float y);
     FloatPoint getPosition() const;
-    int32_t getDisplayId() const;
+    ui::LogicalDisplayId getDisplayId() const;
     void fade(PointerControllerInterface::Transition transition);
     void unfade(PointerControllerInterface::Transition transition);
     void setDisplayViewport(const DisplayViewport& viewport, bool getAdditionalMouseResources);

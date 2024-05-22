@@ -426,7 +426,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
         assertEquals(View.GONE,
-                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+                mFragment.getView().findViewById(R.id.ongoing_activity_chip).getVisibility());
     }
 
     @Test
@@ -438,7 +438,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
         assertEquals(View.VISIBLE,
-                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+                mFragment.getView().findViewById(R.id.ongoing_activity_chip).getVisibility());
         assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
     }
 
@@ -452,7 +452,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 StatusBarManager.DISABLE_NOTIFICATION_ICONS, 0, false);
 
         assertEquals(View.GONE,
-                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+                mFragment.getView().findViewById(R.id.ongoing_activity_chip).getVisibility());
     }
 
     @Test
@@ -465,7 +465,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
         assertEquals(View.GONE,
-                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+                mFragment.getView().findViewById(R.id.ongoing_activity_chip).getVisibility());
     }
 
     @Test
@@ -477,21 +477,21 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
         assertEquals(View.VISIBLE,
-                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+                mFragment.getView().findViewById(R.id.ongoing_activity_chip).getVisibility());
 
         // Ongoing call ended
         when(mOngoingCallController.hasOngoingCall()).thenReturn(false);
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
         assertEquals(View.GONE,
-                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+                mFragment.getView().findViewById(R.id.ongoing_activity_chip).getVisibility());
 
         // Ongoing call started
         when(mOngoingCallController.hasOngoingCall()).thenReturn(true);
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
         assertEquals(View.VISIBLE,
-                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+                mFragment.getView().findViewById(R.id.ongoing_activity_chip).getVisibility());
     }
 
     @Test

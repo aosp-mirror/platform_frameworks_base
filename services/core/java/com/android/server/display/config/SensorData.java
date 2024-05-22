@@ -24,7 +24,6 @@ import android.text.TextUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.feature.DisplayManagerFlags;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,7 +41,7 @@ public class SensorData {
     public final String name;
     public final float minRefreshRate;
     public final float maxRefreshRate;
-    public final List<SupportedMode> supportedModes;
+    public final List<SupportedModeData> supportedModes;
 
     @VisibleForTesting
     public SensorData() {
@@ -61,7 +60,7 @@ public class SensorData {
 
     @VisibleForTesting
     public SensorData(String type, String name, float minRefreshRate, float maxRefreshRate,
-            List<SupportedMode> supportedModes) {
+            List<SupportedModeData> supportedModes) {
         this.type = type;
         this.name = name;
         this.minRefreshRate = minRefreshRate;
@@ -214,26 +213,11 @@ public class SensorData {
             minRefreshRate = rr.getMinimum().floatValue();
             maxRefreshRate = rr.getMaximum().floatValue();
         }
-        ArrayList<SupportedMode> supportedModes = new ArrayList<>();
-        NonNegativeFloatToFloatMap configSupportedModes = sensorDetails.getSupportedModes();
-        if (configSupportedModes != null) {
-            for (NonNegativeFloatToFloatPoint supportedMode : configSupportedModes.getPoint()) {
-                supportedModes.add(new SupportedMode(supportedMode.getFirst().floatValue(),
-                        supportedMode.getSecond().floatValue()));
-            }
-        }
+        List<SupportedModeData> supportedModes = SupportedModeData.load(
+                sensorDetails.getSupportedModes());
 
         return new SensorData(sensorDetails.getType(), sensorDetails.getName(), minRefreshRate,
                 maxRefreshRate, supportedModes);
     }
 
-    public static class SupportedMode {
-        public final float refreshRate;
-        public final float vsyncRate;
-
-        public SupportedMode(float refreshRate, float vsyncRate) {
-            this.refreshRate = refreshRate;
-            this.vsyncRate = vsyncRate;
-        }
-    }
 }

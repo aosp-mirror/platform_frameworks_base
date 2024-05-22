@@ -18,11 +18,11 @@ package com.android.systemui.fold.ui.composable
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowInfoTracker
 import com.android.systemui.fold.ui.helper.FoldPosture
 import com.android.systemui.fold.ui.helper.foldPostureInternal
@@ -32,7 +32,8 @@ import com.android.systemui.fold.ui.helper.foldPostureInternal
 fun foldPosture(): State<FoldPosture> {
     val context = LocalContext.current
     val infoTracker = remember(context) { WindowInfoTracker.getOrCreate(context) }
-    val layoutInfo by infoTracker.windowLayoutInfo(context).collectAsState(initial = null)
+    val layoutInfo by
+        infoTracker.windowLayoutInfo(context).collectAsStateWithLifecycle(initialValue = null)
 
     return produceState<FoldPosture>(
         initialValue = FoldPosture.Folded,

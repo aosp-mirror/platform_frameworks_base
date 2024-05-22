@@ -64,7 +64,6 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -706,26 +705,6 @@ class RecentTasks {
                 remove(task);
             }
         }
-    }
-
-    /**
-     * Removes the oldest recent task that is compatible with the given one. This is possible if
-     * the task windowing mode changed after being added to the Recents.
-     */
-    void removeCompatibleRecentTask(Task task) {
-        final int taskIndex = mTasks.indexOf(task);
-        if (taskIndex < 0) {
-            return;
-        }
-
-        final int candidateIndex = findRemoveIndexForTask(task, false /* includingSelf */);
-        if (candidateIndex == -1) {
-            // Nothing to trim
-            return;
-        }
-
-        final Task taskToRemove = taskIndex > candidateIndex ? task : mTasks.get(candidateIndex);
-        remove(taskToRemove);
     }
 
     void removeTasksByPackageName(String packageName, int userId) {
@@ -1615,10 +1594,6 @@ class RecentTasks {
      * list (if any).
      */
     private int findRemoveIndexForAddTask(Task task) {
-        return findRemoveIndexForTask(task, true /* includingSelf */);
-    }
-
-    private int findRemoveIndexForTask(Task task, boolean includingSelf) {
         final int recentsCount = mTasks.size();
         final Intent intent = task.intent;
         final boolean document = intent != null && intent.isDocument();
@@ -1674,8 +1649,6 @@ class RecentTasks {
                     // existing task
                     continue;
                 }
-            } else if (!includingSelf) {
-                continue;
             }
             return i;
         }

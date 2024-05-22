@@ -19,6 +19,7 @@ package com.android.wm.shell.windowdecor;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -39,6 +40,9 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Handler;
 import android.os.SystemProperties;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.view.Choreographer;
@@ -51,6 +55,7 @@ import android.window.WindowContainerTransaction;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
@@ -61,6 +66,7 @@ import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -82,6 +88,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
             "persist.wm.debug.desktop_use_window_shadows_focused_window";
     private static final String USE_ROUNDED_CORNERS_SYSPROP_KEY =
             "persist.wm.debug.desktop_use_rounded_corners";
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
     @Mock
     private DisplayController mMockDisplayController;
@@ -107,6 +115,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private WindowDecoration.SurfaceControlViewHostFactory mMockSurfaceControlViewHostFactory;
     @Mock
     private TypedArray mMockRoundedCornersRadiusArray;
+    @Mock
+    private ResizeHandleSizeRepository mMockResizeHandleSizeRepository;
 
     private final Configuration mConfiguration = new Configuration();
 
@@ -172,6 +182,48 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* shouldSetTaskPositionAndCrop */ false);
 
         assertThat(relayoutParams.mCornerRadius).isGreaterThan(0);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_APP_HEADER_WITH_TASK_DENSITY)
+    public void updateRelayoutParams_appHeader_usesTaskDensity() {
+        final int systemDensity = mTestableContext.getOrCreateTestableResources().getResources()
+                .getConfiguration().densityDpi;
+        final int customTaskDensity = systemDensity + 300;
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        taskInfo.configuration.densityDpi = customTaskDensity;
+        final RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
+
+        assertThat(relayoutParams.mWindowDecorConfig.densityDpi).isEqualTo(customTaskDensity);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_APP_HEADER_WITH_TASK_DENSITY)
+    public void updateRelayoutParams_appHeader_usesSystemDensity() {
+        final int systemDensity = mTestableContext.getOrCreateTestableResources().getResources()
+                .getConfiguration().densityDpi;
+        final int customTaskDensity = systemDensity + 300;
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        taskInfo.configuration.densityDpi = customTaskDensity;
+        final RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
+
+        assertThat(relayoutParams.mWindowDecorConfig.densityDpi).isEqualTo(systemDensity);
     }
 
     @Test
@@ -294,10 +346,10 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private DesktopModeWindowDecoration createWindowDecoration(
             ActivityManager.RunningTaskInfo taskInfo) {
         return new DesktopModeWindowDecoration(mContext, mMockDisplayController,
-                mMockShellTaskOrganizer, taskInfo, mMockSurfaceControl, mConfiguration,
+                mMockShellTaskOrganizer, taskInfo, mMockSurfaceControl,
                 mMockHandler, mMockChoreographer, mMockSyncQueue, mMockRootTaskDisplayAreaOrganizer,
-                SurfaceControl.Builder::new, mMockTransactionSupplier,
-                WindowContainerTransaction::new, SurfaceControl::new,
+                mMockResizeHandleSizeRepository, SurfaceControl.Builder::new,
+                mMockTransactionSupplier, WindowContainerTransaction::new, SurfaceControl::new,
                 mMockSurfaceControlViewHostFactory);
     }
 

@@ -32,13 +32,17 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
+import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
+import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.qs.footerActionsController
 import com.android.systemui.qs.footerActionsViewModelFactory
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModel
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
@@ -49,7 +53,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
 import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -93,7 +96,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 qsSceneAdapter = qsSceneAdapter,
                 notifications = kosmos.notificationsPlaceholderViewModel,
                 brightnessMirrorViewModel = kosmos.brightnessMirrorViewModel,
-                mediaDataManager = mediaDataManager,
+                mediaCarouselInteractor = kosmos.mediaCarouselInteractor,
                 shadeInteractor = kosmos.shadeInteractor,
                 footerActionsViewModelFactory = kosmos.footerActionsViewModelFactory,
                 footerActionsController = kosmos.footerActionsController,
@@ -159,6 +162,27 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun upTransitionKey_splitShadeEnabled_isGoneToSplitShade() =
+        testScope.runTest {
+            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            shadeRepository.setShadeMode(ShadeMode.Split)
+            runCurrent()
+
+            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.transitionKey)
+                .isEqualTo(ToSplitShade)
+        }
+
+    @Test
+    fun upTransitionKey_splitShadeDisable_isNull() =
+        testScope.runTest {
+            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            shadeRepository.setShadeMode(ShadeMode.Single)
+            runCurrent()
+
+            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.transitionKey).isNull()
+        }
+
+    @Test
     fun isClickable_deviceUnlocked_false() =
         testScope.runTest {
             val isClickable by collectLastValue(underTest.isClickable)
@@ -200,19 +224,20 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun hasActiveMedia_mediaVisible() =
+    fun addAndRemoveMedia_mediaVisibilityisUpdated() =
         testScope.runTest {
-            whenever(mediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true)
+            val isMediaVisible by collectLastValue(underTest.isMediaVisible)
+            val userMedia = MediaData(active = true)
 
-            assertThat(underTest.isMediaVisible()).isTrue()
-        }
+            assertThat(isMediaVisible).isFalse()
 
-    @Test
-    fun doesNotHaveActiveMedia_mediaNotVisible() =
-        testScope.runTest {
-            whenever(mediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(false)
+            kosmos.mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
 
-            assertThat(underTest.isMediaVisible()).isFalse()
+            assertThat(isMediaVisible).isTrue()
+
+            kosmos.mediaFilterRepository.removeSelectedUserMediaEntry(userMedia.instanceId)
+
+            assertThat(isMediaVisible).isFalse()
         }
 
     @Test

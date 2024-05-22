@@ -18,7 +18,7 @@ package android.service.dreams;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.service.dreams.Flags.dreamHandlesConfirmKeys;
-import static android.service.dreams.Flags.dreamTracksFocus;
+import static android.service.dreams.Flags.dreamHandlesBeingObscured;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IdRes;
@@ -571,15 +571,6 @@ public class DreamService extends Service implements Window.Callback {
     /** {@inheritDoc} */
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
-        if (!dreamTracksFocus()) {
-            return;
-        }
-
-        try {
-            mDreamManager.onDreamFocusChanged(hasFocus);
-        } catch (RemoteException ex) {
-            // system server died
-        }
     }
 
     /** {@inheritDoc} */
@@ -1737,7 +1728,7 @@ public class DreamService extends Service implements Window.Callback {
 
         @Override
         public void comeToFront() {
-            if (!dreamTracksFocus()) {
+            if (!dreamHandlesBeingObscured()) {
                 return;
             }
 

@@ -384,6 +384,8 @@
 
     <!-- Content description for the app logo icon on biometric prompt. [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_logo">App logo</string>
+    <!-- List of packages for which we want to show overridden logo. For example, an app overrides its launcher logo, if it's in this array, biometric dialog shows the overridden logo; otherwise biometric dialog still shows the default application info icon. [CHAR LIMIT=NONE] -->
+    <string-array name="biometric_dialog_package_names_for_logo_with_overrides" />
     <!-- Message shown when a biometric is authenticated, asking the user to confirm authentication [CHAR LIMIT=30] -->
     <string name="biometric_dialog_confirm">Confirm</string>
     <!-- Button name on BiometricPrompt shown when a biometric is detected but not authenticated. Tapping the button resumes authentication [CHAR LIMIT=30] -->
@@ -763,7 +765,7 @@
     <!-- QuickSettings: Wifi secondary label shown when the wifi is being enabled [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_secondary_label_transient">Turning on&#8230;</string>
     <!-- QuickSettings: Cast title [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_cast_title">Screen Cast</string>
+    <string name="quick_settings_cast_title">Cast</string>
     <!-- QuickSettings: Cast detail panel, status text when casting [CHAR LIMIT=NONE] -->
     <string name="quick_settings_casting">Casting</string>
     <!-- QuickSettings: Cast detail panel, default device name [CHAR LIMIT=NONE] -->
@@ -899,15 +901,6 @@
 
     <!-- QuickSettings: Label for the toggle that controls whether One-handed mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_onehanded_label">One-handed mode</string>
-
-    <!-- QuickSettings: Contrast tile [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_contrast_label">Contrast</string>
-    <!-- QuickSettings: Contrast tile description: standard [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_contrast_standard">Standard</string>
-    <!-- QuickSettings: Contrast tile description: medium [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_contrast_medium">Medium</string>
-    <!-- QuickSettings: Contrast tile description: high [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_contrast_high">High</string>
 
     <!-- Hearing devices -->
     <!-- QuickSettings: Hearing devices [CHAR LIMIT=NONE] -->
@@ -1158,6 +1151,8 @@
     <string name="button_to_configure_widgets_text">Customize widgets</string>
     <!-- Description for the App icon of disabled widget. [CHAR LIMIT=NONE] -->
     <string name="icon_description_for_disabled_widget">App icon for disabled widget</string>
+    <!-- Description for the App icon of a package that is currently being installed. [CHAR LIMIT=NONE] -->
+    <string name="icon_description_for_pending_widget">App icon for a widget being installed</string>
     <!-- Label for the button which configures widgets [CHAR LIMIT=NONE] -->
     <string name="edit_widget">Edit widget</string>
     <!-- Description for the button that removes a widget on click. [CHAR LIMIT=50] -->
@@ -1186,6 +1181,10 @@
     <string name="accessibility_content_description_for_communal_hub">Widgets on lock screen</string>
     <!-- Label for accessibility action to select a widget in edit mode. [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_label_select_widget">select widget</string>
+    <!-- Label for accessibility action to remove a widget in edit mode. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_label_remove_widget">remove widget</string>
+    <!-- Label for accessibility action to place a widget in edit mode after selecting move widget. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_label_place_widget">place selected widget</string>
 
     <!-- Related to user switcher --><skip/>
 
@@ -1630,9 +1629,15 @@
     <string name="volume_panel_collapsed_sliders">Volume sliders collapsed</string>
 
     <!-- Hint for accessibility. A stream name is a parameter. For example: double tap to mute media [CHAR_LIMIT=NONE] -->
-    <string name="volume_panel_hint_mute">mute %s</string>
+    <string name="volume_panel_hint_mute">Mute %s</string>
     <!-- Hint for accessibility. A stream name is a parameter. For example: double tap to unmute media [CHAR_LIMIT=NONE] -->
-    <string name="volume_panel_hint_unmute">unmute %s</string>
+    <string name="volume_panel_hint_unmute">Unmute %s</string>
+
+    <!-- Hint for accessibility. This is announced when the stream is muted [CHAR_LIMIT=NONE] -->
+    <string name="volume_panel_hint_muted">muted</string>
+
+    <!-- Hint for accessibility. This is announced when ring mode is set to Vibrate. [CHAR_LIMIT=NONE] -->
+    <string name="volume_panel_hint_vibrate">vibrate</string>
 
     <!-- Title with application label for media output settings when there is media playing. [CHAR LIMIT=20] -->
     <string name="media_output_label_title">Playing <xliff:g id="label" example="Music Player">%s</xliff:g> on</string>

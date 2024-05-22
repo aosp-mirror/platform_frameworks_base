@@ -16,10 +16,7 @@
 
 package com.android.wm.shell.splitscreen;
 
-import static android.app.ActivityOptions.KEY_LAUNCH_ROOT_TASK_TOKEN;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED;
-import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
@@ -31,8 +28,9 @@ import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RETURN_HOME;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -45,6 +43,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -54,7 +53,6 @@ import android.os.Looper;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.RemoteTransition;
-import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.annotation.UiThreadTest;
@@ -343,14 +341,14 @@ public class StageCoordinatorTests extends ShellTestCase {
 
     @Test
     public void testAddActivityOptions_addsBackgroundActivitiesFlags() {
-        Bundle options = mStageCoordinator.resolveStartStage(STAGE_TYPE_MAIN,
+        Bundle bundle = mStageCoordinator.resolveStartStage(STAGE_TYPE_MAIN,
                 SPLIT_POSITION_UNDEFINED, null /* options */, null /* wct */);
+        ActivityOptions options = ActivityOptions.fromBundle(bundle);
 
-        assertEquals(options.getParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, WindowContainerToken.class),
-                mMainStage.mRootTaskInfo.token);
-        assertTrue(options.getBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED));
-        assertTrue(options.getBoolean(
-                KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION));
+        assertThat(options.getLaunchRootTask()).isEqualTo(mMainStage.mRootTaskInfo.token);
+        assertThat(options.getPendingIntentBackgroundActivityStartMode())
+                .isEqualTo(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+        assertThat(options.isPendingIntentBackgroundActivityLaunchAllowedByPermission()).isTrue();
     }
 
     @Test

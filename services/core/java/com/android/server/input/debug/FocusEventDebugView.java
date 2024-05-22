@@ -240,7 +240,8 @@ public class FocusEventDebugView extends RelativeLayout {
             return;
         }
 
-        post(() -> handleRotaryInput(MotionEvent.obtain((MotionEvent) event)));
+        MotionEvent motionEvent = MotionEvent.obtain(event);
+        post(() -> handleRotaryInput(motionEvent));
     }
 
     private void handleKeyEvent(KeyEvent keyEvent) {

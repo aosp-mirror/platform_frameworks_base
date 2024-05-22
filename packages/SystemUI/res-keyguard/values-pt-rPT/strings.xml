@@ -57,7 +57,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN incorreto"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN errado. Tente de novo."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Ou desbloqueie com a impressão digital"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Impr. dig. não reconhecida"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Impressão digital não reconhecida"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Rosto não reconhecido"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Tente novamente ou introduza o PIN"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Tente novamente ou introduza a palavra-passe"</string>

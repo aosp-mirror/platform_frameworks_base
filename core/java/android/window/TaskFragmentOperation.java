@@ -84,8 +84,8 @@ public final class TaskFragmentOperation implements Parcelable {
     /**
      * Sets the activity navigation to be isolated, where the activity navigation on the
      * TaskFragment is separated from the rest activities in the Task. Activities cannot be
-     * started on an isolated TaskFragment unless the activities are launched from the same
-     * TaskFragment or explicitly requested to.
+     * started on an isolated TaskFragment unless explicitly requested to. That said, new launched
+     * activities should be positioned as a sibling to the TaskFragment with higher z-ordering.
      */
     public static final int OP_TYPE_SET_ISOLATED_NAVIGATION = 11;
 
@@ -149,6 +149,18 @@ public final class TaskFragmentOperation implements Parcelable {
      */
     public static final int OP_TYPE_SET_DECOR_SURFACE_BOOSTED = 18;
 
+    /**
+     * Sets the TaskFragment to be pinned.
+     * <p>
+     * If a TaskFragment is pinned, the TaskFragment should be the top-most TaskFragment among other
+     * sibling TaskFragments. Any newly launched and embeddable activity should not be placed in the
+     * pinned TaskFragment, unless the activity is launched from the pinned TaskFragment or
+     * explicitly requested to. Non-embeddable activities are not restricted to.
+     * <p>
+     * See {@link #OP_TYPE_REORDER_TO_FRONT} on how to reorder a pinned TaskFragment to the top.
+     */
+    public static final int OP_TYPE_SET_PINNED = 19;
+
     @IntDef(prefix = { "OP_TYPE_" }, value = {
             OP_TYPE_UNKNOWN,
             OP_TYPE_CREATE_TASK_FRAGMENT,
@@ -170,6 +182,7 @@ public final class TaskFragmentOperation implements Parcelable {
             OP_TYPE_SET_DIM_ON_TASK,
             OP_TYPE_SET_MOVE_TO_BOTTOM_IF_CLEAR_WHEN_LAUNCH,
             OP_TYPE_SET_DECOR_SURFACE_BOOSTED,
+            OP_TYPE_SET_PINNED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface OperationType {}

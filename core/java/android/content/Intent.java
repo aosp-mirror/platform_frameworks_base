@@ -4353,13 +4353,6 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.BRIGHTNESS_DIALOG_IS_FULL_WIDTH";
 
     /**
-     * Activity Action: Shows the contrast setting dialog.
-     * @hide
-     */
-    public static final String ACTION_SHOW_CONTRAST_DIALOG =
-            "com.android.intent.action.SHOW_CONTRAST_DIALOG";
-
-    /**
      * Broadcast Action:  A global button was pressed.  Includes a single
      * extra field, {@link #EXTRA_KEY_EVENT}, containing the key event that
      * caused the broadcast.

@@ -45,13 +45,13 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.testing.AndroidTestingRunner;
 import android.testing.UiThreadTest;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -72,7 +72,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Locale;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @UiThreadTest
 public class FeedbackInfoTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test_package";

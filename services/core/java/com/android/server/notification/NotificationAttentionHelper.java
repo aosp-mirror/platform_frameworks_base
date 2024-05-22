@@ -22,12 +22,14 @@ import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 import static android.media.audio.Flags.focusExclusiveWithRecording;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_CALL_EFFECTS;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_NOTIFICATION_EFFECTS;
 
+import android.Manifest.permission;
 import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
@@ -135,7 +137,7 @@ public final class NotificationAttentionHelper {
     private LogicalLight mAttentionLight;
 
     private final boolean mUseAttentionLight;
-    boolean mHasLight = true;
+    boolean mHasLight;
 
     private final SettingsObserver mSettingsObserver;
 
@@ -149,7 +151,7 @@ public final class NotificationAttentionHelper {
     private boolean mInCallStateOffHook = false;
     private boolean mScreenOn = true;
     private boolean mUserPresent = false;
-    boolean mNotificationPulseEnabled;
+    private boolean mNotificationPulseEnabled;
     private final Uri mInCallNotificationUri;
     private final AudioAttributes mInCallNotificationAudioAttributes;
     private final float mInCallNotificationVolume;
@@ -223,7 +225,10 @@ public final class NotificationAttentionHelper {
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T2),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME1),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME2),
-                    mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_COUNTER_RESET));
+                    mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_COUNTER_RESET),
+                    record -> mPackageManager.checkPermission(
+                            permission.RECEIVE_EMERGENCY_BROADCAST,
+                            record.getSbn().getPackageName()) == PERMISSION_GRANTED);
 
             return new StrategyAvalanche(
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T1),
@@ -231,14 +236,17 @@ public final class NotificationAttentionHelper {
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME1),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME2),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_AVALANCHE_TIMEOUT),
-                    appStrategy);
+                    appStrategy, appStrategy.mExemptionProvider);
         } else {
             return new StrategyPerApp(
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T1),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T2),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME1),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME2),
-                    mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_COUNTER_RESET));
+                    mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_COUNTER_RESET),
+                    record -> mPackageManager.checkPermission(
+                            permission.RECEIVE_EMERGENCY_BROADCAST,
+                            record.getSbn().getPackageName()) == PERMISSION_GRANTED);
         }
     }
 
@@ -305,6 +313,13 @@ public final class NotificationAttentionHelper {
     }
 
     private void loadUserSettings() {
+        boolean pulseEnabled = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.NOTIFICATION_LIGHT_PULSE, 0, UserHandle.USER_CURRENT) != 0;
+        if (mNotificationPulseEnabled != pulseEnabled) {
+            mNotificationPulseEnabled = pulseEnabled;
+            updateLightsLocked();
+        }
+
         if (Flags.politeNotifications()) {
             try {
                 mCurrentWorkProfileId = getManagedProfileId(ActivityManager.getCurrentUser());
@@ -874,6 +889,9 @@ public final class NotificationAttentionHelper {
 
     boolean canShowLightsLocked(final NotificationRecord record, final Signals signals,
             boolean aboveThreshold) {
+        if (!mSystemReady) {
+            return false;
+        }
         // device lacks light
         if (!mHasLight) {
             return false;
@@ -1088,6 +1106,11 @@ public final class NotificationAttentionHelper {
         }
     }
 
+    // Returns true if a notification should be exempted from attenuation
+    private interface ExemptionProvider {
+        boolean isExempted(NotificationRecord record);
+    }
+
     @VisibleForTesting
     abstract static class PolitenessStrategy {
         static final int POLITE_STATE_DEFAULT = 0;
@@ -1118,8 +1141,10 @@ public final class NotificationAttentionHelper {
 
         protected boolean mIsActive = true;
 
+        protected final ExemptionProvider mExemptionProvider;
+
         public PolitenessStrategy(int timeoutPolite, int timeoutMuted, int volumePolite,
-                int volumeMuted) {
+                int volumeMuted, ExemptionProvider exemptionProvider) {
             mVolumeStates = new HashMap<>();
             mLastUpdatedTimestampByPackage = new HashMap<>();
 
@@ -1127,6 +1152,7 @@ public final class NotificationAttentionHelper {
             this.mTimeoutMuted = timeoutMuted;
             this.mVolumePolite = volumePolite / 100.0f;
             this.mVolumeMuted = volumeMuted / 100.0f;
+            this.mExemptionProvider = exemptionProvider;
         }
 
         abstract void onNotificationPosted(NotificationRecord record);
@@ -1284,8 +1310,8 @@ public final class NotificationAttentionHelper {
         private final int mMaxPostedForReset;
 
         public StrategyPerApp(int timeoutPolite, int timeoutMuted, int volumePolite,
-                int volumeMuted, int maxPosted) {
-            super(timeoutPolite, timeoutMuted, volumePolite, volumeMuted);
+                int volumeMuted, int maxPosted, ExemptionProvider exemptionProvider) {
+            super(timeoutPolite, timeoutMuted, volumePolite, volumeMuted, exemptionProvider);
 
             mNumPosted = new HashMap<>();
             mMaxPostedForReset = maxPosted;
@@ -1306,7 +1332,12 @@ public final class NotificationAttentionHelper {
 
             final String key = getChannelKey(record);
             @PolitenessState final int currState = getPolitenessState(record);
-            @PolitenessState int nextState = getNextState(currState, timeSinceLastNotif);
+            @PolitenessState int nextState;
+            if (Flags.politeNotificationsAttnUpdate()) {
+                nextState = getNextState(currState, timeSinceLastNotif, record);
+            } else {
+                nextState = getNextState(currState, timeSinceLastNotif);
+            }
 
             // Reset to default state if number of posted notifications exceed this value when muted
             int numPosted = mNumPosted.getOrDefault(key, 0) + 1;
@@ -1322,6 +1353,14 @@ public final class NotificationAttentionHelper {
             }
 
             mVolumeStates.put(key, nextState);
+        }
+
+        @PolitenessState int getNextState(@PolitenessState final int currState,
+                final long timeSinceLastNotif, final NotificationRecord record) {
+            if (mExemptionProvider.isExempted(record)) {
+                return POLITE_STATE_DEFAULT;
+            }
+            return getNextState(currState, timeSinceLastNotif);
         }
 
         @Override
@@ -1344,8 +1383,9 @@ public final class NotificationAttentionHelper {
         private long mLastAvalancheTriggerTimestamp = 0;
 
         StrategyAvalanche(int timeoutPolite, int timeoutMuted, int volumePolite,
-                    int volumeMuted, int timeoutAvalanche, PolitenessStrategy appStrategy) {
-            super(timeoutPolite, timeoutMuted, volumePolite, volumeMuted);
+                    int volumeMuted, int timeoutAvalanche, PolitenessStrategy appStrategy,
+                    ExemptionProvider exemptionProvider) {
+            super(timeoutPolite, timeoutMuted, volumePolite, volumeMuted, exemptionProvider);
 
             mTimeoutAvalanche = timeoutAvalanche;
             mAppStrategy = appStrategy;
@@ -1518,7 +1558,7 @@ public final class NotificationAttentionHelper {
                 return true;
             }
 
-            return false;
+            return mExemptionProvider.isExempted(record);
         }
 
         private boolean isAvalancheExempted(final NotificationRecord record) {
@@ -1721,8 +1761,6 @@ public final class NotificationAttentionHelper {
     void setLights(LogicalLight light) {
         mNotificationLight = light;
         mAttentionLight = light;
-        mNotificationPulseEnabled = true;
-        mHasLight = true;
     }
 
     @VisibleForTesting

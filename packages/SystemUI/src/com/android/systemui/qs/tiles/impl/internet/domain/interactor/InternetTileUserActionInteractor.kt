@@ -49,13 +49,13 @@ constructor(
                             aboveStatusBar = true,
                             accessPointController.canConfigMobileData(),
                             accessPointController.canConfigWifi(),
-                            action.view,
+                            action.expandable,
                         )
                     }
                 }
                 is QSTileUserAction.LongClick -> {
                     qsTileIntentUserActionHandler.handle(
-                        action.view,
+                        action.expandable,
                         Intent(Settings.ACTION_WIFI_SETTINGS)
                     )
                 }

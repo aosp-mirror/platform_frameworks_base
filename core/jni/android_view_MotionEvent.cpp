@@ -22,7 +22,6 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <attestation/HmacKeyManager.h>
-#include <gui/constants.h>
 #include <input/Input.h>
 #include <log/log.h>
 #include <nativehelper/JNIHelp.h>
@@ -367,8 +366,8 @@ static jlong android_view_MotionEvent_nativeInitialize(
     ui::Transform transform;
     transform.set(xOffset, yOffset);
     ui::Transform identityTransform;
-    event->initialize(InputEvent::nextId(), deviceId, source, displayId, INVALID_HMAC, action, 0,
-                      flags, edgeFlags, metaState, buttonState,
+    event->initialize(InputEvent::nextId(), deviceId, source, ui::LogicalDisplayId{displayId},
+                      INVALID_HMAC, action, 0, flags, edgeFlags, metaState, buttonState,
                       static_cast<MotionClassification>(classification), transform, xPrecision,
                       yPrecision, AMOTION_EVENT_INVALID_CURSOR_POSITION,
                       AMOTION_EVENT_INVALID_CURSOR_POSITION, identityTransform, downTimeNanos,
@@ -646,13 +645,13 @@ static void android_view_MotionEvent_nativeSetSource(CRITICAL_JNI_PARAMS_COMMA j
 
 static jint android_view_MotionEvent_nativeGetDisplayId(CRITICAL_JNI_PARAMS_COMMA jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getDisplayId();
+    return static_cast<jint>(event->getDisplayId().val());
 }
 
 static void android_view_MotionEvent_nativeSetDisplayId(CRITICAL_JNI_PARAMS_COMMA jlong nativePtr,
                                                         jint displayId) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->setDisplayId(displayId);
+    event->setDisplayId(ui::LogicalDisplayId{displayId});
 }
 
 static jint android_view_MotionEvent_nativeGetAction(CRITICAL_JNI_PARAMS_COMMA jlong nativePtr) {

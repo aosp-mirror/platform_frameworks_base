@@ -20,7 +20,6 @@ import android.app.IActivityManager
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.LauncherApps
 import android.content.res.Resources
 import android.net.Uri
 import android.os.Handler
@@ -63,7 +62,6 @@ constructor(
     private val panelInteractor: PanelInteractor,
     private val issueRecordingState: IssueRecordingState,
     private val iActivityManager: IActivityManager,
-    private val launcherApps: LauncherApps,
 ) :
     RecordingService(
         controller,
@@ -85,7 +83,7 @@ constructor(
         when (intent?.action) {
             ACTION_START -> {
                 TraceUtils.traceStart(
-                    contentResolver,
+                    this,
                     DEFAULT_TRACE_TAGS,
                     DEFAULT_BUFFER_SIZE,
                     DEFAULT_IS_INCLUDING_WINSCOPE,
@@ -104,11 +102,7 @@ constructor(
             }
             ACTION_STOP,
             ACTION_STOP_NOTIF -> {
-                // ViewCapture needs to save it's data before it is disabled, or else the data will
-                // be lost. This is expected to change in the near future, and when that happens
-                // this line should be removed.
-                launcherApps.saveViewCaptureData()
-                TraceUtils.traceStop(contentResolver)
+                TraceUtils.traceStop(this)
                 issueRecordingState.isRecording = false
             }
             ACTION_SHARE -> {
@@ -142,7 +136,7 @@ constructor(
 
     private fun shareRecording(screenRecording: Uri?) {
         val traces =
-            TraceUtils.traceDump(contentResolver, TRACE_FILE_NAME).getOrElse {
+            TraceUtils.traceDump(this, TRACE_FILE_NAME).getOrElse {
                 Log.v(
                     TAG,
                     "Traces were not present. This can happen if users double" +

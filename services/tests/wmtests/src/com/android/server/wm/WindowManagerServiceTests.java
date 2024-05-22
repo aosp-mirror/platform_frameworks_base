@@ -21,13 +21,15 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.permission.flags.Flags.FLAG_SENSITIVE_CONTENT_IMPROVEMENTS;
+import static android.permission.flags.Flags.FLAG_SENSITIVE_CONTENT_RECENTS_SCREENSHOT_BUGFIX;
 import static android.permission.flags.Flags.FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_OWN_FOCUS;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
-import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_TRACING;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_PRIVACY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
@@ -1020,6 +1022,35 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsEnabled(
+            {FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION, FLAG_SENSITIVE_CONTENT_IMPROVEMENTS,
+                    FLAG_SENSITIVE_CONTENT_RECENTS_SCREENSHOT_BUGFIX})
+    public void addBlockScreenCaptureForApps_appNotInForeground_invalidateSnapshot() {
+        spyOn(mWm.mTaskSnapshotController);
+
+        // createAppWindow uses package name of "test" and uid of "0"
+        String testPackage = "test";
+        int ownerId1 = 0;
+
+        final Task task = createTask(mDisplayContent);
+        final WindowState win = createAppWindow(task, ACTIVITY_TYPE_STANDARD, "appWindow");
+        mWm.mWindowMap.put(win.mClient.asBinder(), win);
+        final ActivityRecord activity = win.mActivityRecord;
+        activity.setVisibleRequested(false);
+        activity.setVisible(false);
+        win.setHasSurface(false);
+
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages);
+
+        verify(mWm.mTaskSnapshotController).removeAndDeleteSnapshot(anyInt(), eq(ownerId1));
+    }
+
+    @Test
     public void clearBlockedApps_clearsCache() {
         String testPackage = "test";
         int ownerId1 = 20;
@@ -1192,20 +1223,20 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final InputChannel inputChannel = new InputChannel();
         mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY, surfaceControl,
                 window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE, 0 /* privateFlags */,
-                INPUT_FEATURE_SENSITIVE_FOR_TRACING, TYPE_APPLICATION, null /* windowToken */,
+                INPUT_FEATURE_SENSITIVE_FOR_PRIVACY, TYPE_APPLICATION, null /* windowToken */,
                 inputTransferToken,
                 "TestInputChannel", inputChannel);
         verify(mTransaction).setInputWindowInfo(
                 eq(surfaceControl),
-                argThat(h -> (h.inputConfig & InputConfig.SENSITIVE_FOR_TRACING) == 0));
+                argThat(h -> (h.inputConfig & InputConfig.SENSITIVE_FOR_PRIVACY) == 0));
 
         mWm.updateInputChannel(inputChannel.getToken(), DEFAULT_DISPLAY, surfaceControl,
                 FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY,
-                INPUT_FEATURE_SENSITIVE_FOR_TRACING,
+                INPUT_FEATURE_SENSITIVE_FOR_PRIVACY,
                 null /* region */);
         verify(mTransaction).setInputWindowInfo(
                 eq(surfaceControl),
-                argThat(h -> (h.inputConfig & InputConfig.SENSITIVE_FOR_TRACING) != 0));
+                argThat(h -> (h.inputConfig & InputConfig.SENSITIVE_FOR_PRIVACY) != 0));
     }
 
     @RequiresFlagsDisabled(Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER)

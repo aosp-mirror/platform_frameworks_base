@@ -15,6 +15,7 @@
  */
 
 package com.android.server.inputmethod;
+
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.pm.UserInfo;
@@ -25,18 +26,21 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.pm.UserManagerInternal;
 
 import java.util.function.Consumer;
+import java.util.function.IntFunction;
 
 final class UserDataRepository {
 
     @GuardedBy("ImfLock.class")
     private final SparseArray<UserData> mUserData = new SparseArray<>();
 
+    private final IntFunction<InputMethodBindingController> mBindingControllerFactory;
+
     @GuardedBy("ImfLock.class")
     @NonNull
     UserData getOrCreate(@UserIdInt int userId) {
         UserData userData = mUserData.get(userId);
         if (userData == null) {
-            userData = new UserData(userId);
+            userData = new UserData(userId, mBindingControllerFactory.apply(userId));
             mUserData.put(userId, userData);
         }
         return userData;
@@ -49,7 +53,9 @@ final class UserDataRepository {
         }
     }
 
-    UserDataRepository(@NonNull Handler handler, @NonNull UserManagerInternal userManagerInternal) {
+    UserDataRepository(@NonNull Handler handler, @NonNull UserManagerInternal userManagerInternal,
+            @NonNull IntFunction<InputMethodBindingController> bindingControllerFactory) {
+        mBindingControllerFactory = bindingControllerFactory;
         userManagerInternal.addUserLifecycleListener(
                 new UserManagerInternal.UserLifecycleListener() {
                     @Override
@@ -79,11 +85,21 @@ final class UserDataRepository {
         @UserIdInt
         final int mUserId;
 
-       /**
+        @NonNull
+        final InputMethodBindingController mBindingController;
+
+        /**
          * Intended to be instantiated only from this file.
          */
-        private UserData(@UserIdInt int userId) {
+        private UserData(@UserIdInt int userId,
+                @NonNull InputMethodBindingController bindingController) {
             mUserId = userId;
+            mBindingController = bindingController;
+        }
+
+        @Override
+        public String toString() {
+            return "UserData{" + "mUserId=" + mUserId + '}';
         }
     }
 }

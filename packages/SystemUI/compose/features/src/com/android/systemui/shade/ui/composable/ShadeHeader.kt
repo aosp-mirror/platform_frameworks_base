@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -50,7 +49,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
@@ -63,6 +64,8 @@ import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
+import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
@@ -76,6 +79,7 @@ import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernShadeCarrierGroupMobileView
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.ShadeCarrierGroupMobileIconViewModel
 import com.android.systemui.statusbar.policy.Clock
+import kotlin.math.max
 
 object ShadeHeader {
     object Elements {
@@ -100,6 +104,10 @@ object ShadeHeader {
         val ColorScheme.shadeHeaderText: Color
             get() = Color.White
     }
+
+    object TestTags {
+        const val Root = "shade_header_root"
+    }
 }
 
 @Composable
@@ -110,13 +118,17 @@ fun SceneScope.CollapsedShadeHeader(
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
-    val isDisabled by viewModel.isDisabled.collectAsState()
+    val isDisabled by viewModel.isDisabled.collectAsStateWithLifecycle()
     if (isDisabled) {
         return
     }
 
     val cutoutWidth = LocalDisplayCutout.current.width()
+    val cutoutHeight = LocalDisplayCutout.current.height()
+    val cutoutTop = LocalDisplayCutout.current.top
     val cutoutLocation = LocalDisplayCutout.current.location
+    val horizontalPadding =
+        max(LocalScreenCornerRadius.current / 2f, Shade.Dimensions.HorizontalPadding)
 
     val useExpandedFormat by
         remember(cutoutLocation) {
@@ -126,16 +138,16 @@ fun SceneScope.CollapsedShadeHeader(
             }
         }
 
-    val isPrivacyChipVisible by viewModel.isPrivacyChipVisible.collectAsState()
+    val isPrivacyChipVisible by viewModel.isPrivacyChipVisible.collectAsStateWithLifecycle()
 
     // This layout assumes it is globally positioned at (0, 0) and is the
     // same size as the screen.
     Layout(
-        modifier = modifier,
+        modifier = modifier.sysuiResTag(ShadeHeader.TestTags.Root),
         contents =
             listOf(
                 {
-                    Row {
+                    Row(modifier = Modifier.padding(horizontal = horizontalPadding)) {
                         Clock(
                             scale = 1f,
                             viewModel = viewModel,
@@ -152,7 +164,12 @@ fun SceneScope.CollapsedShadeHeader(
                 },
                 {
                     if (isPrivacyChipVisible) {
-                        Box(modifier = Modifier.height(CollapsedHeight).fillMaxWidth()) {
+                        Box(
+                            modifier =
+                                Modifier.height(CollapsedHeight)
+                                    .fillMaxWidth()
+                                    .padding(horizontal = horizontalPadding)
+                        ) {
                             PrivacyChip(
                                 viewModel = viewModel,
                                 modifier = Modifier.align(Alignment.CenterEnd),
@@ -161,9 +178,13 @@ fun SceneScope.CollapsedShadeHeader(
                     } else {
                         Row(
                             horizontalArrangement = Arrangement.End,
-                            modifier = Modifier.element(ShadeHeader.Elements.CollapsedContentEnd)
+                            modifier =
+                                Modifier.element(ShadeHeader.Elements.CollapsedContentEnd)
+                                    .padding(horizontal = horizontalPadding)
                         ) {
-                            SystemIconContainer {
+                            SystemIconContainer(
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                            ) {
                                 when (LocalWindowSizeClass.current.widthSizeClass) {
                                     WindowWidthSizeClass.Medium,
                                     WindowWidthSizeClass.Expanded ->
@@ -201,7 +222,7 @@ fun SceneScope.CollapsedShadeHeader(
 
         val screenWidth = constraints.maxWidth
         val cutoutWidthPx = cutoutWidth.roundToPx()
-        val height = CollapsedHeight.roundToPx()
+        val height = max(cutoutHeight + (cutoutTop * 2), CollapsedHeight).roundToPx()
         val childConstraints = Constraints.fixed((screenWidth - cutoutWidthPx) / 2, height)
 
         val startMeasurable = measurables[0][0]
@@ -250,7 +271,7 @@ fun SceneScope.ExpandedShadeHeader(
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
-    val isDisabled by viewModel.isDisabled.collectAsState()
+    val isDisabled by viewModel.isDisabled.collectAsStateWithLifecycle()
     if (isDisabled) {
         return
     }
@@ -259,9 +280,9 @@ fun SceneScope.ExpandedShadeHeader(
         derivedStateOf { shouldUseExpandedFormat(layoutState.transitionState) }
     }
 
-    val isPrivacyChipVisible by viewModel.isPrivacyChipVisible.collectAsState()
+    val isPrivacyChipVisible by viewModel.isPrivacyChipVisible.collectAsStateWithLifecycle()
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier.sysuiResTag(ShadeHeader.TestTags.Root)) {
         if (isPrivacyChipVisible) {
             Box(modifier = Modifier.height(CollapsedHeight).fillMaxWidth()) {
                 PrivacyChip(
@@ -414,7 +435,7 @@ private fun ShadeCarrierGroup(
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier) {
-        val subIds by viewModel.mobileSubIds.collectAsState()
+        val subIds by viewModel.mobileSubIds.collectAsStateWithLifecycle()
 
         for (subId in subIds) {
             Spacer(modifier = Modifier.width(5.dp))
@@ -451,10 +472,12 @@ private fun SceneScope.StatusIcons(
     val micSlot = stringResource(id = com.android.internal.R.string.status_bar_microphone)
     val locationSlot = stringResource(id = com.android.internal.R.string.status_bar_location)
 
-    val isSingleCarrier by viewModel.isSingleCarrier.collectAsState()
-    val isPrivacyChipEnabled by viewModel.isPrivacyChipEnabled.collectAsState()
-    val isMicCameraIndicationEnabled by viewModel.isMicCameraIndicationEnabled.collectAsState()
-    val isLocationIndicationEnabled by viewModel.isLocationIndicationEnabled.collectAsState()
+    val isSingleCarrier by viewModel.isSingleCarrier.collectAsStateWithLifecycle()
+    val isPrivacyChipEnabled by viewModel.isPrivacyChipEnabled.collectAsStateWithLifecycle()
+    val isMicCameraIndicationEnabled by
+        viewModel.isMicCameraIndicationEnabled.collectAsStateWithLifecycle()
+    val isLocationIndicationEnabled by
+        viewModel.isLocationIndicationEnabled.collectAsStateWithLifecycle()
 
     AndroidView(
         factory = { context ->
@@ -523,7 +546,7 @@ private fun SceneScope.PrivacyChip(
     viewModel: ShadeHeaderViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val privacyList by viewModel.privacyItems.collectAsState()
+    val privacyList by viewModel.privacyItems.collectAsStateWithLifecycle()
 
     AndroidView(
         factory = { context ->

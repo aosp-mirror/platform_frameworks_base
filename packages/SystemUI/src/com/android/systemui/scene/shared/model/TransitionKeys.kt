@@ -24,6 +24,8 @@ import com.android.compose.animation.scene.TransitionKey
  * These are the subset of transitions that can be referenced by key when asking for a scene change.
  */
 object TransitionKeys {
+    /** Reference to the gone/lockscreen to shade transition with split shade enabled. */
+    val ToSplitShade = TransitionKey("GoneToSplitShade")
 
     /** Reference to a scene transition that can collapse the shade scene instantly. */
     val CollapseShadeInstantly = TransitionKey("CollapseShadeInstantly")

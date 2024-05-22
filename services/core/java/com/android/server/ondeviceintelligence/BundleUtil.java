@@ -33,6 +33,7 @@ import android.graphics.Bitmap;
 import android.os.BadParcelableException;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -41,7 +42,10 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
 
+import com.android.internal.infra.AndroidFuture;
+
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Util methods for ensuring the Bundle passed in various methods are read-only and restricted to
@@ -78,16 +82,16 @@ public class BundleUtil {
             if (canMarshall(obj) || obj instanceof CursorWindow) {
                 continue;
             }
-
-            if (obj instanceof ParcelFileDescriptor) {
+            if (obj instanceof Bundle) {
+              sanitizeInferenceParams((Bundle) obj);
+            } else if (obj instanceof ParcelFileDescriptor) {
                 validatePfdReadOnly((ParcelFileDescriptor) obj);
             } else if (obj instanceof SharedMemory) {
                 ((SharedMemory) obj).setProtect(PROT_READ);
             } else if (obj instanceof Bitmap) {
-                if (((Bitmap) obj).isMutable()) {
-                    throw new BadParcelableException(
-                            "Encountered a mutable Bitmap in the Bundle at key : " + key);
-                }
+                validateBitmap((Bitmap) obj);
+            } else if (obj instanceof Parcelable[]) {
+                validateParcelableArray((Parcelable[]) obj);
             } else {
                 throw new BadParcelableException(
                         "Unsupported Parcelable type encountered in the Bundle: "
@@ -125,20 +129,20 @@ public class BundleUtil {
                 continue;
             }
 
-            if (obj instanceof ParcelFileDescriptor) {
+            if (obj instanceof Bundle) {
+                sanitizeResponseParams((Bundle) obj);
+            } else if (obj instanceof ParcelFileDescriptor) {
                 validatePfdReadOnly((ParcelFileDescriptor) obj);
             } else if (obj instanceof Bitmap) {
-                if (((Bitmap) obj).isMutable()) {
-                    throw new BadParcelableException(
-                            "Encountered a mutable Bitmap in the Bundle at key : " + key);
-                }
+                validateBitmap((Bitmap) obj);
+            } else if (obj instanceof Parcelable[]) {
+                validateParcelableArray((Parcelable[]) obj);
             } else {
                 throw new BadParcelableException(
                         "Unsupported Parcelable type encountered in the Bundle: "
                                 + obj.getClass().getSimpleName());
             }
         }
-        Log.e(TAG, "validateResponseParams : Finished");
     }
 
     /**
@@ -183,7 +187,8 @@ public class BundleUtil {
 
     public static IStreamingResponseCallback wrapWithValidation(
             IStreamingResponseCallback streamingResponseCallback,
-            Executor resourceClosingExecutor) {
+            Executor resourceClosingExecutor,
+            AndroidFuture future) {
         return new IStreamingResponseCallback.Stub() {
             @Override
             public void onNewContent(Bundle processedResult) throws RemoteException {
@@ -203,6 +208,7 @@ public class BundleUtil {
                     streamingResponseCallback.onSuccess(resultBundle);
                 } finally {
                     resourceClosingExecutor.execute(() -> tryCloseResource(resultBundle));
+                    future.complete(null);
                 }
             }
 
@@ -210,6 +216,7 @@ public class BundleUtil {
             public void onFailure(int errorCode, String errorMessage,
                     PersistableBundle errorParams) throws RemoteException {
                 streamingResponseCallback.onFailure(errorCode, errorMessage, errorParams);
+                future.completeExceptionally(new TimeoutException());
             }
 
             @Override
@@ -237,7 +244,8 @@ public class BundleUtil {
     }
 
     public static IResponseCallback wrapWithValidation(IResponseCallback responseCallback,
-            Executor resourceClosingExecutor) {
+            Executor resourceClosingExecutor,
+            AndroidFuture future) {
         return new IResponseCallback.Stub() {
             @Override
             public void onSuccess(Bundle resultBundle)
@@ -247,6 +255,7 @@ public class BundleUtil {
                     responseCallback.onSuccess(resultBundle);
                 } finally {
                     resourceClosingExecutor.execute(() -> tryCloseResource(resultBundle));
+                    future.complete(null);
                 }
             }
 
@@ -254,6 +263,7 @@ public class BundleUtil {
             public void onFailure(int errorCode, String errorMessage,
                     PersistableBundle errorParams) throws RemoteException {
                 responseCallback.onFailure(errorCode, errorMessage, errorParams);
+                future.completeExceptionally(new TimeoutException());
             }
 
             @Override
@@ -280,17 +290,20 @@ public class BundleUtil {
     }
 
 
-    public static ITokenInfoCallback wrapWithValidation(ITokenInfoCallback responseCallback) {
+    public static ITokenInfoCallback wrapWithValidation(ITokenInfoCallback responseCallback,
+            AndroidFuture future) {
         return new ITokenInfoCallback.Stub() {
             @Override
             public void onSuccess(TokenInfo tokenInfo) throws RemoteException {
                 responseCallback.onSuccess(tokenInfo);
+                future.complete(null);
             }
 
             @Override
             public void onFailure(int errorCode, String errorMessage, PersistableBundle errorParams)
                     throws RemoteException {
                 responseCallback.onFailure(errorCode, errorMessage, errorParams);
+                future.completeExceptionally(new TimeoutException());
             }
         };
     }
@@ -310,6 +323,26 @@ public class BundleUtil {
         }
     }
 
+    private static void validateParcelableArray(Parcelable[] parcelables) {
+        if (parcelables.length > 0
+                && parcelables[0] instanceof ParcelFileDescriptor) {
+            // Safe to cast
+            validatePfdsReadOnly(parcelables);
+        } else if (parcelables.length > 0
+                && parcelables[0] instanceof Bitmap) {
+            validateBitmapsImmutable(parcelables);
+        } else {
+            throw new BadParcelableException(
+                    "Could not cast to any known parcelable array");
+        }
+    }
+
+    public static void validatePfdsReadOnly(Parcelable[] pfds) {
+        for (Parcelable pfd : pfds) {
+            validatePfdReadOnly((ParcelFileDescriptor) pfd);
+        }
+    }
+
     public static void validatePfdReadOnly(ParcelFileDescriptor pfd) {
         if (pfd == null) {
             return;
@@ -323,6 +356,19 @@ public class BundleUtil {
         } catch (ErrnoException e) {
             throw new BadParcelableException(
                     "Invalid File descriptor passed in the Bundle.", e);
+        }
+    }
+
+    private static void validateBitmap(Bitmap obj) {
+        if (obj.isMutable()) {
+            throw new BadParcelableException(
+                    "Encountered a mutable Bitmap in the Bundle at key : " + obj);
+        }
+    }
+
+    private static void validateBitmapsImmutable(Parcelable[] bitmaps) {
+        for (Parcelable bitmap : bitmaps) {
+            validateBitmap((Bitmap) bitmap);
         }
     }
 

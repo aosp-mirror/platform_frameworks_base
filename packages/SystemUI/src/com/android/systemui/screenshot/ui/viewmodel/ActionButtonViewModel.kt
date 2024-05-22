@@ -20,6 +20,7 @@ data class ActionButtonViewModel(
     val appearance: ActionButtonAppearance,
     val id: Int,
     val visible: Boolean,
+    val showDuringEntrance: Boolean,
     val onClicked: (() -> Unit)?,
 ) {
     companion object {
@@ -29,7 +30,14 @@ data class ActionButtonViewModel(
 
         fun withNextId(
             appearance: ActionButtonAppearance,
+            showDuringEntrance: Boolean,
             onClicked: (() -> Unit)?
-        ): ActionButtonViewModel = ActionButtonViewModel(appearance, getId(), true, onClicked)
+        ): ActionButtonViewModel =
+            ActionButtonViewModel(appearance, getId(), true, showDuringEntrance, onClicked)
+
+        fun withNextId(
+            appearance: ActionButtonAppearance,
+            onClicked: (() -> Unit)?
+        ): ActionButtonViewModel = withNextId(appearance, showDuringEntrance = true, onClicked)
     }
 }

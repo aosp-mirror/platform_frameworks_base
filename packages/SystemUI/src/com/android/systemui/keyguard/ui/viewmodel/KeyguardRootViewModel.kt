@@ -30,6 +30,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
@@ -38,11 +39,12 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.ui.StateToValue
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
-import com.android.systemui.util.kotlin.BooleanFlowOperators.or
+import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.ui.AnimatableEvent
@@ -56,6 +58,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -64,7 +67,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -116,14 +118,19 @@ constructor(
     private val shadeInteractor: ShadeInteractor,
 ) {
     private var burnInJob: Job? = null
-    private val burnInModel = MutableStateFlow(BurnInModel())
+    private val _burnInModel = MutableStateFlow(BurnInModel())
+    val burnInModel = _burnInModel.asStateFlow()
 
     val burnInLayerVisibility: Flow<Int> =
         keyguardTransitionInteractor.startedKeyguardState
             .filter { it == AOD || it == LOCKSCREEN }
             .map { VISIBLE }
 
-    val goneToAodTransition = keyguardTransitionInteractor.transition(from = GONE, to = AOD)
+    val goneToAodTransition =
+        keyguardTransitionInteractor.transition(
+            edge = Edge.create(Scenes.Gone, AOD),
+            edgeWithoutSceneContainer = Edge.create(GONE, AOD)
+        )
 
     private val goneToAodTransitionRunning: Flow<Boolean> =
         goneToAodTransition
@@ -134,7 +141,7 @@ constructor(
     private val isOnLockscreen: Flow<Boolean> =
         combine(
                 keyguardTransitionInteractor.isFinishedInState(LOCKSCREEN).onStart { emit(false) },
-                or(
+                anyOf(
                     keyguardTransitionInteractor.isInTransitionToState(LOCKSCREEN),
                     keyguardTransitionInteractor.isInTransitionFromState(LOCKSCREEN),
                 ),
@@ -145,7 +152,10 @@ constructor(
 
     private val alphaOnShadeExpansion: Flow<Float> =
         combineTransform(
-                keyguardTransitionInteractor.isInTransition(from = LOCKSCREEN, to = GONE),
+                keyguardTransitionInteractor.isInTransition(
+                    edge = Edge.create(from = LOCKSCREEN, to = Scenes.Gone),
+                    edgeWithoutSceneContainer = Edge.create(from = LOCKSCREEN, to = GONE),
+                ),
                 isOnLockscreen,
                 shadeInteractor.qsExpansion,
                 shadeInteractor.shadeExpansion,
@@ -271,7 +281,7 @@ constructor(
 
         burnInJob =
             scope.launch("$TAG#aodBurnInViewModel") {
-                aodBurnInViewModel.movement(params).collect { burnInModel.value = it }
+                aodBurnInViewModel.movement(params).collect { _burnInModel.value = it }
             }
     }
 

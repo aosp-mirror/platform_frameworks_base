@@ -957,6 +957,7 @@ class ActivityClientController extends IActivityClientController.Stub {
     public boolean enterPictureInPictureMode(IBinder token, final PictureInPictureParams params) {
         final long origId = Binder.clearCallingIdentity();
         try {
+            ensureSetPipAspectRatioQuotaTracker();
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ensureValidPictureInPictureActivityParams(
                         "enterPictureInPictureMode", token, params);
@@ -971,6 +972,7 @@ class ActivityClientController extends IActivityClientController.Stub {
     public void setPictureInPictureParams(IBinder token, final PictureInPictureParams params) {
         final long origId = Binder.clearCallingIdentity();
         try {
+            ensureSetPipAspectRatioQuotaTracker();
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ensureValidPictureInPictureActivityParams(
                         "setPictureInPictureParams", token, params);
@@ -1023,6 +1025,19 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     /**
+     * Initialize the {@link #mSetPipAspectRatioQuotaTracker} if applicable, which should happen
+     * out of {@link #mGlobalLock} to avoid deadlock (AM lock is used in QuotaTrack ctor).
+     */
+    private void ensureSetPipAspectRatioQuotaTracker() {
+        if (mSetPipAspectRatioQuotaTracker == null) {
+            mSetPipAspectRatioQuotaTracker = new CountQuotaTracker(mContext,
+                    Categorizer.SINGLE_CATEGORIZER);
+            mSetPipAspectRatioQuotaTracker.setCountLimit(Category.SINGLE_CATEGORY,
+                    SET_PIP_ASPECT_RATIO_LIMIT, SET_PIP_ASPECT_RATIO_TIME_WINDOW_MS);
+        }
+    }
+
+    /**
      * Checks the state of the system and the activity associated with the given {@param token} to
      * verify that picture-in-picture is supported for that activity.
      *
@@ -1049,12 +1064,6 @@ class ActivityClientController extends IActivityClientController.Stub {
         // Rate limit how frequent an app can request aspect ratio change via
         // Activity#setPictureInPictureParams
         final int userId = UserHandle.getCallingUserId();
-        if (mSetPipAspectRatioQuotaTracker == null) {
-            mSetPipAspectRatioQuotaTracker = new CountQuotaTracker(mContext,
-                    Categorizer.SINGLE_CATEGORIZER);
-            mSetPipAspectRatioQuotaTracker.setCountLimit(Category.SINGLE_CATEGORY,
-                    SET_PIP_ASPECT_RATIO_LIMIT, SET_PIP_ASPECT_RATIO_TIME_WINDOW_MS);
-        }
         if (r.pictureInPictureArgs.hasSetAspectRatio()
                 && params.hasSetAspectRatio()
                 && !r.pictureInPictureArgs.getAspectRatio().equals(

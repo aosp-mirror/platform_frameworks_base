@@ -216,6 +216,46 @@ public class ProcFileReaderTest {
     }
 
     @Test
+    public void testBufferSizeWithConsecutiveDelimiters() throws Exception {
+        // Read numbers using very small buffer size, exercising fillBuf()
+        // Include more consecutive delimiters than the buffer size.
+        final ProcFileReader reader =
+                buildReader("1   21  3  41           5  61  7  81 9   10\n", 3);
+
+        assertEquals(1, reader.nextInt());
+        assertEquals(21, reader.nextInt());
+        assertEquals(3, reader.nextInt());
+        assertEquals(41, reader.nextInt());
+        assertEquals(5, reader.nextInt());
+        assertEquals(61, reader.nextInt());
+        assertEquals(7, reader.nextInt());
+        assertEquals(81, reader.nextInt());
+        assertEquals(9, reader.nextInt());
+        assertEquals(10, reader.nextInt());
+        reader.finishLine();
+        assertFalse(reader.hasMoreData());
+    }
+
+    @Test
+    public void testBufferSizeWithConsecutiveDelimitersAndMultipleLines() throws Exception {
+        final ProcFileReader reader =
+                buildReader("1 21  41    \n    5  7     81   \n    9 10     \n", 3);
+
+        assertEquals(1, reader.nextInt());
+        assertEquals(21, reader.nextInt());
+        assertEquals(41, reader.nextInt());
+        reader.finishLine();
+        assertEquals(5, reader.nextInt());
+        assertEquals(7, reader.nextInt());
+        assertEquals(81, reader.nextInt());
+        reader.finishLine();
+        assertEquals(9, reader.nextInt());
+        assertEquals(10, reader.nextInt());
+        reader.finishLine();
+        assertFalse(reader.hasMoreData());
+    }
+
+    @Test
     public void testIgnore() throws Exception {
         final ProcFileReader reader = buildReader("a b c\n");
 

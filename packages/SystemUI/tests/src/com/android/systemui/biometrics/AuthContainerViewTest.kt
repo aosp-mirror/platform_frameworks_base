@@ -43,6 +43,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
+import com.android.launcher3.icons.IconProvider
 import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
@@ -150,6 +151,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     private lateinit var displayStateInteractor: DisplayStateInteractor
     private lateinit var udfpsOverlayInteractor: UdfpsOverlayInteractor
     private lateinit var biometricStatusInteractor: BiometricStatusInteractor
+    private lateinit var iconProvider: IconProvider
 
     private val credentialViewModel = CredentialViewModel(mContext, bpCredentialInteractor)
     private val defaultLogoIcon = context.getDrawable(R.drawable.ic_android)
@@ -178,6 +180,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
         biometricStatusInteractor =
                 BiometricStatusInteractorImpl(activityTaskManager, biometricStatusRepository,
                     fingerprintRepository)
+        iconProvider = IconProvider(context)
         // Set up default logo icon
         whenever(packageManager.getApplicationIcon(OP_PACKAGE_NAME)).thenReturn(defaultLogoIcon)
         context.setMockPackageManager(packageManager)
@@ -649,14 +652,15 @@ open class AuthContainerViewTest : SysuiTestCase() {
         lockPatternUtils,
         interactionJankMonitor,
         { promptSelectorInteractor },
-        { bpCredentialInteractor },
         PromptViewModel(
             displayStateInteractor,
             promptSelectorInteractor,
             context,
             udfpsOverlayInteractor,
             biometricStatusInteractor,
-            udfpsUtils
+            udfpsUtils,
+            iconProvider,
+            activityTaskManager
         ),
         { credentialViewModel },
         Handler(TestableLooper.get(this).looper),

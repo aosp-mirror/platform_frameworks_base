@@ -240,3 +240,20 @@ flag {
     description: "Add entrypoint in Settings Reset options for deleting private space when lock is forgotten"
     bug: "329601751"
 }
+
+flag {
+    name: "allow_main_user_to_access_blocked_number_provider"
+    namespace: "multiuser"
+    description: "Allow MAIN user to access blocked number provider"
+    bug: "338579331"
+}
+
+flag {
+    name: "restrict_quiet_mode_credential_bug_fix_to_managed_profiles"
+    namespace: "profile_experiences"
+    description: "Use user states to check the state of quiet mode for managed profiles only"
+    bug: "332812630"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

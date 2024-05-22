@@ -26,6 +26,7 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_STA
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -115,27 +116,27 @@ public class SplitLayoutTests extends ShellTestCase {
 
     @Test
     public void testUpdateDivideBounds() {
-        mSplitLayout.updateDivideBounds(anyInt());
+        mSplitLayout.updateDividerBounds(anyInt(), anyBoolean());
         verify(mSplitLayoutHandler).onLayoutSizeChanging(any(SplitLayout.class), anyInt(),
-                anyInt());
+                anyInt(), anyBoolean());
     }
 
     @Test
     public void testSetDividePosition() {
-        mSplitLayout.setDividePosition(100, false /* applyLayoutChange */);
-        assertThat(mSplitLayout.getDividePosition()).isEqualTo(100);
+        mSplitLayout.setDividerPosition(100, false /* applyLayoutChange */);
+        assertThat(mSplitLayout.getDividerPosition()).isEqualTo(100);
         verify(mSplitLayoutHandler, never()).onLayoutSizeChanged(any(SplitLayout.class));
 
-        mSplitLayout.setDividePosition(200, true /* applyLayoutChange */);
-        assertThat(mSplitLayout.getDividePosition()).isEqualTo(200);
+        mSplitLayout.setDividerPosition(200, true /* applyLayoutChange */);
+        assertThat(mSplitLayout.getDividerPosition()).isEqualTo(200);
         verify(mSplitLayoutHandler).onLayoutSizeChanged(any(SplitLayout.class));
     }
 
     @Test
     public void testSetDivideRatio() {
-        mSplitLayout.setDividePosition(200, false /* applyLayoutChange */);
+        mSplitLayout.setDividerPosition(200, false /* applyLayoutChange */);
         mSplitLayout.setDivideRatio(SNAP_TO_50_50);
-        assertThat(mSplitLayout.getDividePosition()).isEqualTo(
+        assertThat(mSplitLayout.getDividerPosition()).isEqualTo(
                 mSplitLayout.mDividerSnapAlgorithm.getMiddleTarget().position);
     }
 
@@ -152,7 +153,7 @@ public class SplitLayoutTests extends ShellTestCase {
         DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
                 SNAP_TO_START_AND_DISMISS);
 
-        mSplitLayout.snapToTarget(mSplitLayout.getDividePosition(), snapTarget);
+        mSplitLayout.snapToTarget(mSplitLayout.getDividerPosition(), snapTarget);
         waitDividerFlingFinished();
         verify(mSplitLayoutHandler).onSnappedToDismiss(eq(false), anyInt());
     }
@@ -164,7 +165,7 @@ public class SplitLayoutTests extends ShellTestCase {
         DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
                 SNAP_TO_END_AND_DISMISS);
 
-        mSplitLayout.snapToTarget(mSplitLayout.getDividePosition(), snapTarget);
+        mSplitLayout.snapToTarget(mSplitLayout.getDividerPosition(), snapTarget);
         waitDividerFlingFinished();
         verify(mSplitLayoutHandler).onSnappedToDismiss(eq(true), anyInt());
     }
@@ -188,7 +189,7 @@ public class SplitLayoutTests extends ShellTestCase {
     }
 
     private void waitDividerFlingFinished() {
-        verify(mSplitLayout).flingDividePosition(anyInt(), anyInt(), anyInt(),
+        verify(mSplitLayout).flingDividerPosition(anyInt(), anyInt(), anyInt(),
                 mRunnableCaptor.capture());
         mRunnableCaptor.getValue().run();
     }

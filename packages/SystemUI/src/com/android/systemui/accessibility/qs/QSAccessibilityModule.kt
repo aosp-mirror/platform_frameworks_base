@@ -41,6 +41,14 @@ import com.android.systemui.qs.tiles.impl.inversion.domain.ColorInversionTileMap
 import com.android.systemui.qs.tiles.impl.inversion.domain.interactor.ColorInversionTileDataInteractor
 import com.android.systemui.qs.tiles.impl.inversion.domain.interactor.ColorInversionUserActionInteractor
 import com.android.systemui.qs.tiles.impl.inversion.domain.model.ColorInversionTileModel
+import com.android.systemui.qs.tiles.impl.night.domain.interactor.NightDisplayTileDataInteractor
+import com.android.systemui.qs.tiles.impl.night.domain.interactor.NightDisplayTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.night.domain.model.NightDisplayTileModel
+import com.android.systemui.qs.tiles.impl.night.ui.NightDisplayTileMapper
+import com.android.systemui.qs.tiles.impl.onehanded.domain.OneHandedModeTileDataInteractor
+import com.android.systemui.qs.tiles.impl.onehanded.domain.OneHandedModeTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.onehanded.domain.model.OneHandedModeTileModel
+import com.android.systemui.qs.tiles.impl.onehanded.ui.OneHandedModeTileMapper
 import com.android.systemui.qs.tiles.impl.reducebrightness.domain.interactor.ReduceBrightColorsTileDataInteractor
 import com.android.systemui.qs.tiles.impl.reducebrightness.domain.interactor.ReduceBrightColorsTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.reducebrightness.domain.model.ReduceBrightColorsTileModel
@@ -113,6 +121,7 @@ interface QSAccessibilityModule {
         const val FONT_SCALING_TILE_SPEC = "font_scaling"
         const val REDUCE_BRIGHTNESS_TILE_SPEC = "reduce_brightness"
         const val ONE_HANDED_TILE_SPEC = "onehanded"
+        const val NIGHT_DISPLAY_TILE_SPEC = "night"
 
         @Provides
         @IntoMap
@@ -256,5 +265,60 @@ interface QSAccessibilityModule {
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
             )
+
+        /** Inject One Handed Mode Tile into tileViewModelMap in QSModule. */
+        @Provides
+        @IntoMap
+        @StringKey(ONE_HANDED_TILE_SPEC)
+        fun provideOneHandedModeTileViewModel(
+            factory: QSTileViewModelFactory.Static<OneHandedModeTileModel>,
+            mapper: OneHandedModeTileMapper,
+            stateInteractor: OneHandedModeTileDataInteractor,
+            userActionInteractor: OneHandedModeTileUserActionInteractor
+        ): QSTileViewModel =
+            if (Flags.qsNewTilesFuture())
+                factory.create(
+                    TileSpec.create(ONE_HANDED_TILE_SPEC),
+                    userActionInteractor,
+                    stateInteractor,
+                    mapper,
+                )
+            else StubQSTileViewModel
+
+        @Provides
+        @IntoMap
+        @StringKey(NIGHT_DISPLAY_TILE_SPEC)
+        fun provideNightDisplayTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(NIGHT_DISPLAY_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.qs_nightlight_icon_off,
+                        labelRes = R.string.quick_settings_night_display_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
+
+        /**
+         * Inject NightDisplay Tile into tileViewModelMap in QSModule. The tile is hidden behind a
+         * flag.
+         */
+        @Provides
+        @IntoMap
+        @StringKey(NIGHT_DISPLAY_TILE_SPEC)
+        fun provideNightDisplayTileViewModel(
+            factory: QSTileViewModelFactory.Static<NightDisplayTileModel>,
+            mapper: NightDisplayTileMapper,
+            stateInteractor: NightDisplayTileDataInteractor,
+            userActionInteractor: NightDisplayTileUserActionInteractor
+        ): QSTileViewModel =
+            if (Flags.qsNewTilesFuture())
+                factory.create(
+                    TileSpec.create(NIGHT_DISPLAY_TILE_SPEC),
+                    userActionInteractor,
+                    stateInteractor,
+                    mapper,
+                )
+            else StubQSTileViewModel
     }
 }

@@ -128,7 +128,7 @@ public final class NavBarHelper implements
     private boolean mLongPressHomeEnabled;
     private boolean mAssistantTouchGestureEnabled;
     private int mNavBarMode;
-    private int mA11yButtonState;
+    private long mA11yButtonState;
     private int mRotationWatcherRotation;
     private boolean mTogglingNavbarTaskbar;
     private boolean mWallpaperVisible;
@@ -374,7 +374,7 @@ public final class NavBarHelper implements
      * {@link Secure#ACCESSIBILITY_BUTTON_MODE_GESTURE}, otherwise it is reset to 0.
      */
     private void updateA11yState() {
-        final int prevState = mA11yButtonState;
+        final long prevState = mA11yButtonState;
         final boolean clickable;
         final boolean longClickable;
         if (mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()
@@ -431,7 +431,7 @@ public final class NavBarHelper implements
      * 48 = the combination of {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_CLICKABLE} and
      * {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE}
      */
-    public int getA11yButtonState() {
+    public long getA11yButtonState() {
         return mA11yButtonState;
     }
 

@@ -149,7 +149,11 @@ public class LocalMediaManager implements BluetoothCallback {
                 // TODO: b/321969740 - Take the userHandle as a parameter and pass it through. The
                 // package name is not sufficient to unambiguously identify an app.
                 InfoMediaManager.createInstance(
-                        context, packageName, /* userHandle */ null, mLocalBluetoothManager);
+                        context,
+                        packageName,
+                        /* userHandle */ null,
+                        mLocalBluetoothManager,
+                        /* token */ null);
     }
 
     /**

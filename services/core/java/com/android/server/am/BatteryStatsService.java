@@ -159,6 +159,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * All information we are collecting about things that can happen that impact
@@ -409,26 +411,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 com.android.internal.R.bool.config_batteryStatsResetOnUnplugHighBatteryLevel);
         final boolean resetOnUnplugAfterSignificantCharge = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_batteryStatsResetOnUnplugAfterSignificantCharge);
-        final long powerStatsThrottlePeriodCpu = context.getResources().getInteger(
-                com.android.internal.R.integer.config_defaultPowerStatsThrottlePeriodCpu);
-        final long powerStatsThrottlePeriodMobileRadio = context.getResources().getInteger(
-                com.android.internal.R.integer.config_defaultPowerStatsThrottlePeriodMobileRadio);
-        final long powerStatsThrottlePeriodWifi = context.getResources().getInteger(
-                com.android.internal.R.integer.config_defaultPowerStatsThrottlePeriodWifi);
-        mBatteryStatsConfig =
+        BatteryStatsImpl.BatteryStatsConfig.Builder batteryStatsConfigBuilder =
                 new BatteryStatsImpl.BatteryStatsConfig.Builder()
                         .setResetOnUnplugHighBatteryLevel(resetOnUnplugHighBatteryLevel)
-                        .setResetOnUnplugAfterSignificantCharge(resetOnUnplugAfterSignificantCharge)
-                        .setPowerStatsThrottlePeriodMillis(
-                                BatteryConsumer.POWER_COMPONENT_CPU,
-                                powerStatsThrottlePeriodCpu)
-                        .setPowerStatsThrottlePeriodMillis(
-                                BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
-                                powerStatsThrottlePeriodMobileRadio)
-                        .setPowerStatsThrottlePeriodMillis(
-                                BatteryConsumer.POWER_COMPONENT_WIFI,
-                                powerStatsThrottlePeriodWifi)
-                        .build();
+                        .setResetOnUnplugAfterSignificantCharge(
+                                resetOnUnplugAfterSignificantCharge);
+        setPowerStatsThrottlePeriods(batteryStatsConfigBuilder, context.getResources().getString(
+                com.android.internal.R.string.config_powerStatsThrottlePeriods));
+        mBatteryStatsConfig = batteryStatsConfigBuilder.build();
         mPowerStatsUidResolver = new PowerStatsUidResolver();
         mStats = new BatteryStatsImpl(mBatteryStatsConfig, Clock.SYSTEM_CLOCK, mMonotonicClock,
                 systemDir, mHandler, this, this, mUserManagerUserInfoProvider, mPowerProfile,
@@ -513,6 +503,26 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 .setProcessor(
                         new WifiPowerStatsProcessor(mPowerProfile));
         return config;
+    }
+
+    private void setPowerStatsThrottlePeriods(BatteryStatsImpl.BatteryStatsConfig.Builder builder,
+            String configString) {
+        Matcher matcher = Pattern.compile("([^:]+):(\\d+)\\s*").matcher(configString);
+        while (matcher.find()) {
+            String powerComponentName = matcher.group(1);
+            long throttlePeriod;
+            try {
+                throttlePeriod = Long.parseLong(matcher.group(2));
+            } catch (NumberFormatException nfe) {
+                throw new IllegalArgumentException(
+                        "Invalid config_powerStatsThrottlePeriods format: " + configString);
+            }
+            if (powerComponentName.equals("*")) {
+                builder.setDefaultPowerStatsThrottlePeriodMillis(throttlePeriod);
+            } else {
+                builder.setPowerStatsThrottlePeriodMillis(powerComponentName, throttlePeriod);
+            }
+        }
     }
 
     /**

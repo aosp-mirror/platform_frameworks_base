@@ -49,6 +49,7 @@ import android.content.SharedPreferences;
 import android.content.om.OverlayManager;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.content.res.AssetManager;
@@ -76,6 +77,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
 import android.os.BatteryStats;
+import android.os.IDeviceIdleController;
 import android.os.PowerExemptionManager;
 import android.os.PowerManager;
 import android.os.ServiceManager;
@@ -219,6 +221,13 @@ public class FrameworkServicesModule {
     @Singleton
     static DevicePolicyManager provideDevicePolicyManager(Context context) {
         return context.getSystemService(DevicePolicyManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static UserScopedService<ColorDisplayManager> provideScopedColorDisplayManager(
+            Context context) {
+        return new UserScopedServiceImpl<>(context, ColorDisplayManager.class);
     }
 
     @Provides
@@ -482,6 +491,12 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    static PackageInstaller providePackageInstaller(PackageManager packageManager) {
+        return packageManager.getPackageInstaller();
+    }
+
+    @Provides
+    @Singleton
     static PackageManagerWrapper providePackageManagerWrapper() {
         return PackageManagerWrapper.getInstance();
     }
@@ -734,5 +749,12 @@ public class FrameworkServicesModule {
     @Singleton
     static Optional<SatelliteManager> provideSatelliteManager(Context context) {
         return Optional.ofNullable(context.getSystemService(SatelliteManager.class));
+    }
+
+    @Provides
+    @Singleton
+    static IDeviceIdleController provideDeviceIdleController() {
+        return IDeviceIdleController.Stub.asInterface(
+                ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
     }
 }

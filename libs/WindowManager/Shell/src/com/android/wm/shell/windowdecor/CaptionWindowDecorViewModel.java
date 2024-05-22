@@ -63,6 +63,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final SyncTransactionQueue mSyncQueue;
     private final Transitions mTransitions;
+    private final ResizeHandleSizeRepository mResizeHandleSizeRepository;
     private TaskOperations mTaskOperations;
 
     private final SparseArray<CaptionWindowDecoration> mWindowDecorByTaskId = new SparseArray<>();
@@ -75,7 +76,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             DisplayController displayController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             SyncTransactionQueue syncQueue,
-            Transitions transitions) {
+            Transitions transitions,
+            ResizeHandleSizeRepository resizeHandleSizeRepository) {
         mContext = context;
         mMainHandler = mainHandler;
         mMainChoreographer = mainChoreographer;
@@ -84,6 +86,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mSyncQueue = syncQueue;
         mTransitions = transitions;
+        mResizeHandleSizeRepository = resizeHandleSizeRepository;
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTaskOperations = new TaskOperations(null, mContext, mSyncQueue);
         }
@@ -116,6 +119,21 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
 
         decoration.relayout(taskInfo);
         setupCaptionColor(taskInfo, decoration);
+    }
+
+    @Override
+    public void onTaskVanished(RunningTaskInfo taskInfo) {
+        // A task vanishing doesn't necessarily mean the task was closed, it could also mean its
+        // windowing mode changed. We're only interested in closing tasks so checking whether
+        // its info still exists in the task organizer is one way to disambiguate.
+        final boolean closed = mTaskOrganizer.getRunningTaskInfo(taskInfo.taskId) == null;
+        if (closed) {
+            // Destroying the window decoration is usually handled when a TRANSIT_CLOSE transition
+            // changes happen, but there are certain cases in which closing tasks aren't included
+            // in transitions, such as when a non-visible task is closed. See b/296921167.
+            // Destroy the decoration here in case the lack of transition missed it.
+            destroyWindowDecoration(taskInfo);
+        }
     }
 
     @Override
@@ -216,7 +234,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                         taskSurface,
                         mMainHandler,
                         mMainChoreographer,
-                        mSyncQueue);
+                        mSyncQueue,
+                        mResizeHandleSizeRepository);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
         final FluidResizeTaskPositioner taskPositioner =

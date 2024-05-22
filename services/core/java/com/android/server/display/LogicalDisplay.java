@@ -35,6 +35,7 @@ import android.view.SurfaceControl;
 
 import com.android.server.display.layout.Layout;
 import com.android.server.display.mode.DisplayModeDirector;
+import com.android.server.display.mode.SyntheticModeManager;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
@@ -408,7 +409,8 @@ final class LogicalDisplay {
      *
      * @param deviceRepo Repository of active {@link DisplayDevice}s.
      */
-    public void updateLocked(DisplayDeviceRepository deviceRepo) {
+    public void updateLocked(DisplayDeviceRepository deviceRepo,
+            SyntheticModeManager syntheticModeManager) {
         // Nothing to update if already invalid.
         if (mPrimaryDisplayDevice == null) {
             return;
@@ -426,6 +428,7 @@ final class LogicalDisplay {
         // logical display that they are sharing.  (eg. Adjust size for pixel-perfect
         // mirroring over HDMI.)
         DisplayDeviceInfo deviceInfo = mPrimaryDisplayDevice.getDisplayDeviceInfoLocked();
+        DisplayDeviceConfig config = mPrimaryDisplayDevice.getDisplayDeviceConfig();
         if (!Objects.equals(mPrimaryDisplayDeviceInfo, deviceInfo) || mDirty) {
             mBaseDisplayInfo.layerStack = mLayerStack;
             mBaseDisplayInfo.flags = 0;
@@ -507,6 +510,9 @@ final class LogicalDisplay {
             mBaseDisplayInfo.userPreferredModeId = deviceInfo.userPreferredModeId;
             mBaseDisplayInfo.supportedModes = Arrays.copyOf(
                     deviceInfo.supportedModes, deviceInfo.supportedModes.length);
+            mBaseDisplayInfo.appsSupportedModes = syntheticModeManager.createAppSupportedModes(
+                    config, mBaseDisplayInfo.supportedModes
+            );
             mBaseDisplayInfo.colorMode = deviceInfo.colorMode;
             mBaseDisplayInfo.supportedColorModes = Arrays.copyOf(
                     deviceInfo.supportedColorModes,

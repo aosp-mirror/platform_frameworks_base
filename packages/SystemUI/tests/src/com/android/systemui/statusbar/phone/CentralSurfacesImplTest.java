@@ -21,9 +21,13 @@ import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED;
 import static android.provider.Settings.Global.HEADS_UP_ON;
 
+import static com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR;
+import static com.android.systemui.Flags.FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE;
 import static com.android.systemui.Flags.FLAG_LIGHT_REVEAL_MIGRATION;
+import static com.android.systemui.flags.Flags.SHORTCUT_LIST_SEARCH_LAYOUT;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -42,6 +46,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import static java.util.Collections.emptySet;
@@ -52,6 +57,9 @@ import android.app.WallpaperManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientDisplayConfiguration;
@@ -64,16 +72,20 @@ import android.os.IThermalService;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.service.dreams.IDreamManager;
 import android.support.test.metricshelper.MetricsAsserts;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
+import android.view.WindowMetrics;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.compose.animation.scene.ObservableTransitionState;
@@ -97,8 +109,6 @@ import com.android.systemui.charging.WiredChargingRippleController;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.communal.data.repository.CommunalRepository;
-import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
@@ -137,6 +147,8 @@ import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeLogger;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.KeyboardShortcutListSearch;
+import com.android.systemui.statusbar.KeyboardShortcuts;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -202,6 +214,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.ByteArrayOutputStream;
@@ -211,8 +224,9 @@ import java.util.Optional;
 import javax.inject.Provider;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
+@EnableFlags(FLAG_LIGHT_REVEAL_MIGRATION)
 public class CentralSurfacesImplTest extends SysuiTestCase {
 
     private static final int FOLD_STATE_FOLDED = 0;
@@ -227,8 +241,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
 
     private final TestScope mTestScope = mKosmos.getTestScope();
-    private final CommunalInteractor mCommunalInteractor = mKosmos.getCommunalInteractor();
-    private final CommunalRepository mCommunalRepository = mKosmos.getCommunalRepository();
     @Mock private NotificationsController mNotificationsController;
     @Mock private LightBarController mLightBarController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -326,18 +338,22 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock IPowerManager mPowerManagerService;
     @Mock ActivityStarter mActivityStarter;
     @Mock private WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
+    @Mock private KeyboardShortcuts mKeyboardShortcuts;
+    @Mock private KeyboardShortcutListSearch mKeyboardShortcutListSearch;
+    @Mock private PackageManager mPackageManager;
 
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeGlobalSettings mFakeGlobalSettings = new FakeGlobalSettings();
     private final SystemSettings mSystemSettings = new FakeSettings();
     private final FakeEventLog mFakeEventLog = new FakeEventLog();
-    private final FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
+    private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
     private final FakeExecutor mUiBgExecutor = new FakeExecutor(mFakeSystemClock);
     private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     private final InitController mInitController = new InitController();
     private final DumpManager mDumpManager = new DumpManager();
     private final ScreenLifecycle mScreenLifecycle = new ScreenLifecycle(mDumpManager);
+    private MessageRouterImpl mMessageRouter = new MessageRouterImpl(mMainExecutor);
 
     private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor =
             mKosmos.getBrightnessMirrorShowingInteractor();
@@ -347,14 +363,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         // Set default value to avoid IllegalStateException.
-        mFeatureFlags.set(Flags.SHORTCUT_LIST_SEARCH_LAYOUT, false);
-        mSetFlagsRule.enableFlags(FLAG_LIGHT_REVEAL_MIGRATION);
+        mFeatureFlags.set(SHORTCUT_LIST_SEARCH_LAYOUT, false);
         // Turn AOD on and toggle feature flag for jank fixes
         mFeatureFlags.set(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD, true);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
-        if (!SceneContainerFlag.isEnabled()) {
-            mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
-        }
 
         IThermalService thermalService = mock(IThermalService.class);
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,
@@ -382,7 +394,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mock(UiEventLogger.class),
                         mUserTracker,
                         mAvalancheProvider,
-                        mSystemSettings);
+                        mSystemSettings,
+                        mPackageManager);
         mVisualInterruptionDecisionProvider.start();
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
@@ -462,6 +475,16 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     private void createCentralSurfaces() {
+        mMainExecutor = new FakeExecutor(mFakeSystemClock);
+        mMessageRouter = new MessageRouterImpl(mMainExecutor);
+        mKeyboardShortcuts = mock(KeyboardShortcuts.class);
+        mKeyboardShortcutListSearch = mock(KeyboardShortcutListSearch.class);
+        // Test setup for legacy version
+        mKeyboardShortcuts.mContext = mContext;
+        mKeyboardShortcutListSearch.mContext = mContext;
+        KeyboardShortcuts.sInstance = mKeyboardShortcuts;
+        KeyboardShortcutListSearch.sInstance = mKeyboardShortcutListSearch;
+
         ConfigurationController configurationController = new ConfigurationControllerImpl(mContext);
         mCentralSurfaces = new CentralSurfacesImpl(
                 mContext,
@@ -504,7 +527,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mScreenLifecycle,
                 mWakefulnessLifecycle,
                 mPowerInteractor,
-                mCommunalInteractor,
+                mKosmos.getCommunalInteractor(),
                 mStatusBarStateController,
                 Optional.of(mBubbles),
                 () -> mNoteTaskController,
@@ -554,7 +577,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mFeatureFlags,
                 mKeyguardUnlockAnimationController,
                 mMainExecutor,
-                new MessageRouterImpl(mMainExecutor),
+                mMessageRouter,
                 mWallpaperManager,
                 Optional.of(mStartingSurface),
                 mActivityTransitionAnimator,
@@ -813,6 +836,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
     public void testSetDozingNotUnlocking_transitionToAuthScrimmed_cancelKeyguardFadingAway() {
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
         when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(true);
@@ -824,7 +848,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOccludingQSNotExpanded_transitionToAuthScrimmed() {
+    @DisableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+    public void testOccludingQSNotExpanded_flagOff_transitionToAuthScrimmed() {
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
 
         // GIVEN device occluded and panel is NOT expanded
@@ -838,6 +863,39 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+    public void testNotOccluding_QSNotExpanded_flagOn_doesNotTransitionScrimState() {
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // GIVEN device occluded and panel is NOT expanded
+        mCentralSurfaces.setBarStateForTest(SHADE);
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(false);
+
+        mCentralSurfaces.updateScrimController();
+
+        // Tests the safeguard to reset the scrimstate
+        verify(mScrimController, never()).transitionTo(any());
+    }
+
+    @Test
+    @EnableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+    public void testNotOccluding_QSExpanded_flagOn_doesTransitionScrimStateToKeyguard() {
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // GIVEN device occluded and panel is NOT expanded
+        mCentralSurfaces.setBarStateForTest(SHADE);
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(true);
+
+        mCentralSurfaces.updateScrimController();
+
+        // Tests the safeguard to reset the scrimstate
+        verify(mScrimController, never()).transitionTo(eq(ScrimState.KEYGUARD));
+    }
+
+    @Test
+    @DisableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
     public void testOccludingQSExpanded_transitionToAuthScrimmedShade() {
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
 
@@ -854,16 +912,18 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Test
     public void testEnteringGlanceableHub_updatesScrim() {
         // Transition to the glanceable hub.
-        mCommunalRepository.setTransitionState(flowOf(new ObservableTransitionState.Idle(
-                CommunalScenes.Communal)));
+        mKosmos.getCommunalRepository()
+                .setTransitionState(
+                        flowOf(new ObservableTransitionState.Idle(CommunalScenes.Communal)));
         mTestScope.getTestScheduler().runCurrent();
 
         // ScrimState also transitions.
         verify(mScrimController).transitionTo(ScrimState.GLANCEABLE_HUB);
 
         // Transition away from the glanceable hub.
-        mCommunalRepository.setTransitionState(flowOf(new ObservableTransitionState.Idle(
-                CommunalScenes.Blank)));
+        mKosmos.getCommunalRepository()
+                .setTransitionState(
+                        flowOf(new ObservableTransitionState.Idle(CommunalScenes.Blank)));
         mTestScope.getTestScheduler().runCurrent();
 
         // ScrimState goes back to UNLOCKED.
@@ -877,16 +937,18 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.isDreaming()).thenReturn(true);
 
         // Transition to the glanceable hub.
-        mCommunalRepository.setTransitionState(flowOf(new ObservableTransitionState.Idle(
-                CommunalScenes.Communal)));
+        mKosmos.getCommunalRepository()
+                .setTransitionState(
+                        flowOf(new ObservableTransitionState.Idle(CommunalScenes.Communal)));
         mTestScope.getTestScheduler().runCurrent();
 
         // ScrimState also transitions.
         verify(mScrimController).transitionTo(ScrimState.GLANCEABLE_HUB_OVER_DREAM);
 
         // Transition away from the glanceable hub.
-        mCommunalRepository.setTransitionState(flowOf(new ObservableTransitionState.Idle(
-                CommunalScenes.Blank)));
+        mKosmos.getCommunalRepository()
+                .setTransitionState(
+                        flowOf(new ObservableTransitionState.Idle(CommunalScenes.Blank)));
         mTestScope.getTestScheduler().runCurrent();
 
         // ScrimState goes back to UNLOCKED.
@@ -1081,18 +1143,16 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
     public void updateResources_flagEnabled_doesNotUpdateStatusBarWindowHeight() {
-        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX);
-
         mCentralSurfaces.updateResources();
 
         verify(mStatusBarWindowController, never()).refreshStatusBarHeight();
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
     public void updateResources_flagDisabled_updatesStatusBarWindowHeight() {
-        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX);
-
         mCentralSurfaces.updateResources();
 
         verify(mStatusBarWindowController).refreshStatusBarHeight();
@@ -1124,6 +1184,194 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mTestScope.getTestScheduler().runCurrent();
         verify(mScrimController, never()).transitionTo(ScrimState.BRIGHTNESS_MIRROR);
         verify(mScrimController, never()).transitionTo(eq(ScrimState.BRIGHTNESS_MIRROR), any());
+    }
+
+    @Test
+    @EnableFlags(FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE)
+    public void dismissKeyboardShortcuts_largeScreen_bothFlagsEnabled_doesNotDismissAny() {
+        switchToLargeScreen();
+        mFeatureFlags.set(SHORTCUT_LIST_SEARCH_LAYOUT, true);
+        createCentralSurfaces();
+
+        dismissKeyboardShortcuts();
+
+        verifyNoMoreInteractions(mKeyboardShortcuts, mKeyboardShortcutListSearch);
+    }
+
+    @Test
+    @DisableFlags(FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE)
+    public void dismissKeyboardShortcuts_largeScreen_newFlagsDisabled_dismissesTabletVersion() {
+        switchToLargeScreen();
+        mFeatureFlags.set(SHORTCUT_LIST_SEARCH_LAYOUT, true);
+        createCentralSurfaces();
+
+        dismissKeyboardShortcuts();
+
+        verify(mKeyboardShortcutListSearch).dismissKeyboardShortcuts();
+    }
+
+    @Test
+    @DisableFlags(FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE)
+    public void dismissKeyboardShortcuts_largeScreen_bothFlagsDisabled_dismissesPhoneVersion() {
+        switchToLargeScreen();
+        mFeatureFlags.set(SHORTCUT_LIST_SEARCH_LAYOUT, false);
+        createCentralSurfaces();
+
+        dismissKeyboardShortcuts();
+
+        verify(mKeyboardShortcuts).dismissKeyboardShortcuts();
+        verifyNoMoreInteractions(mKeyboardShortcutListSearch);
+    }
+
+    @Test
+    @EnableFlags(FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE)
+    public void dismissKeyboardShortcuts_smallScreen_bothFlagsEnabled_doesNotDismissAny() {
+        switchToSmallScreen();
+        mFeatureFlags.set(SHORTCUT_LIST_SEARCH_LAYOUT, true);
+        createCentralSurfaces();
+
+        dismissKeyboardShortcuts();
+
+        verifyNoMoreInteractions(mKeyboardShortcuts, mKeyboardShortcutListSearch);
+    }
+
+    @Test
+    @DisableFlags(FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE)
+    public void dismissKeyboardShortcuts_smallScreen_newFlagsDisabled_dismissesPhoneVersion() {
+        switchToSmallScreen();
+        mFeatureFlags.set(SHORTCUT_LIST_SEARCH_LAYOUT, true);
+        createCentralSurfaces();
+
+        dismissKeyboardShortcuts();
+
+        verify(mKeyboardShortcuts).dismissKeyboardShortcuts();
+        verifyNoMoreInteractions(mKeyboardShortcutListSearch);
+    }
+
+    @Test
+    @DisableFlags(FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE)
+    public void dismissKeyboardShortcuts_smallScreen_bothFlagsDisabled_dismissesPhoneVersion() {
+        switchToSmallScreen();
+        mFeatureFlags.set(SHORTCUT_LIST_SEARCH_LAYOUT, false);
+        createCentralSurfaces();
+
+        dismissKeyboardShortcuts();
+
+        verify(mKeyboardShortcuts).dismissKeyboardShortcuts();
+        verifyNoMoreInteractions(mKeyboardShortcutListSearch);
+    }
+
+    @Test
+    @EnableFlags(FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE)
+    public void toggleKeyboardShortcuts_largeScreen_bothFlagsEnabled_doesNotTogglesAny() {
+        switchToLargeScreen();
+        mFeatureFlags.set(SHORTCUT_LIST_SEARCH_LAYOUT, true);
+        createCentralSurfaces();
+
+        int deviceId = 321;
+        toggleKeyboardShortcuts(/* deviceId= */ deviceId);
+
+        verifyNoMoreInteractions(mKeyboardShortcuts, mKeyboardShortcutListSearch);
+    }
+
+    @Test
+    @DisableFlags(FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE)
+    public void toggleKeyboardShortcuts_largeScreen_newFlagsDisabled_togglesTabletVersion() {
+        switchToLargeScreen();
+        mFeatureFlags.set(SHORTCUT_LIST_SEARCH_LAYOUT, true);
+        createCentralSurfaces();
+
+        int deviceId = 654;
+        toggleKeyboardShortcuts(deviceId);
+
+        verify(mKeyboardShortcutListSearch).showKeyboardShortcuts(deviceId);
+        verifyNoMoreInteractions(mKeyboardShortcuts);
+    }
+
+    @Test
+    @DisableFlags(FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE)
+    public void toggleKeyboardShortcuts_largeScreen_bothFlagsDisabled_togglesPhoneVersion() {
+        switchToLargeScreen();
+        mFeatureFlags.set(SHORTCUT_LIST_SEARCH_LAYOUT, false);
+        createCentralSurfaces();
+
+        int deviceId = 987;
+        toggleKeyboardShortcuts(deviceId);
+
+        verify(mKeyboardShortcuts).showKeyboardShortcuts(deviceId);
+        verifyNoMoreInteractions(mKeyboardShortcutListSearch);
+    }
+
+    @Test
+    @EnableFlags(FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE)
+    public void toggleKeyboardShortcuts_smallScreen_bothFlagsEnabled_doesNotToggleAny() {
+        switchToSmallScreen();
+        mFeatureFlags.set(SHORTCUT_LIST_SEARCH_LAYOUT, true);
+        createCentralSurfaces();
+
+        int deviceId = 789;
+        toggleKeyboardShortcuts(/* deviceId= */ deviceId);
+
+        verifyNoMoreInteractions(mKeyboardShortcuts, mKeyboardShortcutListSearch);
+    }
+
+    @Test
+    @DisableFlags(FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE)
+    public void toggleKeyboardShortcuts_smallScreen_newFlagsDisabled_togglesPhoneVersion() {
+        switchToSmallScreen();
+        mFeatureFlags.set(SHORTCUT_LIST_SEARCH_LAYOUT, true);
+        createCentralSurfaces();
+
+        int deviceId = 456;
+        toggleKeyboardShortcuts(deviceId);
+
+        verify(mKeyboardShortcuts).showKeyboardShortcuts(deviceId);
+        verifyNoMoreInteractions(mKeyboardShortcutListSearch);
+    }
+
+    @Test
+    @DisableFlags(FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE)
+    public void toggleKeyboardShortcuts_smallScreen_bothFlagsDisabled_togglesPhoneVersion() {
+        switchToSmallScreen();
+        mFeatureFlags.set(SHORTCUT_LIST_SEARCH_LAYOUT, false);
+        createCentralSurfaces();
+
+        int deviceId = 123;
+        toggleKeyboardShortcuts(deviceId);
+
+        verify(mKeyboardShortcuts).showKeyboardShortcuts(deviceId);
+        verifyNoMoreInteractions(mKeyboardShortcutListSearch);
+    }
+
+    private void dismissKeyboardShortcuts() {
+        mMessageRouter.sendMessage(MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU);
+        mMainExecutor.runAllReady();
+    }
+
+    private void toggleKeyboardShortcuts(int deviceId) {
+        mMessageRouter.sendMessage(new CentralSurfaces.KeyboardShortcutsMessage(deviceId));
+        mMainExecutor.runAllReady();
+    }
+
+    private void switchToLargeScreen() {
+        switchToScreenSize(1280, 800);
+    }
+
+    private void switchToSmallScreen() {
+        switchToScreenSize(504, 1122);
+    }
+
+    private void switchToScreenSize(int widthDp, int heightDp) {
+        WindowMetrics windowMetrics = Mockito.mock(WindowMetrics.class);
+        WindowManager windowManager = Mockito.mock(WindowManager.class);
+
+        Configuration configuration = new Configuration();
+        configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT;
+        mContext.getOrCreateTestableResources().overrideConfiguration(configuration);
+
+        when(windowMetrics.getBounds()).thenReturn(new Rect(0, 0, widthDp, heightDp));
+        when(windowManager.getCurrentWindowMetrics()).thenReturn(windowMetrics);
+        mContext.addMockSystemService(WindowManager.class, windowManager);
     }
 
     /**

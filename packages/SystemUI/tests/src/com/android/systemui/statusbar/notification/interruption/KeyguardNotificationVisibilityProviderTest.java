@@ -42,9 +42,9 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -86,7 +86,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     private static final int NOTIF_USER_ID = 0;

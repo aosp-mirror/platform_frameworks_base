@@ -64,3 +64,24 @@ flag {
     description: "Enables long-press action for nav handle when a bubble is expanded"
     bug: "324910035"
 }
+
+flag {
+    name: "enable_optional_bubble_overflow"
+    namespace: "multitasking"
+    description: "Hides the bubble overflow if there aren't any overflowed bubbles"
+    bug: "334175587"
+}
+
+flag {
+    name: "enable_retrievable_bubbles"
+    namespace: "multitasking"
+    description: "Allow opening bubbles overflow UI without bubbles being visible"
+    bug: "340337839"
+}
+
+flag {
+    name: "enable_bubble_stashing"
+    namespace: "multitasking"
+    description: "Allow the floating bubble stack to stash on the edge of the screen"
+    bug: "341361249"
+}

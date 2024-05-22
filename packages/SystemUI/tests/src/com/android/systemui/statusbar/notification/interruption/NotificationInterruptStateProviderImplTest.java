@@ -60,8 +60,8 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.DisableFlags;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.testing.UiEventLoggerFake;
@@ -96,7 +96,7 @@ import java.util.Set;
  * Tests for the interruption state provider which understands whether the system & notification
  * is in a state allowing a particular notification to hun, pulse, or bubble.
  */
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
 

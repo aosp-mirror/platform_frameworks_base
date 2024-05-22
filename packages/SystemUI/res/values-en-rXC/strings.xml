@@ -447,6 +447,7 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‏‎‏‎‎‏‏‏‎‎‎‏‎‎‏‏‎‏‏‏‏‎‎‏‎‏‎‏‏‏‎‎‏‎‎‎‎‏‎‎‏‏‎‏‎‏‎‎‎‎‎‏‏‎Long press to customize widgets‎‏‎‎‏‎"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‎‎‏‎‏‏‎‎‎‏‏‏‏‏‎‏‎‎‎‎‏‏‎‏‏‎‎‎‎‏‎‎‎‏‏‏‎‎‏‎‏‏‎‏‏‏‏‏‏‏‎‎‎‏‎‏‎Customize widgets‎‏‎‎‏‎"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‎‏‏‎‏‏‎‎‎‏‏‏‏‎‏‏‏‎‏‎‎‏‎‏‎‎‎‏‎‏‎‏‏‎‏‏‎‎‎‏‎‎‎‏‏‏‏‏‎App icon for disabled widget‎‏‎‎‏‎"</string>
+    <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‎‎‎‎‏‏‏‏‏‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‏‎‏‏‏‎‏‎‏‏‎‎‏‎‏‎‎‏‎‎‎‏‏‏‎‏‏‎‏‏‎App icon for a widget being installed‎‏‎‎‏‎"</string>
     <string name="edit_widget" msgid="9030848101135393954">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‏‎‎‎‎‎‎‎‏‎‎‏‎‎‎‎‎‎‎‎‎‏‎‎‎‎‎‏‎‏‎‏‏‏‏‏‎‏‎‎‏‎‎‏‎‏‎‎‎‏‎‎Edit widget‎‏‎‎‏‎"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‏‏‎‎‏‎‏‎‏‏‎‏‎‏‏‏‎‏‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‎‏‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‎‏‎‎Remove‎‏‎‎‏‎"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‎‎‏‏‎‎‏‏‎‎‏‏‏‏‏‎‎‎‎‎‏‎‏‏‎‏‏‏‎‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‎‎‎‎‎‏‎‎‎‏‎Add widget‎‏‎‎‏‎"</string>
@@ -461,6 +462,8 @@
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‎‎‎‎‏‎‏‎‎‎‎‎‎‎‎‏‎‎‏‏‏‎‎‏‏‏‎‎‎‎‎‏‎‏‏‏‏‏‏‎‎‎‏‎‏‏‎‎‎‎‏‎‏‎‏‎‎Customize widgets‎‏‎‎‏‎"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‎‎‏‎‏‏‎‏‏‏‎‏‎‎‎‏‎‎‎‎‎‎‎‏‎‏‎‏‏‏‎‎‎‏‏‎‎‎‎‏‎‏‏‎‎‎‎‎‏‎‎‏‎‏‏‎‎Widgets on lock screen‎‏‎‎‏‎"</string>
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‏‎‎‏‎‏‏‏‏‏‏‎‎‏‏‎‎‎‏‎‏‎‏‏‏‏‎‎‏‏‎‏‏‎‎‏‏‎‎‏‏‏‎‎‎‎‏‎‏‏‏‏‎select widget‎‏‎‎‏‎"</string>
+    <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‏‏‎‏‎‎‏‎‎‎‎‏‎‎‏‎‏‎‎‎‏‎‎‎‎‏‎‎‏‎‏‏‏‎‏‏‎‎‏‎‎‏‏‎‎‏‏‏‎‎‏‏‎‏‏‎‎remove widget‎‏‎‎‏‎"</string>
+    <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‏‎‎‏‎‎‎‎‏‎‎‏‏‎‎‎‎‏‏‏‎‎‏‎‎‏‏‎‎‎‎‎‎‏‏‏‎‎‎‎‏‏‏‏‎‎‎‏‎‎‎‏‎‎‏‎‎place selected widget‎‏‎‎‏‎"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‏‏‏‏‏‎‎‏‏‎‎‎‏‏‏‎‏‎‎‎‎‏‏‎‎‏‎‎‎‎‎‏‏‏‎‏‎‏‏‏‎‏‏‏‎‎‎‎‏‎‏‏‎‏‎‎‎Switch user‎‏‎‎‏‎"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‏‏‏‎‏‎‏‎‏‎‏‏‏‎‏‏‎‏‎‎‏‏‎‎‎‎‎‎‎‏‏‏‏‎‎‏‎‏‎‎‏‏‎‎‎‎‏‏‏‏‏‏‏‎pulldown menu‎‏‎‎‏‎"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‎‏‎‎‎‏‎‏‏‏‎‏‎‏‎‏‎‏‎‎‎‎‎‏‎‎‏‎‏‏‎‎‏‏‎‏‎‎‏‏‏‎‏‏‏‏‎‏‎‏‏‏‎‏‎All apps and data in this session will be deleted.‎‏‎‎‏‎"</string>
@@ -625,8 +628,10 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‏‎‏‏‎‎‎‎‎‎‎‏‏‎‏‏‎‎‎‏‏‏‎‎‏‏‏‏‎‎‏‎‏‏‏‎‎‎‎‏‎‏‏‏‎‏‏‎‏‏‏‎‏‎Enter output settings‎‏‎‎‏‎"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‎‎‏‎‏‎‏‏‏‎‎‎‏‎‎‎‏‎‎‎‏‎‎‎‎‏‎‎‎‎‎‎‏‏‎‎‏‎‎‎‏‎‏‎‎‏‏‏‏‎‎‏‏‏‏‏‎Volume sliders expanded‎‏‎‎‏‎"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‏‎‎‏‏‏‎‏‎‏‎‏‏‎‎‏‎‎‎‎‏‎‏‎‎‏‏‏‎‎‎‎‎‏‏‎‏‎‏‎‏‎‏‏‏‎‏‎‎‎‎‏‏‎‏‎‎Volume sliders collapsed‎‏‎‎‏‎"</string>
-    <string name="volume_panel_hint_mute" msgid="6962563028495243738">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‏‏‎‏‏‎‎‏‏‏‏‎‏‏‏‎‏‎‎‎‎‏‏‎‎‏‏‏‎‏‏‎‏‎‎mute %s‎‏‎‎‏‎"</string>
-    <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‏‏‏‏‏‏‎‏‎‏‎‏‏‏‎‎‏‏‎‏‏‏‏‎‎‎‏‎‏‏‎‏‏‎‎‎‏‎‎‏‎‎‎‏‏‎‎unmute %s‎‏‎‎‏‎"</string>
+    <string name="volume_panel_hint_mute" msgid="2153922288568199077">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‏‏‏‏‎‎‏‎‎‎‏‎‎‎‏‎‎‏‏‏‎‏‎‎‎‏‏‎‏‎‎‏‏‏‏‏‎‎‏‏‏‎‏‏‎‎‏‏‏‏‎‏‎‎‏‎‏‎Mute %s‎‏‎‎‏‎"</string>
+    <string name="volume_panel_hint_unmute" msgid="4831850937582282340">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‎‎‏‏‏‎‎‎‏‎‏‏‏‎‏‏‎‏‎‎‏‏‏‏‎‏‎‏‏‎‎‎‏‏‏‎‏‎‏‏‏‎‎‏‏‎‎‏‏‎‎‏‎‎‎Unmute %s‎‏‎‎‏‎"</string>
+    <string name="volume_panel_hint_muted" msgid="1124844870181285320">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‏‎‎‏‏‏‎‎‎‏‎‎‎‎‎‎‎‏‏‏‎‎‏‏‎‎‏‎‎‎‏‎‏‎‎‏‎‎‏‏‎‏‏‎‏‏‎‏‏‏‎‎‏‎‎‎‎muted‎‏‎‎‏‎"</string>
+    <string name="volume_panel_hint_vibrate" msgid="4136223145435914132">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‎‏‏‎‎‏‏‎‏‏‎‏‎‎‎‏‎‎‎‎‏‎‎‏‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‎‏‏‎‏‏‏‏‏‏‎‎‏‎‏‎‎‎vibrate‎‏‎‎‏‎"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‎‎‎‎‏‏‏‎‎‏‏‏‎‎‏‎‏‎‏‏‏‎‎‎‎‎‏‎‏‏‏‏‎‏‏‎‏‎‏‎‏‏‎‎‎‎‎‏‏‎‎‏‎‏‎‎‏‎Playing ‎‏‎‎‏‏‎<xliff:g id="LABEL">%s</xliff:g>‎‏‎‎‏‏‏‎ on‎‏‎‎‏‎"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‎‎‎‏‎‏‏‏‎‏‏‏‏‏‎‎‏‏‎‏‏‎‎‏‏‏‎‎‎‎‎‏‎‏‏‎‏‎‏‏‎‏‎‎‎‎‎‏‏‎‏‏‎‏‎‏‎Audio will play on‎‏‎‎‏‎"</string>
     <string name="media_output_title_ongoing_call" msgid="208426888064112006">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‏‏‏‎‎‏‎‎‎‏‏‏‏‎‏‏‎‎‏‎‎‏‏‎‏‎‎‎‎‎‎‎‏‎‏‏‎‎‏‏‏‎‎‏‎‏‎‏‏‎‎‎‎‏‏‎‎Calling on‎‏‎‎‏‎"</string>

@@ -51,6 +51,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
+import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
 import com.android.compose.test.subjects.DpOffsetSubject
 import com.android.compose.test.subjects.assertThat
@@ -147,34 +148,34 @@ class SceneTransitionLayoutTest {
         rule.onNodeWithText("SceneA").assertIsDisplayed()
         rule.onNodeWithText("SceneB").assertDoesNotExist()
         rule.onNodeWithText("SceneC").assertDoesNotExist()
-        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
-        assertThat(layoutState.transitionState.currentScene).isEqualTo(SceneA)
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
 
         // Change to scene B. Only that scene is displayed.
         currentScene = SceneB
         rule.onNodeWithText("SceneA").assertDoesNotExist()
         rule.onNodeWithText("SceneB").assertIsDisplayed()
         rule.onNodeWithText("SceneC").assertDoesNotExist()
-        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
-        assertThat(layoutState.transitionState.currentScene).isEqualTo(SceneB)
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneB)
     }
 
     @Test
     fun testBack() {
         rule.setContent { TestContent() }
 
-        assertThat(layoutState.transitionState.currentScene).isEqualTo(SceneA)
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
 
         rule.activity.onBackPressed()
         rule.waitForIdle()
-        assertThat(layoutState.transitionState.currentScene).isEqualTo(SceneB)
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneB)
     }
 
     @Test
     fun testTransitionState() {
         rule.setContent { TestContent() }
-        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
-        assertThat(layoutState.transitionState.currentScene).isEqualTo(SceneA)
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
 
         // We will advance the clock manually.
         rule.mainClock.autoAdvance = false
@@ -182,45 +183,38 @@ class SceneTransitionLayoutTest {
         // Change the current scene. Until composition is triggered, this won't change the layout
         // state.
         currentScene = SceneB
-        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
-        assertThat(layoutState.transitionState.currentScene).isEqualTo(SceneA)
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
 
         // On the next frame, we will recompose because currentScene changed, which will start the
         // transition (i.e. it will change the transitionState to be a Transition) in a
         // LaunchedEffect.
         rule.mainClock.advanceTimeByFrame()
-        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Transition::class.java)
-        val transition = layoutState.transitionState as TransitionState.Transition
-        assertThat(transition.fromScene).isEqualTo(SceneA)
-        assertThat(transition.toScene).isEqualTo(SceneB)
-        assertThat(transition.progress).isEqualTo(0f)
+        val transition = assertThat(layoutState.transitionState).isTransition()
+        assertThat(transition).hasFromScene(SceneA)
+        assertThat(transition).hasToScene(SceneB)
+        assertThat(transition).hasProgress(0f)
 
         // Then, on the next frame, the animator we started gets its initial value and clock
         // starting time. We are now at progress = 0f.
         rule.mainClock.advanceTimeByFrame()
-        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Transition::class.java)
-        assertThat((layoutState.transitionState as TransitionState.Transition).progress)
-            .isEqualTo(0f)
+        assertThat(transition).hasProgress(0f)
 
         // The test transition lasts 480ms. 240ms after the start of the transition, we are at
         // progress = 0.5f.
         rule.mainClock.advanceTimeBy(TestTransitionDuration / 2)
-        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Transition::class.java)
-        assertThat((layoutState.transitionState as TransitionState.Transition).progress)
-            .isEqualTo(0.5f)
+        assertThat(transition).hasProgress(0.5f)
 
         // (240-16) ms later, i.e. one frame before the transition is finished, we are at
         // progress=(480-16)/480.
         rule.mainClock.advanceTimeBy(TestTransitionDuration / 2 - 16)
-        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Transition::class.java)
-        assertThat((layoutState.transitionState as TransitionState.Transition).progress)
-            .isEqualTo((TestTransitionDuration - 16) / 480f)
+        assertThat(transition).hasProgress((TestTransitionDuration - 16) / 480f)
 
         // one frame (16ms) later, the transition is finished and we are in the idle state in scene
         // B.
         rule.mainClock.advanceTimeByFrame()
-        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
-        assertThat(layoutState.transitionState.currentScene).isEqualTo(SceneB)
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneB)
     }
 
     @Test
@@ -261,8 +255,8 @@ class SceneTransitionLayoutTest {
         // 100.dp. We pause at the middle of the transition, so it should now be 75.dp given that we
         // use a linear interpolator. Foo was at (x = layoutSize - 50dp, y = 0) in SceneA and is
         // going to (x = 0, y = 0), so the offset should now be half what it was.
-        assertThat((layoutState.transitionState as TransitionState.Transition).progress)
-            .isEqualTo(0.5f)
+        var transition = assertThat(layoutState.transitionState).isTransition()
+        assertThat(transition).hasProgress(0.5f)
         sharedFoo.assertWidthIsEqualTo(75.dp)
         sharedFoo.assertHeightIsEqualTo(75.dp)
         sharedFoo.assertPositionInRootIsEqualTo(
@@ -290,8 +284,8 @@ class SceneTransitionLayoutTest {
         val expectedSize = 100.dp + (150.dp - 100.dp) * interpolatedProgress
 
         sharedFoo = rule.onNode(isElement(TestElements.Foo, SceneC))
-        assertThat((layoutState.transitionState as TransitionState.Transition).progress)
-            .isEqualTo(interpolatedProgress)
+        transition = assertThat(layoutState.transitionState).isTransition()
+        assertThat(transition).hasProgress(interpolatedProgress)
         sharedFoo.assertWidthIsEqualTo(expectedSize)
         sharedFoo.assertHeightIsEqualTo(expectedSize)
         sharedFoo.assertPositionInRootIsEqualTo(expectedLeft, expectedTop)
@@ -305,16 +299,16 @@ class SceneTransitionLayoutTest {
 
         // Wait for the transition to C to finish.
         rule.mainClock.advanceTimeBy(TestTransitionDuration)
-        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
-        assertThat(layoutState.transitionState.currentScene).isEqualTo(SceneC)
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneC)
 
         // Go back to scene A. This should happen instantly (once the animation started, i.e. after
         // 2 frames) given that we use a snap() animation spec.
         currentScene = SceneA
         rule.mainClock.advanceTimeByFrame()
         rule.mainClock.advanceTimeByFrame()
-        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
-        assertThat(layoutState.transitionState.currentScene).isEqualTo(SceneA)
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
     }
 
     @Test
@@ -384,7 +378,9 @@ class SceneTransitionLayoutTest {
         rule.mainClock.advanceTimeByFrame()
         rule.mainClock.advanceTimeBy(duration / 2)
         rule.waitForIdle()
-        assertThat(state.currentTransition?.progress).isEqualTo(0.5f)
+
+        var transition = assertThat(state.transitionState).isTransition()
+        assertThat(transition).hasProgress(0.5f)
 
         // A and B are composed.
         rule.onNodeWithTag("aRoot").assertExists()
@@ -396,7 +392,9 @@ class SceneTransitionLayoutTest {
         rule.mainClock.advanceTimeByFrame()
         rule.mainClock.advanceTimeByFrame()
         rule.waitForIdle()
-        assertThat(state.currentTransition?.progress).isEqualTo(0f)
+
+        transition = assertThat(state.transitionState).isTransition()
+        assertThat(transition).hasProgress(0f)
 
         // A, B and C are composed.
         rule.onNodeWithTag("aRoot").assertExists()
@@ -405,7 +403,7 @@ class SceneTransitionLayoutTest {
 
         // Let A => B finish.
         rule.mainClock.advanceTimeBy(duration / 2L)
-        assertThat(state.currentTransition?.progress).isEqualTo(0.5f)
+        assertThat(transition).hasProgress(0.5f)
         rule.waitForIdle()
 
         // B and C are composed.
@@ -416,8 +414,8 @@ class SceneTransitionLayoutTest {
         // Let B => C finish.
         rule.mainClock.advanceTimeBy(duration / 2L)
         rule.mainClock.advanceTimeByFrame()
-        assertThat(state.currentTransition).isNull()
         rule.waitForIdle()
+        assertThat(state.transitionState).isIdle()
 
         // Only C is composed.
         rule.onNodeWithTag("aRoot").assertDoesNotExist()

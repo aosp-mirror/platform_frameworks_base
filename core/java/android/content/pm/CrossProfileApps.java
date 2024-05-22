@@ -326,6 +326,7 @@ public class CrossProfileApps {
      * @return whether the specified user is a profile.
      */
     @FlaggedApi(FLAG_ALLOW_QUERYING_PROFILE_TYPE)
+    @SuppressWarnings("UserHandleName")
     public boolean isProfile(@NonNull UserHandle userHandle) {
         // Note that this is not a security check, but rather a check for correct use.
         // The actual security check is performed by UserManager.
@@ -343,6 +344,7 @@ public class CrossProfileApps {
      * @return whether the specified user is a managed profile.
      */
     @FlaggedApi(FLAG_ALLOW_QUERYING_PROFILE_TYPE)
+    @SuppressWarnings("UserHandleName")
     public boolean isManagedProfile(@NonNull UserHandle userHandle) {
         // Note that this is not a security check, but rather a check for correct use.
         // The actual security check is performed by UserManager.

@@ -137,7 +137,7 @@ constructor(
                 // farther and dismiss the media data so that media controls for the local session
                 // don't hang around while casting.
                 if (!keyedTokens.get(key)!!.contains(TokenId(remote.sessionToken))) {
-                    dispatchMediaDataRemoved(key)
+                    dispatchMediaDataRemoved(key, userInitiated = false)
                 }
             }
         }
@@ -151,11 +151,11 @@ constructor(
         backgroundExecutor.execute { dispatchSmartspaceMediaDataLoaded(key, data) }
     }
 
-    override fun onMediaDataRemoved(key: String) {
+    override fun onMediaDataRemoved(key: String, userInitiated: Boolean) {
         // Queue on background thread to ensure ordering of loaded and removed events is maintained.
         backgroundExecutor.execute {
             keyedTokens.remove(key)
-            dispatchMediaDataRemoved(key)
+            dispatchMediaDataRemoved(key, userInitiated)
         }
     }
 
@@ -174,8 +174,10 @@ constructor(
         }
     }
 
-    private fun dispatchMediaDataRemoved(key: String) {
-        foregroundExecutor.execute { listeners.toSet().forEach { it.onMediaDataRemoved(key) } }
+    private fun dispatchMediaDataRemoved(key: String, userInitiated: Boolean) {
+        foregroundExecutor.execute {
+            listeners.toSet().forEach { it.onMediaDataRemoved(key, userInitiated) }
+        }
     }
 
     private fun dispatchSmartspaceMediaDataLoaded(key: String, info: SmartspaceMediaData) {

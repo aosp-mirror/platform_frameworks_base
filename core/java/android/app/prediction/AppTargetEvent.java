@@ -24,6 +24,7 @@ import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * A representation of an app target event.
@@ -113,6 +114,13 @@ public final class AppTargetEvent implements Parcelable {
         return mTarget.equals(other.mTarget)
                 && mLocation.equals(other.mLocation)
                 && mAction == other.mAction;
+    }
+
+    @Override
+    public int hashCode() {
+        int hashCode = Objects.hash(mTarget, mLocation);
+        hashCode = 31 * hashCode + mAction;
+        return hashCode;
     }
 
     @Override

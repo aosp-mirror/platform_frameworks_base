@@ -16,8 +16,7 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
-import android.view.View
-import android.view.View.OnLongClickListener
+import com.android.systemui.animation.Expandable
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
@@ -26,8 +25,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.onStart
 
-class TileViewModel(private val tile: QSTile, val spec: TileSpec) :
-    OnLongClickListener, View.OnClickListener {
+class TileViewModel(private val tile: QSTile, val spec: TileSpec) {
     val state: Flow<QSTile.State> =
         conflatedCallbackFlow {
                 val callback = QSTile.Callback { trySend(it.copy()) }
@@ -42,13 +40,12 @@ class TileViewModel(private val tile: QSTile, val spec: TileSpec) :
     val currentState: QSTile.State
         get() = tile.state
 
-    override fun onClick(view: View?) {
-        tile.click(view)
+    fun onClick(expandable: Expandable?) {
+        tile.click(expandable)
     }
 
-    override fun onLongClick(view: View?): Boolean {
-        tile.longClick(view)
-        return true
+    fun onLongClick(expandable: Expandable?) {
+        tile.longClick(expandable)
     }
 
     fun startListening(token: Any) = tile.setListening(token, true)

@@ -13,10 +13,14 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<shape
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-    android:shape="rectangle">
-    <corners android:radius="30dp"/>
-    <stroke android:width="3dp" android:color="?androidprv:attr/materialColorSecondaryFixed"/>
-</shape>
+
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:inset="-5dp">
+    <shape xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+        android:shape="rectangle">
+        <corners android:radius="30dp" />
+        <stroke
+            android:width="3dp"
+            android:color="?androidprv:attr/materialColorSecondaryFixed" />
+    </shape>
+</inset>

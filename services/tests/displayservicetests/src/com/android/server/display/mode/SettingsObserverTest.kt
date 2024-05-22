@@ -27,8 +27,11 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.filters.SmallTest
 import com.android.internal.util.test.FakeSettingsProvider
 import com.android.server.display.DisplayDeviceConfig
+import com.android.server.display.config.RefreshRateData
+import com.android.server.display.config.SupportedModeData
 import com.android.server.display.feature.DisplayManagerFlags
 import com.android.server.display.mode.DisplayModeDirector.DisplayDeviceConfigProvider
+import com.android.server.display.mode.SupportedRefreshRatesVote.RefreshRates
 import com.android.server.testutils.TestHandler
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
@@ -69,6 +72,13 @@ private val RANGES_MIN90_90TO120 = RefreshRateRanges(RANGE_90_INF, RANGE_90_120)
 private val RANGES_MIN60_60TO90 = RefreshRateRanges(RANGE_60_INF, RANGE_60_90)
 private val RANGES_MIN90_90TO90 = RefreshRateRanges(RANGE_90_INF, RANGE_90_90)
 
+private val LOW_POWER_GLOBAL_VOTE = Vote.forRenderFrameRates(0f, 60f)
+private val LOW_POWER_REFRESH_RATE_DATA = createRefreshRateData(
+    lowPowerSupportedModes = listOf(SupportedModeData(60f, 60f), SupportedModeData(60f, 240f)))
+private val LOW_POWER_EMPTY_REFRESH_RATE_DATA = createRefreshRateData()
+private val EXPECTED_SUPPORTED_MODES_VOTE = SupportedRefreshRatesVote(
+    listOf(RefreshRates(60f, 60f), RefreshRates(60f, 240f)))
+
 @SmallTest
 @RunWith(TestParameterInjector::class)
 class SettingsObserverTest {
@@ -103,7 +113,7 @@ class SettingsObserverTest {
         val displayModeDirector = DisplayModeDirector(
                 spyContext, testHandler, mockInjector, mockFlags, mockDisplayDeviceConfigProvider)
         val ddcByDisplay = SparseArray<DisplayDeviceConfig>()
-        whenever(mockDeviceConfig.isVrrSupportEnabled).thenReturn(testCase.vrrSupported)
+        whenever(mockDeviceConfig.refreshRateData).thenReturn(testCase.refreshRateData)
         ddcByDisplay.put(Display.DEFAULT_DISPLAY, mockDeviceConfig)
         displayModeDirector.injectDisplayDeviceConfigByDisplay(ddcByDisplay)
         val settingsObserver = displayModeDirector.SettingsObserver(
@@ -113,27 +123,30 @@ class SettingsObserverTest {
                 false, Settings.Global.getUriFor(Settings.Global.LOW_POWER_MODE), 1)
 
         assertThat(displayModeDirector.getVote(VotesStorage.GLOBAL_ID,
-                Vote.PRIORITY_LOW_POWER_MODE)).isEqualTo(testCase.expectedVote)
+                Vote.PRIORITY_LOW_POWER_MODE_RENDER_RATE)).isEqualTo(testCase.globalVote)
+        assertThat(displayModeDirector.getVote(Display.DEFAULT_DISPLAY,
+            Vote.PRIORITY_LOW_POWER_MODE_MODES)).isEqualTo(testCase.displayVote)
     }
 
     enum class LowPowerTestCase(
-        val vrrSupported: Boolean,
+        val refreshRateData: RefreshRateData,
         val vsyncLowPowerVoteEnabled: Boolean,
         val lowPowerModeEnabled: Boolean,
-        internal val expectedVote: Vote?
+        internal val globalVote: Vote?,
+        internal val displayVote: Vote?
     ) {
-        ALL_ENABLED(true, true, true,
-            SupportedRefreshRatesVote(listOf(
-                SupportedRefreshRatesVote.RefreshRates(60f, 240f),
-                SupportedRefreshRatesVote.RefreshRates(60f, 60f)
-            ))),
-        LOW_POWER_OFF(true, true, false, null),
-        DVRR_NOT_SUPPORTED_LOW_POWER_ON(false, true, true,
-            RefreshRateVote.RenderVote(0f, 60f)),
-        DVRR_NOT_SUPPORTED_LOW_POWER_OFF(false, true, false, null),
-        VSYNC_VOTE_DISABLED_SUPPORTED_LOW_POWER_ON(true, false, true,
-            RefreshRateVote.RenderVote(0f, 60f)),
-        VSYNC_VOTE_DISABLED_LOW_POWER_OFF(true, false, false, null),
+        ALL_ENABLED(LOW_POWER_REFRESH_RATE_DATA, true, true,
+            LOW_POWER_GLOBAL_VOTE, EXPECTED_SUPPORTED_MODES_VOTE),
+        LOW_POWER_OFF(LOW_POWER_REFRESH_RATE_DATA, true, false,
+            null, null),
+        EMPTY_REFRESH_LOW_POWER_ON(LOW_POWER_EMPTY_REFRESH_RATE_DATA, true, true,
+            LOW_POWER_GLOBAL_VOTE, null),
+        EMPTY_REFRESH__LOW_POWER_OFF(LOW_POWER_EMPTY_REFRESH_RATE_DATA, true, false,
+            null, null),
+        VSYNC_VOTE_DISABLED_SUPPORTED_LOW_POWER_ON(LOW_POWER_REFRESH_RATE_DATA, false, true,
+            LOW_POWER_GLOBAL_VOTE, null),
+        VSYNC_VOTE_DISABLED_LOW_POWER_OFF(LOW_POWER_REFRESH_RATE_DATA, false, false,
+            null, null),
     }
 
     @Test

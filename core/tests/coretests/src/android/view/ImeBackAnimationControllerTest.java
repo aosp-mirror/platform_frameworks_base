@@ -37,6 +37,7 @@ import static org.testng.Assert.assertEquals;
 import android.content.Context;
 import android.graphics.Insets;
 import android.platform.test.annotations.Presubmit;
+import android.util.SparseArray;
 import android.view.animation.BackGestureInterpolator;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
@@ -53,6 +54,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import java.lang.reflect.Field;
 
 /**
  * Tests for {@link ImeBackAnimationController}.
@@ -104,6 +107,13 @@ public class ImeBackAnimationControllerTest {
             when(mInsetsController.getHost()).thenReturn(mViewRootInsetsControllerHost);
             when(mViewRootInsetsControllerHost.getInputMethodManager()).thenReturn(
                     inputMethodManager);
+            try {
+                Field field = InsetsController.class.getDeclaredField("mSourceConsumers");
+                field.setAccessible(true);
+                field.set(mInsetsController, new SparseArray<InsetsSourceConsumer>());
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException("Unable to set mSourceConsumers", e);
+            }
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
@@ -238,6 +248,23 @@ public class ImeBackAnimationControllerTest {
                     eq(Insets.of(0, 0, 0, IME_HEIGHT)), eq(1f), anyFloat());
             // verify post-commit hide anim has started
             verify(mInsetsController, times(1)).setPredictiveBackImeHideAnimInProgress(eq(true));
+        });
+    }
+
+    @Test
+    public void testOnBackInvokedHidesImeEvenIfInsetsControlCancelled() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // start back gesture
+            WindowInsetsAnimationControlListener animationControlListener = startBackGesture();
+
+            // simulate ImeBackAnimationController not receiving control (e.g. due to split screen)
+            animationControlListener.onCancelled(mWindowInsetsAnimationController);
+
+            // commit back gesture
+            mBackAnimationController.onBackInvoked();
+
+            // verify that InsetsController#hide is called
+            verify(mInsetsController, times(1)).hide(ime());
         });
     }
 

@@ -21,6 +21,8 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.Nullable;
+import android.annotation.PermissionManuallyEnforced;
+import android.annotation.RequiresNoPermission;
 import android.app.UiAutomation;
 import android.content.ComponentName;
 import android.content.Context;
@@ -242,7 +244,6 @@ class UiAutomationManager {
         }
     }
 
-    @SuppressWarnings("MissingPermissionAnnotation")
     private class UiAutomationService extends AbstractAccessibilityServiceConnection {
         private final Handler mMainHandler;
 
@@ -318,6 +319,7 @@ class UiAutomationManager {
             return true;
         }
 
+        @PermissionManuallyEnforced
         @Override
         public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
@@ -330,31 +332,37 @@ class UiAutomationManager {
         }
 
         // Since this isn't really an accessibility service, several methods are just stubbed here.
+        @RequiresNoPermission
         @Override
         public boolean setSoftKeyboardShowMode(int mode) {
             return false;
         }
 
+        @RequiresNoPermission
         @Override
         public int getSoftKeyboardShowMode() {
             return 0;
         }
 
+        @RequiresNoPermission
         @Override
         public boolean switchToInputMethod(String imeId) {
             return false;
         }
 
+        @RequiresNoPermission
         @Override
         public int setInputMethodEnabled(String imeId, boolean enabled) {
             return AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_UNKNOWN;
         }
 
+        @RequiresNoPermission
         @Override
         public boolean isAccessibilityButtonAvailable() {
             return false;
         }
 
+        @RequiresNoPermission
         @Override
         public void disableSelf() {}
 
@@ -375,6 +383,7 @@ class UiAutomationManager {
         @Override
         public void onFingerprintGesture(int gesture) {}
 
+        @RequiresNoPermission
         @Override
         public void takeScreenshot(int displayId, RemoteCallback callback) {}
     }

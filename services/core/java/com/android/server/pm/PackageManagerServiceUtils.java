@@ -19,7 +19,7 @@ package com.android.server.pm;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
-import static android.content.pm.PackageManager.PROPERTY_ANDROID_SAFETY_LABEL_PATH;
+import static android.content.pm.PackageManager.PROPERTY_ANDROID_SAFETY_LABEL;
 import static android.content.pm.SigningDetails.CertCapabilities.SHARED_USER_ID;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
@@ -71,8 +71,12 @@ import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.content.res.ApkAssets;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Build;
+import android.os.CancellationSignal;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -93,6 +97,7 @@ import android.system.Os;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Base64;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.LogPrinter;
 import android.util.Printer;
@@ -147,11 +152,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 /**
  * Class containing helper methods for the PackageManagerService.
@@ -1248,7 +1252,7 @@ public class PackageManagerServiceUtils {
                 }
                 final ParsedMainComponent comp = componentInfoToComponent(
                         resolveInfo.getComponentInfo(), resolver, isReceiver);
-                if (!comp.getIntents().isEmpty() && intent.getAction() == null) {
+                if (comp != null && !comp.getIntents().isEmpty() && intent.getAction() == null) {
                     match = false;
                 }
             } else if (c instanceof IntentFilter) {
@@ -1667,45 +1671,63 @@ public class PackageManagerServiceUtils {
         if (appMetadataFile.exists()) {
             return true;
         }
-        if (isSystem) {
+        Map<String, Property> properties = pkg.getProperties();
+        if (!properties.containsKey(PROPERTY_ANDROID_SAFETY_LABEL)) {
+            return false;
+        }
+        Property fileInApkProperty = properties.get(PROPERTY_ANDROID_SAFETY_LABEL);
+        if (!fileInApkProperty.isResourceId()) {
+            return false;
+        }
+        if (isSystem && !appMetadataFile.getParentFile().exists()) {
             try {
-                makeDirRecursive(new File(appMetadataFilePath).getParentFile(), 0700);
+                makeDirRecursive(appMetadataFile.getParentFile(), 0700);
             } catch (Exception e) {
                 Slog.e(TAG, "Failed to create app metadata dir for package "
                         + pkg.getPackageName() + ": " + e.getMessage());
                 return false;
             }
         }
-        Map<String, Property> properties = pkg.getProperties();
-        if (!properties.containsKey(PROPERTY_ANDROID_SAFETY_LABEL_PATH)) {
-            return false;
-        }
-        Property fileInAPkPathProperty = properties.get(PROPERTY_ANDROID_SAFETY_LABEL_PATH);
-        if (!fileInAPkPathProperty.isString()) {
-            return false;
-        }
-        String fileInApkPath = fileInAPkPathProperty.getString();
         List<AndroidPackageSplit> splits = pkg.getSplits();
+        AssetManager.Builder builder = new AssetManager.Builder();
         for (int i = 0; i < splits.size(); i++) {
-            try (ZipFile zipFile = new ZipFile(splits.get(i).getPath())) {
-                ZipEntry zipEntry = zipFile.getEntry(fileInApkPath);
-                if (zipEntry != null
-                        && (isSystem || zipEntry.getSize() <= getAppMetadataSizeLimit())) {
-                    try (InputStream in = zipFile.getInputStream(zipEntry)) {
-                        try (FileOutputStream out = new FileOutputStream(appMetadataFile)) {
-                            FileUtils.copy(in, out);
-                            Os.chmod(appMetadataFile.getAbsolutePath(),
-                                    APP_METADATA_FILE_ACCESS_MODE);
-                            return true;
+            try {
+                builder.addApkAssets(ApkAssets.loadFromPath(splits.get(i).getPath()));
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to load resources from APK " + splits.get(i).getPath());
+            }
+        }
+        AssetManager assetManager = builder.build();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        displayMetrics.setToDefaults();
+        Resources res = new Resources(assetManager, displayMetrics, null);
+        AtomicBoolean copyFailed = new AtomicBoolean(false);
+        try (InputStream in = res.openRawResource(fileInApkProperty.getResourceId())) {
+            try (FileOutputStream out = new FileOutputStream(appMetadataFile)) {
+                if (isSystem) {
+                    FileUtils.copy(in, out);
+                } else {
+                    long sizeLimit = getAppMetadataSizeLimit();
+                    CancellationSignal signal = new CancellationSignal();
+                    FileUtils.copy(in, out, signal, Runnable::run, (long progress) -> {
+                        if (progress > sizeLimit) {
+                            copyFailed.set(true);
+                            signal.cancel();
                         }
-                    }
+                    });
                 }
-            } catch (Exception e) {
-                Slog.e(TAG, e.getMessage());
+                Os.chmod(appMetadataFile.getAbsolutePath(),
+                        APP_METADATA_FILE_ACCESS_MODE);
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, e.getMessage());
+            copyFailed.set(true);
+        } finally {
+            if (copyFailed.get()) {
                 appMetadataFile.delete();
             }
         }
-        return false;
+        return !copyFailed.get();
     }
 
     public static void linkFilesToOldDirs(@NonNull Installer installer,

@@ -27,12 +27,13 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
-import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
+import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.settings.brightness.ui.viewModel.BrightnessMirrorViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
@@ -60,7 +61,7 @@ constructor(
     val shadeHeaderViewModel: ShadeHeaderViewModel,
     val notifications: NotificationsPlaceholderViewModel,
     val brightnessMirrorViewModel: BrightnessMirrorViewModel,
-    val mediaDataManager: MediaDataManager,
+    val mediaCarouselInteractor: MediaCarouselInteractor,
     shadeInteractor: ShadeInteractor,
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
@@ -72,13 +73,13 @@ constructor(
                 deviceEntryInteractor.isUnlocked,
                 deviceEntryInteractor.canSwipeToEnter,
                 shadeInteractor.shadeMode,
-                qsSceneAdapter.isCustomizing
-            ) { isUnlocked, canSwipeToDismiss, shadeMode, isCustomizing ->
+                qsSceneAdapter.isCustomizerShowing
+            ) { isUnlocked, canSwipeToDismiss, shadeMode, isCustomizerShowing ->
                 destinationScenes(
                     isUnlocked = isUnlocked,
                     canSwipeToDismiss = canSwipeToDismiss,
                     shadeMode = shadeMode,
-                    isCustomizing = isCustomizing
+                    isCustomizing = isCustomizerShowing
                 )
             }
             .stateIn(
@@ -89,7 +90,7 @@ constructor(
                         isUnlocked = deviceEntryInteractor.isUnlocked.value,
                         canSwipeToDismiss = deviceEntryInteractor.canSwipeToEnter.value,
                         shadeMode = shadeInteractor.shadeMode.value,
-                        isCustomizing = qsSceneAdapter.isCustomizing.value,
+                        isCustomizing = qsSceneAdapter.isCustomizerShowing.value,
                     ),
             )
 
@@ -108,6 +109,8 @@ constructor(
 
     val shadeMode: StateFlow<ShadeMode> = shadeInteractor.shadeMode
 
+    val isMediaVisible: StateFlow<Boolean> = mediaCarouselInteractor.hasActiveMediaOrRecommendation
+
     /**
      * Amount of X-axis translation to apply to various elements as the unfolded foldable is folded
      * slightly, in pixels.
@@ -123,11 +126,6 @@ constructor(
         }
 
         sceneInteractor.changeScene(Scenes.Lockscreen, "Shade empty content clicked")
-    }
-
-    fun isMediaVisible(): Boolean {
-        // TODO(b/296122467): handle updates to carousel visibility while scene is still visible
-        return mediaDataManager.hasActiveMediaOrRecommendation()
     }
 
     private val footerActionsControllerInitialized = AtomicBoolean(false)
@@ -152,11 +150,13 @@ constructor(
                 else -> Scenes.Lockscreen
             }
 
+        val upTransitionKey = ToSplitShade.takeIf { shadeMode is ShadeMode.Split }
+
         val down = Scenes.QuickSettings.takeIf { shadeMode is ShadeMode.Single }
 
         return buildMap {
             if (!isCustomizing) {
-                this[Swipe(SwipeDirection.Up)] = UserActionResult(up)
+                this[Swipe(SwipeDirection.Up)] = UserActionResult(up, upTransitionKey)
             } // TODO(b/330200163) Add an else to be able to collapse the shade while customizing
             down?.let { this[Swipe(SwipeDirection.Down)] = UserActionResult(down) }
         }

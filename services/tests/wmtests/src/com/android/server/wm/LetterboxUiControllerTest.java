@@ -85,6 +85,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.view.InsetsSource;
 import android.view.InsetsState;
@@ -96,6 +98,7 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
+import com.android.window.flags.Flags;
 
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
@@ -905,6 +908,24 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testOverrideOrientationIfNeeded_fullscreenOverride_cameraActivity_unchanged() {
+        doReturn(true).when(mLetterboxConfiguration).isCameraCompatTreatmentEnabled();
+        doReturn(true).when(mLetterboxConfiguration)
+                .isCameraCompatTreatmentEnabledAtBuildTime();
+
+        // Recreate DisplayContent with DisplayRotationCompatPolicy
+        mActivity = setUpActivityWithComponent();
+        mController = new LetterboxUiController(mWm, mActivity);
+        spyOn(mDisplayContent.mDisplayRotationCompatPolicy);
+
+        doReturn(false).when(mDisplayContent.mDisplayRotationCompatPolicy)
+                .isCameraActive(mActivity, /* mustBeFullscreen= */ true);
+
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_PORTRAIT));
+    }
+
+    @Test
     public void testOverrideOrientationIfNeeded_respectOrientationRequestOverUserFullScreen() {
         spyOn(mController);
         doReturn(true).when(mController).shouldApplyUserFullscreenOverride();
@@ -1526,6 +1547,104 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         assertEquals(mController.getSplitScreenAspectRatio(),
                 mController.getFixedOrientationLetterboxAspectRatio(
                         mActivity.getParent().getConfiguration()), /* delta */  0.01);
+    }
+
+    @Test
+    public void testIsVerticalThinLetterboxed() {
+        // Vertical thin letterbox disabled
+        doReturn(-1).when(mActivity.mWmService.mLetterboxConfiguration)
+                .getThinLetterboxHeightPx();
+        assertFalse(mController.isVerticalThinLetterboxed());
+        // Define a Task 100x100
+        final Task task = mock(Task.class);
+        doReturn(new Rect(0, 0, 100, 100)).when(task).getBounds();
+        doReturn(10).when(mActivity.mWmService.mLetterboxConfiguration)
+                .getThinLetterboxHeightPx();
+
+        // Vertical thin letterbox disabled without Task
+        doReturn(null).when(mActivity).getTask();
+        assertFalse(mController.isVerticalThinLetterboxed());
+        // Assign a Task for the Activity
+        doReturn(task).when(mActivity).getTask();
+
+        // (task.width() - act.width()) / 2  = 5 < 10
+        doReturn(new Rect(5, 5, 95, 95)).when(mActivity).getBounds();
+        assertTrue(mController.isVerticalThinLetterboxed());
+
+        // (task.width() - act.width()) / 2  = 10 = 10
+        doReturn(new Rect(10, 10, 90, 90)).when(mActivity).getBounds();
+        assertTrue(mController.isVerticalThinLetterboxed());
+
+        // (task.width() - act.width()) / 2  = 11 > 10
+        doReturn(new Rect(11, 11, 89, 89)).when(mActivity).getBounds();
+        assertFalse(mController.isVerticalThinLetterboxed());
+    }
+
+    @Test
+    public void testIsHorizontalThinLetterboxed() {
+        // Horizontal thin letterbox disabled
+        doReturn(-1).when(mActivity.mWmService.mLetterboxConfiguration)
+                .getThinLetterboxWidthPx();
+        assertFalse(mController.isHorizontalThinLetterboxed());
+        // Define a Task 100x100
+        final Task task = mock(Task.class);
+        doReturn(new Rect(0, 0, 100, 100)).when(task).getBounds();
+        doReturn(10).when(mActivity.mWmService.mLetterboxConfiguration)
+                .getThinLetterboxWidthPx();
+
+        // Vertical thin letterbox disabled without Task
+        doReturn(null).when(mActivity).getTask();
+        assertFalse(mController.isHorizontalThinLetterboxed());
+        // Assign a Task for the Activity
+        doReturn(task).when(mActivity).getTask();
+
+        // (task.height() - act.height()) / 2  = 5 < 10
+        doReturn(new Rect(5, 5, 95, 95)).when(mActivity).getBounds();
+        assertTrue(mController.isHorizontalThinLetterboxed());
+
+        // (task.height() - act.height()) / 2  = 10 = 10
+        doReturn(new Rect(10, 10, 90, 90)).when(mActivity).getBounds();
+        assertTrue(mController.isHorizontalThinLetterboxed());
+
+        // (task.height() - act.height()) / 2  = 11 > 10
+        doReturn(new Rect(11, 11, 89, 89)).when(mActivity).getBounds();
+        assertFalse(mController.isHorizontalThinLetterboxed());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_DISABLE_THIN_LETTERBOXING_POLICY)
+    public void testAllowReachabilityForThinLetterboxWithFlagEnabled() {
+        spyOn(mController);
+        doReturn(true).when(mController).isVerticalThinLetterboxed();
+        assertFalse(mController.allowVerticalReachabilityForThinLetterbox());
+        doReturn(true).when(mController).isHorizontalThinLetterboxed();
+        assertFalse(mController.allowHorizontalReachabilityForThinLetterbox());
+
+        doReturn(false).when(mController).isVerticalThinLetterboxed();
+        assertTrue(mController.allowVerticalReachabilityForThinLetterbox());
+        doReturn(false).when(mController).isHorizontalThinLetterboxed();
+        assertTrue(mController.allowHorizontalReachabilityForThinLetterbox());
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_DISABLE_THIN_LETTERBOXING_POLICY)
+    public void testAllowReachabilityForThinLetterboxWithFlagDisabled() {
+        spyOn(mController);
+        doReturn(true).when(mController).isVerticalThinLetterboxed();
+        assertTrue(mController.allowVerticalReachabilityForThinLetterbox());
+        doReturn(true).when(mController).isHorizontalThinLetterboxed();
+        assertTrue(mController.allowHorizontalReachabilityForThinLetterbox());
+
+        doReturn(false).when(mController).isVerticalThinLetterboxed();
+        assertTrue(mController.allowVerticalReachabilityForThinLetterbox());
+        doReturn(false).when(mController).isHorizontalThinLetterboxed();
+        assertTrue(mController.allowHorizontalReachabilityForThinLetterbox());
+    }
+
+    @Test
+    public void testIsLetterboxEducationEnabled() {
+        mController.isLetterboxEducationEnabled();
+        verify(mLetterboxConfiguration).getIsEducationEnabled();
     }
 
     private void mockThatProperty(String propertyName, boolean value) throws Exception {

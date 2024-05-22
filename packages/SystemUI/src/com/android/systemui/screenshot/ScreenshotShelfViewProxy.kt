@@ -31,6 +31,7 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import com.android.internal.logging.UiEventLogger
@@ -45,6 +46,7 @@ import com.android.systemui.screenshot.scroll.ScrollCaptureController
 import com.android.systemui.screenshot.ui.ScreenshotAnimationController
 import com.android.systemui.screenshot.ui.ScreenshotShelfView
 import com.android.systemui.screenshot.ui.binder.ScreenshotShelfViewBinder
+import com.android.systemui.screenshot.ui.viewmodel.AnimationState
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -57,6 +59,7 @@ constructor(
     private val logger: UiEventLogger,
     private val viewModel: ScreenshotViewModel,
     private val windowManager: WindowManager,
+    shelfViewBinder: ScreenshotShelfViewBinder,
     private val thumbnailObserver: ThumbnailObserver,
     @Assisted private val context: Context,
     @Assisted private val displayId: Int
@@ -68,7 +71,17 @@ constructor(
     override var callbacks: ScreenshotView.ScreenshotViewCallback? = null
     override var screenshot: ScreenshotData? = null
         set(value) {
-            viewModel.setScreenshotBitmap(value?.bitmap)
+            value?.let {
+                viewModel.setScreenshotBitmap(it.bitmap)
+                val badgeBg =
+                    AppCompatResources.getDrawable(context, R.drawable.overlay_badge_background)
+                val user = it.userHandle
+                if (badgeBg != null && user != null) {
+                    viewModel.setScreenshotBadge(
+                        context.packageManager.getUserBadgedIcon(badgeBg, user)
+                    )
+                }
+            }
             field = value
         }
 
@@ -77,15 +90,16 @@ constructor(
     override var isDismissing = false
     override var isPendingSharedTransition = false
 
-    private val animationController = ScreenshotAnimationController(view)
+    private val animationController = ScreenshotAnimationController(view, viewModel)
 
     init {
-        ScreenshotShelfViewBinder.bind(
+        shelfViewBinder.bind(
             view,
             viewModel,
+            animationController,
             LayoutInflater.from(context),
             onDismissalRequested = { event, velocity -> requestDismissal(event, velocity) },
-            onDismissalCancelled = { animationController.getSwipeReturnAnimation().start() }
+            onUserInteraction = { callbacks?.onUserInteraction() }
         )
         view.updateInsets(windowManager.currentWindowMetrics.windowInsets)
         addPredictiveBackListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
@@ -119,12 +133,19 @@ constructor(
     override fun updateOrientation(insets: WindowInsets) {}
 
     override fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator {
-        val entrance = animationController.getEntranceAnimation(screenRect, showFlash)
-        entrance.doOnStart { thumbnailObserver.onEntranceStarted() }
+        val entrance =
+            animationController.getEntranceAnimation(screenRect, showFlash) {
+                viewModel.setAnimationState(AnimationState.ENTRANCE_REVEAL)
+            }
+        entrance.doOnStart {
+            thumbnailObserver.onEntranceStarted()
+            viewModel.setAnimationState(AnimationState.ENTRANCE_STARTED)
+        }
         entrance.doOnEnd {
             // reset the timeout when animation finishes
             callbacks?.onUserInteraction()
             thumbnailObserver.onEntranceComplete()
+            viewModel.setAnimationState(AnimationState.ENTRANCE_COMPLETE)
         }
         return entrance
     }
@@ -167,24 +188,53 @@ constructor(
 
     override fun prepareScrollingTransition(
         response: ScrollCaptureResponse,
-        screenBitmap: Bitmap,
+        screenBitmap: Bitmap, // unused
         newScreenshot: Bitmap,
         screenshotTakenInPortrait: Boolean,
         onTransitionPrepared: Runnable,
     ) {
-        onTransitionPrepared.run()
+        viewModel.setScrollingScrimBitmap(newScreenshot)
+        viewModel.setScrollableRect(scrollableAreaOnScreen(response))
+        animationController.fadeForLongScreenshotTransition()
+        view.post { onTransitionPrepared.run() }
+    }
+
+    private fun scrollableAreaOnScreen(response: ScrollCaptureResponse): Rect {
+        val r = Rect(response.boundsInWindow)
+        val windowInScreen = response.windowBounds
+        r.offset(windowInScreen?.left ?: 0, windowInScreen?.top ?: 0)
+        r.intersect(
+            Rect(
+                0,
+                0,
+                context.resources.displayMetrics.widthPixels,
+                context.resources.displayMetrics.heightPixels
+            )
+        )
+        return r
     }
 
     override fun startLongScreenshotTransition(
         transitionDestination: Rect,
         onTransitionEnd: Runnable,
-        longScreenshot: ScrollCaptureController.LongScreenshot
+        longScreenshot: ScrollCaptureController.LongScreenshot,
     ) {
-        onTransitionEnd.run()
-        callbacks?.onDismiss()
+        val transitionAnimation =
+            animationController.runLongScreenshotTransition(
+                transitionDestination,
+                longScreenshot,
+                onTransitionEnd
+            )
+        transitionAnimation.doOnEnd { callbacks?.onDismiss() }
+        transitionAnimation.start()
     }
 
-    override fun restoreNonScrollingUi() {}
+    override fun restoreNonScrollingUi() {
+        viewModel.setScrollableRect(null)
+        viewModel.setScrollingScrimBitmap(null)
+        animationController.restoreUI()
+        callbacks?.onUserInteraction() // reset the timeout
+    }
 
     override fun stopInputListening() {}
 
@@ -205,6 +255,10 @@ constructor(
                 }
             }
         )
+    }
+
+    override fun fadeForSharedTransition() {
+        animationController.fadeForSharedTransition()
     }
 
     private fun addPredictiveBackListener(onDismissRequested: (ScreenshotEvent) -> Unit) {

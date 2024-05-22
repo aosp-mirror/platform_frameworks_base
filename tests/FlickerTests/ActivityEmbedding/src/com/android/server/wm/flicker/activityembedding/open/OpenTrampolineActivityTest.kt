@@ -43,6 +43,7 @@ import org.junit.runners.Parameterized
  *
  * To run this test: `atest FlickerTestsOther:OpenTrampolineActivityTest`
  */
+@FlakyTest(bugId = 341209752)
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -168,7 +169,6 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
         }
     }
 
-    @FlakyTest(bugId = 290736037)
     /** Main activity should go from fullscreen to being a split with secondary activity. */
     @Test
     fun mainActivityLayerGoesFromFullscreenToSplit() {
@@ -203,7 +203,6 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
         }
     }
 
-    @FlakyTest(bugId = 288591571)
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         super.visibleLayersShownMoreThanOneConsecutiveEntry()

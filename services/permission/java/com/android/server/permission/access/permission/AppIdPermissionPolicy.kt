@@ -63,11 +63,8 @@ class AppIdPermissionPolicy : SchemePolicy() {
 
     private val privilegedPermissionAllowlistViolations = MutableIndexedSet<String>()
 
-    /**
-     * Test-only switch to enforce signature permission allowlist even on debuggable builds.
-     */
-    @Volatile
-    var isSignaturePermissionAllowlistForceEnforced = false
+    /** Test-only switch to enforce signature permission allowlist even on debuggable builds. */
+    @Volatile var isSignaturePermissionAllowlistForceEnforced = false
 
     override val subjectScheme: String
         get() = UidUri.SCHEME
@@ -108,8 +105,8 @@ class AppIdPermissionPolicy : SchemePolicy() {
         val changedPermissionNames = MutableIndexedSet<String>()
         packageNames.forEachIndexed { _, packageName ->
             // The package may still be removed even if it was once notified as installed.
-            val packageState = newState.externalState.packageStates[packageName]
-                ?: return@forEachIndexed
+            val packageState =
+                newState.externalState.packageStates[packageName] ?: return@forEachIndexed
             adoptPermissions(packageState, changedPermissionNames)
             addPermissionGroups(packageState)
             addPermissions(packageState, changedPermissionNames)
@@ -122,14 +119,14 @@ class AppIdPermissionPolicy : SchemePolicy() {
         }
 
         packageNames.forEachIndexed { _, packageName ->
-            val packageState = newState.externalState.packageStates[packageName]
-                ?: return@forEachIndexed
+            val packageState =
+                newState.externalState.packageStates[packageName] ?: return@forEachIndexed
             val installedPackageState = if (isSystemUpdated) packageState else null
             evaluateAllPermissionStatesForPackage(packageState, installedPackageState)
         }
         packageNames.forEachIndexed { _, packageName ->
-            val packageState = newState.externalState.packageStates[packageName]
-                ?: return@forEachIndexed
+            val packageState =
+                newState.externalState.packageStates[packageName] ?: return@forEachIndexed
             newState.externalState.userIds.forEachIndexed { _, userId ->
                 inheritImplicitPermissionStates(packageState.appId, userId)
             }
@@ -1279,7 +1276,23 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     packageName,
                     permissionName
                 )
-            else -> permissionAllowlist.getSignatureAppAllowlistState(packageName, permissionName)
+            else ->
+                permissionAllowlist.getProductSignatureAppAllowlistState(
+                    packageName,
+                    permissionName
+                )
+                    ?: permissionAllowlist.getVendorSignatureAppAllowlistState(
+                        packageName,
+                        permissionName
+                    )
+                    ?: permissionAllowlist.getSystemExtSignatureAppAllowlistState(
+                        packageName,
+                        permissionName
+                    )
+                    ?: permissionAllowlist.getSignatureAppAllowlistState(
+                        packageName,
+                        permissionName
+                    )
         }
     }
 
@@ -1775,6 +1788,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 Manifest.permission.READ_MEDIA_AUDIO,
                 Manifest.permission.READ_MEDIA_IMAGES,
                 Manifest.permission.READ_MEDIA_VIDEO,
+                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
             )
 
         private val NEARBY_DEVICES_PERMISSIONS =

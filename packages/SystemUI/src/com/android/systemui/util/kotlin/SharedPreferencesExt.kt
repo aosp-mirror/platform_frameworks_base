@@ -17,23 +17,15 @@
 package com.android.systemui.util.kotlin
 
 import android.content.SharedPreferences
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.mapNotNull
 
 object SharedPreferencesExt {
-    /**
-     * Returns a flow of [Unit] that is invoked each time shared preference is updated.
-     *
-     * @param key Optional key to limit updates to a particular key.
-     */
-    fun SharedPreferences.observe(key: String? = null): Flow<Unit> =
-        conflatedCallbackFlow {
-                val listener =
-                    SharedPreferences.OnSharedPreferenceChangeListener { _, key -> trySend(key) }
-                registerOnSharedPreferenceChangeListener(listener)
-                awaitClose { unregisterOnSharedPreferenceChangeListener(listener) }
-            }
-            .mapNotNull { changedKey -> if ((key ?: changedKey) == changedKey) Unit else null }
+    /** Returns a flow of [Unit] that is invoked each time shared preference is updated. */
+    fun SharedPreferences.observe(): Flow<Unit> = conflatedCallbackFlow {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> trySend(Unit) }
+        registerOnSharedPreferenceChangeListener(listener)
+        awaitClose { unregisterOnSharedPreferenceChangeListener(listener) }
+    }
 }

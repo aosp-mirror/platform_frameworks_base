@@ -188,6 +188,32 @@ public class OverlayPresentationTest {
     }
 
     @Test
+    public void testSetIsolatedNavigation_overlayFeatureDisabled_earlyReturn() {
+        mSetFlagRule.disableFlags(Flags.FLAG_ACTIVITY_EMBEDDING_OVERLAY_PRESENTATION_FLAG);
+
+        final TaskFragmentContainer container = createTestOverlayContainer(TASK_ID, "test");
+
+        mSplitPresenter.setTaskFragmentIsolatedNavigation(mTransaction, container,
+                !container.isIsolatedNavigationEnabled());
+
+        verify(mSplitPresenter, never()).setTaskFragmentIsolatedNavigation(any(),
+                any(IBinder.class), anyBoolean());
+    }
+
+    @Test
+    public void testSetPinned_overlayFeatureDisabled_earlyReturn() {
+        mSetFlagRule.disableFlags(Flags.FLAG_ACTIVITY_EMBEDDING_OVERLAY_PRESENTATION_FLAG);
+
+        final TaskFragmentContainer container = createTestOverlayContainer(TASK_ID, "test");
+
+        mSplitPresenter.setTaskFragmentPinned(mTransaction, container,
+                !container.isPinned());
+
+        verify(mSplitPresenter, never()).setTaskFragmentPinned(any(), any(IBinder.class),
+                anyBoolean());
+    }
+
+    @Test
     public void testGetAllNonFinishingOverlayContainers() {
         assertThat(mSplitController.getAllNonFinishingOverlayContainers()).isEmpty();
 
@@ -580,7 +606,7 @@ public class OverlayPresentationTest {
         final TaskContainer.TaskProperties taskProperties = taskContainer.getTaskProperties();
         final TaskFragmentParentInfo parentInfo = new TaskFragmentParentInfo(
                 new Configuration(taskProperties.getConfiguration()), taskProperties.getDisplayId(),
-                false /* visible */, false /* hasDirectActivity */, null /* decorSurface */);
+                true /* visible */, false /* hasDirectActivity */, null /* decorSurface */);
 
         mSplitController.onTaskFragmentParentInfoChanged(mTransaction, TASK_ID, parentInfo);
 
@@ -608,8 +634,11 @@ public class OverlayPresentationTest {
                 WINDOWING_MODE_UNDEFINED);
         verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
                 TaskFragmentAnimationParams.DEFAULT);
-        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, container, false);
         verify(mSplitPresenter).setTaskFragmentDimOnTask(mTransaction, token, false);
+        verify(mSplitPresenter, never()).setTaskFragmentPinned(any(),
+                any(TaskFragmentContainer.class), anyBoolean());
+        verify(mSplitPresenter, never()).setTaskFragmentIsolatedNavigation(any(),
+                any(TaskFragmentContainer.class), anyBoolean());
     }
 
     @Test
@@ -630,9 +659,9 @@ public class OverlayPresentationTest {
                 WINDOWING_MODE_MULTI_WINDOW);
         verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
                 TaskFragmentAnimationParams.DEFAULT);
-        // Set isolated navigation to false if the overlay container is associated with
-        // the launching activity.
-        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, container, false);
+        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, container, true);
+        verify(mSplitPresenter, never()).setTaskFragmentPinned(any(),
+                any(TaskFragmentContainer.class), anyBoolean());
         verify(mSplitPresenter).setTaskFragmentDimOnTask(mTransaction, token, true);
     }
 
@@ -655,10 +684,9 @@ public class OverlayPresentationTest {
                 container, WINDOWING_MODE_MULTI_WINDOW);
         verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
                 TaskFragmentAnimationParams.DEFAULT);
-        // Set isolated navigation to false if the overlay container is associated with
-        // the launching activity.
-        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction,
-                container, true);
+        verify(mSplitPresenter, never()).setTaskFragmentIsolatedNavigation(any(),
+                any(TaskFragmentContainer.class), anyBoolean());
+        verify(mSplitPresenter).setTaskFragmentPinned(mTransaction, container, true);
         verify(mSplitPresenter).setTaskFragmentDimOnTask(mTransaction, token, true);
     }
 
@@ -678,6 +706,8 @@ public class OverlayPresentationTest {
         verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
                 TaskFragmentAnimationParams.DEFAULT);
         verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, container, false);
+        verify(mSplitPresenter, never()).setTaskFragmentPinned(any(),
+                any(TaskFragmentContainer.class), anyBoolean());
         verify(mSplitPresenter).setTaskFragmentDimOnTask(mTransaction, token, false);
     }
 
@@ -804,6 +834,30 @@ public class OverlayPresentationTest {
         assertThat(container).isNull();
         verify(mSplitController, never()).resolveStartActivityIntentByRule(any(), anyInt(), any(),
                 any());
+    }
+
+    @Test
+    public void testOnActivityReparentedToTask_overlayRestoration() {
+        mSetFlagRule.enableFlags(Flags.FLAG_FIX_PIP_RESTORE_TO_OVERLAY);
+
+        // Prepares and mock the data necessary for the test.
+        final IBinder activityToken = mActivity.getActivityToken();
+        final Intent intent = new Intent();
+        final IBinder fillTaskActivityToken = new Binder();
+        final IBinder lastOverlayToken = new Binder();
+        final TaskFragmentContainer overlayContainer = mSplitController.newContainer(intent,
+                mActivity, TASK_ID);
+        final TaskFragmentContainer.OverlayContainerRestoreParams params = mock(
+                TaskFragmentContainer.OverlayContainerRestoreParams.class);
+        doReturn(params).when(mSplitController).getOverlayContainerRestoreParams(any(), any());
+        doReturn(overlayContainer).when(mSplitController).createOrUpdateOverlayTaskFragmentIfNeeded(
+                any(), any(), any(), any());
+
+        // Verify the activity should be reparented to the overlay container.
+        mSplitController.onActivityReparentedToTask(mTransaction, TASK_ID, intent, activityToken,
+                fillTaskActivityToken, lastOverlayToken);
+        verify(mTransaction).reparentActivityToTaskFragment(
+                eq(overlayContainer.getTaskFragmentToken()), eq(activityToken));
     }
 
     /**
