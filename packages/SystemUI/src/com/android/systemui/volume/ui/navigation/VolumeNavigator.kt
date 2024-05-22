@@ -63,6 +63,7 @@ constructor(
 
     private fun showNewVolumePanel() {
         applicationScope.launch(mainContext) {
+            uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_SHOWN)
             dialogFactory
                 .createBottomSheet(
                     content = { dialog ->
