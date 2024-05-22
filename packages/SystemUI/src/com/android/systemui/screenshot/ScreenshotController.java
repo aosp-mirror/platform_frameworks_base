@@ -659,7 +659,7 @@ public class ScreenshotController {
                 () -> {
                     final Intent intent = ActionIntentCreator.INSTANCE.createLongScreenshotIntent(
                             owner, mContext);
-                    mActionIntentExecutor.launchIntentAsync(intent, owner, true, null, null);
+                    mContext.startActivity(intent);
                 },
                 mViewProxy::restoreNonScrollingUi,
                 mViewProxy::startLongScreenshotTransition);
