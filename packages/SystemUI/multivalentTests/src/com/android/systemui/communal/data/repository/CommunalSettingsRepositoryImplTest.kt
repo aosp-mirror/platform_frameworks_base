@@ -195,6 +195,7 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
         }
 
     @EnableFlags(FLAG_COMMUNAL_HUB)
+    @DisableFlags(FLAG_ALLOW_ALL_WIDGETS_ON_LOCKSCREEN_BY_DEFAULT)
     @Test
     fun hubShowsKeyguardWidgetsByDefault() =
         testScope.runTest {
