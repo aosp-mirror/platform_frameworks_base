@@ -76,7 +76,6 @@ aconfig_declarations_group {
         "android.widget.flags-aconfig-java",
         "backstage_power_flags_lib",
         "backup_flags_lib",
-        "bluetooth_exported_flags_java_lib",
         "camera_platform_flags_core_java_lib",
         "com.android.hardware.input-aconfig-java",
         "com.android.input.flags-aconfig-java",
