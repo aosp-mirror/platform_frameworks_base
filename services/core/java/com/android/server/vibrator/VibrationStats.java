@@ -61,6 +61,10 @@ final class VibrationStats {
     private int mEndedByUsage;
     private int mInterruptedUsage;
 
+    // Vibration parameters.
+    // Set by VibrationThread only (single-threaded).
+    private float mAdaptiveScale;
+
     // All following counters are set by VibrationThread only (single-threaded):
     // Counts how many times the VibrationEffect was repeated.
     private int mRepeatCount;
@@ -188,6 +192,14 @@ final class VibrationStats {
         }
     }
 
+    /** Report the adaptive scale that was applied to this vibration. */
+    void reportAdaptiveScale(float scale) {
+        // Only report adaptive scale if it was set for this vibration.
+        if (Float.compare(scale, VibrationScaler.ADAPTIVE_SCALE_NONE) != 0) {
+            mAdaptiveScale = scale;
+        }
+    }
+
     /** Report the vibration has looped a few more times. */
     void reportRepetition(int loops) {
         mRepeatCount += loops;
@@ -287,6 +299,7 @@ final class VibrationStats {
         public final int vibrationType;
         public final int usage;
         public final int status;
+        public final float adaptiveScale;
         public final boolean endedBySameUid;
         public final int endedByUsage;
         public final int interruptedUsage;
@@ -316,6 +329,7 @@ final class VibrationStats {
             this.vibrationType = vibrationType;
             this.usage = usage;
             this.status = status.getProtoEnumValue();
+            this.adaptiveScale = stats.mAdaptiveScale;
             endedBySameUid = (uid == stats.mEndedByUid);
             endedByUsage = stats.mEndedByUsage;
             interruptedUsage = stats.mInterruptedUsage;
@@ -376,7 +390,7 @@ final class VibrationStats {
                     halOnCount, halOffCount, halPerformCount, halSetAmplitudeCount,
                     halSetExternalControlCount, halSupportedCompositionPrimitivesUsed,
                     halSupportedEffectsUsed, halUnsupportedCompositionPrimitivesUsed,
-                    halUnsupportedEffectsUsed, halCompositionSize, halPwleSize);
+                    halUnsupportedEffectsUsed, halCompositionSize, halPwleSize, adaptiveScale);
         }
 
         private static int[] filteredKeys(SparseBooleanArray supportArray, boolean supported) {

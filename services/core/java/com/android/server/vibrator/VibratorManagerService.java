@@ -1628,6 +1628,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             mStatus = Vibration.Status.RUNNING;
         }
 
+        public void scale(VibrationScaler scaler, int usage) {
+            scale.scaleLevel = scaler.getScaleLevel(usage);
+            scale.adaptiveHapticsScale = scaler.getAdaptiveHapticsScale(usage);
+            stats.reportAdaptiveScale(scale.adaptiveHapticsScale);
+        }
+
         public void mute() {
             externalVibration.mute();
         }
@@ -2042,9 +2048,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 }
                 mCurrentExternalVibration = vibHolder;
                 vibHolder.linkToDeath();
-                vibHolder.scale.scaleLevel = mVibrationScaler.getScaleLevel(attrs.getUsage());
-                vibHolder.scale.adaptiveHapticsScale =
-                        mVibrationScaler.getAdaptiveHapticsScale(attrs.getUsage());
+                vibHolder.scale(mVibrationScaler, attrs.getUsage());
             }
 
             if (waitForCompletion) {
