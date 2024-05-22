@@ -114,7 +114,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
-import com.android.internal.util.NewlineNormalizer;
+import com.android.internal.util.NotificationBigTextNormalizer;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -3186,12 +3186,12 @@ public class Notification implements Parcelable
         return cs.toString();
     }
 
-    private static CharSequence cleanUpNewLines(@Nullable CharSequence charSequence) {
+    private static CharSequence normalizeBigText(@Nullable CharSequence charSequence) {
         if (charSequence == null) {
             return charSequence;
         }
 
-        return NewlineNormalizer.normalizeNewlines(charSequence.toString());
+        return NotificationBigTextNormalizer.normalizeBigText(charSequence.toString());
     }
 
     private static CharSequence removeTextSizeSpans(CharSequence charSequence) {
@@ -8423,7 +8423,7 @@ public class Notification implements Parcelable
             // Replace the text with the big text, but only if the big text is not empty.
             CharSequence bigTextText = mBuilder.processLegacyText(mBigText);
             if (Flags.cleanUpSpansAndNewLines()) {
-                bigTextText = cleanUpNewLines(stripStyling(bigTextText));
+                bigTextText = normalizeBigText(stripStyling(bigTextText));
             }
             if (!TextUtils.isEmpty(bigTextText)) {
                 p.text(bigTextText);
