@@ -103,6 +103,10 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"E: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de bateria, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de bateria."</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Esquerre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Dret: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria."</string>
+    <!-- no translation found for tv_bluetooth_battery_level_untethered_left (337629670583744410) -->
+    <skip />
+    <!-- no translation found for tv_bluetooth_battery_level_untethered_right (8610019317279155595) -->
+    <skip />
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Actiu"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Desat"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Actiu (només l\'esquerre)"</string>
@@ -208,11 +212,11 @@
     <string name="tts_install_data_title" msgid="1829942496472751703">"Instal·la dades de veu"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"Instal·la les dades de veu necessàries per a la síntesi de veu"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Pot ser que aquest motor de síntesi de parla pugui recopilar tot el text que s\'enunciarà, incloses les dades personals, com ara les contrasenyes i els números de les targetes de crèdit. Ve del motor <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Vols activar l\'ús d\'aquest motor de síntesi de parla?"</string>
-    <string name="tts_engine_network_required" msgid="8722087649733906851">"Aquest idioma requereix una connexió a la xarxa activa per a la sortida de text a parla."</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"Aquest idioma requereix una connexió de xarxa activa per a la sortida de text a parla."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"Això és un exemple de síntesi de veu"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"Estat de l\'idioma predeterminat"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> és totalment compatible"</string>
-    <string name="tts_status_requires_network" msgid="8327617638884678896">"Es necessita una connexió a la xarxa per a <xliff:g id="LOCALE">%1$s</xliff:g>"</string>
+    <string name="tts_status_requires_network" msgid="8327617638884678896">"Es necessita una connexió de xarxa per a <xliff:g id="LOCALE">%1$s</xliff:g>"</string>
     <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> no és compatible"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"S\'està comprovant…"</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"Configuració de: <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
@@ -706,7 +710,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teclat físic"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Tria una disposició de teclat"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Predeterminat"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Activa la pantalla"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"Control d\'activació de la pantalla"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permet que activi la pantalla"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permet que una aplicació activi la pantalla. Si concedeixes aquest permís, pot ser que l\'aplicació activi la pantalla en qualsevol moment sense la teva intenció explícita."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Vols deixar d\'emetre <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

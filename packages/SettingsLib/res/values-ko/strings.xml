@@ -103,6 +103,10 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"배터리는 왼쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, 오른쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>입니다."</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"왼쪽 배터리는 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>입니다."</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"오른쪽 배터리는 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>입니다."</string>
+    <!-- no translation found for tv_bluetooth_battery_level_untethered_left (337629670583744410) -->
+    <skip />
+    <!-- no translation found for tv_bluetooth_battery_level_untethered_right (8610019317279155595) -->
+    <skip />
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"활성"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"저장됨"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"활성(왼쪽만)"</string>
@@ -493,7 +497,7 @@
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g>에 완전히 충전됨"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>에 완전히 충전됨"</string>
     <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"<xliff:g id="TIME">%1$s</xliff:g>에 완전히 충전됨"</string>
-    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"<xliff:g id="TIME">%1$s</xliff:g>에 완전히 충전됨"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"<xliff:g id="TIME">%1$s</xliff:g>까지 완전히 충전됨"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"알 수 없음"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"충전 중"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"고속 충전 중"</string>
@@ -706,7 +710,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"물리적 키보드"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"키보드 레이아웃 선택"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"기본"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"화면 켜기"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"화면 사용 설정 제어"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"화면 켜기 허용"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"앱에서 화면을 켜도록 허용합니다. 권한이 부여된 경우 앱에서 명시적 인텐트 없이 언제든지 화면을 켤 수 있습니다."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> 방송을 중지하시겠습니까?"</string>
