@@ -20,6 +20,7 @@ package com.android.systemui.bouncer.ui.composable
 
 import android.app.AlertDialog
 import android.content.DialogInterface
+import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
@@ -69,6 +70,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
@@ -104,6 +106,9 @@ import com.android.systemui.res.R
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.pow
+import platform.test.motion.compose.values.MotionTestValueKey
+import platform.test.motion.compose.values.MotionTestValues
+import platform.test.motion.compose.values.motionTestValues
 
 @Composable
 fun BouncerContent(
@@ -114,6 +119,17 @@ fun BouncerContent(
     val isSideBySideSupported by viewModel.isSideBySideSupported.collectAsStateWithLifecycle()
     val layout = calculateLayout(isSideBySideSupported = isSideBySideSupported)
 
+    BouncerContent(layout, viewModel, dialogFactory, modifier)
+}
+
+@Composable
+@VisibleForTesting
+fun BouncerContent(
+    layout: BouncerSceneLayout,
+    viewModel: BouncerViewModel,
+    dialogFactory: BouncerDialogFactory,
+    modifier: Modifier
+) {
     Box(
         // Allows the content within each of the layouts to react to the appearance and
         // disappearance of the IME, which is also known as the software keyboard.
@@ -318,6 +334,8 @@ private fun BesideUserSwitcherLayout(
         LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Expanded
     val authMethod by viewModel.authMethodViewModel.collectAsStateWithLifecycle()
 
+    var swapAnimationEnd by remember { mutableStateOf(false) }
+
     Row(
         modifier =
             modifier
@@ -331,11 +349,16 @@ private fun BesideUserSwitcherLayout(
                         }
                     )
                 }
+                .testTag("BesideUserSwitcherLayout")
+                .motionTestValues {
+                    swapAnimationEnd exportAs BouncerMotionTestKeys.swapAnimationEnd
+                }
                 .padding(
                     top = if (isHeightExpanded) 128.dp else 96.dp,
                     bottom = if (isHeightExpanded) 128.dp else 48.dp,
                 ),
     ) {
+        LaunchedEffect(isSwapped) { swapAnimationEnd = false }
         val animatedOffset by
             animateFloatAsState(
                 targetValue =
@@ -354,31 +377,35 @@ private fun BesideUserSwitcherLayout(
                         -1f
                     },
                 label = "offset",
-            )
+            ) {
+                swapAnimationEnd = true
+            }
 
         fun Modifier.swappable(inversed: Boolean = false): Modifier {
             return graphicsLayer {
-                translationX =
-                    size.width *
-                        animatedOffset *
-                        if (inversed) {
-                            // A negative sign is used to make sure this is offset in the direction
-                            // that's opposite to the direction that the user switcher is pushed in.
-                            -1
-                        } else {
-                            1
-                        }
-                alpha = animatedAlpha(animatedOffset)
-            }
+                    translationX =
+                        size.width *
+                            animatedOffset *
+                            if (inversed) {
+                                // A negative sign is used to make sure this is offset in the
+                                // direction that's opposite to the direction that the user
+                                // switcher is pushed in.
+                                -1
+                            } else {
+                                1
+                            }
+                    alpha = animatedAlpha(animatedOffset)
+                }
+                .motionTestValues { animatedAlpha(animatedOffset) exportAs MotionTestValues.alpha }
         }
 
         UserSwitcher(
             viewModel = viewModel,
-            modifier = Modifier.weight(1f).swappable(),
+            modifier = Modifier.weight(1f).swappable().testTag("UserSwitcher"),
         )
 
         FoldAware(
-            modifier = Modifier.weight(1f).swappable(inversed = true),
+            modifier = Modifier.weight(1f).swappable(inversed = true).testTag("FoldAware"),
             viewModel = viewModel,
             aboveFold = {
                 Column(
@@ -389,7 +416,10 @@ private fun BesideUserSwitcherLayout(
                         viewModel = viewModel.message,
                     )
 
-                    OutputArea(viewModel = viewModel, modifier = Modifier.padding(top = 24.dp))
+                    OutputArea(
+                        viewModel = viewModel,
+                        modifier = Modifier.padding(top = 24.dp).testTag("OutputArea")
+                    )
                 }
             },
             belowFold = {
@@ -412,13 +442,13 @@ private fun BesideUserSwitcherLayout(
                             viewModel = viewModel,
                             pinButtonRowVerticalSpacing = 12.dp,
                             centerPatternDotsVertically = true,
-                            modifier = Modifier.align(Alignment.BottomCenter),
+                            modifier = Modifier.align(Alignment.BottomCenter).testTag("InputArea"),
                         )
                     }
 
                     ActionArea(
                         viewModel = viewModel,
-                        modifier = Modifier.padding(top = 48.dp),
+                        modifier = Modifier.padding(top = 48.dp).testTag("ActionArea"),
                     )
                 }
             },
@@ -937,4 +967,9 @@ private object SceneElements {
 
 private val SceneTransitions = transitions {
     from(SceneKeys.ContiguousSceneKey, to = SceneKeys.SplitSceneKey) { spec = tween() }
+}
+
+@VisibleForTesting
+object BouncerMotionTestKeys {
+    val swapAnimationEnd = MotionTestValueKey<Boolean>("swapAnimationEnd")
 }
