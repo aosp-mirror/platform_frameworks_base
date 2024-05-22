@@ -126,6 +126,31 @@ class SceneInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun changeScene_toGoneWhenTransitionToLockedFromGone() =
+        testScope.runTest {
+            underTest = kosmos.sceneInteractor
+            val currentScene by collectLastValue(underTest.currentScene)
+            val transitionTo by collectLastValue(underTest.transitioningTo)
+            kosmos.sceneContainerRepository.setTransitionState(
+                flowOf(
+                    ObservableTransitionState.Transition(
+                        fromScene = Scenes.Gone,
+                        toScene = Scenes.Lockscreen,
+                        currentScene = flowOf(Scenes.Lockscreen),
+                        progress = flowOf(.5f),
+                        isInitiatedByUserInput = true,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            )
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(transitionTo).isEqualTo(Scenes.Lockscreen)
+
+            underTest.changeScene(Scenes.Gone, "simulate double tap power")
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
     fun snapToScene_toUnknownScene_doesNothing() =
         testScope.runTest {
             val sceneKeys =
