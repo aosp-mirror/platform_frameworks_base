@@ -27,11 +27,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -40,14 +38,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
+import com.android.systemui.keyguard.ui.composable.LockscreenContent
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
+import com.android.systemui.util.kotlin.getOrNull
+import dagger.Lazy
+import java.util.Optional
 
 /** The overlay shade renders a lightweight shade UI container on top of a background scene. */
 @Composable
 fun SceneScope.OverlayShade(
     viewModel: OverlayShadeViewModel,
     horizontalArrangement: Arrangement.Horizontal,
+    lockscreenContent: Lazy<Optional<LockscreenContent>>,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
@@ -55,7 +58,10 @@ fun SceneScope.OverlayShade(
 
     Box(modifier) {
         if (backgroundScene == Scenes.Lockscreen) {
-            Lockscreen()
+            // Lockscreen content is optionally injected, because variants of System UI without a
+            // lockscreen cannot provide it.
+            val lockscreenContentOrNull = lockscreenContent.get().getOrNull()
+            lockscreenContentOrNull?.apply { Content(Modifier.fillMaxSize()) }
         }
 
         Scrim(onClicked = viewModel::onScrimClicked)
@@ -66,16 +72,6 @@ fun SceneScope.OverlayShade(
         ) {
             Panel(content = content)
         }
-    }
-}
-
-@Composable
-private fun Lockscreen(
-    modifier: Modifier = Modifier,
-) {
-    // TODO(b/338025605): This is a placeholder, replace with the actual lockscreen.
-    Box(modifier = modifier.fillMaxSize().background(Color.LightGray)) {
-        Text(text = "Lockscreen", modifier = Modifier.align(Alignment.Center))
     }
 }
 

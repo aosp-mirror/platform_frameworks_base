@@ -69,6 +69,7 @@ import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.inputmethod.InputMethodModule;
 import com.android.systemui.keyboard.KeyboardModule;
 import com.android.systemui.keyevent.data.repository.KeyEventRepositoryModule;
+import com.android.systemui.keyguard.ui.composable.LockscreenContent;
 import com.android.systemui.keyguard.ui.view.layout.blueprints.KeyguardBlueprintModule;
 import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule;
 import com.android.systemui.log.dagger.LogModule;
@@ -363,6 +364,9 @@ public abstract class SystemUIModule {
 
     @BindsOptionalOf
     abstract FingerprintReEnrollNotification optionalFingerprintReEnrollNotification();
+
+    @BindsOptionalOf
+    abstract LockscreenContent optionalLockscreenContent();
 
     @SysUISingleton
     @Binds
