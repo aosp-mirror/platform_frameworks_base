@@ -149,21 +149,6 @@ public final class PermissionsUtils {
     }
 
     /**
-     * Check if the caller is system UID or the provided user.
-     */
-    public static boolean checkCallerIsSystemOr(@UserIdInt int userId,
-            @NonNull String packageName) {
-        final int callingUid = getCallingUid();
-        if (callingUid == SYSTEM_UID) return true;
-
-        if (getCallingUserId() != userId) return false;
-
-        if (!checkPackage(callingUid, packageName)) return false;
-
-        return true;
-    }
-
-    /**
      * Check if the calling user id matches the userId, and if the package belongs to
      * the calling uid.
      */
@@ -184,21 +169,30 @@ public final class PermissionsUtils {
     }
 
     /**
-     * Check if the caller holds the necessary permission to manage companion devices.
-     */
-    public static boolean checkCallerCanManageCompanionDevice(@NonNull Context context) {
-        if (getCallingUid() == SYSTEM_UID) return true;
-
-        return context.checkCallingPermission(MANAGE_COMPANION_DEVICES) == PERMISSION_GRANTED;
-    }
-
-    /**
      * Require the caller to be able to manage the associations for the package.
      */
     public static void enforceCallerCanManageAssociationsForPackage(@NonNull Context context,
             @UserIdInt int userId, @NonNull String packageName,
             @Nullable String actionDescription) {
-        if (checkCallerCanManageAssociationsForPackage(context, userId, packageName)) return;
+        final int callingUid = getCallingUid();
+
+        // If the caller is the system
+        if (callingUid == SYSTEM_UID) {
+            return;
+        }
+
+        // If caller can manage the package or has the permissions to manage companion devices
+        boolean canInteractAcrossUsers = context.checkCallingPermission(INTERACT_ACROSS_USERS)
+                == PERMISSION_GRANTED;
+        boolean canManageCompanionDevices = context.checkCallingPermission(MANAGE_COMPANION_DEVICES)
+                == PERMISSION_GRANTED;
+        if (getCallingUserId() == userId) {
+            if (checkPackage(callingUid, packageName) || canManageCompanionDevices) {
+                return;
+            }
+        } else if (canInteractAcrossUsers && canManageCompanionDevices) {
+            return;
+        }
 
         throw new SecurityException("Caller (uid=" + getCallingUid() + ") does not have "
                 + "permissions to "
@@ -217,25 +211,6 @@ public final class PermissionsUtils {
             throw new SecurityException("Caller (uid=" + getCallingUid() + ") does not have "
                     + "permissions to request observing device presence base on the UUID");
         }
-    }
-
-    /**
-     * Check if the caller is either:
-     * <ul>
-     * <li> the package itself
-     * <li> the System ({@link android.os.Process#SYSTEM_UID})
-     * <li> holds {@link Manifest.permission#MANAGE_COMPANION_DEVICES} and, if belongs to a
-     * different user, also holds {@link Manifest.permission#INTERACT_ACROSS_USERS}.
-     * </ul>
-     * @return whether the caller is one of the above.
-     */
-    public static boolean checkCallerCanManageAssociationsForPackage(@NonNull Context context,
-            @UserIdInt int userId, @NonNull String packageName) {
-        if (checkCallerIsSystemOr(userId, packageName)) return true;
-
-        if (!checkCallerCanInteractWithUserId(context, userId)) return false;
-
-        return checkCallerCanManageCompanionDevice(context);
     }
 
     private static boolean checkPackage(@UserIdInt int uid, @NonNull String packageName) {

@@ -98,7 +98,6 @@ public class DisassociationProcessor {
         Slog.i(TAG, "Disassociating id=[" + id + "]...");
 
         final AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(id);
-
         final int userId = association.getUserId();
         final String packageName = association.getPackageName();
         final String deviceProfile = association.getDeviceProfile();
