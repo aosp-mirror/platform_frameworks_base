@@ -25,11 +25,8 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
-import com.android.systemui.qs.tiles.impl.screenrecord.domain.model.ScreenRecordTileModel
-import com.android.systemui.screenrecord.RecordingController
-import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
+import com.android.systemui.screenrecord.data.model.ScreenRecordModel
+import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -37,7 +34,6 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.verify
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -46,13 +42,13 @@ import org.mockito.Mockito.verify
 class ScreenRecordTileDataInteractorTest : SysuiTestCase() {
     private val kosmos = Kosmos()
     private val testScope = kosmos.testScope
-    private val controller = mock<RecordingController>()
+    private val screenRecordRepo = kosmos.screenRecordRepository
     private val underTest: ScreenRecordTileDataInteractor =
-        ScreenRecordTileDataInteractor(testScope.testScheduler, controller)
+        ScreenRecordTileDataInteractor(screenRecordRepo)
 
-    private val isRecording = ScreenRecordTileModel.Recording
-    private val isDoingNothing = ScreenRecordTileModel.DoingNothing
-    private val isStarting0 = ScreenRecordTileModel.Starting(0)
+    private val isRecording = ScreenRecordModel.Recording
+    private val isDoingNothing = ScreenRecordModel.DoingNothing
+    private val isStarting0 = ScreenRecordModel.Starting(0)
 
     @Test
     fun isAvailable_returnsTrue() = runTest {
@@ -62,85 +58,31 @@ class ScreenRecordTileDataInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun dataMatchesController() =
+    fun dataMatchesRepo() =
         testScope.runTest {
-            whenever(controller.isRecording).thenReturn(false)
-            whenever(controller.isStarting).thenReturn(false)
-
-            val callbackCaptor = argumentCaptor<RecordingController.RecordingStateChangeCallback>()
-
             val lastModel by
                 collectLastValue(
                     underTest.tileData(TEST_USER, flowOf(DataUpdateTrigger.InitialRequest))
                 )
             runCurrent()
 
-            verify(controller).addCallback(callbackCaptor.capture())
-            val callback = callbackCaptor.value
-
             assertThat(lastModel).isEqualTo(isDoingNothing)
 
-            val expectedModelStartingIn1 = ScreenRecordTileModel.Starting(1)
-            callback.onCountdown(1)
+            val expectedModelStartingIn1 = ScreenRecordModel.Starting(1)
+            screenRecordRepo.screenRecordState.value = expectedModelStartingIn1
             assertThat(lastModel).isEqualTo(expectedModelStartingIn1)
 
-            val expectedModelStartingIn0 = isStarting0
-            callback.onCountdown(0)
-            assertThat(lastModel).isEqualTo(expectedModelStartingIn0)
-
-            callback.onCountdownEnd()
-            assertThat(lastModel).isEqualTo(isDoingNothing)
-
-            callback.onRecordingStart()
-            assertThat(lastModel).isEqualTo(isRecording)
-
-            callback.onRecordingEnd()
-            assertThat(lastModel).isEqualTo(isDoingNothing)
-        }
-
-    @Test
-    fun data_whenRecording_matchesController() =
-        testScope.runTest {
-            whenever(controller.isRecording).thenReturn(true)
-            whenever(controller.isStarting).thenReturn(false)
-
-            val lastModel by
-                collectLastValue(
-                    underTest.tileData(TEST_USER, flowOf(DataUpdateTrigger.InitialRequest))
-                )
-            runCurrent()
-
-            assertThat(lastModel).isEqualTo(isRecording)
-        }
-
-    @Test
-    fun data_whenStarting_matchesController() =
-        testScope.runTest {
-            whenever(controller.isRecording).thenReturn(false)
-            whenever(controller.isStarting).thenReturn(true)
-
-            val lastModel by
-                collectLastValue(
-                    underTest.tileData(TEST_USER, flowOf(DataUpdateTrigger.InitialRequest))
-                )
-            runCurrent()
-
+            screenRecordRepo.screenRecordState.value = isStarting0
             assertThat(lastModel).isEqualTo(isStarting0)
-        }
 
-    @Test
-    fun data_whenRecordingAndStarting_matchesControllerRecording() =
-        testScope.runTest {
-            whenever(controller.isRecording).thenReturn(true)
-            whenever(controller.isStarting).thenReturn(true)
+            screenRecordRepo.screenRecordState.value = isDoingNothing
+            assertThat(lastModel).isEqualTo(isDoingNothing)
 
-            val lastModel by
-                collectLastValue(
-                    underTest.tileData(TEST_USER, flowOf(DataUpdateTrigger.InitialRequest))
-                )
-            runCurrent()
-
+            screenRecordRepo.screenRecordState.value = isRecording
             assertThat(lastModel).isEqualTo(isRecording)
+
+            screenRecordRepo.screenRecordState.value = isDoingNothing
+            assertThat(lastModel).isEqualTo(isDoingNothing)
         }
 
     private companion object {

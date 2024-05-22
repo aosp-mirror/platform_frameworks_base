@@ -23,12 +23,14 @@ import com.android.systemui.qs.tiles.ScreenRecordTile
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
 import com.android.systemui.qs.tiles.impl.screenrecord.domain.interactor.ScreenRecordTileDataInteractor
 import com.android.systemui.qs.tiles.impl.screenrecord.domain.interactor.ScreenRecordTileUserActionInteractor
-import com.android.systemui.qs.tiles.impl.screenrecord.domain.model.ScreenRecordTileModel
 import com.android.systemui.qs.tiles.impl.screenrecord.domain.ui.ScreenRecordTileMapper
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
 import com.android.systemui.res.R
+import com.android.systemui.screenrecord.data.model.ScreenRecordModel
+import com.android.systemui.screenrecord.data.repository.ScreenRecordRepository
+import com.android.systemui.screenrecord.data.repository.ScreenRecordRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -37,6 +39,9 @@ import dagger.multibindings.StringKey
 
 @Module
 interface ScreenRecordModule {
+
+    @Binds fun bindScreenRecordRepository(impl: ScreenRecordRepositoryImpl): ScreenRecordRepository
+
     /** Inject ScreenRecordTile into tileMap in QSModule */
     @Binds
     @IntoMap
@@ -65,7 +70,7 @@ interface ScreenRecordModule {
         @IntoMap
         @StringKey(SCREEN_RECORD_TILE_SPEC)
         fun provideScreenRecordTileViewModel(
-            factory: QSTileViewModelFactory.Static<ScreenRecordTileModel>,
+            factory: QSTileViewModelFactory.Static<ScreenRecordModel>,
             mapper: ScreenRecordTileMapper,
             stateInteractor: ScreenRecordTileDataInteractor,
             userActionInteractor: ScreenRecordTileUserActionInteractor
