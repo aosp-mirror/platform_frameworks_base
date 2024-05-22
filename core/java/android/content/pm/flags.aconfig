@@ -276,3 +276,11 @@ flag {
     bug: "300309050"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "get_package_info_with_fd"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the feature to retrieve package info without installation with a file descriptor."
+    bug: "340879905"
+}
