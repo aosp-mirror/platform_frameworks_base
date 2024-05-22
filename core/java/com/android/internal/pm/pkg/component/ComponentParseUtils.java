@@ -61,9 +61,6 @@ public class ComponentParseUtils {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
-            if (ParsingPackageUtils.getAconfigFlags().skipCurrentElement(parser)) {
-                continue;
-            }
 
             final ParseResult result;
             if ("meta-data".equals(parser.getName())) {
