@@ -338,7 +338,7 @@
     <string name="permgrouplab_phone" msgid="570318944091926620">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"упатува и управува со телефонски повици"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Телесни сензори"</string>
-    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"пристапува до податоците од сензорите за виталните знаци"</string>
+    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"пристапува до податоците од сензорите за виталните функции"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Известувања"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"да прикажува известувања"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"да ги вчитува содржините од прозорците"</string>
