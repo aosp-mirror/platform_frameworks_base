@@ -153,6 +153,8 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"ಕಳುಹಿಸಿ"</string>
     <string name="cancel" msgid="1089011503403416730">"ರದ್ದುಮಾಡಿ"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"ಆ್ಯಪ್ ಲೋಗೋ"</string>
+  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
+  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"ದೃಢೀಕರಿಸಿ"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ದೃಢೀಕರಣವನ್ನು ರದ್ದುಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
@@ -302,7 +304,7 @@
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"ಯಾವುದೇ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"ಆನ್ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"ಸ್ಕ್ರೀನ್ ಕ್ಯಾಸ್ಟ್"</string>
+    <string name="quick_settings_cast_title" msgid="3033553249449938182">"ಬಿತ್ತರಿಸುವಿಕೆ"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"ಬಿತ್ತರಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"ಹೆಸರಿಸದಿರುವ ಸಾಧನ"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"ಯಾವುದೇ ಸಾಧನಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
@@ -364,10 +366,6 @@
     <item msgid="8309220355268900335">"ಬ್ಯಾಟರಿ"</item>
   </string-array>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"ಒಂದು ಕೈ ಮೋಡ್"</string>
-    <string name="quick_settings_contrast_label" msgid="988087460210159123">"ಕಾಂಟ್ರಾಸ್ಟ್‌‌"</string>
-    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"ಪ್ರಮಾಣಿತ"</string>
-    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"ಮಧ್ಯಮ"</string>
-    <string name="quick_settings_contrast_high" msgid="656049259587494499">"ಹೆಚ್ಚು"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"ಶ್ರವಣ ಸಾಧನಗಳು"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"ಹಿಯರಿಂಗ್ ಸಾಧನಗಳು"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"ಹೊಸ ಸಾಧನವನ್ನು ಪೇರ್ ಮಾಡಿ"</string>
@@ -447,8 +445,7 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ವಿಜೆಟ್‌ಗಳನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ದೀರ್ಘಕಾಲ ಒತ್ತಿರಿ"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ವಿಜೆಟ್‌ಗಳನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಿ"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾದ ವಿಜೆಟ್‌ಗಾಗಿ ಆ್ಯಪ್ ಐಕಾನ್"</string>
-    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
-    <skip />
+    <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾದ ವಿಜೆಟ್‌ಗಾಗಿ ಆ್ಯಪ್ ಐಕಾನ್"</string>
     <string name="edit_widget" msgid="9030848101135393954">"ವಿಜೆಟ್ ಅನ್ನು ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ತೆಗೆದುಹಾಕಿ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ವಿಜೆಟ್ ಅನ್ನು ಸೇರಿಸಿ"</string>
@@ -629,14 +626,10 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"ಔಟ್‌ಪುಟ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"ವಾಲ್ಯೂಮ್ ಸ್ಲೈಡರ್‌ಗಳನ್ನು ವಿಸ್ತೃತಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"ವಾಲ್ಯೂಮ್ ಸ್ಲೈಡರ್‌ಗಳನ್ನು ಕುಗ್ಗಿಸಲಾಗಿದೆ"</string>
-    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
-    <skip />
+    <string name="volume_panel_hint_mute" msgid="2153922288568199077">"%s ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
+    <string name="volume_panel_hint_unmute" msgid="4831850937582282340">"%s ಅನ್‌ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
+    <string name="volume_panel_hint_muted" msgid="1124844870181285320">"ಮ್ಯೂಟ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="volume_panel_hint_vibrate" msgid="4136223145435914132">"ವೈಬ್ರೇಟ್‌"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> ನಲ್ಲಿ ಪ್ಲೇ ಆಗು..."</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"ಇದರಲ್ಲಿ ಪ್ಲೇ ಆಗುತ್ತದೆ"</string>
     <string name="media_output_title_ongoing_call" msgid="208426888064112006">"ಕರೆ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>

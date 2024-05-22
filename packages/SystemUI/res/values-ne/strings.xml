@@ -153,6 +153,8 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"पठाउनुहोस्"</string>
     <string name="cancel" msgid="1089011503403416730">"रद्द गर्नुहोस्"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"एपको लोगो"</string>
+  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
+  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"पुष्टि गर्नुहोस्"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"फेरि प्रयास गर्नुहोस्"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"प्रमाणीकरण रद्द गर्न ट्याप गर्नुहोस्"</string>
@@ -302,7 +304,7 @@
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"नेटवर्क उपलब्ध छैन"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Wi-Fi नेटवर्क अनुपलब्ध"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"सक्रिय गर्दै…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"स्क्रिन Cast"</string>
+    <string name="quick_settings_cast_title" msgid="3033553249449938182">"Cast"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"प्रसारण गर्दै"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"बेनाम उपकरण"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"कुनै उपकरणहरू उपलब्ध छैन"</string>
@@ -364,10 +366,6 @@
     <item msgid="8309220355268900335">"ब्याट्री"</item>
   </string-array>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"एक हाते मोड"</string>
-    <string name="quick_settings_contrast_label" msgid="988087460210159123">"कन्ट्रास्ट"</string>
-    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"डिफल्ट"</string>
-    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"मध्यम"</string>
-    <string name="quick_settings_contrast_high" msgid="656049259587494499">"उच्च"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"हियरिङ डिभाइसहरू"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"हियरिङ डिभाइसहरू"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"नयाँ डिभाइस कनेक्ट गर्नुहोस्"</string>
@@ -403,7 +401,7 @@
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"परिदृश्य टगल गर्नुहोस्"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"तपाईंलाई अलार्म, रिमाइन्डर, कार्यक्रम र तपाईंले निर्दिष्ट गर्नुभएका कलरहरू बाहेकका ध्वनि र कम्पनहरूले बाधा पुऱ्याउने छैनन्। तपाईंले अझै सङ्गीत, भिडियो र खेलहरू लगायत आफूले प्ले गर्न छनौट गरेका जुनसुकै कुरा सुन्न सक्नुहुनेछ।"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"तपाईंलाई अलार्महरू बाहेकका ध्वनि र कम्पनहरूले बाधा पुऱ्याउने छैनन्। तपाईंले अझै सङ्गीत, भिडियो र खेलहरू लगायत आफूले प्ले गर्न छनौट गरेका जुनसुकै कुरा सुन्न सक्नुहुनेछ।"</string>
-    <string name="zen_priority_customize_button" msgid="4119213187257195047">"आफू अनुकूल बनाउनुहोस्"</string>
+    <string name="zen_priority_customize_button" msgid="4119213187257195047">" कस्टम बनाउनुहोस्"</string>
     <string name="zen_silence_introduction_voice" msgid="853573681302712348">"यसले अलार्म, सङ्गीत, भिडियो, र खेलहरू लगायत सबैका ध्वनि र कम्पनहरूमाथि रोक लगाउँछ। तपाईं अझै पनि फोन कलहरू गर्न सक्नुहुनेछ।"</string>
     <string name="zen_silence_introduction" msgid="6117517737057344014">"यसले अलार्म, सङ्गीत, भिडियोहरू र खेलहरूसहित सबै ध्वनिहरू र कम्पनहरूलाई रोक्छ।"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"खोल्न पुनः ट्याप गर्नुहोस्"</string>
@@ -433,7 +431,7 @@
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"पूरै\nशान्त"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"प्राथमिकता \nमात्र"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"अलार्महरू \nमात्र"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • तारविनै चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • वायरलेस तरिकाले चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरा चार्ज हुन्छ"</string>
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • छिटो चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • बिस्तारै चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
@@ -447,8 +445,7 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"विजेटहरू कस्टमाइज गर्न केही बेरसम्म थिच्नुहोस्"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"विजेटहरू कस्टमाइज गर्नुहोस्"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"अफ गरिएको विजेटको एप जनाउने आइकन"</string>
-    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
-    <skip />
+    <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"इन्स्टल भइरहेको विजेटको एप आइकन"</string>
     <string name="edit_widget" msgid="9030848101135393954">"विजेट सम्पादन गर्नुहोस्"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"हटाउनुहोस्"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"विजेट हाल्नुहोस्"</string>
@@ -629,14 +626,10 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"आउटपुटसम्बन्धी सेटिङमा जानुहोस्"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"भोल्युम स्लाइडरहरू एक्स्पान्ड गरिएका छन्"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"भोल्युम स्लाइडरहरू कोल्याप्स गरिएका छन्"</string>
-    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
-    <skip />
+    <string name="volume_panel_hint_mute" msgid="2153922288568199077">"%s म्युट गर्नुहोस्"</string>
+    <string name="volume_panel_hint_unmute" msgid="4831850937582282340">"%s अनम्युट गर्नुहोस्"</string>
+    <string name="volume_panel_hint_muted" msgid="1124844870181285320">"म्यूट गरिएको छ"</string>
+    <string name="volume_panel_hint_vibrate" msgid="4136223145435914132">"भाइब्रेट गर्नुहोस्"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> प्ले गरिँदै छ"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"अडियो यसमा प्ले हुने छ"</string>
     <string name="media_output_title_ongoing_call" msgid="208426888064112006">"कल चलिरहेको छ"</string>
@@ -670,7 +663,7 @@
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"स्याटलाइट SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"कार्य प्रोफाइल"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"केहीका लागि रमाइलो हुन्छ तर सबैका लागि होइन"</string>
-    <string name="tuner_warning" msgid="1861736288458481650">"सिस्टम UI ट्युनरले तपाईँलाई Android प्रयोगकर्ता इन्टरफेस आफू अनुकूल गर्न र ट्विक गर्न थप तरिकाहरू प्रदान गर्छ। यी प्रयोगात्मक सुविधाहरू भावी विमोचनमा परिवर्तन हुन, बिग्रिन वा हराउन सक्ने छन्। सावधानीपूर्वक अगाडि बढ्नुहोस्।"</string>
+    <string name="tuner_warning" msgid="1861736288458481650">"सिस्टम UI ट्युनरले तपाईँलाई Android प्रयोगकर्ता इन्टरफेस  कस्टम गर्न र ट्विक गर्न थप तरिकाहरू प्रदान गर्छ। यी प्रयोगात्मक सुविधाहरू भावी विमोचनमा परिवर्तन हुन, बिग्रिन वा हराउन सक्ने छन्। सावधानीपूर्वक अगाडि बढ्नुहोस्।"</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"यी प्रयोगात्मक सुविधाहरू भावी विमोचनहरूमा परिवर्तन हुन, बिग्रन वा  हराउन सक्छन्। सावधानीपूर्वक अगाडि बढ्नुहोस्।"</string>
     <string name="got_it" msgid="477119182261892069">"बुझेँ"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"बधाईँ छ! सेटिङहरूमा सिस्टम UI ट्युनर थप गरिएको छ"</string>
@@ -715,7 +708,7 @@
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> का सूचना सम्बन्धी नियन्त्रणहरूलाई खोलियो"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g> का सूचना सम्बन्धी नियन्त्रणहरूलाई बन्द गरियो"</string>
     <string name="notification_more_settings" msgid="4936228656989201793">"थप सेटिङहरू"</string>
-    <string name="notification_app_settings" msgid="8963648463858039377">"आफू अनुकूल पार्नुहोस्"</string>
+    <string name="notification_app_settings" msgid="8963648463858039377">" कस्टम पार्नुहोस्"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"बबल देखाउनुहोस्"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"बबलहरू हटाउनुहोस्"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>

@@ -153,6 +153,8 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"পাঠান"</string>
     <string name="cancel" msgid="1089011503403416730">"বাতিল করুন"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"অ্যাপের লোগো"</string>
+  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
+  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"কনফার্ম করুন"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"আবার চেষ্টা করুন"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"যাচাইকরণ বাতিল করতে ট্যাপ করুন"</string>
@@ -201,7 +203,7 @@
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"\'ফেস আনলক\' সেট-আপ করুন"</string>
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"\'ফেস আনলক\' আবার সেট-আপ করতে, বর্তমানে থাকা আপনার ফেস মডেলটি মুছে ফেলা হবে।\n\nফেস ব্যবহার করে আপনার ফোন আনলক করার জন্য আপনাকে আবার এই ফিচার সেট-আপ করতে হবে।"</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"\'ফেস আনলক\' সেট-আপ করা যায়নি। আবার চেষ্টা করতে সেটিংসে যান।"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"আঙ্গুলের ছাপের সেন্সর স্পর্শ করুন"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ফিঙ্গারপ্রিন্ট সেন্সর টাচ করুন"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"চালিয়ে যেতে \'আনলক করুন\' আইকনে প্রেস করুন"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"মুখ চেনা যায়নি। পরিবর্তে ফিঙ্গারপ্রিন্ট ব্যবহার করুন।"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -302,7 +304,7 @@
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"নেটওয়ার্ক উপলভ্য নেই"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"কোনো ওয়াই-ফাই নেটওয়ার্ক উপলব্ধ নেই"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"চালু করা হচ্ছে…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"স্ক্রিন কাস্ট"</string>
+    <string name="quick_settings_cast_title" msgid="3033553249449938182">"কাস্ট করুন"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"কাস্ট করা হচ্ছে"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"নামবিহীন ডিভাইস"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"কোনো ডিভাইস উপলব্ধ নয়"</string>
@@ -364,10 +366,6 @@
     <item msgid="8309220355268900335">"ব্যাটারি"</item>
   </string-array>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"এক হাতে ব্যবহার করার মোড"</string>
-    <string name="quick_settings_contrast_label" msgid="988087460210159123">"কনট্রাস্ট"</string>
-    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"স্ট্যান্ডার্ড"</string>
-    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"মিডিয়াম"</string>
-    <string name="quick_settings_contrast_high" msgid="656049259587494499">"হাই"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"হিয়ারিং ডিভাইস"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"হিয়ারিং ডিভাইস"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"নতুন ডিভাইস পেয়ার করুন"</string>
@@ -447,8 +445,7 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"উইজেট কাস্টমাইজ করতে বেশিক্ষণ প্রেস করুন"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"উইজেট কাস্টমাইজ করুন"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"বন্ধ করা উইজেটের জন্য অ্যাপের আইকন"</string>
-    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
-    <skip />
+    <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"ইনস্টল করা হচ্ছে এমন উইজেটের অ্যাপ আইকন"</string>
     <string name="edit_widget" msgid="9030848101135393954">"উইজেট এডিট করুন"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"সরান"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"উইজেট যোগ করুন"</string>
@@ -629,14 +626,10 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"আউটপুট সেটিংস লিখুন"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"ভলিউম স্লাইডার বড় করা হয়েছে"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"ভলিউম স্লাইডার আড়াল করা হয়েছে"</string>
-    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
-    <skip />
+    <string name="volume_panel_hint_mute" msgid="2153922288568199077">"%s মিউট করুন"</string>
+    <string name="volume_panel_hint_unmute" msgid="4831850937582282340">"%s আনমিউট করুন"</string>
+    <string name="volume_panel_hint_muted" msgid="1124844870181285320">"মিউট করা হয়েছে"</string>
+    <string name="volume_panel_hint_vibrate" msgid="4136223145435914132">"ভাইব্রেট"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g>-এ প্লে করা হচ্ছে"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"অডিও এতে প্লে করা হবে"</string>
     <string name="media_output_title_ongoing_call" msgid="208426888064112006">"কল চালু আছে"</string>
