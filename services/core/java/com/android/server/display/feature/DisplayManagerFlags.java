@@ -164,6 +164,11 @@ public class DisplayManagerFlags {
             Flags::ignoreAppPreferredRefreshRateRequest
     );
 
+    private final FlagState mSynthetic60hzModes = new FlagState(
+            Flags.FLAG_ENABLE_SYNTHETIC_60HZ_MODES,
+            Flags::enableSynthetic60hzModes
+    );
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -333,6 +338,10 @@ public class DisplayManagerFlags {
         return mIgnoreAppPreferredRefreshRate.isEnabled();
     }
 
+    public boolean isSynthetic60HzModesEnabled() {
+        return mSynthetic60hzModes.isEnabled();
+    }
+
     /**
      * dumps all flagstates
      * @param pw printWriter
@@ -365,6 +374,8 @@ public class DisplayManagerFlags {
         pw.println(" " + mResolutionBackupRestore);
         pw.println(" " + mUseFusionProxSensor);
         pw.println(" " + mPeakRefreshRatePhysicalLimit);
+        pw.println(" " + mIgnoreAppPreferredRefreshRate);
+        pw.println(" " + mSynthetic60hzModes);
     }
 
     private static class FlagState {

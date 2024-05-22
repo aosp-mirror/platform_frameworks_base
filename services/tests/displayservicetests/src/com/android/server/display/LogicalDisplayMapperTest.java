@@ -50,6 +50,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -80,10 +81,10 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.foldables.FoldGracePeriodProvider;
 import com.android.internal.util.test.LocalServiceKeeperRule;
-import com.android.server.LocalServices;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.DisplayIdProducer;
 import com.android.server.display.layout.Layout;
+import com.android.server.display.mode.SyntheticModeManager;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.utils.FoldSettingProvider;
 
@@ -91,6 +92,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.AdditionalAnswers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -141,6 +143,8 @@ public class LogicalDisplayMapperTest {
     @Mock DisplayManagerFlags mFlagsMock;
     @Mock DisplayAdapter mDisplayAdapterMock;
     @Mock WindowManagerPolicy mWindowManagerPolicy;
+    @Mock
+    SyntheticModeManager mSyntheticModeManagerMock;
 
     @Captor ArgumentCaptor<LogicalDisplay> mDisplayCaptor;
     @Captor ArgumentCaptor<Integer> mDisplayEventCaptor;
@@ -196,6 +200,8 @@ public class LogicalDisplayMapperTest {
         when(mResourcesMock.getIntArray(
                 com.android.internal.R.array.config_deviceStatesOnWhichToSleep))
                 .thenReturn(new int[]{0});
+        when(mSyntheticModeManagerMock.createAppSupportedModes(any(), any())).thenAnswer(
+                AdditionalAnswers.returnsSecondArg());
 
         when(mFlagsMock.isConnectedDisplayManagementEnabled()).thenReturn(false);
         mLooper = new TestLooper();
@@ -204,7 +210,7 @@ public class LogicalDisplayMapperTest {
                 mFoldGracePeriodProvider,
                 mDisplayDeviceRepo,
                 mListenerMock, new DisplayManagerService.SyncRoot(), mHandler,
-                mDeviceStateToLayoutMapSpy, mFlagsMock);
+                mDeviceStateToLayoutMapSpy, mFlagsMock, mSyntheticModeManagerMock);
         mLogicalDisplayMapper.onWindowManagerReady();
     }
 
