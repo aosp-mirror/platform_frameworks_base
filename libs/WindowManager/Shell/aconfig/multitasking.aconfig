@@ -85,3 +85,10 @@ flag {
     description: "Allow the floating bubble stack to stash on the edge of the screen"
     bug: "341361249"
 }
+
+flag {
+    name: "enable_tiny_taskbar"
+    namespace: "multitasking"
+    description: "Enables Taskbar on phones"
+    bug: "341784466"
+}
