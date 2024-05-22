@@ -140,9 +140,11 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             assertThat(latest).isEqualTo(callChip)
         }
 
-    private fun assertIsScreenRecordChip(latest: OngoingActivityChipModel?) {
-        assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-        val icon = (latest as OngoingActivityChipModel.Shown).icon
-        assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.stat_sys_screen_record)
+    companion object {
+        fun assertIsScreenRecordChip(latest: OngoingActivityChipModel?) {
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+            val icon = (latest as OngoingActivityChipModel.Shown).icon
+            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.stat_sys_screen_record)
+        }
     }
 }
