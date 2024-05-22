@@ -224,6 +224,7 @@ import android.view.IWindowId;
 import android.view.InputChannel;
 import android.view.InputWindowHandle;
 import android.view.InsetsSource;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.Surface;
 import android.view.Surface.Rotation;
@@ -431,6 +432,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /** @see #isLastConfigReportedToClient() */
     private boolean mLastConfigReportedToClient;
+
+    // TODO(b/339380439): Ensure to use the same object for IWindowSession#relayout
+    private final InsetsSourceControl.Array mLastReportedActiveControls =
+            new InsetsSourceControl.Array();
 
     private final Configuration mTempConfiguration = new Configuration();
 
@@ -3813,9 +3818,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         final InsetsStateController stateController =
                 getDisplayContent().getInsetsStateController();
+        mLastReportedActiveControls.set(stateController.getControlsForDispatch(this));
         try {
-            mClient.insetsControlChanged(getCompatInsetsState(),
-                    stateController.getControlsForDispatch(this));
+            mClient.insetsControlChanged(getCompatInsetsState(), mLastReportedActiveControls);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver inset control state change to w=" + this, e);
         }
