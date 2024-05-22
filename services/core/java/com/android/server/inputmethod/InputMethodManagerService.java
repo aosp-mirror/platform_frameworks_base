@@ -332,9 +332,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private final UserManagerInternal mUserManagerInternal;
     @MultiUserUnawareField
     private final InputMethodMenuController mMenuController;
-    @MultiUserUnawareField
-    @NonNull
-    private final AutofillSuggestionsController mAutofillController;
 
     @GuardedBy("ImfLock.class")
     @MultiUserUnawareField
@@ -1304,7 +1301,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     new HardwareKeyboardShortcutController(settings.getMethodMap(),
                             settings.getUserId());
             mMenuController = new InputMethodMenuController(this);
-            mAutofillController = new AutofillSuggestionsController(this);
             mVisibilityStateComputer = new ImeVisibilityStateComputer(this);
             mVisibilityApplier = new DefaultImeVisibilityApplier(this);
 
@@ -1713,11 +1709,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         return methodList;
     }
 
-    @GuardedBy("ImfLock.class")
-    void performOnCreateInlineSuggestionsRequestLocked() {
-        mAutofillController.performOnCreateInlineSuggestionsRequest();
-    }
-
     /**
      * Gets enabled subtypes of the specified {@link InputMethodInfo}.
      *
@@ -2115,7 +2106,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (DEBUG) {
                 Slog.d(TAG, "Avoiding IME startup and unbinding current input method.");
             }
-            invalidateAutofillSessionLocked();
+            bindingController.invalidateAutofillSession();
             bindingController.unbindCurrentMethod();
             return InputBindResult.NO_EDITOR;
         }
@@ -2213,11 +2204,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     + mDisplayIdToShowIme + " belongs to device with id " + mDeviceIdToShowIme);
         }
         return deviceMethodId;
-    }
-
-    @GuardedBy("ImfLock.class")
-    void invalidateAutofillSessionLocked() {
-        mAutofillController.invalidateAutofillSession();
     }
 
     @GuardedBy("ImfLock.class")
@@ -2408,7 +2394,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         mImeWindowVis = 0;
         mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
         updateSystemUiLocked(mImeWindowVis, mBackDisposition);
-        mAutofillController.onResetSystemUi();
     }
 
     @GuardedBy("ImfLock.class")
@@ -5470,8 +5455,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     .isTouchExplorationEnabled(userId);
 
             synchronized (ImfLock.class) {
-                mAutofillController.onCreateInlineSuggestionsRequest(userId, requestInfo, cb,
-                        touchExplorationEnabled);
+                getInputMethodBindingController(userId).onCreateInlineSuggestionsRequest(
+                        requestInfo, cb, touchExplorationEnabled);
             }
         }
 
@@ -5539,7 +5524,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 if (displayId != getCurTokenDisplayIdLocked()) {
                     return false;
                 }
-                curHostInputToken = mAutofillController.getCurHostInputToken();
+                curHostInputToken = getInputMethodBindingController(userId).getCurHostInputToken();
                 if (curHostInputToken == null) {
                     return false;
                 }
@@ -5881,7 +5866,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
             p.println("  mCurToken=" + getCurTokenLocked());
             p.println("  mCurTokenDisplayId=" + getCurTokenDisplayIdLocked());
-            p.println("  mCurHostInputToken=" + mAutofillController.getCurHostInputToken());
+            p.println("  mCurHostInputToken=" + bindingController.getCurHostInputToken());
             p.println("  mCurIntent=" + bindingController.getCurIntent());
             method = getCurMethodLocked();
             p.println("  mCurMethod=" + getCurMethodLocked());
