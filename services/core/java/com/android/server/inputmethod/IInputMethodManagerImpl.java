@@ -47,6 +47,7 @@ import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputBindResult;
+import com.android.internal.inputmethod.InputMethodInfoSafeList;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
@@ -80,10 +81,19 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
 
         InputMethodInfo getCurrentInputMethodInfoAsUser(@UserIdInt int userId);
 
-        List<InputMethodInfo> getInputMethodList(@UserIdInt int userId,
+        @NonNull
+        InputMethodInfoSafeList getInputMethodList(@UserIdInt int userId,
                 @DirectBootAwareness int directBootAwareness);
 
-        List<InputMethodInfo> getEnabledInputMethodList(@UserIdInt int userId);
+        @NonNull
+        InputMethodInfoSafeList getEnabledInputMethodList(@UserIdInt int userId);
+
+        @NonNull
+        List<InputMethodInfo> getInputMethodListLegacy(@UserIdInt int userId,
+                @DirectBootAwareness int directBootAwareness);
+
+        @NonNull
+        List<InputMethodInfo> getEnabledInputMethodListLegacy(@UserIdInt int userId);
 
         List<InputMethodSubtype> getEnabledInputMethodSubtypeList(String imiId,
                 boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId);
@@ -216,15 +226,30 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
         return mCallback.getCurrentInputMethodInfoAsUser(userId);
     }
 
+    @NonNull
     @Override
-    public List<InputMethodInfo> getInputMethodList(@UserIdInt int userId,
+    public InputMethodInfoSafeList getInputMethodList(@UserIdInt int userId,
             int directBootAwareness) {
         return mCallback.getInputMethodList(userId, directBootAwareness);
     }
 
+    @NonNull
     @Override
-    public List<InputMethodInfo> getEnabledInputMethodList(@UserIdInt int userId) {
+    public InputMethodInfoSafeList getEnabledInputMethodList(@UserIdInt int userId) {
         return mCallback.getEnabledInputMethodList(userId);
+    }
+
+    @NonNull
+    @Override
+    public List<InputMethodInfo> getInputMethodListLegacy(@UserIdInt int userId,
+            int directBootAwareness) {
+        return mCallback.getInputMethodListLegacy(userId, directBootAwareness);
+    }
+
+    @NonNull
+    @Override
+    public List<InputMethodInfo> getEnabledInputMethodListLegacy(@UserIdInt int userId) {
+        return mCallback.getEnabledInputMethodListLegacy(userId);
     }
 
     @Override
