@@ -1225,4 +1225,110 @@ class ElementTest {
         assertThat(stateInC.scaleInterruptionDelta).isEqualTo(Scale.Zero)
         assertThat(stateInC.alphaInterruptionDelta).isEqualTo(0f)
     }
+
+    @Test
+    fun interruption_sharedTransitionDisabled() = runTest {
+        // 4 frames of animation.
+        val duration = 4 * 16
+        val layoutSize = DpSize(200.dp, 100.dp)
+        val fooSize = 100.dp
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateImpl(
+                    SceneA,
+                    transitions {
+                        from(SceneA, to = SceneB) { spec = tween(duration, easing = LinearEasing) }
+
+                        // Disable the shared transition during B => C.
+                        from(SceneB, to = SceneC) {
+                            spec = tween(duration, easing = LinearEasing)
+                            sharedElement(TestElements.Foo, enabled = false)
+                        }
+                    },
+                )
+            }
+
+        @Composable
+        fun SceneScope.Foo(modifier: Modifier = Modifier) {
+            Box(modifier.element(TestElements.Foo).size(fooSize))
+        }
+
+        rule.setContent {
+            SceneTransitionLayout(state, Modifier.size(layoutSize)) {
+                scene(SceneA) {
+                    Box(Modifier.fillMaxSize()) { Foo(Modifier.align(Alignment.TopStart)) }
+                }
+
+                scene(SceneB) {
+                    Box(Modifier.fillMaxSize()) { Foo(Modifier.align(Alignment.TopEnd)) }
+                }
+
+                scene(SceneC) {
+                    Box(Modifier.fillMaxSize()) { Foo(Modifier.align(Alignment.BottomEnd)) }
+                }
+            }
+        }
+
+        // The offset of Foo when idle in A, B or C.
+        val offsetInA = DpOffset.Zero
+        val offsetInB = DpOffset(layoutSize.width - fooSize, 0.dp)
+        val offsetInC = DpOffset(layoutSize.width - fooSize, layoutSize.height - fooSize)
+
+        // State is a transition A => B at 50% interrupted by B => C at 30%.
+        val aToB =
+            transition(from = SceneA, to = SceneB, progress = { 0.5f }, onFinish = neverFinish())
+        var bToCInterruptionProgress by mutableStateOf(1f)
+        val bToC =
+            transition(
+                from = SceneB,
+                to = SceneC,
+                progress = { 0.3f },
+                interruptionProgress = { bToCInterruptionProgress },
+                onFinish = neverFinish(),
+            )
+        rule.runOnUiThread { state.startTransition(aToB, transitionKey = null) }
+        rule.waitForIdle()
+        rule.runOnUiThread { state.startTransition(bToC, transitionKey = null) }
+
+        // Foo is placed in both B and C given that the shared transition is disabled. In B, its
+        // offset is impacted by the interruption but in C it is not.
+        val offsetInAToB = lerp(offsetInA, offsetInB, 0.5f)
+        val interruptionDelta = offsetInAToB - offsetInB
+        assertThat(interruptionDelta).isNotEqualTo(Offset.Zero)
+        rule
+            .onNode(isElement(TestElements.Foo, SceneB))
+            .assertPositionInRootIsEqualTo(
+                offsetInB.x + interruptionDelta.x,
+                offsetInB.y + interruptionDelta.y,
+            )
+
+        rule
+            .onNode(isElement(TestElements.Foo, SceneC))
+            .assertPositionInRootIsEqualTo(offsetInC.x, offsetInC.y)
+
+        // Manually finish A => B so only B => C is remaining.
+        bToCInterruptionProgress = 0f
+        rule.runOnUiThread { state.finishTransition(aToB, SceneB) }
+        rule
+            .onNode(isElement(TestElements.Foo, SceneB))
+            .assertPositionInRootIsEqualTo(offsetInB.x, offsetInB.y)
+        rule
+            .onNode(isElement(TestElements.Foo, SceneC))
+            .assertPositionInRootIsEqualTo(offsetInC.x, offsetInC.y)
+
+        // Interrupt B => C by B => A, starting directly at 70%
+        val bToA =
+            transition(
+                from = SceneB,
+                to = SceneA,
+                progress = { 0.7f },
+                interruptionProgress = { 1f },
+            )
+        rule.runOnUiThread { state.startTransition(bToA, transitionKey = null) }
+
+        // Foo should have the position it had in B right before the interruption.
+        rule
+            .onNode(isElement(TestElements.Foo, SceneB))
+            .assertPositionInRootIsEqualTo(offsetInB.x, offsetInB.y)
+    }
 }
