@@ -402,6 +402,11 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             }
         }
 
+        /**
+         * Cleans up the recents transition.  This should generally not be called directly
+         * to cancel a transition after it has started, instead callers should call one of
+         * the cancel() methods to ensure that Launcher is notified.
+         */
         void cleanUp() {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                     "[%d] RecentsController.cleanup", mInstanceId);
@@ -438,7 +443,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             if (mListener == null || mTransition == null) {
                 Slog.e(TAG, "Missing listener or transition, hasListener=" + (mListener != null) +
                         " hasTransition=" + (mTransition != null));
-                cleanUp();
+                cancel("No listener (" + (mListener == null)
+                        + ") or no transition (" + (mTransition == null) + ")");
                 return false;
             }
             // First see if this is a valid recents transition.
@@ -462,7 +468,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             if (mRecentsTask == null && !hasPausingTasks) {
                 // Recents is already running apparently, so this is a no-op.
                 Slog.e(TAG, "Tried to start recents while it is already running.");
-                cleanUp();
+                cancel("No recents task and no pausing tasks");
                 return false;
             }
 
