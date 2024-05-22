@@ -123,6 +123,7 @@ android_test {
     sdk_version: "core_platform",
     test_suites: [
         "device-tests",
+        "device-platinum-tests",
         "automotive-tests",
     ],
 
