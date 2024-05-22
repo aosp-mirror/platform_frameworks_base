@@ -97,7 +97,7 @@ constructor(
 
     private fun endDream() {
         homeControlsComponentInteractor.onDreamEndUnexpectedly()
-        wakeUp()
+        finish()
     }
 
     private fun onTaskFragmentCreated(taskFragmentInfo: TaskFragmentInfo) {
