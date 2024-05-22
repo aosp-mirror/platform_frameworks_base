@@ -252,6 +252,9 @@ internal class ElementNode(
         measurable: Measurable,
         constraints: Constraints,
     ): MeasureResult {
+        // Update the size this element has in this scene when idle.
+        sceneState.targetSize = lookaheadSize
+
         val transitions = currentTransitions
         val transition = elementTransition(element, transitions)
 
@@ -268,7 +271,16 @@ internal class ElementNode(
 
             val placeable = measurable.measure(constraints)
             sceneState.lastSize = placeable.size()
-            return layout(placeable.width, placeable.height) {}
+
+            this as LookaheadScope
+            return layout(placeable.width, placeable.height) {
+                // Update the offset (relative to the SceneTransitionLayout) this element has in
+                // this scene when idle.
+                coordinates?.let { coords ->
+                    sceneState.targetOffset =
+                        lookaheadScopeCoordinates.localLookaheadPositionOf(coords)
+                }
+            }
         }
 
         val placeable =
@@ -700,13 +712,6 @@ private fun ApproachMeasureScope.measure(
     measurable: Measurable,
     constraints: Constraints,
 ): Placeable {
-    // Update the size this element has in this scene when idle.
-    val targetSizeInScene = lookaheadSize
-    if (targetSizeInScene != sceneState.targetSize) {
-        // TODO(b/290930950): Better handle when this changes to avoid instant size jumps.
-        sceneState.targetSize = targetSizeInScene
-    }
-
     // Some lambdas called (max once) by computeValue() will need to measure [measurable], in which
     // case we store the resulting placeable here to make sure the element is not measured more than
     // once.
@@ -847,10 +852,7 @@ private fun ApproachMeasureScope.place(
         // when idle.
         val coords = coordinates ?: error("Element ${element.key} does not have any coordinates")
         val targetOffsetInScene = lookaheadScopeCoordinates.localLookaheadPositionOf(coords)
-        if (targetOffsetInScene != sceneState.targetOffset) {
-            // TODO(b/290930950): Better handle when this changes to avoid instant offset jumps.
-            sceneState.targetOffset = targetOffsetInScene
-        }
+        sceneState.targetOffset = targetOffsetInScene
 
         // No need to place the element in this scene if we don't want to draw it anyways.
         if (!shouldPlaceElement(layoutImpl, scene, element, transition)) {

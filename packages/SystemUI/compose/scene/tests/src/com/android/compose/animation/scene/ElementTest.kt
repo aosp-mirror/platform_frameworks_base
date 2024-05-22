@@ -1331,4 +1331,48 @@ class ElementTest {
             .onNode(isElement(TestElements.Foo, SceneB))
             .assertPositionInRootIsEqualTo(offsetInB.x, offsetInB.y)
     }
+
+    @Test
+    fun targetStateIsSetEvenWhenNotPlaced() {
+        // Start directly at A => B but with progress < 0f to overscroll on A.
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateImpl(
+                        SceneA,
+                        transitions { overscroll(SceneA, Orientation.Horizontal) {} }
+                    )
+                    .apply {
+                        startTransition(
+                            transition(
+                                from = SceneA,
+                                to = SceneB,
+                                progress = { -1f },
+                                orientation = Orientation.Horizontal
+                            ),
+                            transitionKey = null,
+                        )
+                    }
+            }
+
+        lateinit var layoutImpl: SceneTransitionLayoutImpl
+        rule.setContent {
+            SceneTransitionLayoutForTesting(
+                state,
+                Modifier.size(100.dp),
+                onLayoutImpl = { layoutImpl = it },
+            ) {
+                scene(SceneA) {}
+                scene(SceneB) { Box(Modifier.element(TestElements.Foo)) }
+            }
+        }
+
+        assertThat(layoutImpl.elements).containsKey(TestElements.Foo)
+        val foo = layoutImpl.elements.getValue(TestElements.Foo)
+
+        assertThat(foo.sceneStates).containsKey(SceneB)
+        val bState = foo.sceneStates.getValue(SceneB)
+
+        assertThat(bState.targetSize).isNotEqualTo(Element.SizeUnspecified)
+        assertThat(bState.targetOffset).isNotEqualTo(Offset.Unspecified)
+    }
 }
