@@ -977,6 +977,13 @@ flag {
 }
 
 flag {
+  name: "new_touchpad_gestures_tutorial"
+  namespace: "systemui"
+  description: "Enables new interactive tutorial for learning touchpad gestures"
+  bug: "309928033"
+}
+
+flag {
    name: "register_wallpaper_notifier_background"
    namespace: "systemui"
    description: "Decide whether to register wallpaper change broadcast receiver on background executor."
