@@ -46,6 +46,7 @@ import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogcatEchoTracker;
 import com.android.systemui.plugins.DarkIconDispatcher;
@@ -55,6 +56,7 @@ import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.OperatorNameViewController;
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModel;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder;
@@ -90,10 +92,11 @@ import java.util.List;
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
-
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter();
     private NotificationIconAreaController mMockNotificationAreaController;
     private ShadeExpansionStateManager mShadeExpansionStateManager;
     private OngoingCallController mOngoingCallController;
+    private OngoingActivityChipsViewModel mOngoingActivityChipsViewModel;
     private SystemStatusAnimationScheduler mAnimationScheduler;
     private StatusBarLocationPublisher mLocationPublisher;
     // Set in instantiate()
@@ -667,6 +670,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         MockitoAnnotations.initMocks(this);
         setUpDaggerComponent();
         mOngoingCallController = mock(OngoingCallController.class);
+        mOngoingActivityChipsViewModel = mKosmos.getOngoingActivityChipsViewModel();
         mAnimationScheduler = mock(SystemStatusAnimationScheduler.class);
         mLocationPublisher = mock(StatusBarLocationPublisher.class);
         mStatusBarIconController = mock(StatusBarIconController.class);
@@ -687,6 +691,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         return new CollapsedStatusBarFragment(
                 mStatusBarFragmentComponentFactory,
                 mOngoingCallController,
+                mOngoingActivityChipsViewModel,
                 mAnimationScheduler,
                 mLocationPublisher,
                 mMockNotificationAreaController,
