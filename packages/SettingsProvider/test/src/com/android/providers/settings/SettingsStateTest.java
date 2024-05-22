@@ -29,11 +29,17 @@ import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.Xml;
+import android.util.proto.ProtoOutputStream;
+import com.android.providers.settings.SettingsState.FlagOverrideToSync;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.modules.utils.TypedXmlSerializer;
+
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import com.google.common.base.Strings;
 
@@ -946,5 +952,116 @@ public class SettingsStateTest {
         expectedMemUsageForPackage2 = (testKey2.length() + testValue1.length()
                 + testValue1.length() /* size for default */) * Character.BYTES;
         assertEquals(expectedMemUsageForPackage2, settingsState.getMemoryUsage(package2));
+    }
+
+    @Test
+    public void testGetFlagOverrideToSync() {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+        Object lock = new Object();
+        SettingsState settingsState = new SettingsState(
+                InstrumentationRegistry.getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+        parsed_flags flags = parsed_flags
+                .newBuilder()
+                .addParsedFlag(parsed_flag
+                    .newBuilder()
+                        .setPackage("com.android.flags")
+                        .setName("flag1")
+                        .setNamespace("test_namespace")
+                        .setDescription("test flag")
+                        .addBug("12345678")
+                        .setState(Aconfig.flag_state.DISABLED)
+                        .setPermission(Aconfig.flag_permission.READ_WRITE))
+                .build();
+
+        synchronized (lock) {
+            Map<String, Map<String, String>> defaults = new HashMap<>();
+            settingsState.loadAconfigDefaultValues(flags.toByteArray(), defaults);
+            Map<String, String> namespaceDefaults = defaults.get("test_namespace");
+            assertEquals(1, namespaceDefaults.keySet().size());
+            settingsState.addAconfigDefaultValuesFromMap(defaults);
+        }
+
+        // invalid flag name
+        assertTrue(settingsState.getFlagOverrideToSync(
+            "invalid_flag", "false") == null);
+
+        // non aconfig flag
+        assertTrue(settingsState.getFlagOverrideToSync(
+            "some_namespace/some_flag", "false") == null);
+
+        // server override
+        FlagOverrideToSync flag = settingsState.getFlagOverrideToSync(
+            "test_namespace/com.android.flags.flag1", "false");
+        assertTrue(flag != null);
+        assertEquals(flag.packageName, "com.android.flags");
+        assertEquals(flag.flagName, "flag1");
+        assertEquals(flag.flagValue, "false");
+        assertEquals(flag.isLocal, false);
+
+        // local override
+        flag = settingsState.getFlagOverrideToSync(
+            "device_config_overrides/test_namespace:com.android.flags.flag1", "false");
+        assertTrue(flag != null);
+        assertEquals(flag.packageName, "com.android.flags");
+        assertEquals(flag.flagName, "flag1");
+        assertEquals(flag.flagValue, "false");
+        assertEquals(flag.isLocal, true);
+    }
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
+    @Test
+    @EnableFlags(com.android.aconfig_new_storage.Flags.FLAG_ENABLE_ACONFIG_STORAGE_DAEMON)
+    public void testHandleBulkSyncWithAconfigdEnabled() {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+        Object lock = new Object();
+        SettingsState settingsState = new SettingsState(
+                InstrumentationRegistry.getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        synchronized (lock) {
+            settingsState.insertSettingLocked("aconfigd_marker/bulk_synced",
+                    "false", null, false, "aconfig");
+
+            // first bulk sync
+            ProtoOutputStream requests = settingsState.handleBulkSyncToNewStorage();
+            assertTrue(requests != null);
+            String value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
+            assertEquals("true", value);
+
+            // send time should no longer bulk sync
+            requests = settingsState.handleBulkSyncToNewStorage();
+            assertTrue(requests == null);
+            value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
+            assertEquals("true", value);
+        }
+    }
+
+    @Test
+    @DisableFlags(com.android.aconfig_new_storage.Flags.FLAG_ENABLE_ACONFIG_STORAGE_DAEMON)
+    public void testHandleBulkSyncWithAconfigdDisabled() {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+        Object lock = new Object();
+        SettingsState settingsState = new SettingsState(
+                InstrumentationRegistry.getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        synchronized (lock) {
+            settingsState.insertSettingLocked("aconfigd_marker/bulk_synced",
+                    "true", null, false, "aconfig");
+
+            // when aconfigd is off, should change the marker to false
+            ProtoOutputStream requests = settingsState.handleBulkSyncToNewStorage();
+            assertTrue(requests == null);
+            String value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
+            assertEquals("false", value);
+
+            // marker started with false value, after call, it should remain false
+            requests = settingsState.handleBulkSyncToNewStorage();
+            assertTrue(requests == null);
+            value = settingsState.getSettingLocked("aconfigd_marker/bulk_synced").getValue();
+            assertEquals("false", value);
+        }
     }
 }

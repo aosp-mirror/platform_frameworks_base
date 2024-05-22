@@ -32,6 +32,8 @@ android_library {
         "unsupportedappusage",
     ],
     static_libs: [
+        "aconfig_new_storage_flags_lib",
+        "aconfigd_java_utils",
         "aconfig_demo_flags_java_lib",
         "device_config_service_flags_java",
         "libaconfig_java_proto_lite",
