@@ -318,6 +318,16 @@ flag {
 }
 
 flag {
+  name: "delete_private_space_under_restriction"
+  namespace: "enterprise"
+  description: "Delete private space if user restriction is set"
+  bug: "328758346"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "headless_single_user_fixes"
     namespace: "enterprise"
     description: "Various fixes for headless single user mode"

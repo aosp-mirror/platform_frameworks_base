@@ -55,6 +55,8 @@ import com.android.systemui.settings.brightness.domain.interactor.brightnessMirr
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shadeController
+import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
+import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
@@ -62,11 +64,18 @@ import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisionin
 import com.android.systemui.util.time.systemClock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-/** Helper for using [Kosmos] from Java. */
+/**
+ * Helper for using [Kosmos] from Java.
+ *
+ * If your test class extends [SysuiTestCase], you may use the secondary constructor so that
+ * [Kosmos.applicationContext] and [Kosmos.testCase] are automatically set.
+ */
 @Deprecated("Please convert your test to Kotlin and use [Kosmos] directly.")
-class KosmosJavaAdapter(
-    testCase: SysuiTestCase,
-) {
+class KosmosJavaAdapter() {
+    constructor(testCase: SysuiTestCase) : this() {
+        kosmos.applicationContext = testCase.context
+        kosmos.testCase = testCase
+    }
 
     private val kosmos = Kosmos()
 
@@ -78,6 +87,7 @@ class KosmosJavaAdapter(
     val configurationInteractor by lazy { kosmos.configurationInteractor }
     val bouncerRepository by lazy { kosmos.bouncerRepository }
     val communalRepository by lazy { kosmos.fakeCommunalRepository }
+    val headsUpNotificationInteractor by lazy { kosmos.headsUpNotificationInteractor }
     val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
     val keyguardBouncerRepository by lazy { kosmos.fakeKeyguardBouncerRepository }
     val keyguardInteractor by lazy { kosmos.keyguardInteractor }
@@ -117,8 +127,5 @@ class KosmosJavaAdapter(
     val shadeRepository by lazy { kosmos.shadeRepository }
     val shadeInteractor by lazy { kosmos.shadeInteractor }
 
-    init {
-        kosmos.applicationContext = testCase.context
-        kosmos.testCase = testCase
-    }
+    val ongoingActivityChipsViewModel by lazy { kosmos.ongoingActivityChipsViewModel }
 }

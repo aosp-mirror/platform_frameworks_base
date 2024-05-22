@@ -21,9 +21,9 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qs.panels.domain.interactor.GridLayoutTypeInteractor
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.ui.compose.GridLayout
-import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import javax.inject.Inject
+import javax.inject.Named
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -41,7 +41,7 @@ constructor(
     gridLayoutTypeInteractor: GridLayoutTypeInteractor,
     gridLayoutMap: Map<GridLayoutType, @JvmSuppressWildcards GridLayout>,
     tilesInteractor: CurrentTilesInteractor,
-    defaultGridLayout: InfiniteGridLayout,
+    @Named("Default") defaultGridLayout: GridLayout,
     @Application private val applicationScope: CoroutineScope
 ) {
     val gridLayout: StateFlow<GridLayout> =

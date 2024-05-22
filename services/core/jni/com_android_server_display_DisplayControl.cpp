@@ -23,20 +23,22 @@
 
 namespace android {
 
-static jobject nativeCreateDisplay(JNIEnv* env, jclass clazz, jstring nameObj, jboolean secure,
-                                   jstring uniqueIdStr, jfloat requestedRefreshRate) {
+static jobject nativeCreateVirtualDisplay(JNIEnv* env, jclass clazz, jstring nameObj,
+                                          jboolean secure, jstring uniqueIdStr,
+                                          jfloat requestedRefreshRate) {
     const ScopedUtfChars name(env, nameObj);
     const ScopedUtfChars uniqueId(env, uniqueIdStr);
-    sp<IBinder> token(SurfaceComposerClient::createDisplay(String8(name.c_str()), bool(secure),
-                                                           std::string(uniqueId.c_str()),
-                                                           requestedRefreshRate));
+    sp<IBinder> token(SurfaceComposerClient::createVirtualDisplay(std::string(name.c_str()),
+                                                                  bool(secure),
+                                                                  std::string(uniqueId.c_str()),
+                                                                  requestedRefreshRate));
     return javaObjectForIBinder(env, token);
 }
 
-static void nativeDestroyDisplay(JNIEnv* env, jclass clazz, jobject tokenObj) {
+static void nativeDestroyVirtualDisplay(JNIEnv* env, jclass clazz, jobject tokenObj) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return;
-    SurfaceComposerClient::destroyDisplay(token);
+    SurfaceComposerClient::destroyVirtualDisplay(token);
 }
 
 static void nativeOverrideHdrTypes(JNIEnv* env, jclass clazz, jobject tokenObject,
@@ -180,10 +182,10 @@ static jobject nativeGetPhysicalDisplayToken(JNIEnv* env, jclass clazz, jlong ph
 
 static const JNINativeMethod sDisplayMethods[] = {
         // clang-format off
-    {"nativeCreateDisplay", "(Ljava/lang/String;ZLjava/lang/String;F)Landroid/os/IBinder;",
-            (void*)nativeCreateDisplay },
-    {"nativeDestroyDisplay", "(Landroid/os/IBinder;)V",
-            (void*)nativeDestroyDisplay },
+    {"nativeCreateVirtualDisplay", "(Ljava/lang/String;ZLjava/lang/String;F)Landroid/os/IBinder;",
+            (void*)nativeCreateVirtualDisplay },
+    {"nativeDestroyVirtualDisplay", "(Landroid/os/IBinder;)V",
+            (void*)nativeDestroyVirtualDisplay },
     {"nativeOverrideHdrTypes", "(Landroid/os/IBinder;[I)V",
                 (void*)nativeOverrideHdrTypes },
     {"nativeGetPhysicalDisplayIds", "()[J",

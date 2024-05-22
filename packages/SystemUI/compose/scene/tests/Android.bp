@@ -25,8 +25,8 @@ package {
 android_test {
     name: "PlatformComposeSceneTransitionLayoutTests",
     manifest: "AndroidManifest.xml",
+    defaults: ["MotionTestDefaults"],
     test_suites: ["device-tests"],
-    certificate: "platform",
 
     srcs: [
         "src/**/*.kt",
@@ -38,7 +38,7 @@ android_test {
 
     static_libs: [
         "PlatformComposeSceneTransitionLayoutTestsUtils",
-
+        "PlatformMotionTestingCompose",
         "androidx.test.runner",
         "androidx.test.ext.junit",
 
@@ -48,7 +48,7 @@ android_test {
 
         "truth",
     ],
-
+    asset_dirs: ["goldens"],
     kotlincflags: ["-Xjvm-default=all"],
     use_resource_processor: true,
 }

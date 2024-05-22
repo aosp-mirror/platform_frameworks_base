@@ -433,7 +433,8 @@ public class DreamService extends Service implements Window.Callback {
                         mTrackingConfirmKey = event.getKeyCode();
                     }
                     case KeyEvent.ACTION_UP -> {
-                        if (mTrackingConfirmKey != event.getKeyCode()) {
+                        if (mTrackingConfirmKey == null
+                                || mTrackingConfirmKey != event.getKeyCode()) {
                             return true;
                         }
 

@@ -207,19 +207,24 @@ constructor(
             .distinctUntilChanged()
 
     private val isUnlocked: Flow<Boolean> =
-        keyguardInteractor.isKeyguardDismissible.flatMapLatest { isUnlocked ->
-            if (!isUnlocked) {
-                flowOf(false)
+        if (SceneContainerFlag.isEnabled) {
+                deviceEntryInteractor.isUnlocked
             } else {
-                flow {
-                    // delay in case device ends up transitioning away from the lock screen;
-                    // we don't want to animate to the unlocked icon and just let the
-                    // icon fade with the transition to GONE
-                    delay(UNLOCKED_DELAY_MS)
-                    emit(true)
+                keyguardInteractor.isKeyguardDismissible
+            }
+            .flatMapLatest { isUnlocked ->
+                if (!isUnlocked) {
+                    flowOf(false)
+                } else {
+                    flow {
+                        // delay in case device ends up transitioning away from the lock screen;
+                        // we don't want to animate to the unlocked icon and just let the
+                        // icon fade with the transition to GONE
+                        delay(UNLOCKED_DELAY_MS)
+                        emit(true)
+                    }
                 }
             }
-        }
 
     val iconType: Flow<DeviceEntryIconView.IconType> =
         combine(

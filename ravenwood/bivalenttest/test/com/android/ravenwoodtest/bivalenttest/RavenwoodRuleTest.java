@@ -18,6 +18,7 @@ package com.android.ravenwoodtest.bivalenttest;
 import android.platform.test.annotations.DisabledOnNonRavenwood;
 import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
+import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -41,6 +42,14 @@ public class RavenwoodRuleTest {
     @DisabledOnNonRavenwood
     public void testRavenwoodOnly() {
         Assert.assertTrue(RavenwoodRule.isOnRavenwood());
+    }
+
+    @Test
+    public void testDumpSystemProperties() {
+        Log.w("XXX", "System properties");
+        for (var sp : System.getProperties().entrySet()) {
+            Log.w("XXX", "" + sp.getKey() + "=" + sp.getValue());
+        }
     }
 
     // TODO: Add more tests

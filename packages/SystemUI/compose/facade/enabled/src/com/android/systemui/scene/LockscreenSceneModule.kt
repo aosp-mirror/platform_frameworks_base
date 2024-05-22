@@ -19,11 +19,14 @@ package com.android.systemui.scene
 import android.view.View
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewConfigurator
+import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.qualifiers.KeyguardRootView
 import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
+import com.android.systemui.keyguard.ui.composable.LockscreenContent
 import com.android.systemui.keyguard.ui.composable.LockscreenScene
 import com.android.systemui.keyguard.ui.composable.LockscreenSceneBlueprintModule
 import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.scene.shared.model.Scene
 import dagger.Binds
 import dagger.Module
@@ -59,6 +62,15 @@ interface LockscreenSceneModule {
             blueprints: Set<@JvmSuppressWildcards ComposableLockscreenSceneBlueprint>
         ): Set<LockscreenSceneBlueprint> {
             return blueprints
+        }
+
+        @Provides
+        fun providesLockscreenContent(
+            viewModel: LockscreenContentViewModel,
+            blueprints: Set<@JvmSuppressWildcards ComposableLockscreenSceneBlueprint>,
+            clockInteractor: KeyguardClockInteractor,
+        ): LockscreenContent {
+            return LockscreenContent(viewModel, blueprints, clockInteractor)
         }
     }
 }

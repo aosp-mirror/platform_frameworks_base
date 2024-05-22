@@ -249,8 +249,14 @@ constructor(
                     state == GLANCEABLE_HUB
                 },
                 anyOf(
-                    keyguardTransitionInteractor.isInTransitionToState(GLANCEABLE_HUB),
-                    keyguardTransitionInteractor.isInTransitionFromState(GLANCEABLE_HUB),
+                    keyguardTransitionInteractor.isInTransition(
+                        edge = Edge.create(to = Scenes.Communal),
+                        edgeWithoutSceneContainer = Edge.create(to = GLANCEABLE_HUB)
+                    ),
+                    keyguardTransitionInteractor.isInTransition(
+                        edge = Edge.create(from = Scenes.Communal),
+                        edgeWithoutSceneContainer = Edge.create(from = GLANCEABLE_HUB)
+                    ),
                 ),
             ) { isOnGlanceableHub, transitioningToOrFromHub ->
                 isOnGlanceableHub || transitioningToOrFromHub

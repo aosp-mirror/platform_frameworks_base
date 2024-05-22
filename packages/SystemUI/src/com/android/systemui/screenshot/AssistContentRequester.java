@@ -89,9 +89,12 @@ public class AssistContentRequester {
         // ActivityTaskManager interaction here is synchronous, so call off the main thread.
         mSystemInteractionExecutor.execute(() -> {
             try {
-                mActivityTaskManager.requestAssistDataForTask(
+                boolean success = mActivityTaskManager.requestAssistDataForTask(
                         new AssistDataReceiver(callback, this), taskId, mPackageName,
                         mAttributionTag);
+                if (!success) {
+                    callback.onAssistContentAvailable(null);
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Requesting assist content failed for task: " + taskId, e);
             }

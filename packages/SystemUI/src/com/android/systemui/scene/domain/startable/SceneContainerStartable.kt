@@ -45,6 +45,7 @@ import com.android.systemui.model.updateFlags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.FalsingBeliefListener
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.scene.data.model.asIterable
 import com.android.systemui.scene.domain.interactor.SceneBackInteractor
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
@@ -364,6 +365,29 @@ constructor(
     }
 
     private fun handlePowerState() {
+        applicationScope.launch {
+            powerInteractor.detailedWakefulness.collect { wakefulness ->
+                // Detect a double-tap-power-button gesture that was started while the device was
+                // still awake.
+                if (wakefulness.isAsleep()) return@collect
+                if (!wakefulness.powerButtonLaunchGestureTriggered) return@collect
+                if (wakefulness.lastSleepReason != WakeSleepReason.POWER_BUTTON) return@collect
+
+                // If we're mid-transition from Gone to Lockscreen due to the first power button
+                // press, then return to Gone.
+                val transition: ObservableTransitionState.Transition =
+                    sceneInteractor.transitionState.value as? ObservableTransitionState.Transition
+                        ?: return@collect
+                if (
+                    transition.fromScene == Scenes.Gone && transition.toScene == Scenes.Lockscreen
+                ) {
+                    switchToScene(
+                        targetSceneKey = Scenes.Gone,
+                        loggingReason = "double-tap power gesture",
+                    )
+                }
+            }
+        }
         applicationScope.launch {
             powerInteractor.isAsleep.collect { isAsleep ->
                 if (isAsleep) {

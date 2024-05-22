@@ -24,6 +24,7 @@ import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 import static com.google.common.truth.Truth.assertThat;
 
 import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+import static kotlinx.coroutines.flow.SharedFlowKt.MutableSharedFlow;
 import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -204,6 +205,7 @@ import com.android.wm.shell.animation.FlingAnimationUtils;
 import dagger.Lazy;
 
 import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.channels.BufferOverflow;
 import kotlinx.coroutines.test.TestScope;
 
 import org.junit.After;
@@ -351,7 +353,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock private KeyguardClockPositionAlgorithm mKeyguardClockPositionAlgorithm;
     @Mock private NaturalScrollingSettingObserver mNaturalScrollingSettingObserver;
     @Mock private LargeScreenHeaderHelper mLargeScreenHeaderHelper;
-
     protected final int mMaxUdfpsBurnInOffsetY = 5;
     protected FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
@@ -366,8 +367,11 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     protected PowerInteractor mPowerInteractor;
     protected FakeHeadsUpNotificationRepository mFakeHeadsUpNotificationRepository =
             new FakeHeadsUpNotificationRepository();
-    protected HeadsUpNotificationInteractor mHeadsUpNotificationInteractor =
-            new HeadsUpNotificationInteractor(mFakeHeadsUpNotificationRepository);
+    protected NotificationsKeyguardViewStateRepository mNotificationsKeyguardViewStateRepository =
+            new NotificationsKeyguardViewStateRepository();
+    protected NotificationsKeyguardInteractor mNotificationsKeyguardInteractor =
+            new NotificationsKeyguardInteractor(mNotificationsKeyguardViewStateRepository);
+    protected HeadsUpNotificationInteractor mHeadsUpNotificationInteractor;
     protected NotificationPanelViewController.TouchHandler mTouchHandler;
     protected ConfigurationController mConfigurationController;
     protected SysuiStatusBarStateController mStatusBarStateController;
@@ -417,11 +421,14 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mPowerInteractor = keyguardInteractorDeps.getPowerInteractor();
         when(mKeyguardTransitionInteractor.isInTransitionToStateWhere(any())).thenReturn(
                 MutableStateFlow(false));
+        when(mKeyguardTransitionInteractor.isInTransition(any(), any()))
+                .thenReturn(emptyFlow());
+        when(mKeyguardTransitionInteractor.getCurrentKeyguardState()).thenReturn(
+                MutableSharedFlow(0, 0, BufferOverflow.SUSPEND));
+        when(mDeviceEntryFaceAuthInteractor.isBypassEnabled()).thenReturn(MutableStateFlow(false));
         DeviceEntryUdfpsInteractor deviceEntryUdfpsInteractor =
                 mock(DeviceEntryUdfpsInteractor.class);
         when(deviceEntryUdfpsInteractor.isUdfpsSupported()).thenReturn(MutableStateFlow(false));
-
-        when(mKeyguardTransitionInteractor.isInTransitionToState(any())).thenReturn(emptyFlow());
 
         mShadeInteractor = new ShadeInteractorImpl(
                 mTestScope.getBackgroundScope(),
@@ -669,6 +676,11 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
         when(mView.requireViewById(R.id.keyguard_long_press))
                 .thenReturn(mock(LongPressHandlingView.class));
+
+        mHeadsUpNotificationInteractor =
+                new HeadsUpNotificationInteractor(mFakeHeadsUpNotificationRepository,
+                        mDeviceEntryFaceAuthInteractor, mKeyguardTransitionInteractor,
+                        mNotificationsKeyguardInteractor, mShadeInteractor);
 
         mNotificationPanelViewController = new NotificationPanelViewController(
                 mView,

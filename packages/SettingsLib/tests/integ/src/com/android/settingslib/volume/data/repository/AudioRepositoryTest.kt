@@ -173,6 +173,7 @@ class AudioRepositoryTest {
                         volume = 50,
                         minVolume = MIN_VOLUME,
                         maxVolume = MAX_VOLUME,
+                        isAffectedByMute = false,
                         isAffectedByRingerMode = false,
                         isMuted = false,
                     )
@@ -201,6 +202,7 @@ class AudioRepositoryTest {
                         volume = 0,
                         minVolume = MIN_VOLUME,
                         maxVolume = MAX_VOLUME,
+                        isAffectedByMute = false,
                         isAffectedByRingerMode = false,
                         isMuted = true,
                     )
@@ -230,6 +232,7 @@ class AudioRepositoryTest {
                         volume = 0,
                         minVolume = MIN_VOLUME,
                         maxVolume = MAX_VOLUME,
+                        isAffectedByMute = false,
                         isAffectedByRingerMode = false,
                         isMuted = false,
                     )

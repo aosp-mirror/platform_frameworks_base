@@ -46,6 +46,7 @@ import android.service.dreams.IDreamOverlayCallback;
 import android.service.dreams.IDreamOverlayClient;
 import android.service.dreams.IDreamService;
 import android.testing.TestableLooper;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowInsetsController;
@@ -388,6 +389,13 @@ public class TestDreamEnvironment {
 
             mDreamOverlayCallback = overlayCallbackCaptor.getValue();
         }
+    }
+
+    /**
+     * Sends a key event to the dream.
+     */
+    public void dispatchKeyEvent(KeyEvent event) {
+        mService.dispatchKeyEvent(event);
     }
 
     private void wakeDream() throws RemoteException {

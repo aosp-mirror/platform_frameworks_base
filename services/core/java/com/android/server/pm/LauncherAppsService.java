@@ -1239,6 +1239,8 @@ public class LauncherAppsService extends SystemService {
                 @NonNull final ShortcutQueryWrapper query, @NonNull final UserHandle targetUser) {
             ensureShortcutPermission(callingPackage);
             if (!canAccessProfile(targetUser.getIdentifier(), "Cannot get shortcuts")) {
+                Log.e(TAG, "return empty shortcuts because callingPackage " + callingPackage
+                        + " cannot access user " + targetUser.getIdentifier());
                 return new ParceledListSlice<>(Collections.EMPTY_LIST);
             }
 

@@ -36,9 +36,7 @@ import javax.inject.Inject
  * This is separate from the [LockscreenScene] because it's meant to support usage of this UI from
  * outside the scene container framework.
  */
-class LockscreenContent
-@Inject
-constructor(
+class LockscreenContent(
     private val viewModel: LockscreenContentViewModel,
     private val blueprints: Set<@JvmSuppressWildcards ComposableLockscreenSceneBlueprint>,
     private val clockInteractor: KeyguardClockInteractor,

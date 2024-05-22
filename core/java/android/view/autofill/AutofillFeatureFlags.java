@@ -532,7 +532,7 @@ public class AutofillFeatureFlags {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_IGNORE_VIEW_STATE_RESET_TO_EMPTY,
-                false);
+                true);
     }
 
     /** @hide */

@@ -10234,7 +10234,7 @@ public final class ViewRootImpl implements ViewParent,
             // force DRAG_EXITED_EVENT if appropriate
             DragEvent event = DragEvent.obtain(
                     isExiting ? DragEvent.ACTION_DRAG_EXITED : DragEvent.ACTION_DRAG_LOCATION,
-                    x, y, 0 /* offsetX */, 0 /* offsetY */, null/* localState */,
+                    x, y, 0 /* offsetX */, 0 /* offsetY */, 0 /* flags */, null/* localState */,
                     null/* description */, null /* data */, null /* dragSurface */,
                     null /* dragAndDropPermissions */, false /* result */);
             dispatchDragEvent(event);
@@ -11258,10 +11258,10 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void insetsControlChanged(InsetsState insetsState,
-                InsetsSourceControl[] activeControls) {
+                InsetsSourceControl.Array activeControls) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.dispatchInsetsControlChanged(insetsState, activeControls);
+                viewAncestor.dispatchInsetsControlChanged(insetsState, activeControls.get());
             }
         }
 

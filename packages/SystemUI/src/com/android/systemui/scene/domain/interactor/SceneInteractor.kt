@@ -315,9 +315,17 @@ constructor(
             return false
         }
 
-        check(to != Scenes.Gone || deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked) {
-            "Cannot change to the Gone scene while the device is locked. Logging reason for scene" +
-                " change was: $loggingReason"
+        val inMidTransitionFromGone =
+            (transitionState.value as? ObservableTransitionState.Transition)?.fromScene ==
+                Scenes.Gone
+        val isChangeAllowed =
+            to != Scenes.Gone ||
+                inMidTransitionFromGone ||
+                deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked
+        check(isChangeAllowed) {
+            "Cannot change to the Gone scene while the device is locked and not currently" +
+                " transitioning from Gone. Current transition state is ${transitionState.value}." +
+                " Logging reason for scene change was: $loggingReason"
         }
 
         return from != to

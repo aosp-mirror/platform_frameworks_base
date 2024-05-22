@@ -90,7 +90,9 @@ public class BatteryUsageStatsProvider {
                 if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_WIFI)) {
                     mPowerCalculators.add(new WifiPowerCalculator(mPowerProfile));
                 }
-                mPowerCalculators.add(new BluetoothPowerCalculator(mPowerProfile));
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_BLUETOOTH)) {
+                    mPowerCalculators.add(new BluetoothPowerCalculator(mPowerProfile));
+                }
                 mPowerCalculators.add(new SensorPowerCalculator(
                         mContext.getSystemService(SensorManager.class)));
                 mPowerCalculators.add(new GnssPowerCalculator(mPowerProfile));

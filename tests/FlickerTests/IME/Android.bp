@@ -56,6 +56,10 @@ android_test {
     defaults: ["FlickerTestsDefault"],
     manifest: "AndroidManifest.xml",
     test_config_template: "AndroidTestTemplate.xml",
+    test_suites: [
+        "device-tests",
+        "device-platinum-tests",
+    ],
     srcs: [":FlickerTestsIme1-src"],
     static_libs: [
         "FlickerTestsBase",

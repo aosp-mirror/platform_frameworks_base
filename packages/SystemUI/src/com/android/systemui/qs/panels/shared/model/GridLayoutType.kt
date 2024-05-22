@@ -31,3 +31,6 @@ data object InfiniteGridLayoutType : GridLayoutType
  * spaces.
  */
 data object StretchedGridLayoutType : GridLayoutType
+
+/** Grid type grouping large tiles on top and icon tiles at the bottom. */
+data object PartitionedGridLayoutType : GridLayoutType

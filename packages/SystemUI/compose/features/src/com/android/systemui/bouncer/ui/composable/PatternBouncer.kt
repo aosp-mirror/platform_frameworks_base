@@ -17,6 +17,7 @@
 package com.android.systemui.bouncer.ui.composable
 
 import android.view.HapticFeedbackConstants
+import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.tween
@@ -50,6 +51,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Easings
 import com.android.compose.modifiers.thenIf
 import com.android.internal.R
+import com.android.systemui.bouncer.ui.composable.MotionTestKeys.dotAppearFadeIn
+import com.android.systemui.bouncer.ui.composable.MotionTestKeys.dotAppearMoveUp
+import com.android.systemui.bouncer.ui.composable.MotionTestKeys.dotScaling
+import com.android.systemui.bouncer.ui.composable.MotionTestKeys.entryCompleted
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternDotViewModel
 import com.android.systemui.compose.modifiers.sysuiResTag
@@ -58,6 +63,8 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import platform.test.motion.compose.values.MotionTestValueKey
+import platform.test.motion.compose.values.motionTestValues
 
 /**
  * UI for the input part of a pattern-requiring version of the bouncer.
@@ -68,7 +75,8 @@ import kotlinx.coroutines.launch
  * `false`, the dots will be pushed towards the end/bottom of the axis.
  */
 @Composable
-internal fun PatternBouncer(
+@VisibleForTesting
+fun PatternBouncer(
     viewModel: PatternBouncerViewModel,
     centerDotsVertically: Boolean,
     modifier: Modifier = Modifier,
@@ -111,33 +119,11 @@ internal fun PatternBouncer(
         remember(dots) {
             dots.associateWith { dot -> with(density) { (80 + (20 * dot.y)).dp.toPx() } }
         }
+
+    var entryAnimationCompleted by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        dotAppearFadeInAnimatables.forEach { (dot, animatable) ->
-            scope.launch {
-                animatable.animateTo(
-                    targetValue = 1f,
-                    animationSpec =
-                        tween(
-                            delayMillis = 33 * dot.y,
-                            durationMillis = 450,
-                            easing = Easings.LegacyDecelerate,
-                        )
-                )
-            }
-        }
-        dotAppearMoveUpAnimatables.forEach { (dot, animatable) ->
-            scope.launch {
-                animatable.animateTo(
-                    targetValue = 1f,
-                    animationSpec =
-                        tween(
-                            delayMillis = 0,
-                            durationMillis = 450 + (33 * dot.y),
-                            easing = Easings.StandardDecelerate,
-                        )
-                )
-            }
-        }
+        showEntryAnimation(dotAppearFadeInAnimatables, dotAppearMoveUpAnimatables)
+        entryAnimationCompleted = true
     }
 
     val view = LocalView.current
@@ -286,6 +272,12 @@ internal fun PatternBouncer(
                         }
                     }
             }
+            .motionTestValues {
+                entryAnimationCompleted exportAs entryCompleted
+                dotAppearFadeInAnimatables.map { it.value.value } exportAs dotAppearFadeIn
+                dotAppearMoveUpAnimatables.map { it.value.value } exportAs dotAppearMoveUp
+                dotScalingAnimatables.map { it.value.value } exportAs dotScaling
+            }
     ) {
         gridCoordinates?.let { nonNullCoordinates ->
             val containerSize = nonNullCoordinates.size
@@ -375,6 +367,40 @@ internal fun PatternBouncer(
                     color =
                         dotColor.copy(alpha = checkNotNull(dotAppearFadeInAnimatables[dot]).value),
                     radius = dotRadius * checkNotNull(dotScalingAnimatables[dot]).value
+                )
+            }
+        }
+    }
+}
+
+private suspend fun showEntryAnimation(
+    dotAppearFadeInAnimatables: Map<PatternDotViewModel, Animatable<Float, AnimationVector1D>>,
+    dotAppearMoveUpAnimatables: Map<PatternDotViewModel, Animatable<Float, AnimationVector1D>>,
+) {
+    coroutineScope {
+        dotAppearFadeInAnimatables.forEach { (dot, animatable) ->
+            launch {
+                animatable.animateTo(
+                    targetValue = 1f,
+                    animationSpec =
+                        tween(
+                            delayMillis = 33 * dot.y,
+                            durationMillis = 450,
+                            easing = Easings.LegacyDecelerate,
+                        )
+                )
+            }
+        }
+        dotAppearMoveUpAnimatables.forEach { (dot, animatable) ->
+            launch {
+                animatable.animateTo(
+                    targetValue = 1f,
+                    animationSpec =
+                        tween(
+                            delayMillis = 0,
+                            durationMillis = 450 + (33 * dot.y),
+                            easing = Easings.StandardDecelerate,
+                        )
                 )
             }
         }
@@ -490,3 +516,11 @@ private const val FAILURE_ANIMATION_DOT_DIAMETER_DP = (DOT_DIAMETER_DP * 0.81f).
 private const val FAILURE_ANIMATION_DOT_SHRINK_ANIMATION_DURATION_MS = 50
 private const val FAILURE_ANIMATION_DOT_SHRINK_STAGGER_DELAY_MS = 33
 private const val FAILURE_ANIMATION_DOT_REVERT_ANIMATION_DURATION = 617
+
+@VisibleForTesting
+object MotionTestKeys {
+    val entryCompleted = MotionTestValueKey<Boolean>("PinBouncer::entryAnimationCompleted")
+    val dotAppearFadeIn = MotionTestValueKey<List<Float>>("PinBouncer::dotAppearFadeIn")
+    val dotAppearMoveUp = MotionTestValueKey<List<Float>>("PinBouncer::dotAppearMoveUp")
+    val dotScaling = MotionTestValueKey<List<Float>>("PinBouncer::dotScaling")
+}

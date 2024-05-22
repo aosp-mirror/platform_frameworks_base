@@ -21,26 +21,26 @@ import android.text.TextUtils
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
-import com.android.systemui.qs.tiles.impl.screenrecord.domain.model.ScreenRecordTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import javax.inject.Inject
 
-/** Maps [ScreenRecordTileModel] to [QSTileState]. */
+/** Maps [ScreenRecordModel] to [QSTileState]. */
 class ScreenRecordTileMapper
 @Inject
 constructor(
     @Main private val resources: Resources,
     private val theme: Resources.Theme,
-) : QSTileDataToStateMapper<ScreenRecordTileModel> {
-    override fun map(config: QSTileConfig, data: ScreenRecordTileModel): QSTileState =
+) : QSTileDataToStateMapper<ScreenRecordModel> {
+    override fun map(config: QSTileConfig, data: ScreenRecordModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
             label = resources.getString(R.string.quick_settings_screen_record_label)
             supportedActions = setOf(QSTileState.UserAction.CLICK)
 
             when (data) {
-                is ScreenRecordTileModel.Recording -> {
+                is ScreenRecordModel.Recording -> {
                     activationState = QSTileState.ActivationState.ACTIVE
                     val loadedIcon =
                         Icon.Loaded(
@@ -51,7 +51,7 @@ constructor(
                     sideViewIcon = QSTileState.SideViewIcon.None
                     secondaryLabel = resources.getString(R.string.quick_settings_screen_record_stop)
                 }
-                is ScreenRecordTileModel.Starting -> {
+                is ScreenRecordModel.Starting -> {
                     activationState = QSTileState.ActivationState.ACTIVE
                     val loadedIcon =
                         Icon.Loaded(
@@ -63,7 +63,7 @@ constructor(
                     sideViewIcon = QSTileState.SideViewIcon.None
                     secondaryLabel = String.format("%d...", countDown)
                 }
-                is ScreenRecordTileModel.DoingNothing -> {
+                is ScreenRecordModel.DoingNothing -> {
                     activationState = QSTileState.ActivationState.INACTIVE
                     val loadedIcon =
                         Icon.Loaded(

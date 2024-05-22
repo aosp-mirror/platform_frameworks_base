@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.res.Resources
 import com.android.internal.annotations.VisibleForTesting
-import com.android.keyguard.KeyguardClockSwitch.SMALL
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -48,7 +47,7 @@ constructor(
     val longPress: KeyguardLongPressViewModel,
     val shadeInteractor: ShadeInteractor,
     @Application private val applicationScope: CoroutineScope,
-    private val unfoldTransitionInteractor: UnfoldTransitionInteractor,
+    unfoldTransitionInteractor: UnfoldTransitionInteractor,
 ) {
     @VisibleForTesting val clockSize = clockInteractor.clockSize
 

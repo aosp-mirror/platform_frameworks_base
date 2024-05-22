@@ -196,7 +196,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 .getInteger(R.integer.config_keyguardRefreshRate);
         float actualPreferredRefreshRate = -1;
         if (desiredPreferredRefreshRate > -1) {
-            for (Display.Mode displayMode : context.getDisplay().getSupportedModes()) {
+            for (Display.Mode displayMode : context.getDisplay().getSystemSupportedModes()) {
                 if (Math.abs(displayMode.getRefreshRate() - desiredPreferredRefreshRate) <= .1) {
                     actualPreferredRefreshRate = displayMode.getRefreshRate();
                     break;

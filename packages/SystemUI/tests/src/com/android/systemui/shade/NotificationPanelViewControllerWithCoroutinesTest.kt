@@ -79,10 +79,9 @@ class NotificationPanelViewControllerWithCoroutinesTest :
 
         verify(mView, atLeastOnce()).addView(viewCaptor.capture(), anyInt())
         val userSwitcherStub =
-            CollectionUtils.find(
-                viewCaptor.getAllValues(),
-                { view -> view.getId() == R.id.keyguard_user_switcher_stub }
-            )
+            CollectionUtils.find(viewCaptor.allValues) { view ->
+                view.id == R.id.keyguard_user_switcher_stub
+            }
         assertThat(userSwitcherStub).isNotNull()
         assertThat(userSwitcherStub).isInstanceOf(ViewStub::class.java)
     }
@@ -251,7 +250,7 @@ class NotificationPanelViewControllerWithCoroutinesTest :
 
             // WHEN a pinned heads up is present
             mFakeHeadsUpNotificationRepository.setNotifications(
-                fakeHeadsUpRowRepository("key", isPinned = true)
+                FakeHeadsUpRowRepository("key", isPinned = true)
             )
         }
         advanceUntilIdle()
@@ -274,9 +273,4 @@ class NotificationPanelViewControllerWithCoroutinesTest :
         // THEN the panel should be visible
         assertThat(mNotificationPanelViewController.isExpanded).isTrue()
     }
-
-    private fun fakeHeadsUpRowRepository(key: String, isPinned: Boolean = false) =
-        FakeHeadsUpRowRepository(key = key, elementKey = Any()).apply {
-            this.isPinned.value = isPinned
-        }
 }

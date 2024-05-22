@@ -21,6 +21,7 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.SpringSpec
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -190,16 +191,17 @@ private fun CoroutineScope.animate(
         }
 
     // Animate the progress to its target value.
+    // Important: We start atomically to make sure that we start the coroutine even if it is
+    // cancelled right after it is launched, so that finishTransition() is correctly called.
+    // Otherwise, this transition will never be stopped and we will never settle to Idle.
     transition.job =
-        launch { animatable.animateTo(targetProgress, animationSpec, initialVelocity) }
-            .apply {
-                invokeOnCompletion {
-                    // Settle the state to Idle(target). Note that this will do nothing if this
-                    // transition was replaced/interrupted by another one, and this also runs if
-                    // this coroutine is cancelled, i.e. if [this] coroutine scope is cancelled.
-                    layoutState.finishTransition(transition, targetScene)
-                }
+        launch(start = CoroutineStart.ATOMIC) {
+            try {
+                animatable.animateTo(targetProgress, animationSpec, initialVelocity)
+            } finally {
+                layoutState.finishTransition(transition, targetScene)
             }
+        }
 
     return transition
 }

@@ -1446,6 +1446,7 @@ public class ZenModeHelper {
         if (Flags.modesApi()) {
             azr = new AutomaticZenRule.Builder(rule.name, rule.conditionId)
                     .setManualInvocationAllowed(rule.allowManualInvocation)
+                    .setPackage(rule.pkg)
                     .setCreationTime(rule.creationTime)
                     .setIconResId(drawableResNameToResId(rule.pkg, rule.iconResName))
                     .setType(rule.type)
@@ -1464,8 +1465,8 @@ public class ZenModeHelper {
                     rule.conditionId, rule.zenPolicy,
                     NotificationManager.zenModeToInterruptionFilter(rule.zenMode),
                     rule.enabled, rule.creationTime);
+            azr.setPackageName(rule.pkg);
         }
-        azr.setPackageName(rule.pkg);
         return azr;
     }
 

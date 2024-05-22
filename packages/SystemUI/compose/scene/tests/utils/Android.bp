@@ -32,6 +32,7 @@ android_library {
 
     static_libs: [
         "PlatformComposeSceneTransitionLayout",
+        "PlatformMotionTestingCompose",
         "androidx.compose.runtime_runtime",
         "androidx.compose.ui_ui-test-junit4",
     ],

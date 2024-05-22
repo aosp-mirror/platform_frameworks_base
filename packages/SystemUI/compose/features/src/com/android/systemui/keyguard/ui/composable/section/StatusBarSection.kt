@@ -54,12 +54,19 @@ constructor(
         @SuppressLint("InflateParams")
         val view =
             remember(context) {
-                LayoutInflater.from(context)
-                    .inflate(
-                        R.layout.keyguard_status_bar,
-                        null,
-                        false,
-                    ) as KeyguardStatusBarView
+                (LayoutInflater.from(context)
+                        .inflate(
+                            R.layout.keyguard_status_bar,
+                            null,
+                            false,
+                        ) as KeyguardStatusBarView)
+                    .also {
+                        it.layoutParams =
+                            ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT
+                            )
+                    }
             }
         val viewController =
             remember(view) {

@@ -66,6 +66,7 @@ import kotlinx.coroutines.test.runTest
             FaceWakeUpTriggersConfigModule::class,
         ]
 )
+@Deprecated("Use Kosmos instead. See com.android.systemui.kosmos.Kosmos.")
 interface SysUITestModule {
 
     @Binds fun bindTestableContext(sysuiTestableContext: SysuiTestableContext): TestableContext
@@ -127,6 +128,7 @@ interface SysUITestModule {
     }
 }
 
+@Deprecated("Use Kosmos instead. See com.android.systemui.kosmos.Kosmos.")
 interface SysUITestComponent<out T> {
     val testScope: TestScope
     val underTest: T

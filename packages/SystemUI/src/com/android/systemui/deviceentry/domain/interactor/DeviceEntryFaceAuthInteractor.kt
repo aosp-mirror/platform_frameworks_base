@@ -36,6 +36,9 @@ interface DeviceEntryFaceAuthInteractor {
 
     val authenticated: Flow<Boolean>
 
+    /** Whether bypass is enabled. If enabled, face unlock dismisses the lock screen. */
+    val isBypassEnabled: Flow<Boolean>
+
     /** Can face auth be run right now */
     fun canFaceAuthRun(): Boolean
 
