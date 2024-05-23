@@ -43,6 +43,7 @@ import static android.view.WindowManager.TransitionFlags;
 import static android.view.WindowManager.TransitionType;
 import static android.view.WindowManager.transitTypeToString;
 import static android.window.TaskFragmentAnimationParams.DEFAULT_ANIMATION_BACKGROUND_COLOR;
+import static android.window.TransitionInfo.AnimationOptions;
 import static android.window.TransitionInfo.FLAGS_IS_OCCLUDED_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_CONFIG_AT_END;
 import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
@@ -105,6 +106,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -318,6 +320,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      */
     ArrayList<ActivityRecord> mConfigAtEndActivities = null;
 
+    @VisibleForTesting
     Transition(@TransitionType int type, @TransitionFlags int flags,
             TransitionController controller, BLASTSyncEngine syncEngine) {
         mType = type;
@@ -2668,6 +2671,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             return out;
         }
 
+        final AnimationOptions animOptions = calculateAnimationOptionsForActivityTransition(type,
+                sortedTargets);
+        if (!Flags.moveAnimationOptionsToChange() && animOptions != null) {
+            out.setAnimationOptions(animOptions);
+        }
+
         // Convert all the resolved ChangeInfos into TransactionInfo.Change objects in order.
         final int count = sortedTargets.size();
         for (int i = 0; i < count; ++i) {
@@ -2757,6 +2766,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 change.setBackgroundColor(ColorUtils.setAlphaComponent(backgroundColor, 255));
             }
 
+            if (Flags.moveAnimationOptionsToChange() && activityRecord != null
+                    && animOptions != null) {
+                change.setAnimationOptions(animOptions);
+            }
+
             if (activityRecord != null) {
                 change.setActivityComponent(activityRecord.mActivityComponent);
             }
@@ -2768,11 +2782,26 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
             out.addChange(change);
         }
+        return out;
+    }
 
+    /**
+     * Calculates {@link AnimationOptions} for activity-to-activity transition.
+     * It returns a valid {@link AnimationOptions} if:
+     * <ul>
+     *   <li>the top animation target is an Activity</li>
+     *   <li>there's a {@link android.view.Window#setWindowAnimations(int)} and there's only
+     *     {@link WindowState}, {@link WindowToken} and {@link ActivityRecord} target</li>
+     * </ul>
+     * Otherwise, it returns {@code null}.
+     */
+    @Nullable
+    private static AnimationOptions calculateAnimationOptionsForActivityTransition(
+            @TransitionType int type, @NonNull ArrayList<ChangeInfo> sortedTargets) {
         TransitionInfo.AnimationOptions animOptions = null;
 
-        // Check if the top-most app is an activity (ie. activity->activity). If so, make sure to
-        // honor its custom transition options.
+        // Check if the top-most app is an activity (ie. activity->activity). If so, make sure
+        // to honor its custom transition options.
         WindowContainer<?> topApp = null;
         for (int i = 0; i < sortedTargets.size(); i++) {
             if (isWallpaper(sortedTargets.get(i).mContainer)) continue;
@@ -2781,16 +2810,18 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
         if (topApp.asActivityRecord() != null) {
             final ActivityRecord topActivity = topApp.asActivityRecord();
-            animOptions = addCustomActivityTransition(topActivity, true/* open */, null);
-            animOptions = addCustomActivityTransition(topActivity, false/* open */, animOptions);
+            animOptions = addCustomActivityTransition(topActivity, true/* open */,
+                    null /* animOptions */);
+            animOptions = addCustomActivityTransition(topActivity, false/* open */,
+                    animOptions);
         }
         final WindowManager.LayoutParams animLp =
                 getLayoutParamsForAnimationsStyle(type, sortedTargets);
         if (animLp != null && animLp.type != TYPE_APPLICATION_STARTING
                 && animLp.windowAnimations != 0) {
-            // Don't send animation options if no windowAnimations have been set or if the we are
-            // running an app starting animation, in which case we don't want the app to be able to
-            // change its animation directly.
+            // Don't send animation options if no windowAnimations have been set or if the we
+            // are running an app starting animation, in which case we don't want the app to be
+            // able to change its animation directly.
             if (animOptions != null) {
                 animOptions.addOptionsFromLayoutParameters(animLp);
             } else {
@@ -2798,20 +2829,29 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         .makeAnimOptionsFromLayoutParameters(animLp);
             }
         }
-        if (animOptions != null) {
-            out.setAnimationOptions(animOptions);
-        }
-        return out;
+        return animOptions;
     }
 
-    static TransitionInfo.AnimationOptions addCustomActivityTransition(ActivityRecord topActivity,
-            boolean open, TransitionInfo.AnimationOptions animOptions) {
+    /**
+     * Returns {@link TransitionInfo.AnimationOptions} with custom Activity transition appended if
+     * {@code topActivity} specifies {@link ActivityRecord#getCustomAnimation(boolean)}, or
+     * {@code animOptions}, otherwise.
+     * <p>
+     * If the passed {@code animOptions} is {@code null}, this method will creates an
+     * {@link TransitionInfo.AnimationOptions} with custom animation appended
+     *
+     * @param open {@code true} to add a custom open animation, and {@false} to add a close one
+     */
+    @Nullable
+    private static TransitionInfo.AnimationOptions addCustomActivityTransition(
+            @NonNull ActivityRecord activity, boolean open,
+            @Nullable TransitionInfo.AnimationOptions animOptions) {
         final ActivityRecord.CustomAppTransition customAnim =
-                topActivity.getCustomAnimation(open);
+                activity.getCustomAnimation(open);
         if (customAnim != null) {
             if (animOptions == null) {
                 animOptions = TransitionInfo.AnimationOptions
-                        .makeCommonAnimOptions(topActivity.packageName);
+                        .makeCommonAnimOptions(activity.packageName);
             }
             animOptions.addCustomActivityTransition(open, customAnim.mEnterAnim,
                     customAnim.mExitAnim, customAnim.mBackgroundColor);

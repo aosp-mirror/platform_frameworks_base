@@ -81,7 +81,9 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.SurfaceControl;
@@ -100,7 +102,9 @@ import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.graphics.ColorUtils;
+import com.android.window.flags.Flags;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -116,6 +120,7 @@ import java.util.function.Function;
  * Build/Install/Run:
  *  atest WmTests:TransitionTests
  */
+@EnableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
@@ -123,6 +128,8 @@ public class TransitionTests extends WindowTestsBase {
     final SurfaceControl.Transaction mMockT = mock(SurfaceControl.Transaction.class);
     private BLASTSyncEngine mSyncEngine;
 
+    @Rule
+    public SetFlagsRule mRule = new SetFlagsRule();
     private Transition createTestTransition(int transitType, TransitionController controller) {
         final Transition transition = new Transition(transitType, 0 /* flags */, controller,
                 controller.mSyncEngine);
