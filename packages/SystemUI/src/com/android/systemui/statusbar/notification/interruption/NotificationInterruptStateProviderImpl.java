@@ -52,9 +52,11 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.EventLog;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
+import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -83,6 +85,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     private final SystemClock mSystemClock;
     private final GlobalSettings mGlobalSettings;
     private final EventLog mEventLog;
+    private final Optional<Bubbles> mBubbles;
 
     @VisibleForTesting
     protected boolean mUseHeadsUp = false;
@@ -132,7 +135,8 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             DeviceProvisionedController deviceProvisionedController,
             SystemClock systemClock,
             GlobalSettings globalSettings,
-            EventLog eventLog) {
+            EventLog eventLog,
+            Optional<Bubbles> bubbles) {
         mPowerManager = powerManager;
         mBatteryController = batteryController;
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
@@ -148,6 +152,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         mSystemClock = systemClock;
         mGlobalSettings = globalSettings;
         mEventLog = eventLog;
+        mBubbles = bubbles;
         ContentObserver headsUpObserver = new ContentObserver(mainHandler) {
             @Override
             public void onChange(boolean selfChange) {
@@ -440,7 +445,9 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         }
 
         boolean inShade = mStatusBarStateController.getState() == SHADE;
-        if (entry.isBubble() && inShade) {
+        boolean bubblesCanShowNotification =
+                mBubbles.isPresent() && mBubbles.get().canShowBubbleNotification();
+        if (entry.isBubble() && inShade && bubblesCanShowNotification) {
             if (log) mLogger.logNoHeadsUpAlreadyBubbled(entry);
             return false;
         }

@@ -2228,6 +2228,7 @@ public class BubbleController implements ConfigurationChangeListener,
         pw.print(prefix); pw.println("  currentUserId= " + mCurrentUserId);
         pw.print(prefix); pw.println("  isStatusBarShade= " + mIsStatusBarShade);
         pw.print(prefix); pw.println("  isShowingAsBubbleBar= " + isShowingAsBubbleBar());
+        pw.print(prefix); pw.println("  isImeVisible= " + mBubblePositioner.isImeVisible());
         pw.println();
 
         mBubbleData.dump(pw);
@@ -2730,7 +2731,7 @@ public class BubbleController implements ConfigurationChangeListener,
         public boolean canShowBubbleNotification() {
             // in bubble bar mode, when the IME is visible we can't animate new bubbles.
             if (BubbleController.this.isShowingAsBubbleBar()) {
-                return !BubbleController.this.mBubblePositioner.getIsImeVisible();
+                return !BubbleController.this.mBubblePositioner.isImeVisible();
             }
             return true;
         }
