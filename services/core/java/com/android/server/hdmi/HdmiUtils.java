@@ -175,14 +175,15 @@ final class HdmiUtils {
      *
      * @param logicalAddress the logical address to verify
      * @param deviceType the device type to check
-     * @throws IllegalArgumentException
      */
-    static void verifyAddressType(int logicalAddress, int deviceType) {
+    static boolean verifyAddressType(int logicalAddress, int deviceType) {
         List<Integer> actualDeviceTypes = getTypeFromAddress(logicalAddress);
         if (!actualDeviceTypes.contains(deviceType)) {
-            throw new IllegalArgumentException("Device type missmatch:[Expected:" + deviceType
-                    + ", Actual:" + actualDeviceTypes);
+            Slog.w(TAG,"Device type mismatch:[Expected:" + deviceType
+                    + ", Actual:" + actualDeviceTypes + "]");
+            return false;
         }
+        return true;
     }
 
     /**
