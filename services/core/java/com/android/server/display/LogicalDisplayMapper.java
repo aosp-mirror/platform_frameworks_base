@@ -1191,7 +1191,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         return display;
     }
 
-    @VisibleForTesting
     void setEnabledLocked(LogicalDisplay display, boolean isEnabled) {
         final int displayId = display.getDisplayIdLocked();
         final DisplayInfo info = display.getDisplayInfoLocked();
