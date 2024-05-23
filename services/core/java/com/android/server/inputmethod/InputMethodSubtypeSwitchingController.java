@@ -367,9 +367,9 @@ final class InputMethodSubtypeSwitchingController {
         }
 
         protected void dump(final Printer pw, final String prefix) {
-            for (int i = 0; i < mUsageHistoryOfSubtypeListItemIndex.length; ++i) {
-                final int rank = mUsageHistoryOfSubtypeListItemIndex[i];
-                final ImeSubtypeListItem item = mImeSubtypeList.get(i);
+            for (int rank = 0; rank < mUsageHistoryOfSubtypeListItemIndex.length; ++rank) {
+                final int index = mUsageHistoryOfSubtypeListItemIndex[rank];
+                final ImeSubtypeListItem item = mImeSubtypeList.get(index);
                 pw.println(prefix + "rank=" + rank + " item=" + item);
             }
         }
