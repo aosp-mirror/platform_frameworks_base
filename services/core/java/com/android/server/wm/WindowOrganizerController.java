@@ -2088,6 +2088,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     @Override
+    public void unregisterTransitionPlayer(ITransitionPlayer player) {
+        enforceTaskPermission("unregisterTransitionPlayer()");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mTransitionController.unregisterTransitionPlayer(player);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public ITransitionMetricsReporter getTransitionMetricsReporter() {
         return mTransitionController.mTransitionMetricsReporter;
     }
