@@ -214,6 +214,8 @@
     <string name="screenshot_saving_title">Saving screenshot\u2026</string>
     <!-- Informs the user that a screenshot is being saved. [CHAR LIMIT=50] -->
     <string name="screenshot_saving_work_profile_title">Saving screenshot to work profile\u2026</string>
+    <!-- Informs the user that a screenshot is being saved to the private profile. [CHAR LIMIT=100] -->
+    <string name="screenshot_saving_private_profile">Saving screenshot to private</string>
     <!-- Notification title displayed when a screenshot is saved to the Gallery. [CHAR LIMIT=50] -->
     <string name="screenshot_saved_title">Screenshot saved</string>
     <!-- Notification title displayed when we fail to take a screenshot. [CHAR LIMIT=50] -->
