@@ -97,6 +97,8 @@ public class ShadeCarrierGroupController {
 
     private final SlotIndexResolver mSlotIndexResolver;
 
+    private final ShadeCarrierGroupControllerLogger mLogger;
+
     private final SignalCallback mSignalCallback = new SignalCallback() {
                 @Override
                 public void setMobileDataIndicators(@NonNull MobileDataIndicators indicators) {
@@ -148,6 +150,7 @@ public class ShadeCarrierGroupController {
             ActivityStarter activityStarter,
             @Background Handler bgHandler,
             @Main Looper mainLooper,
+            ShadeCarrierGroupControllerLogger logger,
             NetworkController networkController,
             CarrierTextManager.Builder carrierTextManagerBuilder,
             Context context,
@@ -160,6 +163,7 @@ public class ShadeCarrierGroupController {
         mContext = context;
         mActivityStarter = activityStarter;
         mBgHandler = bgHandler;
+        mLogger = logger;
         mNetworkController = networkController;
         mStatusBarPipelineFlags = statusBarPipelineFlags;
         mCarrierTextManager = carrierTextManagerBuilder
@@ -374,10 +378,13 @@ public class ShadeCarrierGroupController {
             return;
         }
 
+        mLogger.logHandleUpdateCarrierInfo(info);
+
         mNoSimTextView.setVisibility(View.GONE);
         if (!info.airplaneMode && info.anySimReady) {
             boolean[] slotSeen = new boolean[SIM_SLOTS];
             if (info.listOfCarriers.length == info.subscriptionIds.length) {
+                mLogger.logUsingSimViews();
                 for (int i = 0; i < SIM_SLOTS && i < info.listOfCarriers.length; i++) {
                     int slot = getSlotIndex(info.subscriptionIds[i]);
                     if (slot >= SIM_SLOTS) {
@@ -405,9 +412,11 @@ public class ShadeCarrierGroupController {
                     }
                 }
             } else {
-                Log.e(TAG, "Carrier information arrays not of same length");
+                mLogger.logInvalidArrayLengths(
+                        info.listOfCarriers.length, info.subscriptionIds.length);
             }
         } else {
+            mLogger.logUsingNoSimView(info.carrierText);
             // No sims or airplane mode (but not WFC). Do not show ShadeCarrierGroup,
             // instead just show info.carrierText in a different view.
             for (int i = 0; i < SIM_SLOTS; i++) {
@@ -458,6 +467,7 @@ public class ShadeCarrierGroupController {
         private final ActivityStarter mActivityStarter;
         private final Handler mHandler;
         private final Looper mLooper;
+        private final ShadeCarrierGroupControllerLogger mLogger;
         private final NetworkController mNetworkController;
         private final CarrierTextManager.Builder mCarrierTextControllerBuilder;
         private final Context mContext;
@@ -472,6 +482,7 @@ public class ShadeCarrierGroupController {
                 ActivityStarter activityStarter,
                 @Background Handler handler,
                 @Main Looper looper,
+                ShadeCarrierGroupControllerLogger logger,
                 NetworkController networkController,
                 CarrierTextManager.Builder carrierTextControllerBuilder,
                 Context context,
@@ -484,6 +495,7 @@ public class ShadeCarrierGroupController {
             mActivityStarter = activityStarter;
             mHandler = handler;
             mLooper = looper;
+            mLogger = logger;
             mNetworkController = networkController;
             mCarrierTextControllerBuilder = carrierTextControllerBuilder;
             mContext = context;
@@ -505,6 +517,7 @@ public class ShadeCarrierGroupController {
                     mActivityStarter,
                     mHandler,
                     mLooper,
+                    mLogger,
                     mNetworkController,
                     mCarrierTextControllerBuilder,
                     mContext,

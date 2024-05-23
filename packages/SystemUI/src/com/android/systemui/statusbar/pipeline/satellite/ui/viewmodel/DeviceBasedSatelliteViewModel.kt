@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel
 
 import android.content.Context
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -60,6 +62,7 @@ interface DeviceBasedSatelliteViewModel {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@SysUISingleton
 class DeviceBasedSatelliteViewModelImpl
 @Inject
 constructor(
@@ -124,17 +127,36 @@ constructor(
                 shouldActuallyShowIcon,
                 interactor.connectionState,
             ) { shouldShow, connectionState ->
+                logBuffer.log(
+                    TAG,
+                    LogLevel.INFO,
+                    {
+                        bool1 = shouldShow
+                        str1 = connectionState.name
+                    },
+                    { "Updating carrier text. shouldActuallyShow=$bool1 connectionState=$str1" }
+                )
                 if (shouldShow) {
                     when (connectionState) {
                         SatelliteConnectionState.On,
                         SatelliteConnectionState.Connected ->
                             context.getString(R.string.satellite_connected_carrier_text)
                         SatelliteConnectionState.Off,
-                        SatelliteConnectionState.Unknown -> null
+                        SatelliteConnectionState.Unknown -> {
+                            null
+                        }
                     }
                 } else {
                     null
                 }
+            }
+            .onEach {
+                logBuffer.log(
+                    TAG,
+                    LogLevel.INFO,
+                    { str1 = it },
+                    { "Resulting carrier text = $str1" }
+                )
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
