@@ -134,8 +134,9 @@ JNIEnv* DeviceCallback::getJNIEnv() {
     return env;
 }
 
-std::unique_ptr<Device> Device::open(int32_t id, const char* name, int32_t vid, int32_t pid,
-                                     uint16_t bus, const std::vector<uint8_t>& descriptor,
+std::unique_ptr<Device> Device::open(int32_t id, const char* name, const char* uniq, int32_t vid,
+                                     int32_t pid, uint16_t bus,
+                                     const std::vector<uint8_t>& descriptor,
                                      std::unique_ptr<DeviceCallback> callback) {
     size_t size = descriptor.size();
     if (size > HID_MAX_DESCRIPTOR_SIZE) {
@@ -152,8 +153,7 @@ std::unique_ptr<Device> Device::open(int32_t id, const char* name, int32_t vid, 
     struct uhid_event ev = {};
     ev.type = UHID_CREATE2;
     strlcpy(reinterpret_cast<char*>(ev.u.create2.name), name, sizeof(ev.u.create2.name));
-    std::string uniq = android::base::StringPrintf("Id: %d", id);
-    strlcpy(reinterpret_cast<char*>(ev.u.create2.uniq), uniq.c_str(), sizeof(ev.u.create2.uniq));
+    strlcpy(reinterpret_cast<char*>(ev.u.create2.uniq), uniq, sizeof(ev.u.create2.uniq));
     memcpy(&ev.u.create2.rd_data, descriptor.data(), size * sizeof(ev.u.create2.rd_data[0]));
     ev.u.create2.rd_size = size;
     ev.u.create2.bus = bus;
@@ -314,10 +314,21 @@ std::vector<uint8_t> getData(JNIEnv* env, jbyteArray javaArray) {
     return data;
 }
 
-static jlong openDevice(JNIEnv* env, jclass /* clazz */, jstring rawName, jint id, jint vid,
-                        jint pid, jint bus, jbyteArray rawDescriptor, jobject callback) {
+static jlong openDevice(JNIEnv* env, jclass /* clazz */, jstring rawName, jstring rawUniq, jint id,
+                        jint vid, jint pid, jint bus, jbyteArray rawDescriptor, jobject callback) {
     ScopedUtfChars name(env, rawName);
     if (name.c_str() == nullptr) {
+        return 0;
+    }
+
+    std::string uniq;
+    if (rawUniq != nullptr) {
+        uniq = ScopedUtfChars(env, rawUniq);
+    } else {
+        uniq = android::base::StringPrintf("Id: %d", id);
+    }
+
+    if (uniq.c_str() == nullptr) {
         return 0;
     }
 
@@ -326,7 +337,8 @@ static jlong openDevice(JNIEnv* env, jclass /* clazz */, jstring rawName, jint i
     std::unique_ptr<uhid::DeviceCallback> cb(new uhid::DeviceCallback(env, callback));
 
     std::unique_ptr<uhid::Device> d =
-            uhid::Device::open(id, reinterpret_cast<const char*>(name.c_str()), vid, pid, bus, desc,
+            uhid::Device::open(id, reinterpret_cast<const char*>(name.c_str()),
+                               reinterpret_cast<const char*>(uniq.c_str()), vid, pid, bus, desc,
                                std::move(cb));
     return reinterpret_cast<jlong>(d.release());
 }
@@ -370,7 +382,7 @@ static void closeDevice(JNIEnv* /* env */, jclass /* clazz */, jlong ptr) {
 
 static JNINativeMethod sMethods[] = {
         {"nativeOpenDevice",
-         "(Ljava/lang/String;IIII[B"
+         "(Ljava/lang/String;Ljava/lang/String;IIII[B"
          "Lcom/android/commands/hid/Device$DeviceCallback;)J",
          reinterpret_cast<void*>(openDevice)},
         {"nativeSendReport", "(J[B)V", reinterpret_cast<void*>(sendReport)},
