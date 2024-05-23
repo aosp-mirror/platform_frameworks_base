@@ -49,8 +49,13 @@ public final class SystemZenRules {
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static void maybeUpgradeRules(Context context, ZenModeConfig config) {
         for (ZenRule rule : config.automaticRules.values()) {
-            if (isSystemOwnedRule(rule) && rule.type == AutomaticZenRule.TYPE_UNKNOWN) {
-                upgradeSystemProviderRule(context, rule);
+            if (isSystemOwnedRule(rule)) {
+                if (rule.type == AutomaticZenRule.TYPE_UNKNOWN) {
+                    upgradeSystemProviderRule(context, rule);
+                }
+                if (Flags.modesUi()) {
+                    rule.allowManualInvocation = true;
+                }
             }
         }
     }

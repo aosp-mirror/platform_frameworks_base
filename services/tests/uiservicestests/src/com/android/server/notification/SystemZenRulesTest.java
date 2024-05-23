@@ -16,13 +16,17 @@
 
 package com.android.server.notification;
 
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleTime;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.AutomaticZenRule;
+import android.app.Flags;
 import android.content.res.Configuration;
 import android.os.LocaleList;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.SystemZenRules;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.EventInfo;
@@ -33,6 +37,7 @@ import com.android.internal.R;
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Calendar;
@@ -40,6 +45,8 @@ import java.util.Locale;
 
 public class SystemZenRulesTest extends UiServiceTestCase {
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
     private static final ScheduleInfo SCHEDULE_INFO;
     private static final EventInfo EVENT_INFO;
 
@@ -65,6 +72,7 @@ public class SystemZenRulesTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MODES_UI)
     public void maybeUpgradeRules_oldSystemRules_upgraded() {
         ZenModeConfig config = new ZenModeConfig();
         ZenRule timeRule = new ZenRule();
@@ -82,9 +90,12 @@ public class SystemZenRulesTest extends UiServiceTestCase {
         assertThat(timeRule.triggerDescription).isNotEmpty();
         assertThat(calendarRule.type).isEqualTo(AutomaticZenRule.TYPE_SCHEDULE_CALENDAR);
         assertThat(timeRule.triggerDescription).isNotEmpty();
+        assertThat(timeRule.allowManualInvocation).isTrue();
+        assertThat(calendarRule.allowManualInvocation).isTrue();
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MODES_UI)
     public void maybeUpgradeRules_newSystemRules_untouched() {
         ZenModeConfig config = new ZenModeConfig();
         ZenRule timeRule = new ZenRule();
@@ -96,7 +107,8 @@ public class SystemZenRulesTest extends UiServiceTestCase {
 
         SystemZenRules.maybeUpgradeRules(mContext, config);
 
-        assertThat(timeRule).isEqualTo(original);
+        assertThat(timeRule.triggerDescription).isEqualTo(original.triggerDescription);
+        assertThat(timeRule.allowManualInvocation).isTrue();
     }
 
     @Test
