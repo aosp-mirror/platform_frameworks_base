@@ -350,7 +350,7 @@ static Rds RdsForRegion(bool rds, Region region) {
         case Region::ITU_2:
             return Rds::US;
         default:
-            ALOGE("Unexpected region: %d", region);
+            ALOGE("Unexpected region: %d", static_cast<int>(region));
             return Rds::NONE;
     }
 }
@@ -365,7 +365,7 @@ static Deemphasis DeemphasisForRegion(Region region) {
         case Region::JAPAN:
             return Deemphasis::D50;
         default:
-            ALOGE("Unexpected region: %d", region);
+            ALOGE("Unexpected region: %d", static_cast<int>(region));
             return Deemphasis::D50;
     }
 }

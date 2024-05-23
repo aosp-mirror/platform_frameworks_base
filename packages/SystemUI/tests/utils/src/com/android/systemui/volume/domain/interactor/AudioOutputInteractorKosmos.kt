@@ -21,6 +21,7 @@ import com.android.systemui.bluetooth.localBluetoothManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.volume.data.repository.audioRepository
+import com.android.systemui.volume.data.repository.audioSharingRepository
 import com.android.systemui.volume.localMediaRepositoryFactory
 import com.android.systemui.volume.mediaOutputInteractor
 
@@ -36,5 +37,6 @@ val Kosmos.audioOutputInteractor by
             deviceIconInteractor,
             mediaOutputInteractor,
             localMediaRepositoryFactory,
+            audioSharingRepository,
         )
     }

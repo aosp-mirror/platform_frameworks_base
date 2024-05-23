@@ -103,6 +103,8 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"बायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, दायां हेडसेट:<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बैटरी."</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"बायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"दायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी"</string>
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"बाएं ईयरबड में <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी बची है"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"दाएं ईयरबड में <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी बची है"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"चालू"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"सेव किया गया"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"सिर्फ़ बाईं तरफ़ वाला चालू है"</string>
@@ -493,7 +495,7 @@
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - बैटरी <xliff:g id="TIME">%3$s</xliff:g> में पूरी चार्ज हो जाएगी"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - बैटरी <xliff:g id="TIME">%2$s</xliff:g> में पूरी चार्ज हो जाएगी"</string>
     <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"बैटरी <xliff:g id="TIME">%1$s</xliff:g> में पूरी चार्ज हो जाएगी"</string>
-    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"बैटरी <xliff:g id="TIME">%1$s</xliff:g> में पूरी चार्ज हो जाएगी"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"बैटरी <xliff:g id="TIME">%1$s</xliff:g> तक पूरी चार्ज हो जाएगी"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हो रही है"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"तेज़ चार्ज हो रही है"</string>
@@ -706,7 +708,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"फ़िज़िकल कीबोर्ड"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"कीबोर्ड का लेआउट चुनें"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"डिफ़ॉल्ट"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"स्क्रीन चालू करने की अनुमति"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"इन ऐप के पास स्क्रीन को चालू करने का कंट्रोल है"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"स्क्रीन चालू करने की अनुमति दें"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ऐप्लिकेशन को स्क्रीन चालू करने की अनुमति दें. ऐसा करने पर, ऐप्लिकेशन आपकी अनुमति लिए बिना भी, जब चाहे स्क्रीन चालू कर सकता है."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर ब्रॉडकास्ट करना रोकें?"</string>

@@ -17,9 +17,7 @@
 
 package com.android.systemui.biometrics.ui.binder
 
-import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
-import android.graphics.drawable.Drawable
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
@@ -30,8 +28,8 @@ import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel.AuthType
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
-import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import kotlinx.coroutines.flow.combine
@@ -63,16 +61,6 @@ object PromptIconViewBinder {
                 }
 
                 var faceIcon: AnimatedVectorDrawable? = null
-                val faceIconCallback =
-                    object : Animatable2.AnimationCallback() {
-                        override fun onAnimationStart(drawable: Drawable) {
-                            viewModel.onAnimationStart()
-                        }
-
-                        override fun onAnimationEnd(drawable: Drawable) {
-                            viewModel.onAnimationEnd()
-                        }
-                    }
 
                 if (!constraintBp()) {
                     launch {
@@ -138,19 +126,13 @@ object PromptIconViewBinder {
                             combine(
                                 viewModel.activeAuthType,
                                 viewModel.shouldAnimateIconView,
-                                viewModel.shouldRepeatAnimation,
                                 viewModel.showingError,
-                                ::toQuad
+                                ::Triple
                             ),
-                            ::toQuint
+                            ::toQuad
                         )
-                        .collect {
-                            (
-                                iconAsset,
-                                activeAuthType,
-                                shouldAnimateIconView,
-                                shouldRepeatAnimation,
-                                showingError) ->
+                        .collect { (iconAsset, activeAuthType, shouldAnimateIconView, showingError)
+                            ->
                             if (iconAsset != -1) {
                                 when (activeAuthType) {
                                     AuthType.Fingerprint,
@@ -163,21 +145,27 @@ object PromptIconViewBinder {
                                         }
                                     }
                                     AuthType.Face -> {
-                                        faceIcon?.apply {
-                                            unregisterAnimationCallback(faceIconCallback)
-                                            stop()
-                                        }
-                                        faceIcon =
-                                            iconView.context.getDrawable(iconAsset)
-                                                as AnimatedVectorDrawable
-                                        faceIcon?.apply {
-                                            iconView.setImageDrawable(this)
+                                        // TODO(b/318569643): Consolidate logic once all face auth
+                                        // assets are migrated from drawable to json
+                                        if (iconAsset == R.raw.face_dialog_authenticating) {
+                                            iconView.setAnimation(iconAsset)
+                                            iconView.frame = 0
+
                                             if (shouldAnimateIconView) {
-                                                forceAnimationOnUI()
-                                                if (shouldRepeatAnimation) {
-                                                    registerAnimationCallback(faceIconCallback)
+                                                iconView.playAnimation()
+                                                iconView.loop(true)
+                                            }
+                                        } else {
+                                            faceIcon?.apply { stop() }
+                                            faceIcon =
+                                                iconView.context.getDrawable(iconAsset)
+                                                    as AnimatedVectorDrawable
+                                            faceIcon?.apply {
+                                                iconView.setImageDrawable(this)
+                                                if (shouldAnimateIconView) {
+                                                    forceAnimationOnUI()
+                                                    start()
                                                 }
-                                                start()
                                             }
                                         }
                                     }

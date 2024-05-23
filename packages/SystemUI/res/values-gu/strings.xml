@@ -153,6 +153,8 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"મોકલો"</string>
     <string name="cancel" msgid="1089011503403416730">"રદ કરો"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"ઍપનો લોગો"</string>
+  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
+  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"કન્ફર્મ કરો"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ફરી પ્રયાસ કરો"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"પ્રમાણીકરણ રદ કરવા માટે ટૅપ કરો"</string>
@@ -302,7 +304,7 @@
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"નેટવર્ક અનુપલબ્ધ છે"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"કોઈ વાઇ-ફાઇ નેટવર્ક્સ ઉપલબ્ધ નથી"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"ચાલુ કરી રહ્યાં છીએ…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"સ્ક્રીન કાસ્ટ"</string>
+    <string name="quick_settings_cast_title" msgid="3033553249449938182">"કાસ્ટ કરો"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"કાસ્ટ કરી રહ્યાં છે"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"અનામાંકિત ઉપકરણ"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"કોઈ ઉપકરણો ઉપલબ્ધ નથી"</string>
@@ -364,10 +366,6 @@
     <item msgid="8309220355268900335">"બૅટરી"</item>
   </string-array>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"એક-હાથે વાપરો મોડ"</string>
-    <string name="quick_settings_contrast_label" msgid="988087460210159123">"કોન્ટ્રાસ્ટ"</string>
-    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"સ્ટૅન્ડર્ડ"</string>
-    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"મધ્યમ"</string>
-    <string name="quick_settings_contrast_high" msgid="656049259587494499">"વધુ"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"સાંભળવામાં મદદ આપતા ડિવાઇસ"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"સાંભળવામાં મદદ આપતા ડિવાઇસ"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"નવા ડિવાઇસ સાથે જોડાણ કરો"</string>
@@ -447,8 +445,7 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"વિજેટ કસ્ટમાઇઝ કરવા માટે થોડીવાર દબાવી રાખો"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"વિજેટ કસ્ટમાઇઝ કરો"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"બંધ કરેલા વિજેટ માટેની ઍપનું આઇકન"</string>
-    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
-    <skip />
+    <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"ઇન્સ્ટૉલ થઈ રહેલા વિજેટ માટે ઍપનું આઇકન"</string>
     <string name="edit_widget" msgid="9030848101135393954">"વિજેટમાં ફેરફાર કરો"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"કાઢી નાખો"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"વિજેટ ઉમેરો"</string>
@@ -629,14 +626,10 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"આઉટપુટના સેટિંગ દાખલ કરો"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"વૉલ્યૂમના સ્લાઇડર મોટા કરવામાં આવ્યા"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"વૉલ્યૂમના સ્લાઇડર નાના કરવામાં આવ્યા"</string>
-    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
-    <skip />
+    <string name="volume_panel_hint_mute" msgid="2153922288568199077">"%sને મ્યૂટ કરો"</string>
+    <string name="volume_panel_hint_unmute" msgid="4831850937582282340">"%sને અનમ્યૂટ કરો"</string>
+    <string name="volume_panel_hint_muted" msgid="1124844870181285320">"મ્યૂટ કરી છે"</string>
+    <string name="volume_panel_hint_vibrate" msgid="4136223145435914132">"વાઇબ્રેટ"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> વગાડી રહ્યાં છીએ"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"ઑડિયો આની પર વાગશે"</string>
     <string name="media_output_title_ongoing_call" msgid="208426888064112006">"કૉલ ચાલુ છે"</string>

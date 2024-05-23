@@ -59,9 +59,7 @@ class PackageUpdateMonitorTest : SysuiTestCase() {
         underTest = PackageUpdateMonitor(USER, PACKAGE, {}, bgHandler, context)
 
         underTest.startMonitoring()
-        // There are two receivers registered
-        verify(context, times(1))
-            .registerReceiverAsUser(any(), eq(USER), any(), eq(null), eq(bgHandler))
+
         verify(packageManager).registerPackageMonitorCallback(any(), eq(USER.getIdentifier()))
         // context will be used to get PackageManager, the test should clear invocations
         // for next startMonitoring() assertion
@@ -83,7 +81,7 @@ class PackageUpdateMonitorTest : SysuiTestCase() {
         clearInvocations(packageManager)
 
         underTest.stopMonitoring()
-        verify(context).unregisterReceiver(any())
+
         verify(packageManager).unregisterPackageMonitorCallback(any())
         // context will be used to get PackageManager, the test should clear invocations
         // for next stopMonitoring() assertion

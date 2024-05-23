@@ -140,6 +140,29 @@ public abstract class AnrTimer<V> implements AutoCloseable {
     private static final Injector sDefaultInjector = new Injector();
 
     /**
+     * This class provides build-style arguments to an AnrTimer constructor.  This simplifies the
+     * number of AnrTimer constructors needed, especially as new options are added.
+     */
+    public static class Args {
+        /** The Injector (used only for testing). */
+        private Injector mInjector = AnrTimer.sDefaultInjector;
+
+        /** Grant timer extensions when the system is heavily loaded. */
+        private boolean mExtend = false;
+
+        // This is only used for testing, so it is limited to package visibility.
+        Args injector(@NonNull Injector injector) {
+            mInjector = injector;
+            return this;
+        }
+
+        public Args extend(boolean flag) {
+            mExtend = flag;
+            return this;
+        }
+    }
+
+    /**
      * An error is defined by its issue, the operation that detected the error, the tag of the
      * affected service, a short stack of the bad call, and the stringified arg associated with
      * the error.
@@ -229,11 +252,8 @@ public abstract class AnrTimer<V> implements AutoCloseable {
     /** A label that identifies the AnrTimer associated with a Timer in log messages. */
     private final String mLabel;
 
-    /** Whether this timer instance supports extending timeouts. */
-    private final boolean mExtend;
-
-    /** The injector used to create this instance.  This is only used for testing. */
-    private final Injector mInjector;
+    /** The configuration for this instance. */
+    private final Args mArgs;
 
     /** The top-level switch for the feature enabled or disabled. */
     private final FeatureSwitch mFeature;
@@ -254,18 +274,14 @@ public abstract class AnrTimer<V> implements AutoCloseable {
      * @param handler The handler to which the expiration message will be delivered.
      * @param what The "what" parameter for the expiration message.
      * @param label A name for this instance.
-     * @param extend A flag to indicate if expired timers can be granted extensions.
-     * @param injector An injector to provide overrides for testing.
+     * @param args Configuration information for this instance.
      */
-    @VisibleForTesting
-    AnrTimer(@NonNull Handler handler, int what, @NonNull String label, boolean extend,
-             @NonNull Injector injector) {
+    public AnrTimer(@NonNull Handler handler, int what, @NonNull String label, @NonNull Args args) {
         mHandler = handler;
         mWhat = what;
         mLabel = label;
-        mExtend = extend;
-        mInjector = injector;
-        boolean enabled = mInjector.anrTimerServiceEnabled() && nativeTimersSupported();
+        mArgs = args;
+        boolean enabled = args.mInjector.anrTimerServiceEnabled() && nativeTimersSupported();
         mFeature = createFeatureSwitch(enabled);
     }
 
@@ -288,29 +304,7 @@ public abstract class AnrTimer<V> implements AutoCloseable {
     }
 
     /**
-     * Create one AnrTimer instance.  The instance is given a handler and a "what".  Individual
-     * timers are started with {@link #start}.  If a timer expires, then a {@link Message} is sent
-     * immediately to the handler with {@link Message.what} set to what and {@link Message.obj} set
-     * to the timer key.
-     *
-     * AnrTimer instances have a label, which must be unique.  The label is used for reporting and
-     * debug.
-     *
-     * If an individual timer expires internally, and the "extend" parameter is true, then the
-     * AnrTimer may extend the individual timer rather than immediately delivering the timeout to
-     * the client.  The extension policy is not part of the instance.
-     *
-     * @param handler The handler to which the expiration message will be delivered.
-     * @param what The "what" parameter for the expiration message.
-     * @param label A name for this instance.
-     * @param extend A flag to indicate if expired timers can be granted extensions.
-     */
-    public AnrTimer(@NonNull Handler handler, int what, @NonNull String label, boolean extend) {
-        this(handler, what, label, extend, sDefaultInjector);
-    }
-
-    /**
-     * Create an AnrTimer instance with the default {@link #Injector} and with extensions disabled.
+     * Create an AnrTimer instance with the default {@link #Injector} and the default configuration.
      * See {@link AnrTimer(Handler, int, String, boolean, Injector} for a functional description.
      *
      * @param handler The handler to which the expiration message will be delivered.
@@ -318,7 +312,7 @@ public abstract class AnrTimer<V> implements AutoCloseable {
      * @param label A name for this instance.
      */
     public AnrTimer(@NonNull Handler handler, int what, @NonNull String label) {
-        this(handler, what, label, false);
+        this(handler, what, label, new Args());
     }
 
     /**
@@ -449,7 +443,7 @@ public abstract class AnrTimer<V> implements AutoCloseable {
 
         /** Fetch the native tag (an integer) for the given label. */
         FeatureEnabled() {
-            mNative = nativeAnrTimerCreate(mLabel);
+            mNative = nativeAnrTimerCreate(mLabel, mArgs.mExtend);
             if (mNative == 0) throw new IllegalArgumentException("unable to create native timer");
             synchronized (sAnrTimerList) {
                 sAnrTimerList.put(mNative, new WeakReference(AnrTimer.this));
@@ -466,7 +460,7 @@ public abstract class AnrTimer<V> implements AutoCloseable {
                 // exist.
                 if (cancel(arg)) mTotalRestarted++;
 
-                int timerId = nativeAnrTimerStart(mNative, pid, uid, timeoutMs, mExtend);
+                int timerId = nativeAnrTimerStart(mNative, pid, uid, timeoutMs);
                 if (timerId > 0) {
                     mTimerIdMap.put(arg, timerId);
                     mTimerArgMap.put(timerId, arg);
@@ -828,19 +822,17 @@ public abstract class AnrTimer<V> implements AutoCloseable {
     private static native boolean nativeAnrTimerSupported();
 
     /**
-     * Create a new native timer with the given key and name.  The key is not used by the native
-     * code but it is returned to the Java layer in the expiration handler.  The name is only for
-     * logging.  Unlike the other methods, this is an instance method: the "this" parameter is
-     * passed into the native layer.
+     * Create a new native timer with the given name and flags.  The name is only for logging.
+     * Unlike the other methods, this is an instance method: the "this" parameter is passed into
+     * the native layer.
      */
-    private native long nativeAnrTimerCreate(String name);
+    private native long nativeAnrTimerCreate(String name, boolean extend);
 
     /** Release the native resources.  No further operations are premitted. */
     private static native int nativeAnrTimerClose(long service);
 
     /** Start a timer and return its ID.  Zero is returned on error. */
-    private static native int nativeAnrTimerStart(long service, int pid, int uid, long timeoutMs,
-            boolean extend);
+    private static native int nativeAnrTimerStart(long service, int pid, int uid, long timeoutMs);
 
     /**
      * Cancel a timer by ID.  Return true if the timer was running and canceled.  Return false if

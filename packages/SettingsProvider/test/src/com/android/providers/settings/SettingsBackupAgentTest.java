@@ -31,6 +31,7 @@ import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.provider.settings.validators.SettingsValidators;
 import android.provider.settings.validators.Validator;
@@ -38,6 +39,8 @@ import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
 
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,8 +57,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
-/** Tests for the SettingsHelperTest */
+/**
+ * Tests for the SettingsHelperTest
+ * Usage: atest SettingsProviderTest:SettingsBackupAgentTest
+ */
 @RunWith(AndroidJUnit4.class)
 public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
     private static final Uri TEST_URI = Uri.EMPTY;
@@ -211,6 +218,32 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
 
         assertTrue(settingsHelper.mWrittenValues.containsKey(OVERRIDDEN_TEST_SETTING));
         assertFalse(settingsHelper.mWrittenValues.containsKey(PRESERVED_TEST_SETTING));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_CONFIGURABLE_FONT_SCALE_DEFAULT)
+    public void testFindClosestAllowedFontScale() {
+        final String[] availableFontScales = new String[]{"0.5", "0.9", "1.0", "1.1", "1.5"};
+        final Function<String, String> testedMethod =
+                (value) -> SettingsBackupAgent.findClosestAllowedFontScale(value,
+                        availableFontScales);
+
+        // Any allowed value needs to be preserved.
+        assertEquals("0.5", testedMethod.apply("0.5"));
+        assertEquals("0.9", testedMethod.apply("0.9"));
+        assertEquals("1.0", testedMethod.apply("1.0"));
+        assertEquals("1.1", testedMethod.apply("1.1"));
+        assertEquals("1.5", testedMethod.apply("1.5"));
+
+        // When the current value is not one of the available, the first larger is returned
+        assertEquals("0.5", testedMethod.apply("0.3"));
+        assertEquals("0.9", testedMethod.apply("0.8"));
+        assertEquals("1.1", testedMethod.apply("1.05"));
+        assertEquals("1.5", testedMethod.apply("1.2"));
+
+        // When the current value is larger than the only one available, the largest allowed
+        // is returned.
+        assertEquals("1.5", testedMethod.apply("1.8"));
     }
 
     private byte[] generateBackupData(Map<String, String> keyValueData) {

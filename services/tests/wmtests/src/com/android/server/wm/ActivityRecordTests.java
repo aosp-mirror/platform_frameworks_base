@@ -2805,24 +2805,6 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
-    public void testTransferStartingWindowWhileCreating() {
-        final TestStartingWindowOrganizer organizer = registerTestStartingWindowOrganizer();
-        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
-        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
-        organizer.setRunnableWhenAddingSplashScreen(
-                () -> {
-                    // Surprise, ...! Transfer window in the middle of the creation flow.
-                    activity2.addStartingWindow(mPackageName, android.R.style.Theme, activity1,
-                            true, true, false, true, false, false, false);
-                });
-        activity1.addStartingWindow(mPackageName, android.R.style.Theme, null, true, true, false,
-                true, false, false, false);
-        waitUntilHandlersIdle();
-        assertNoStartingWindow(activity1);
-        assertHasStartingWindow(activity2);
-    }
-
-    @Test
     public void testTransferStartingWindowCanAnimate() {
         registerTestStartingWindowOrganizer();
         final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();

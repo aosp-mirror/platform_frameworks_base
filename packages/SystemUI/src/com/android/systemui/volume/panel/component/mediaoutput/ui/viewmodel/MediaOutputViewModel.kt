@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 
@@ -56,7 +57,7 @@ constructor(
     @VolumePanelScope private val coroutineScope: CoroutineScope,
     private val actionsInteractor: MediaOutputActionsInteractor,
     private val mediaDeviceSessionInteractor: MediaDeviceSessionInteractor,
-    audioOutputInteractor: AudioOutputInteractor,
+    private val audioOutputInteractor: AudioOutputInteractor,
     audioModeInteractor: AudioModeInteractor,
     interactor: MediaOutputInteractor,
     private val uiEventLogger: UiEventLogger,
@@ -88,7 +89,8 @@ constructor(
                 audioOutputInteractor.currentAudioDevice.filter {
                     it !is AudioOutputDevice.Unknown
                 },
-            ) { mediaDeviceSession, isOngoingCall, currentConnectedDevice ->
+                audioOutputInteractor.isInAudioSharing,
+            ) { mediaDeviceSession, isOngoingCall, currentConnectedDevice, isInAudioSharing ->
                 val label =
                     when {
                         isOngoingCall -> context.getString(R.string.media_output_title_ongoing_call)
@@ -99,7 +101,17 @@ constructor(
                             )
                         else -> context.getString(R.string.media_output_title_without_playing)
                     }
-                ConnectedDeviceViewModel(label, currentConnectedDevice.name)
+                ConnectedDeviceViewModel(
+                    label,
+                    when (isInAudioSharing) {
+                        true -> {
+                            context.getString(R.string.audio_sharing_description)
+                        }
+                        false -> {
+                            currentConnectedDevice.name
+                        }
+                    }
+                )
             }
             .stateIn(
                 coroutineScope,
@@ -141,6 +153,15 @@ constructor(
                 coroutineScope,
                 SharingStarted.Eagerly,
                 null,
+            )
+
+    val enabled: StateFlow<Boolean> =
+        audioOutputInteractor.isInAudioSharing
+            .map { !it }
+            .stateIn(
+                coroutineScope,
+                SharingStarted.Eagerly,
+                true,
             )
 
     fun onBarClick(expandable: Expandable?) {

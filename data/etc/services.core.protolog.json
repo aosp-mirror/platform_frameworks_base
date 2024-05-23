@@ -79,20 +79,8 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "1789854065584848502": {
-      "message": "startingData was nulled out before handling mAddStartingWindow: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "5659016061937922595": {
       "message": "Add starting %s: startingData=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "-9066702108316454290": {
-      "message": "Aborted starting %s: startingData=%s",
       "level": "VERBOSE",
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
@@ -1122,12 +1110,6 @@
       "level": "INFO",
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/BlackFrame.java"
-    },
-    "5256889109971284149": {
-      "message": "CameraManager cannot be found.",
-      "level": "ERROR",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/CameraStateMonitor.java"
     },
     "8116030277393789125": {
       "message": "Display id=%d is notified that Camera %s is open for package %s",
@@ -4185,18 +4167,6 @@
     },
     "1278715281433572858": {
       "message": "Bad requesting window %s",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "-707915937966769475": {
-      "message": "unable to update pointer icon",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "-8663841671650918687": {
-      "message": "unable to restore pointer icon",
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"

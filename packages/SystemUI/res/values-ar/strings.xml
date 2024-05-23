@@ -153,6 +153,8 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"إرسال"</string>
     <string name="cancel" msgid="1089011503403416730">"إلغاء"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"شعار التطبيق"</string>
+  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
+  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"تأكيد"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"إعادة المحاولة"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"انقر لإلغاء المصادقة."</string>
@@ -302,7 +304,7 @@
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"الشبكات غير متوفرة"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"‏لا تتوفر أي شبكة Wi-Fi"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"جارٍ التفعيل…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"بث الشاشة"</string>
+    <string name="quick_settings_cast_title" msgid="3033553249449938182">"الإرسال"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"جارٍ الإرسال"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"جهاز لا يحمل اسمًا"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"لا يتوفر أي جهاز"</string>
@@ -364,10 +366,6 @@
     <item msgid="8309220355268900335">"البطارية"</item>
   </string-array>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"وضع \"التصفح بيد واحدة\""</string>
-    <string name="quick_settings_contrast_label" msgid="988087460210159123">"التباين"</string>
-    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"عادي"</string>
-    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"متوسط"</string>
-    <string name="quick_settings_contrast_high" msgid="656049259587494499">"مرتفع"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"سماعات الأذن الطبية"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"سماعات الأذن الطبية"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"إقران جهاز جديد"</string>
@@ -447,8 +445,7 @@
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"اضغط مع الاستمرار لتخصيص التطبيقات المصغّرة."</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"تخصيص التطبيقات المصغَّرة"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"رمز التطبيق المصغّر غير المفعّل"</string>
-    <!-- no translation found for icon_description_for_pending_widget (8413816401868001755) -->
-    <skip />
+    <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"رمز تطبيق مصغَّر جارٍ تثبيته"</string>
     <string name="edit_widget" msgid="9030848101135393954">"تعديل التطبيق المصغَّر"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"إزالة"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"إضافة تطبيق مصغّر"</string>
@@ -463,10 +460,8 @@
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"تخصيص التطبيقات المصغَّرة"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"التطبيقات المصغّرة على شاشة القفل"</string>
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"اختيار التطبيق المصغّر"</string>
-    <!-- no translation found for accessibility_action_label_remove_widget (3373779447448758070) -->
-    <skip />
-    <!-- no translation found for accessibility_action_label_place_widget (1914197458644168978) -->
-    <skip />
+    <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"إزالة التطبيق المصغّر"</string>
+    <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"إضافة التطبيق المصغّر المحدَّد"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"تبديل المستخدم"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"القائمة المنسدلة"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"سيتم حذف كل التطبيقات والبيانات في هذه الجلسة."</string>
@@ -631,18 +626,13 @@
     <string name="volume_panel_enter_media_output_settings" msgid="8824244246272552669">"الدخول إلى إعدادات إخراج الصوت"</string>
     <string name="volume_panel_expanded_sliders" msgid="1885750987768506271">"تم توسيع أشرطة تمرير الصوت"</string>
     <string name="volume_panel_collapsed_sliders" msgid="1413383759434791450">"تم تصغير أشرطة تمرير الصوت"</string>
-    <!-- no translation found for volume_panel_hint_mute (2153922288568199077) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_unmute (4831850937582282340) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_muted (1124844870181285320) -->
-    <skip />
-    <!-- no translation found for volume_panel_hint_vibrate (4136223145435914132) -->
-    <skip />
+    <string name="volume_panel_hint_mute" msgid="2153922288568199077">"‏كتم صوت \"%s\""</string>
+    <string name="volume_panel_hint_unmute" msgid="4831850937582282340">"‏إعادة صوت \"%s\""</string>
+    <string name="volume_panel_hint_muted" msgid="1124844870181285320">"تم كتم الصوت"</string>
+    <string name="volume_panel_hint_vibrate" msgid="4136223145435914132">"اهتزاز"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"تشغيل <xliff:g id="LABEL">%s</xliff:g> على"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"سيتم تشغيل الصوت على"</string>
-    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
-    <skip />
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"هناك مكالمة جارية"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"أداة ضبط واجهة مستخدم النظام"</string>
     <string name="status_bar" msgid="4357390266055077437">"شريط الحالة"</string>
     <string name="demo_mode" msgid="263484519766901593">"وضع تجريبي لواجهة مستخدم النظام"</string>

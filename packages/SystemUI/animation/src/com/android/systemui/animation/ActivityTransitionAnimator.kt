@@ -20,6 +20,8 @@ import android.app.ActivityManager
 import android.app.ActivityTaskManager
 import android.app.PendingIntent
 import android.app.TaskInfo
+import android.app.WindowConfiguration
+import android.content.ComponentName
 import android.graphics.Matrix
 import android.graphics.Rect
 import android.graphics.RectF
@@ -38,7 +40,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.WindowManager.TRANSIT_CLOSE
+import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_BACK
+import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.view.animation.PathInterpolator
 import android.window.RemoteTransition
 import android.window.TransitionFilter
@@ -202,6 +206,10 @@ constructor(
                 listeners.forEach { it.onTransitionAnimationCancelled() }
             }
         }
+
+    /** Book-keeping for long-lived transitions that are currently registered. */
+    private val longLivedTransitions =
+        HashMap<TransitionCookie, Pair<RemoteTransition, RemoteTransition>>()
 
     /**
      * Start an intent and animate the opening window. The intent will be started by running
@@ -497,6 +505,7 @@ constructor(
                 view: View,
                 cujType: Int? = null,
                 cookie: TransitionCookie? = null,
+                component: ComponentName? = null,
                 returnCujType: Int? = null
             ): Controller? {
                 // Make sure the View we launch from implements LaunchableView to avoid visibility
@@ -519,7 +528,13 @@ constructor(
                     return null
                 }
 
-                return GhostedViewTransitionAnimatorController(view, cujType, cookie, returnCujType)
+                return GhostedViewTransitionAnimatorController(
+                    view,
+                    cujType,
+                    cookie,
+                    component,
+                    returnCujType
+                )
             }
         }
 
@@ -554,6 +569,16 @@ constructor(
             get() = null
 
         /**
+         * The [ComponentName] of the activity whose window is tied to this [Controller].
+         *
+         * This is used as a fallback when a cookie is defined but there is no match (e.g. when a
+         * matching activity was launched by a mean different from the launchable in this
+         * [Controller]), and should be defined for all long-lived registered [Controller]s.
+         */
+        val component: ComponentName?
+            get() = null
+
+        /**
          * The intent was started. If [willAnimate] is false, nothing else will happen and the
          * animation will not be started.
          */
@@ -569,6 +594,91 @@ constructor(
          * appropriately.
          */
         fun onTransitionAnimationCancelled(newKeyguardOccludedState: Boolean? = null) {}
+    }
+
+    /**
+     * Registers [controller] as a long-lived transition handler for launch and return animations.
+     *
+     * The [controller] will only be used for transitions matching the [TransitionCookie] defined
+     * within it, or the [ComponentName] if the cookie matching fails. Both fields are mandatory for
+     * this registration.
+     */
+    fun register(controller: Controller) {
+        check(returnAnimationFrameworkLibrary()) {
+            "Long-lived registrations cannot be used when the returnAnimationFrameworkLibrary " +
+                "flag is disabled"
+        }
+
+        if (transitionRegister == null) {
+            throw IllegalStateException(
+                "A RemoteTransitionRegister must be provided when creating this animator in " +
+                    "order to use long-lived animations"
+            )
+        }
+
+        val cookie =
+            controller.transitionCookie
+                ?: throw IllegalStateException(
+                    "A cookie must be defined in order to use long-lived animations"
+                )
+        val component =
+            controller.component
+                ?: throw IllegalStateException(
+                    "A component must be defined in order to use long-lived animations"
+                )
+
+        // Make sure that any previous registrations linked to the same cookie are gone.
+        unregister(cookie)
+
+        val launchFilter =
+            TransitionFilter().apply {
+                mRequirements =
+                    arrayOf(
+                        TransitionFilter.Requirement().apply {
+                            mActivityType = WindowConfiguration.ACTIVITY_TYPE_STANDARD
+                            mModes = intArrayOf(TRANSIT_OPEN, TRANSIT_TO_FRONT)
+                            mTopActivity = component
+                        }
+                    )
+            }
+        val launchRemoteTransition =
+            RemoteTransition(
+                RemoteAnimationRunnerCompat.wrap(createRunner(controller)),
+                "${cookie}_launchTransition"
+            )
+        transitionRegister.register(launchFilter, launchRemoteTransition)
+
+        val returnController =
+            object : Controller by controller {
+                override val isLaunching: Boolean = false
+            }
+        val returnFilter =
+            TransitionFilter().apply {
+                mRequirements =
+                    arrayOf(
+                        TransitionFilter.Requirement().apply {
+                            mActivityType = WindowConfiguration.ACTIVITY_TYPE_STANDARD
+                            mModes = intArrayOf(TRANSIT_CLOSE, TRANSIT_TO_BACK)
+                            mTopActivity = component
+                        }
+                    )
+            }
+        val returnRemoteTransition =
+            RemoteTransition(
+                RemoteAnimationRunnerCompat.wrap(createRunner(returnController)),
+                "${cookie}_returnTransition"
+            )
+        transitionRegister.register(returnFilter, returnRemoteTransition)
+
+        longLivedTransitions[cookie] = Pair(launchRemoteTransition, returnRemoteTransition)
+    }
+
+    /** Unregisters all controllers previously registered that contain [cookie]. */
+    fun unregister(cookie: TransitionCookie) {
+        val transitions = longLivedTransitions[cookie] ?: return
+        transitionRegister?.unregister(transitions.first)
+        transitionRegister?.unregister(transitions.second)
+        longLivedTransitions.remove(cookie)
     }
 
     /**
@@ -817,13 +927,16 @@ constructor(
                 if (it.mode == targetMode) {
                     if (activityTransitionUseLargestWindow()) {
                         if (returnAnimationFrameworkLibrary()) {
-                            // If the controller contains a cookie, _only_ match if the candidate
-                            // contains the matching cookie.
+                            // If the controller contains a cookie, _only_ match if either the
+                            // candidate contains the matching cookie, or a component is also
+                            // defined and is a match.
                             if (
                                 controller.transitionCookie != null &&
                                     it.taskInfo
                                         ?.launchCookies
-                                        ?.contains(controller.transitionCookie) != true
+                                        ?.contains(controller.transitionCookie) != true &&
+                                    (controller.component == null ||
+                                        it.taskInfo?.topActivity != controller.component)
                             ) {
                                 continue
                             }

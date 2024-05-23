@@ -1154,10 +1154,12 @@ public class ZenModeHelper {
                 rule.allowManualInvocation = azr.isManualInvocationAllowed();
                 modified = true;
             }
-            String iconResName = drawableResIdToResName(rule.pkg, azr.getIconResId());
-            if (!Objects.equals(rule.iconResName, iconResName)) {
-                rule.iconResName = iconResName;
-                modified = true;
+            if (!Flags.modesUi()) {
+                String iconResName = drawableResIdToResName(rule.pkg, azr.getIconResId());
+                if (!Objects.equals(rule.iconResName, iconResName)) {
+                    rule.iconResName = iconResName;
+                    modified = true;
+                }
             }
             if (!Objects.equals(rule.triggerDescription, azr.getTriggerDescription())) {
                 rule.triggerDescription = azr.getTriggerDescription();
@@ -1208,6 +1210,17 @@ public class ZenModeHelper {
                     rule.userModifiedFields |= AutomaticZenRule.FIELD_INTERRUPTION_FILTER;
                 }
                 modified = true;
+            }
+
+            if (Flags.modesUi()) {
+                String iconResName = drawableResIdToResName(rule.pkg, azr.getIconResId());
+                if (!Objects.equals(rule.iconResName, iconResName)) {
+                    rule.iconResName = iconResName;
+                    if (updateBitmask) {
+                        rule.userModifiedFields |= AutomaticZenRule.FIELD_ICON;
+                    }
+                    modified = true;
+                }
             }
 
             // Updates the bitmask and values for all policy fields, based on the origin.

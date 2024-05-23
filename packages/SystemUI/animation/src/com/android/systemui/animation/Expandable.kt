@@ -16,6 +16,7 @@
 
 package com.android.systemui.animation
 
+import android.content.ComponentName
 import android.view.View
 
 /** A piece of UI that can be expanded into a Dialog or an Activity. */
@@ -28,13 +29,16 @@ interface Expandable {
      * @param launchCujType The CUJ type from the [com.android.internal.jank.InteractionJankMonitor]
      *   associated to the launch that will use this controller.
      * @param cookie The unique cookie associated with the launch that will use this controller.
-     *   This is required iff the a return animation should be included.
+     *   This is required iff a return animation should be included.
+     * @param component The name of the activity that will be launched by this controller. This is
+     *   required for long-lived registrations only.
      * @param returnCujType The CUJ type from the [com.android.internal.jank.InteractionJankMonitor]
      *   associated to the return animation that will use this controller.
      */
     fun activityTransitionController(
         launchCujType: Int? = null,
         cookie: ActivityTransitionAnimator.TransitionCookie? = null,
+        component: ComponentName? = null,
         returnCujType: Int? = null
     ): ActivityTransitionAnimator.Controller?
 
@@ -47,7 +51,12 @@ interface Expandable {
     fun activityTransitionController(
         launchCujType: Int? = null
     ): ActivityTransitionAnimator.Controller? {
-        return activityTransitionController(launchCujType, cookie = null, returnCujType = null)
+        return activityTransitionController(
+            launchCujType,
+            cookie = null,
+            component = null,
+            returnCujType = null
+        )
     }
 
     /**
@@ -70,12 +79,14 @@ interface Expandable {
                 override fun activityTransitionController(
                     launchCujType: Int?,
                     cookie: ActivityTransitionAnimator.TransitionCookie?,
+                    component: ComponentName?,
                     returnCujType: Int?
                 ): ActivityTransitionAnimator.Controller? {
                     return ActivityTransitionAnimator.Controller.fromView(
                         view,
                         launchCujType,
                         cookie,
+                        component,
                         returnCujType
                     )
                 }

@@ -34,8 +34,8 @@ open class ListenerSetTest : SysuiTestCase() {
     @Test
     fun addIfAbsent_doesNotDoubleAdd() {
         // setup & preconditions
-        val runnable1 = Runnable { }
-        val runnable2 = Runnable { }
+        val runnable1 = Runnable {}
+        val runnable2 = Runnable {}
         assertThat(runnableSet).isEmpty()
 
         // Test that an element can be added
@@ -53,7 +53,7 @@ open class ListenerSetTest : SysuiTestCase() {
 
     @Test
     fun isEmpty_changes() {
-        val runnable = Runnable { }
+        val runnable = Runnable {}
         assertThat(runnableSet).isEmpty()
         assertThat(runnableSet.isEmpty()).isTrue()
         assertThat(runnableSet.isNotEmpty()).isFalse()
@@ -74,17 +74,17 @@ open class ListenerSetTest : SysuiTestCase() {
         assertThat(runnableSet).isEmpty()
         assertThat(runnableSet.size).isEqualTo(0)
 
-        assertThat(runnableSet.addIfAbsent(Runnable { })).isTrue()
+        assertThat(runnableSet.addIfAbsent(Runnable {})).isTrue()
         assertThat(runnableSet.size).isEqualTo(1)
 
-        assertThat(runnableSet.addIfAbsent(Runnable { })).isTrue()
+        assertThat(runnableSet.addIfAbsent(Runnable {})).isTrue()
         assertThat(runnableSet.size).isEqualTo(2)
     }
 
     @Test
     fun contains_worksAsExpected() {
-        val runnable1 = Runnable { }
-        val runnable2 = Runnable { }
+        val runnable1 = Runnable {}
+        val runnable2 = Runnable {}
         assertThat(runnableSet).isEmpty()
         assertThat(runnable1 in runnableSet).isFalse()
         assertThat(runnable2 in runnableSet).isFalse()
@@ -112,8 +112,8 @@ open class ListenerSetTest : SysuiTestCase() {
 
     @Test
     fun containsAll_worksAsExpected() {
-        val runnable1 = Runnable { }
-        val runnable2 = Runnable { }
+        val runnable1 = Runnable {}
+        val runnable2 = Runnable {}
 
         assertThat(runnableSet).isEmpty()
         assertThat(runnableSet.containsAll(listOf())).isTrue()
@@ -143,8 +143,8 @@ open class ListenerSetTest : SysuiTestCase() {
     @Test
     fun remove_removesListener() {
         // setup and preconditions
-        val runnable1 = Runnable { }
-        val runnable2 = Runnable { }
+        val runnable1 = Runnable {}
+        val runnable2 = Runnable {}
         assertThat(runnableSet).isEmpty()
         runnableSet.addIfAbsent(runnable1)
         runnableSet.addIfAbsent(runnable2)
@@ -168,15 +168,14 @@ open class ListenerSetTest : SysuiTestCase() {
         // Setup and preconditions
         val runnablesCalled = mutableListOf<Int>()
         // runnable1 is configured to remove itself
-        val runnable1 = object : Runnable {
-            override fun run() {
-                runnableSet.remove(this)
-                runnablesCalled.add(1)
+        val runnable1 =
+            object : Runnable {
+                override fun run() {
+                    runnableSet.remove(this)
+                    runnablesCalled.add(1)
+                }
             }
-        }
-        val runnable2 = Runnable {
-            runnablesCalled.add(2)
-        }
+        val runnable2 = Runnable { runnablesCalled.add(2) }
         assertThat(runnableSet).isEmpty()
         runnableSet.addIfAbsent(runnable1)
         runnableSet.addIfAbsent(runnable2)
@@ -194,17 +193,13 @@ open class ListenerSetTest : SysuiTestCase() {
     fun addIfAbsent_isReentrantSafe() {
         // Setup and preconditions
         val runnablesCalled = mutableListOf<Int>()
-        val runnable99 = Runnable {
-            runnablesCalled.add(99)
-        }
+        val runnable99 = Runnable { runnablesCalled.add(99) }
         // runnable1 is configured to add runnable99
         val runnable1 = Runnable {
             runnableSet.addIfAbsent(runnable99)
             runnablesCalled.add(1)
         }
-        val runnable2 = Runnable {
-            runnablesCalled.add(2)
-        }
+        val runnable2 = Runnable { runnablesCalled.add(2) }
         assertThat(runnableSet).isEmpty()
         runnableSet.addIfAbsent(runnable1)
         runnableSet.addIfAbsent(runnable2)

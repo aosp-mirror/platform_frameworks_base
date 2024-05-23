@@ -26,6 +26,7 @@ import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_UNDEFINED;
 
 import android.annotation.NonNull;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -34,6 +35,8 @@ import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+
+import com.android.wm.shell.R;
 
 import java.util.Objects;
 
@@ -60,10 +63,6 @@ final class DragResizeWindowGeometry {
     // Extra-large edge bounds for logging to help debug when an edge resize is ignored.
     private final @Nullable TaskEdges mDebugTaskEdges;
 
-    /**
-     * Constructs an instance representing the drag resize touch input regions, where all sizes
-     * are represented in pixels.
-     */
     DragResizeWindowGeometry(int taskCornerRadius, @NonNull Size taskSize,
             int resizeHandleThickness, int fineCornerSize, int largeCornerSize) {
         mTaskCornerRadius = taskCornerRadius;
@@ -80,6 +79,31 @@ final class DragResizeWindowGeometry {
         } else {
             mDebugTaskEdges = null;
         }
+    }
+
+    /**
+     * Returns the resource value to use for the resize handle on the edge of the window.
+     */
+    static int getResizeEdgeHandleSize(@NonNull Resources res) {
+        return enableWindowingEdgeDragResize()
+                ? res.getDimensionPixelSize(R.dimen.desktop_mode_edge_handle)
+                : res.getDimensionPixelSize(R.dimen.freeform_resize_handle);
+    }
+
+    /**
+     * Returns the resource value to use for course input, such as touch, that benefits from a large
+     * square on each of the window's corners.
+     */
+    static int getLargeResizeCornerSize(@NonNull Resources res) {
+        return res.getDimensionPixelSize(R.dimen.desktop_mode_corner_resize_large);
+    }
+
+    /**
+     * Returns the resource value to use for fine input, such as stylus, that can use a smaller
+     * square on each of the window's corners.
+     */
+    static int getFineResizeCornerSize(@NonNull Resources res) {
+        return res.getDimensionPixelSize(R.dimen.freeform_resize_corner);
     }
 
     /**

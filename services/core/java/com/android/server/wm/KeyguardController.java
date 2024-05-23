@@ -173,7 +173,13 @@ class KeyguardController {
      * Update the Keyguard showing state.
      */
     void setKeyguardShown(int displayId, boolean keyguardShowing, boolean aodShowing) {
-        if (mRootWindowContainer.getDisplayContent(displayId).isKeyguardAlwaysUnlocked()) {
+        final DisplayContent dc = mRootWindowContainer.getDisplayContent(displayId);
+
+        if (dc == null) {
+            Slog.w(TAG, "setKeyguardShown called on non-existent display " + displayId);
+            return;
+        }
+        if (dc.isKeyguardAlwaysUnlocked()) {
             Slog.i(TAG, "setKeyguardShown ignoring always unlocked display " + displayId);
             return;
         }
@@ -212,8 +218,8 @@ class KeyguardController {
         //   be OFF or DOZE (the path of screen off may have handled it).
         if (displayId == DEFAULT_DISPLAY
                 && ((aodShowing ^ keyguardShowing) || (aodShowing && aodChanged && keyguardChanged))
-                && !state.mKeyguardGoingAway && Display.isOnState(
-                        mRootWindowContainer.getDefaultDisplay().getDisplayInfo().state)) {
+                && !state.mKeyguardGoingAway
+                && Display.isOnState(dc.getDisplayInfo().state)) {
             mWindowManager.mTaskSnapshotController.snapshotForSleeping(DEFAULT_DISPLAY);
         }
 
@@ -226,16 +232,20 @@ class KeyguardController {
             if (keyguardShowing) {
                 state.mDismissalRequested = false;
             }
-            if (goingAwayRemoved || (keyguardShowing && Flags.keyguardAppearTransition())) {
+            if (goingAwayRemoved
+                    || (Flags.keyguardAppearTransition() && keyguardShowing
+                            && !Display.isOffState(dc.getDisplayInfo().state))) {
                 // Keyguard decided to show or stopped going away. Send a transition to animate back
                 // to the locked state before holding the sleep token again
-                final DisplayContent dc = mRootWindowContainer.getDefaultDisplay();
-                dc.requestTransitionAndLegacyPrepare(
+                final DisplayContent transitionDc = Flags.keyguardAppearTransition()
+                        ? dc
+                        : mRootWindowContainer.getDefaultDisplay();
+                transitionDc.requestTransitionAndLegacyPrepare(
                         TRANSIT_TO_FRONT, TRANSIT_FLAG_KEYGUARD_APPEARING);
                 if (Flags.keyguardAppearTransition()) {
                     dc.mWallpaperController.adjustWallpaperWindows();
                 }
-                dc.executeAppTransition();
+                transitionDc.executeAppTransition();
             }
         }
 

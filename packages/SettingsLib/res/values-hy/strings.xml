@@ -103,6 +103,10 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"Ձախ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, աջ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>։"</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Ձախ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Աջ ականջակալի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for tv_bluetooth_battery_level_untethered_left (337629670583744410) -->
+    <skip />
+    <!-- no translation found for tv_bluetooth_battery_level_untethered_right (8610019317279155595) -->
+    <skip />
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Ակտիվ է"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Պահված է"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Ակտիվ է (միայն ձախ)"</string>
@@ -159,7 +163,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Չեղարկել"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Զուգակցում է մուտքի թույլտվությունը դեպի ձեր կոնտակտները և զանգերի պատմությունը, երբ միացված է:"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Չհաջողվեց զուգակցել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Չհաջողվեց զուգակցել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ՝ սխալ PIN-ի կամ անցաբառի պատճառով:"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Չհաջողվեց զուգակցել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ՝ սխալ PIN-ի կամ մուտքի բանալու պատճառով:"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Հնարավոր չէ կապ հաստատել  <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Զուգավորումը մերժվեց <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի կողմից:"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Համակարգիչ"</string>
@@ -258,7 +262,7 @@
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Զուգակցեք նոր սարքեր՝ օգտագործելով վեցանիշ կոդը"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Զուգակցված սարքեր"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Միացված է"</string>
-    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Սարքի տվյալները"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Սարքի տվյալներ"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Հեռացնել"</string>
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Սարքի մատնահետք՝ <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Չհաջողվեց միացնել"</string>
@@ -706,7 +710,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Ֆիզիկական ստեղնաշար"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Ընտրեք ստեղնաշարի դասավորությունը"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Կանխադրված"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Էկրանի միացում"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"Էկրանի միացման կառավարում"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Թույլատրել հավելվածին միացնել էկրանը"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Եթե թույլ տաք, հավելվածը ցանկացած ժամանակ կկարողանա միացնել էկրանը՝ առանց ձեր բացահայտ համաձայնության։"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Կանգնեցնել <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի հեռարձակումը"</string>

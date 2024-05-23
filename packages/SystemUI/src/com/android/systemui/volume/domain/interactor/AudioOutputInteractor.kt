@@ -26,6 +26,7 @@ import com.android.settingslib.media.BluetoothMediaDevice
 import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.media.MediaDevice.MediaDeviceType
 import com.android.settingslib.volume.data.repository.AudioRepository
+import com.android.settingslib.volume.data.repository.AudioSharingRepository
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.volume.domain.model.AudioOutputDevice
@@ -58,6 +59,7 @@ constructor(
     private val deviceIconInteractor: DeviceIconInteractor,
     private val mediaOutputInteractor: MediaOutputInteractor,
     private val localMediaRepositoryFactory: LocalMediaRepositoryFactory,
+    private val audioSharingRepository: AudioSharingRepository,
 ) {
 
     val currentAudioDevice: Flow<AudioOutputDevice> =
@@ -76,6 +78,9 @@ constructor(
             .map { it ?: AudioOutputDevice.Unknown }
             .flowOn(backgroundCoroutineContext)
             .stateIn(scope, SharingStarted.Eagerly, AudioOutputDevice.Unknown)
+
+    /** Whether the device is in audio sharing */
+    val isInAudioSharing: Flow<Boolean> = audioSharingRepository.inAudioSharing
 
     private fun AudioDeviceInfo.toAudioOutputDevice(): AudioOutputDevice {
         if (type == TYPE_WIRED_HEADPHONES || type == TYPE_WIRED_HEADSET) {

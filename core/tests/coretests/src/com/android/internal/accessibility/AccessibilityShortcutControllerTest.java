@@ -634,6 +634,42 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
+    @EnableFlags({
+            Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS,
+            Flags.FLAG_RESTORE_A11Y_SHORTCUT_TARGET_SERVICE})
+    public void testOnAccessibilityShortcut_settingNull_dialogShown_enablesDefaultShortcut()
+            throws Exception {
+        configureDefaultAccessibilityService();
+        Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
+                AccessibilityShortcutController.DialogStatus.SHOWN);
+        // Setting is only `null` during SUW.
+        Settings.Secure.putString(mContentResolver, ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, null);
+        getController().performAccessibilityShortcut();
+
+        verify(mAccessibilityManagerService).enableShortcutsForTargets(
+                eq(true), eq(HARDWARE), mListCaptor.capture(), anyInt());
+        assertThat(mListCaptor.getValue()).containsExactly(SERVICE_NAME_STRING);
+        verify(mAccessibilityManagerService).performAccessibilityShortcut(null);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_RESTORE_A11Y_SHORTCUT_TARGET_SERVICE)
+    @DisableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
+    public void testOnAccessibilityShortcut_settingNull_dialogShown_writesDefaultSetting()
+            throws Exception {
+        configureDefaultAccessibilityService();
+        Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
+                AccessibilityShortcutController.DialogStatus.SHOWN);
+        // Setting is only `null` during SUW.
+        Settings.Secure.putString(mContentResolver, ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, null);
+        getController().performAccessibilityShortcut();
+
+        assertThat(Settings.Secure.getString(mContentResolver,
+                ACCESSIBILITY_SHORTCUT_TARGET_SERVICE)).isEqualTo(SERVICE_NAME_STRING);
+        verify(mAccessibilityManagerService).performAccessibilityShortcut(null);
+    }
+
+    @Test
     public void getFrameworkFeatureMap_shouldBeUnmodifiable() {
         final Map<ComponentName, AccessibilityShortcutController.FrameworkFeatureInfo>
                 frameworkFeatureMap =
