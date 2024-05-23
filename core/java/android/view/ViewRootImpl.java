@@ -1192,6 +1192,8 @@ public final class ViewRootImpl implements ViewParent,
             toolkitFrameRateVelocityMappingReadOnly();
     private static boolean sToolkitEnableInvalidateCheckThreadFlagValue =
             Flags.enableInvalidateCheckThread();
+    private static boolean sSurfaceFlingerBugfixFlagValue =
+            com.android.graphics.surfaceflinger.flags.Flags.vrrBugfix24q4();
 
     static {
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
@@ -4269,7 +4271,7 @@ public final class ViewRootImpl implements ViewParent,
         // when the values are applicable.
         if (mDrawnThisFrame) {
             mDrawnThisFrame = false;
-            if (!mInvalidationIdleMessagePosted) {
+            if (!mInvalidationIdleMessagePosted && sSurfaceFlingerBugfixFlagValue) {
                 mInvalidationIdleMessagePosted = true;
                 mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE, IDLE_TIME_MILLIS);
             }
@@ -13017,7 +13019,7 @@ public final class ViewRootImpl implements ViewParent,
     private void removeVrrMessages() {
         mHandler.removeMessages(MSG_TOUCH_BOOST_TIMEOUT);
         mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
-        if (mInvalidationIdleMessagePosted) {
+        if (mInvalidationIdleMessagePosted && sSurfaceFlingerBugfixFlagValue) {
             mInvalidationIdleMessagePosted = false;
             mHandler.removeMessages(MSG_CHECK_INVALIDATION_IDLE);
         }

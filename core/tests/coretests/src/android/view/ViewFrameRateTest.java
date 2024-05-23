@@ -625,7 +625,8 @@ public class ViewFrameRateTest {
 
     @Test
     @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
-            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY,
+            com.android.graphics.surfaceflinger.flags.Flags.FLAG_VRR_BUGFIX_24Q4
     })
     public void idleDetected() throws Throwable {
         waitForFrameRateCategoryToSettle();
