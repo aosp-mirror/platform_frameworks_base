@@ -215,111 +215,37 @@ genrule {
 
 java_library {
     name: "services.core.ravenwood-jarjar",
+    defaults: ["ravenwood-internal-only-visibility-java"],
     installable: false,
     static_libs: [
         "services.core.ravenwood",
     ],
     jarjar_rules: ":ravenwood-services-jarjar-rules",
-    visibility: ["//visibility:private"],
-}
-
-java_library {
-    name: "services.fakes.ravenwood-jarjar",
-    installable: false,
-    srcs: [":services.fakes-sources"],
-    libs: [
-        "ravenwood-framework",
-        "services.core.ravenwood",
-    ],
-    jarjar_rules: ":ravenwood-services-jarjar-rules",
-    visibility: ["//visibility:private"],
-}
-
-java_library {
-    name: "mockito-ravenwood-prebuilt",
-    installable: false,
-    static_libs: [
-        "mockito-robolectric-prebuilt",
-    ],
-}
-
-java_library {
-    name: "inline-mockito-ravenwood-prebuilt",
-    installable: false,
-    static_libs: [
-        "inline-mockito-robolectric-prebuilt",
-    ],
 }
 
 // Jars in "ravenwood-runtime" are set to the classpath, sorted alphabetically.
 // Rename some of the dependencies to make sure they're included in the intended order.
 java_genrule {
     name: "100-framework-minus-apex.ravenwood",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
     cmd: "cp $(in) $(out)",
     srcs: [":framework-minus-apex.ravenwood"],
     out: ["100-framework-minus-apex.ravenwood.jar"],
-    visibility: ["//visibility:private"],
 }
 
 java_genrule {
     // Use 200 to make sure it comes before the mainline stub ("all-updatable...").
     name: "200-kxml2-android",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
     cmd: "cp $(in) $(out)",
     srcs: [":kxml2-android"],
     out: ["200-kxml2-android.jar"],
-    visibility: ["//visibility:private"],
 }
 
 java_genrule {
     name: "z00-all-updatable-modules-system-stubs",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
     cmd: "cp $(in) $(out)",
     srcs: [":all-updatable-modules-system-stubs"],
     out: ["z00-all-updatable-modules-system-stubs.jar"],
-    visibility: ["//visibility:private"],
-}
-
-android_ravenwood_libgroup {
-    name: "ravenwood-runtime",
-    libs: [
-        "100-framework-minus-apex.ravenwood",
-        "200-kxml2-android",
-
-        "ravenwood-runtime-common-ravenwood",
-
-        "android.test.mock.ravenwood",
-        "ravenwood-helper-runtime",
-        "hoststubgen-helper-runtime.ravenwood",
-        "services.core.ravenwood-jarjar",
-        "services.fakes.ravenwood-jarjar",
-
-        // Provide runtime versions of utils linked in below
-        "junit",
-        "truth",
-        "flag-junit",
-        "ravenwood-framework",
-        "ravenwood-junit-impl",
-        "ravenwood-junit-impl-flag",
-        "mockito-ravenwood-prebuilt",
-        "inline-mockito-ravenwood-prebuilt",
-
-        // It's a stub, so it should be towards the end.
-        "z00-all-updatable-modules-system-stubs",
-    ],
-    jni_libs: [
-        "libandroid_runtime",
-        "libravenwood_runtime",
-    ],
-}
-
-android_ravenwood_libgroup {
-    name: "ravenwood-utils",
-    libs: [
-        "junit",
-        "truth",
-        "flag-junit",
-        "ravenwood-framework",
-        "ravenwood-junit",
-        "mockito-ravenwood-prebuilt",
-        "inline-mockito-ravenwood-prebuilt",
-    ],
 }
