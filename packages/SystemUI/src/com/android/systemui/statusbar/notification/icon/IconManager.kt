@@ -225,15 +225,21 @@ constructor(
             return it
         }
 
-        val smallIcon = entry.sbn.notification.smallIcon
+        val n = entry.sbn.notification
         var usingMonochromeAppIcon = false
         val icon: Icon?
         if (showPeopleAvatar) {
             icon = createPeopleAvatar(entry)
         } else if (android.app.Flags.notificationsUseMonochromeAppIcon()) {
-            icon = getMonochromeAppIcon(entry)?.also { usingMonochromeAppIcon = true } ?: smallIcon
+            if (n.shouldUseAppIcon()) {
+                icon =
+                    getMonochromeAppIcon(entry)?.also { usingMonochromeAppIcon = true }
+                        ?: n.smallIcon
+            } else {
+                icon = n.smallIcon
+            }
         } else {
-            icon = smallIcon
+            icon = n.smallIcon
         }
 
         if (icon == null) {

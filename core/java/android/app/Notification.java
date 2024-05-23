@@ -1634,6 +1634,9 @@ public class Notification implements Parcelable
     private Icon mLargeIcon;
     private Icon mAppIcon;
 
+    /** Cache for whether the notification was posted by a headless system app. */
+    private Boolean mBelongsToHeadlessSystemApp = null;
+
     @UnsupportedAppUsage
     private String mChannelId;
     private long mTimeout;
@@ -3080,24 +3083,16 @@ public class Notification implements Parcelable
                     return name.toString();
                 }
             }
-            // If not, try getting the app info from extras.
+            // If not, try getting the name from the app info.
             if (context == null) {
                 return null;
             }
-            final PackageManager pm = context.getPackageManager();
             if (TextUtils.isEmpty(name)) {
-                if (extras.containsKey(EXTRA_BUILDER_APPLICATION_INFO)) {
-                    final ApplicationInfo info = extras.getParcelable(
-                            EXTRA_BUILDER_APPLICATION_INFO,
-                            ApplicationInfo.class);
-                    if (info != null) {
-                        name = pm.getApplicationLabel(info);
-                    }
+                ApplicationInfo info = getApplicationInfo(context);
+                if (info != null) {
+                    final PackageManager pm = context.getPackageManager();
+                    name = pm.getApplicationLabel(getApplicationInfo(context));
                 }
-            }
-            // If that's still empty, use the one from the context directly.
-            if (TextUtils.isEmpty(name)) {
-                name = pm.getApplicationLabel(context.getApplicationInfo());
             }
             // If there's still nothing, ¯\_(ツ)_/¯
             if (TextUtils.isEmpty(name)) {
@@ -3110,19 +3105,55 @@ public class Notification implements Parcelable
     }
 
     /**
+     * Whether this notification was posted by a headless system app.
+     *
+     * If we don't have enough information to figure this out, this will return false. Therefore,
+     * false negatives are possible, but false positives should not be.
+     *
+     * @hide
+     */
+    public boolean belongsToHeadlessSystemApp(Context context) {
+        Trace.beginSection("Notification#belongsToHeadlessSystemApp");
+
+        try {
+            if (mBelongsToHeadlessSystemApp != null) {
+                return mBelongsToHeadlessSystemApp;
+            }
+
+            if (context == null) {
+                // Without a valid context, we don't know exactly. Let's assume it doesn't belong to
+                // a system app, but not cache the value.
+                return false;
+            }
+
+            ApplicationInfo info = getApplicationInfo(context);
+            if (info != null) {
+                if ((info.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                    // It's not a system app at all.
+                    mBelongsToHeadlessSystemApp = false;
+                } else {
+                    // If there's no launch intent, it's probably a headless app.
+                    final PackageManager pm = context.getPackageManager();
+                    mBelongsToHeadlessSystemApp = pm.getLaunchIntentForPackage(info.packageName)
+                            == null;
+                }
+            } else {
+                // If for some reason we don't have the app info, we don't know; best assume it's
+                // not a system app.
+                return false;
+            }
+            return mBelongsToHeadlessSystemApp;
+        } finally {
+            Trace.endSection();
+        }
+    }
+
+    /**
      * Get the resource ID of the app icon from application info.
      * @hide
      */
     public int getHeaderAppIconRes(Context context) {
-        ApplicationInfo info = null;
-        if (extras.containsKey(EXTRA_BUILDER_APPLICATION_INFO)) {
-            info = extras.getParcelable(
-                    EXTRA_BUILDER_APPLICATION_INFO,
-                    ApplicationInfo.class);
-        }
-        if (info == null && context != null) {
-            info = context.getApplicationInfo();
-        }
+        ApplicationInfo info = getApplicationInfo(context);
         if (info != null) {
             return info.icon;
         }
@@ -3137,19 +3168,39 @@ public class Notification implements Parcelable
         Trace.beginSection("Notification#loadHeaderAppIcon");
 
         try {
-            final PackageManager pm = context.getPackageManager();
-            if (extras.containsKey(EXTRA_BUILDER_APPLICATION_INFO)) {
-                final ApplicationInfo info = extras.getParcelable(
-                        EXTRA_BUILDER_APPLICATION_INFO,
-                        ApplicationInfo.class);
-                if (info != null) {
-                    return pm.getApplicationIcon(info);
-                }
+            if (context == null) {
+                Log.e(TAG, "Cannot load the app icon drawable with a null context");
+                return null;
             }
-            return pm.getApplicationIcon(context.getApplicationInfo());
+            final PackageManager pm = context.getPackageManager();
+            ApplicationInfo info = getApplicationInfo(context);
+            if (info == null) {
+                Log.e(TAG, "Cannot load the app icon drawable: no application info");
+                return null;
+            }
+            return pm.getApplicationIcon(info);
         } finally {
             Trace.endSection();
         }
+    }
+
+    /**
+     * Fetch the application info from the notification, or the context if that isn't available.
+     */
+    private ApplicationInfo getApplicationInfo(Context context) {
+        ApplicationInfo info = null;
+        if (extras.containsKey(EXTRA_BUILDER_APPLICATION_INFO)) {
+            info = extras.getParcelable(
+                    EXTRA_BUILDER_APPLICATION_INFO,
+                    ApplicationInfo.class);
+        }
+        if (info == null) {
+            if (context == null) {
+                return null;
+            }
+            info = context.getApplicationInfo();
+        }
+        return info;
     }
 
     /**
@@ -4189,6 +4240,9 @@ public class Notification implements Parcelable
      */
     public boolean shouldUseAppIcon() {
         if (Flags.notificationsUseAppIconInRow()) {
+            if (belongsToHeadlessSystemApp(/* context = */ null)) {
+                return false;
+            }
             return getAppIcon() != null;
         }
         return false;
@@ -6189,7 +6243,7 @@ public class Notification implements Parcelable
             }
 
             boolean usingAppIcon = false;
-            if (Flags.notificationsUseAppIconInRow()) {
+            if (Flags.notificationsUseAppIconInRow() && !mN.belongsToHeadlessSystemApp(mContext)) {
                 // Use the app icon in the view
                 int appIconRes = mN.getHeaderAppIconRes(mContext);
                 if (appIconRes != 0) {
