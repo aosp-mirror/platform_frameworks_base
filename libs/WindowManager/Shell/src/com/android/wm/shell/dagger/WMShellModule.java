@@ -100,7 +100,6 @@ import com.android.wm.shell.unfold.qualifier.UnfoldShellTransition;
 import com.android.wm.shell.unfold.qualifier.UnfoldTransition;
 import com.android.wm.shell.windowdecor.CaptionWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel;
-import com.android.wm.shell.windowdecor.ResizeHandleSizeRepository;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import dagger.Binds;
@@ -221,8 +220,7 @@ public abstract class WMShellModule {
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            ResizeHandleSizeRepository resizeHandleSizeRepository) {
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -239,8 +237,7 @@ public abstract class WMShellModule {
                     syncQueue,
                     transitions,
                     desktopTasksController,
-                    rootTaskDisplayAreaOrganizer,
-                    resizeHandleSizeRepository);
+                    rootTaskDisplayAreaOrganizer);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -250,8 +247,7 @@ public abstract class WMShellModule {
                 displayController,
                 rootTaskDisplayAreaOrganizer,
                 syncQueue,
-                transitions,
-                resizeHandleSizeRepository);
+                transitions);
     }
 
     //
@@ -533,8 +529,7 @@ public abstract class WMShellModule {
                 exitDesktopTransitionHandler, toggleResizeDesktopTaskTransitionHandler,
                 dragToDesktopTransitionHandler, desktopModeTaskRepository,
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
-                recentsTransitionHandler, multiInstanceHelper,
-                mainExecutor, desktopTasksLimiter);
+                recentsTransitionHandler, multiInstanceHelper, mainExecutor, desktopTasksLimiter);
     }
 
     @WMSingleton
@@ -625,12 +620,6 @@ public abstract class WMShellModule {
     @Provides
     static DesktopModeEventLogger provideDesktopModeEventLogger() {
         return new DesktopModeEventLogger();
-    }
-
-    @WMSingleton
-    @Provides
-    static ResizeHandleSizeRepository provideResizeHandleSizeRepository() {
-        return new ResizeHandleSizeRepository();
     }
 
     //
