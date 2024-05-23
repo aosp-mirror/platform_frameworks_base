@@ -2096,7 +2096,7 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ദിനചര്യ മോഡ് വിവരത്തെ കുറിച്ചുള്ള അറിയിപ്പ്"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ബാറ്ററി സേവർ ഓണാക്കി"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ബാറ്ററി ലൈഫ് വർദ്ധിപ്പിക്കാൻ ബാറ്ററി ഉപയോഗം കുറയ്ക്കുന്നു"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ബാറ്ററി ലാഭിക്കൽ"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ബാറ്ററി സേവർ"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ബാറ്ററി സേവർ ഓഫാക്കിയിരിക്കുന്നു"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ഫോണിൽ വേണ്ടത്ര ചാർജ് ഉണ്ട്. ഫീച്ചറുകൾക്ക് ഇനി നിയന്ത്രണമില്ല."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"ടാബ്‌ലെറ്റിൽ വേണ്ടത്ര ചാർജ് ഉണ്ട്. ഫീച്ചറുകൾക്ക് ഇനി നിയന്ത്രണമില്ല."</string>
