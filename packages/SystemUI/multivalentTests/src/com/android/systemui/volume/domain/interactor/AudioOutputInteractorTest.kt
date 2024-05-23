@@ -40,6 +40,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.volume.data.repository.audioRepository
+import com.android.systemui.volume.data.repository.audioSharingRepository
 import com.android.systemui.volume.domain.model.AudioOutputDevice
 import com.android.systemui.volume.localMediaController
 import com.android.systemui.volume.localMediaRepository
@@ -249,5 +250,33 @@ class AudioOutputInteractorTest : SysuiTestCase() {
                 }
                 whenever(cachedDevice).thenReturn(cachedBluetoothDevice)
             }
+    }
+
+    @Test
+    fun inAudioSharing_returnTrue() {
+        with(kosmos) {
+            testScope.runTest {
+                audioSharingRepository.setInAudioSharing(true)
+
+                val inAudioSharing by collectLastValue(underTest.isInAudioSharing)
+                runCurrent()
+
+                assertThat(inAudioSharing).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun notInAudioSharing_returnFalse() {
+        with(kosmos) {
+            testScope.runTest {
+                audioSharingRepository.setInAudioSharing(false)
+
+                val inAudioSharing by collectLastValue(underTest.isInAudioSharing)
+                runCurrent()
+
+                assertThat(inAudioSharing).isFalse()
+            }
+        }
     }
 }

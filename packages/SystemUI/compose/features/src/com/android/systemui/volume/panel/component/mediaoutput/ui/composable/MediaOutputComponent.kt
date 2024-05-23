@@ -81,6 +81,7 @@ constructor(
         val deviceIconViewModel: DeviceIconViewModel? by
             viewModel.deviceIconViewModel.collectAsStateWithLifecycle()
         val clickLabel = stringResource(R.string.volume_panel_enter_media_output_settings)
+        val enabled: Boolean by viewModel.enabled.collectAsStateWithLifecycle()
 
         Expandable(
             modifier =
@@ -93,7 +94,12 @@ constructor(
                 },
             color = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(28.dp),
-            onClick = { viewModel.onBarClick(it) },
+            onClick =
+                if (enabled) {
+                    { viewModel.onBarClick(it) }
+                } else {
+                    null
+                },
         ) { _ ->
             Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
                 connectedDeviceViewModel?.let { ConnectedDeviceText(it) }
