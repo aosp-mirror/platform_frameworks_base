@@ -93,7 +93,6 @@ import com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_DESKTOP_MODE
 import com.android.wm.shell.transition.Transitions.TransitionHandler
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import java.util.Optional
 import org.junit.After
 import org.junit.Assume.assumeTrue
 import org.junit.Before
@@ -116,6 +115,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.capture
 import org.mockito.quality.Strictness
+import java.util.Optional
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import org.mockito.Mockito.`when` as whenever

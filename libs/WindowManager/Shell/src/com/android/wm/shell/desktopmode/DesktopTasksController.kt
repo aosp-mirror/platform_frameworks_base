@@ -124,6 +124,8 @@ class DesktopTasksController(
 
     private val desktopMode: DesktopModeImpl
     private var visualIndicator: DesktopModeVisualIndicator? = null
+    private val desktopModeShellCommandHandler: DesktopModeShellCommandHandler =
+        DesktopModeShellCommandHandler(this)
     private val mOnAnimationFinishedCallback = Consumer<SurfaceControl.Transaction> {
         t: SurfaceControl.Transaction ->
         visualIndicator?.releaseVisualIndicator(t)
@@ -176,6 +178,11 @@ class DesktopTasksController(
     private fun onInit() {
         KtProtoLog.d(WM_SHELL_DESKTOP_MODE, "Initialize DesktopTasksController")
         shellCommandHandler.addDumpCallback(this::dump, this)
+        shellCommandHandler.addCommandCallback(
+            "desktopmode",
+            desktopModeShellCommandHandler,
+            this
+        )
         shellController.addExternalInterface(
             ShellSharedConstants.KEY_EXTRA_SHELL_DESKTOP_MODE,
             { createExternalInterface() },
