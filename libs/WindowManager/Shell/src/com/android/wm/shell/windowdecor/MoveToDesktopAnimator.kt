@@ -7,7 +7,7 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.view.MotionEvent
 import android.view.SurfaceControl
-import com.android.internal.policy.ScreenDecorationsUtils
+import com.android.wm.shell.R
 
 /**
  * Creates an animator to shrink and position task after a user drags a fullscreen task from
@@ -39,7 +39,8 @@ class MoveToDesktopAnimator @JvmOverloads constructor(
             .setDuration(ANIMATION_DURATION.toLong())
             .apply {
                 val t = SurfaceControl.Transaction()
-                val cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
+                val cornerRadius = context.resources
+                    .getDimensionPixelSize(R.dimen.desktop_mode_dragged_task_radius).toFloat()
                 addUpdateListener {
                     setTaskPosition(mostRecentInput.x, mostRecentInput.y)
                     t.setScale(taskSurface, scale, scale)
