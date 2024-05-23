@@ -24,7 +24,7 @@
             android:toDegrees="275">
             <shape
                 android:shape="ring"
-                android:thickness="3dp"
+                android:thickness="2dp"
                 android:innerRadius="14dp"
                 android:useLevel="true">
             </shape>

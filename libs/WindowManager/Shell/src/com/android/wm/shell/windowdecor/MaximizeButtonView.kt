@@ -28,7 +28,6 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ProgressBar
-import androidx.annotation.ColorInt
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import androidx.core.content.ContextCompat
@@ -106,30 +105,17 @@ class MaximizeButtonView(
     fun setAnimationTints(
         darkMode: Boolean,
         iconForegroundColor: ColorStateList? = null,
-        baseForegroundColor: Int? = null
+        baseForegroundColor: Int? = null,
+        rippleDrawable: RippleDrawable? = null
     ) {
         if (Flags.enableThemedAppHeaders()) {
             requireNotNull(iconForegroundColor) { "Icon foreground color must be non-null" }
             requireNotNull(baseForegroundColor) { "Base foreground color must be non-null" }
+            requireNotNull(rippleDrawable) { "Ripple drawable must be non-null" }
             maximizeWindow.imageTintList = iconForegroundColor
-            maximizeWindow.background = RippleDrawable(
-                ColorStateList(
-                    arrayOf(
-                        intArrayOf(android.R.attr.state_hovered),
-                        intArrayOf(android.R.attr.state_pressed),
-                        intArrayOf(),
-                    ),
-                    intArrayOf(
-                        replaceColorAlpha(baseForegroundColor, OPACITY_8),
-                        replaceColorAlpha(baseForegroundColor, OPACITY_12),
-                        Color.TRANSPARENT
-                    )
-                ),
-                null,
-                null
-            )
+            maximizeWindow.background = rippleDrawable
             progressBar.progressTintList = ColorStateList.valueOf(baseForegroundColor)
-                .withAlpha(OPACITY_12)
+                .withAlpha(OPACITY_15)
             progressBar.progressBackgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
         } else {
             if (darkMode) {
@@ -146,18 +132,7 @@ class MaximizeButtonView(
         }
     }
 
-    @ColorInt
-    private fun replaceColorAlpha(@ColorInt color: Int, alpha: Int): Int {
-        return Color.argb(
-            alpha,
-            Color.red(color),
-            Color.green(color),
-            Color.blue(color)
-        )
-    }
-
     companion object {
-        private const val OPACITY_8 = 20
-        private const val OPACITY_12 = 31
+        private const val OPACITY_15 = 38
     }
 }
