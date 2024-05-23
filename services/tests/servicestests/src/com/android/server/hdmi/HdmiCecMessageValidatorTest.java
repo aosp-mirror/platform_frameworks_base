@@ -139,12 +139,13 @@ public class HdmiCecMessageValidatorTest {
 
     @Test
     public void isValid_setSystemAudioMode() {
-        assertMessageValidity("40:72:00").isEqualTo(OK);
-        assertMessageValidity("4F:72:01:03").isEqualTo(OK);
+        assertMessageValidity("50:72:00").isEqualTo(OK);
+        assertMessageValidity("50:72:01").isEqualTo(OK);
+        assertMessageValidity("5F:72:01:03").isEqualTo(ERROR_PARAMETER_LONG);
 
-        assertMessageValidity("F0:72").isEqualTo(ERROR_SOURCE);
-        assertMessageValidity("40:72").isEqualTo(ERROR_PARAMETER_SHORT);
-        assertMessageValidity("40:72:02").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:72:00").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("50:72").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("50:72:02").isEqualTo(ERROR_PARAMETER);
     }
 
     @Test

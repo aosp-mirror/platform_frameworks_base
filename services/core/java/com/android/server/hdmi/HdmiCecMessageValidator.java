@@ -269,8 +269,7 @@ public class HdmiCecMessageValidator {
         addValidationInfo(Constants.MESSAGE_REQUEST_SHORT_AUDIO_DESCRIPTOR,
                 oneByteValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE,
-                new MinimumOneByteRangeValidator(0x00, 0x01),
-                ADDR_NOT_UNREGISTERED, ADDR_ALL);
+                new SingleByteRangeValidator(0x00, 0x01), ADDR_AUDIO_SYSTEM, ADDR_ALL);
         addValidationInfo(Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS,
                 new SingleByteRangeValidator(0x00, 0x01), ADDR_NOT_UNREGISTERED,
                 ADDR_DIRECT);
