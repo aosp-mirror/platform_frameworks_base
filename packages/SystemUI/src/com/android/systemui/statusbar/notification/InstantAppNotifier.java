@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.AppGlobals;
@@ -271,13 +272,16 @@ public class InstantAppNotifier
                     .addFlags(Intent.FLAG_IGNORE_EPHEMERAL)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
+            ActivityOptions options = ActivityOptions.makeBasic()
+                    .setPendingIntentCreatorBackgroundActivityStartMode(
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
             PendingIntent pendingIntent =
                     PendingIntent.getActivityAsUser(
                             mContext,
                             0 /* requestCode */,
                             browserIntent,
                             PendingIntent.FLAG_IMMUTABLE /* flags */,
-                            null,
+                            options.toBundle(),
                             user);
             ComponentName aiaComponent = null;
             try {
