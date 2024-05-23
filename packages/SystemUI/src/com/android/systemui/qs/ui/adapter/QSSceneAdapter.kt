@@ -46,7 +46,6 @@ import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -89,8 +88,10 @@ interface QSSceneAdapter {
     /**
      * A view with the QS content ([QSContainerImpl]), managed by an instance of [QSImpl] tracked by
      * the interactor.
+     *
+     * A null value means that there is no inflated view yet. See [inflate].
      */
-    val qsView: Flow<View>
+    val qsView: StateFlow<View?>
 
     /** Sets the [MirrorController] in [QSImpl]. Set to `null` to remove. */
     fun setBrightnessMirrorController(mirrorController: MirrorController?)
@@ -141,14 +142,24 @@ interface QSSceneAdapter {
             override val squishiness = { 1f }
         }
 
-        /** State for appearing QQS from Lockscreen or Gone */
-        data class UnsquishingQQS(override val squishiness: () -> Float) : State {
+        /**
+         * State for appearing QQS from Lockscreen or Gone.
+         *
+         * This should not be a data class, as it has a method parameter and even if it's the same
+         * lambda the output value may have changed.
+         */
+        class UnsquishingQQS(override val squishiness: () -> Float) : State {
             override val isVisible = true
             override val expansion = 0f
         }
 
-        /** State for appearing QS from Lockscreen or Gone, used in Split shade */
-        data class UnsquishingQS(override val squishiness: () -> Float) : State {
+        /**
+         * State for appearing QS from Lockscreen or Gone, used in Split shade.
+         *
+         * This should not be a data class, as it has a method parameter and even if it's the same
+         * lambda the output value may have changed.
+         */
+        class UnsquishingQS(override val squishiness: () -> Float) : State {
             override val isVisible = true
             override val expansion = 1f
         }
@@ -236,7 +247,10 @@ constructor(
 
     private val _qsImpl: MutableStateFlow<QSImpl?> = MutableStateFlow(null)
     val qsImpl = _qsImpl.asStateFlow()
-    override val qsView: Flow<View> = _qsImpl.map { it?.view }.filterNotNull()
+    override val qsView: StateFlow<View?> =
+        _qsImpl
+            .map { it?.view }
+            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), _qsImpl.value?.view)
 
     override val qqsHeight: Int
         get() = qsImpl.value?.qqsHeight ?: 0

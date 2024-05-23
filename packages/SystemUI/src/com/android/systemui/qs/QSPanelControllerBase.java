@@ -93,6 +93,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     private final Provider<QSLongPressEffect> mLongPressEffectProvider;
 
+    private boolean mDestroyed = false;
+
     @VisibleForTesting
     protected final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
             new QSPanel.OnConfigurationChangedListener() {
@@ -192,7 +194,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         // will remove the attach listener. We don't need to do that, because once this object is
         // detached from the graph, it will be gc.
         mHost.removeCallback(mQSHostCallback);
-
+        mDestroyed = true;
         for (TileRecord record : mRecords) {
             record.tile.removeCallback(record.callback);
             mView.removeTile(record);
@@ -242,6 +244,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     /** */
     public void setTiles(Collection<QSTile> tiles, boolean collapsedView) {
+        if (mDestroyed) return;
         // TODO(b/168904199): move this logic into QSPanelController.
         if (!collapsedView && mQsTileRevealController != null) {
             mQsTileRevealController.updateRevealedTiles(tiles);

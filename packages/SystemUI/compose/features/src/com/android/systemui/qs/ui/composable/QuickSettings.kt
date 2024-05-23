@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.ui.composable
 
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -164,11 +166,8 @@ private fun QuickSettingsContent(
     state: () -> QSSceneAdapter.State,
     modifier: Modifier = Modifier,
 ) {
-    val qsView by qsSceneAdapter.qsView.collectAsStateWithLifecycle(null)
-    val isCustomizing by
-        qsSceneAdapter.isCustomizerShowing.collectAsStateWithLifecycle(
-            qsSceneAdapter.isCustomizerShowing.value
-        )
+    val qsView by qsSceneAdapter.qsView.collectAsStateWithLifecycle()
+    val isCustomizing by qsSceneAdapter.isCustomizerShowing.collectAsStateWithLifecycle()
     QuickSettingsTheme {
         val context = LocalContext.current
 
@@ -184,11 +183,24 @@ private fun QuickSettingsContent(
             ) {
                 AndroidView(
                     modifier = Modifier.fillMaxWidth(),
-                    factory = { _ ->
+                    factory = { context ->
                         qsSceneAdapter.setState(state())
-                        view
+                        FrameLayout(context).apply {
+                            (view.parent as? ViewGroup)?.removeView(view)
+                            addView(view)
+                        }
                     },
-                    update = { qsSceneAdapter.setState(state()) }
+                    // When the view changes (e.g. due to a theme change), this will be recomposed
+                    // if needed and the new view will be attached to the FrameLayout here.
+                    update = {
+                        qsSceneAdapter.setState(state())
+                        if (view.parent != it) {
+                            it.removeAllViews()
+                            (view.parent as? ViewGroup)?.removeView(view)
+                            it.addView(view)
+                        }
+                    },
+                    onRelease = { it.removeAllViews() }
                 )
             }
         }

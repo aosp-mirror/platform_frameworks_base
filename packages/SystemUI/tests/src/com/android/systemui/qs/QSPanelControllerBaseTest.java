@@ -502,4 +502,16 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         verify(mQSPanel, times(2)).removeTile(any());
         verify(mQSPanel, times(2)).addTile(any());
     }
+
+    @Test
+    public void dettach_destroy_attach_tilesAreNotReadded() {
+        when(mQSHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
+        mController.setTiles();
+
+        mController.onViewDetached();
+        mController.destroy();
+        mController.onViewAttached();
+
+        assertThat(mController.mRecords).isEmpty();
+    }
 }
