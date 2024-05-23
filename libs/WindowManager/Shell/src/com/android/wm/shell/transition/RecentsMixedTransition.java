@@ -142,8 +142,7 @@ class RecentsMixedTransition extends DefaultMixedHandler.MixedTransition {
                     && mSplitHandler.getSplitItemPosition(change.getLastParent())
                     != SPLIT_POSITION_UNDEFINED) {
                 return animateEnterPipFromSplit(this, info, startTransaction, finishTransaction,
-                        finishCallback, mPlayer, mMixedHandler, mPipHandler, mSplitHandler,
-                        /*replacingPip*/ false);
+                        finishCallback, mPlayer, mMixedHandler, mPipHandler, mSplitHandler);
             }
         }
 
