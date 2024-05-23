@@ -213,7 +213,7 @@ public class BackgroundActivityStartControllerTests {
                 BalVerdict.BLOCK);
     }
 
-    private void setViaReflection(Object o, String property, Object value) {
+    static final void setViaReflection(Object o, String property, Object value) {
         try {
             Field field = o.getClass().getDeclaredField(property);
             field.setAccessible(true);
