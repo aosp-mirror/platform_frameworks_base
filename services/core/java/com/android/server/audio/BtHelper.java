@@ -488,6 +488,11 @@ public class BtHelper {
                 == BluetoothHeadset.STATE_AUDIO_CONNECTED;
     }
 
+    /*package*/ synchronized boolean isBluetoothScoRequestedInternally() {
+        return mScoAudioState == SCO_STATE_ACTIVE_INTERNAL
+              || mScoAudioState == SCO_STATE_ACTIVATE_REQ;
+    }
+
     // @GuardedBy("mDeviceBroker.mSetModeLock")
     @GuardedBy("AudioDeviceBroker.this.mDeviceStateLock")
     /*package*/ synchronized boolean startBluetoothSco(int scoAudioMode,
