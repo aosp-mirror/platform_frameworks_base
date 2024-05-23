@@ -115,8 +115,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private WindowDecoration.SurfaceControlViewHostFactory mMockSurfaceControlViewHostFactory;
     @Mock
     private TypedArray mMockRoundedCornersRadiusArray;
-    @Mock
-    private ResizeHandleSizeRepository mMockResizeHandleSizeRepository;
 
     private final Configuration mConfiguration = new Configuration();
 
@@ -348,8 +346,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         return new DesktopModeWindowDecoration(mContext, mMockDisplayController,
                 mMockShellTaskOrganizer, taskInfo, mMockSurfaceControl,
                 mMockHandler, mMockChoreographer, mMockSyncQueue, mMockRootTaskDisplayAreaOrganizer,
-                mMockResizeHandleSizeRepository, SurfaceControl.Builder::new,
-                mMockTransactionSupplier, WindowContainerTransaction::new, SurfaceControl::new,
+                SurfaceControl.Builder::new, mMockTransactionSupplier,
+                WindowContainerTransaction::new, SurfaceControl::new,
                 mMockSurfaceControlViewHostFactory);
     }
 
