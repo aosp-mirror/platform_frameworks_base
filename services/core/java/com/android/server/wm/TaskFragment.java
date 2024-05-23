@@ -1904,6 +1904,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             prev.setWillCloseOrEnterPip(false);
             final boolean wasStopping = prev.isState(STOPPING);
             prev.setState(PAUSED, "completePausedLocked");
+            mPausingActivity = null;
             if (prev.finishing) {
                 // We will update the activity visibility later, no need to do in
                 // completeFinishing(). Updating visibility here might also making the next
@@ -1939,7 +1940,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             if (prev != null) {
                 prev.stopFreezingScreen(true /* unfreezeNow */, true /* force */);
             }
-            mPausingActivity = null;
         }
 
         if (resumeNext) {
