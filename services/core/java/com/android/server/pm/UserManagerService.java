@@ -2308,7 +2308,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public @NonNull int getProfileAccessibilityLabelResId(@UserIdInt int userId) {
+    public @StringRes int getProfileAccessibilityLabelResId(@UserIdInt int userId) {
         checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId,
                 "getProfileAccessibilityLabelResId");
         final UserInfo userInfo = getUserInfoNoChecks(userId);
