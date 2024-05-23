@@ -16953,6 +16953,18 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         int userId = UserHandle.getCallingUserId();
 
+        if (UserManager.isVisibleBackgroundUsersEnabled() && userId != getCurrentUserId()) {
+            // The check is added mainly for auto devices. On auto devices, it is possible that
+            // multiple users are visible simultaneously using visible background users.
+            // In such cases, it is desired that only the current user (not the visible background
+            // user) can change the locale and other persistent settings of the device.
+            Slog.w(TAG, "Only current user is allowed to update persistent configuration if "
+                    + "visible background users are enabled. Current User" + getCurrentUserId()
+                    + ". Calling User: " + userId);
+            throw new SecurityException("Only current user is allowed to update persistent "
+                    + "configuration.");
+        }
+
         mActivityTaskManager.updatePersistentConfiguration(values, userId);
     }
 
