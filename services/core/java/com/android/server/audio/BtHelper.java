@@ -378,7 +378,6 @@ public class BtHelper {
     /*package*/ synchronized void onReceiveBtEvent(Intent intent) {
         final String action = intent.getAction();
 
-        Log.i(TAG, "onReceiveBtEvent action: " + action + " mScoAudioState: " + mScoAudioState);
         if (action.equals(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED)) {
             BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE,
                     android.bluetooth.BluetoothDevice.class);
@@ -405,6 +404,7 @@ public class BtHelper {
     private void onScoAudioStateChanged(int state) {
         boolean broadcast = false;
         int scoAudioState = AudioManager.SCO_AUDIO_STATE_ERROR;
+        Log.i(TAG, "onScoAudioStateChanged state: " + state + " mScoAudioState: " + mScoAudioState);
         if (mDeviceBroker.isScoManagedByAudio()) {
             switch (state) {
                 case BluetoothHeadset.STATE_AUDIO_CONNECTED:
