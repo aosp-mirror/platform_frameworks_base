@@ -49,6 +49,7 @@ import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
@@ -67,6 +68,7 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     protected final Transitions mTransitions;
     private final List<PipTransitionCallback> mPipTransitionCallbacks = new ArrayList<>();
     protected PipTaskOrganizer mPipOrganizer;
+    protected DefaultMixedHandler mMixedHandler;
 
     protected final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
             new PipAnimationController.PipAnimationCallback() {
@@ -166,6 +168,14 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     void setPipOrganizer(PipTaskOrganizer pto) {
         mPipOrganizer = pto;
+    }
+
+    public void setMixedHandler(DefaultMixedHandler mixedHandler) {
+        mMixedHandler = mixedHandler;
+    }
+
+    public void applyTransaction(WindowContainerTransaction wct) {
+        mShellTaskOrganizer.applyTransaction(wct);
     }
 
     /**
