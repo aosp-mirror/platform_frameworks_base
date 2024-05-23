@@ -964,6 +964,13 @@ flag {
   namespace: "systemui"
   description: "Only dismiss media notifications when the control was removed by the user."
   bug: "335875159"
+}
+
+flag {
+  namespace: "systemui"
+  name: "enable_view_capture_tracing"
+  description: "Enables view capture tracing in System UI."
+  bug: "336521992"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
