@@ -5246,28 +5246,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void cancelNotificationFromListener(INotificationListener token, String pkg,
                 String tag, int id) {
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                synchronized (mNotificationLock) {
-                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                    int cancelReason = REASON_LISTENER_CANCEL;
-                    if (mAssistants.isServiceTokenValidLocked(token)) {
-                        cancelReason = REASON_ASSISTANT_CANCEL;
-                    }
-                    if (info.supportsProfiles()) {
-                        Slog.e(TAG, "Ignoring deprecated cancelNotification(pkg, tag, id) "
-                                + "from " + info.component
-                                + " use cancelNotification(key) instead.");
-                    } else {
-                        cancelNotificationFromListenerLocked(info, callingUid, callingPid,
-                                pkg, tag, id, info.userid, cancelReason);
-                    }
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+            Slog.e(TAG, "Ignoring deprecated cancelNotification(pkg, tag, id) use " +
+                    "cancelNotification(key) instead.");
         }
 
         /**
