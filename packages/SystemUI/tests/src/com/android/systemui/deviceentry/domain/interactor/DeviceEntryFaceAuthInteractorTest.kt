@@ -538,13 +538,14 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
     @Test
     fun lockedOut_providesSameValueFromRepository() =
         testScope.runTest {
-            assertThat(underTest.lockedOut).isSameInstanceAs(faceAuthRepository.isLockedOut)
+            assertThat(underTest.isLockedOut).isSameInstanceAs(faceAuthRepository.isLockedOut)
         }
 
     @Test
     fun authenticated_providesSameValueFromRepository() =
         testScope.runTest {
-            assertThat(underTest.authenticated).isSameInstanceAs(faceAuthRepository.isAuthenticated)
+            assertThat(underTest.isAuthenticated)
+                .isSameInstanceAs(faceAuthRepository.isAuthenticated)
         }
 
     companion object {

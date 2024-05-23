@@ -189,10 +189,14 @@ constructor(
                             currentSecurityMode.toAuthModel()
                         )
                         .toMessage()
-                } else if (fpLockedOut) {
+                } else if (
+                    biometricSettingsRepository.isFingerprintEnrolledAndEnabled.value && fpLockedOut
+                ) {
                     BouncerMessageStrings.class3AuthLockedOut(currentSecurityMode.toAuthModel())
                         .toMessage()
-                } else if (faceLockedOut) {
+                } else if (
+                    biometricSettingsRepository.isFaceAuthEnrolledAndEnabled.value && faceLockedOut
+                ) {
                     if (isFaceAuthClass3) {
                         BouncerMessageStrings.class3AuthLockedOut(currentSecurityMode.toAuthModel())
                             .toMessage()
