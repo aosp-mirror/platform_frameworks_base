@@ -1614,7 +1614,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val task = createFreeformTask(displayId, bounds)
         whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
         desktopModeTaskRepository.addActiveTask(displayId, task.taskId)
-        desktopModeTaskRepository.addOrMoveFreeformTaskToTop(task.taskId)
+        desktopModeTaskRepository.addOrMoveFreeformTaskToTop(displayId, task.taskId)
         runningTasks.add(task)
         return task
     }

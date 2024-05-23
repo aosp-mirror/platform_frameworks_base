@@ -363,11 +363,11 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
 
     @Test
     fun addOrMoveFreeformTaskToTop_didNotExist_addsToTop() {
-        repo.addOrMoveFreeformTaskToTop(5)
-        repo.addOrMoveFreeformTaskToTop(6)
-        repo.addOrMoveFreeformTaskToTop(7)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 5)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 6)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 7)
 
-        val tasks = repo.getFreeformTasksInZOrder()
+        val tasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
         assertThat(tasks.size).isEqualTo(3)
         assertThat(tasks[0]).isEqualTo(7)
         assertThat(tasks[1]).isEqualTo(6)
@@ -376,13 +376,13 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
 
     @Test
     fun addOrMoveFreeformTaskToTop_alreadyExists_movesToTop() {
-        repo.addOrMoveFreeformTaskToTop(5)
-        repo.addOrMoveFreeformTaskToTop(6)
-        repo.addOrMoveFreeformTaskToTop(7)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 5)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 6)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 7)
 
-        repo.addOrMoveFreeformTaskToTop(6)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 6)
 
-        val tasks = repo.getFreeformTasksInZOrder()
+        val tasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
         assertThat(tasks.size).isEqualTo(3)
         assertThat(tasks.first()).isEqualTo(6)
     }
@@ -391,7 +391,7 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     fun removeFreeformTask_removesTaskBoundsBeforeMaximize() {
         val taskId = 1
         repo.saveBoundsBeforeMaximize(taskId, Rect(0, 0, 200, 200))
-        repo.removeFreeformTask(taskId)
+        repo.removeFreeformTask(THIRD_DISPLAY, taskId)
         assertThat(repo.removeBoundsBeforeMaximize(taskId)).isNull()
     }
 
@@ -480,31 +480,31 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
 
     @Test
     fun getActiveNonMinimizedTasksOrderedFrontToBack_returnsFreeformTasksInCorrectOrder() {
-        repo.addActiveTask(displayId = 0, taskId = 1)
-        repo.addActiveTask(displayId = 0, taskId = 2)
-        repo.addActiveTask(displayId = 0, taskId = 3)
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 1)
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 2)
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 3)
         // The front-most task will be the one added last through addOrMoveFreeformTaskToTop
-        repo.addOrMoveFreeformTaskToTop(taskId = 3)
-        repo.addOrMoveFreeformTaskToTop(taskId = 2)
-        repo.addOrMoveFreeformTaskToTop(taskId = 1)
+        repo.addOrMoveFreeformTaskToTop(displayId = DEFAULT_DISPLAY, taskId = 3)
+        repo.addOrMoveFreeformTaskToTop(displayId = 0, taskId = 2)
+        repo.addOrMoveFreeformTaskToTop(displayId = 0, taskId = 1)
 
-        assertThat(repo.getActiveNonMinimizedTasksOrderedFrontToBack(displayId = 0)).isEqualTo(
-                listOf(1, 2, 3))
+        assertThat(repo.getActiveNonMinimizedTasksOrderedFrontToBack(displayId = 0))
+            .containsExactly(1, 2, 3).inOrder()
     }
 
     @Test
     fun getActiveNonMinimizedTasksOrderedFrontToBack_minimizedTaskNotIncluded() {
-        repo.addActiveTask(displayId = 0, taskId = 1)
-        repo.addActiveTask(displayId = 0, taskId = 2)
-        repo.addActiveTask(displayId = 0, taskId = 3)
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 1)
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 2)
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 3)
         // The front-most task will be the one added last through addOrMoveFreeformTaskToTop
-        repo.addOrMoveFreeformTaskToTop(taskId = 3)
-        repo.addOrMoveFreeformTaskToTop(taskId = 2)
-        repo.addOrMoveFreeformTaskToTop(taskId = 1)
-        repo.minimizeTask(displayId = 0, taskId = 2)
+        repo.addOrMoveFreeformTaskToTop(displayId = DEFAULT_DISPLAY, taskId = 3)
+        repo.addOrMoveFreeformTaskToTop(displayId = DEFAULT_DISPLAY, taskId = 2)
+        repo.addOrMoveFreeformTaskToTop(displayId = DEFAULT_DISPLAY, taskId = 1)
+        repo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = 2)
 
-        assertThat(repo.getActiveNonMinimizedTasksOrderedFrontToBack(displayId = 0)).isEqualTo(
-                listOf(1, 3))
+        assertThat(repo.getActiveNonMinimizedTasksOrderedFrontToBack(
+            displayId = DEFAULT_DISPLAY)).containsExactly(1, 3).inOrder()
     }
 
 
@@ -544,5 +544,6 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
 
     companion object {
         const val SECOND_DISPLAY = 1
+        const val THIRD_DISPLAY = 345
     }
 }
