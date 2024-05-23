@@ -73,7 +73,16 @@ sealed interface ObservableTransitionState {
          * the transition completes/settles.
          */
         val isUserInputOngoing: Flow<Boolean>,
-    ) : ObservableTransitionState
+    ) : ObservableTransitionState {
+        override fun toString(): String =
+            """Transition
+                |(from=$fromScene,
+                | to=$toScene,
+                | isInitiatedByUserInput=$isInitiatedByUserInput,
+                | isUserInputOngoing=$isUserInputOngoing
+                |)"""
+                .trimMargin()
+    }
 
     fun isIdle(scene: SceneKey?): Boolean {
         return this is Idle && (scene == null || this.currentScene == scene)

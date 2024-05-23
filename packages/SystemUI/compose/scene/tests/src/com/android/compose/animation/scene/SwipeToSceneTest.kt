@@ -70,7 +70,9 @@ class SwipeToSceneTest {
     private fun layoutState(
         initialScene: SceneKey = SceneA,
         transitions: SceneTransitions = EmptyTestTransitions,
-    ) = MutableSceneTransitionLayoutState(initialScene, transitions)
+    ): MutableSceneTransitionLayoutState {
+        return rule.runOnUiThread { MutableSceneTransitionLayoutState(initialScene, transitions) }
+    }
 
     /** The content under test. */
     @Composable
@@ -455,7 +457,7 @@ class SwipeToSceneTest {
 
     @Test
     fun swipeEnabledLater() {
-        val layoutState = MutableSceneTransitionLayoutState(SceneA)
+        val layoutState = layoutState()
         var swipesEnabled by mutableStateOf(false)
         var touchSlop = 0f
         rule.setContent {
@@ -489,7 +491,7 @@ class SwipeToSceneTest {
     fun transitionKey() {
         val transitionkey = TransitionKey(debugName = "foo")
         val state =
-            MutableSceneTransitionLayoutStateImpl(
+            layoutState(
                 SceneA,
                 transitions {
                     from(SceneA, to = SceneB) { fade(TestElements.Foo) }
@@ -553,7 +555,7 @@ class SwipeToSceneTest {
             }
 
         val state =
-            MutableSceneTransitionLayoutState(
+            layoutState(
                 SceneA,
                 transitions { from(SceneA, to = SceneB) { distance = swipeDistance } }
             )

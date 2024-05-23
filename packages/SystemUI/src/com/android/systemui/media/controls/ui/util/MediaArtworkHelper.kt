@@ -107,7 +107,7 @@ object MediaArtworkHelper {
         return try {
             // Set up media source app's logo.
             val icon = applicationContext.packageManager.getApplicationIcon(packageName)
-            ColorScheme(WallpaperColors.fromDrawable(icon), darkTheme = true, style)
+            ColorScheme(WallpaperColors.fromDrawable(icon), true, style)
         } catch (e: PackageManager.NameNotFoundException) {
             Log.w(tag, "Fail to get media app info", e)
             null

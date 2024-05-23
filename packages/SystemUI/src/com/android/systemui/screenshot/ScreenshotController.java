@@ -58,6 +58,7 @@ import android.util.Pair;
 import android.view.Display;
 import android.view.ScrollCaptureResponse;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
@@ -699,6 +700,12 @@ public class ScreenshotController {
         mBlockAttach = true;
         mWindowManager.addView(decorView, mWindowLayoutParams);
         decorView.requestApplyInsets();
+
+        if (screenshotShelfUi2()) {
+            ViewGroup layout = decorView.requireViewById(android.R.id.content);
+            layout.setClipChildren(false);
+            layout.setClipToPadding(false);
+        }
     }
 
     void removeWindow() {

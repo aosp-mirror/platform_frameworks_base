@@ -75,6 +75,7 @@ import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.CounterRotatorHelper;
+import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
@@ -107,6 +108,7 @@ public class PipTransition extends PipTransitionController {
     private final PipDisplayLayoutState mPipDisplayLayoutState;
     private final int mEnterExitAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
+    private final HomeTransitionObserver mHomeTransitionObserver;
     private final Optional<SplitScreenController> mSplitScreenOptional;
     private final PipAnimationController mPipAnimationController;
     private @PipAnimationController.AnimationType int mEnterAnimationType = ANIM_TYPE_BOUNDS;
@@ -164,6 +166,7 @@ public class PipTransition extends PipTransitionController {
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipAnimationController pipAnimationController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
+            HomeTransitionObserver homeTransitionObserver,
             Optional<SplitScreenController> splitScreenOptional) {
         super(shellInit, shellTaskOrganizer, transitions, pipBoundsState, pipMenuController,
                 pipBoundsAlgorithm);
@@ -174,6 +177,7 @@ public class PipTransition extends PipTransitionController {
         mEnterExitAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
         mSurfaceTransactionHelper = pipSurfaceTransactionHelper;
+        mHomeTransitionObserver = homeTransitionObserver;
         mSplitScreenOptional = splitScreenOptional;
     }
 
@@ -196,6 +200,9 @@ public class PipTransition extends PipTransitionController {
             animator.cancel();
         }
         mExitTransition = mTransitions.startTransition(type, out, this);
+        if (mPipOrganizer.getOutPipWindowingMode() == WINDOWING_MODE_UNDEFINED) {
+            mHomeTransitionObserver.notifyHomeVisibilityChanged(false /* isVisible */);
+        }
     }
 
     @Override

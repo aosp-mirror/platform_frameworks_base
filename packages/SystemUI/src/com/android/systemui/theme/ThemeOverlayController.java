@@ -77,6 +77,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.monet.ColorScheme;
+import com.android.systemui.monet.DynamicColors;
 import com.android.systemui.monet.Style;
 import com.android.systemui.monet.TonalPalette;
 import com.android.systemui.settings.UserTracker;
@@ -623,7 +624,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
             TonalPalette tonalPalette) {
         String resourcePrefix = "android:color/system_" + name;
 
-        tonalPalette.getAllShadesMapped().forEach((key, value) -> {
+        tonalPalette.allShadesMapped.forEach((key, value) -> {
             String resourceName = resourcePrefix + "_" + key;
             int colorValue = ColorUtils.setAlphaComponent(value, 0xFF);
             overlay.setResourceValue(resourceName, TYPE_INT_COLOR_ARGB8, colorValue,
@@ -634,7 +635,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     protected FabricatedOverlay createDynamicOverlay() {
         FabricatedOverlay overlay = newFabricatedOverlay("dynamic");
         //Themed Colors
-        assignColorsToOverlay(overlay, DynamicColors.allDynamicColorsMapped(mIsFidelityEnabled),
+        assignColorsToOverlay(overlay, DynamicColors.getAllDynamicColorsMapped(mIsFidelityEnabled),
                 false);
         // Fixed Colors
         assignColorsToOverlay(overlay, DynamicColors.getFixedColorsMapped(mIsFidelityEnabled),

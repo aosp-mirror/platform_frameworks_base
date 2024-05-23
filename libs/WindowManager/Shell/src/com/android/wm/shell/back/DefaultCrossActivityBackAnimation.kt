@@ -56,7 +56,7 @@ constructor(
         targetEnteringRect.scaleCentered(MAX_SCALE)
     }
 
-    override fun onGestureCommitted() {
+    override fun onGestureCommitted(velocity: Float) {
         // We enter phase 2 of the animation, the starting coordinates for phase 2 are the current
         // coordinate of the gesture driven phase. Let's update the start and target rects and kick
         // off the animator in the superclass
@@ -65,7 +65,7 @@ constructor(
         targetEnteringRect.set(backAnimRect)
         targetClosingRect.set(backAnimRect)
         targetClosingRect.offset(currentClosingRect.left + enteringStartOffset, 0f)
-        super.onGestureCommitted()
+        super.onGestureCommitted(velocity)
     }
 
     override fun onPostCommitProgress(linearProgress: Float) {

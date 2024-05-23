@@ -38,6 +38,9 @@ interface ShadeInteractor : BaseShadeInteractor {
     /** Whether the Shade is fully expanded. */
     val isShadeFullyExpanded: Flow<Boolean>
 
+    /** Whether the Shade is fully collapsed. */
+    val isShadeFullyCollapsed: Flow<Boolean>
+
     /**
      * Whether the user is expanding or collapsing either the shade or quick settings with user
      * input (i.e. dragging a pointer). This will be true even if the user's input gesture had ended

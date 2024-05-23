@@ -33,7 +33,7 @@ import com.android.internal.dynamicanimation.animation.SpringForce;
  *
  * @hide
  */
-public class BackProgressAnimator {
+public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateListener {
     /**
      *  A factor to scale the input progress by, so that it works better with the spring.
      *  We divide the output progress by this value before sending it to apps, so that apps
@@ -43,6 +43,7 @@ public class BackProgressAnimator {
     private final SpringAnimation mSpring;
     private ProgressCallback mCallback;
     private float mProgress = 0;
+    private float mVelocity = 0;
     private BackMotionEvent mLastBackEvent;
     private boolean mBackAnimationInProgress = false;
     @Nullable
@@ -67,7 +68,6 @@ public class BackProgressAnimator {
                 @Override
                 public void setValue(BackProgressAnimator animator, float value) {
                     animator.setProgress(value);
-                    animator.updateProgressValue(value);
                 }
 
                 @Override
@@ -75,6 +75,11 @@ public class BackProgressAnimator {
                     return object.getProgress();
                 }
             };
+
+    @Override
+    public void onAnimationUpdate(DynamicAnimation animation, float value, float velocity) {
+        updateProgressValue(value, velocity);
+    }
 
 
     /** A callback to be invoked when there's a progress value update from the animator. */
@@ -85,6 +90,7 @@ public class BackProgressAnimator {
 
     public BackProgressAnimator() {
         mSpring = new SpringAnimation(this, PROGRESS_PROP);
+        mSpring.addUpdateListener(this);
         mSpring.setSpring(new SpringForce()
                 .setStiffness(SpringForce.STIFFNESS_MEDIUM)
                 .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY));
@@ -117,7 +123,7 @@ public class BackProgressAnimator {
         mLastBackEvent = event;
         mCallback = callback;
         mBackAnimationInProgress = true;
-        updateProgressValue(0);
+        updateProgressValue(0, 0);
     }
 
     /**
@@ -126,7 +132,7 @@ public class BackProgressAnimator {
     public void reset() {
         if (mBackCancelledFinishRunnable != null) {
             // Ensure that last progress value that apps see is 0
-            updateProgressValue(0);
+            updateProgressValue(0, 0);
             invokeBackCancelledRunnable();
         }
         mSpring.animateToFinalPosition(0);
@@ -167,7 +173,15 @@ public class BackProgressAnimator {
         return mBackAnimationInProgress;
     }
 
-    private void updateProgressValue(float progress) {
+    /**
+     * @return The last recorded velocity. Unit: change in progress per second
+     */
+    public float getVelocity() {
+        return mVelocity / SCALE_FACTOR;
+    }
+
+    private void updateProgressValue(float progress, float velocity) {
+        mVelocity = velocity;
         if (mLastBackEvent == null || mCallback == null || !mBackAnimationInProgress) {
             return;
         }

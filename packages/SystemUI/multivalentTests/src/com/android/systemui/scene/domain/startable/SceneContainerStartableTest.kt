@@ -49,6 +49,7 @@ import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.scene.domain.interactor.sceneContainerStartable
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -380,6 +381,43 @@ class SceneContainerStartableTest : SysuiTestCase() {
             powerInteractor.setAsleepForTest()
 
             assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @Test
+    fun switchToGoneWhenDoubleTapPowerGestureIsTriggeredFromGone() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val transitionStateFlow =
+                prepareState(
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                    isDeviceUnlocked = true,
+                    initialSceneKey = Scenes.Gone,
+                )
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+            underTest.start()
+
+            kosmos.fakePowerRepository.updateWakefulness(
+                rawState = WakefulnessState.STARTING_TO_SLEEP,
+                lastSleepReason = WakeSleepReason.POWER_BUTTON,
+                powerButtonLaunchGestureTriggered = false,
+            )
+            transitionStateFlow.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Gone,
+                    toScene = Scenes.Lockscreen,
+                    currentScene = flowOf(Scenes.Lockscreen),
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(false),
+                )
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+
+            kosmos.fakePowerRepository.updateWakefulness(
+                rawState = WakefulnessState.STARTING_TO_WAKE,
+                lastSleepReason = WakeSleepReason.POWER_BUTTON,
+                powerButtonLaunchGestureTriggered = true,
+            )
+            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test

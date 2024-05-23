@@ -25,11 +25,11 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.tiles.impl.custom.QSTileStateSubject
-import com.android.systemui.qs.tiles.impl.screenrecord.domain.model.ScreenRecordTileModel
 import com.android.systemui.qs.tiles.impl.screenrecord.domain.ui.ScreenRecordTileMapper
 import com.android.systemui.qs.tiles.impl.screenrecord.qsScreenRecordTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,7 +58,7 @@ class ScreenRecordTileMapperTest : SysuiTestCase() {
 
     @Test
     fun activeStateMatchesRecordingDataModel() {
-        val inputModel = ScreenRecordTileModel.Recording
+        val inputModel = ScreenRecordModel.Recording
 
         val outputState = mapper.map(config, inputModel)
 
@@ -74,7 +74,7 @@ class ScreenRecordTileMapperTest : SysuiTestCase() {
     @Test
     fun activeStateMatchesStartingDataModel() {
         val timeLeft = 0L
-        val inputModel = ScreenRecordTileModel.Starting(timeLeft)
+        val inputModel = ScreenRecordModel.Starting(timeLeft)
 
         val outputState = mapper.map(config, inputModel)
 
@@ -89,7 +89,7 @@ class ScreenRecordTileMapperTest : SysuiTestCase() {
 
     @Test
     fun inactiveStateMatchesDisabledDataModel() {
-        val inputModel = ScreenRecordTileModel.DoingNothing
+        val inputModel = ScreenRecordModel.DoingNothing
 
         val outputState = mapper.map(config, inputModel)
 

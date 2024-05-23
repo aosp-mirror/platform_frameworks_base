@@ -1262,9 +1262,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     mHost.getInputMethodManager(), null /* icProto */);
         }
 
-        final var statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_USER,
-                ImeTracker.ORIGIN_CLIENT, SoftInputShowHideReason.CONTROL_WINDOW_INSETS_ANIMATION,
-                mHost.isHandlingPointerEvent() /* fromUser */);
+        final var statsToken = (types & ime()) == 0 ? null
+                : ImeTracker.forLogging().onStart(ImeTracker.TYPE_USER,
+                        ImeTracker.ORIGIN_CLIENT,
+                        SoftInputShowHideReason.CONTROL_WINDOW_INSETS_ANIMATION,
+                        mHost.isHandlingPointerEvent() /* fromUser */);
         controlAnimationUnchecked(types, cancellationSignal, listener, mFrame, fromIme, durationMs,
                 interpolator, animationType,
                 getLayoutInsetsDuringAnimationMode(types, fromPredictiveBack),

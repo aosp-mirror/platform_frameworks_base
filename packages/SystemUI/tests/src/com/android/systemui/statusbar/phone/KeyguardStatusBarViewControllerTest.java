@@ -181,6 +181,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         mViewModel =
                 new KeyguardStatusBarViewModel(
                         mTestScope.getBackgroundScope(),
+                        mKosmos.getHeadsUpNotificationInteractor(),
                         mKeyguardInteractor,
                         new KeyguardStatusBarInteractor(new FakeKeyguardStatusBarRepository()),
                         mBatteryController);

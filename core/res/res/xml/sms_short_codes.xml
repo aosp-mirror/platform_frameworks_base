@@ -60,6 +60,9 @@
     <!-- Belgium: 4 digits, plus EU: http://www.mobileweb.be/en/mobileweb/sms-numberplan.asp -->
     <shortcode country="be" premium="\\d{4}" free="8\\d{3}|116\\d{3}" />
 
+    <!-- Burkina Faso: 1-4 digits (standard system default, not country specific) -->
+    <shortcode country="bf" pattern="\\d{1,4}" free="3558" />
+
     <!-- Bulgaria: 4-5 digits, plus EU -->
     <shortcode country="bg" pattern="\\d{4,5}" premium="18(?:16|423)|19(?:1[56]|35)" free="116\\d{3}|1988|1490" />
 
@@ -175,8 +178,8 @@
     <!-- Israel: 1-5 digits, known premium codes listed -->
     <shortcode country="il" pattern="\\d{1,5}" premium="4422|4545" free="37477|6681" />
 
-    <!-- Iran: 4-6 digits, known premium codes listed -->
-    <shortcode country="ir" pattern="\\d{4,6}" free="700791|700792" />
+    <!-- Iran: 4-8 digits, known premium codes listed -->
+    <shortcode country="ir" pattern="\\d{4,8}" free="700791|700792|100016|30008360" />
 
     <!-- Italy: 5 digits (premium=41xxx,42xxx), plus EU:
          https://www.itu.int/dms_pub/itu-t/oth/02/02/T020200006B0001PDFE.pdf -->
@@ -352,7 +355,7 @@
     <shortcode country="za" pattern="\\d{1,5}" free="44136|30791|36056|33009" />
 
     <!-- Yemen -->
-    <shortcode country="ye" pattern="\\d{1,4}" free="5081" />
+    <shortcode country="ye" pattern="\\d{1,4}" free="5079" />
 
     <!-- Zimbabwe -->
     <shortcode country="zw" pattern="\\d{1,5}" free="33679" />

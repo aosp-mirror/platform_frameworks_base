@@ -19,7 +19,9 @@
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:clipToPadding="false">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/screenshot_static"
         android:layout_width="match_parent"
@@ -79,7 +81,6 @@
             android:layout_width="wrap_content"
             android:elevation="4dp"
             android:background="@drawable/shelf_action_chip_container_background"
-            android:layout_marginHorizontal="@dimen/overlay_action_container_minimum_edge_spacing"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toTopOf="@id/guideline"
             >

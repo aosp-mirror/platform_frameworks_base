@@ -16,16 +16,25 @@
 
 package android.os;
 
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
+
+import static java.util.stream.Collectors.toList;
 
 import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
+import android.util.Pair;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.xml.sax.InputSource;
+
+import java.io.StringReader;
+import java.util.stream.Stream;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 @RunWith(AndroidJUnit4.class)
 @IgnoreUnderRavenwood(blockedBy = VintfObject.class)
@@ -39,12 +48,26 @@ public class VintfObjectTest {
     @Test
     public void testReport() {
         String[] xmls = VintfObject.report();
-        assertTrue(xmls.length > 0);
-        // From /system/manifest.xml
-        assertTrue(String.join("", xmls).contains(
-                "<manifest version=\"1.0\" type=\"framework\">"));
-        // From /system/compatibility-matrix.xml
-        assertTrue(String.join("", xmls).contains(
-                "<compatibility-matrix version=\"1.0\" type=\"framework\""));
+
+        assertThat(Stream.of(xmls).map(xml -> rootAndType(xml)).collect(toList()))
+                .containsExactly(
+                    Pair.create("manifest", "framework"),
+                    Pair.create("compatibility-matrix", "framework"),
+                    Pair.create("manifest", "device"),
+                    Pair.create("compatibility-matrix", "device")
+                );
+    }
+
+    private static Pair<String, String> rootAndType(String content) {
+        try {
+            var factory = DocumentBuilderFactory.newInstance();
+            var builder = factory.newDocumentBuilder();
+            var inputSource = new InputSource(new StringReader(content));
+            var document = builder.parse(inputSource);
+            var root = document.getDocumentElement();
+            return Pair.create(root.getTagName(), root.getAttribute("type"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

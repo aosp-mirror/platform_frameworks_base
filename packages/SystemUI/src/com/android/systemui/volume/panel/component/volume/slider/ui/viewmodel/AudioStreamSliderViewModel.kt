@@ -77,8 +77,6 @@ constructor(
         mapOf(
             AudioStream(AudioManager.STREAM_NOTIFICATION) to
                 R.string.stream_notification_unavailable,
-            AudioStream(AudioManager.STREAM_ALARM) to R.string.stream_alarm_unavailable,
-            AudioStream(AudioManager.STREAM_MUSIC) to R.string.stream_media_unavailable,
         )
     private val uiEventByStream =
         mapOf(
@@ -126,7 +124,7 @@ constructor(
         }
     }
 
-    private suspend fun AudioStreamModel.toState(
+    private fun AudioStreamModel.toState(
         isEnabled: Boolean,
         ringerMode: RingerMode,
     ): State {
@@ -138,7 +136,13 @@ constructor(
             valueRange = volumeRange.first.toFloat()..volumeRange.last.toFloat(),
             icon = getIcon(ringerMode),
             label = label,
-            disabledMessage = disabledTextByStream[audioStream]?.let(context::getString),
+            disabledMessage =
+                context.getString(
+                    disabledTextByStream.getOrDefault(
+                        audioStream,
+                        R.string.stream_alarm_unavailable,
+                    )
+                ),
             isEnabled = isEnabled,
             a11yStep = volumeRange.step,
             a11yClickDescription =
@@ -167,14 +171,13 @@ constructor(
                     null
                 },
             audioStreamModel = this,
-            isMutable = audioVolumeInteractor.isAffectedByMute(audioStream),
+            isMutable = isAffectedByMute,
         )
     }
 
     private fun AudioStreamModel.getIcon(ringerMode: RingerMode): Icon {
-        val isMutedOrNoVolume = isMuted || volume == minVolume
         val iconRes =
-            if (isMutedOrNoVolume) {
+            if (isAffectedByMute && isMuted) {
                 if (audioStream.value in streamsAffectedByRing) {
                     if (ringerMode.value == AudioManager.RINGER_MODE_VIBRATE) {
                         R.drawable.ic_volume_ringer_vibrate

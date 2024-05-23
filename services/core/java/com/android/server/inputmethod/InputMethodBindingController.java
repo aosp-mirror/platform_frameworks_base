@@ -48,6 +48,8 @@ import android.view.inputmethod.InputMethodManager;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.IInputMethod;
+import com.android.internal.inputmethod.InlineSuggestionsRequestCallback;
+import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.server.EventLogTags;
@@ -68,6 +70,7 @@ final class InputMethodBindingController {
     @UserIdInt final int mUserId;
     @NonNull private final InputMethodManagerService mService;
     @NonNull private final Context mContext;
+    @NonNull private final AutofillSuggestionsController mAutofillController;
     @NonNull private final PackageManagerInternal mPackageManagerInternal;
     @NonNull private final WindowManagerInternal mWindowManagerInternal;
 
@@ -122,6 +125,7 @@ final class InputMethodBindingController {
         mUserId = userId;
         mService = service;
         mContext = mService.mContext;
+        mAutofillController = new AutofillSuggestionsController(this);
         mPackageManagerInternal = mService.mPackageManagerInternal;
         mWindowManagerInternal = mService.mWindowManagerInternal;
         mImeConnectionBindFlags = imeConnectionBindFlags;
@@ -282,7 +286,7 @@ final class InputMethodBindingController {
     private final ServiceConnection mVisibleConnection = new ServiceConnection() {
         @Override public void onBindingDied(ComponentName name) {
             synchronized (ImfLock.class) {
-                mService.invalidateAutofillSessionLocked();
+                mAutofillController.invalidateAutofillSession();
                 if (isVisibleBound()) {
                     unbindVisibleConnection();
                 }
@@ -294,7 +298,7 @@ final class InputMethodBindingController {
 
         @Override public void onServiceDisconnected(ComponentName name) {
             synchronized (ImfLock.class) {
-                mService.invalidateAutofillSessionLocked();
+                mAutofillController.invalidateAutofillSession();
             }
         }
     };
@@ -339,7 +343,7 @@ final class InputMethodBindingController {
                     mService.initializeImeLocked(mCurMethod, mCurToken);
                     mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);
                     mService.reRequestCurrentClientSessionLocked();
-                    mService.performOnCreateInlineSuggestionsRequestLocked();
+                    mAutofillController.performOnCreateInlineSuggestionsRequest();
                 }
 
                 // reset Handwriting event receiver.
@@ -398,6 +402,24 @@ final class InputMethodBindingController {
     };
 
     @GuardedBy("ImfLock.class")
+    void invalidateAutofillSession() {
+        mAutofillController.invalidateAutofillSession();
+    }
+
+    @GuardedBy("ImfLock.class")
+    void onCreateInlineSuggestionsRequest(InlineSuggestionsRequestInfo requestInfo,
+            InlineSuggestionsRequestCallback callback, boolean touchExplorationEnabled) {
+        mAutofillController.onCreateInlineSuggestionsRequest(requestInfo, callback,
+                touchExplorationEnabled);
+    }
+
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    IBinder getCurHostInputToken() {
+        return mAutofillController.getCurHostInputToken();
+    }
+
+    @GuardedBy("ImfLock.class")
     void unbindCurrentMethod() {
         if (isVisibleBound()) {
             unbindVisibleConnection();
@@ -410,6 +432,7 @@ final class InputMethodBindingController {
         if (getCurToken() != null) {
             removeCurrentToken();
             mService.resetSystemUiLocked();
+            mAutofillController.onResetSystemUi();
         }
 
         mCurId = null;

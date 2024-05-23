@@ -79,8 +79,6 @@ interface AudioRepository {
     suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean): Boolean
 
     suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode)
-
-    suspend fun isAffectedByMute(audioStream: AudioStream): Boolean
 }
 
 class AudioRepositoryImpl(
@@ -152,8 +150,9 @@ class AudioRepositoryImpl(
             minVolume = getMinVolume(audioStream),
             maxVolume = audioManager.getStreamMaxVolume(audioStream.value),
             volume = audioManager.getStreamVolume(audioStream.value),
+            isAffectedByMute = audioManager.isStreamAffectedByMute(audioStream.value),
             isAffectedByRingerMode = audioManager.isStreamAffectedByRingerMode(audioStream.value),
-            isMuted = audioManager.isStreamMute(audioStream.value)
+            isMuted = audioManager.isStreamMute(audioStream.value),
         )
     }
 
@@ -185,12 +184,6 @@ class AudioRepositoryImpl(
 
     override suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode) {
         withContext(backgroundCoroutineContext) { audioManager.ringerMode = mode.value }
-    }
-
-    override suspend fun isAffectedByMute(audioStream: AudioStream): Boolean {
-        return withContext(backgroundCoroutineContext) {
-            audioManager.isStreamAffectedByMute(audioStream.value)
-        }
     }
 
     private fun getMinVolume(stream: AudioStream): Int =

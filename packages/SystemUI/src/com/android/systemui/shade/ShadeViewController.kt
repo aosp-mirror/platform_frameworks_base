@@ -181,11 +181,8 @@ interface ShadeViewStateProvider {
 
     /**
      * Returns true if heads up should be visible.
-     *
-     * TODO(b/138786270): If HeadsUpAppearanceController was injectable, we could inject it into
-     *   [KeyguardStatusBarViewController] and remove this method.
      */
-    @Deprecated("deprecated in Flexiglass.") fun shouldHeadsUpBeVisible(): Boolean
+    @Deprecated("deprecated by SceneContainerFlag.isEnabled.") fun shouldHeadsUpBeVisible(): Boolean
 
     /** Return the fraction of the shade that's expanded, when in lockscreen. */
     @Deprecated("deprecated by SceneContainerFlag.isEnabled") val lockscreenShadeDragProgress: Float

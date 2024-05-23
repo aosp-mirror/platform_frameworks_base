@@ -1225,12 +1225,25 @@ public final class Display {
     }
 
     /**
-     * Gets the supported modes of this display.
+     * Gets the supported modes of this display, might include synthetic modes
      */
     public Mode[] getSupportedModes() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
             final Display.Mode[] modes = mDisplayInfo.appsSupportedModes;
+            return Arrays.copyOf(modes, modes.length);
+        }
+    }
+
+    /**
+     * Gets system supported modes of this display,
+     * @hide
+     */
+    @SuppressLint("ArrayReturn")
+    public @NonNull Mode[] getSystemSupportedModes() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            final Display.Mode[] modes = mDisplayInfo.supportedModes;
             return Arrays.copyOf(modes, modes.length);
         }
     }

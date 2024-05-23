@@ -126,6 +126,10 @@ internal class SceneTransitionLayoutImpl(
                 orientation = Orientation.Vertical,
                 coroutineScope = coroutineScope,
             )
+
+        // Make sure that the state is created on the same thread (most probably the main thread)
+        // than this STLImpl.
+        state.checkThread()
     }
 
     internal fun draggableHandler(orientation: Orientation): DraggableHandlerImpl =

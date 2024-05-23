@@ -342,33 +342,29 @@ public class SettingsToPropertiesMapper {
             AsyncTask.THREAD_POOL_EXECUTOR,
             (DeviceConfig.Properties properties) -> {
 
-              HashMap<String, HashMap<String, String>> propsToStage =
-                  getStagedFlagsWithValueChange(properties);
-
-              // send prop stage request to sys prop
-              for (HashMap.Entry<String, HashMap<String, String>> entry : propsToStage.entrySet()) {
-                String actualNamespace = entry.getKey();
-                HashMap<String, String> flagValuesToStage = entry.getValue();
-
-                for (String flagName : flagValuesToStage.keySet()) {
-                  String stagedValue = flagValuesToStage.get(flagName);
-                  String propertyName = "next_boot." + makeAconfigFlagPropertyName(
-                      actualNamespace, flagName);
-
-                  if (!propertyName.matches(SYSTEM_PROPERTY_VALID_CHARACTERS_REGEX)
-                      || propertyName.contains(SYSTEM_PROPERTY_INVALID_SUBSTRING)) {
-                    logErr("unable to construct system property for " + actualNamespace
-                        + "/" + flagName);
-                    continue;
+              for (String flagName : properties.getKeyset()) {
+                  String flagValue = properties.getString(flagName, null);
+                  if (flagName == null || flagValue == null) {
+                      continue;
                   }
 
-                  setProperty(propertyName, stagedValue);
-                }
+                  int idx = flagName.indexOf(NAMESPACE_REBOOT_STAGING_DELIMITER);
+                  if (idx == -1 || idx == flagName.length() - 1 || idx == 0) {
+                      logErr("invalid staged flag: " + flagName);
+                      continue;
+                  }
+
+                  String actualNamespace = flagName.substring(0, idx);
+                  String actualFlagName = flagName.substring(idx+1);
+                  String propertyName = "next_boot." + makeAconfigFlagPropertyName(
+                      actualNamespace, actualFlagName);
+
+                  setProperty(propertyName, flagValue);
               }
 
               // send prop stage request to new storage
               if (enableAconfigStorageDaemon()) {
-                  stageFlagsInNewStorage(propsToStage);
+                  stageFlagsInNewStorage(properties);
               }
 
         });
@@ -607,25 +603,33 @@ public class SettingsToPropertiesMapper {
      * @param propsToStage
      */
     @VisibleForTesting
-    static void stageFlagsInNewStorage(HashMap<String, HashMap<String, String>> propsToStage) {
+    static void stageFlagsInNewStorage(DeviceConfig.Properties props) {
         // write aconfigd requests proto to proto output stream
         int num_requests = 0;
         ProtoOutputStream requests = new ProtoOutputStream();
-        for (HashMap.Entry<String, HashMap<String, String>> entry : propsToStage.entrySet()) {
-            String actualNamespace = entry.getKey();
-            HashMap<String, String> flagValuesToStage = entry.getValue();
-            for (String fullFlagName : flagValuesToStage.keySet()) {
-                String stagedValue = flagValuesToStage.get(fullFlagName);
-                int idx = fullFlagName.lastIndexOf(".");
-                if (idx == -1) {
-                    logErr("invalid flag name: " + fullFlagName);
-                    continue;
-                }
-                String packageName = fullFlagName.substring(0, idx);
-                String flagName = fullFlagName.substring(idx+1);
-                writeFlagOverrideRequest(requests, packageName, flagName, stagedValue, false);
-                ++num_requests;
+        for (String flagName : props.getKeyset()) {
+            String flagValue = props.getString(flagName, null);
+            if (flagName == null || flagValue == null) {
+                continue;
             }
+
+            int idx = flagName.indexOf("*");
+            if (idx == -1 || idx == flagName.length() - 1 || idx == 0) {
+                logErr("invalid local flag override: " + flagName);
+                continue;
+            }
+            String actualNamespace = flagName.substring(0, idx);
+            String fullFlagName = flagName.substring(idx+1);
+
+            idx = fullFlagName.lastIndexOf(".");
+            if (idx == -1) {
+                logErr("invalid flag name: " + fullFlagName);
+                continue;
+            }
+            String packageName = fullFlagName.substring(0, idx);
+            String realFlagName = fullFlagName.substring(idx+1);
+            writeFlagOverrideRequest(requests, packageName, realFlagName, flagValue, false);
+            ++num_requests;
         }
 
         if (num_requests == 0) {
@@ -637,7 +641,7 @@ public class SettingsToPropertiesMapper {
 
         // deserialize back using proto input stream
         try {
-          parseAndLogAconfigdReturn(returns);
+            parseAndLogAconfigdReturn(returns);
         } catch (IOException ioe) {
             logErr("failed to parse aconfigd return", ioe);
         }
@@ -663,63 +667,6 @@ public class SettingsToPropertiesMapper {
         }
 
         return propertyName;
-    }
-
-    /**
-     * Get the flags that need to be staged in sys prop, only these with a real value
-     * change needs to be staged in sys prop. Otherwise, the flag stage is useless and
-     * create performance problem at sys prop side.
-     * @param properties
-     * @return a hash map of namespace name to actual flags to stage
-     */
-    @VisibleForTesting
-    static HashMap<String, HashMap<String, String>> getStagedFlagsWithValueChange(
-        DeviceConfig.Properties properties) {
-
-      // sort flags by actual namespace of the flag
-      HashMap<String, HashMap<String, String>> stagedProps = new HashMap<>();
-      for (String flagName : properties.getKeyset()) {
-        int idx = flagName.indexOf(NAMESPACE_REBOOT_STAGING_DELIMITER);
-        if (idx == -1 || idx == flagName.length() - 1 || idx == 0) {
-          logErr("invalid staged flag: " + flagName);
-          continue;
-        }
-        String actualNamespace = flagName.substring(0, idx);
-        String actualFlagName = flagName.substring(idx+1);
-        HashMap<String, String> flagStagedValues = stagedProps.get(actualNamespace);
-        if (flagStagedValues == null) {
-          flagStagedValues = new HashMap<String, String>();
-          stagedProps.put(actualNamespace, flagStagedValues);
-        }
-        flagStagedValues.put(actualFlagName, properties.getString(flagName, null));
-      }
-
-      // for each namespace, find flags with real flag value change
-      HashMap<String, HashMap<String, String>> propsToStage = new HashMap<>();
-      for (HashMap.Entry<String, HashMap<String, String>> entry : stagedProps.entrySet()) {
-        String actualNamespace = entry.getKey();
-        HashMap<String, String> flagStagedValues = entry.getValue();
-        Map<String, String> flagCurrentValues = Settings.Config.getStrings(
-            actualNamespace, new ArrayList<String>(flagStagedValues.keySet()));
-
-        HashMap<String, String> flagsToStage = new HashMap<>();
-        for (String flagName : flagStagedValues.keySet()) {
-          String stagedValue = flagStagedValues.get(flagName);
-          String currentValue = flagCurrentValues.get(flagName);
-          if (stagedValue == null) {
-            continue;
-          }
-          if (currentValue == null || !stagedValue.equalsIgnoreCase(currentValue)) {
-            flagsToStage.put(flagName, stagedValue);
-          }
-        }
-
-        if (!flagsToStage.isEmpty()) {
-          propsToStage.put(actualNamespace, flagsToStage);
-        }
-      }
-
-      return propsToStage;
     }
 
     private void setProperty(String key, String value) {

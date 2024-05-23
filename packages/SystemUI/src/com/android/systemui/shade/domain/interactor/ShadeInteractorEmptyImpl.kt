@@ -38,6 +38,7 @@ class ShadeInteractorEmptyImpl @Inject constructor() : ShadeInteractor {
     override val anyExpansion: StateFlow<Float> = inactiveFlowFloat
     override val isAnyFullyExpanded: StateFlow<Boolean> = inactiveFlowBoolean
     override val isShadeFullyExpanded: Flow<Boolean> = inactiveFlowBoolean
+    override val isShadeFullyCollapsed: Flow<Boolean> = inactiveFlowBoolean
     override val isAnyExpanded: StateFlow<Boolean> = inactiveFlowBoolean
     override val isUserInteractingWithShade: Flow<Boolean> = inactiveFlowBoolean
     override val isUserInteractingWithQs: Flow<Boolean> = inactiveFlowBoolean

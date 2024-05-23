@@ -99,6 +99,8 @@ public class ImeBackAnimationControllerTest {
             } catch (WindowManager.BadTokenException e) {
                 // activity isn't running, we will ignore BadTokenException.
             }
+            mViewRoot.setOnContentApplyWindowInsetsListener(
+                    mock(Window.OnContentApplyWindowInsetsListener.class));
             mBackAnimationController = new ImeBackAnimationController(mViewRoot, mInsetsController);
 
             when(mWindowInsetsAnimationController.getHiddenStateInsets()).thenReturn(Insets.NONE);
@@ -124,6 +126,19 @@ public class ImeBackAnimationControllerTest {
         mViewRoot.getView()
                 .setWindowInsetsAnimationCallback(mock(WindowInsetsAnimation.Callback.class));
         mViewRoot.mWindowAttributes.softInputMode = SOFT_INPUT_ADJUST_RESIZE;
+        // start back gesture
+        mBackAnimationController.onBackStarted(new BackEvent(0f, 0f, 0f, EDGE_LEFT));
+        // verify that ImeBackAnimationController takes control over IME insets
+        verify(mInsetsController, times(1)).controlWindowInsetsAnimation(anyInt(), any(), any(),
+                anyBoolean(), anyLong(), any(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void testAdjustResizeWithEdgeToEdgePlaysAnim() {
+        // set OnContentApplyWindowInsetsListener to null (to simulate edge-to-edge enabled) and
+        // softInputMode=adjustResize
+        mViewRoot.mWindowAttributes.softInputMode = SOFT_INPUT_ADJUST_RESIZE;
+        mViewRoot.setOnContentApplyWindowInsetsListener(null);
         // start back gesture
         mBackAnimationController.onBackStarted(new BackEvent(0f, 0f, 0f, EDGE_LEFT));
         // verify that ImeBackAnimationController takes control over IME insets

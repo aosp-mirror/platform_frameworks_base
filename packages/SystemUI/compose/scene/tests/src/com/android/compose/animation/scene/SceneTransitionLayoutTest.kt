@@ -76,12 +76,13 @@ class SceneTransitionLayoutTest {
 
     /** The content under test. */
     @Composable
-    private fun TestContent() {
+    private fun TestContent(enableInterruptions: Boolean = true) {
         layoutState =
             updateSceneTransitionLayoutState(
                 currentScene,
                 { currentScene = it },
-                EmptyTestTransitions
+                EmptyTestTransitions,
+                enableInterruptions = enableInterruptions,
             )
 
         SceneTransitionLayout(
@@ -219,7 +220,7 @@ class SceneTransitionLayoutTest {
 
     @Test
     fun testSharedElement() {
-        rule.setContent { TestContent() }
+        rule.setContent { TestContent(enableInterruptions = false) }
 
         // In scene A, the shared element SharedFoo() is at the top end of the layout and has a size
         // of 50.dp.

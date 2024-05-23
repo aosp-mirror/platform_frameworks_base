@@ -843,6 +843,15 @@ public final class AutomaticZenRule implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets the package that owns this rule
+         * @hide
+         */
+        public @NonNull Builder setPackage(@NonNull String pkg) {
+            mPkg = pkg;
+            return this;
+        }
+
         public @NonNull AutomaticZenRule build() {
             AutomaticZenRule rule = new AutomaticZenRule(mName, mOwner, mConfigurationActivity,
                     mConditionId, mPolicy, mInterruptionFilter, mEnabled);

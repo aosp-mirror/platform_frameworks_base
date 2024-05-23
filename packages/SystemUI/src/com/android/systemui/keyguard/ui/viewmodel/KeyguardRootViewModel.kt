@@ -142,8 +142,8 @@ constructor(
         combine(
                 keyguardTransitionInteractor.isFinishedInState(LOCKSCREEN).onStart { emit(false) },
                 anyOf(
-                    keyguardTransitionInteractor.isInTransitionToState(LOCKSCREEN),
-                    keyguardTransitionInteractor.isInTransitionFromState(LOCKSCREEN),
+                    keyguardTransitionInteractor.isInTransition(Edge.create(to = LOCKSCREEN)),
+                    keyguardTransitionInteractor.isInTransition(Edge.create(from = LOCKSCREEN)),
                 ),
             ) { onLockscreen, transitioningToOrFromLockscreen ->
                 onLockscreen || transitioningToOrFromLockscreen

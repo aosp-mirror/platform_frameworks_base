@@ -94,12 +94,13 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             @Override
             public IBinder createDisplay(String name, boolean secure, String uniqueId,
                                          float requestedRefreshRate) {
-                return DisplayControl.createDisplay(name, secure, uniqueId, requestedRefreshRate);
+                return DisplayControl.createVirtualDisplay(name, secure, uniqueId,
+                                                           requestedRefreshRate);
             }
 
             @Override
             public void destroyDisplay(IBinder displayToken) {
-                DisplayControl.destroyDisplay(displayToken);
+                DisplayControl.destroyVirtualDisplay(displayToken);
             }
         }, featureFlags);
     }

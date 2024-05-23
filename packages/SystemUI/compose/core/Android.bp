@@ -32,6 +32,7 @@ android_library {
 
     static_libs: [
         "PlatformAnimationLib",
+        "PlatformMotionTestingComposeValues",
 
         "androidx.compose.runtime_runtime",
         "androidx.compose.material3_material3",

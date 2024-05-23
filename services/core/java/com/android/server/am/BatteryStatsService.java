@@ -124,6 +124,7 @@ import com.android.server.power.stats.BatteryExternalStatsWorker;
 import com.android.server.power.stats.BatteryStatsDumpHelperImpl;
 import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.power.stats.BatteryUsageStatsProvider;
+import com.android.server.power.stats.BluetoothPowerStatsProcessor;
 import com.android.server.power.stats.CpuPowerStatsProcessor;
 import com.android.server.power.stats.MobileRadioPowerStatsProcessor;
 import com.android.server.power.stats.PhoneCallPowerStatsProcessor;
@@ -502,6 +503,17 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
                 .setProcessor(
                         new WifiPowerStatsProcessor(mPowerProfile));
+
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_BLUETOOTH)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessor(
+                        new BluetoothPowerStatsProcessor(mPowerProfile));
         return config;
     }
 
@@ -561,6 +573,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 Flags.streamlinedConnectivityBatteryStats());
         mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
                 BatteryConsumer.POWER_COMPONENT_WIFI,
+                Flags.streamlinedConnectivityBatteryStats());
+
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
+                Flags.streamlinedConnectivityBatteryStats());
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
                 Flags.streamlinedConnectivityBatteryStats());
 
         mWorker.systemServicesReady();

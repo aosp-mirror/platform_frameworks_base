@@ -26,13 +26,16 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.ui.composable.LockscreenContent
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneViewModel
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
+import java.util.Optional
 
 @SysUISingleton
 class QuickSettingsShadeScene
@@ -40,6 +43,7 @@ class QuickSettingsShadeScene
 constructor(
     viewModel: QuickSettingsShadeSceneViewModel,
     private val overlayShadeViewModel: OverlayShadeViewModel,
+    private val lockscreenContent: Lazy<Optional<LockscreenContent>>,
 ) : ComposableScene {
 
     override val key = Scenes.QuickSettingsShade
@@ -55,6 +59,7 @@ constructor(
             viewModel = overlayShadeViewModel,
             modifier = modifier,
             horizontalArrangement = Arrangement.End,
+            lockscreenContent = lockscreenContent,
         ) {
             Text(
                 text = "Quick settings grid",

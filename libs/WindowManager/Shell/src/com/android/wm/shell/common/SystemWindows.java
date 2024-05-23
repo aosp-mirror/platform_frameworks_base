@@ -353,7 +353,7 @@ public class SystemWindows {
 
         @Override
         public void insetsControlChanged(InsetsState insetsState,
-                InsetsSourceControl[] activeControls) {}
+                InsetsSourceControl.Array activeControls) {}
 
         @Override
         public void showInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {}

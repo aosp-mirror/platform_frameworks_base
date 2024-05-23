@@ -1261,6 +1261,7 @@
         <item name="android:lineHeight">32sp</item>
         <item name="android:gravity">center</item>
         <item name="android:textAlignment">center</item>
+        <item name="android:hyphenationFrequency">full</item>
     </style>
 
     <style name="TextAppearance.Dialog.Body" parent="@android:style/TextAppearance.DeviceDefault.Medium">

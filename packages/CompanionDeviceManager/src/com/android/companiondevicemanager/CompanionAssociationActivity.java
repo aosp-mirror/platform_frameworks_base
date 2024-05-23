@@ -211,7 +211,10 @@ public class CompanionAssociationActivity extends FragmentActivity implements
 
         // Start discovery services if needed.
         if (!mRequest.isSelfManaged()) {
-            CompanionDeviceDiscoveryService.startForRequest(this, mRequest);
+            boolean started = CompanionDeviceDiscoveryService.startForRequest(this, mRequest);
+            if (!started) {
+                return;
+            }
             // TODO(b/217749191): Create the ViewModel for the LiveData
             CompanionDeviceDiscoveryService.getDiscoveryState().observe(
                     /* LifeCycleOwner */ this, this::onDiscoveryStateChanged);
