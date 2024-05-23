@@ -109,28 +109,28 @@ interface Vote {
     // Settings.Global.LOW_POWER_MODE is on.
     // Lower priority that PRIORITY_LOW_POWER_MODE_RENDER_RATE and if discarded (due to other
     // higher priority votes), render rate limit can still apply
-    int PRIORITY_LOW_POWER_MODE_MODES = 14;
+    int PRIORITY_LOW_POWER_MODE_MODES = 15;
 
     // PRIORITY_LOW_POWER_MODE_RENDER_RATE force the render frame rate to [0, 60HZ] if
     // Settings.Global.LOW_POWER_MODE is on.
-    int PRIORITY_LOW_POWER_MODE_RENDER_RATE = 15;
+    int PRIORITY_LOW_POWER_MODE_RENDER_RATE = 16;
 
     // PRIORITY_FLICKER_REFRESH_RATE_SWITCH votes for disabling refresh rate switching. If the
     // higher priority voters' result is a range, it will fix the rate to a single choice.
     // It's used to avoid refresh rate switches in certain conditions which may result in the
     // user seeing the display flickering when the switches occur.
-    int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 16;
+    int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 17;
 
     // Force display to [0, 60HZ] if skin temperature is at or above CRITICAL.
-    int PRIORITY_SKIN_TEMPERATURE = 17;
+    int PRIORITY_SKIN_TEMPERATURE = 18;
 
     // The proximity sensor needs the refresh rate to be locked in order to function, so this is
     // set to a high priority.
-    int PRIORITY_PROXIMITY = 18;
+    int PRIORITY_PROXIMITY = 19;
 
     // The Under-Display Fingerprint Sensor (UDFPS) needs the refresh rate to be locked in order
     // to function, so this needs to be the highest priority of all votes.
-    int PRIORITY_UDFPS = 19;
+    int PRIORITY_UDFPS = 20;
 
     // Whenever a new priority is added, remember to update MIN_PRIORITY, MAX_PRIORITY, and
     // APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF, as well as priorityToString.
@@ -250,6 +250,8 @@ interface Vote {
                 return "PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE";
             case PRIORITY_LAYOUT_LIMITED_FRAME_RATE:
                 return "PRIORITY_LAYOUT_LIMITED_FRAME_RATE";
+            case PRIORITY_SYSTEM_REQUESTED_MODES:
+                return "PRIORITY_SYSTEM_REQUESTED_MODES";
             default:
                 return Integer.toString(priority);
         }
