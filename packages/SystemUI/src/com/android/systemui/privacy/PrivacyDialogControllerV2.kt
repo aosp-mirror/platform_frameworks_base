@@ -23,6 +23,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.UserHandle
 import android.permission.PermissionGroupUsage
 import android.permission.PermissionManager
@@ -65,6 +66,7 @@ private val defaultDialogProvider =
 class PrivacyDialogControllerV2(
     private val permissionManager: PermissionManager,
     private val packageManager: PackageManager,
+    private val locationManager: LocationManager,
     private val privacyItemController: PrivacyItemController,
     private val userTracker: UserTracker,
     private val activityStarter: ActivityStarter,
@@ -82,6 +84,7 @@ class PrivacyDialogControllerV2(
     constructor(
         permissionManager: PermissionManager,
         packageManager: PackageManager,
+        locationManager: LocationManager,
         privacyItemController: PrivacyItemController,
         userTracker: UserTracker,
         activityStarter: ActivityStarter,
@@ -95,6 +98,7 @@ class PrivacyDialogControllerV2(
     ) : this(
         permissionManager,
         packageManager,
+        locationManager,
         privacyItemController,
         userTracker,
         activityStarter,
@@ -166,12 +170,18 @@ class PrivacyDialogControllerV2(
 
     @WorkerThread
     private fun getStartViewPermissionUsageIntent(
+        context: Context,
         packageName: String,
         permGroupName: String,
         attributionTag: CharSequence?,
         isAttributionSupported: Boolean
     ): Intent? {
-        if (attributionTag != null && isAttributionSupported) {
+        // We should only limit this intent to location provider
+        if (
+            attributionTag != null &&
+                isAttributionSupported &&
+                locationManager.isProviderPackage(null, packageName, attributionTag.toString())
+        ) {
             val intent = Intent(Intent.ACTION_MANAGE_PERMISSION_USAGE)
             intent.setPackage(packageName)
             intent.putExtra(Intent.EXTRA_PERMISSION_GROUP_NAME, permGroupName)
@@ -237,6 +247,7 @@ class PrivacyDialogControllerV2(
                         val userId = UserHandle.getUserId(it.uid)
                         val viewUsageIntent =
                             getStartViewPermissionUsageIntent(
+                                context,
                                 it.packageName,
                                 it.permissionGroupName,
                                 it.attributionTag,
