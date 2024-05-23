@@ -518,23 +518,25 @@ public class SystemSensorManager extends SensorManager {
 
                     Handler mainHandler = new Handler(mContext.getMainLooper());
 
-                    for (Map.Entry<DynamicSensorCallback, Handler> entry :
-                            mDynamicSensorCallbacks.entrySet()) {
-                        final DynamicSensorCallback callback = entry.getKey();
-                        Handler handler =
-                                entry.getValue() == null ? mainHandler : entry.getValue();
+                    synchronized (mDynamicSensorCallbacks) {
+                        for (Map.Entry<DynamicSensorCallback, Handler> entry :
+                                mDynamicSensorCallbacks.entrySet()) {
+                            final DynamicSensorCallback callback = entry.getKey();
+                            Handler handler =
+                                    entry.getValue() == null ? mainHandler : entry.getValue();
 
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                for (Sensor s: addedList) {
-                                    callback.onDynamicSensorConnected(s);
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    for (Sensor s: addedList) {
+                                        callback.onDynamicSensorConnected(s);
+                                    }
+                                    for (Sensor s: removedList) {
+                                        callback.onDynamicSensorDisconnected(s);
+                                    }
                                 }
-                                for (Sensor s: removedList) {
-                                    callback.onDynamicSensorDisconnected(s);
-                                }
-                            }
-                        });
+                            });
+                        }
                     }
 
                     for (Sensor s: removedList) {
@@ -653,13 +655,15 @@ public class SystemSensorManager extends SensorManager {
         if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null");
         }
-        if (mDynamicSensorCallbacks.containsKey(callback)) {
-            // has been already registered, ignore
-            return;
-        }
+        synchronized (mDynamicSensorCallbacks) {
+            if (mDynamicSensorCallbacks.containsKey(callback)) {
+                // has been already registered, ignore
+                return;
+            }
 
-        setupDynamicSensorBroadcastReceiver();
-        mDynamicSensorCallbacks.put(callback, handler);
+            setupDynamicSensorBroadcastReceiver();
+            mDynamicSensorCallbacks.put(callback, handler);
+        }
     }
 
     /** @hide */
@@ -668,7 +672,9 @@ public class SystemSensorManager extends SensorManager {
         if (DEBUG_DYNAMIC_SENSOR) {
             Log.i(TAG, "Removing dynamic sensor listener");
         }
-        mDynamicSensorCallbacks.remove(callback);
+        synchronized (mDynamicSensorCallbacks) {
+            mDynamicSensorCallbacks.remove(callback);
+        }
     }
 
     /*
