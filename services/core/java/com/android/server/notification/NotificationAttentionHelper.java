@@ -1500,9 +1500,7 @@ public final class NotificationAttentionHelper {
 
         private boolean isAvalancheExemptedFullVolume(final NotificationRecord record) {
             // important conversation
-            if (record.isConversation()
-                    && (record.getImportance() > NotificationManager.IMPORTANCE_DEFAULT
-                    || record.getChannel().isImportantConversation())) {
+            if (record.isConversation() && record.getChannel().isImportantConversation()) {
                 return true;
             }
 

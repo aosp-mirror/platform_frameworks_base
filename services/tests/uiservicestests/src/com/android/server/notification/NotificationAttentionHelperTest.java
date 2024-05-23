@@ -2298,8 +2298,20 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         mAttentionHelper.buzzBeepBlinkLocked(r4, DEFAULT_SIGNALS);
         verifyBeepVolume(0.5f);
 
-        verify(mAccessibilityService, times(4)).sendAccessibilityEvent(any(), anyInt());
-        assertNotEquals(-1, r4.getLastAudiblyAlertedMs());
+        // Set important conversation
+        mChannel.setImportantConversation(true);
+        NotificationRecord r5 = getConversationNotificationRecord(mId, false /* insistent */,
+                false /* once */, true /* noisy */, false /* buzzy*/, false /* lights */, true,
+                true, false, null, Notification.GROUP_ALERT_ALL, false, mUser, "yetAnotherPkg",
+                "shortcut");
+
+        // important conversation should beep at 100% volume
+        Mockito.reset(mRingtonePlayer);
+        mAttentionHelper.buzzBeepBlinkLocked(r5, DEFAULT_SIGNALS);
+        verifyBeepVolume(1.0f);
+
+        verify(mAccessibilityService, times(5)).sendAccessibilityEvent(any(), anyInt());
+        assertNotEquals(-1, r5.getLastAudiblyAlertedMs());
     }
 
     @Test
