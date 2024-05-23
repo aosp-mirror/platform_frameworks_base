@@ -154,7 +154,7 @@ public class InstallStart extends Activity {
             mAbortInstall = true;
         }
 
-        checkDevicePolicyRestrictions();
+        checkDevicePolicyRestrictions(isTrustedSource);
 
         final String installerPackageNameFromIntent = getIntent().getStringExtra(
                 Intent.EXTRA_INSTALLER_PACKAGE_NAME);
@@ -304,12 +304,17 @@ public class InstallStart extends Activity {
         return callingUid == installerUid;
     }
 
-    private void checkDevicePolicyRestrictions() {
-        final String[] restrictions = new String[] {
-            UserManager.DISALLOW_INSTALL_APPS,
-            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
-            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
-        };
+    private void checkDevicePolicyRestrictions(boolean isTrustedSource) {
+        String[] restrictions;
+        if(isTrustedSource) {
+            restrictions = new String[] { UserManager.DISALLOW_INSTALL_APPS };
+        } else {
+            restrictions =  new String[] {
+                UserManager.DISALLOW_INSTALL_APPS,
+                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
+            };
+        }
 
         final DevicePolicyManager dpm = getSystemService(DevicePolicyManager.class);
         for (String restriction : restrictions) {
