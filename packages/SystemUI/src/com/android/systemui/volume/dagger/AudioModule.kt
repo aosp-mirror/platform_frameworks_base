@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.dagger
 
+import android.content.ContentResolver
 import android.content.Context
 import android.media.AudioManager
 import com.android.settingslib.bluetooth.LocalBluetoothManager
@@ -28,6 +29,7 @@ import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
 import com.android.settingslib.volume.domain.interactor.AudioVolumeInteractor
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiverImpl
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import dagger.Module
@@ -42,21 +44,31 @@ interface AudioModule {
     companion object {
 
         @Provides
+        @SysUISingleton
         fun provideAudioManagerIntentsReceiver(
             @Application context: Context,
             @Application coroutineScope: CoroutineScope,
         ): AudioManagerEventsReceiver = AudioManagerEventsReceiverImpl(context, coroutineScope)
 
         @Provides
+        @SysUISingleton
         fun provideAudioRepository(
             intentsReceiver: AudioManagerEventsReceiver,
             audioManager: AudioManager,
+            contentResolver: ContentResolver,
             @Background coroutineContext: CoroutineContext,
             @Application coroutineScope: CoroutineScope,
         ): AudioRepository =
-            AudioRepositoryImpl(intentsReceiver, audioManager, coroutineContext, coroutineScope)
+            AudioRepositoryImpl(
+                intentsReceiver,
+                audioManager,
+                contentResolver,
+                coroutineContext,
+                coroutineScope,
+            )
 
         @Provides
+        @SysUISingleton
         fun provideAudioSharingRepository(
             localBluetoothManager: LocalBluetoothManager?,
             @Background coroutineContext: CoroutineContext,
@@ -64,10 +76,12 @@ interface AudioModule {
             AudioSharingRepositoryImpl(localBluetoothManager, coroutineContext)
 
         @Provides
+        @SysUISingleton
         fun provideAudioModeInteractor(repository: AudioRepository): AudioModeInteractor =
             AudioModeInteractor(repository)
 
         @Provides
+        @SysUISingleton
         fun provideAudioVolumeInteractor(
             audioRepository: AudioRepository,
             notificationsSoundPolicyInteractor: NotificationsSoundPolicyInteractor,
