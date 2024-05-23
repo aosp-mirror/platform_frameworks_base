@@ -90,6 +90,7 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = FakeUserTracker(),
+                systemSettings = FakeSettings(),
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         settings = FakeSettings()
