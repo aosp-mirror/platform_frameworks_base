@@ -18,6 +18,9 @@ package com.android.systemui.shade
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogBufferFactory
+import com.android.systemui.shade.carrier.ShadeCarrierGroupControllerLog
 import com.android.systemui.shade.data.repository.PrivacyChipRepository
 import com.android.systemui.shade.data.repository.PrivacyChipRepositoryImpl
 import com.android.systemui.shade.data.repository.ShadeRepository
@@ -110,6 +113,13 @@ abstract class ShadeModule {
             } else {
                 sceneContainerOff.get()
             }
+        }
+
+        @Provides
+        @SysUISingleton
+        @ShadeCarrierGroupControllerLog
+        fun provideShadeCarrierLog(factory: LogBufferFactory): LogBuffer {
+            return factory.create("ShadeCarrierGroupControllerLog", 400)
         }
     }
 
