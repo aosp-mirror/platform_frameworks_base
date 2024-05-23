@@ -10304,7 +10304,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         command.add("/system/bin/logcat");
         command.add("-v");
         // This adds a timestamp and thread info to each log line.
-        command.add("threadtime");
+        // Also change the timestamps to use UTC time.
+        command.add("threadtime,UTC");
         for (String buffer : buffers) {
             command.add("-b");
             command.add(buffer);
