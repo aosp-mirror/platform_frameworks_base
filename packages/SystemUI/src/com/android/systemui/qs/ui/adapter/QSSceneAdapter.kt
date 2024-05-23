@@ -102,8 +102,21 @@ interface QSSceneAdapter {
      */
     suspend fun inflate(context: Context)
 
-    /** Set the current state for QS. [state]. */
+    /**
+     * Set the current state for QS. [state].
+     *
+     * This will not trigger expansion (animation between QQS or QS) or squishiness to be applied.
+     * For that, use [applyLatestExpansionAndSquishiness] outside of the composition phase.
+     */
     fun setState(state: State)
+
+    /**
+     * Explicitly applies the expansion and squishiness value from the latest state set. Call this
+     * only outside of the composition phase as this will call [QSImpl.setQsExpansion] that is
+     * normally called during animations. In particular, this will read the value of
+     * [State.squishiness], that is not safe to read in the composition phase.
+     */
+    fun applyLatestExpansionAndSquishiness()
 
     /** Propagates the bottom nav bar size to [QSImpl] to be used as necessary. */
     suspend fun applyBottomNavBarPadding(padding: Int)
@@ -384,7 +397,12 @@ constructor(
         setQsVisible(state.isVisible)
         setExpanded(state.isVisible && state.expansion > 0f)
         setListening(state.isVisible)
-        setQsExpansion(state.expansion, 1f, 0f, state.squishiness())
+    }
+
+    override fun applyLatestExpansionAndSquishiness() {
+        val qsImpl = _qsImpl.value
+        val state = state.value
+        qsImpl?.setQsExpansion(state.expansion, 1f, 0f, state.squishiness())
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {

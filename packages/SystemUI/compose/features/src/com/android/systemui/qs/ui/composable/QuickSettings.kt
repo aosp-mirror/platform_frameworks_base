@@ -26,6 +26,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -179,7 +180,13 @@ private fun QuickSettingsContent(
         qsView?.let { view ->
             Box(
                 modifier =
-                    modifier.fillMaxWidth().thenIf(isCustomizing) { Modifier.fillMaxHeight() }
+                    modifier
+                        .fillMaxWidth()
+                        .thenIf(isCustomizing) { Modifier.fillMaxHeight() }
+                        .drawWithContent {
+                            qsSceneAdapter.applyLatestExpansionAndSquishiness()
+                            drawContent()
+                        }
             ) {
                 AndroidView(
                     modifier = Modifier.fillMaxWidth(),

@@ -64,6 +64,8 @@ class FakeQSSceneAdapter(
         }
     }
 
+    override fun applyLatestExpansionAndSquishiness() {}
+
     fun setCustomizing(value: Boolean) {
         updateCustomizerFlows(if (value) CustomizerState.Showing else CustomizerState.Hidden)
     }
