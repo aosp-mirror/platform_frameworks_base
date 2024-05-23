@@ -1812,3 +1812,10 @@ flag {
     description: "Applies GSF font styles to Quick Settings surfaces."
     bug: "379364381"
 }
+
+flag {
+    name: "glanceable_hub_shortcut_button"
+    namespace: "systemui"
+    description: "Adds a shortcut button to lockscreen to show glanceable hub."
+    bug: "378173531"
+}
