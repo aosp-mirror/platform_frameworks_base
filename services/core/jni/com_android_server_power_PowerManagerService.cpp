@@ -116,10 +116,8 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
                 }
                 gLastEventTime[eventType] = eventTime;
             }
-
-            // Tell the power HAL when user activity occurs.
-            setPowerBoost(Boost::INTERACTION, 0);
         }
+        // Note that the below PowerManagerService method may call setPowerBoost.
 
         JNIEnv* env = AndroidRuntime::getJNIEnv();
 
