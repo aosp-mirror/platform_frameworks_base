@@ -403,6 +403,7 @@ public class SettingsHelper {
         // it means that the user has performed a global gesture to enable accessibility or set
         // these settings in the Accessibility portion of the Setup Wizard, and definitely needs
         // these features working after the restore.
+        // Note: Settings.Secure.FONT_SCALE is already handled in the caller class.
         switch (name) {
             case Settings.Secure.ACCESSIBILITY_ENABLED:
             case Settings.Secure.TOUCH_EXPLORATION_ENABLED:
@@ -422,8 +423,6 @@ public class SettingsHelper {
                 float currentScale = Settings.Secure.getFloat(
                         mContext.getContentResolver(), name, defaultScale);
                 return Math.abs(currentScale - defaultScale) >= FLOAT_TOLERANCE;
-            case Settings.System.FONT_SCALE:
-                return Settings.System.getFloat(mContext.getContentResolver(), name, 1.0f) != 1.0f;
             default:
                 return false;
         }
