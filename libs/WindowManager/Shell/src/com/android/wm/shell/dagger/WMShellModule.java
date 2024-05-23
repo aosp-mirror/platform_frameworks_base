@@ -57,7 +57,6 @@ import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
-import com.android.wm.shell.desktopmode.DesktopModeShellCommandHandler;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksLimiter;
@@ -534,7 +533,8 @@ public abstract class WMShellModule {
                 exitDesktopTransitionHandler, toggleResizeDesktopTaskTransitionHandler,
                 dragToDesktopTransitionHandler, desktopModeTaskRepository,
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
-                recentsTransitionHandler, multiInstanceHelper, mainExecutor, desktopTasksLimiter);
+                recentsTransitionHandler, multiInstanceHelper,
+                mainExecutor, desktopTasksLimiter);
     }
 
     @WMSingleton
@@ -633,20 +633,6 @@ public abstract class WMShellModule {
         return new ResizeHandleSizeRepository();
     }
 
-    @WMSingleton
-    @Provides
-    static Optional<DesktopModeShellCommandHandler> provideDesktopModeShellCommandHandler(
-            ShellInit shellInit, ShellCommandHandler shellCommandHandler,
-            Optional<DesktopTasksController> tasksController,
-            ResizeHandleSizeRepository resizeHandleSizeRepository) {
-        if (!DesktopModeStatus.isEnabled()) {
-            return Optional.empty();
-        }
-        return Optional.of(
-                new DesktopModeShellCommandHandler(shellInit, shellCommandHandler, tasksController,
-                        resizeHandleSizeRepository));
-    }
-
     //
     // Drag and drop
     //
@@ -687,8 +673,7 @@ public abstract class WMShellModule {
     @Provides
     static Object provideIndependentShellComponentsToCreate(
             DragAndDropController dragAndDropController,
-            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional,
-            Optional<DesktopModeShellCommandHandler> desktopModeShellCommandHandler) {
+            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional) {
         return new Object();
     }
 }
