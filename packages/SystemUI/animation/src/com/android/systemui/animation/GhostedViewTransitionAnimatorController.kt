@@ -16,6 +16,7 @@
 
 package com.android.systemui.animation
 
+import android.content.ComponentName
 import android.graphics.Canvas
 import android.graphics.ColorFilter
 import android.graphics.Insets
@@ -62,6 +63,7 @@ constructor(
     /** The [CujType] associated to this launch animation. */
     private val launchCujType: Int? = null,
     override val transitionCookie: ActivityTransitionAnimator.TransitionCookie? = null,
+    override val component: ComponentName? = null,
 
     /** The [CujType] associated to this return animation. */
     private val returnCujType: Int? = null,
