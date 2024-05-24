@@ -30,6 +30,7 @@ import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.ColorCorrectionTile
 import com.android.systemui.qs.tiles.ColorInversionTile
 import com.android.systemui.qs.tiles.FontScalingTile
+import com.android.systemui.qs.tiles.HearingDevicesTile
 import com.android.systemui.qs.tiles.OneHandedModeTile
 import com.android.systemui.qs.tiles.ReduceBrightColorsTile
 import javax.inject.Inject
@@ -74,6 +75,8 @@ constructor(
                         .REDUCE_BRIGHT_COLORS_TILE_SERVICE_COMPONENT_NAME,
                 FontScalingTile.TILE_SPEC to
                     AccessibilityShortcutController.FONT_SIZE_TILE_COMPONENT_NAME,
+                HearingDevicesTile.TILE_SPEC to
+                    AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_TILE_COMPONENT_NAME
             )
     }
 

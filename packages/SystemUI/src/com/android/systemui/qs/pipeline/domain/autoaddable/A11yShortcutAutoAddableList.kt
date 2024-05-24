@@ -22,6 +22,7 @@ import com.android.systemui.qs.pipeline.domain.model.AutoAddable
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.ColorCorrectionTile
 import com.android.systemui.qs.tiles.ColorInversionTile
+import com.android.systemui.qs.tiles.HearingDevicesTile
 import com.android.systemui.qs.tiles.OneHandedModeTile
 import com.android.systemui.qs.tiles.ReduceBrightColorsTile
 
@@ -50,6 +51,10 @@ object A11yShortcutAutoAddableList {
                     TileSpec.create(ReduceBrightColorsTile.TILE_SPEC),
                     AccessibilityShortcutController.REDUCE_BRIGHT_COLORS_COMPONENT_NAME
                 ),
+                factory.create(
+                    TileSpec.create(HearingDevicesTile.TILE_SPEC),
+                    AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME
+                )
             )
         } else {
             emptySet()

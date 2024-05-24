@@ -29,6 +29,7 @@ import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.ColorCorrectionTile
 import com.android.systemui.qs.tiles.ColorInversionTile
 import com.android.systemui.qs.tiles.FontScalingTile
+import com.android.systemui.qs.tiles.HearingDevicesTile
 import com.android.systemui.qs.tiles.OneHandedModeTile
 import com.android.systemui.qs.tiles.ReduceBrightColorsTile
 import com.android.systemui.util.mockito.whenever
@@ -94,7 +95,7 @@ class AccessibilityQsShortcutsRepositoryImplForDeviceTest : SysuiTestCase() {
     fun testTileSpecToComponentMappingContent() {
         val mapping = AccessibilityQsShortcutsRepositoryImpl.TILE_SPEC_TO_COMPONENT_MAPPING
 
-        assertThat(mapping.size).isEqualTo(5)
+        assertThat(mapping.size).isEqualTo(6)
         assertThat(mapping[ColorCorrectionTile.TILE_SPEC])
             .isEqualTo(AccessibilityShortcutController.DALTONIZER_TILE_COMPONENT_NAME)
         assertThat(mapping[ColorInversionTile.TILE_SPEC])
@@ -107,6 +108,10 @@ class AccessibilityQsShortcutsRepositoryImplForDeviceTest : SysuiTestCase() {
             )
         assertThat(mapping[FontScalingTile.TILE_SPEC])
             .isEqualTo(AccessibilityShortcutController.FONT_SIZE_TILE_COMPONENT_NAME)
+        assertThat(mapping[HearingDevicesTile.TILE_SPEC])
+            .isEqualTo(
+                AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_TILE_COMPONENT_NAME
+            )
     }
 
     @Test
