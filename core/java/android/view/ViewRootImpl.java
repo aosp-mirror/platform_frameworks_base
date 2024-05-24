@@ -667,6 +667,8 @@ public final class ViewRootImpl implements ViewParent,
     private int mMinusTwoFrameIntervalMillis = 0;
     // VRR has the invalidation idle message been posted?
     private boolean mInvalidationIdleMessagePosted = false;
+    // VRR: List of all Views that are animating with the threaded render
+    private ArrayList<View> mThreadedRendererViews = new ArrayList();
 
     /**
      * Update the Choreographer's FrameInfo object with the timing information for the current
@@ -4277,6 +4279,7 @@ public final class ViewRootImpl implements ViewParent,
             }
             setCategoryFromCategoryCounts();
             updateInfrequentCount();
+            updateFrameRateFromThreadedRendererViews();
             setPreferredFrameRate(mPreferredFrameRate);
             setPreferredFrameRateCategory(mPreferredFrameRateCategory);
             if (mPreferredFrameRate > 0
@@ -6789,8 +6792,9 @@ public final class ViewRootImpl implements ViewParent,
                         mFrameRateCategoryLowCount = 0;
                         mPreferredFrameRate = 0;
                         mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-                        setPreferredFrameRateCategory(FRAME_RATE_CATEGORY_NO_PREFERENCE);
-                        setPreferredFrameRate(0f);
+                        updateFrameRateFromThreadedRendererViews();
+                        setPreferredFrameRate(mPreferredFrameRate);
+                        setPreferredFrameRateCategory(mPreferredFrameRateCategory);
                         mInvalidationIdleMessagePosted = false;
                     } else {
                         mInvalidationIdleMessagePosted = true;
@@ -12617,6 +12621,24 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
+     * Views that are animating with the ThreadedRenderer don't use the normal invalidation
+     * path, so the value won't be updated through performTraversals. This reads the votes
+     * from those views.
+     */
+    private void updateFrameRateFromThreadedRendererViews() {
+        ArrayList<View> views = mThreadedRendererViews;
+        for (int i = views.size() - 1; i >= 0; i--) {
+            View view = views.get(i);
+            View.AttachInfo attachInfo = view.mAttachInfo;
+            if (attachInfo == null || attachInfo.mViewRootImpl != this) {
+                views.remove(i);
+            } else {
+                view.votePreferredFrameRate();
+            }
+        }
+    }
+
+    /**
      * Sets the mPreferredFrameRateCategory from the high, high_hint, normal, and low counts.
      */
     private void setCategoryFromCategoryCounts() {
@@ -12794,6 +12816,31 @@ public final class ViewRootImpl implements ViewParent,
             // mFrameRateCategoryView = view == null ? "-" : view.getClass().getSimpleName();
         }
         mDrawnThisFrame = true;
+    }
+
+    /**
+     * Mark a View as having an active ThreadedRenderer animation. This is used for
+     * RenderNodeAnimators and AnimatedVectorDrawables. When the animation stops,
+     * {@link #removeThreadedRendererView(View)} must be called.
+     * @param view The View with the ThreadedRenderer animation that started.
+     */
+    public void addThreadedRendererView(View view) {
+        if (!mThreadedRendererViews.contains(view)) {
+            mThreadedRendererViews.add(view);
+        }
+    }
+
+    /**
+     * When a ThreadedRenderer animation ends, the View that is associated with it using
+     * {@link #addThreadedRendererView(View)} must be removed with a call to this method.
+     * @param view The View whose ThreadedRender animation has stopped.
+     */
+    public void removeThreadedRendererView(View view) {
+        mThreadedRendererViews.remove(view);
+        if (!mInvalidationIdleMessagePosted && sSurfaceFlingerBugfixFlagValue) {
+            mInvalidationIdleMessagePosted = true;
+            mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE, IDLE_TIME_MILLIS);
+        }
     }
 
     /**
@@ -13041,7 +13088,7 @@ public final class ViewRootImpl implements ViewParent,
         mMinusOneFrameIntervalMillis = timeIntervalMillis;
 
         mLastUpdateTimeMillis = currentTimeMillis;
-        if (timeIntervalMillis + mMinusTwoFrameIntervalMillis
+        if (mThreadedRendererViews.isEmpty() && timeIntervalMillis + mMinusTwoFrameIntervalMillis
                 >= INFREQUENT_UPDATE_INTERVAL_MILLIS) {
             int infrequentUpdateCount = mInfrequentUpdateCount;
             mInfrequentUpdateCount = infrequentUpdateCount == INFREQUENT_UPDATE_COUNTS
