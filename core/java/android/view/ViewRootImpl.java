@@ -2276,6 +2276,33 @@ public final class ViewRootImpl implements ViewParent,
         requestLayout();
     }
 
+    /** Handles messages {@link #MSG_INSETS_CONTROL_CHANGED}. */
+    private void handleInsetsControlChanged(@NonNull InsetsState insetsState,
+            @NonNull InsetsSourceControl.Array activeControls) {
+        final InsetsSourceControl[] controls = activeControls.get();
+
+        if (mTranslator != null) {
+            mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
+            mTranslator.translateSourceControlsInScreenToAppWindow(controls);
+        }
+
+        // Deliver state change before control change, such that:
+        // a) When gaining control, controller can compare with server state to evaluate
+        // whether it needs to run animation.
+        // b) When loosing control, controller can restore server state by taking last
+        // dispatched state as truth.
+        mInsetsController.onStateChanged(insetsState);
+        if (mAdded) {
+            mInsetsController.onControlsChanged(controls);
+        } else if (controls != null) {
+            for (InsetsSourceControl control : controls) {
+                if (control != null) {
+                    control.release(SurfaceControl::release);
+                }
+            }
+        }
+    }
+
     private final DisplayListener mDisplayListener = new DisplayListener() {
         @Override
         public void onDisplayChanged(int displayId) {
@@ -6591,24 +6618,11 @@ public final class ViewRootImpl implements ViewParent,
                     break;
                 }
                 case MSG_INSETS_CONTROL_CHANGED: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-
-                    // Deliver state change before control change, such that:
-                    // a) When gaining control, controller can compare with server state to evaluate
-                    // whether it needs to run animation.
-                    // b) When loosing control, controller can restore server state by taking last
-                    // dispatched state as truth.
-                    mInsetsController.onStateChanged((InsetsState) args.arg1);
-                    InsetsSourceControl[] controls = (InsetsSourceControl[]) args.arg2;
-                    if (mAdded) {
-                        mInsetsController.onControlsChanged(controls);
-                    } else if (controls != null) {
-                        for (InsetsSourceControl control : controls) {
-                            if (control != null) {
-                                control.release(SurfaceControl::release);
-                            }
-                        }
-                    }
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final InsetsState insetsState = (InsetsState) args.arg1;
+                    final InsetsSourceControl.Array activeControls =
+                            (InsetsSourceControl.Array) args.arg2;
+                    handleInsetsControlChanged(insetsState, activeControls);
                     args.recycle();
                     break;
                 }
@@ -9828,25 +9842,9 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
-    private void dispatchInsetsControlChanged(InsetsState insetsState,
-            InsetsSourceControl[] activeControls) {
-        if (Binder.getCallingPid() == android.os.Process.myPid()) {
-            insetsState = new InsetsState(insetsState, true /* copySource */);
-            if (activeControls != null) {
-                for (int i = activeControls.length - 1; i >= 0; i--) {
-                    activeControls[i] = new InsetsSourceControl(activeControls[i]);
-                }
-            }
-        }
-        if (mTranslator != null) {
-            mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
-            mTranslator.translateSourceControlsInScreenToAppWindow(activeControls);
-        }
-        if (insetsState != null && insetsState.isSourceOrDefaultVisible(ID_IME, Type.ime())) {
-            ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchInsetsControlChanged",
-                    getInsetsController().getHost().getInputMethodManager(), null /* icProto */);
-        }
-        SomeArgs args = SomeArgs.obtain();
+    private void dispatchInsetsControlChanged(@NonNull InsetsState insetsState,
+            @NonNull InsetsSourceControl.Array activeControls) {
+        final SomeArgs args = SomeArgs.obtain();
         args.arg1 = insetsState;
         args.arg2 = activeControls;
         mHandler.obtainMessage(MSG_INSETS_CONTROL_CHANGED, args).sendToTarget();
@@ -11289,9 +11287,9 @@ public final class ViewRootImpl implements ViewParent,
                 return;
             }
             // The the parameters from WindowStateResizeItem are already copied.
-            final boolean needCopy =
+            final boolean needsCopy =
                     !isFromResizeItem && (Binder.getCallingPid() == Process.myPid());
-            if (needCopy) {
+            if (needsCopy) {
                 insetsState = new InsetsState(insetsState, true /* copySource */);
                 frames = new ClientWindowFrames(frames);
                 mergedConfiguration = new MergedConfiguration(mergedConfiguration);
@@ -11307,10 +11305,32 @@ public final class ViewRootImpl implements ViewParent,
             final boolean isFromInsetsControlChangeItem = mIsFromTransactionItem;
             mIsFromTransactionItem = false;
             final ViewRootImpl viewAncestor = mViewAncestor.get();
-            if (viewAncestor != null) {
-                viewAncestor.dispatchInsetsControlChanged(insetsState, activeControls.get());
+            if (viewAncestor == null) {
+                return;
             }
-            // TODO(b/339380439): no need to post if the call is from InsetsControlChangeItem
+            if (insetsState.isSourceOrDefaultVisible(ID_IME, Type.ime())) {
+                ImeTracing.getInstance().triggerClientDump(
+                        "ViewRootImpl#dispatchInsetsControlChanged",
+                        viewAncestor.getInsetsController().getHost().getInputMethodManager(),
+                        null /* icProto */);
+            }
+            // If the UI thread is the same as the current thread that is dispatching
+            // WindowStateInsetsControlChangeItem, then it can run directly.
+            if (isFromInsetsControlChangeItem && viewAncestor.mHandler.getLooper()
+                    == ActivityThread.currentActivityThread().getLooper()) {
+                viewAncestor.handleInsetsControlChanged(insetsState, activeControls);
+                return;
+            }
+            // The parameters from WindowStateInsetsControlChangeItem are already copied.
+            final boolean needsCopy =
+                    !isFromInsetsControlChangeItem && (Binder.getCallingPid() == Process.myPid());
+            if (needsCopy) {
+                insetsState = new InsetsState(insetsState, true /* copySource */);
+                activeControls = new InsetsSourceControl.Array(
+                        activeControls, true /* copyControls */);
+            }
+
+            viewAncestor.dispatchInsetsControlChanged(insetsState, activeControls);
         }
 
         @Override

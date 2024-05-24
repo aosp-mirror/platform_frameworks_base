@@ -3820,7 +3820,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final InsetsStateController stateController =
                 getDisplayContent().getInsetsStateController();
         final InsetsState insetsState = getCompatInsetsState();
-        mLastReportedActiveControls.set(stateController.getControlsForDispatch(this));
+        mLastReportedActiveControls.set(stateController.getControlsForDispatch(this),
+                false /* copyControls */);
         if (Flags.insetsControlChangedItem()) {
             getProcess().scheduleClientTransactionItem(WindowStateInsetsControlChangeItem.obtain(
                     mClient, insetsState, mLastReportedActiveControls));
