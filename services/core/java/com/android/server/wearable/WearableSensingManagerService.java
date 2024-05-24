@@ -35,6 +35,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
@@ -189,6 +190,9 @@ public class WearableSensingManagerService extends
 
     @Override
     protected int getMaximumTemporaryServiceDurationMs() {
+        if (Build.isDebuggable()) {
+            return Integer.MAX_VALUE;
+        }
         return MAX_TEMPORARY_SERVICE_DURATION_MS;
     }
 
