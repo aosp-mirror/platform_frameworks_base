@@ -523,7 +523,7 @@ public final class MediaRoute2Info implements Parcelable {
     private final int mConnectionState;
     private final String mClientPackageName;
     private final String mPackageName;
-    private final int mVolumeHandling;
+    @PlaybackVolume private final int mVolumeHandling;
     private final int mVolumeMax;
     private final int mVolume;
     private final String mAddress;
@@ -855,25 +855,7 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     private void dumpVolume(@NonNull PrintWriter pw, @NonNull String prefix) {
-        String volumeHandlingName;
-
-        switch (mVolumeHandling) {
-            case PLAYBACK_VOLUME_FIXED:
-                volumeHandlingName = "FIXED";
-                break;
-            case PLAYBACK_VOLUME_VARIABLE:
-                volumeHandlingName = "VARIABLE";
-                break;
-            default:
-                volumeHandlingName = "UNKNOWN";
-                break;
-        }
-
-        String volume = String.format(Locale.US,
-                "volume(current=%d, max=%d, handling=%s(%d))",
-                mVolume, mVolumeMax, volumeHandlingName, mVolumeHandling);
-
-        pw.println(prefix + volume);
+        pw.println(prefix + getVolumeString(mVolume, mVolumeMax, mVolumeHandling));
     }
 
     @Override
@@ -936,47 +918,42 @@ public final class MediaRoute2Info implements Parcelable {
     @Override
     public String toString() {
         // Note: mExtras is not printed here.
-        StringBuilder result =
-                new StringBuilder()
-                        .append("MediaRoute2Info{ ")
-                        .append("id=")
-                        .append(getId())
-                        .append(", name=")
-                        .append(getName())
-                        .append(", type=")
-                        .append(getDeviceTypeString(getType()))
-                        .append(", isSystem=")
-                        .append(isSystemRoute())
-                        .append(", features=")
-                        .append(getFeatures())
-                        .append(", iconUri=")
-                        .append(getIconUri())
-                        .append(", description=")
-                        .append(getDescription())
-                        .append(", connectionState=")
-                        .append(getConnectionState())
-                        .append(", clientPackageName=")
-                        .append(getClientPackageName())
-                        .append(", volumeHandling=")
-                        .append(getVolumeHandling())
-                        .append(", volumeMax=")
-                        .append(getVolumeMax())
-                        .append(", volume=")
-                        .append(getVolume())
-                        .append(", address=")
-                        .append(getAddress())
-                        .append(", deduplicationIds=")
-                        .append(String.join(",", getDeduplicationIds()))
-                        .append(", providerId=")
-                        .append(getProviderId())
-                        .append(", isVisibilityRestricted=")
-                        .append(mIsVisibilityRestricted)
-                        .append(", allowedPackages=")
-                        .append(String.join(",", mAllowedPackages))
-                        .append(", suitabilityStatus=")
-                        .append(mSuitabilityStatus)
-                        .append(" }");
-        return result.toString();
+        return new StringBuilder()
+                .append("MediaRoute2Info{ ")
+                .append("id=")
+                .append(getId())
+                .append(", name=")
+                .append(getName())
+                .append(", type=")
+                .append(getDeviceTypeString(getType()))
+                .append(", isSystem=")
+                .append(isSystemRoute())
+                .append(", features=")
+                .append(getFeatures())
+                .append(", iconUri=")
+                .append(getIconUri())
+                .append(", description=")
+                .append(getDescription())
+                .append(", connectionState=")
+                .append(getConnectionState())
+                .append(", clientPackageName=")
+                .append(getClientPackageName())
+                .append(", ")
+                .append(getVolumeString(mVolume, mVolumeMax, mVolumeHandling))
+                .append(", address=")
+                .append(getAddress())
+                .append(", deduplicationIds=")
+                .append(String.join(",", getDeduplicationIds()))
+                .append(", providerId=")
+                .append(getProviderId())
+                .append(", isVisibilityRestricted=")
+                .append(mIsVisibilityRestricted)
+                .append(", allowedPackages=")
+                .append(String.join(",", mAllowedPackages))
+                .append(", suitabilityStatus=")
+                .append(mSuitabilityStatus)
+                .append(" }")
+                .toString();
     }
 
     @Override
@@ -1006,6 +983,36 @@ public final class MediaRoute2Info implements Parcelable {
         dest.writeBoolean(mIsVisibilityRestricted);
         dest.writeString8Array(mAllowedPackages.toArray(new String[0]));
         dest.writeInt(mSuitabilityStatus);
+    }
+
+    /**
+     * Returns a human readable string describing the given volume values.
+     *
+     * @param volume The current volume.
+     * @param maxVolume The maximum volume.
+     * @param volumeHandling The {@link PlaybackVolume}.
+     */
+    /* package */ static String getVolumeString(
+            int volume, int maxVolume, @PlaybackVolume int volumeHandling) {
+        String volumeHandlingName;
+        switch (volumeHandling) {
+            case PLAYBACK_VOLUME_FIXED:
+                volumeHandlingName = "FIXED";
+                break;
+            case PLAYBACK_VOLUME_VARIABLE:
+                volumeHandlingName = "VARIABLE";
+                break;
+            default:
+                volumeHandlingName = "UNKNOWN";
+                break;
+        }
+        return String.format(
+                Locale.US,
+                "volume(current=%d, max=%d, handling=%s(%d))",
+                volume,
+                maxVolume,
+                volumeHandlingName,
+                volumeHandling);
     }
 
     private static String getDeviceTypeString(@Type int deviceType) {
@@ -1079,7 +1086,7 @@ public final class MediaRoute2Info implements Parcelable {
         private int mConnectionState;
         private String mClientPackageName;
         private String mPackageName;
-        private int mVolumeHandling = PLAYBACK_VOLUME_FIXED;
+        @PlaybackVolume private int mVolumeHandling = PLAYBACK_VOLUME_FIXED;
         private int mVolumeMax;
         private int mVolume;
         private String mAddress;
