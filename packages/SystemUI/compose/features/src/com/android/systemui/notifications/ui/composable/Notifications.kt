@@ -169,6 +169,7 @@ fun SceneScope.NotificationScrollingStack(
     viewModel: NotificationsPlaceholderViewModel,
     maxScrimTop: () -> Float,
     shouldPunchHoleBehindScrim: Boolean,
+    shouldFillMaxSize: Boolean = true,
     shadeMode: ShadeMode,
     modifier: Modifier = Modifier,
 ) {
@@ -327,14 +328,14 @@ fun SceneScope.NotificationScrollingStack(
         }
         Box(
             modifier =
-                Modifier.fillMaxSize()
-                    .graphicsLayer {
+                Modifier.graphicsLayer {
                         alpha =
                             if (shouldPunchHoleBehindScrim) {
                                 (expansionFraction / EXPANSION_FOR_MAX_SCRIM_ALPHA).coerceAtMost(1f)
                             } else 1f
                     }
                     .background(MaterialTheme.colorScheme.surface)
+                    .thenIf(shouldFillMaxSize) { Modifier.fillMaxSize() }
                     .debugBackground(viewModel, DEBUG_BOX_COLOR)
         ) {
             NotificationPlaceholder(
