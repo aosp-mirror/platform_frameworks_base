@@ -608,7 +608,8 @@ public class BackgroundActivityStartController {
             return mOnlyCreatorAllows;
         }
 
-        private BalVerdict setBasedOnRealCaller() {
+        @VisibleForTesting
+        BalVerdict setBasedOnRealCaller() {
             mBasedOnRealCaller = true;
             return this;
         }
@@ -1685,16 +1686,15 @@ public class BackgroundActivityStartController {
 
     @VisibleForTesting
     boolean shouldLogStats(BalVerdict finalVerdict, BalState state) {
-        if (finalVerdict.blocks()) {
-            return false;
-        }
-        if (!state.isPendingIntent() && finalVerdict.getRawCode() == BAL_ALLOW_VISIBLE_WINDOW) {
-            return false;
-        }
-        if (state.mBalAllowedByPiSender.allowsBackgroundActivityStarts()
-                && state.mResultForRealCaller != null
-                && state.mResultForRealCaller.getRawCode() == BAL_ALLOW_VISIBLE_WINDOW) {
-            return false;
+        if (finalVerdict.getRawCode() == BAL_ALLOW_VISIBLE_WINDOW) {
+            if (!state.isPendingIntent()) {
+                // regular activity start by visible app
+                return false;
+            }
+            if (finalVerdict.mBasedOnRealCaller) {
+                // PendingIntent started by visible app
+                return false;
+            }
         }
         return true;
     }

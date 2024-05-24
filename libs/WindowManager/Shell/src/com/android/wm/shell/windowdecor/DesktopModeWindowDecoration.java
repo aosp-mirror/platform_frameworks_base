@@ -24,11 +24,11 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
 
 import static com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT;
-import static com.android.wm.shell.windowdecor.ResizeHandleSizeRepository.getFineResizeCornerPixels;
-import static com.android.wm.shell.windowdecor.ResizeHandleSizeRepository.getLargeResizeCornerPixels;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
@@ -75,7 +75,6 @@ import com.android.wm.shell.windowdecor.viewholder.DesktopModeWindowDecorationVi
 
 import kotlin.Unit;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -97,8 +96,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private View.OnLongClickListener mOnCaptionLongClickListener;
     private View.OnGenericMotionListener mOnCaptionGenericMotionListener;
     private DragPositioningCallback mDragPositioningCallback;
-    // Listener for handling drag resize events. Will be null if the task cannot be resized.
-    @Nullable
     private DragResizeInputListener mDragResizeListener;
     private DragDetector mDragDetector;
 
@@ -121,19 +118,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
 
-    private final ResizeHandleSizeRepository mResizeHandleSizeRepository;
-    private final Function<ResizeHandleSizeRepository, Boolean> mResizeHandleSizeChangedFunction =
-            (ResizeHandleSizeRepository sizeRepository) -> {
-                final Resources res = mResult.mRootView.getResources();
-                return mDragResizeListener == null || mDragResizeListener.setGeometry(
-                        new DragResizeWindowGeometry(mRelayoutParams.mCornerRadius,
-                                new Size(mResult.mWidth, mResult.mHeight),
-                                sizeRepository.getResizeEdgeHandlePixels(res),
-                                getFineResizeCornerPixels(res),
-                                getLargeResizeCornerPixels(res)),
-                        mDragDetector.getTouchSlop());
-            };
-
     DesktopModeWindowDecoration(
             Context context,
             DisplayController displayController,
@@ -143,13 +127,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Handler handler,
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            ResizeHandleSizeRepository resizeHandleSizeRepository) {
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
         this (context, displayController, taskOrganizer, taskInfo, taskSurface,
                 handler, choreographer, syncQueue, rootTaskDisplayAreaOrganizer,
-                resizeHandleSizeRepository, SurfaceControl.Builder::new,
-                SurfaceControl.Transaction::new, WindowContainerTransaction::new,
-                SurfaceControl::new, new SurfaceControlViewHostFactory() {});
+                SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
+                WindowContainerTransaction::new, SurfaceControl::new,
+                new SurfaceControlViewHostFactory() {});
     }
 
     DesktopModeWindowDecoration(
@@ -162,7 +145,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            ResizeHandleSizeRepository resizeHandleSizeRepository,
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
             Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
@@ -176,9 +158,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
-        mResizeHandleSizeRepository = resizeHandleSizeRepository;
-        mResizeHandleSizeRepository.registerSizeChangeFunction(
-                mResizeHandleSizeChangedFunction::apply);
     }
 
     void setCaptionListeners(
@@ -324,7 +303,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
         // If either task geometry or position have changed, update this task's
         // exclusion region listener
-        if (mResizeHandleSizeChangedFunction.apply(mResizeHandleSizeRepository)
+        final Resources res = mResult.mRootView.getResources();
+        if (mDragResizeListener.setGeometry(
+                new DragResizeWindowGeometry(mRelayoutParams.mCornerRadius,
+                        new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(res),
+                        getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop)
                 || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
             updateExclusionRegion();
         }
@@ -960,8 +943,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 Handler handler,
                 Choreographer choreographer,
                 SyncTransactionQueue syncQueue,
-                RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-                ResizeHandleSizeRepository resizeHandleSizeRepository) {
+                RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
             return new DesktopModeWindowDecoration(
                     context,
                     displayController,
@@ -971,8 +953,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     handler,
                     choreographer,
                     syncQueue,
-                    rootTaskDisplayAreaOrganizer,
-                    resizeHandleSizeRepository);
+                    rootTaskDisplayAreaOrganizer);
         }
     }
 

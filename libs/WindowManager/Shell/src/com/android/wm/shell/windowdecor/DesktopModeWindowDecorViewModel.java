@@ -149,7 +149,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             new DesktopModeKeyguardChangeListener();
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final DisplayInsetsController mDisplayInsetsController;
-    private final ResizeHandleSizeRepository mResizeHandleSizeRepository;
     private final Region mExclusionRegion = Region.obtain();
     private boolean mInImmersiveMode;
 
@@ -182,8 +181,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            ResizeHandleSizeRepository resizeHandleSizeRepository
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer
     ) {
         this(
                 context,
@@ -204,8 +202,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 new InputMonitorFactory(),
                 SurfaceControl.Transaction::new,
                 rootTaskDisplayAreaOrganizer,
-                new SparseArray<>(),
-                resizeHandleSizeRepository);
+                new SparseArray<>());
     }
 
     @VisibleForTesting
@@ -228,8 +225,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             InputMonitorFactory inputMonitorFactory,
             Supplier<SurfaceControl.Transaction> transactionFactory,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            SparseArray<DesktopModeWindowDecoration> windowDecorByTaskId,
-            ResizeHandleSizeRepository resizeHandleSizeRepository) {
+            SparseArray<DesktopModeWindowDecoration> windowDecorByTaskId) {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
@@ -250,7 +246,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mInputManager = mContext.getSystemService(InputManager.class);
         mWindowDecorByTaskId = windowDecorByTaskId;
-        mResizeHandleSizeRepository = resizeHandleSizeRepository;
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -1065,8 +1060,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mMainHandler,
                         mMainChoreographer,
                         mSyncQueue,
-                        mRootTaskDisplayAreaOrganizer,
-                        mResizeHandleSizeRepository);
+                        mRootTaskDisplayAreaOrganizer);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
         final DragPositioningCallback dragPositioningCallback;

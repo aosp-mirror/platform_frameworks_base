@@ -25,6 +25,16 @@ flag {
 }
 
 flag {
+    name: "clear_default_from_a11y_shortcut_target_service_restore"
+    namespace: "accessibility"
+    description: "Clears the config_defaultAccessibilityService from B&R for ACCESSIBILITY_SHORTCUT_TARGET_SERVICE."
+    bug: "341374402"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "compute_window_changes_on_a11y_v2"
     namespace: "accessibility"
     description: "Computes accessibility window changes in accessibility instead of wm package."

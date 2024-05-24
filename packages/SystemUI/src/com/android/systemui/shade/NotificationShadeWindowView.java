@@ -18,6 +18,7 @@ package com.android.systemui.shade;
 
 import static android.os.Trace.TRACE_TAG_APP;
 
+import static com.android.systemui.Flags.enableViewCaptureTracing;
 import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
 
 import android.annotation.ColorInt;
@@ -29,6 +30,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.media.permission.SafeCloseable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Trace;
@@ -47,6 +49,7 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsetsController;
 
+import com.android.app.viewcapture.ViewCaptureFactory;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
 import com.android.systemui.scene.ui.view.WindowRootView;
@@ -68,6 +71,8 @@ public class NotificationShadeWindowView extends WindowRootView {
 
     private InteractionEventHandler mInteractionEventHandler;
 
+    private SafeCloseable mViewCaptureCloseable;
+
     public NotificationShadeWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setMotionEventSplittingEnabled(false);
@@ -77,6 +82,18 @@ public class NotificationShadeWindowView extends WindowRootView {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         setWillNotDraw(!DEBUG);
+        if (enableViewCaptureTracing()) {
+            mViewCaptureCloseable = ViewCaptureFactory.getInstance(getContext())
+                .startCapture(getRootView(), ".NotificationShadeWindowView");
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mViewCaptureCloseable != null) {
+            mViewCaptureCloseable.close();
+        }
     }
 
     @Override

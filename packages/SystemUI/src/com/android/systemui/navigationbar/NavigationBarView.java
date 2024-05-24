@@ -19,6 +19,7 @@ package com.android.systemui.navigationbar;
 import static android.inputmethodservice.InputMethodService.canImeRenderGesturalNavButtons;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
+import static com.android.systemui.Flags.enableViewCaptureTracing;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SEARCH_DISABLED;
@@ -37,6 +38,7 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.media.permission.SafeCloseable;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.AttributeSet;
@@ -59,6 +61,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.Nullable;
 
 import com.android.app.animation.Interpolators;
+import com.android.app.viewcapture.ViewCaptureFactory;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.Utils;
 import com.android.systemui.Gefingerpoken;
@@ -177,6 +180,7 @@ public class NavigationBarView extends FrameLayout {
     private boolean mOverviewProxyEnabled;
     private boolean mShowSwipeUpUi;
     private UpdateActiveTouchRegionsCallback mUpdateActiveTouchRegionsCallback;
+    private SafeCloseable mViewCaptureCloseable;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -1077,6 +1081,10 @@ public class NavigationBarView extends FrameLayout {
         }
 
         updateNavButtonIcons();
+        if (enableViewCaptureTracing()) {
+            mViewCaptureCloseable = ViewCaptureFactory.getInstance(getContext())
+                    .startCapture(getRootView(), ".NavigationBarView");
+        }
     }
 
     @Override
@@ -1088,6 +1096,9 @@ public class NavigationBarView extends FrameLayout {
         if (mRotationButtonController != null) {
             mFloatingRotationButton.hide();
             mRotationButtonController.unregisterListeners();
+        }
+        if (mViewCaptureCloseable != null) {
+            mViewCaptureCloseable.close();
         }
     }
 

@@ -352,6 +352,25 @@ public class OverlayPresentationTest {
                 .containsExactly(overlayContainer);
     }
 
+    @Test
+    public void testCreateOrUpdateOverlay_launchFromSplit_returnNull() {
+        final Activity primaryActivity = createMockActivity();
+        final Activity secondaryActivity = createMockActivity();
+        final TaskFragmentContainer primaryContainer =
+                createMockTaskFragmentContainer(primaryActivity);
+        final TaskFragmentContainer secondaryContainer =
+                createMockTaskFragmentContainer(secondaryActivity);
+        final SplitPairRule splitPairRule = createSplitPairRuleBuilder(
+                activityActivityPair -> true /* activityPairPredicate */,
+                activityIntentPair -> true  /* activityIntentPairPredicate */,
+                parentWindowMetrics -> true /* parentWindowMetricsPredicate */).build();
+        mSplitController.registerSplit(mTransaction, primaryContainer, primaryActivity,
+                secondaryContainer, splitPairRule,  splitPairRule.getDefaultSplitAttributes());
+
+        assertThat(createOrUpdateOverlayTaskFragmentIfNeeded("test", primaryActivity)).isNull();
+        assertThat(createOrUpdateOverlayTaskFragmentIfNeeded("test", secondaryActivity)).isNull();
+    }
+
     private void createExistingOverlayContainers() {
         createExistingOverlayContainers(true /* visible */);
     }
@@ -383,33 +402,6 @@ public class OverlayPresentationTest {
         bounds.offset(10, 10);
         final TaskFragmentContainer overlayContainer =
                 createTestOverlayContainer(TASK_ID, "test1");
-
-        assertThat(sanitizeBounds(bounds, null, overlayContainer)
-                .isEmpty()).isTrue();
-    }
-
-    @Test
-    public void testSanitizeBounds_visibleSplit_expandOverlay() {
-        // Launch a visible split
-        final Activity primaryActivity = createMockActivity();
-        final Activity secondaryActivity = createMockActivity();
-        final TaskFragmentContainer primaryContainer =
-                createMockTaskFragmentContainer(primaryActivity, true /* isVisible */);
-        final TaskFragmentContainer secondaryContainer =
-                createMockTaskFragmentContainer(secondaryActivity, true /* isVisible */);
-
-        final SplitPairRule splitPairRule = createSplitPairRuleBuilder(
-                activityActivityPair -> true /* activityPairPredicate */,
-                activityIntentPair -> true  /* activityIntentPairPredicate */,
-                parentWindowMetrics -> true /* parentWindowMetricsPredicate */)
-                .build();
-        mSplitController.registerSplit(mTransaction, primaryContainer, primaryActivity,
-                secondaryContainer, splitPairRule,  splitPairRule.getDefaultSplitAttributes());
-
-        final Rect bounds = new Rect(0, 0, 100, 100);
-        final TaskFragmentContainer overlayContainer =
-                createTestOverlayContainer(TASK_ID, "test1", true /* isVisible */,
-                        true /* associatedLaunchingActivity */, secondaryActivity);
 
         assertThat(sanitizeBounds(bounds, null, overlayContainer)
                 .isEmpty()).isTrue();

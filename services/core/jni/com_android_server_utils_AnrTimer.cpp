@@ -130,7 +130,8 @@ class AnrTimerService {
      * constructor is also given the notifier callback, and two cookies for the callback: the
      * traditional void* and an int.
      */
-    AnrTimerService(char const* label, notifier_t notifier, void* cookie, jweak jtimer, Ticker*);
+    AnrTimerService(char const* label, notifier_t notifier, void* cookie, jweak jtimer, Ticker*,
+                    bool extend);
 
     // Delete the service and clean up memory.
     ~AnrTimerService();
@@ -138,7 +139,7 @@ class AnrTimerService {
     // Start a timer and return the associated timer ID.  It does not matter if the same pid/uid
     // are already in the running list.  Once start() is called, one of cancel(), accept(), or
     // discard() must be called to clean up the internal data structures.
-    timer_id_t start(int pid, int uid, nsecs_t timeout, bool extend);
+    timer_id_t start(int pid, int uid, nsecs_t timeout);
 
     // Cancel a timer and remove it from all lists.  This is called when the event being timed
     // has occurred.  If the timer was Running, the function returns true.  The other
@@ -191,6 +192,9 @@ class AnrTimerService {
     // The two cookies passed to the notifier.
     void* notifierCookie_;
     jweak notifierObject_;
+
+    // True if extensions can be granted to expired timers.
+    const bool extend_;
 
     // The global lock
     mutable Mutex lock_;
@@ -636,12 +640,13 @@ class AnrTimerService::Ticker {
 std::atomic<size_t> AnrTimerService::Ticker::idGen_;
 
 
-AnrTimerService::AnrTimerService(char const* label,
-            notifier_t notifier, void* cookie, jweak jtimer, Ticker* ticker) :
+AnrTimerService::AnrTimerService(char const* label, notifier_t notifier, void* cookie,
+            jweak jtimer, Ticker* ticker, bool extend) :
         label_(label),
         notifier_(notifier),
         notifierCookie_(cookie),
         notifierObject_(jtimer),
+        extend_(extend),
         ticker_(ticker) {
 
     // Zero the statistics
@@ -666,11 +671,10 @@ char const *AnrTimerService::statusString(Status s) {
     return "unknown";
 }
 
-AnrTimerService::timer_id_t AnrTimerService::start(int pid, int uid,
-        nsecs_t timeout, bool extend) {
+AnrTimerService::timer_id_t AnrTimerService::start(int pid, int uid, nsecs_t timeout) {
     ALOGI_IF(DEBUG, "starting");
     AutoMutex _l(lock_);
-    Timer t(pid, uid, timeout, extend);
+    Timer t(pid, uid, timeout, extend_);
     insert(t);
     counters_.started++;
 
@@ -826,7 +830,8 @@ bool nativeSupportEnabled = false;
 /**
  * Singleton/globals for the anr timer.  Among other things, this includes a Ticker* and a use
  * count.  The JNI layer creates a single Ticker for all operational AnrTimers.  The Ticker is
- * created when the first AnrTimer is created, and is deleted when the last AnrTimer is closed.
+ * created when the first AnrTimer is created; this means that the Ticker is only created if
+ * native anr timers are used.
  */
 static Mutex gAnrLock;
 struct AnrArgs {
@@ -834,7 +839,6 @@ struct AnrArgs {
     jmethodID func = NULL;
     JavaVM* vm = NULL;
     AnrTimerService::Ticker* ticker = nullptr;
-    int tickerUseCount = 0;;
 };
 static AnrArgs gAnrArgs;
 
@@ -863,18 +867,17 @@ jboolean anrTimerSupported(JNIEnv* env, jclass) {
     return nativeSupportEnabled;
 }
 
-jlong anrTimerCreate(JNIEnv* env, jobject jtimer, jstring jname) {
+jlong anrTimerCreate(JNIEnv* env, jobject jtimer, jstring jname, jboolean extend) {
     if (!nativeSupportEnabled) return 0;
     AutoMutex _l(gAnrLock);
-    if (!gAnrArgs.ticker) {
+    if (gAnrArgs.ticker == nullptr) {
         gAnrArgs.ticker = new AnrTimerService::Ticker();
     }
-    gAnrArgs.tickerUseCount++;
 
     ScopedUtfChars name(env, jname);
     jobject timer = env->NewWeakGlobalRef(jtimer);
-    AnrTimerService* service =
-            new AnrTimerService(name.c_str(), anrNotify, &gAnrArgs, timer, gAnrArgs.ticker);
+    AnrTimerService* service = new AnrTimerService(name.c_str(),
+            anrNotify, &gAnrArgs, timer, gAnrArgs.ticker, extend);
     return reinterpret_cast<jlong>(service);
 }
 
@@ -889,19 +892,14 @@ jint anrTimerClose(JNIEnv* env, jclass, jlong ptr) {
     AnrTimerService *s = toService(ptr);
     env->DeleteWeakGlobalRef(s->jtimer());
     delete s;
-    if (--gAnrArgs.tickerUseCount <= 0) {
-        delete gAnrArgs.ticker;
-        gAnrArgs.ticker = nullptr;
-    }
     return 0;
 }
 
-jint anrTimerStart(JNIEnv* env, jclass, jlong ptr,
-        jint pid, jint uid, jlong timeout, jboolean extend) {
+jint anrTimerStart(JNIEnv* env, jclass, jlong ptr, jint pid, jint uid, jlong timeout) {
     if (!nativeSupportEnabled) return 0;
     // On the Java side, timeouts are expressed in milliseconds and must be converted to
     // nanoseconds before being passed to the library code.
-    return toService(ptr)->start(pid, uid, milliseconds_to_nanoseconds(timeout), extend);
+    return toService(ptr)->start(pid, uid, milliseconds_to_nanoseconds(timeout));
 }
 
 jboolean anrTimerCancel(JNIEnv* env, jclass, jlong ptr, jint timerId) {
@@ -932,9 +930,9 @@ jobjectArray anrTimerDump(JNIEnv *env, jclass, jlong ptr) {
 
 static const JNINativeMethod methods[] = {
     {"nativeAnrTimerSupported", "()Z",  (void*) anrTimerSupported},
-    {"nativeAnrTimerCreate",   "(Ljava/lang/String;)J", (void*) anrTimerCreate},
+    {"nativeAnrTimerCreate",   "(Ljava/lang/String;Z)J", (void*) anrTimerCreate},
     {"nativeAnrTimerClose",    "(J)I",     (void*) anrTimerClose},
-    {"nativeAnrTimerStart",    "(JIIJZ)I", (void*) anrTimerStart},
+    {"nativeAnrTimerStart",    "(JIIJ)I",  (void*) anrTimerStart},
     {"nativeAnrTimerCancel",   "(JI)Z",    (void*) anrTimerCancel},
     {"nativeAnrTimerAccept",   "(JI)Z",    (void*) anrTimerAccept},
     {"nativeAnrTimerDiscard",  "(JI)Z",    (void*) anrTimerDiscard},
@@ -948,12 +946,15 @@ int register_android_server_utils_AnrTimer(JNIEnv* env)
     static const char *className = "com/android/server/utils/AnrTimer";
     jniRegisterNativeMethods(env, className, methods, NELEM(methods));
 
+    nativeSupportEnabled = NATIVE_SUPPORT;
+
+    // Do not perform any further initialization if native support is not enabled.
+    if (!nativeSupportEnabled) return 0;
+
     jclass service = FindClassOrDie(env, className);
     gAnrArgs.clazz = MakeGlobalRefOrDie(env, service);
     gAnrArgs.func = env->GetMethodID(gAnrArgs.clazz, "expire", "(IIIJ)Z");
     env->GetJavaVM(&gAnrArgs.vm);
-
-    nativeSupportEnabled = NATIVE_SUPPORT;
 
     return 0;
 }

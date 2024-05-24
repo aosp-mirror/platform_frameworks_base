@@ -2129,7 +2129,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     mSkipEvictingMainStageChildren = false;
                 } else {
                     mShowDecorImmediately = true;
-                    mSplitLayout.flingDividerToCenter();
+                    mSplitLayout.flingDividerToCenter(/*finishCallback*/ null);
                 }
             });
         }
@@ -2329,7 +2329,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     mSkipEvictingMainStageChildren = false;
                 } else {
                     mShowDecorImmediately = true;
-                    mSplitLayout.flingDividerToCenter();
+                    mSplitLayout.flingDividerToCenter(/*finishCallback*/ null);
                 }
             });
         }
@@ -3172,7 +3172,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final TransitionInfo.Change finalMainChild = mainChild;
         final TransitionInfo.Change finalSideChild = sideChild;
         enterTransition.setFinishedCallback((callbackWct, callbackT) -> {
-            notifySplitAnimationFinished();
+            if (!enterTransition.mResizeAnim) {
+                // If resizing, we'll call notify at the end of the resizing animation (below)
+                notifySplitAnimationFinished();
+            }
             if (finalMainChild != null) {
                 if (!mainNotContainOpenTask) {
                     mMainStage.evictOtherChildren(callbackWct, finalMainChild.getTaskInfo().taskId);
@@ -3192,7 +3195,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
             if (enterTransition.mResizeAnim) {
                 mShowDecorImmediately = true;
-                mSplitLayout.flingDividerToCenter();
+                mSplitLayout.flingDividerToCenter(this::notifySplitAnimationFinished);
             }
             callbackWct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token, false);
             mPausingTasks.clear();

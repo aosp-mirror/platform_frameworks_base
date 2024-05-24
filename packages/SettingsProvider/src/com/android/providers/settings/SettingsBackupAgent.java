@@ -16,6 +16,8 @@
 
 package com.android.providers.settings;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.backup.BackupAgentHelper;
 import android.app.backup.BackupDataInput;
@@ -57,6 +59,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.display.DisplayDensityConfiguration;
+import com.android.window.flags.Flags;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -91,6 +94,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     private static final byte[] NULL_VALUE = new byte[0];
     private static final int NULL_SIZE = -1;
+    private static final float FONT_SCALE_DEF_VALUE = 1.0f;
 
     private static final String KEY_SYSTEM = "system";
     private static final String KEY_SECURE = "secure";
@@ -114,7 +118,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     // Versioning of the Network Policies backup payload.
     private static final int NETWORK_POLICIES_BACKUP_VERSION = 1;
-
 
     // Slots in the checksum array.  Never insert new items in the middle
     // of this array; new slots must be appended.
@@ -214,10 +217,19 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     // Populated in onRestore().
     private int mRestoredFromSdkInt;
 
+    // The available font scale for the current device
+    @Nullable
+    private String[] mAvailableFontScales;
+
+    // The font_scale default value for this device.
+    private float mDefaultFontScale;
+
     @Override
     public void onCreate() {
         if (DEBUG_BACKUP) Log.d(TAG, "onCreate() invoked");
-
+        mDefaultFontScale = getBaseContext().getResources().getFloat(R.dimen.def_device_font_scale);
+        mAvailableFontScales = getBaseContext().getResources()
+                .getStringArray(R.array.entryvalues_font_size);
         mSettingsHelper = new SettingsHelper(this);
         mWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         super.onCreate();
@@ -933,11 +945,54 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     continue;
                 }
             }
+
+            if (Settings.System.FONT_SCALE.equals(key)) {
+                // If the current value is different from the default it means that it's been
+                // already changed for a11y reason. In that case we don't need to restore
+                // the new value.
+                final float currentValue = Settings.System.getFloat(cr, Settings.System.FONT_SCALE,
+                        mDefaultFontScale);
+                if (currentValue != mDefaultFontScale) {
+                    Log.d(TAG, "Font scale not restored because changed for a11y reason.");
+                    continue;
+                }
+                final String toRestore = value;
+                value = findClosestAllowedFontScale(value, mAvailableFontScales);
+                Log.d(TAG, "Restored font scale from: " + toRestore + " to " + value);
+            }
+
+
             settingsHelper.restoreValue(this, cr, contentValues, destination, key, value,
                     mRestoredFromSdkInt);
 
             Log.d(TAG, "Restored setting: " + destination + " : " + key + "=" + value);
         }
+    }
+
+
+    @VisibleForTesting
+    static String findClosestAllowedFontScale(@NonNull String requestedFontScale,
+            @NonNull String[] availableFontScales) {
+        if (Flags.configurableFontScaleDefault()) {
+            final float requestedValue = Float.parseFloat(requestedFontScale);
+            // Whatever is the requested value, we search the closest allowed value which is
+            // equals or larger. Note that if the requested value is the previous default,
+            // and this is still available, the value will be preserved.
+            float candidate = 0.0f;
+            boolean fontScaleFound = false;
+            for (int i = 0; !fontScaleFound && i < availableFontScales.length; i++) {
+                final float fontScale = Float.parseFloat(availableFontScales[i]);
+                if (fontScale >= requestedValue) {
+                    candidate = fontScale;
+                    fontScaleFound = true;
+                }
+            }
+            // If the current value is greater than all the allowed ones, we return the
+            // largest possible.
+            return fontScaleFound ? String.valueOf(candidate) : String.valueOf(
+                    availableFontScales[availableFontScales.length - 1]);
+        }
+        return requestedFontScale;
     }
 
     @VisibleForTesting

@@ -137,9 +137,6 @@ flag {
     name: "activity_embedding_animation_customization_flag"
     description: "Whether the animation customization feature for AE is enabled"
     bug: "293658614"
-    metadata {
-        purpose: PURPOSE_FEATURE
-    }
 }
 
 flag {

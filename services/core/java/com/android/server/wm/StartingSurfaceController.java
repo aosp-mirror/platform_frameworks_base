@@ -81,14 +81,12 @@ public class StartingSurfaceController {
     }
 
     StartingSurface createSplashScreenStartingSurface(ActivityRecord activity, int theme) {
-        synchronized (mService.mGlobalLock) {
-            final Task task = activity.getTask();
-            final TaskOrganizerController controller =
-                    mService.mAtmService.mTaskOrganizerController;
-            if (task != null && controller.addStartingWindow(task, activity, theme,
-                    null /* taskSnapshot */)) {
-                return new StartingSurface(task, controller.getTaskOrganizer());
-            }
+        final Task task = activity.getTask();
+        final TaskOrganizerController controller =
+                mService.mAtmService.mTaskOrganizerController;
+        if (task != null && controller.addStartingWindow(task, activity, theme,
+                null /* taskSnapshot */)) {
+            return new StartingSurface(task, controller.getTaskOrganizer());
         }
         return null;
     }
@@ -143,42 +141,38 @@ public class StartingSurfaceController {
 
     StartingSurface createTaskSnapshotSurface(ActivityRecord activity, TaskSnapshot taskSnapshot) {
         final WindowState topFullscreenOpaqueWindow;
-        final Task task;
-        synchronized (mService.mGlobalLock) {
-            task = activity.getTask();
-            if (task == null) {
-                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find task for activity="
-                        + activity);
-                return null;
-            }
-            final ActivityRecord topFullscreenActivity =
-                    activity.getTask().getTopFullscreenActivity();
-            if (topFullscreenActivity == null) {
-                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find top fullscreen for task="
-                        + task);
-                return null;
-            }
-            topFullscreenOpaqueWindow = topFullscreenActivity.getTopFullscreenOpaqueWindow();
-            if (topFullscreenOpaqueWindow == null) {
-                Slog.w(TAG, "TaskSnapshotSurface.create: no opaque window in "
-                        + topFullscreenActivity);
-                return null;
-            }
-            if (activity.mDisplayContent.getRotation() != taskSnapshot.getRotation()) {
-                // The snapshot should have been checked by ActivityRecord#isSnapshotCompatible
-                // that the activity will be updated to the same rotation as the snapshot. Since
-                // the transition is not started yet, fixed rotation transform needs to be applied
-                // earlier to make the snapshot show in a rotated container.
-                activity.mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(
-                        activity, false /* checkOpening */);
-            }
-            final TaskOrganizerController controller =
-                    mService.mAtmService.mTaskOrganizerController;
-            if (controller.addStartingWindow(task, activity, 0 /* launchTheme */, taskSnapshot)) {
-                return new StartingSurface(task, controller.getTaskOrganizer());
-            }
+        final Task task = activity.getTask();
+        if (task == null) {
+            Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find task for activity="
+                    + activity);
             return null;
         }
+        final ActivityRecord topFullscreenActivity = task.getTopFullscreenActivity();
+        if (topFullscreenActivity == null) {
+            Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find top fullscreen for task="
+                    + task);
+            return null;
+        }
+        topFullscreenOpaqueWindow = topFullscreenActivity.getTopFullscreenOpaqueWindow();
+        if (topFullscreenOpaqueWindow == null) {
+            Slog.w(TAG, "TaskSnapshotSurface.create: no opaque window in "
+                    + topFullscreenActivity);
+            return null;
+        }
+        if (activity.mDisplayContent.getRotation() != taskSnapshot.getRotation()) {
+            // The snapshot should have been checked by ActivityRecord#isSnapshotCompatible
+            // that the activity will be updated to the same rotation as the snapshot. Since
+            // the transition is not started yet, fixed rotation transform needs to be applied
+            // earlier to make the snapshot show in a rotated container.
+            activity.mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(
+                    activity, false /* checkOpening */);
+        }
+        final TaskOrganizerController controller =
+                mService.mAtmService.mTaskOrganizerController;
+        if (controller.addStartingWindow(task, activity, 0 /* launchTheme */, taskSnapshot)) {
+            return new StartingSurface(task, controller.getTaskOrganizer());
+        }
+        return null;
     }
 
     private static final class DeferringStartingWindowRecord {

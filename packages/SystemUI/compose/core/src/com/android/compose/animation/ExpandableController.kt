@@ -16,6 +16,7 @@
 
 package com.android.compose.animation
 
+import android.content.ComponentName
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
@@ -136,13 +137,14 @@ internal class ExpandableControllerImpl(
             override fun activityTransitionController(
                 launchCujType: Int?,
                 cookie: ActivityTransitionAnimator.TransitionCookie?,
+                component: ComponentName?,
                 returnCujType: Int?
             ): ActivityTransitionAnimator.Controller? {
                 if (!isComposed.value) {
                     return null
                 }
 
-                return activityController(launchCujType, cookie, returnCujType)
+                return activityController(launchCujType, cookie, component, returnCujType)
             }
 
             override fun dialogTransitionController(
@@ -170,7 +172,6 @@ internal class ExpandableControllerImpl(
 
             override var transitionContainer: ViewGroup = composeViewRoot.rootView as ViewGroup
 
-            // TODO(b/323863002): update to be dependant on usage.
             override val isLaunching: Boolean = true
 
             override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
@@ -267,6 +268,7 @@ internal class ExpandableControllerImpl(
     private fun activityController(
         launchCujType: Int?,
         cookie: ActivityTransitionAnimator.TransitionCookie?,
+        component: ComponentName?,
         returnCujType: Int?
     ): ActivityTransitionAnimator.Controller {
         val delegate = transitionController()
@@ -284,6 +286,7 @@ internal class ExpandableControllerImpl(
                     }
 
             override val transitionCookie = cookie
+            override val component = component
 
             override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                 delegate.onTransitionAnimationStart(isExpandingFullyAbove)

@@ -672,27 +672,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             // Expand the bounds if the bounds exceed the task bounds.
             return new Rect();
         }
-
-        if (!container.isOverlay()) {
-            // Stop here if the container is not an overlay.
-            return bounds;
-        }
-
-        final IBinder associatedActivityToken = container.getAssociatedActivityToken();
-
-        if (associatedActivityToken == null) {
-            // Stop here if the container is an always-on-top overlay.
-            return bounds;
-        }
-
-        // Expand the overlay with activity association if the associated activity is part of a
-        // split, or we may need to handle three change transition together.
-        final TaskFragmentContainer associatedContainer = taskContainer
-                .getContainerWithActivity(associatedActivityToken);
-        if (taskContainer.getActiveSplitForContainer(associatedContainer) != null) {
-            return new Rect();
-        }
-
         return bounds;
     }
 

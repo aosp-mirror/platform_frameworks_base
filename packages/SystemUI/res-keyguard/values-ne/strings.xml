@@ -28,7 +28,7 @@
     <string name="keyguard_enter_password" msgid="6483623792371009758">"पासवर्ड हाल्नुहोस्"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"अमान्य कार्ड।"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"चार्ज भयो"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • तारविनै चार्ज गर्दै"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • वायरलेस तरिकाले चार्ज गरिँदै छ"</string>
     <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज हुँदै छ"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज गरिँदै"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • द्रुत गतिमा चार्ज गरिँदै छ"</string>

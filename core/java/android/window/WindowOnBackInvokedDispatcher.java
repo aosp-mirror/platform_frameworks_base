@@ -480,7 +480,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 // reset progress animator before dispatching onBackStarted to callback. This
                 // ensures that onBackCancelled (of a previous gesture) is always dispatched
                 // before onBackStarted
-                if (callback != null) mProgressAnimator.reset();
+                if (callback != null && mProgressAnimator.isBackAnimationInProgress()) {
+                    mProgressAnimator.reset();
+                }
                 mTouchTracker.setState(BackTouchTracker.TouchTrackerState.ACTIVE);
                 mTouchTracker.setShouldUpdateStartLocation(true);
                 mTouchTracker.setGestureStartLocation(

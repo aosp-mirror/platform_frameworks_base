@@ -73,6 +73,7 @@ import android.app.AppProtoEnums;
 import android.app.ApplicationExitInfo;
 import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
+import android.app.ApplicationStartInfo;
 import android.app.IApplicationThread;
 import android.app.IProcessObserver;
 import android.app.UidObserver;
@@ -2479,6 +2480,7 @@ public final class ProcessList {
             boolean regularZygote = false;
             app.mProcessGroupCreated = false;
             app.mSkipProcessGroupCreation = false;
+            long forkTimeNs = SystemClock.uptimeNanos();
             if (hostingRecord.usesWebviewZygote()) {
                 startResult = startWebView(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
@@ -2510,6 +2512,11 @@ public final class ProcessList {
                         new String[]{PROC_START_SEQ_IDENT + app.getStartSeq()});
                 // By now the process group should have been created by zygote.
                 app.mProcessGroupCreated = true;
+            }
+
+            if (android.app.Flags.appStartInfoTimestamps()) {
+                mAppStartInfoTracker.addTimestampToStart(app, forkTimeNs,
+                        ApplicationStartInfo.START_TIMESTAMP_FORK);
             }
 
             if (!regularZygote) {

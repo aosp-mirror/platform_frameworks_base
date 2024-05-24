@@ -35,6 +35,7 @@ import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.drawable.LayerDrawable;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
@@ -311,7 +312,8 @@ public class DesktopModeVisualIndicator {
     private static class VisualIndicatorAnimator extends ValueAnimator {
         private static final int FULLSCREEN_INDICATOR_DURATION = 200;
         private static final float FULLSCREEN_SCALE_ADJUSTMENT_PERCENT = 0.015f;
-        private static final float INDICATOR_FINAL_OPACITY = 0.7f;
+        private static final float INDICATOR_FINAL_OPACITY = 0.35f;
+        private static final int MAXIMUM_OPACITY = 255;
 
         /** Determines how this animator will interact with the view's alpha:
          *  Fade in, fade out, or no change to alpha
@@ -455,7 +457,11 @@ public class DesktopModeVisualIndicator {
          * @param fraction current animation fraction
          */
         private void updateIndicatorAlpha(float fraction, View view) {
-            view.setAlpha(fraction * INDICATOR_FINAL_OPACITY);
+            final LayerDrawable drawable = (LayerDrawable) view.getBackground();
+            drawable.findDrawableByLayerId(R.id.indicator_stroke)
+                    .setAlpha((int) (MAXIMUM_OPACITY * fraction));
+            drawable.findDrawableByLayerId(R.id.indicator_solid)
+                    .setAlpha((int) (MAXIMUM_OPACITY * fraction * INDICATOR_FINAL_OPACITY));
         }
 
         /**

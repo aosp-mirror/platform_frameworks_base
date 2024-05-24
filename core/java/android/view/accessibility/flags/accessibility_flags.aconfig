@@ -154,6 +154,16 @@ flag {
 }
 
 flag {
+    name: "restore_a11y_shortcut_target_service"
+    namespace: "accessibility"
+    description: "Perform merging and other bug fixes for SettingsProvider restore of ACCESSIBILITY_SHORTCUT_TARGET_SERVICES secure setting"
+    bug: "341374402"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "support_system_pinch_zoom_opt_out_apis"
     namespace: "accessibility"
     description: "Feature flag for declaring system pinch zoom opt-out apis"

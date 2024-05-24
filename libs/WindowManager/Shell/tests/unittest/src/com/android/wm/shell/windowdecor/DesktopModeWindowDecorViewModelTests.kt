@@ -121,7 +121,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockShellController: ShellController
     @Mock private lateinit var mockShellExecutor: ShellExecutor
     @Mock private lateinit var mockRootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
-    @Mock private lateinit var mockResizeHandleSizeRepository: ResizeHandleSizeRepository
     @Mock private lateinit var mockShellCommandHandler: ShellCommandHandler
     @Mock private lateinit var mockWindowManager: IWindowManager
 
@@ -157,8 +156,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockInputMonitorFactory,
                 transactionFactory,
                 mockRootTaskDisplayAreaOrganizer,
-                windowDecorByTaskIdSpy,
-                mockResizeHandleSizeRepository
+            windowDecorByTaskIdSpy
         )
 
         whenever(mockDisplayController.getDisplayLayout(any())).thenReturn(mockDisplayLayout)
@@ -199,8 +197,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockMainHandler,
                 mockMainChoreographer,
                 mockSyncQueue,
-                mockRootTaskDisplayAreaOrganizer,
-                mockResizeHandleSizeRepository
+                mockRootTaskDisplayAreaOrganizer
         )
         verify(decoration).close()
     }
@@ -224,8 +221,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockMainHandler,
                 mockMainChoreographer,
                 mockSyncQueue,
-                mockRootTaskDisplayAreaOrganizer,
-                mockResizeHandleSizeRepository
+                mockRootTaskDisplayAreaOrganizer
         )
 
         task.setWindowingMode(WINDOWING_MODE_FREEFORM)
@@ -240,8 +236,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockMainHandler,
                 mockMainChoreographer,
                 mockSyncQueue,
-                mockRootTaskDisplayAreaOrganizer,
-                mockResizeHandleSizeRepository
+                mockRootTaskDisplayAreaOrganizer
         )
     }
 
@@ -301,7 +296,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         onTaskChanging(task)
 
         verify(mockDesktopModeWindowDecorFactory, never())
-                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any(), any())
+                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
     }
 
     @Test
@@ -314,7 +309,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         onTaskOpening(task)
 
         verify(mockDesktopModeWindowDecorFactory, never())
-                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any(), any())
+                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
     }
 
     @Test
@@ -411,7 +406,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
             onTaskOpening(task)
             verify(mockDesktopModeWindowDecorFactory, never())
-                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any(), any())
+                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
         } finally {
             mockitoSession.finishMocking()
         }
@@ -435,7 +430,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
             onTaskOpening(task)
             verify(mockDesktopModeWindowDecorFactory)
-                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any(), any())
+                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
         } finally {
             mockitoSession.finishMocking()
         }
@@ -458,7 +453,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
             onTaskOpening(task)
             verify(mockDesktopModeWindowDecorFactory)
-                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any(), any())
+                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
         } finally {
             mockitoSession.finishMocking()
         }
@@ -502,7 +497,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         val decoration = mock(DesktopModeWindowDecoration::class.java)
         whenever(
             mockDesktopModeWindowDecorFactory.create(
-                any(), any(), any(), eq(task), any(), any(), any(), any(), any(), any())
+                any(), any(), any(), eq(task), any(), any(), any(), any(), any())
         ).thenReturn(decoration)
         decoration.mTaskInfo = task
         whenever(decoration.isFocused).thenReturn(task.isFocused)

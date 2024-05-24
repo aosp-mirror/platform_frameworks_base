@@ -18,9 +18,12 @@ package com.android.systemui.volume.dagger
 
 import android.content.Context
 import android.media.AudioManager
+import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.statusbar.notification.domain.interactor.NotificationsSoundPolicyInteractor
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.data.repository.AudioRepositoryImpl
+import com.android.settingslib.volume.data.repository.AudioSharingRepository
+import com.android.settingslib.volume.data.repository.AudioSharingRepositoryImpl
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
 import com.android.settingslib.volume.domain.interactor.AudioVolumeInteractor
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
@@ -52,6 +55,13 @@ interface AudioModule {
             @Application coroutineScope: CoroutineScope,
         ): AudioRepository =
             AudioRepositoryImpl(intentsReceiver, audioManager, coroutineContext, coroutineScope)
+
+        @Provides
+        fun provideAudioSharingRepository(
+            localBluetoothManager: LocalBluetoothManager?,
+            @Background coroutineContext: CoroutineContext,
+        ): AudioSharingRepository =
+            AudioSharingRepositoryImpl(localBluetoothManager, coroutineContext)
 
         @Provides
         fun provideAudioModeInteractor(repository: AudioRepository): AudioModeInteractor =

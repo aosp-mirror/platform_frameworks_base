@@ -66,8 +66,8 @@ open class BackupHelper : BackupAgentHelper() {
         const val PERMISSION_SELF = "com.android.systemui.permission.SELF"
     }
 
-    override fun onCreate(userHandle: UserHandle, operationType: Int) {
-        super.onCreate()
+    override fun onCreate(userHandle: UserHandle) {
+        super.onCreate(userHandle)
 
         addControlsHelper(userHandle.identifier)
 

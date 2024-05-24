@@ -103,6 +103,8 @@
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"Akumuliatoriaus lygis kairėje: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, dešinėje: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Akumuliatoriaus lygis kairėje: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Akumuliatoriaus lygis dešinėje: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"Kairė: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"Dešinė: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktyvus"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Išsaugota"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktyvus (tik kairiojoje pusėje)"</string>
@@ -706,7 +708,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fizinė klaviatūra"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Klaviatūros išdėstymo pasirinkimas"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Numatytasis"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Ekrano įjungimas"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"Ekrano įjungimo valdiklis"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Leisti įjungti ekraną"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Leiskite programai įjungti ekraną. Jei suteiksite leidimą, programa galės įjungti ekraną bet kuriuo metu be nurodyto tikslo."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Sustabdyti „<xliff:g id="APP_NAME">%1$s</xliff:g>“ transliaciją?"</string>
