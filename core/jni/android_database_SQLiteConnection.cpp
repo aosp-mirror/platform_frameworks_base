@@ -436,7 +436,7 @@ static jboolean nativeUpdatesTempOnly(JNIEnv* env, jclass,
     int result = SQLITE_OK;
     if (connection->tableQuery == nullptr) {
         static char const* sql =
-                "SELECT COUNT(*) FROM tables_used(?) WHERE schema != 'temp' AND wr != 0";
+                "SELECT NULL FROM tables_used(?) WHERE schema != 'temp' AND wr != 0";
         result = sqlite3_prepare_v2(connection->db, sql, -1, &connection->tableQuery, nullptr);
         if (result != SQLITE_OK) {
             ALOGE("failed to compile query table: %s",
@@ -455,17 +455,14 @@ static jboolean nativeUpdatesTempOnly(JNIEnv* env, jclass,
         return false;
     }
     result = sqlite3_step(query);
-    if (result != SQLITE_ROW) {
-        ALOGE("tables query error: %d/%s", result, sqlite3_errstr(result));
-        // Make sure the query is no longer bound to the statement.
-        sqlite3_clear_bindings(query);
-        return false;
-    }
-
-    int count = sqlite3_column_int(query, 0);
     // Make sure the query is no longer bound to the statement SQL string.
     sqlite3_clear_bindings(query);
-    return count == 0;
+
+    if (result != SQLITE_ROW && result != SQLITE_DONE) {
+        ALOGE("tables query error: %d/%s", result, sqlite3_errstr(result));
+        return false;
+    }
+    return result == SQLITE_DONE;
 }
 
 static jint nativeGetColumnCount(JNIEnv* env, jclass clazz, jlong connectionPtr,
