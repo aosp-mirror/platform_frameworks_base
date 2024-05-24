@@ -72,7 +72,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.Xml;
@@ -88,6 +87,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
 import com.android.server.servicewatcher.CurrentUserServiceSupplier;
 import com.android.server.servicewatcher.ServiceWatcher;
+import com.android.server.utils.Slogf;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -98,7 +98,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
+import java.util.Objects;
 
 /**
  * Manages trust agents and trust listeners.
@@ -362,6 +362,13 @@ public class TrustManagerService extends SystemService {
     }
 
     private void scheduleTrustTimeout(boolean override, boolean isTrustableTimeout) {
+        if (DEBUG) {
+            Slogf.d(
+                    TAG,
+                    "scheduleTrustTimeout(override=%s, isTrustable=%s)",
+                    override,
+                    isTrustableTimeout);
+        }
         int shouldOverride = override ? 1 : 0;
         int trustableTimeout = isTrustableTimeout ? 1 : 0;
         mHandler.obtainMessage(MSG_SCHEDULE_TRUST_TIMEOUT, shouldOverride,
@@ -370,6 +377,13 @@ public class TrustManagerService extends SystemService {
 
     private void handleScheduleTrustTimeout(boolean shouldOverride, TimeoutType timeoutType) {
         int userId = mCurrentUser;
+        if (DEBUG) {
+            Slogf.d(
+                    TAG,
+                    "handleScheduleTrustTimeout(shouldOverride=%s, timeoutType=%s)",
+                    shouldOverride,
+                    timeoutType);
+        }
         if (timeoutType == TimeoutType.TRUSTABLE) {
             // don't override the hard timeout unless biometric or knowledge factor authentication
             // occurs which isn't where this is called from. Override the idle timeout what the
@@ -383,6 +397,7 @@ public class TrustManagerService extends SystemService {
 
     /* Override both the idle and hard trustable timeouts */
     private void refreshTrustableTimers(int userId) {
+        if (DEBUG) Slogf.d(TAG, "refreshTrustableTimers(userId=%s)", userId);
         handleScheduleTrustableTimeouts(userId, true /* overrideIdleTimeout */,
                 true /* overrideHardTimeout */);
     }
@@ -405,13 +420,20 @@ public class TrustManagerService extends SystemService {
     }
 
     private void handleScheduleTrustedTimeout(int userId, boolean shouldOverride) {
+        if (DEBUG) {
+            Slogf.d(
+                    TAG,
+                    "handleScheduleTrustedTimeout(userId=%s, shouldOverride=%s)",
+                    userId,
+                    shouldOverride);
+        }
         long when = SystemClock.elapsedRealtime() + TRUST_TIMEOUT_IN_MILLIS;
         TrustedTimeoutAlarmListener alarm = mTrustTimeoutAlarmListenerForUser.get(userId);
 
         // Cancel existing trust timeouts for this user if needed.
         if (alarm != null) {
             if (!shouldOverride && alarm.isQueued()) {
-                if (DEBUG) Slog.d(TAG, "Found existing trust timeout alarm. Skipping.");
+                if (DEBUG) Slogf.d(TAG, "Found existing trust timeout alarm. Skipping.");
                 return;
             }
             mAlarmManager.cancel(alarm);
@@ -420,7 +442,9 @@ public class TrustManagerService extends SystemService {
             mTrustTimeoutAlarmListenerForUser.put(userId, alarm);
         }
 
-        if (DEBUG) Slog.d(TAG, "\tSetting up trust timeout alarm");
+        if (DEBUG) {
+            Slogf.d(TAG, "\tSetting up trust timeout alarm triggering at elapsedRealTime=%s", when);
+        }
         alarm.setQueued(true /* isQueued */);
         mAlarmManager.setExact(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP, when, TRUST_TIMEOUT_ALARM_TAG, alarm,
@@ -434,6 +458,13 @@ public class TrustManagerService extends SystemService {
     }
 
     private void setUpIdleTimeout(int userId, boolean overrideIdleTimeout) {
+        if (DEBUG) {
+            Slogf.d(
+                    TAG,
+                    "setUpIdleTimeout(userId=%s, overrideIdleTimeout=%s)",
+                    userId,
+                    overrideIdleTimeout);
+        }
         long when = SystemClock.elapsedRealtime() + TRUSTABLE_IDLE_TIMEOUT_IN_MILLIS;
         TrustableTimeoutAlarmListener alarm = mIdleTrustableTimeoutAlarmListenerForUser.get(userId);
         mContext.enforceCallingOrSelfPermission(Manifest.permission.SCHEDULE_EXACT_ALARM, null);
@@ -441,7 +472,7 @@ public class TrustManagerService extends SystemService {
         // Cancel existing trustable timeouts for this user if needed.
         if (alarm != null) {
             if (!overrideIdleTimeout && alarm.isQueued()) {
-                if (DEBUG) Slog.d(TAG, "Found existing trustable timeout alarm. Skipping.");
+                if (DEBUG) Slogf.d(TAG, "Found existing trustable timeout alarm. Skipping.");
                 return;
             }
             mAlarmManager.cancel(alarm);
@@ -450,7 +481,12 @@ public class TrustManagerService extends SystemService {
             mIdleTrustableTimeoutAlarmListenerForUser.put(userId, alarm);
         }
 
-        if (DEBUG) Slog.d(TAG, "\tSetting up trustable idle timeout alarm");
+        if (DEBUG) {
+            Slogf.d(
+                    TAG,
+                    "\tSetting up trustable idle timeout alarm triggering at elapsedRealTime=%s",
+                    when);
+        }
         alarm.setQueued(true /* isQueued */);
         mAlarmManager.setExact(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP, when, TRUST_TIMEOUT_ALARM_TAG, alarm,
@@ -458,6 +494,13 @@ public class TrustManagerService extends SystemService {
     }
 
     private void setUpHardTimeout(int userId, boolean overrideHardTimeout) {
+        if (DEBUG) {
+            Slogf.i(
+                    TAG,
+                    "setUpHardTimeout(userId=%s, overrideHardTimeout=%s)",
+                    userId,
+                    overrideHardTimeout);
+        }
         mContext.enforceCallingOrSelfPermission(Manifest.permission.SCHEDULE_EXACT_ALARM, null);
         TrustableTimeoutAlarmListener alarm = mTrustableTimeoutAlarmListenerForUser.get(userId);
 
@@ -472,7 +515,13 @@ public class TrustManagerService extends SystemService {
             } else if (overrideHardTimeout) {
                 mAlarmManager.cancel(alarm);
             }
-            if (DEBUG) Slog.d(TAG, "\tSetting up trustable hard timeout alarm");
+            if (DEBUG) {
+                Slogf.d(
+                        TAG,
+                        "\tSetting up trustable hard timeout alarm triggering at "
+                                + "elapsedRealTime=%s",
+                        when);
+            }
             alarm.setQueued(true /* isQueued */);
             mAlarmManager.setExact(
                     AlarmManager.ELAPSED_REALTIME_WAKEUP, when, TRUST_TIMEOUT_ALARM_TAG, alarm,
@@ -503,6 +552,12 @@ public class TrustManagerService extends SystemService {
         public int hashCode() {
             return component.hashCode() * 31 + userId;
         }
+
+        @Override
+        public String toString() {
+            return String.format(
+                    "AgentInfo{label=%s, component=%s, userId=%s}", label, component, userId);
+        }
     }
 
     private void updateTrustAll() {
@@ -532,6 +587,15 @@ public class TrustManagerService extends SystemService {
             int flags,
             boolean isFromUnlock,
             @Nullable AndroidFuture<GrantTrustResult> resultCallback) {
+        if (DEBUG) {
+            Slogf.d(
+                    TAG,
+                    "updateTrust(userId=%s, flags=%s, isFromUnlock=%s, resultCallbackPresent=%s)",
+                    userId,
+                    flags,
+                    isFromUnlock,
+                    Objects.isNull(resultCallback));
+        }
         boolean managed = aggregateIsTrustManaged(userId);
         dispatchOnTrustManagedChanged(managed, userId);
         if (mStrongAuthTracker.isTrustAllowedForUser(userId)
@@ -559,27 +623,50 @@ public class TrustManagerService extends SystemService {
                     (flags & TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) != 0);
             boolean canMoveToTrusted =
                     alreadyUnlocked || isFromUnlock || renewingTrust || isAutomotive();
-            boolean upgradingTrustForCurrentUser = (userId == mCurrentUser);
+            boolean updatingTrustForCurrentUser = (userId == mCurrentUser);
+
+            if (DEBUG) {
+                Slogf.d(
+                        TAG,
+                        "updateTrust: alreadyUnlocked=%s, wasTrusted=%s, wasTrustable=%s, "
+                                + "renewingTrust=%s, canMoveToTrusted=%s, "
+                                + "updatingTrustForCurrentUser=%s",
+                        alreadyUnlocked,
+                        wasTrusted,
+                        wasTrustable,
+                        renewingTrust,
+                        canMoveToTrusted,
+                        updatingTrustForCurrentUser);
+            }
 
             if (trustedByAtLeastOneAgent && wasTrusted) {
                 // no change
                 return;
-            } else if (trustedByAtLeastOneAgent && canMoveToTrusted
-                    && upgradingTrustForCurrentUser) {
+            } else if (trustedByAtLeastOneAgent
+                    && canMoveToTrusted
+                    && updatingTrustForCurrentUser) {
                 pendingTrustState = TrustState.TRUSTED;
-            } else if (trustableByAtLeastOneAgent && (wasTrusted || wasTrustable)
-                    && upgradingTrustForCurrentUser) {
+            } else if (trustableByAtLeastOneAgent
+                    && (wasTrusted || wasTrustable)
+                    && updatingTrustForCurrentUser) {
                 pendingTrustState = TrustState.TRUSTABLE;
             } else {
                 pendingTrustState = TrustState.UNTRUSTED;
             }
+            if (DEBUG) Slogf.d(TAG, "updateTrust: pendingTrustState=%s", pendingTrustState);
 
             mUserTrustState.put(userId, pendingTrustState);
         }
-        if (DEBUG) Slog.d(TAG, "pendingTrustState: " + pendingTrustState);
 
         boolean isNowTrusted = pendingTrustState == TrustState.TRUSTED;
         boolean newlyUnlocked = !alreadyUnlocked && isNowTrusted;
+        if (DEBUG) {
+            Slogf.d(
+                    TAG,
+                    "updateTrust: isNowTrusted=%s, newlyUnlocked=%s",
+                    isNowTrusted,
+                    newlyUnlocked);
+        }
         maybeActiveUnlockRunningChanged(userId);
         dispatchOnTrustChanged(
                 isNowTrusted, newlyUnlocked, userId, flags, getTrustGrantedMessages(userId));
@@ -598,13 +685,13 @@ public class TrustManagerService extends SystemService {
         boolean shouldSendCallback = newlyUnlocked;
         if (shouldSendCallback) {
             if (resultCallback != null) {
-                if (DEBUG) Slog.d(TAG, "calling back with UNLOCKED_BY_GRANT");
+                if (DEBUG) Slogf.d(TAG, "calling back with UNLOCKED_BY_GRANT");
                 resultCallback.complete(new GrantTrustResult(STATUS_UNLOCKED_BY_GRANT));
             }
         }
 
         if ((wasTrusted || wasTrustable) && pendingTrustState == TrustState.UNTRUSTED) {
-            if (DEBUG) Slog.d(TAG, "Trust was revoked, destroy trustable alarms");
+            if (DEBUG) Slogf.d(TAG, "Trust was revoked, destroy trustable alarms");
             cancelBothTrustableAlarms(userId);
         }
     }
@@ -650,7 +737,7 @@ public class TrustManagerService extends SystemService {
         try {
             WindowManagerGlobal.getWindowManagerService().lockNow(null);
         } catch (RemoteException e) {
-            Slog.e(TAG, "Error locking screen when called from trust agent");
+            Slogf.e(TAG, "Error locking screen when called from trust agent");
         }
     }
 
@@ -659,8 +746,9 @@ public class TrustManagerService extends SystemService {
     }
 
     void refreshAgentList(int userIdOrAll) {
-        if (DEBUG) Slog.d(TAG, "refreshAgentList(" + userIdOrAll + ")");
+        if (DEBUG) Slogf.d(TAG, "refreshAgentList(userIdOrAll=%s)", userIdOrAll);
         if (!mTrustAgentsCanRun) {
+            if (DEBUG) Slogf.d(TAG, "Did not refresh agent list because agents cannot run.");
             return;
         }
         if (userIdOrAll != UserHandle.USER_ALL && userIdOrAll < UserHandle.USER_SYSTEM) {
@@ -686,18 +774,30 @@ public class TrustManagerService extends SystemService {
             if (userInfo == null || userInfo.partial || !userInfo.isEnabled()
                     || userInfo.guestToRemove) continue;
             if (!userInfo.supportsSwitchToByUser()) {
-                if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
-                        + ": switchToByUser=false");
+                if (DEBUG) {
+                    Slogf.d(
+                            TAG,
+                            "refreshAgentList: skipping user %s: switchToByUser=false",
+                            userInfo.id);
+                }
                 continue;
             }
             if (!mActivityManager.isUserRunning(userInfo.id)) {
-                if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
-                        + ": user not started");
+                if (DEBUG) {
+                    Slogf.d(
+                            TAG,
+                            "refreshAgentList: skipping user %s: user not started",
+                            userInfo.id);
+                }
                 continue;
             }
             if (!lockPatternUtils.isSecure(userInfo.id)) {
-                if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
-                        + ": no secure credential");
+                if (DEBUG) {
+                    Slogf.d(
+                            TAG,
+                            "refreshAgentList: skipping user %s: no secure credential",
+                            userInfo.id);
+                }
                 continue;
             }
 
@@ -708,8 +808,12 @@ public class TrustManagerService extends SystemService {
 
             List<ComponentName> enabledAgents = lockPatternUtils.getEnabledTrustAgents(userInfo.id);
             if (enabledAgents.isEmpty()) {
-                if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
-                        + ": no agents enabled by user");
+                if (DEBUG) {
+                    Slogf.d(
+                            TAG,
+                            "refreshAgentList: skipping user %s: no agents enabled by user",
+                            userInfo.id);
+                }
                 continue;
             }
             List<ResolveInfo> resolveInfos = resolveAllowedTrustAgents(pm, userInfo.id);
@@ -717,9 +821,13 @@ public class TrustManagerService extends SystemService {
                 ComponentName name = getComponentName(resolveInfo);
 
                 if (!enabledAgents.contains(name)) {
-                    if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping "
-                            + name.flattenToShortString() + " u"+ userInfo.id
-                            + ": not enabled by user");
+                    if (DEBUG) {
+                        Slogf.d(
+                                TAG,
+                                "refreshAgentList: skipping %s u%s: not enabled by user",
+                                name.flattenToShortString(),
+                                userInfo.id);
+                    }
                     continue;
                 }
                 if (disableTrustAgents) {
@@ -727,9 +835,13 @@ public class TrustManagerService extends SystemService {
                             dpm.getTrustAgentConfiguration(null /* admin */, name, userInfo.id);
                     // Disable agent if no features are enabled.
                     if (config == null || config.isEmpty()) {
-                        if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping "
-                                + name.flattenToShortString() + " u"+ userInfo.id
-                                + ": not allowed by DPM");
+                        if (DEBUG) {
+                            Slogf.d(
+                                    TAG,
+                                    "refreshAgentList: skipping %s u%s: not allowed by DPM",
+                                    name.flattenToShortString(),
+                                    userInfo.id);
+                        }
                         continue;
                     }
                 }
@@ -752,15 +864,26 @@ public class TrustManagerService extends SystemService {
                 }
 
                 if (directUnlock) {
-                    if (DEBUG) Slog.d(TAG, "refreshAgentList: trustagent " + name
-                            + "of user " + userInfo.id + "can unlock user profile.");
+                    if (DEBUG) {
+                        Slogf.d(
+                                TAG,
+                                "refreshAgentList: trustagent %s of user %s can unlock user "
+                                        + "profile.",
+                                name,
+                                userInfo.id);
+                    }
                 }
 
                 if (!mUserManager.isUserUnlockingOrUnlocked(userInfo.id)
                         && !directUnlock) {
-                    if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
-                            + "'s trust agent " + name + ": FBE still locked and "
-                            + " the agent cannot unlock user profile.");
+                    if (DEBUG) {
+                        Slogf.d(
+                                TAG,
+                                "refreshAgentList: skipping user %s's trust agent %s: FBE still "
+                                        + "locked and the agent cannot unlock user profile.",
+                                userInfo.id,
+                                name);
+                    }
                     continue;
                 }
 
@@ -769,11 +892,16 @@ public class TrustManagerService extends SystemService {
                     if (flag != StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT) {
                         if (flag != StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
                             || !directUnlock) {
-                            if (DEBUG)
-                                Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
-                                    + ": prevented by StrongAuthTracker = 0x"
-                                    + Integer.toHexString(mStrongAuthTracker.getStrongAuthForUser(
-                                    userInfo.id)));
+                            if (DEBUG) {
+                                Slogf.d(
+                                        TAG,
+                                        "refreshAgentList: skipping user %s: prevented by "
+                                                + "StrongAuthTracker = 0x%s",
+                                        userInfo.id,
+                                        Integer.toHexString(
+                                                mStrongAuthTracker.getStrongAuthForUser(
+                                                        userInfo.id)));
+                            }
                             continue;
                         }
                     }
@@ -802,6 +930,15 @@ public class TrustManagerService extends SystemService {
                 info.agent.destroy();
                 mActiveAgents.remove(info);
             }
+        }
+
+        if (DEBUG) {
+            Slogf.d(
+                    TAG,
+                    "refreshAgentList: userInfos=%s, obsoleteAgents=%s, trustMayHaveChanged=%s",
+                    userInfos,
+                    obsoleteAgents,
+                    trustMayHaveChanged);
         }
 
         if (trustMayHaveChanged) {
@@ -1044,7 +1181,7 @@ public class TrustManagerService extends SystemService {
             parser = resolveInfo.serviceInfo.loadXmlMetaData(pm,
                     TrustAgentService.TRUST_AGENT_META_DATA);
             if (parser == null) {
-                Slog.w(TAG, "Can't find " + TrustAgentService.TRUST_AGENT_META_DATA + " meta-data");
+                Slogf.w(TAG, "Can't find %s meta-data", TrustAgentService.TRUST_AGENT_META_DATA);
                 return null;
             }
             Resources res = pm.getResourcesForApplication(resolveInfo.serviceInfo.applicationInfo);
@@ -1056,7 +1193,7 @@ public class TrustManagerService extends SystemService {
             }
             String nodeName = parser.getName();
             if (!"trust-agent".equals(nodeName)) {
-                Slog.w(TAG, "Meta-data does not start with trust-agent tag");
+                Slogf.w(TAG, "Meta-data does not start with trust-agent tag");
                 return null;
             }
             TypedArray sa = res
@@ -1075,7 +1212,11 @@ public class TrustManagerService extends SystemService {
             if (parser != null) parser.close();
         }
         if (caughtException != null) {
-            Slog.w(TAG, "Error parsing : " + resolveInfo.serviceInfo.packageName, caughtException);
+            Slogf.w(
+                    TAG,
+                    caughtException,
+                    "Error parsing : %s",
+                    resolveInfo.serviceInfo.packageName);
             return null;
         }
         if (cn == null) {
@@ -1242,13 +1383,18 @@ public class TrustManagerService extends SystemService {
     // Agent dispatch and aggregation
 
     private boolean aggregateIsTrusted(int userId) {
+        if (DEBUG) Slogf.d(TAG, "aggregateIsTrusted(userId=%s)", userId);
         if (!mStrongAuthTracker.isTrustAllowedForUser(userId)) {
+            if (DEBUG) {
+                Slogf.d(TAG, "not trusted because trust not allowed for userId=%s", userId);
+            }
             return false;
         }
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo info = mActiveAgents.valueAt(i);
             if (info.userId == userId) {
                 if (info.agent.isTrusted()) {
+                    if (DEBUG) Slogf.d(TAG, "trusted by %s", info);
                     return true;
                 }
             }
@@ -1257,13 +1403,18 @@ public class TrustManagerService extends SystemService {
     }
 
     private boolean aggregateIsTrustable(int userId) {
+        if (DEBUG) Slogf.d(TAG, "aggregateIsTrustable(userId=%s)", userId);
         if (!mStrongAuthTracker.isTrustAllowedForUser(userId)) {
+            if (DEBUG) {
+                Slogf.d(TAG, "not trustable because trust not allowed for userId=%s", userId);
+            }
             return false;
         }
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo info = mActiveAgents.valueAt(i);
             if (info.userId == userId) {
                 if (info.agent.isTrustable()) {
+                    if (DEBUG) Slogf.d(TAG, "trustable by %s", info);
                     return true;
                 }
             }
@@ -1328,20 +1479,31 @@ public class TrustManagerService extends SystemService {
 
     private boolean aggregateIsTrustManaged(int userId) {
         if (!mStrongAuthTracker.isTrustAllowedForUser(userId)) {
+            if (DEBUG) {
+                Slogf.d(
+                        TAG,
+                        "trust not managed due to trust not being allowed for userId=%s",
+                        userId);
+            }
             return false;
         }
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo info = mActiveAgents.valueAt(i);
             if (info.userId == userId) {
                 if (info.agent.isManagingTrust()) {
+                    if (DEBUG) Slogf.d(TAG, "trust managed for userId=%s", userId);
                     return true;
                 }
             }
         }
+        if (DEBUG) Slogf.d(TAG, "trust not managed for userId=%s", userId);
         return false;
     }
 
     private void dispatchUnlockAttempt(boolean successful, int userId) {
+        if (DEBUG) {
+            Slogf.d(TAG, "dispatchUnlockAttempt(successful=%s, userId=%s)", successful, userId);
+        }
         if (successful) {
             mStrongAuthTracker.allowTrustFromUnlock(userId);
             // Allow the presence of trust on a successful unlock attempt to extend unlock
@@ -1359,8 +1521,11 @@ public class TrustManagerService extends SystemService {
 
     private void dispatchUserRequestedUnlock(int userId, boolean dismissKeyguard) {
         if (DEBUG) {
-            Slog.d(TAG, "dispatchUserRequestedUnlock(user=" + userId + ", dismissKeyguard="
-                    + dismissKeyguard + ")");
+            Slogf.d(
+                    TAG,
+                    "dispatchUserRequestedUnlock(user=%s, dismissKeyguard=%s)",
+                    userId,
+                    dismissKeyguard);
         }
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo info = mActiveAgents.valueAt(i);
@@ -1372,7 +1537,7 @@ public class TrustManagerService extends SystemService {
 
     private void dispatchUserMayRequestUnlock(int userId) {
         if (DEBUG) {
-            Slog.d(TAG, "dispatchUserMayRequestUnlock(user=" + userId + ")");
+            Slogf.d(TAG, "dispatchUserMayRequestUnlock(user=%s)", userId);
         }
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo info = mActiveAgents.valueAt(i);
@@ -1405,9 +1570,9 @@ public class TrustManagerService extends SystemService {
         try {
             listener.onIsActiveUnlockRunningChanged(isRunning, userId);
         } catch (DeadObjectException e) {
-            Slog.d(TAG, "TrustListener dead while trying to notify Active Unlock running state");
+            Slogf.d(TAG, "TrustListener dead while trying to notify Active Unlock running state");
         } catch (RemoteException e) {
-            Slog.e(TAG, "Exception while notifying TrustListener.", e);
+            Slogf.e(TAG, "Exception while notifying TrustListener.", e);
         }
     }
 
@@ -1445,11 +1610,11 @@ public class TrustManagerService extends SystemService {
                 mTrustListeners.get(i).onTrustChanged(
                         enabled, newlyUnlocked, userId, flags, trustGrantedMessages);
             } catch (DeadObjectException e) {
-                Slog.d(TAG, "Removing dead TrustListener.");
+                Slogf.d(TAG, "Removing dead TrustListener.");
                 mTrustListeners.remove(i);
                 i--;
             } catch (RemoteException e) {
-                Slog.e(TAG, "Exception while notifying TrustListener.", e);
+                Slogf.e(TAG, "Exception while notifying TrustListener.", e);
             }
         }
     }
@@ -1462,11 +1627,11 @@ public class TrustManagerService extends SystemService {
             try {
                 mTrustListeners.get(i).onEnabledTrustAgentsChanged(userId);
             } catch (DeadObjectException e) {
-                Slog.d(TAG, "Removing dead TrustListener.");
+                Slogf.d(TAG, "Removing dead TrustListener.");
                 mTrustListeners.remove(i);
                 i--;
             } catch (RemoteException e) {
-                Slog.e(TAG, "Exception while notifying TrustListener.", e);
+                Slogf.e(TAG, "Exception while notifying TrustListener.", e);
             }
         }
     }
@@ -1479,11 +1644,11 @@ public class TrustManagerService extends SystemService {
             try {
                 mTrustListeners.get(i).onTrustManagedChanged(managed, userId);
             } catch (DeadObjectException e) {
-                Slog.d(TAG, "Removing dead TrustListener.");
+                Slogf.d(TAG, "Removing dead TrustListener.");
                 mTrustListeners.remove(i);
                 i--;
             } catch (RemoteException e) {
-                Slog.e(TAG, "Exception while notifying TrustListener.", e);
+                Slogf.e(TAG, "Exception while notifying TrustListener.", e);
             }
         }
     }
@@ -1496,11 +1661,11 @@ public class TrustManagerService extends SystemService {
             try {
                 mTrustListeners.get(i).onTrustError(message);
             } catch (DeadObjectException e) {
-                Slog.d(TAG, "Removing dead TrustListener.");
+                Slogf.d(TAG, "Removing dead TrustListener.");
                 mTrustListeners.remove(i);
                 i--;
             } catch (RemoteException e) {
-                Slog.e(TAG, "Exception while notifying TrustListener.", e);
+                Slogf.e(TAG, "Exception while notifying TrustListener.", e);
             }
         }
     }
@@ -1535,7 +1700,7 @@ public class TrustManagerService extends SystemService {
                     && mFingerprintManager.hasEnrolledTemplates(userId)
                     && isWeakOrConvenienceSensor(
                             mFingerprintManager.getSensorProperties().get(0))) {
-                Slog.i(TAG, "User is unlockable by non-strong fingerprint auth");
+                Slogf.i(TAG, "User is unlockable by non-strong fingerprint auth");
                 return true;
             }
 
@@ -1543,7 +1708,7 @@ public class TrustManagerService extends SystemService {
                     && (disabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_FACE) == 0
                     && mFaceManager.hasEnrolledTemplates(userId)
                     && isWeakOrConvenienceSensor(mFaceManager.getSensorProperties().get(0))) {
-                Slog.i(TAG, "User is unlockable by non-strong face auth");
+                Slogf.i(TAG, "User is unlockable by non-strong face auth");
                 return true;
             }
         }
@@ -1551,7 +1716,7 @@ public class TrustManagerService extends SystemService {
         // Check whether it's possible for the device to be actively unlocked by a trust agent.
         if (getUserTrustStateInner(userId) == TrustState.TRUSTABLE
                 || (isAutomotive() && isTrustUsuallyManagedInternal(userId))) {
-            Slog.i(TAG, "User is unlockable by trust agent");
+            Slogf.i(TAG, "User is unlockable by trust agent");
             return true;
         }
 
@@ -1595,6 +1760,13 @@ public class TrustManagerService extends SystemService {
     private final IBinder mService = new ITrustManager.Stub() {
         @Override
         public void reportUnlockAttempt(boolean authenticated, int userId) throws RemoteException {
+            if (DEBUG) {
+                Slogf.d(
+                        TAG,
+                        "reportUnlockAttempt(authenticated=%s, userId=%s)",
+                        authenticated,
+                        userId);
+            }
             enforceReportPermission();
             mHandler.obtainMessage(MSG_DISPATCH_UNLOCK_ATTEMPT, authenticated ? 1 : 0, userId)
                     .sendToTarget();
@@ -1611,7 +1783,8 @@ public class TrustManagerService extends SystemService {
         @Override
         public void reportUserMayRequestUnlock(int userId) throws RemoteException {
             enforceReportPermission();
-            mHandler.obtainMessage(MSG_USER_MAY_REQUEST_UNLOCK, userId, /*arg2=*/ 0).sendToTarget();
+            mHandler.obtainMessage(MSG_USER_MAY_REQUEST_UNLOCK, userId, /* arg2= */ 0)
+                    .sendToTarget();
         }
 
         @Override
@@ -1932,6 +2105,7 @@ public class TrustManagerService extends SystemService {
         return new Handler(looper) {
             @Override
             public void handleMessage(Message msg) {
+                if (DEBUG) Slogf.d(TAG, "handler: %s", msg.what);
                 switch (msg.what) {
                     case MSG_REGISTER_LISTENER:
                         addListener((ITrustListener) msg.obj);
@@ -2002,8 +2176,24 @@ public class TrustManagerService extends SystemService {
                         handleScheduleTrustTimeout(shouldOverride, timeoutType);
                         break;
                     case MSG_REFRESH_TRUSTABLE_TIMERS_AFTER_AUTH:
+                        if (DEBUG) {
+                            Slogf.d(TAG, "REFRESH_TRUSTABLE_TIMERS_AFTER_AUTH userId=%s", msg.arg1);
+                        }
                         TrustableTimeoutAlarmListener trustableAlarm =
                                 mTrustableTimeoutAlarmListenerForUser.get(msg.arg1);
+                        if (DEBUG) {
+                            if (trustableAlarm != null) {
+                                Slogf.d(
+                                        TAG,
+                                        "REFRESH_TRUSTABLE_TIMERS_AFTER_AUTH trustable alarm "
+                                                + "isQueued=%s",
+                                        trustableAlarm.mIsQueued);
+                            } else {
+                                Slogf.d(
+                                        TAG,
+                                        "REFRESH_TRUSTABLE_TIMERS_AFTER_AUTH no trustable alarm");
+                            }
+                        }
                         if (trustableAlarm != null && trustableAlarm.isQueued()) {
                             refreshTrustableTimers(msg.arg1);
                         }
@@ -2194,7 +2384,7 @@ public class TrustManagerService extends SystemService {
             handleAlarm();
             // Only fire if trust can unlock.
             if (mStrongAuthTracker.isTrustAllowedForUser(mUserId)) {
-                if (DEBUG) Slog.d(TAG, "Revoking all trust because of trust timeout");
+                if (DEBUG) Slogf.d(TAG, "Revoking all trust because of trust timeout");
                 mLockPatternUtils.requireStrongAuth(
                         mStrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED, mUserId);
             }
