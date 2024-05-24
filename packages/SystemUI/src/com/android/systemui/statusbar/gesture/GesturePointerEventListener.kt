@@ -98,10 +98,10 @@ constructor(context: Context, gestureDetector: GesturePointerEventDetector) : Co
             return
         }
         val r = mContext.resources
-        val defaultThreshold = r.getDimensionPixelSize(R.dimen.system_gestures_start_threshold)
-        mSwipeStartThreshold[defaultThreshold, defaultThreshold, defaultThreshold] =
-            defaultThreshold
-        mSwipeDistanceThreshold = defaultThreshold
+        val startThreshold = r.getDimensionPixelSize(R.dimen.system_gestures_start_threshold)
+        mSwipeStartThreshold[startThreshold, startThreshold, startThreshold] = startThreshold
+        mSwipeDistanceThreshold =
+            r.getDimensionPixelSize(R.dimen.system_gestures_distance_threshold)
         val display = DisplayManagerGlobal.getInstance().getRealDisplay(mContext.displayId)
         val displayCutout = display.cutout
         if (displayCutout != null) {
