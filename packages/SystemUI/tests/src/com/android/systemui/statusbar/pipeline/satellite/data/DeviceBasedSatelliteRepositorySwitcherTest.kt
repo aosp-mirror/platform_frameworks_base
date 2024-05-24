@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.satellite.data
 
+import android.telephony.TelephonyManager
 import android.telephony.satellite.SatelliteManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -50,11 +51,13 @@ class DeviceBasedSatelliteRepositorySwitcherTest : SysuiTestCase() {
     private val demoModeController =
         mock<DemoModeController>().apply { whenever(this.isInDemoMode).thenReturn(false) }
     private val satelliteManager = mock<SatelliteManager>()
+    private val telephonyManager = mock<TelephonyManager>()
     private val systemClock = FakeSystemClock()
 
     private val realImpl =
         DeviceBasedSatelliteRepositoryImpl(
             Optional.of(satelliteManager),
+            telephonyManager,
             testDispatcher,
             testScope.backgroundScope,
             FakeLogBuffer.Factory.create(),
