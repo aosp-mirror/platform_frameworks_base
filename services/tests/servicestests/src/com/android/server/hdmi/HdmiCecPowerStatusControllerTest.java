@@ -115,12 +115,12 @@ public class HdmiCecPowerStatusControllerTest {
                         .build();
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mNativeWrapper.setPortConnectionStatus(1, true);
+        mNativeWrapper.setPhysicalAddress(0x2000);
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(contextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);
         mHdmiControlService.getHdmiCecNetwork().initPortInfo();
-        mNativeWrapper.setPhysicalAddress(0x2000);
         mTestLooper.dispatchAll();
         mHdmiCecLocalDevicePlayback = mHdmiControlService.playback();
         mHdmiCecPowerStatusController = new HdmiCecPowerStatusController(mHdmiControlService);

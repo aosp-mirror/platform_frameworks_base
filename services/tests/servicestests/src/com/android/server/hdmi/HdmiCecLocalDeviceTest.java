@@ -181,6 +181,7 @@ public class HdmiCecLocalDeviceTest {
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mNativeWrapper = new FakeNativeWrapper();
+        mNativeWrapper.setPhysicalAddress(0x2000);
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
@@ -199,7 +200,6 @@ public class HdmiCecLocalDeviceTest {
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
-        mNativeWrapper.setPhysicalAddress(0x2000);
         mTestLooper.dispatchAll();
         mNativeWrapper.clearResultMessages();
     }
@@ -237,6 +237,7 @@ public class HdmiCecLocalDeviceTest {
     @Test
     public void handleGivePhysicalAddress_success() {
         mNativeWrapper.setPhysicalAddress(0x0);
+        mHdmiControlService.onHotplug(0x0, true);
         HdmiCecMessage expectedMessage =
                 HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(ADDR_TV, 0, DEVICE_TV);
         @Constants.HandleMessageResult
@@ -252,6 +253,7 @@ public class HdmiCecLocalDeviceTest {
     @Test
     public void handleGivePhysicalAddress_failure() {
         mNativeWrapper.setPhysicalAddress(Constants.INVALID_PHYSICAL_ADDRESS);
+        mHdmiControlService.onHotplug(Constants.INVALID_PHYSICAL_ADDRESS, true);
         HdmiCecMessage expectedMessage =
                 HdmiCecMessageBuilder.buildFeatureAbortCommand(
                         ADDR_TV,
