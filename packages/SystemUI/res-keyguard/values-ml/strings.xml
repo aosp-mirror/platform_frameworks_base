@@ -33,8 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • വേഗത്തിൽ ചാർജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • പതുക്കെ ചാർജ് ചെയ്യുന്നു"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ബാറ്ററി പരിരക്ഷിക്കാൻ ചാർജിംഗ് ഒപ്റ്റിമൈസ് ചെയ്തു"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജിംഗ് ആക്സസറിയുമായി ബന്ധപ്പെട്ട പ്രശ്നം"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ബാറ്ററി പരിരക്ഷിക്കാൻ ചാർജിംഗ് ഹോൾഡിലാണ്"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജിംഗ് ആക്സസറി പരിശോധിക്കുക"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"നെറ്റ്‌വർക്ക് ലോക്കുചെയ്‌തു"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"സിം ഇല്ല"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ഉപയോഗശൂന്യമായ സിം."</string>

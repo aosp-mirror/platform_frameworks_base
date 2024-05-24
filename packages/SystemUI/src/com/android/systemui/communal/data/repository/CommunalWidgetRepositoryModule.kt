@@ -17,57 +17,11 @@
 
 package com.android.systemui.communal.data.repository
 
-import android.appwidget.AppWidgetHost
-import android.appwidget.AppWidgetManager
-import android.content.Context
-import android.content.res.Resources
-import com.android.systemui.communal.shared.CommunalWidgetHost
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.dagger.CommunalLog
-import com.android.systemui.res.R
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import javax.inject.Named
 
 @Module
 interface CommunalWidgetRepositoryModule {
-    companion object {
-        private const val APP_WIDGET_HOST_ID = 116
-        const val DEFAULT_WIDGETS = "default_widgets"
-
-        @SysUISingleton
-        @Provides
-        fun provideAppWidgetManager(@Application context: Context): AppWidgetManager {
-            return AppWidgetManager.getInstance(context)
-        }
-
-        @SysUISingleton
-        @Provides
-        fun provideAppWidgetHost(@Application context: Context): AppWidgetHost {
-            return AppWidgetHost(context, APP_WIDGET_HOST_ID)
-        }
-
-        @SysUISingleton
-        @Provides
-        fun provideCommunalWidgetHost(
-            appWidgetManager: AppWidgetManager,
-            appWidgetHost: AppWidgetHost,
-            @CommunalLog logBuffer: LogBuffer,
-        ): CommunalWidgetHost {
-            return CommunalWidgetHost(appWidgetManager, appWidgetHost, logBuffer)
-        }
-
-        @Provides
-        @Named(DEFAULT_WIDGETS)
-        fun provideDefaultWidgets(@Main resources: Resources): Array<String> {
-            return resources.getStringArray(R.array.config_communalWidgetAllowlist)
-        }
-    }
-
     @Binds
     fun communalWidgetRepository(impl: CommunalWidgetRepositoryImpl): CommunalWidgetRepository
 }

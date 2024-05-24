@@ -25,6 +25,8 @@ import java.io.Writer;
  * @deprecated Use {@link android.util.IndentingPrintWriter}
  */
 @Deprecated
+// Exported to Mainline modules; cannot use annotations
+// @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class IndentingPrintWriter extends android.util.IndentingPrintWriter {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)

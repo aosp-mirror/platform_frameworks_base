@@ -18,20 +18,12 @@ package com.android.wm.shell.desktopmode;
 
 import android.os.SystemProperties;
 
-import com.android.wm.shell.Flags;
+import com.android.window.flags.Flags;
 
 /**
  * Constants for desktop mode feature
  */
 public class DesktopModeStatus {
-
-    private static final boolean ENABLE_DESKTOP_WINDOWING = Flags.enableDesktopWindowing();
-
-    /**
-     * Flag to indicate whether desktop mode proto is available on the device
-     */
-    private static final boolean IS_PROTO2_ENABLED = SystemProperties.getBoolean(
-            "persist.wm.debug.desktop_mode_2", false);
 
     /**
      * Flag to indicate whether task resizing is veiled.
@@ -55,16 +47,30 @@ public class DesktopModeStatus {
             "persist.wm.debug.desktop_stashing", false);
 
     /**
-     * Return {@code true} is desktop windowing proto 2 is enabled
+     * Flag to indicate whether to apply shadows to windows in desktop mode.
+     */
+    private static final boolean USE_WINDOW_SHADOWS = SystemProperties.getBoolean(
+            "persist.wm.debug.desktop_use_window_shadows", true);
+
+    /**
+     * Flag to indicate whether to apply shadows to the focused window in desktop mode.
+     *
+     * Note: this flag is only relevant if USE_WINDOW_SHADOWS is false.
+     */
+    private static final boolean USE_WINDOW_SHADOWS_FOCUSED_WINDOW = SystemProperties.getBoolean(
+            "persist.wm.debug.desktop_use_window_shadows_focused_window", false);
+
+    /**
+     * Flag to indicate whether to apply shadows to windows in desktop mode.
+     */
+    private static final boolean USE_ROUNDED_CORNERS = SystemProperties.getBoolean(
+            "persist.wm.debug.desktop_use_rounded_corners", true);
+
+    /**
+     * Return {@code true} if desktop windowing is enabled
      */
     public static boolean isEnabled() {
-        // Check for aconfig flag first
-        if (ENABLE_DESKTOP_WINDOWING) {
-            return true;
-        }
-        // Fall back to sysprop flag
-        // TODO(b/304778354): remove sysprop once desktop aconfig flag supports dynamic overriding
-        return IS_PROTO2_ENABLED;
+        return Flags.enableDesktopWindowingMode();
     }
 
     /**
@@ -80,5 +86,22 @@ public class DesktopModeStatus {
      */
     public static boolean isStashingEnabled() {
         return IS_STASHING_ENABLED;
+    }
+
+    /**
+     * Return whether to use window shadows.
+     *
+     * @param isFocusedWindow whether the window to apply shadows to is focused
+     */
+    public static boolean useWindowShadow(boolean isFocusedWindow) {
+        return USE_WINDOW_SHADOWS
+            || (USE_WINDOW_SHADOWS_FOCUSED_WINDOW && isFocusedWindow);
+    }
+
+    /**
+     * Return whether to use rounded corners for windows.
+     */
+    public static boolean useRoundedCorners() {
+        return USE_ROUNDED_CORNERS;
     }
 }

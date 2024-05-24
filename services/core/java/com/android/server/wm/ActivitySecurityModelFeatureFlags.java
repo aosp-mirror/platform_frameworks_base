@@ -22,12 +22,10 @@ import static com.android.server.wm.ActivityStarter.ASM_RESTRICTIONS;
 
 import android.annotation.NonNull;
 import android.app.compat.CompatChanges;
-import android.content.pm.PackageManager;
 import android.provider.DeviceConfig;
 
 import com.android.internal.annotations.GuardedBy;
 
-import java.util.HashSet;
 import java.util.concurrent.Executor;
 
 /**
@@ -43,64 +41,50 @@ class ActivitySecurityModelFeatureFlags {
     static final String DOC_LINK = "go/android-asm";
 
     /** Used to determine which version of the ASM logic was used in logs while we iterate */
-    static final int ASM_VERSION = 8;
+    static final int ASM_VERSION = 10;
 
     private static final String NAMESPACE = NAMESPACE_WINDOW_MANAGER;
     private static final String KEY_ASM_PREFIX = "ActivitySecurity__";
     private static final String KEY_ASM_RESTRICTIONS_ENABLED = KEY_ASM_PREFIX
             + "asm_restrictions_enabled";
     private static final String KEY_ASM_TOASTS_ENABLED = KEY_ASM_PREFIX + "asm_toasts_enabled";
-    private static final String KEY_ASM_EXEMPTED_PACKAGES = KEY_ASM_PREFIX
-            + "asm_exempted_packages";
+
     private static final int VALUE_DISABLE = 0;
     private static final int VALUE_ENABLE_FOR_V = 1;
     private static final int VALUE_ENABLE_FOR_ALL = 2;
 
     private static final int DEFAULT_VALUE = VALUE_DISABLE;
-    private static final String DEFAULT_EXCEPTION_LIST = "";
 
     private static int sAsmToastsEnabled;
     private static int sAsmRestrictionsEnabled;
-    private static final HashSet<String> sExcludedPackageNames = new HashSet<>();
-    private static PackageManager sPm;
 
     @GuardedBy("ActivityTaskManagerService.mGlobalLock")
-    static void initialize(@NonNull Executor executor, @NonNull PackageManager pm) {
+    static void initialize(@NonNull Executor executor) {
         updateFromDeviceConfig();
         DeviceConfig.addOnPropertiesChangedListener(NAMESPACE, executor,
                 properties -> updateFromDeviceConfig());
-        sPm = pm;
     }
 
     @GuardedBy("ActivityTaskManagerService.mGlobalLock")
     static boolean shouldShowToast(int uid) {
-        return flagEnabledForUid(sAsmToastsEnabled, uid);
+        return sAsmToastsEnabled == VALUE_ENABLE_FOR_ALL
+                || (sAsmToastsEnabled == VALUE_ENABLE_FOR_V
+                        && CompatChanges.isChangeEnabled(ASM_RESTRICTIONS, uid));
     }
 
     @GuardedBy("ActivityTaskManagerService.mGlobalLock")
     static boolean shouldRestrictActivitySwitch(int uid) {
-        return flagEnabledForUid(sAsmRestrictionsEnabled, uid);
-    }
-
-    private static boolean flagEnabledForUid(int flag, int uid) {
-        boolean flagEnabled = flag == VALUE_ENABLE_FOR_ALL
-                || (flag == VALUE_ENABLE_FOR_V
-                    && CompatChanges.isChangeEnabled(ASM_RESTRICTIONS, uid));
-
-        if (flagEnabled) {
-            String[] packageNames = sPm.getPackagesForUid(uid);
-            if (packageNames == null) {
-                return true;
-            }
-            for (int i = 0; i < packageNames.length; i++) {
-                if (sExcludedPackageNames.contains(packageNames[i])) {
-                    return false;
-                }
-            }
-            return true;
+        if (android.security.Flags.asmRestrictionsEnabled()) {
+            return CompatChanges.isChangeEnabled(ASM_RESTRICTIONS, uid)
+                    || asmRestrictionsEnabledForAll();
         }
 
         return false;
+    }
+
+    @GuardedBy("ActivityTaskManagerService.mGlobalLock")
+    static boolean asmRestrictionsEnabledForAll() {
+        return sAsmRestrictionsEnabled == VALUE_ENABLE_FOR_ALL;
     }
 
     private static void updateFromDeviceConfig() {
@@ -108,16 +92,5 @@ class ActivitySecurityModelFeatureFlags {
                 DEFAULT_VALUE);
         sAsmRestrictionsEnabled = DeviceConfig.getInt(NAMESPACE, KEY_ASM_RESTRICTIONS_ENABLED,
                 DEFAULT_VALUE);
-
-        String rawExceptionList = DeviceConfig.getString(NAMESPACE,
-                KEY_ASM_EXEMPTED_PACKAGES, DEFAULT_EXCEPTION_LIST);
-        sExcludedPackageNames.clear();
-        String[] packages = rawExceptionList.split(",");
-        for (String packageName : packages) {
-            String packageNameTrimmed = packageName.trim();
-            if (!packageNameTrimmed.isEmpty()) {
-                sExcludedPackageNames.add(packageNameTrimmed);
-            }
-        }
     }
 }

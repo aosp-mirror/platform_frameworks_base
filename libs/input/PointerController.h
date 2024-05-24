@@ -79,14 +79,16 @@ public:
     std::string dump() override;
 
 protected:
-    using WindowListenerConsumer =
+    using WindowListenerRegisterConsumer = std::function<std::vector<gui::DisplayInfo>(
+            const sp<android::gui::WindowInfosListener>&)>;
+    using WindowListenerUnregisterConsumer =
             std::function<void(const sp<android::gui::WindowInfosListener>&)>;
 
     // Constructor used to test WindowInfosListener registration.
     PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
                       SpriteController& spriteController, bool enabled,
-                      WindowListenerConsumer registerListener,
-                      WindowListenerConsumer unregisterListener);
+                      const WindowListenerRegisterConsumer& registerListener,
+                      WindowListenerUnregisterConsumer unregisterListener);
 
     PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
                       SpriteController& spriteController, bool enabled);
@@ -129,7 +131,7 @@ private:
     };
 
     sp<DisplayInfoListener> mDisplayInfoListener;
-    const WindowListenerConsumer mUnregisterWindowInfosListener;
+    const WindowListenerUnregisterConsumer mUnregisterWindowInfosListener;
 
     const ui::Transform& getTransformForDisplayLocked(int displayId) const REQUIRES(getLock());
 

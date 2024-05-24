@@ -358,7 +358,8 @@ public class SuspendedAppActivity extends AlertActivity
                 .setClassName("android", SuspendedAppActivity.class.getName())
                 .putExtra(EXTRA_SUSPENDED_PACKAGE, suspendedPackage)
                 .putExtra(EXTRA_DIALOG_INFO, dialogInfo)
-                .putExtra(EXTRA_SUSPENDING_PACKAGE, suspendingPackage.packageName)
+                .putExtra(EXTRA_SUSPENDING_PACKAGE,
+                        suspendingPackage != null ? suspendingPackage.packageName : null)
                 .putExtra(EXTRA_UNSUSPEND_INTENT, onUnsuspend)
                 .putExtra(EXTRA_ACTIVITY_OPTIONS, options)
                 .putExtra(Intent.EXTRA_USER_ID, userId)

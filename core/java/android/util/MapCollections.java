@@ -31,6 +31,7 @@ import java.util.Set;
  * structure like {@link ArrayMap}.
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 abstract class MapCollections<K, V> {
     EntrySet mEntrySet;
     KeySet mKeySet;

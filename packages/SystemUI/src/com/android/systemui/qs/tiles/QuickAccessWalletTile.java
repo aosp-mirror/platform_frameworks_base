@@ -20,6 +20,7 @@ import static android.graphics.drawable.Icon.TYPE_URI;
 import static android.provider.Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT;
 
 import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE;
+import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.DEFAULT_WALLET_APP_CHANGE;
 import static com.android.systemui.wallet.util.WalletCardUtilsKt.getPaymentCards;
 
 import android.content.Intent;
@@ -42,8 +43,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.res.R;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -54,6 +54,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
@@ -118,7 +119,8 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     protected void handleSetListening(boolean listening) {
         super.handleSetListening(listening);
         if (listening) {
-            mController.setupWalletChangeObservers(mCardRetriever, DEFAULT_PAYMENT_APP_CHANGE);
+            mController.setupWalletChangeObservers(mCardRetriever, DEFAULT_PAYMENT_APP_CHANGE,
+                    DEFAULT_WALLET_APP_CHANGE);
             if (!mController.getWalletClient().isWalletServiceAvailable()
                     || !mController.getWalletClient().isWalletFeatureAvailable()) {
                 Log.i(TAG, "QAW service is unavailable, recreating the wallet client.");
@@ -130,8 +132,8 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
 
     @Override
     protected void handleClick(@Nullable View view) {
-        ActivityLaunchAnimator.Controller animationController =
-                view == null ? null : ActivityLaunchAnimator.Controller.fromView(view,
+        ActivityTransitionAnimator.Controller animationController =
+                view == null ? null : ActivityTransitionAnimator.Controller.fromView(view,
                         InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE);
 
         mUiHandler.post(
@@ -201,7 +203,8 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     @Override
     protected void handleDestroy() {
         super.handleDestroy();
-        mController.unregisterWalletChangeObservers(DEFAULT_PAYMENT_APP_CHANGE);
+        mController.unregisterWalletChangeObservers(DEFAULT_PAYMENT_APP_CHANGE,
+                DEFAULT_WALLET_APP_CHANGE);
     }
 
     private class WalletCardRetriever implements

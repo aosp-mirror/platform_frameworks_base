@@ -29,6 +29,8 @@ import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.EXTRA_SHORTCUT_ID;
 import static android.content.Intent.EXTRA_TASK_ID;
 import static android.content.Intent.EXTRA_USER;
+import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
@@ -52,9 +54,11 @@ import android.content.pm.LauncherApps;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.Log;
 import android.util.Slog;
 
 import androidx.annotation.IntDef;
@@ -63,8 +67,10 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.InstanceId;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.lang.annotation.Retention;
@@ -104,7 +110,9 @@ public class DragAndDropPolicy {
     void start(DragSession session, InstanceId loggerSessionId) {
         mLoggerSessionId = loggerSessionId;
         mSession = session;
-        RectF disallowHitRegion = (RectF) mSession.dragData.getExtra(EXTRA_DISALLOW_HIT_REGION);
+        RectF disallowHitRegion = mSession.appData != null
+                ? (RectF) mSession.appData.getExtra(EXTRA_DISALLOW_HIT_REGION)
+                : null;
         if (disallowHitRegion == null) {
             mDisallowHitRegion.setEmpty();
         } else {
@@ -223,7 +231,7 @@ public class DragAndDropPolicy {
     }
 
     @VisibleForTesting
-    void handleDrop(Target target, ClipData data) {
+    void handleDrop(Target target) {
         if (target == null || !mTargets.contains(target)) {
             return;
         }
@@ -238,38 +246,74 @@ public class DragAndDropPolicy {
             mSplitScreen.onDroppedToSplit(position, mLoggerSessionId);
         }
 
-        final ClipDescription description = data.getDescription();
-        final Intent dragData = mSession.dragData;
-        startClipDescription(description, dragData, position);
+        if (mSession.appData != null) {
+            launchApp(mSession, position);
+        } else {
+            launchIntent(mSession, position);
+        }
     }
 
-    private void startClipDescription(ClipDescription description, Intent intent,
-            @SplitPosition int position) {
+    /**
+     * Launches an app provided by SysUI.
+     */
+    private void launchApp(DragSession session, @SplitPosition int position) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Launching app data at position=%d",
+                position);
+        final ClipDescription description = session.getClipDescription();
         final boolean isTask = description.hasMimeType(MIMETYPE_APPLICATION_TASK);
         final boolean isShortcut = description.hasMimeType(MIMETYPE_APPLICATION_SHORTCUT);
         final ActivityOptions baseActivityOpts = ActivityOptions.makeBasic();
         baseActivityOpts.setDisallowEnterPictureInPictureWhileLaunching(true);
         final Bundle opts = baseActivityOpts.toBundle();
-        if (intent.hasExtra(EXTRA_ACTIVITY_OPTIONS)) {
-            opts.putAll(intent.getBundleExtra(EXTRA_ACTIVITY_OPTIONS));
+        if (session.appData.hasExtra(EXTRA_ACTIVITY_OPTIONS)) {
+            opts.putAll(session.appData.getBundleExtra(EXTRA_ACTIVITY_OPTIONS));
         }
         // Put BAL flags to avoid activity start aborted.
         opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, true);
         opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, true);
-        final UserHandle user = intent.getParcelableExtra(EXTRA_USER);
+        final UserHandle user = session.appData.getParcelableExtra(EXTRA_USER);
 
         if (isTask) {
-            final int taskId = intent.getIntExtra(EXTRA_TASK_ID, INVALID_TASK_ID);
+            final int taskId = session.appData.getIntExtra(EXTRA_TASK_ID, INVALID_TASK_ID);
             mStarter.startTask(taskId, position, opts);
         } else if (isShortcut) {
-            final String packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME);
-            final String id = intent.getStringExtra(EXTRA_SHORTCUT_ID);
+            final String packageName = session.appData.getStringExtra(EXTRA_PACKAGE_NAME);
+            final String id = session.appData.getStringExtra(EXTRA_SHORTCUT_ID);
             mStarter.startShortcut(packageName, id, position, opts, user);
         } else {
-            final PendingIntent launchIntent = intent.getParcelableExtra(EXTRA_PENDING_INTENT);
+            final PendingIntent launchIntent =
+                    session.appData.getParcelableExtra(EXTRA_PENDING_INTENT);
+            if (Build.IS_DEBUGGABLE) {
+                if (!user.equals(launchIntent.getCreatorUserHandle())) {
+                    Log.e(TAG, "Expected app intent's EXTRA_USER to match pending intent user");
+                }
+            }
             mStarter.startIntent(launchIntent, user.getIdentifier(), null /* fillIntent */,
                     position, opts);
         }
+    }
+
+    /**
+     * Launches an intent sender provided by an application.
+     */
+    private void launchIntent(DragSession session, @SplitPosition int position) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Launching intent at position=%d",
+                position);
+        final ActivityOptions baseActivityOpts = ActivityOptions.makeBasic();
+        baseActivityOpts.setDisallowEnterPictureInPictureWhileLaunching(true);
+        // TODO(b/255649902): Rework this so that SplitScreenController can always use the options
+        // instead of a fillInIntent since it's assuming that the PendingIntent is mutable
+        baseActivityOpts.setPendingIntentLaunchFlags(FLAG_ACTIVITY_NEW_TASK
+                | FLAG_ACTIVITY_MULTIPLE_TASK);
+
+        final Bundle opts = baseActivityOpts.toBundle();
+        // Put BAL flags to avoid activity start aborted.
+        opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, true);
+        opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, true);
+
+        mStarter.startIntent(session.launchableIntent,
+                session.launchableIntent.getCreatorUserHandle().getIdentifier(),
+                null /* fillIntent */, position, opts);
     }
 
     /**

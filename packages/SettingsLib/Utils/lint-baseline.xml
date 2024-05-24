@@ -1,26 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="6" by="lint 8.0.0-dev" type="baseline" dependencies="true" variant="all" version="8.0.0-dev">
+<issues format="6" by="lint 8.4.0-alpha01" type="baseline" client="" dependencies="true" name="" variant="all" version="8.4.0-alpha01">
 
     <issue
         id="NewApi"
-        message="Call requires API level 24 (current min is 21): `android.os.UserHandle#of`"
-        errorLine1="                            mContext.getPackageName(), 0, UserHandle.of(managedUserId)"
-        errorLine2="                                                                     ~~">
+        message="Call requires API level 24 (current min is 23): `android.os.UserManager#isManagedProfile`"
+        errorLine1="        return context.getSystemService(UserManager.class).isManagedProfile(userId)"
+        errorLine2="                                                           ~~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SettingsLib/Utils/src/com/android/settingslib/utils/WorkPolicyUtils.java"
-            line="119"
-            column="70"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 24 (current min is 21): `android.os.UserHandle#of`"
-        errorLine1="                        intent, 0, UserHandle.of(managedUserId));"
-        errorLine2="                                              ~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/Utils/src/com/android/settingslib/utils/WorkPolicyUtils.java"
-            line="150"
-            column="47"/>
+            file="frameworks/base/packages/SettingsLib/Utils/src/com/android/settingslib/utils/applications/AppUtils.java"
+            line="62"
+            column="60"/>
     </issue>
 
     <issue
@@ -36,35 +25,13 @@
 
     <issue
         id="NewApi"
-        message="Call requires API level 24 (current min is 21): `android.os.UserManager#isManagedProfile`"
-        errorLine1="            if (mUserManager.isManagedProfile(id)) {"
-        errorLine2="                             ~~~~~~~~~~~~~~~~">
+        message="Call requires API level 29 (current min is 21): `android.content.Context#startActivityAsUser`"
+        errorLine1="            activityContext.startActivityAsUser(intent, UserHandle.of(userId));"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/Utils/src/com/android/settingslib/utils/WorkPolicyUtils.java"
-            line="173"
-            column="30"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 24 (current min is 23): `android.os.UserManager#isManagedProfile`"
-        errorLine1="        return context.getSystemService(UserManager.class).isManagedProfile(userId)"
-        errorLine2="                                                           ~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/Utils/src/com/android/settingslib/utils/applications/AppUtils.java"
-            line="62"
-            column="60"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 26 (current min is 21): `android.app.admin.DevicePolicyManager#getDeviceOwnerComponentOnAnyUser`"
-        errorLine1="        return mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser();"
-        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/Utils/src/com/android/settingslib/utils/WorkPolicyUtils.java"
-            line="163"
-            column="37"/>
+            line="80"
+            column="29"/>
     </issue>
 
     <issue
@@ -80,13 +47,13 @@
 
     <issue
         id="NewApi"
-        message="Call requires API level 29 (current min is 21): `android.content.Context#startActivityAsUser`"
-        errorLine1="            activityContext.startActivityAsUser(intent, UserHandle.of(userId));"
-        errorLine2="                            ~~~~~~~~~~~~~~~~~~~">
+        message="Call requires API level 24 (current min is 21): `android.os.UserHandle#of`"
+        errorLine1="                            mContext.getPackageName(), 0, UserHandle.of(managedUserId)"
+        errorLine2="                                                                     ~~">
         <location
             file="frameworks/base/packages/SettingsLib/Utils/src/com/android/settingslib/utils/WorkPolicyUtils.java"
-            line="80"
-            column="29"/>
+            line="119"
+            column="70"/>
     </issue>
 
     <issue
@@ -102,6 +69,28 @@
 
     <issue
         id="NewApi"
+        message="Call requires API level 24 (current min is 21): `android.os.UserHandle#of`"
+        errorLine1="                        intent, 0, UserHandle.of(managedUserId));"
+        errorLine2="                                              ~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/Utils/src/com/android/settingslib/utils/WorkPolicyUtils.java"
+            line="150"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 21): `android.app.admin.DevicePolicyManager#getDeviceOwnerComponentOnAnyUser`"
+        errorLine1="        return mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser();"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/Utils/src/com/android/settingslib/utils/WorkPolicyUtils.java"
+            line="163"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
         message="Call requires API level 30 (current min is 21): `android.os.UserManager#getAllProfiles`"
         errorLine1="        List&lt;UserHandle&gt; allProfiles = mUserManager.getAllProfiles();"
         errorLine2="                                                    ~~~~~~~~~~~~~~">
@@ -109,6 +98,17 @@
             file="frameworks/base/packages/SettingsLib/Utils/src/com/android/settingslib/utils/WorkPolicyUtils.java"
             line="170"
             column="53"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 24 (current min is 21): `android.os.UserManager#isManagedProfile`"
+        errorLine1="            if (mUserManager.isManagedProfile(id)) {"
+        errorLine2="                             ~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/Utils/src/com/android/settingslib/utils/WorkPolicyUtils.java"
+            line="173"
+            column="30"/>
     </issue>
 
 </issues>

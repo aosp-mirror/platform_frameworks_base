@@ -54,16 +54,6 @@ public abstract class MediaManager {
         }
     }
 
-    /**
-     * Start scan connected MediaDevice
-     */
-    public abstract void startScan();
-
-    /**
-     * Stop scan MediaDevice
-     */
-    public abstract void stopScan();
-
     protected MediaDevice findMediaDevice(String id) {
         for (MediaDevice mediaDevice : mMediaDevices) {
             if (mediaDevice.getId().equals(id)) {

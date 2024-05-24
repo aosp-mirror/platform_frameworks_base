@@ -17,21 +17,22 @@
 package com.android.systemui.mediaprojection.appselector.view
 
 import android.app.ActivityOptions
-import android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+import android.app.ActivityOptions.LaunchCookie
+import android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
 import android.app.IActivityTaskManager
 import android.graphics.Rect
-import android.os.Binder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.systemui.res.R
+import com.android.systemui.Flags.pssAppSelectorAbruptExitFix
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorResultHandler
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorScope
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.mediaprojection.appselector.view.RecentTasksAdapter.RecentTaskClickListener
 import com.android.systemui.mediaprojection.appselector.view.TaskPreviewSizeProvider.TaskPreviewSizeListener
+import com.android.systemui.res.R
 import com.android.systemui.util.recycler.HorizontalSpacerItemDecoration
 import javax.inject.Inject
 
@@ -121,8 +122,30 @@ constructor(
     }
 
     override fun onRecentAppClicked(task: RecentTask, view: View) {
-        val launchCookie = Binder()
-        val activityOptions =
+        val launchCookie = LaunchCookie()
+        val activityOptions = createAnimation(task, view)
+        activityOptions.pendingIntentBackgroundActivityStartMode =
+            MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+        activityOptions.setLaunchCookie(launchCookie)
+        activityOptions.launchDisplayId = task.displayId
+
+        activityTaskManager.startActivityFromRecents(task.taskId, activityOptions.toBundle())
+        resultHandler.returnSelectedApp(launchCookie)
+    }
+
+    private fun createAnimation(task: RecentTask, view: View): ActivityOptions =
+        if (pssAppSelectorAbruptExitFix() && task.isForegroundTask) {
+            // When the selected task is in the foreground, the scale up animation doesn't work.
+            // We fallback to the default close animation.
+            ActivityOptions.makeCustomTaskAnimation(
+                view.context,
+                /* enterResId= */ 0,
+                /* exitResId= */ com.android.internal.R.anim.resolver_close_anim,
+                /* handler = */ null,
+                /* startedListener = */ null,
+                /* finishedListener = */ null
+            )
+        } else {
             ActivityOptions.makeScaleUpAnimation(
                 view,
                 /* startX= */ 0,
@@ -130,14 +153,7 @@ constructor(
                 view.width,
                 view.height
             )
-        activityOptions.pendingIntentBackgroundActivityStartMode =
-            MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-        activityOptions.launchCookie = launchCookie
-        activityOptions.launchDisplayId = task.displayId
-
-        activityTaskManager.startActivityFromRecents(task.taskId, activityOptions.toBundle())
-        resultHandler.returnSelectedApp(launchCookie)
-    }
+        }
 
     override fun onTaskSizeChanged(size: Rect) {
         views?.recentsContainer?.setTaskHeightSize()

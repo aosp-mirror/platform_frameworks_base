@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 import android.app.WindowConfiguration;
 import android.companion.virtual.IVirtualDeviceIntentInterceptor;
 import android.companion.virtual.VirtualDeviceManager;
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -161,6 +162,19 @@ public class GenericWindowPolicyControllerTest {
                 /* displayOnRemoteDevices */ true,
                 /* targetDisplayCategory */ null);
         assertActivityIsBlocked(gwpc, activityInfo);
+    }
+
+    @Test
+    public void userNotAllowlisted_systemUserCanLaunchBlockedAppStreamingActivity() {
+        GenericWindowPolicyController gwpc = createGwpcWithNoAllowedUsers();
+        gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
+
+        ActivityInfo activityInfo = getActivityInfo(
+                BLOCKED_APP_STREAMING_COMPONENT.getPackageName(),
+                BLOCKED_APP_STREAMING_COMPONENT.getClassName(),
+                /* displayOnRemoteDevices */ true,
+                /* targetDisplayCategory */ null);
+        assertActivityCanBeLaunched(gwpc, activityInfo);
     }
 
     @Test
@@ -699,6 +713,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
@@ -719,6 +734,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
@@ -740,6 +756,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
@@ -761,6 +778,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ Collections.singleton(blockedComponent),
@@ -782,6 +800,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ false,
                 /* activityPolicyExemptions= */ Collections.singleton(allowedComponent),
@@ -803,6 +822,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
@@ -824,6 +844,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
@@ -845,6 +866,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
@@ -867,6 +889,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),

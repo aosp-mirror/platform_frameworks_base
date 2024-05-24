@@ -19,26 +19,31 @@ import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.GROUP_ALERT_ALL;
 import static android.app.Notification.GROUP_ALERT_CHILDREN;
 import static android.app.Notification.GROUP_ALERT_SUMMARY;
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
+
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -55,7 +60,10 @@ import android.app.Notification.Builder;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.graphics.Color;
@@ -75,12 +83,13 @@ import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Pair;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags;
@@ -93,9 +102,6 @@ import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 import com.android.server.pm.PackageManagerService;
 
-import java.util.List;
-import java.util.Objects;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -106,6 +112,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -128,6 +138,8 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
     KeyguardManager mKeyguardManager;
     @Mock
     private UserManager mUserManager;
+    @Mock
+    private PackageManager mPackageManager;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
         1 << 30);
@@ -167,17 +179,22 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
     private static final int CUSTOM_LIGHT_OFF = 10000;
     private static final int MAX_VIBRATION_DELAY = 1000;
     private static final float DEFAULT_VOLUME = 1.0f;
+    private BroadcastReceiver mAvalancheBroadcastReceiver;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         getContext().addMockSystemService(Vibrator.class, mVibrator);
+        getContext().addMockSystemService(PackageManager.class, mPackageManager);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)).thenReturn(false);
 
         when(mAudioManager.isAudioFocusExclusive()).thenReturn(false);
         when(mAudioManager.getRingtonePlayer()).thenReturn(mRingtonePlayer);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(10);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
         when(mAudioManager.getFocusRampTimeMs(anyInt(), any(AudioAttributes.class))).thenReturn(50);
+        when(mAudioManager.shouldNotificationSoundPlay(any(AudioAttributes.class)))
+                .thenReturn(true);
         when(mUsageStats.isAlertRateLimited(any())).thenReturn(false);
         when(mVibrator.hasFrequencyControl()).thenReturn(false);
         when(mKeyguardManager.isDeviceLocked(anyInt())).thenReturn(false);
@@ -195,7 +212,8 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         // TODO (b/291907312): remove feature flag
         mSetFlagsRule.enableFlags(Flags.FLAG_REFACTOR_ATTENTION_HELPER);
         // Disable feature flags by default. Tests should enable as needed.
-        mSetFlagsRule.disableFlags(Flags.FLAG_POLITE_NOTIFICATIONS, Flags.FLAG_EXPIRE_BITMAPS);
+        mSetFlagsRule.disableFlags(Flags.FLAG_POLITE_NOTIFICATIONS,
+                Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS, Flags.FLAG_VIBRATE_WHILE_UNLOCKED);
 
         mService = spy(new NotificationManagerService(getContext(), mNotificationRecordLogger,
             mNotificationInstanceIdSequence));
@@ -207,8 +225,9 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
 
     private void initAttentionHelper(TestableFlagResolver flagResolver) {
         mAttentionHelper = new NotificationAttentionHelper(getContext(), mock(LightsManager.class),
-            mAccessibilityManager, getContext().getPackageManager(), mUserManager, mUsageStats,
-            mService.mNotificationManagerPrivate, mock(ZenModeHelper.class), flagResolver);
+                mAccessibilityManager, mPackageManager, mUserManager, mUsageStats,
+                mService.mNotificationManagerPrivate, mock(ZenModeHelper.class), flagResolver);
+        mAttentionHelper.onSystemReady();
         mAttentionHelper.setVibratorHelper(spy(new VibratorHelper(getContext())));
         mAttentionHelper.setAudioManager(mAudioManager);
         mAttentionHelper.setSystemReady(true);
@@ -219,6 +238,29 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         mAttentionHelper.setScreenOn(false);
         mAttentionHelper.setInCallStateOffHook(false);
         mAttentionHelper.mNotificationPulseEnabled = true;
+
+        if (Flags.crossAppPoliteNotifications()) {
+            // Capture BroadcastReceiver for avalanche triggers
+            ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
+                    ArgumentCaptor.forClass(BroadcastReceiver.class);
+            ArgumentCaptor<IntentFilter> intentFilterCaptor =
+                    ArgumentCaptor.forClass(IntentFilter.class);
+            verify(getContext(), atLeastOnce()).registerReceiverAsUser(
+                    broadcastReceiverCaptor.capture(),
+                    any(), intentFilterCaptor.capture(), any(), any());
+            List<BroadcastReceiver> broadcastReceivers = broadcastReceiverCaptor.getAllValues();
+            List<IntentFilter> intentFilters = intentFilterCaptor.getAllValues();
+
+            assertThat(broadcastReceivers.size()).isAtLeast(1);
+            assertThat(intentFilters.size()).isAtLeast(1);
+            for (int i = 0; i < intentFilters.size(); i++) {
+                final IntentFilter filter = intentFilters.get(i);
+                if (filter.hasAction(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
+                    mAvalancheBroadcastReceiver = broadcastReceivers.get(i);
+                }
+            }
+            assertThat(mAvalancheBroadcastReceiver).isNotNull();
+        }
     }
 
     //
@@ -364,10 +406,20 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
     }
 
     private NotificationRecord getNotificationRecord(int id,
-        boolean insistent, boolean once,
-        boolean noisy, boolean buzzy, boolean lights, boolean defaultVibration,
-        boolean defaultSound, boolean defaultLights, String groupKey, int groupAlertBehavior,
-        boolean isLeanback, UserHandle userHandle) {
+            boolean insistent, boolean once,
+            boolean noisy, boolean buzzy, boolean lights, boolean defaultVibration,
+            boolean defaultSound, boolean defaultLights, String groupKey, int groupAlertBehavior,
+            boolean isLeanback, UserHandle userHandle) {
+        return getNotificationRecord(id, insistent, once, noisy, buzzy, lights, defaultVibration,
+                defaultSound, defaultLights, groupKey, groupAlertBehavior, isLeanback, userHandle,
+                mPkg);
+    }
+
+    private NotificationRecord getNotificationRecord(int id,
+            boolean insistent, boolean once,
+            boolean noisy, boolean buzzy, boolean lights, boolean defaultVibration,
+            boolean defaultSound, boolean defaultLights, String groupKey, int groupAlertBehavior,
+            boolean isLeanback, UserHandle userHandle, String packageName) {
 
         final Builder builder = new Builder(getContext())
             .setContentTitle("foo")
@@ -427,8 +479,8 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         when(packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK))
             .thenReturn(isLeanback);
 
-        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, id, mTag, mUid,
-            mPid, n, userHandle, null, System.currentTimeMillis());
+        StatusBarNotification sbn = new StatusBarNotification(packageName, packageName, id, mTag,
+                mUid, mPid, n, userHandle, null, System.currentTimeMillis());
         NotificationRecord r = new NotificationRecord(context, sbn, mChannel);
         mService.addNotification(r);
         return r;
@@ -915,6 +967,8 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
+        when(mAudioManager.shouldNotificationSoundPlay(any(AudioAttributes.class)))
+                .thenReturn(false);
 
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
 
@@ -932,6 +986,8 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(1);
+        // all streams at 1 means no muting from audio framework
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(true);
 
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
 
@@ -950,6 +1006,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
 
@@ -971,6 +1028,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
 
@@ -1243,6 +1301,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
         verifyDelayedVibrate(mAttentionHelper.getVibratorHelper().createFallbackVibration(false));
@@ -1973,6 +2032,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         NotificationRecord r = getBuzzyBeepyNotification();
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
 
@@ -1990,7 +2050,6 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
     public void testBeepVolume_politeNotif() throws Exception {
         mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
         TestableFlagResolver flagResolver = new TestableFlagResolver();
-        flagResolver.setFlagOverride(NotificationFlags.NOTIF_COOLDOWN_RULE, "rule1");
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
         initAttentionHelper(flagResolver);
@@ -2015,15 +2074,100 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
-    // TODO b/270456865: Only one of the two strategies will be released.
-    //  The other one need to be removed
     @Test
-    public void testBeepVolume_politeNotif_Strategy2() throws Exception {
+    public void testBeepVolume_politeNotif_AvalancheStrategy() throws Exception {
         mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
         TestableFlagResolver flagResolver = new TestableFlagResolver();
-        flagResolver.setFlagOverride(NotificationFlags.NOTIF_COOLDOWN_RULE, "rule2");
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
+        initAttentionHelper(flagResolver);
+
+        // Trigger avalanche trigger intent
+        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        intent.putExtra("state", false);
+        mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+
+        NotificationRecord r = getBeepyNotification();
+
+        // set up internal state
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        Mockito.reset(mRingtonePlayer);
+
+        // Use different package for next notifications
+        NotificationRecord r2 = getNotificationRecord(mId, false /* insistent */, false /* once */,
+                true /* noisy */, false /* buzzy*/, false /* lights */, true, true,
+                false, null, Notification.GROUP_ALERT_ALL, false, mUser, "anotherPkg");
+
+        // update should beep at 50% volume
+        mAttentionHelper.buzzBeepBlinkLocked(r2, DEFAULT_SIGNALS);
+        verifyBeepVolume(0.5f);
+
+        // Use different package for next notifications
+        NotificationRecord r3 = getNotificationRecord(mId, false /* insistent */, false /* once */,
+                true /* noisy */, false /* buzzy*/, false /* lights */, true, true,
+                false, null, Notification.GROUP_ALERT_ALL, false, mUser, "yetAnotherPkg");
+
+        // 2nd update should beep at 0% volume
+        Mockito.reset(mRingtonePlayer);
+        mAttentionHelper.buzzBeepBlinkLocked(r3, DEFAULT_SIGNALS);
+        verifyBeepVolume(0.0f);
+
+        verify(mAccessibilityService, times(3)).sendAccessibilityEvent(any(), anyInt());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testBeepVolume_politeNotif_AvalancheStrategy_ChannelHasUserSound()
+            throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
+        initAttentionHelper(flagResolver);
+
+        // Trigger avalanche trigger intent
+        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        intent.putExtra("state", false);
+        mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+
+        NotificationRecord r = getBeepyNotification();
+
+        // set up internal state
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        Mockito.reset(mRingtonePlayer);
+
+        // Use package with user-set sounds for next notifications
+        mChannel = new NotificationChannel("test2", "test2", IMPORTANCE_DEFAULT);
+        mChannel.lockFields(NotificationChannel.USER_LOCKED_SOUND);
+        NotificationRecord r2 = getNotificationRecord(mId, false /* insistent */, false /* once */,
+                true /* noisy */, false /* buzzy*/, false /* lights */, true, true,
+                false, null, Notification.GROUP_ALERT_ALL, false, mUser, "anotherPkg");
+
+        // update should beep at 100% volume
+        mAttentionHelper.buzzBeepBlinkLocked(r2, DEFAULT_SIGNALS);
+        verifyBeepVolume(1.0f);
+
+        // 2nd update should beep at 50% volume
+        Mockito.reset(mRingtonePlayer);
+        mAttentionHelper.buzzBeepBlinkLocked(r2, DEFAULT_SIGNALS);
+        verifyBeepVolume(0.5f);
+
+        verify(mAccessibilityService, times(3)).sendAccessibilityEvent(any(), anyInt());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testBeepVolume_politeNotif_applyPerApp() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.disableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
+        // NOTIFICATION_COOLDOWN_ALL setting is enabled
+        Settings.System.putInt(getContext().getContentResolver(),
+                Settings.System.NOTIFICATION_COOLDOWN_ALL, 1);
         initAttentionHelper(flagResolver);
 
         NotificationRecord r = getBeepyNotification();
@@ -2032,17 +2176,77 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
         Mockito.reset(mRingtonePlayer);
 
-        // update should beep at 0% volume
-        r.isUpdate = true;
-        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        // Use different channel for next notifications
+        mChannel = new NotificationChannel("test2", "test2", IMPORTANCE_DEFAULT);
+
+        // update should beep at 50% volume
+        NotificationRecord r2 = getBeepyNotification();
+        mAttentionHelper.buzzBeepBlinkLocked(r2, DEFAULT_SIGNALS);
+        verifyBeepVolume(0.5f);
+
+        // 2nd update should beep at 0% volume
+        Mockito.reset(mRingtonePlayer);
+        mAttentionHelper.buzzBeepBlinkLocked(r2, DEFAULT_SIGNALS);
         verifyBeepVolume(0.0f);
+
+        // Use different package for next notifications
+        NotificationRecord r3 = getNotificationRecord(mId, false /* insistent */, false /* once */,
+                true /* noisy */, false /* buzzy*/, false /* lights */, true, true,
+                false, null, Notification.GROUP_ALERT_ALL, false, mUser, "anotherPkg");
+
+        // Update from new package should beep at 100% volume
+        Mockito.reset(mRingtonePlayer);
+        mAttentionHelper.buzzBeepBlinkLocked(r3, DEFAULT_SIGNALS);
+        verifyBeepVolume(1.0f);
+
+        verify(mAccessibilityService, times(4)).sendAccessibilityEvent(any(), anyInt());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testBeepVolume_politeNotif_applyPerApp_ChannelHasUserSound() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.disableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
+        // NOTIFICATION_COOLDOWN_ALL setting is enabled
+        Settings.System.putInt(getContext().getContentResolver(),
+                Settings.System.NOTIFICATION_COOLDOWN_ALL, 1);
+        initAttentionHelper(flagResolver);
+
+        NotificationRecord r = getBeepyNotification();
+
+        // set up internal state
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        Mockito.reset(mRingtonePlayer);
+
+        // Use different channel for next notifications
+        mChannel = new NotificationChannel("test2", "test2", IMPORTANCE_DEFAULT);
+        mChannel.lockFields(NotificationChannel.USER_LOCKED_SOUND);
+
+        // update should beep at 100% volume
+        NotificationRecord r2 = getBeepyNotification();
+        mAttentionHelper.buzzBeepBlinkLocked(r2, DEFAULT_SIGNALS);
+        verifyBeepVolume(1.0f);
 
         // 2nd update should beep at 50% volume
         Mockito.reset(mRingtonePlayer);
-        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        mAttentionHelper.buzzBeepBlinkLocked(r2, DEFAULT_SIGNALS);
         verifyBeepVolume(0.5f);
 
-        verify(mAccessibilityService, times(3)).sendAccessibilityEvent(any(), anyInt());
+        // Use different package for next notifications
+        mChannel = new NotificationChannel("test3", "test3", IMPORTANCE_DEFAULT);
+        NotificationRecord r3 = getNotificationRecord(mId, false /* insistent */, false /* once */,
+                true /* noisy */, false /* buzzy*/, false /* lights */, true, true,
+                false, null, Notification.GROUP_ALERT_ALL, false, mUser, "anotherPkg");
+
+        // Update from new package should beep at 100% volume
+        Mockito.reset(mRingtonePlayer);
+        mAttentionHelper.buzzBeepBlinkLocked(r3, DEFAULT_SIGNALS);
+        verifyBeepVolume(1.0f);
+
+        verify(mAccessibilityService, times(4)).sendAccessibilityEvent(any(), anyInt());
         assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
@@ -2050,7 +2254,6 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
     public void testVibrationIntensity_politeNotif() throws Exception {
         mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
         TestableFlagResolver flagResolver = new TestableFlagResolver();
-        flagResolver.setFlagOverride(NotificationFlags.NOTIF_COOLDOWN_RULE, "rule1");
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
         initAttentionHelper(flagResolver);
@@ -2076,37 +2279,9 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testVibrationIntensity_politeNotif_Strategy2() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
-        TestableFlagResolver flagResolver = new TestableFlagResolver();
-        flagResolver.setFlagOverride(NotificationFlags.NOTIF_COOLDOWN_RULE, "rule2");
-        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
-        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
-        initAttentionHelper(flagResolver);
-
-        NotificationRecord r = getBuzzyBeepyNotification();
-
-        // set up internal state
-        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
-
-        VibratorHelper vibratorHelper = mAttentionHelper.getVibratorHelper();
-        Mockito.reset(vibratorHelper);
-
-        // update should buzz at 0% intensity
-        r.isUpdate = true;
-        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
-
-        verify(vibratorHelper, times(1)).scale(any(), eq(0.0f));
-        Mockito.reset(vibratorHelper);
-
-        // 2nd update should buzz at 50% intensity
-        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
-        verify(vibratorHelper, times(1)).scale(any(), eq(0.5f));
-    }
-
-    @Test
     public void testBuzzOnlyOnScreenUnlock_politeNotif() throws Exception {
         mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_VIBRATE_WHILE_UNLOCKED);
         TestableFlagResolver flagResolver = new TestableFlagResolver();
 
         // When NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED setting is enabled
@@ -2161,7 +2336,6 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
     public void testBeepVolume_politeNotif_workProfile() throws Exception {
         mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
         TestableFlagResolver flagResolver = new TestableFlagResolver();
-        flagResolver.setFlagOverride(NotificationFlags.NOTIF_COOLDOWN_RULE, "rule1");
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
 
@@ -2202,7 +2376,6 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
     public void testBeepVolume_politeNotif_workProfile_disabled() throws Exception {
         mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
         TestableFlagResolver flagResolver = new TestableFlagResolver();
-        flagResolver.setFlagOverride(NotificationFlags.NOTIF_COOLDOWN_RULE, "rule1");
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
 
@@ -2235,6 +2408,82 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         verifyBeepVolume(1.0f);
 
         assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testAvalancheStrategyTriggers() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        final int avalancheTimeoutMs = 100;
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_AVALANCHE_TIMEOUT, avalancheTimeoutMs);
+        initAttentionHelper(flagResolver);
+
+        // Trigger avalanche trigger intents
+        for (String intentAction
+                : NotificationAttentionHelper.NOTIFICATION_AVALANCHE_TRIGGER_INTENTS) {
+            // Set the action and extras to trigger the avalanche strategy
+            Intent intent = new Intent(intentAction);
+            Pair<String, Boolean> extras =
+                    NotificationAttentionHelper.NOTIFICATION_AVALANCHE_TRIGGER_EXTRAS
+                        .get(intentAction);
+            if (extras != null) {
+                intent.putExtra(extras.first, extras.second);
+            }
+            mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+            assertThat(mAttentionHelper.getPolitenessStrategy().isActive()).isTrue();
+
+            // Wait for avalanche timeout
+            Thread.sleep(avalancheTimeoutMs + 1);
+
+            // Check that avalanche strategy is inactive
+            assertThat(mAttentionHelper.getPolitenessStrategy().isActive()).isFalse();
+        }
+    }
+
+    @Test
+    public void testAvalancheStrategyTriggers_disabledExtras() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        initAttentionHelper(flagResolver);
+
+        for (String intentAction
+                : NotificationAttentionHelper.NOTIFICATION_AVALANCHE_TRIGGER_INTENTS) {
+            Intent intent = new Intent(intentAction);
+            Pair<String, Boolean> extras =
+                    NotificationAttentionHelper.NOTIFICATION_AVALANCHE_TRIGGER_EXTRAS
+                        .get(intentAction);
+            // Test only for intents with extras
+            if (extras != null) {
+                // Set the action extras to NOT trigger the avalanche strategy
+                intent.putExtra(extras.first, !extras.second);
+                mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+                // Check that avalanche strategy is inactive
+                assertThat(mAttentionHelper.getPolitenessStrategy().isActive()).isFalse();
+            }
+        }
+    }
+
+    @Test
+    public void testAvalancheStrategyTriggers_nonAvalancheIntents() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        initAttentionHelper(flagResolver);
+
+        // Broadcast intents that are not avalanche triggers
+        final Set<String> notAvalancheTriggerIntents = Set.of(
+                Intent.ACTION_USER_ADDED,
+                Intent.ACTION_SCREEN_ON,
+                Intent.ACTION_POWER_CONNECTED
+        );
+        for (String intentAction : notAvalancheTriggerIntents) {
+            Intent intent = new Intent(intentAction);
+            mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+            // Check that avalanche strategy is inactive
+            assertThat(mAttentionHelper.getPolitenessStrategy().isActive()).isFalse();
+        }
     }
 
     static class VibrateRepeatMatcher implements ArgumentMatcher<VibrationEffect> {

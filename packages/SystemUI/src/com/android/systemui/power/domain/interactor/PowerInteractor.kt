@@ -119,6 +119,11 @@ constructor(
         }
     }
 
+    /** Wakes up the device for the Side FPS acquisition event. */
+    fun wakeUpForSideFingerprintAcquisition() {
+        repository.wakeUp("SFPS_FP_ACQUISITION_STARTED", PowerManager.WAKE_REASON_BIOMETRIC)
+    }
+
     /**
      * Called from [KeyguardService] to inform us that the device has started waking up. This is the
      * canonical source of wakefulness information for System UI. This method should not be called

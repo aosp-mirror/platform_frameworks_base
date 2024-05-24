@@ -23,7 +23,6 @@ import android.app.IApplicationThread;
 import android.app.ProcessMemoryState.HostingComponentType;
 import android.content.pm.ApplicationInfo;
 import android.os.Debug;
-import android.os.Flags;
 import android.os.Process;
 import android.os.SystemClock;
 import android.util.DebugUtils;
@@ -677,7 +676,7 @@ final class ProcessProfileRecord {
     void dumpPss(PrintWriter pw, String prefix, long nowUptime) {
         synchronized (mProfilerLock) {
             // TODO(b/297542292): Remove this case once PSS profiling is replaced
-            if (!Flags.removeAppProfilerPssCollection()) {
+            if (mService.mAppProfiler.isProfilingPss()) {
                 pw.print(prefix);
                 pw.print("lastPssTime=");
                 TimeUtils.formatDuration(mLastPssTime, nowUptime, pw);

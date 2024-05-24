@@ -16,7 +16,6 @@
 
 package com.android.settingslib.enterprise;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,6 +23,7 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.RestrictedLockUtils;

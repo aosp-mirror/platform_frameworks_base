@@ -161,6 +161,18 @@ public class ArrayUtilsTest {
     }
 
     @Test
+    public void testAppendBoolean() throws Exception {
+        assertArrayEquals(new boolean[] { true },
+                ArrayUtils.appendBoolean(null, true));
+        assertArrayEquals(new boolean[] { true },
+                ArrayUtils.appendBoolean(new boolean[] { }, true));
+        assertArrayEquals(new boolean[] { true, false },
+                ArrayUtils.appendBoolean(new boolean[] { true }, false));
+        assertArrayEquals(new boolean[] { true, true },
+                ArrayUtils.appendBoolean(new boolean[] { true }, true));
+    }
+
+    @Test
     public void testRemoveLong() throws Exception {
         assertNull(ArrayUtils.removeLong(null, 1));
         assertArrayEquals(new long[] { },

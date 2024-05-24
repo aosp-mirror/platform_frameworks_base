@@ -3,10 +3,10 @@ package com.android.systemui.statusbar
 import android.content.Context
 import android.util.IndentingPrintWriter
 import android.util.MathUtils
-import com.android.systemui.res.R
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.media.controls.ui.MediaHierarchyManager
-import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeLockscreenInteractor
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import dagger.assisted.Assisted
@@ -18,7 +18,7 @@ class LockscreenShadeKeyguardTransitionController
 @AssistedInject
 constructor(
         private val mediaHierarchyManager: MediaHierarchyManager,
-        @Assisted private val notificationPanelController: ShadeViewController,
+        @Assisted private val shadeLockscreenInteractor: ShadeLockscreenInteractor,
         context: Context,
         configurationController: ConfigurationController,
         dumpManager: DumpManager,
@@ -72,10 +72,10 @@ constructor(
         alphaProgress = MathUtils.saturate(dragDownAmount / alphaTransitionDistance)
         alpha = 1f - alphaProgress
         translationY = calculateKeyguardTranslationY(dragDownAmount)
-        notificationPanelController.setKeyguardTransitionProgress(alpha, translationY)
+        shadeLockscreenInteractor.setKeyguardTransitionProgress(alpha, translationY)
 
         statusBarAlpha = if (useSplitShade) alpha else -1f
-        notificationPanelController.setKeyguardStatusBarAlpha(statusBarAlpha)
+        shadeLockscreenInteractor.setKeyguardStatusBarAlpha(statusBarAlpha)
     }
 
     private fun calculateKeyguardTranslationY(dragDownAmount: Float): Int {
@@ -117,7 +117,7 @@ constructor(
     @AssistedFactory
     fun interface Factory {
         fun create(
-            notificationPanelController: ShadeViewController
+            shadeLockscreenInteractor: ShadeLockscreenInteractor
         ): LockscreenShadeKeyguardTransitionController
     }
 }

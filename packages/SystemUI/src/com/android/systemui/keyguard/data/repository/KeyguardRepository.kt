@@ -21,9 +21,9 @@ import android.hardware.biometrics.BiometricSourceType
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
-import com.android.systemui.common.shared.model.Position
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
@@ -39,11 +39,13 @@ import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -53,7 +55,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
 /** Defines interface for classes that encapsulate application state for the keyguard. */
@@ -74,12 +79,6 @@ interface KeyguardRepository {
     val keyguardAlpha: StateFlow<Float>
 
     /**
-     * Observable of the relative offset of the lock-screen clock from its natural position on the
-     * screen.
-     */
-    val clockPosition: StateFlow<Position>
-
-    /**
      * Observable for whether the keyguard is showing.
      *
      * Note: this is also `true` when the lock-screen is occluded with an `Activity` "above" it in
@@ -95,7 +94,7 @@ interface KeyguardRepository {
      * Whether the device is locked or unlocked right now. This is true when keyguard has been
      * dismissed or can be dismissed by a swipe
      */
-    val isKeyguardUnlocked: StateFlow<Boolean>
+    val isKeyguardDismissible: StateFlow<Boolean>
 
     /**
      * Observable for the signal that keyguard is about to go away.
@@ -110,7 +109,7 @@ interface KeyguardRepository {
     val isKeyguardGoingAway: Flow<Boolean>
 
     /** Is the always-on display available to be used? */
-    val isAodAvailable: Flow<Boolean>
+    val isAodAvailable: StateFlow<Boolean>
 
     fun setAodAvailable(value: Boolean)
 
@@ -125,6 +124,9 @@ interface KeyguardRepository {
      * [linearDozeAmount] flow to check if it's greater than `0`
      */
     val isDozing: StateFlow<Boolean>
+
+    /** Keyguard can be clipped at the top as the shade is dragged */
+    val topClippingBounds: MutableStateFlow<Int?>
 
     /**
      * Observable for whether the device is dreaming.
@@ -207,6 +209,12 @@ interface KeyguardRepository {
     val clockShouldBeCentered: Flow<Boolean>
 
     /**
+     * Whether the primary authentication is required for the given user due to lockdown or
+     * encryption after reboot.
+     */
+    val isEncryptedOrLockdown: Flow<Boolean>
+
+    /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
      *
      * Note: this is also `true` when the lock-screen is occluded with an `Activity` "above" it in
@@ -223,11 +231,6 @@ interface KeyguardRepository {
 
     /** Sets the current amount of alpha that should be used for rendering the keyguard. */
     fun setKeyguardAlpha(alpha: Float)
-
-    /**
-     * Sets the relative offset of the lock-screen clock from its natural position on the screen.
-     */
-    fun setClockPosition(x: Int, y: Int)
 
     /**
      * Returns whether the keyguard bottom area should be constrained to the top of the lock icon
@@ -277,6 +280,8 @@ constructor(
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
     private val systemClock: SystemClock,
+    facePropertyRepository: FacePropertyRepository,
+    private val userTracker: UserTracker,
 ) : KeyguardRepository {
     private val _dismissAction: MutableStateFlow<DismissAction> =
         MutableStateFlow(DismissAction.None)
@@ -306,11 +311,10 @@ constructor(
     private val _keyguardAlpha = MutableStateFlow(1f)
     override val keyguardAlpha = _keyguardAlpha.asStateFlow()
 
-    private val _clockPosition = MutableStateFlow(Position(0, 0))
-    override val clockPosition = _clockPosition.asStateFlow()
-
     private val _clockShouldBeCentered = MutableStateFlow(true)
     override val clockShouldBeCentered: Flow<Boolean> = _clockShouldBeCentered.asStateFlow()
+
+    override val topClippingBounds = MutableStateFlow<Int?>(null)
 
     override val isKeyguardShowing: Flow<Boolean> =
         conflatedCallbackFlow {
@@ -338,7 +342,7 @@ constructor(
             .distinctUntilChanged()
 
     private val _isAodAvailable = MutableStateFlow(false)
-    override val isAodAvailable: Flow<Boolean> = _isAodAvailable.asStateFlow()
+    override val isAodAvailable: StateFlow<Boolean> = _isAodAvailable.asStateFlow()
 
     override fun setAodAvailable(value: Boolean) {
         _isAodAvailable.value = value
@@ -369,7 +373,7 @@ constructor(
             }
             .distinctUntilChanged()
 
-    override val isKeyguardUnlocked: StateFlow<Boolean> =
+    override val isKeyguardDismissible: StateFlow<Boolean> =
         conflatedCallbackFlow {
                 val callback =
                     object : KeyguardStateController.Callback {
@@ -377,7 +381,7 @@ constructor(
                             trySendWithFailureLogging(
                                 keyguardStateController.isUnlocked,
                                 TAG,
-                                "updated isKeyguardUnlocked due to onUnlockedChanged"
+                                "updated isKeyguardDismissible due to onUnlockedChanged"
                             )
                         }
 
@@ -385,7 +389,7 @@ constructor(
                             trySendWithFailureLogging(
                                 keyguardStateController.isUnlocked,
                                 TAG,
-                                "updated isKeyguardUnlocked due to onKeyguardShowingChanged"
+                                "updated isKeyguardDismissible due to onKeyguardShowingChanged"
                             )
                         }
                     }
@@ -542,6 +546,24 @@ constructor(
         awaitClose { dozeTransitionListener.removeCallback(callback) }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val isEncryptedOrLockdown: Flow<Boolean> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : KeyguardUpdateMonitorCallback() {
+                        override fun onStrongAuthStateChanged(userId: Int) {
+                            trySendWithFailureLogging(userId, TAG, "strong auth state change")
+                        }
+                    }
+                keyguardUpdateMonitor.registerCallback(callback)
+                awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
+            }
+            .filter { userId -> userId == userTracker.userId }
+            .onStart { emit(userTracker.userId) }
+            .mapLatest { userId -> keyguardUpdateMonitor.isEncryptedOrLockdown(userId) }
+            // KeyguardUpdateMonitor#registerCallback needs to be called on the main thread.
+            .flowOn(mainDispatcher)
+
     override fun isKeyguardShowing(): Boolean {
         return keyguardStateController.isShowing
     }
@@ -599,27 +621,7 @@ constructor(
         awaitClose { authController.removeCallback(callback) }
     }
 
-    override val faceSensorLocation: Flow<Point?> = conflatedCallbackFlow {
-        fun sendSensorLocation() {
-            trySendWithFailureLogging(
-                authController.faceSensorLocation,
-                TAG,
-                "AuthController.Callback#onFingerprintLocationChanged"
-            )
-        }
-
-        val callback =
-            object : AuthController.Callback {
-                override fun onFaceSensorLocationChanged() {
-                    sendSensorLocation()
-                }
-            }
-
-        authController.addCallback(callback)
-        sendSensorLocation()
-
-        awaitClose { authController.removeCallback(callback) }
-    }
+    override val faceSensorLocation: Flow<Point?> = facePropertyRepository.sensorLocation
 
     override val biometricUnlockSource: Flow<BiometricUnlockSource?> = conflatedCallbackFlow {
         val callback =
@@ -658,10 +660,6 @@ constructor(
 
     override fun setKeyguardAlpha(alpha: Float) {
         _keyguardAlpha.value = alpha
-    }
-
-    override fun setClockPosition(x: Int, y: Int) {
-        _clockPosition.value = Position(x, y)
     }
 
     override fun isUdfpsSupported(): Boolean = keyguardUpdateMonitor.isUdfpsSupported

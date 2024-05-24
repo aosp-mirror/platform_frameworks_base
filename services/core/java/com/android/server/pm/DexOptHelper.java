@@ -16,7 +16,10 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_RESTORE;
+import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_SETUP;
 import static android.os.Trace.TRACE_TAG_DALVIK;
+import static android.os.incremental.IncrementalManager.isIncrementalPath;
 
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
 import static com.android.server.pm.ApexManager.ActiveApexInfo;
@@ -27,6 +30,8 @@ import static com.android.server.pm.PackageManagerService.REASON_BOOT_AFTER_MAIN
 import static com.android.server.pm.PackageManagerService.REASON_BOOT_AFTER_OTA;
 import static com.android.server.pm.PackageManagerService.REASON_CMDLINE;
 import static com.android.server.pm.PackageManagerService.REASON_FIRST_BOOT;
+import static com.android.server.pm.PackageManagerService.SCAN_AS_APEX;
+import static com.android.server.pm.PackageManagerService.SCAN_AS_INSTANT_APP;
 import static com.android.server.pm.PackageManagerService.STUB_SUFFIX;
 import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
@@ -45,19 +50,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApexStagedEvent;
-import android.content.pm.IPackageManagerNative;
-import android.content.pm.IStagedApexObserver;
+import android.content.pm.Flags;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.dex.ArtManager;
 import android.os.Binder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
@@ -1050,8 +1054,6 @@ public final class DexOptHelper {
                 artManager.scheduleBackgroundDexoptJob();
             }
         }, new IntentFilter(Intent.ACTION_LOCKED_BOOT_COMPLETED));
-
-        StagedApexObserver.registerForStagedApexUpdates(artManager);
     }
 
     /**
@@ -1098,31 +1100,72 @@ public final class DexOptHelper {
         }
     }
 
-    private static class StagedApexObserver extends IStagedApexObserver.Stub {
-        private final @NonNull ArtManagerLocal mArtManager;
+    /**
+     * Returns DexoptOptions by the given InstallRequest.
+     */
+    static DexoptOptions getDexoptOptionsByInstallRequest(InstallRequest installRequest,
+            DexManager dexManager) {
+        final PackageSetting ps = installRequest.getScannedPackageSetting();
+        final String packageName = ps.getPackageName();
+        final boolean isBackupOrRestore =
+                installRequest.getInstallReason() == INSTALL_REASON_DEVICE_RESTORE
+                        || installRequest.getInstallReason() == INSTALL_REASON_DEVICE_SETUP;
+        final int dexoptFlags = DexoptOptions.DEXOPT_BOOT_COMPLETE
+                | DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES
+                | DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE
+                | (isBackupOrRestore ? DexoptOptions.DEXOPT_FOR_RESTORE : 0);
+        // Compute the compilation reason from the installation scenario.
+        final int compilationReason =
+                dexManager.getCompilationReasonForInstallScenario(
+                        installRequest.getInstallScenario());
+        return new DexoptOptions(packageName, compilationReason, dexoptFlags);
+    }
 
-        static void registerForStagedApexUpdates(@NonNull ArtManagerLocal artManager) {
-            IPackageManagerNative packageNative = IPackageManagerNative.Stub.asInterface(
-                    ServiceManager.getService("package_native"));
-            if (packageNative == null) {
-                Log.e(TAG, "No IPackageManagerNative");
-                return;
-            }
+    /**
+     * Use ArtService to perform dexopt by the given InstallRequest.
+     */
+    static DexoptResult dexoptPackageUsingArtService(InstallRequest installRequest,
+            DexoptOptions dexoptOptions) {
+        final PackageSetting ps = installRequest.getScannedPackageSetting();
+        final String packageName = ps.getPackageName();
 
-            try {
-                packageNative.registerStagedApexObserver(new StagedApexObserver(artManager));
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to register staged apex observer", e);
-            }
+        PackageManagerLocal packageManagerLocal =
+                LocalManagerRegistry.getManager(PackageManagerLocal.class);
+        try (PackageManagerLocal.FilteredSnapshot snapshot =
+                     packageManagerLocal.withFilteredSnapshot()) {
+            boolean ignoreDexoptProfile =
+                    (installRequest.getInstallFlags()
+                            & PackageManager.INSTALL_IGNORE_DEXOPT_PROFILE)
+                            != 0;
+            /*@DexoptFlags*/ int extraFlags =
+                    ignoreDexoptProfile && Flags.useArtServiceV2()
+                            ? ArtFlags.FLAG_IGNORE_PROFILE
+                            : 0;
+            DexoptParams params = dexoptOptions.convertToDexoptParams(extraFlags);
+            DexoptResult dexOptResult = getArtManagerLocal().dexoptPackage(
+                    snapshot, packageName, params);
+
+            return dexOptResult;
         }
+    }
 
-        private StagedApexObserver(@NonNull ArtManagerLocal artManager) {
-            mArtManager = artManager;
-        }
+    /**
+     * Returns whether to perform dexopt by the given InstallRequest.
+     */
+    static boolean shouldPerformDexopt(InstallRequest installRequest, DexoptOptions dexoptOptions,
+            Context context) {
+        final boolean isApex = ((installRequest.getScanFlags() & SCAN_AS_APEX) != 0);
+        final boolean instantApp = ((installRequest.getScanFlags() & SCAN_AS_INSTANT_APP) != 0);
+        final PackageSetting ps = installRequest.getScannedPackageSetting();
+        final AndroidPackage pkg = ps.getPkg();
+        final boolean onIncremental = isIncrementalPath(ps.getPathString());
 
-        @Override
-        public void onApexStaged(@NonNull ApexStagedEvent event) {
-            mArtManager.onApexStaged(event.stagedApexModuleNames);
-        }
+        return (!instantApp || Global.getInt(context.getContentResolver(),
+                Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0)
+                && pkg != null
+                && !pkg.isDebuggable()
+                && (!onIncremental)
+                && dexoptOptions.isCompilationEnabled()
+                && !isApex;
     }
 }

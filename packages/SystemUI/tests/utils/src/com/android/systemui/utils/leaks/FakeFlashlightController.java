@@ -30,11 +30,11 @@ public class FakeFlashlightController extends BaseLeakChecker<FlashlightListener
     private final List<FlashlightListener> callbacks = new ArrayList<>();
 
     @VisibleForTesting
-    public boolean isAvailable;
+    public boolean isAvailable = true;
     @VisibleForTesting
-    public boolean isEnabled;
+    public boolean isEnabled = false;
     @VisibleForTesting
-    public boolean hasFlashlight;
+    public boolean hasFlashlight = true;
 
     public FakeFlashlightController(LeakCheck test) {
         super(test, "flashlight");
@@ -52,16 +52,26 @@ public class FakeFlashlightController extends BaseLeakChecker<FlashlightListener
         callbacks.forEach(FlashlightListener::onFlashlightError);
     }
 
+    /**
+     * Used to decide if tile should be shown or gone
+     * @return available/unavailable
+     */
     @Override
     public boolean hasFlashlight() {
         return hasFlashlight;
     }
 
+    /**
+     * @param newState active/inactive
+     */
     @Override
     public void setFlashlight(boolean newState) {
         callbacks.forEach(flashlightListener -> flashlightListener.onFlashlightChanged(newState));
     }
 
+    /**
+     * @return temporary availability
+     */
     @Override
     public boolean isAvailable() {
         return isAvailable;
@@ -76,6 +86,9 @@ public class FakeFlashlightController extends BaseLeakChecker<FlashlightListener
     public void addCallback(FlashlightListener listener) {
         super.addCallback(listener);
         callbacks.add(listener);
+
+        listener.onFlashlightAvailabilityChanged(isAvailable());
+        listener.onFlashlightChanged(isEnabled());
     }
 
     @Override

@@ -25,10 +25,11 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.view.animation.Animation;
+import android.util.SparseArray;
 
 import com.android.internal.protolog.common.ProtoLog;
 
@@ -48,6 +49,12 @@ class WallpaperWindowToken extends WindowToken {
     float mWallpaperYStep = -1;
     int mWallpaperDisplayOffsetX = Integer.MIN_VALUE;
     int mWallpaperDisplayOffsetY = Integer.MIN_VALUE;
+
+    /**
+     * Map from {@link android.app.WallpaperManager.ScreenOrientation} to crop rectangles.
+     * Crop rectangles represent the part of the wallpaper displayed for each screen orientation.
+     */
+    private SparseArray<Rect> mCropHints = new SparseArray<>();
 
     WallpaperWindowToken(WindowManagerService service, IBinder token, boolean explicit,
             DisplayContent dc, boolean ownerCanManageAppTokens) {
@@ -82,20 +89,26 @@ class WallpaperWindowToken extends WindowToken {
             return;
         }
         mShowWhenLocked = showWhenLocked;
-        // Move the window token to the front (private) or back (showWhenLocked). This is
-        // possible
-        // because the DisplayArea underneath TaskDisplayArea only contains TYPE_WALLPAPER
-        // windows.
+        // Move the window token to the front (private) or back (showWhenLocked). This is possible
+        // because the DisplayArea underneath TaskDisplayArea only contains TYPE_WALLPAPER windows.
         final int position = showWhenLocked ? POSITION_BOTTOM : POSITION_TOP;
 
-        // Note: Moving all the way to the front or back breaks ordering based on addition
-        // times.
-        // We should never have more than one non-animating token of each type.
+        // Note: Moving all the way to the front or back breaks ordering based on addition times.
+        // There should never have more than one non-animating token of each type.
         getParent().positionChildAt(position, this /* child */, false /*includingParents */);
+        mDisplayContent.mWallpaperController.onWallpaperTokenReordered();
     }
 
     boolean canShowWhenLocked() {
         return mShowWhenLocked;
+    }
+
+    void setCropHints(SparseArray<Rect> cropHints) {
+        mCropHints = cropHints.clone();
+    }
+
+    SparseArray<Rect> getCropHints() {
+        return mCropHints;
     }
 
     void sendWindowWallpaperCommand(
@@ -120,16 +133,6 @@ class WallpaperWindowToken extends WindowToken {
                 // We only want to be synchronous with one wallpaper.
                 sync = false;
             }
-        }
-    }
-
-    /**
-     * Starts {@param anim} on all children.
-     */
-    void startAnimation(Animation anim) {
-        for (int ndx = mChildren.size() - 1; ndx >= 0; ndx--) {
-            final WindowState windowState = mChildren.get(ndx);
-            windowState.startAnimation(anim);
         }
     }
 

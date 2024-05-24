@@ -340,6 +340,20 @@ public class CachedBluetoothDeviceManager {
         }
     }
 
+    synchronized void removeDuplicateInstanceForIdentityAddress(BluetoothDevice device) {
+        String identityAddress = device.getIdentityAddress();
+        if (identityAddress == null || identityAddress.equals(device.getAddress())) {
+            return;
+        }
+        mCachedDevices.removeIf(d -> {
+            boolean shouldRemove = d.getDevice().getAddress().equals(identityAddress);
+            if (shouldRemove) {
+                Log.d(TAG, "Remove instance for identity address " + d);
+            }
+            return shouldRemove;
+        });
+    }
+
     public synchronized boolean onProfileConnectionStateChangedIfProcessed(CachedBluetoothDevice
             cachedDevice, int state, int profileId) {
         if (profileId == BluetoothProfile.HEARING_AID) {

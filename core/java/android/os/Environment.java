@@ -17,6 +17,7 @@
 package android.os;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -412,7 +413,9 @@ public class Environment {
      * Returns the base directory for per-user system directory, device encrypted.
      * {@hide}
      */
-    public static File getDataSystemDeDirectory() {
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(android.crashrecovery.flags.Flags.FLAG_ENABLE_CRASHRECOVERY)
+    public static @NonNull File getDataSystemDeDirectory() {
         return buildPath(getDataDirectory(), "system_de");
     }
 

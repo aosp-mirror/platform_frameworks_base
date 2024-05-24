@@ -22,6 +22,7 @@ import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.Flags
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.bouncer.data.repository.BouncerMessageRepository
@@ -29,11 +30,9 @@ import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.bouncer.shared.model.Message
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.REVAMPED_BOUNCER_MESSAGES
+import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.res.R.string.bouncer_face_not_recognized
@@ -51,6 +50,7 @@ import com.android.systemui.res.R.string.kg_fp_not_recognized
 import com.android.systemui.res.R.string.kg_primary_auth_locked_out_password
 import com.android.systemui.res.R.string.kg_primary_auth_locked_out_pattern
 import com.android.systemui.res.R.string.kg_primary_auth_locked_out_pin
+import com.android.systemui.res.R.string.kg_prompt_after_adaptive_auth_lock
 import com.android.systemui.res.R.string.kg_prompt_after_dpm_lock
 import com.android.systemui.res.R.string.kg_prompt_after_update_password
 import com.android.systemui.res.R.string.kg_prompt_after_update_pattern
@@ -93,6 +93,7 @@ private const val SYS_BOOT_REASON_PROP = "sys.boot.reason.last"
 private const val REBOOT_MAINLINE_UPDATE = "reboot,mainline_update"
 private const val TAG = "BouncerMessageInteractor"
 
+/** Handles business logic for the primary bouncer message area. */
 @SysUISingleton
 class BouncerMessageInteractor
 @Inject
@@ -100,7 +101,6 @@ constructor(
     private val repository: BouncerMessageRepository,
     private val userRepository: UserRepository,
     private val countDownTimerUtil: CountDownTimerUtil,
-    private val featureFlags: FeatureFlags,
     private val updateMonitor: KeyguardUpdateMonitor,
     trustRepository: TrustRepository,
     biometricSettingsRepository: BiometricSettingsRepository,
@@ -209,6 +209,11 @@ constructor(
                     } else {
                         faceLockedOut(currentSecurityMode, isFingerprintAuthCurrentlyAllowed.value)
                     }
+                } else if (flags.isSomeAuthRequiredAfterAdaptiveAuthRequest) {
+                    authRequiredAfterAdaptiveAuthRequest(
+                        currentSecurityMode,
+                        isFingerprintAuthCurrentlyAllowed.value
+                    )
                 } else if (
                     trustOrBiometricsAvailable &&
                         flags.strongerAuthRequiredAfterNonStrongBiometricsTimeout
@@ -229,7 +234,7 @@ constructor(
             }
 
     fun onPrimaryAuthLockedOut(secondsBeforeLockoutReset: Long) {
-        if (!featureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) return
+        if (!Flags.revampedBouncerMessages()) return
 
         val callback =
             object : CountDownTimerCallback {
@@ -250,7 +255,7 @@ constructor(
     }
 
     fun onPrimaryAuthIncorrectAttempt() {
-        if (!featureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) return
+        if (!Flags.revampedBouncerMessages()) return
 
         repository.setMessage(
             incorrectSecurityInput(currentSecurityMode, isFingerprintAuthCurrentlyAllowed.value)
@@ -258,21 +263,21 @@ constructor(
     }
 
     fun setFingerprintAcquisitionMessage(value: String?) {
-        if (!featureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) return
+        if (!Flags.revampedBouncerMessages()) return
         repository.setMessage(
             defaultMessage(currentSecurityMode, value, isFingerprintAuthCurrentlyAllowed.value)
         )
     }
 
     fun setFaceAcquisitionMessage(value: String?) {
-        if (!featureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) return
+        if (!Flags.revampedBouncerMessages()) return
         repository.setMessage(
             defaultMessage(currentSecurityMode, value, isFingerprintAuthCurrentlyAllowed.value)
         )
     }
 
     fun setCustomMessage(value: String?) {
-        if (!featureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) return
+        if (!Flags.revampedBouncerMessages()) return
 
         repository.setMessage(
             defaultMessage(currentSecurityMode, value, isFingerprintAuthCurrentlyAllowed.value)
@@ -283,7 +288,7 @@ constructor(
         get() = defaultMessage(currentSecurityMode, isFingerprintAuthCurrentlyAllowed.value)
 
     fun onPrimaryBouncerUserInput() {
-        if (!featureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) return
+        if (!Flags.revampedBouncerMessages()) return
         repository.setMessage(defaultMessage)
     }
 
@@ -461,6 +466,34 @@ private fun authRequiredAfterAdminLockdown(securityMode: SecurityMode): BouncerM
         SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_prompt_after_dpm_lock)
         SecurityMode.Password -> Pair(keyguard_enter_password, kg_prompt_after_dpm_lock)
         SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_prompt_after_dpm_lock)
+        else -> Pair(0, 0)
+    }.toMessage()
+}
+
+private fun authRequiredAfterAdaptiveAuthRequest(
+    securityMode: SecurityMode,
+    fpAuthIsAllowed: Boolean
+): BouncerMessageModel {
+    return if (fpAuthIsAllowed) authRequiredAfterAdaptiveAuthRequestFingerprintAllowed(securityMode)
+    else
+        return when (securityMode) {
+            SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_prompt_after_adaptive_auth_lock)
+            SecurityMode.Password ->
+                Pair(keyguard_enter_password, kg_prompt_after_adaptive_auth_lock)
+            SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_prompt_after_adaptive_auth_lock)
+            else -> Pair(0, 0)
+        }.toMessage()
+}
+
+private fun authRequiredAfterAdaptiveAuthRequestFingerprintAllowed(
+    securityMode: SecurityMode
+): BouncerMessageModel {
+    return when (securityMode) {
+        SecurityMode.Pattern ->
+            Pair(kg_unlock_with_pattern_or_fp, kg_prompt_after_adaptive_auth_lock)
+        SecurityMode.Password ->
+            Pair(kg_unlock_with_password_or_fp, kg_prompt_after_adaptive_auth_lock)
+        SecurityMode.PIN -> Pair(kg_unlock_with_pin_or_fp, kg_prompt_after_adaptive_auth_lock)
         else -> Pair(0, 0)
     }.toMessage()
 }

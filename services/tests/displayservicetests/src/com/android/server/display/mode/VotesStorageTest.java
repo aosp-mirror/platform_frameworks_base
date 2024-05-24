@@ -51,7 +51,7 @@ public class VotesStorageTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mVotesStorage = new VotesStorage(mVotesListener);
+        mVotesStorage = new VotesStorage(mVotesListener, null);
     }
 
     @Test

@@ -71,12 +71,13 @@ constructor(
         val dataType = getString("datatype")?.toDataType()
         val slot = getString("slot")?.toInt()
         val carrierId = getString("carrierid")?.toInt()
-        val inflateStrength = getString("inflate")?.toBoolean()
+        val inflateStrength = getString("inflate").toBoolean()
         val activity = getString("activity")?.toActivity()
         val carrierNetworkChange = getString("carriernetworkchange") == "show"
         val roaming = getString("roam") == "show"
         val name = getString("networkname") ?: "demo mode"
         val slice = getString("slice").toBoolean()
+        val ntn = getString("ntn").toBoolean()
 
         return Mobile(
             level = level,
@@ -89,6 +90,7 @@ constructor(
             roaming = roaming,
             name = name,
             slice = slice,
+            ntn = ntn,
         )
     }
 }

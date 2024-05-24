@@ -591,6 +591,36 @@ package android.location {
 
 package android.location.provider {
 
+  @FlaggedApi("android.location.flags.new_geocoder") public final class ForwardGeocodeRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public String getCallingAttributionTag();
+    method @NonNull public String getCallingPackage();
+    method public int getCallingUid();
+    method @NonNull public java.util.Locale getLocale();
+    method @NonNull public String getLocationName();
+    method @FloatRange(from=-90.0, to=90.0) public double getLowerLeftLatitude();
+    method @FloatRange(from=-180.0, to=180.0) public double getLowerLeftLongitude();
+    method @IntRange(from=1) public int getMaxResults();
+    method @FloatRange(from=-90.0, to=90.0) public double getUpperRightLatitude();
+    method @FloatRange(from=-180.0, to=180.0) public double getUpperRightLongitude();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.provider.ForwardGeocodeRequest> CREATOR;
+  }
+
+  public static final class ForwardGeocodeRequest.Builder {
+    ctor public ForwardGeocodeRequest.Builder(@NonNull String, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @IntRange(from=1) int, @NonNull java.util.Locale, int, @NonNull String);
+    method @NonNull public android.location.provider.ForwardGeocodeRequest build();
+    method @NonNull public android.location.provider.ForwardGeocodeRequest.Builder setCallingAttributionTag(@NonNull String);
+  }
+
+  @FlaggedApi("android.location.flags.new_geocoder") public abstract class GeocodeProviderBase {
+    ctor public GeocodeProviderBase(@NonNull android.content.Context, @NonNull String);
+    method @NonNull public final android.os.IBinder getBinder();
+    method public abstract void onForwardGeocode(@NonNull android.location.provider.ForwardGeocodeRequest, @NonNull android.os.OutcomeReceiver<java.util.List<android.location.Address>,java.lang.Exception>);
+    method public abstract void onReverseGeocode(@NonNull android.location.provider.ReverseGeocodeRequest, @NonNull android.os.OutcomeReceiver<java.util.List<android.location.Address>,java.lang.Exception>);
+    field public static final String ACTION_GEOCODE_PROVIDER = "com.android.location.service.GeocodeProvider";
+  }
+
   public abstract class LocationProviderBase {
     ctor public LocationProviderBase(@NonNull android.content.Context, @NonNull String, @NonNull android.location.provider.ProviderProperties);
     method @Nullable public final android.os.IBinder getBinder();
@@ -640,6 +670,25 @@ package android.location.provider {
 
   public static interface ProviderRequest.ChangedListener {
     method public void onProviderRequestChanged(@NonNull String, @NonNull android.location.provider.ProviderRequest);
+  }
+
+  @FlaggedApi("android.location.flags.new_geocoder") public final class ReverseGeocodeRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public String getCallingAttributionTag();
+    method @NonNull public String getCallingPackage();
+    method public int getCallingUid();
+    method @FloatRange(from=-90.0, to=90.0) public double getLatitude();
+    method @NonNull public java.util.Locale getLocale();
+    method @FloatRange(from=-180.0, to=180.0) public double getLongitude();
+    method @IntRange(from=1) public int getMaxResults();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.provider.ReverseGeocodeRequest> CREATOR;
+  }
+
+  public static final class ReverseGeocodeRequest.Builder {
+    ctor public ReverseGeocodeRequest.Builder(@FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @IntRange(from=0) int, @NonNull java.util.Locale, int, @NonNull String);
+    method @NonNull public android.location.provider.ReverseGeocodeRequest build();
+    method @NonNull public android.location.provider.ReverseGeocodeRequest.Builder setCallingAttributionTag(@NonNull String);
   }
 
 }

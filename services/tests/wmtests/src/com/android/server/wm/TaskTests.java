@@ -43,6 +43,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.policy.WindowManagerPolicy.USER_ROTATION_FREE;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
+import static com.android.server.wm.TaskFragment.EMBEDDED_DIM_AREA_PARENT_TASK;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -339,16 +340,14 @@ public class TaskTests extends WindowTestsBase {
         // Check visibility of occluded tasks
         doReturn(false).when(leafTask1).shouldBeVisible(any());
         doReturn(true).when(leafTask2).shouldBeVisible(any());
-        rootTask.ensureActivitiesVisible(
-                null /* starting */ , 0 /* configChanges */, false /* preserveWindows */);
+        rootTask.ensureActivitiesVisible(null /* starting */);
         assertFalse(activity1.isVisible());
         assertTrue(activity2.isVisible());
 
         // Check visibility of not occluded tasks
         doReturn(true).when(leafTask1).shouldBeVisible(any());
         doReturn(true).when(leafTask2).shouldBeVisible(any());
-        rootTask.ensureActivitiesVisible(
-                null /* starting */ , 0 /* configChanges */, false /* preserveWindows */);
+        rootTask.ensureActivitiesVisible(null /* starting */);
         assertTrue(activity1.isVisible());
         assertTrue(activity2.isVisible());
     }
@@ -1622,6 +1621,29 @@ public class TaskTests extends WindowTestsBase {
     }
 
     @Test
+    public void testBoostDimmingTaskFragmentOnTask() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment primary = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final TaskFragment secondary = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+
+        primary.mVisibleRequested = true;
+        secondary.mVisibleRequested = true;
+        primary.setAdjacentTaskFragment(secondary);
+        secondary.setAdjacentTaskFragment(primary);
+        primary.setEmbeddedDimArea(EMBEDDED_DIM_AREA_PARENT_TASK);
+        doReturn(true).when(primary).shouldBoostDimmer();
+        task.assignChildLayers(t);
+
+        // The layers are initially assigned via the hierarchy, but the primary will be boosted and
+        // assigned again to above of the secondary.
+        verify(primary).assignLayer(t, 0);
+        verify(secondary).assignLayer(t, 1);
+        verify(primary).assignLayer(t, 2);
+    }
+
+    @Test
     public void testMoveOrCreateDecorSurface() {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final Task task =  new TaskBuilder(mSupervisor).setCreateActivity(true).build();
@@ -1798,6 +1820,35 @@ public class TaskTests extends WindowTestsBase {
         verify(unembeddedActivity).assignLayer(t, 0);
         verify(fragment1).assignLayer(t, 1);
         verify(fragment2).assignLayer(t, 2);
+    }
+
+    @Test
+    public void testMoveTaskFragmentsToBottomIfNeeded() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord unembeddedActivity = task.getTopMostActivity();
+
+        final TaskFragment fragment1 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final TaskFragment fragment2 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final TaskFragment fragment3 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        doReturn(true).when(fragment1).isMoveToBottomIfClearWhenLaunch();
+        doReturn(false).when(fragment2).isMoveToBottomIfClearWhenLaunch();
+        doReturn(true).when(fragment3).isMoveToBottomIfClearWhenLaunch();
+
+        assertEquals(unembeddedActivity, task.mChildren.get(0));
+        assertEquals(fragment1, task.mChildren.get(1));
+        assertEquals(fragment2, task.mChildren.get(2));
+        assertEquals(fragment3, task.mChildren.get(3));
+
+        final int[] finishCount = {0};
+        task.moveTaskFragmentsToBottomIfNeeded(unembeddedActivity, finishCount);
+
+        // fragment1 and fragment3 should be moved to the bottom of the task
+        assertEquals(fragment1, task.mChildren.get(0));
+        assertEquals(fragment3, task.mChildren.get(1));
+        assertEquals(unembeddedActivity, task.mChildren.get(2));
+        assertEquals(fragment2, task.mChildren.get(3));
+        assertEquals(2, finishCount[0]);
     }
 
     private Task getTestTask() {

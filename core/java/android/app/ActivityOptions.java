@@ -20,6 +20,7 @@ import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIO
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
 import static android.view.Display.INVALID_DISPLAY;
@@ -29,6 +30,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ExitTransitionCoordinator.ActivityExitTransitionCallbacks;
@@ -41,6 +43,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -73,6 +76,7 @@ import java.util.ArrayList;
  * {@link android.content.Context#startActivity(android.content.Intent, android.os.Bundle)
  * Context.startActivity(Intent, Bundle)} and related methods.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ActivityOptions extends ComponentOptions {
     private static final String TAG = "ActivityOptions";
 
@@ -89,15 +93,30 @@ public class ActivityOptions extends ComponentOptions {
      */
     public static final String EXTRA_USAGE_TIME_REPORT_PACKAGES = "android.usage_time_packages";
 
-    /** No explicit value chosen. The system will decide whether to grant privileges. */
-    public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED =
-            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
-    /** Allow the {@link PendingIntent} to use the background activity start privileges. */
-    public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED =
-            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
-    /** Deny the {@link PendingIntent} to use the background activity start privileges. */
-    public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED =
-            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
+    /** Enumeration of background activity start modes.
+     *
+     * These define if an app wants to grant it's background activity start privileges to a
+     * {@link PendingIntent}.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"MODE_BACKGROUND_ACTIVITY_START_"}, value = {
+            MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED,
+            MODE_BACKGROUND_ACTIVITY_START_ALLOWED,
+            MODE_BACKGROUND_ACTIVITY_START_DENIED})
+    public @interface BackgroundActivityStartMode {}
+    /**
+     * No explicit value chosen. The system will decide whether to grant privileges.
+     */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED = 0;
+    /**
+     * Allow the {@link PendingIntent} to use the background activity start privileges.
+     */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED = 1;
+    /**
+     * Deny the {@link PendingIntent} to use the background activity start privileges.
+     */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED = 2;
 
     /**
      * The package name that created the options.
@@ -180,6 +199,12 @@ public class ActivityOptions extends ComponentOptions {
      * @hide
      */
     public static final String KEY_ANIM_START_LISTENER = "android:activity.animStartListener";
+
+    /**
+     * Callback for when animation is aborted.
+     * @hide
+     */
+    private static final String KEY_ANIM_ABORT_LISTENER = "android:activity.animAbortListener";
 
     /**
      * Specific a theme for a splash screen window.
@@ -357,22 +382,7 @@ public class ActivityOptions extends ComponentOptions {
     private static final String KEY_APPLY_NO_USER_ACTION_FLAG_FOR_SHORTCUT =
             "android:activity.applyNoUserActionFlagForShortcut";
 
-    /**
-     * For Activity transitions, the calling Activity's TransitionListener used to
-     * notify the called Activity when the shared element and the exit transitions
-     * complete.
-     */
-    private static final String KEY_TRANSITION_COMPLETE_LISTENER
-            = "android:activity.transitionCompleteListener";
-
-    private static final String KEY_TRANSITION_IS_RETURNING
-            = "android:activity.transitionIsReturning";
-    private static final String KEY_TRANSITION_SHARED_ELEMENTS
-            = "android:activity.sharedElementNames";
-    private static final String KEY_RESULT_DATA = "android:activity.resultData";
-    private static final String KEY_RESULT_CODE = "android:activity.resultCode";
-    private static final String KEY_EXIT_COORDINATOR_INDEX
-            = "android:activity.exitCoordinatorIndex";
+    private static final String KEY_SCENE_TRANSITION_INFO = "android:activity.sceneTransitionInfo";
 
     /** See {@link SourceInfo}. */
     private static final String KEY_SOURCE_INFO = "android.activity.sourceInfo";
@@ -472,12 +482,8 @@ public class ActivityOptions extends ComponentOptions {
     private int mHeight;
     private IRemoteCallback mAnimationStartedListener;
     private IRemoteCallback mAnimationFinishedListener;
-    private ResultReceiver mTransitionReceiver;
-    private boolean mIsReturning;
-    private ArrayList<String> mSharedElementNames;
-    private Intent mResultData;
-    private int mResultCode;
-    private int mExitCoordinatorIndex;
+    private IRemoteCallback mAnimationAbortListener;
+    private SceneTransitionInfo mSceneTransitionInfo;
     private PendingIntent mUsageTimeReport;
     private int mLaunchDisplayId = INVALID_DISPLAY;
     private int mCallerDisplayId = INVALID_DISPLAY;
@@ -538,6 +544,7 @@ public class ActivityOptions extends ComponentOptions {
      * @return Returns a new ActivityOptions object that you can use to
      * supply these options as the options Bundle when starting an activity.
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Context.class)
     public static ActivityOptions makeCustomAnimation(Context context,
             int enterResId, int exitResId) {
         return makeCustomAnimation(context, enterResId, exitResId, 0, null, null);
@@ -558,6 +565,7 @@ public class ActivityOptions extends ComponentOptions {
      * @return Returns a new ActivityOptions object that you can use to
      * supply these options as the options Bundle when starting an activity.
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Context.class)
     public static @NonNull ActivityOptions makeCustomAnimation(@NonNull Context context,
             int enterResId, int exitResId, int backgroundColor) {
         return makeCustomAnimation(context, enterResId, exitResId, backgroundColor, null, null);
@@ -583,6 +591,7 @@ public class ActivityOptions extends ComponentOptions {
      * @hide
      */
     @UnsupportedAppUsage
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Context.class)
     public static ActivityOptions makeCustomAnimation(Context context,
             int enterResId, int exitResId, int backgroundColor, Handler handler,
             OnAnimationStartedListener listener) {
@@ -618,6 +627,7 @@ public class ActivityOptions extends ComponentOptions {
      * @hide
      */
     @TestApi
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Context.class)
     public static @NonNull ActivityOptions makeCustomAnimation(@NonNull Context context,
             int enterResId, int exitResId, int backgroundColor, @Nullable Handler handler,
             @Nullable OnAnimationStartedListener startedListener,
@@ -652,6 +662,7 @@ public class ActivityOptions extends ComponentOptions {
      */
     @RequiresPermission(START_TASKS_FROM_RECENTS)
     @TestApi
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Context.class)
     public static @NonNull ActivityOptions makeCustomTaskAnimation(@NonNull Context context,
             int enterResId, int exitResId, @Nullable Handler handler,
             @Nullable OnAnimationStartedListener startedListener,
@@ -674,6 +685,7 @@ public class ActivityOptions extends ComponentOptions {
      * supply these options as the options Bundle when running an in-place animation.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Context.class)
     public static ActivityOptions makeCustomInPlaceAnimation(Context context, int animId) {
         if (animId == 0) {
             throw new RuntimeException("You must specify a valid animation.");
@@ -734,6 +746,14 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /**
+     * Callback for finding out when the given animation is finished
+     * @hide
+     */
+    public void setOnAnimationFinishedListener(IRemoteCallback listener) {
+        mAnimationFinishedListener = listener;
+    }
+
+    /**
      * Callback for finding out when the given animation has drawn its last frame.
      * @hide
      */
@@ -743,6 +763,14 @@ public class ActivityOptions extends ComponentOptions {
          * @param elapsedRealTime {@link SystemClock#elapsedRealTime} when animation finished.
          */
         void onAnimationFinished(long elapsedRealTime);
+    }
+
+    /**
+     * Callback for finding out when the given animation is aborted
+     * @hide
+     */
+    public void setOnAnimationAbortListener(IRemoteCallback listener) {
+        mAnimationAbortListener = listener;
     }
 
     /**
@@ -764,6 +792,7 @@ public class ActivityOptions extends ComponentOptions {
      * @return Returns a new ActivityOptions object that you can use to
      * supply these options as the options Bundle when starting an activity.
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = View.class)
     public static ActivityOptions makeScaleUpAnimation(View source,
             int startX, int startY, int width, int height) {
         ActivityOptions opts = new ActivityOptions();
@@ -792,6 +821,7 @@ public class ActivityOptions extends ComponentOptions {
      * @return Returns a new ActivityOptions object that you can use to
      * supply these options as the options Bundle when starting an activity.
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = View.class)
     public static ActivityOptions makeClipRevealAnimation(View source,
             int startX, int startY, int width, int height) {
         ActivityOptions opts = new ActivityOptions();
@@ -837,6 +867,7 @@ public class ActivityOptions extends ComponentOptions {
      * @return Returns a new ActivityOptions object that you can use to
      * supply these options as the options Bundle when starting an activity.
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = View.class)
     public static ActivityOptions makeThumbnailScaleUpAnimation(View source,
             Bitmap thumbnail, int startX, int startY) {
         return makeThumbnailScaleUpAnimation(source, thumbnail, startX, startY, null);
@@ -859,11 +890,13 @@ public class ActivityOptions extends ComponentOptions {
      * @return Returns a new ActivityOptions object that you can use to
      * supply these options as the options Bundle when starting an activity.
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = View.class)
     private static ActivityOptions makeThumbnailScaleUpAnimation(View source,
             Bitmap thumbnail, int startX, int startY, OnAnimationStartedListener listener) {
         return makeThumbnailAnimation(source, thumbnail, startX, startY, listener, true);
     }
 
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = View.class)
     private static ActivityOptions makeThumbnailAnimation(View source,
             Bitmap thumbnail, int startX, int startY, OnAnimationStartedListener listener,
             boolean scaleUp) {
@@ -885,6 +918,7 @@ public class ActivityOptions extends ComponentOptions {
      * @hide
      */
     @UnsupportedAppUsage
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Context.class)
     public static ActivityOptions makeMultiThumbFutureAspectScaleAnimation(Context context,
             Handler handler, IAppTransitionAnimationSpecsFuture specsFuture,
             OnAnimationStartedListener listener, boolean scaleUp) {
@@ -917,6 +951,7 @@ public class ActivityOptions extends ComponentOptions {
      * supply these options as the options Bundle when starting an activity.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = View.class)
     public static ActivityOptions makeThumbnailAspectScaleDownAnimation(View source,
             Bitmap thumbnail, int startX, int startY, int targetWidth, int targetHeight,
             Handler handler, OnAnimationStartedListener listener) {
@@ -924,6 +959,7 @@ public class ActivityOptions extends ComponentOptions {
                 targetWidth, targetHeight, handler, listener, false);
     }
 
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = View.class)
     private static ActivityOptions makeAspectScaledThumbnailAnimation(View source, Bitmap thumbnail,
             int startX, int startY, int targetWidth, int targetHeight,
             Handler handler, OnAnimationStartedListener listener, boolean scaleUp) {
@@ -943,6 +979,7 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = View.class)
     public static ActivityOptions makeThumbnailAspectScaleDownAnimation(View source,
             AppTransitionAnimationSpec[] specs, Handler handler,
             OnAnimationStartedListener onAnimationStartedListener,
@@ -975,6 +1012,7 @@ public class ActivityOptions extends ComponentOptions {
      * @see android.transition.Transition#setEpicenterCallback(
      *          android.transition.Transition.EpicenterCallback)
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Activity.class)
     public static ActivityOptions makeSceneTransitionAnimation(Activity activity,
             View sharedElement, String sharedElementName) {
         return makeSceneTransitionAnimation(activity, Pair.create(sharedElement, sharedElementName));
@@ -1000,14 +1038,18 @@ public class ActivityOptions extends ComponentOptions {
      *          android.transition.Transition.EpicenterCallback)
      */
     @SafeVarargs
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Activity.class)
     public static ActivityOptions makeSceneTransitionAnimation(Activity activity,
             Pair<View, String>... sharedElements) {
         ActivityOptions opts = new ActivityOptions();
         ExitTransitionCoordinator exit = makeSceneTransitionAnimation(
                 new ActivityExitTransitionCallbacks(activity), activity.mExitTransitionListener,
                 activity.getWindow(), opts, sharedElements);
-        opts.mExitCoordinatorIndex =
-                activity.mActivityTransitionState.addExitTransitionCoordinator(exit);
+        final SceneTransitionInfo info = opts.getSceneTransitionInfo();
+        if (info != null) {
+            info.setExitCoordinatorKey(
+                    activity.mActivityTransitionState.addExitTransitionCoordinator(exit));
+        }
         return opts;
     }
 
@@ -1023,24 +1065,29 @@ public class ActivityOptions extends ComponentOptions {
      * @hide
      */
     @SafeVarargs
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Window.class)
     public static Pair<ActivityOptions, ExitTransitionCoordinator> startSharedElementAnimation(
             Window window, ExitTransitionCallbacks exitCallbacks, SharedElementCallback callback,
             Pair<View, String>... sharedElements) {
         ActivityOptions opts = new ActivityOptions();
         ExitTransitionCoordinator exit = makeSceneTransitionAnimation(
                 exitCallbacks, callback, window, opts, sharedElements);
-        opts.mExitCoordinatorIndex = -1;
+        final SceneTransitionInfo info = opts.getSceneTransitionInfo();
+        if (info != null) {
+            info.setExitCoordinatorKey(-1);
+        }
         return Pair.create(opts, exit);
     }
 
     /**
-     * This method should be called when the
-     * {@link #startSharedElementAnimation(Window, ExitTransitionCallbacks, Pair[])}
+     * This method should be called when the {@link #startSharedElementAnimation(Window,
+     * ExitTransitionCallbacks, SharedElementCallback, Pair[])}
      * animation must be stopped and the Views reset. This can happen if there was an error
      * from startActivity or a springboard activity and the animation should stop and reset.
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Window.class)
     public static void stopSharedElementAnimation(Window window) {
         final View decorView = window.getDecorView();
         if (decorView == null) {
@@ -1058,6 +1105,7 @@ public class ActivityOptions extends ComponentOptions {
         }
     }
 
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Window.class)
     static ExitTransitionCoordinator makeSceneTransitionAnimation(
             ExitTransitionCallbacks exitCallbacks, SharedElementCallback callback, Window window,
             ActivityOptions opts, Pair<View, String>[] sharedElements) {
@@ -1088,9 +1136,11 @@ public class ActivityOptions extends ComponentOptions {
 
         ExitTransitionCoordinator exit = new ExitTransitionCoordinator(exitCallbacks, window,
                 callback, names, names, views, false);
-        opts.mTransitionReceiver = exit;
-        opts.mSharedElementNames = names;
-        opts.mIsReturning = false;
+        final SceneTransitionInfo info = new SceneTransitionInfo();
+        info.setResultReceiver(exit);
+        info.setSharedElementNames(names);
+        info.setReturning(false);
+        opts.setSceneTransitionInfo(info);
         return exit;
     }
 
@@ -1106,22 +1156,26 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Activity.class)
     static ActivityOptions makeSceneTransitionAnimation(Activity activity,
             ExitTransitionCoordinator exitCoordinator, ArrayList<String> sharedElementNames,
             int resultCode, Intent resultData) {
         ActivityOptions opts = new ActivityOptions();
         opts.mAnimationType = ANIM_SCENE_TRANSITION;
-        opts.mSharedElementNames = sharedElementNames;
-        opts.mTransitionReceiver = exitCoordinator;
-        opts.mIsReturning = true;
-        opts.mResultCode = resultCode;
-        opts.mResultData = resultData;
+        final SceneTransitionInfo info = new SceneTransitionInfo();
+        info.setSharedElementNames(sharedElementNames);
+        info.setResultReceiver(exitCoordinator);
+        info.setReturning(true);
+        info.setResultCode(resultCode);
+        info.setResultData(resultData);
         if (activity == null) {
-            opts.mExitCoordinatorIndex = -1;
+            info.setExitCoordinatorKey(-1);
         } else {
-            opts.mExitCoordinatorIndex =
-                    activity.mActivityTransitionState.addExitTransitionCoordinator(exitCoordinator);
+            info.setExitCoordinatorKey(
+                    activity.mActivityTransitionState.addExitTransitionCoordinator(
+                            exitCoordinator));
         }
+        opts.setSceneTransitionInfo(info);
         return opts;
     }
 
@@ -1157,6 +1211,7 @@ public class ActivityOptions extends ComponentOptions {
      */
     @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
     @UnsupportedAppUsage
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = RemoteAnimationAdapter.class)
     public static ActivityOptions makeRemoteAnimation(
             RemoteAnimationAdapter remoteAnimationAdapter) {
         final ActivityOptions opts = new ActivityOptions();
@@ -1171,6 +1226,7 @@ public class ActivityOptions extends ComponentOptions {
      * @hide
      */
     @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = RemoteAnimationAdapter.class)
     public static ActivityOptions makeRemoteAnimation(RemoteAnimationAdapter remoteAnimationAdapter,
             RemoteTransition remoteTransition) {
         final ActivityOptions opts = new ActivityOptions();
@@ -1186,6 +1242,7 @@ public class ActivityOptions extends ComponentOptions {
      * @hide
      */
     @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = RemoteAnimationAdapter.class)
     public static ActivityOptions makeRemoteTransition(RemoteTransition remoteTransition) {
         final ActivityOptions opts = new ActivityOptions();
         opts.mRemoteTransition = remoteTransition;
@@ -1200,6 +1257,7 @@ public class ActivityOptions extends ComponentOptions {
      *                               picture-in-picture mode.
      */
     @NonNull
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = PictureInPictureParams.class)
     public static ActivityOptions makeLaunchIntoPip(
             @NonNull PictureInPictureParams pictureInPictureParams) {
         final ActivityOptions opts = new ActivityOptions();
@@ -1269,12 +1327,8 @@ public class ActivityOptions extends ComponentOptions {
                 break;
 
             case ANIM_SCENE_TRANSITION:
-                mTransitionReceiver = opts.getParcelable(KEY_TRANSITION_COMPLETE_LISTENER, android.os.ResultReceiver.class);
-                mIsReturning = opts.getBoolean(KEY_TRANSITION_IS_RETURNING, false);
-                mSharedElementNames = opts.getStringArrayList(KEY_TRANSITION_SHARED_ELEMENTS);
-                mResultData = opts.getParcelable(KEY_RESULT_DATA, android.content.Intent.class);
-                mResultCode = opts.getInt(KEY_RESULT_CODE);
-                mExitCoordinatorIndex = opts.getInt(KEY_EXIT_COORDINATOR_INDEX);
+                mSceneTransitionInfo = opts.getParcelable(KEY_SCENE_TRANSITION_INFO,
+                        SceneTransitionInfo.class);
                 break;
         }
         mLockTaskMode = opts.getBoolean(KEY_LOCK_TASK_MODE, false);
@@ -1338,6 +1392,8 @@ public class ActivityOptions extends ComponentOptions {
                 KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE,
                 MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
         mDisableStartingWindow = opts.getBoolean(KEY_DISABLE_STARTING_WINDOW);
+        mAnimationAbortListener = IRemoteCallback.Stub.asInterface(
+                opts.getBinder(KEY_ANIM_ABORT_LISTENER));
     }
 
     /**
@@ -1437,46 +1493,29 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /** @hide */
-    public int getExitCoordinatorKey() { return mExitCoordinatorIndex; }
-
-    /** @hide */
     public void abort() {
-        if (mAnimationStartedListener != null) {
+        sendResultIgnoreErrors(mAnimationStartedListener, null);
+        sendResultIgnoreErrors(mAnimationAbortListener, null);
+    }
+
+    private void sendResultIgnoreErrors(IRemoteCallback callback, Bundle data) {
+        if (callback != null) {
             try {
-                mAnimationStartedListener.sendResult(null);
-            } catch (RemoteException e) {
-            }
+                callback.sendResult(data);
+            } catch (RemoteException e) { }
         }
     }
 
     /** @hide */
-    public boolean isReturning() {
-        return mIsReturning;
-    }
-
-    /**
-     * Returns whether or not the ActivityOptions was created with
-     * {@link #startSharedElementAnimation(Window, Pair[])}.
-     *
-     * @hide
-     */
-    boolean isCrossTask() {
-        return mExitCoordinatorIndex < 0;
+    public ActivityOptions setSceneTransitionInfo(SceneTransitionInfo info) {
+        mSceneTransitionInfo = info;
+        return this;
     }
 
     /** @hide */
-    public ArrayList<String> getSharedElementNames() {
-        return mSharedElementNames;
+    public SceneTransitionInfo getSceneTransitionInfo() {
+        return mSceneTransitionInfo;
     }
-
-    /** @hide */
-    public ResultReceiver getResultReceiver() { return mTransitionReceiver; }
-
-    /** @hide */
-    public int getResultCode() { return mResultCode; }
-
-    /** @hide */
-    public Intent getResultData() { return mResultData; }
 
     /** @hide */
     public PendingIntent getUsageTimeReport() {
@@ -1826,7 +1865,7 @@ public class ActivityOptions extends ComponentOptions {
     public int getPendingIntentLaunchFlags() {
         // b/243794108: Ignore all flags except the new task flag, to be reconsidered in b/254490217
         return mPendingIntentLaunchFlags &
-                (FLAG_ACTIVITY_NEW_TASK | FLAG_RECEIVER_FOREGROUND);
+                (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK | FLAG_RECEIVER_FOREGROUND);
     }
 
     /**
@@ -1952,6 +1991,115 @@ public class ActivityOptions extends ComponentOptions {
     /** @hide */
     public boolean isApplyNoUserActionFlagForShortcut() {
         return mApplyNoUserActionFlagForShortcut;
+    }
+
+    /**
+     * An opaque token to use with {@link #setLaunchCookie(LaunchCookie)}.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi")
+    @TestApi
+    public static final class LaunchCookie implements Parcelable {
+        /** @hide */
+        public final IBinder binder;
+
+        /** @hide */
+        @SuppressLint("UnflaggedApi")
+        @TestApi
+        public LaunchCookie() {
+            binder = new Binder();
+        }
+
+        /** @hide */
+        public LaunchCookie(@Nullable String descriptor) {
+            binder = new Binder(descriptor);
+        }
+
+        private LaunchCookie(IBinder binder) {
+            this.binder = binder;
+        }
+
+        /** @hide */
+        @SuppressLint("UnflaggedApi")
+        @TestApi
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        /** @hide */
+        @SuppressLint("UnflaggedApi")
+        @TestApi
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeStrongBinder(binder);
+        }
+
+        /** @hide */
+        public static LaunchCookie readFromParcel(@NonNull Parcel in) {
+            IBinder binder = in.readStrongBinder();
+            if (binder == null) {
+                return null;
+            }
+            return new LaunchCookie(binder);
+        }
+
+        /** @hide */
+        public static void writeToParcel(@Nullable LaunchCookie launchCookie, Parcel out) {
+            if (launchCookie != null) {
+                launchCookie.writeToParcel(out, 0);
+            } else {
+                out.writeStrongBinder(null);
+            }
+        }
+
+        /** @hide */
+        @SuppressLint("UnflaggedApi")
+        @TestApi
+        @NonNull
+        public static final Parcelable.Creator<LaunchCookie> CREATOR =
+                new Parcelable.Creator<LaunchCookie>() {
+
+                    @Override
+                    public LaunchCookie createFromParcel(Parcel source) {
+                        return LaunchCookie.readFromParcel(source);
+                    }
+
+                    @Override
+                    public LaunchCookie[] newArray(int size) {
+                        return new LaunchCookie[size];
+                    }
+                };
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (obj instanceof LaunchCookie) {
+                LaunchCookie other = (LaunchCookie) obj;
+                return binder == other.binder;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return binder.hashCode();
+        }
+    }
+
+    /**
+     * Sets a launch cookie that can be used to track the {@link Activity} and task that are
+     * launched as a result of this option. If the launched activity is a trampoline that starts
+     * another activity immediately, the cookie will be transferred to the next activity.
+     *
+     * @param launchCookie a developer specified identifier for a specific task.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi")
+    @TestApi
+    public void setLaunchCookie(@NonNull LaunchCookie launchCookie) {
+        setLaunchCookie(launchCookie.binder);
     }
 
     /**
@@ -2102,12 +2250,7 @@ public class ActivityOptions extends ComponentOptions {
             mPackageName = otherOptions.mPackageName;
         }
         mUsageTimeReport = otherOptions.mUsageTimeReport;
-        mTransitionReceiver = null;
-        mSharedElementNames = null;
-        mIsReturning = false;
-        mResultData = null;
-        mResultCode = 0;
-        mExitCoordinatorIndex = 0;
+        mSceneTransitionInfo = null;
         mAnimationType = otherOptions.mAnimationType;
         switch (otherOptions.mAnimationType) {
             case ANIM_CUSTOM:
@@ -2115,12 +2258,7 @@ public class ActivityOptions extends ComponentOptions {
                 mCustomExitResId = otherOptions.mCustomExitResId;
                 mCustomBackgroundColor = otherOptions.mCustomBackgroundColor;
                 mThumbnail = null;
-                if (mAnimationStartedListener != null) {
-                    try {
-                        mAnimationStartedListener.sendResult(null);
-                    } catch (RemoteException e) {
-                    }
-                }
+                sendResultIgnoreErrors(mAnimationStartedListener, null);
                 mAnimationStartedListener = otherOptions.mAnimationStartedListener;
                 break;
             case ANIM_CUSTOM_IN_PLACE:
@@ -2131,12 +2269,7 @@ public class ActivityOptions extends ComponentOptions {
                 mStartY = otherOptions.mStartY;
                 mWidth = otherOptions.mWidth;
                 mHeight = otherOptions.mHeight;
-                if (mAnimationStartedListener != null) {
-                    try {
-                        mAnimationStartedListener.sendResult(null);
-                    } catch (RemoteException e) {
-                    }
-                }
+                sendResultIgnoreErrors(mAnimationStartedListener, null);
                 mAnimationStartedListener = null;
                 break;
             case ANIM_THUMBNAIL_SCALE_UP:
@@ -2148,23 +2281,13 @@ public class ActivityOptions extends ComponentOptions {
                 mStartY = otherOptions.mStartY;
                 mWidth = otherOptions.mWidth;
                 mHeight = otherOptions.mHeight;
-                if (mAnimationStartedListener != null) {
-                    try {
-                        mAnimationStartedListener.sendResult(null);
-                    } catch (RemoteException e) {
-                    }
-                }
+                sendResultIgnoreErrors(mAnimationStartedListener, null);
                 mAnimationStartedListener = otherOptions.mAnimationStartedListener;
                 break;
             case ANIM_SCENE_TRANSITION:
-                mTransitionReceiver = otherOptions.mTransitionReceiver;
-                mSharedElementNames = otherOptions.mSharedElementNames;
-                mIsReturning = otherOptions.mIsReturning;
+                mSceneTransitionInfo = otherOptions.mSceneTransitionInfo;
                 mThumbnail = null;
                 mAnimationStartedListener = null;
-                mResultData = otherOptions.mResultData;
-                mResultCode = otherOptions.mResultCode;
-                mExitCoordinatorIndex = otherOptions.mExitCoordinatorIndex;
                 break;
         }
         mLockTaskMode = otherOptions.mLockTaskMode;
@@ -2175,6 +2298,9 @@ public class ActivityOptions extends ComponentOptions {
         mRemoteAnimationAdapter = otherOptions.mRemoteAnimationAdapter;
         mLaunchIntoPipParams = otherOptions.mLaunchIntoPipParams;
         mIsEligibleForLegacyPermissionPrompt = otherOptions.mIsEligibleForLegacyPermissionPrompt;
+
+        sendResultIgnoreErrors(mAnimationAbortListener, null);
+        mAnimationAbortListener = otherOptions.mAnimationAbortListener;
     }
 
     /**
@@ -2240,14 +2366,9 @@ public class ActivityOptions extends ComponentOptions {
                         != null ? mAnimationStartedListener.asBinder() : null);
                 break;
             case ANIM_SCENE_TRANSITION:
-                if (mTransitionReceiver != null) {
-                    b.putParcelable(KEY_TRANSITION_COMPLETE_LISTENER, mTransitionReceiver);
+                if (mSceneTransitionInfo != null) {
+                    b.putParcelable(KEY_SCENE_TRANSITION_INFO, mSceneTransitionInfo);
                 }
-                b.putBoolean(KEY_TRANSITION_IS_RETURNING, mIsReturning);
-                b.putStringArrayList(KEY_TRANSITION_SHARED_ELEMENTS, mSharedElementNames);
-                b.putParcelable(KEY_RESULT_DATA, mResultData);
-                b.putInt(KEY_RESULT_CODE, mResultCode);
-                b.putInt(KEY_EXIT_COORDINATOR_INDEX, mExitCoordinatorIndex);
                 break;
         }
         if (mLockTaskMode) {
@@ -2378,6 +2499,8 @@ public class ActivityOptions extends ComponentOptions {
         if (mDisableStartingWindow) {
             b.putBoolean(KEY_DISABLE_STARTING_WINDOW, mDisableStartingWindow);
         }
+        b.putBinder(KEY_ANIM_ABORT_LISTENER,
+                mAnimationAbortListener != null ? mAnimationAbortListener.asBinder() : null);
         return b;
     }
 
@@ -2606,5 +2729,125 @@ public class ActivityOptions extends ComponentOptions {
                 return new SourceInfo[size];
             }
         };
+    }
+
+    /**
+     * This class contains necessary information for Activity Scene Transition.
+     *
+     * @hide
+     */
+    public static class SceneTransitionInfo implements Parcelable {
+        private boolean mIsReturning;
+        private int mResultCode;
+        @Nullable
+        private Intent mResultData;
+        @Nullable
+        private ArrayList<String> mSharedElementNames;
+        @Nullable
+        private ResultReceiver mResultReceiver;
+        private int mExitCoordinatorIndex;
+
+        public SceneTransitionInfo() {
+        }
+
+        SceneTransitionInfo(Parcel in) {
+            mIsReturning = in.readBoolean();
+            mResultCode = in.readInt();
+            mResultData = in.readTypedObject(Intent.CREATOR);
+            mSharedElementNames = in.createStringArrayList();
+            mResultReceiver = in.readTypedObject(ResultReceiver.CREATOR);
+            mExitCoordinatorIndex = in.readInt();
+        }
+
+        public static final Creator<SceneTransitionInfo> CREATOR = new Creator<>() {
+            @Override
+            public SceneTransitionInfo createFromParcel(Parcel in) {
+                return new SceneTransitionInfo(in);
+            }
+
+            @Override
+            public SceneTransitionInfo[] newArray(int size) {
+                return new SceneTransitionInfo[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeBoolean(mIsReturning);
+            dest.writeInt(mResultCode);
+            dest.writeTypedObject(mResultData, flags);
+            dest.writeStringList(mSharedElementNames);
+            dest.writeTypedObject(mResultReceiver, flags);
+            dest.writeInt(mExitCoordinatorIndex);
+        }
+
+        public void setReturning(boolean isReturning) {
+            mIsReturning = isReturning;
+        }
+
+        public boolean isReturning() {
+            return mIsReturning;
+        }
+
+        public void setResultCode(int resultCode) {
+            mResultCode = resultCode;
+        }
+
+        public int getResultCode() {
+            return mResultCode;
+        }
+
+        public void setResultData(Intent resultData) {
+            mResultData = resultData;
+        }
+
+        @Nullable
+        public Intent getResultData() {
+            return mResultData;
+        }
+
+        public void setSharedElementNames(ArrayList<String> sharedElementNames) {
+            mSharedElementNames = sharedElementNames;
+        }
+
+        @Nullable
+        public ArrayList<String> getSharedElementNames() {
+            return mSharedElementNames;
+        }
+
+        public void setResultReceiver(ResultReceiver resultReceiver) {
+            mResultReceiver = resultReceiver;
+        }
+
+        @Nullable
+        public ResultReceiver getResultReceiver() {
+            return mResultReceiver;
+        }
+
+        public void setExitCoordinatorKey(int exitCoordinatorKey) {
+            mExitCoordinatorIndex = exitCoordinatorKey;
+        }
+
+        public int getExitCoordinatorKey() {
+            return mExitCoordinatorIndex;
+        }
+
+        boolean isCrossTask() {
+            return mExitCoordinatorIndex < 0;
+        }
+
+        @Override
+        public String toString() {
+            return "SceneTransitionInfo, mIsReturning=" + mIsReturning
+                    + ", mResultCode=" + mResultCode + ", mResultData=" + mResultData
+                    + ", mSharedElementNames=" + mSharedElementNames
+                    + ", mTransitionReceiver=" + mResultReceiver
+                    + ", mExitCoordinatorIndex=" + mExitCoordinatorIndex;
+        }
     }
 }

@@ -324,7 +324,58 @@ TEST(JavaClassGeneratorTest, CommentsForSimpleResourcesArePresent) {
   EXPECT_THAT(output, HasSubstr(expected_text));
 }
 
-TEST(JavaClassGeneratorTest, CommentsForEnumAndFlagAttributesArePresent) {}
+TEST(JavaClassGeneratorTest, CommentsForEnumAndFlagAttributesArePresent) {
+  std::unique_ptr<Attribute> flagAttr =
+      test::AttributeBuilder()
+          .SetTypeMask(android::ResTable_map::TYPE_FLAGS)
+          .SetComment("Flag attribute")
+          .AddItemWithComment("flagOne", 0x01, "Flag comment 1")
+          .AddItemWithComment("flagTwo", 0x02, "@deprecated Flag comment 2")
+          .Build();
+  std::unique_ptr<Attribute> enumAttr =
+      test::AttributeBuilder()
+          .SetTypeMask(android::ResTable_map::TYPE_ENUM)
+          .SetComment("Enum attribute")
+          .AddItemWithComment("enumOne", 0x01, "@TestApi Enum comment 1")
+          .AddItemWithComment("enumTwo", 0x02, "Enum comment 2")
+          .Build();
+
+  std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+                                             .AddValue("android:attr/one", std::move(flagAttr))
+                                             .AddValue("android:attr/two", std::move(enumAttr))
+                                             .Build();
+
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder()
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .SetNameManglerPolicy(NameManglerPolicy{"android"})
+          .Build();
+  JavaClassGeneratorOptions options;
+  options.use_final = false;
+  JavaClassGenerator generator(context.get(), table.get(), options);
+
+  std::string output;
+  StringOutputStream out(&output);
+  ASSERT_TRUE(generator.Generate("android", &out));
+  out.Flush();
+
+  // Special annotations from the enum/flag values should NOT generate
+  // annotations for the attribute value.
+  EXPECT_THAT(output, Not(HasSubstr("@Deprecated")));
+  EXPECT_THAT(output, Not(HasSubstr("@android.annotation.TestApi")));
+
+  EXPECT_THAT(output, HasSubstr("Flag attribute"));
+  EXPECT_THAT(output, HasSubstr("flagOne"));
+  EXPECT_THAT(output, HasSubstr("Flag comment 1"));
+  EXPECT_THAT(output, HasSubstr("flagTwo"));
+  EXPECT_THAT(output, HasSubstr("@deprecated Flag comment 2"));
+
+  EXPECT_THAT(output, HasSubstr("Enum attribute"));
+  EXPECT_THAT(output, HasSubstr("enumOne"));
+  EXPECT_THAT(output, HasSubstr("@TestApi Enum comment 1"));
+  EXPECT_THAT(output, HasSubstr("enumTwo"));
+  EXPECT_THAT(output, HasSubstr("Enum comment 2"));
+}
 
 TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent) {
   Attribute attr;

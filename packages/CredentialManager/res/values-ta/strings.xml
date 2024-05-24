@@ -39,8 +39,10 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"கடவுச்சொல்லற்ற எதிர்காலத்தை நோக்கி நாம் பயணிக்கிறோம். கடவுச்சாவிகளைப் பயன்படுத்தும் இதே வேளையில் கடவுச்சொற்களையும் பயன்படுத்த முடியும்."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"உங்கள் <xliff:g id="CREATETYPES">%1$s</xliff:g> எங்கே சேமிக்கப்பட வேண்டும் என்பதைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"உங்கள் தகவல்களைச் சேமித்து அடுத்த முறை விரைவாக உள்நுழைய ஒரு கடவுச்சொல் நிர்வாகியைத் தேர்வுசெய்யுங்கள்"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸுக்கான கடவுச்சாவியை உருவாக்கவா?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸுக்கான கடவுச்சொல்லைச் சேமிக்கவா?"</string>
+    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
+    <skip />
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸுக்கான உள்நுழைவு விவரங்களைச் சேமிக்கவா?"</string>
     <string name="passkey" msgid="632353688396759522">"கடவுச்சாவி"</string>
     <string name="password" msgid="6738570945182936667">"கடவுச்சொல்"</string>
@@ -92,4 +94,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"மற்றொரு சாதனத்திலிருந்து பயன்படுத்து"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"வேறு சாதனத்தைப் பயன்படுத்து"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸால் கோரிக்கை ரத்துசெய்யப்பட்டது"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"உள்நுழைவு விருப்பங்கள்"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"மேலும் காட்டு"</string>
 </resources>

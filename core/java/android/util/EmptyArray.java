@@ -23,6 +23,7 @@ import android.annotation.NonNull;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class EmptyArray {
     private EmptyArray() {}
 

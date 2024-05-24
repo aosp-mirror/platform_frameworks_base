@@ -39,6 +39,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.platform.test.annotations.Presubmit;
+import android.window.ActivityWindowInfo;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -81,7 +82,8 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecycleActivityConfigurationChangeItem() {
-        testRecycle(() -> ActivityConfigurationChangeItem.obtain(mActivityToken, config()));
+        testRecycle(() -> ActivityConfigurationChangeItem.obtain(mActivityToken, config(),
+                new ActivityWindowInfo()));
     }
 
     @Test
@@ -123,6 +125,8 @@ public class ObjectPoolTests {
         final IBinder shareableActivityToken = new Binder();
         final int deviceId = 3;
         final IBinder taskFragmentToken = new Binder();
+        final IBinder initialCallerInfoAccessToken = new Binder();
+        final ActivityWindowInfo activityWindowInfo = new ActivityWindowInfo();
 
         testRecycle(() -> new LaunchActivityItemBuilder(
                 activityToken, intent, activityInfo)
@@ -140,18 +144,22 @@ public class ObjectPoolTests {
                 .setShareableActivityToken(shareableActivityToken)
                 .setTaskFragmentToken(taskFragmentToken)
                 .setDeviceId(deviceId)
+                .setInitialCallerInfoAccessToken(initialCallerInfoAccessToken)
+                .setActivityWindowInfo(activityWindowInfo)
                 .build());
     }
 
     @Test
     public void testRecycleActivityRelaunchItem() {
         testRecycle(() -> ActivityRelaunchItem.obtain(mActivityToken,
-                resultInfoList(), referrerIntentList(), 42, mergedConfig(), true));
+                resultInfoList(), referrerIntentList(), 42, mergedConfig(), true,
+                new ActivityWindowInfo()));
     }
 
     @Test
     public void testRecycleMoveToDisplayItem() {
-        testRecycle(() -> MoveToDisplayItem.obtain(mActivityToken, 4, config()));
+        testRecycle(() -> MoveToDisplayItem.obtain(mActivityToken, 4, config(),
+                new ActivityWindowInfo()));
     }
 
     @Test
@@ -171,7 +179,8 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecycleStartActivityItem() {
-        testRecycle(() -> StartActivityItem.obtain(mActivityToken, ActivityOptions.makeBasic()));
+        testRecycle(() -> StartActivityItem.obtain(mActivityToken,
+                new ActivityOptions.SceneTransitionInfo()));
     }
 
     @Test

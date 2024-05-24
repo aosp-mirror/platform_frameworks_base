@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -55,12 +56,15 @@ import android.hardware.input.VirtualMouse;
 import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualNavigationTouchpad;
 import android.hardware.input.VirtualNavigationTouchpadConfig;
+import android.hardware.input.VirtualStylus;
+import android.hardware.input.VirtualStylusConfig;
 import android.hardware.input.VirtualTouchscreen;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.Surface;
 import android.view.WindowManager;
@@ -72,9 +76,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.IntConsumer;
 
@@ -328,6 +334,8 @@ public final class VirtualDeviceManager {
      *
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public @VirtualDeviceParams.DevicePolicy int getDevicePolicy(
             int deviceId, @VirtualDeviceParams.PolicyType int policyType) {
         if (mService == null) {
@@ -346,6 +354,8 @@ public final class VirtualDeviceManager {
      *
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public int getDeviceIdForDisplayId(int displayId) {
         if (mService == null) {
             Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
@@ -353,6 +363,56 @@ public final class VirtualDeviceManager {
         }
         try {
             return mService.getDeviceIdForDisplayId(displayId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the display name for a given persistent device ID.
+     *
+     * <p>This will work even if currently there is no valid virtual device with the given
+     * persistent ID, as long as such a device has been created or can be created.</p>
+     *
+     * @return the display name associated with the given persistent device ID, or {@code null} if
+     *     the persistent ID is invalid or does not correspond to a virtual device.
+     *
+     * @hide
+     */
+    // TODO(b/315481938): Link @see VirtualDevice#getPersistentDeviceId()
+    @FlaggedApi(Flags.FLAG_PERSISTENT_DEVICE_ID_API)
+    @SystemApi
+    @Nullable
+    public CharSequence getDisplayNameForPersistentDeviceId(@NonNull String persistentDeviceId) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
+            return null;
+        }
+        try {
+            return mService.getDisplayNameForPersistentDeviceId(
+                    Objects.requireNonNull(persistentDeviceId));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns all current persistent device IDs, including the ones for which no virtual device
+     * exists, as long as one may have existed or can be created.
+     *
+     * @hide
+     */
+    // TODO(b/315481938): Link @see VirtualDevice#getPersistentDeviceId()
+    @FlaggedApi(Flags.FLAG_PERSISTENT_DEVICE_ID_API)
+    @SystemApi
+    @NonNull
+    public Set<String> getAllPersistentDeviceIds() {
+        if (mService == null) {
+            Log.w(TAG, "Failed to retrieve persistent ids; no virtual device manager service.");
+            return Collections.emptySet();
+        }
+        try {
+            return new ArraySet<>(mService.getAllPersistentDeviceIds());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -391,6 +451,8 @@ public final class VirtualDeviceManager {
      *
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public int getAudioPlaybackSessionId(int deviceId) {
         if (mService == null) {
             return AUDIO_SESSION_ID_GENERATE;
@@ -415,6 +477,8 @@ public final class VirtualDeviceManager {
      *
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public int getAudioRecordingSessionId(int deviceId) {
         if (mService == null) {
             return AUDIO_SESSION_ID_GENERATE;
@@ -436,6 +500,8 @@ public final class VirtualDeviceManager {
      *
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public void playSoundEffect(int deviceId, @AudioManager.SystemSoundEffect int effectType) {
         if (mService == null) {
             Log.w(TAG, "Failed to dispatch sound effect; no virtual device manager service.");
@@ -859,6 +925,19 @@ public final class VirtualDeviceManager {
         }
 
         /**
+         * Creates a virtual stylus.
+         *
+         * @param config the touchscreen configurations for the virtual stylus.
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        @FlaggedApi(Flags.FLAG_VIRTUAL_STYLUS)
+        public VirtualStylus createVirtualStylus(
+                @NonNull VirtualStylusConfig config) {
+            return mVirtualDeviceInternal.createVirtualStylus(config);
+        }
+
+        /**
          * Creates a VirtualAudioDevice, capable of recording audio emanating from this device,
          * or injecting audio from another device.
          *
@@ -886,11 +965,14 @@ public final class VirtualDeviceManager {
         }
 
         /**
-         * Creates a new virtual camera. If a virtual camera was already created, it will be closed.
+         * Creates a new virtual camera with the given {@link VirtualCameraConfig}. A virtual device
+         * can create a virtual camera only if it has
+         * {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM} as its
+         * {@link VirtualDeviceParams#POLICY_TYPE_CAMERA}.
          *
-         * @param config camera config.
-         * @return newly created camera;
-         * @hide
+         * @param config camera configuration.
+         * @return newly created camera.
+         * @see VirtualDeviceParams#POLICY_TYPE_CAMERA
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull

@@ -170,6 +170,10 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         Settings.Secure.putIntForUser(getContext().getContentResolver(),
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, USER_SYSTEM);
         mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
+        // fake cloned settings to profile
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, mProfileId);
+        mHistoryManager.mSettingsObserver.update(null, mProfileId);
 
         // unlock user, verify that history is disabled for self and profile
         mHistoryManager.onUserUnlocked(USER_SYSTEM);
@@ -178,6 +182,36 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isFalse();
         assertThat(mHistoryManager.doesHistoryExistForUser(mProfileId)).isFalse();
         verify(mDb, times(2)).disableHistory();
+    }
+    @Test
+    public void testAddProfile_historyEnabledInPrimary() {
+        // create a history
+        mHistoryManager.onUserUnlocked(MIN_SECONDARY_USER_ID);
+        assertThat(mHistoryManager.doesHistoryExistForUser(MIN_SECONDARY_USER_ID)).isTrue();
+
+        // fake Settings#CLONE_TO_MANAGED_PROFILE
+        int newProfileId = 99;
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 1, newProfileId);
+        mUsers = new ArrayList<>();
+        UserInfo userFullSecondary = new UserInfo();
+        userFullSecondary.id = MIN_SECONDARY_USER_ID;
+        mUsers.add(userFullSecondary);
+        UserInfo userProfile = new UserInfo();
+        userProfile.id = newProfileId;
+        mUsers.add(userProfile);
+        when(mUserManager.getUsers()).thenReturn(mUsers);
+
+        mProfiles = new int[] {MIN_SECONDARY_USER_ID, userProfile.id};
+        when(mUserManager.getProfileIds(MIN_SECONDARY_USER_ID, true)).thenReturn(mProfiles);
+        when(mUserManager.getProfileIds(userProfile.id, true))
+                .thenReturn(new int[] {userProfile.id});
+        when(mUserManager.getProfileParent(userProfile.id)).thenReturn(userFullSecondary);
+
+        // add profile
+        mHistoryManager.onUserAdded(newProfileId);
+        mHistoryManager.onUserUnlocked(newProfileId);
+        assertThat(mHistoryManager.doesHistoryExistForUser(newProfileId)).isTrue();
     }
 
     @Test
@@ -574,5 +608,15 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
 
         assertThat(mHistoryManager.isHistoryEnabled(USER_SYSTEM)).isFalse();
+    }
+    @Test
+    public void testDelayedPackageRemoval_userLocked() {
+        String pkg = "pkg";
+        mHistoryManager.onPackageRemoved(USER_SYSTEM, pkg);
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+        mHistoryManager.onUserStopped(USER_SYSTEM);
+        mHistoryManager.onPackageRemoved(USER_SYSTEM, pkg);
+
+        // no exception, yay
     }
 }

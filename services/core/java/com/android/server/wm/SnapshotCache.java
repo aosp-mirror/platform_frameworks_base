@@ -16,8 +16,11 @@
 package com.android.server.wm;
 
 import android.annotation.Nullable;
+import android.hardware.HardwareBuffer;
 import android.util.ArrayMap;
 import android.window.TaskSnapshot;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
 
@@ -26,25 +29,31 @@ import java.io.PrintWriter;
  * @param <TYPE> The basic type, either Task or ActivityRecord
  */
 abstract class SnapshotCache<TYPE extends WindowContainer> {
-    protected final WindowManagerService mService;
+    protected final Object mLock = new Object();
+
     protected final String mName;
+
+    @GuardedBy("mLock")
     protected final ArrayMap<ActivityRecord, Integer> mAppIdMap = new ArrayMap<>();
+
+    @GuardedBy("mLock")
     protected final ArrayMap<Integer, CacheEntry> mRunningCache = new ArrayMap<>();
 
-    SnapshotCache(WindowManagerService service, String name) {
-        mService = service;
+    SnapshotCache(String name) {
         mName = name;
     }
 
     abstract void putSnapshot(TYPE window, TaskSnapshot snapshot);
 
     void clearRunningCache() {
-        mRunningCache.clear();
+        synchronized (mLock) {
+            mRunningCache.clear();
+        }
     }
 
     @Nullable
     final TaskSnapshot getSnapshot(Integer id) {
-        synchronized (mService.mGlobalLock) {
+        synchronized (mLock) {
             // Try the running cache.
             final CacheEntry entry = mRunningCache.get(id);
             if (entry != null) {
@@ -56,17 +65,21 @@ abstract class SnapshotCache<TYPE extends WindowContainer> {
 
     /** Called when an app token has been removed. */
     void onAppRemoved(ActivityRecord activity) {
-        final Integer id = mAppIdMap.get(activity);
-        if (id != null) {
-            removeRunningEntry(id);
+        synchronized (mLock) {
+            final Integer id = mAppIdMap.get(activity);
+            if (id != null) {
+                removeRunningEntry(id);
+            }
         }
     }
 
     /** Called when an app window token's process died. */
     void onAppDied(ActivityRecord activity) {
-        final Integer id = mAppIdMap.get(activity);
-        if (id != null) {
-            removeRunningEntry(id);
+        synchronized (mLock) {
+            final Integer id = mAppIdMap.get(activity);
+            if (id != null) {
+                removeRunningEntry(id);
+            }
         }
     }
 
@@ -75,10 +88,16 @@ abstract class SnapshotCache<TYPE extends WindowContainer> {
     }
 
     void removeRunningEntry(Integer id) {
-        final CacheEntry entry = mRunningCache.get(id);
-        if (entry != null) {
-            mAppIdMap.remove(entry.topApp);
-            mRunningCache.remove(id);
+        synchronized (mLock) {
+            final CacheEntry entry = mRunningCache.get(id);
+            if (entry != null) {
+                mAppIdMap.remove(entry.topApp);
+                mRunningCache.remove(id);
+                final HardwareBuffer buffer = entry.snapshot.getHardwareBuffer();
+                if (buffer != null) {
+                    buffer.close();
+                }
+            }
         }
     }
 
@@ -86,11 +105,14 @@ abstract class SnapshotCache<TYPE extends WindowContainer> {
         final String doublePrefix = prefix + "  ";
         final String triplePrefix = doublePrefix + "  ";
         pw.println(prefix + "SnapshotCache " + mName);
-        for (int i = mRunningCache.size() - 1; i >= 0; i--) {
-            final CacheEntry entry = mRunningCache.valueAt(i);
-            pw.println(doublePrefix + "Entry token=" + mRunningCache.keyAt(i));
-            pw.println(triplePrefix + "topApp=" + entry.topApp);
-            pw.println(triplePrefix + "snapshot=" + entry.snapshot);
+
+        synchronized (mLock) {
+            for (int i = mRunningCache.size() - 1; i >= 0; i--) {
+                final CacheEntry entry = mRunningCache.valueAt(i);
+                pw.println(doublePrefix + "Entry token=" + mRunningCache.keyAt(i));
+                pw.println(triplePrefix + "topApp=" + entry.topApp);
+                pw.println(triplePrefix + "snapshot=" + entry.snapshot);
+            }
         }
     }
 

@@ -31,6 +31,7 @@ import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,6 +51,7 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
     fun transitionToAlternateBouncer_scrimAlphaUpdate() =
         testScope.runTest {
             val scrimAlphas by collectValues(underTest.scrimAlpha)
+            runCurrent()
 
             transitionRepository.sendTransitionSteps(
                 listOf(
@@ -69,17 +71,17 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
     fun transitionFromAlternateBouncer_scrimAlphaUpdate() =
         testScope.runTest {
             val scrimAlphas by collectValues(underTest.scrimAlpha)
+            runCurrent()
 
             transitionRepository.sendTransitionSteps(
                 listOf(
-                    stepToAlternateBouncer(0f, TransitionState.STARTED),
-                    stepToAlternateBouncer(.4f),
-                    stepToAlternateBouncer(.6f),
-                    stepToAlternateBouncer(1f),
+                    stepFromAlternateBouncer(0f, TransitionState.STARTED),
+                    stepFromAlternateBouncer(.4f),
+                    stepFromAlternateBouncer(.6f),
+                    stepFromAlternateBouncer(1f),
                 ),
                 testScope,
             )
-
             assertThat(scrimAlphas.size).isEqualTo(4)
             scrimAlphas.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
         }

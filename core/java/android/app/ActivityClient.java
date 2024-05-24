@@ -17,13 +17,16 @@
 package android.app;
 
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.os.UserHandle.getCallingUserId;
 
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.content.ComponentName;
+import android.content.ContentProvider;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -291,6 +294,38 @@ public class ActivityClient {
     public String getLaunchedFromPackage(IBinder token) {
         try {
             return getActivityClientController().getLaunchedFromPackage(token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Returns the uid of the app that launched the activity. */
+    public int getActivityCallerUid(IBinder activityToken, IBinder callerToken) {
+        try {
+            return getActivityClientController().getActivityCallerUid(activityToken,
+                    callerToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Returns the package of the app that launched the activity. */
+    public String getActivityCallerPackage(IBinder activityToken, IBinder callerToken) {
+        try {
+            return getActivityClientController().getActivityCallerPackage(activityToken,
+                    callerToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Checks if the app that launched the activity has access to the URI. */
+    public int checkActivityCallerContentUriPermission(IBinder activityToken, IBinder callerToken,
+            Uri uri, int modeFlags) {
+        try {
+            return getActivityClientController().checkActivityCallerContentUriPermission(
+                    activityToken, callerToken, ContentProvider.getUriWithoutUserId(uri), modeFlags,
+                    ContentProvider.getUserIdFromUri(uri, getCallingUserId()));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -26,7 +26,8 @@ import android.content.Context;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dump.DumpManager;
@@ -36,6 +37,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
@@ -68,12 +70,14 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
     protected @Mock UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     protected @Mock SystemUIDialogManager mDialogManager;
     protected @Mock UdfpsController mUdfpsController;
-    protected @Mock ActivityLaunchAnimator mActivityLaunchAnimator;
+    protected @Mock ActivityTransitionAnimator mActivityTransitionAnimator;
     protected @Mock PrimaryBouncerInteractor mPrimaryBouncerInteractor;
+    protected @Mock ShadeInteractor mShadeInteractor;
     protected @Mock AlternateBouncerInteractor mAlternateBouncerInteractor;
     protected @Mock UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
     protected @Mock SelectedUserInteractor mSelectedUserInteractor;
     protected @Mock KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    protected @Mock UdfpsOverlayInteractor mUdfpsOverlayInteractor;
 
     protected FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
@@ -144,12 +148,14 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController,
                 mDialogManager,
                 mUdfpsController,
-                mActivityLaunchAnimator,
+                mActivityTransitionAnimator,
                 mPrimaryBouncerInteractor,
                 mAlternateBouncerInteractor,
                 mUdfpsKeyguardAccessibilityDelegate,
                 mSelectedUserInteractor,
-                mKeyguardTransitionInteractor);
+                mKeyguardTransitionInteractor,
+                mShadeInteractor,
+                mUdfpsOverlayInteractor);
         return controller;
     }
 }

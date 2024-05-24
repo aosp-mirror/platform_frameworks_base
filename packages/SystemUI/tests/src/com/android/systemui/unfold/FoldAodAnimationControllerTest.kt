@@ -246,7 +246,7 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
     private fun sendFoldEvent(folded: Boolean) {
         val state = if (folded) deviceStates.folded else deviceStates.unfolded
-        foldStateListenerCaptor.value.onStateChanged(state)
+        foldStateListenerCaptor.value.onDeviceStateChanged(state)
     }
 
     companion object {

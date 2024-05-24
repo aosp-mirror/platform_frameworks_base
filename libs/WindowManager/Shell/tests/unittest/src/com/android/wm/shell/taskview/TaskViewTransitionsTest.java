@@ -32,13 +32,14 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.os.IBinder;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.transition.Transitions;

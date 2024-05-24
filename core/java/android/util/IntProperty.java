@@ -24,6 +24,7 @@ package android.util;
  *
  * @param <T> The class on which the Property is declared.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class IntProperty<T> extends Property<T, Integer> {
 
     public IntProperty(String name) {

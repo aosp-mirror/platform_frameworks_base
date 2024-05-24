@@ -20,14 +20,15 @@ import android.appwidget.AppWidgetManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.compose.ComposeFacade.isComposeAvailable
-import com.android.systemui.compose.ComposeFacade.setPeopleSpaceActivityContent
+import com.android.compose.theme.PlatformTheme
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.people.ui.compose.PeopleScreen
 import com.android.systemui.people.ui.view.PeopleViewBinder
 import com.android.systemui.people.ui.view.PeopleViewBinder.bind
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
@@ -65,13 +66,11 @@ constructor(
         }
 
         // Set the content of the activity, using either the View or Compose implementation.
-        if (featureFlags.isEnabled(Flags.COMPOSE_PEOPLE_SPACE) && isComposeAvailable()) {
+        if (featureFlags.isEnabled(Flags.COMPOSE_PEOPLE_SPACE)) {
             Log.d(TAG, "Using the Compose implementation of the PeopleSpaceActivity")
-            setPeopleSpaceActivityContent(
-                activity = this,
-                viewModel,
-                onResult = { finishActivity(it) },
-            )
+            setContent {
+                PlatformTheme { PeopleScreen(viewModel, onResult = { finishActivity(it) }) }
+            }
         } else {
             Log.d(TAG, "Using the View implementation of the PeopleSpaceActivity")
             val view = PeopleViewBinder.create(this)

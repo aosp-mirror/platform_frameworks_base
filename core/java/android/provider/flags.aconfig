@@ -7,3 +7,17 @@ flag {
     description: "Enable Settings.System.resetToDefault APIs."
     bug: "279083734"
 }
+
+flag {
+    name: "user_keys"
+    namespace: "privacy_infra_policy"
+    description: "This flag controls new E2EE contact keys API"
+    bug: "290696572"
+}
+
+flag {
+    name: "backup_tasks_settings_screen"
+    namespace: "backstage_power"
+    description: "Add a new settings page for the RUN_BACKUP_JOBS permission."
+    bug: "320563660"
+}

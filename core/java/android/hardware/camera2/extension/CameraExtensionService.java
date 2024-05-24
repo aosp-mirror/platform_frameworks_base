@@ -20,14 +20,21 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.AppOpsManager;
 import android.app.Service;
 import android.content.Intent;
+import android.hardware.camera2.CameraExtensionCharacteristics.Extension;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.camera.flags.Flags;
+
+interface CameraUsageTracker {
+    void startCameraOperation();
+    void finishCameraOperation();
+}
 
 /**
  * Base service class that extension service implementations must extend.
@@ -38,8 +45,33 @@ import com.android.internal.camera.flags.Flags;
 @FlaggedApi(Flags.FLAG_CONCERT_MODE)
 public abstract class CameraExtensionService extends Service {
     private static final String TAG = "CameraExtensionService";
+    private CameraUsageTracker mCameraUsageTracker;
     private static Object mLock = new Object();
 
+    private final class CameraTracker implements CameraUsageTracker {
+
+        private final AppOpsManager mAppOpsService = getApplicationContext().getSystemService(
+                AppOpsManager.class);
+        private final String mPackageName = getPackageName();
+        private final String mAttributionTag = getAttributionTag();
+        private int mUid = getApplicationInfo().uid;
+
+        @Override
+        public void startCameraOperation() {
+            if (mAppOpsService != null) {
+                mAppOpsService.startOp(AppOpsManager.OPSTR_CAMERA, mUid, mPackageName,
+                        mAttributionTag, "Camera extensions");
+            }
+        }
+
+        @Override
+        public void finishCameraOperation() {
+            if (mAppOpsService != null) {
+                mAppOpsService.finishOp(AppOpsManager.OPSTR_CAMERA, mUid, mPackageName,
+                        mAttributionTag);
+            }
+        }
+    }
     @GuardedBy("mLock")
     private static IInitializeSessionCallback mInitializeCb = null;
 
@@ -49,16 +81,22 @@ public abstract class CameraExtensionService extends Service {
             synchronized (mLock) {
                 mInitializeCb = null;
             }
+            if (mCameraUsageTracker != null) {
+                mCameraUsageTracker.finishCameraOperation();
+            }
         }
     };
 
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
-    protected CameraExtensionService() {}
+    protected CameraExtensionService() { }
 
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     @Override
     @NonNull
-    public IBinder onBind(@Nullable Intent intent) {
+    public final IBinder onBind(@Nullable Intent intent) {
+        if (mCameraUsageTracker == null) {
+            mCameraUsageTracker = new CameraTracker();
+        }
         return new CameraExtensionServiceImpl();
     }
 
@@ -116,24 +154,26 @@ public abstract class CameraExtensionService extends Service {
         }
 
         @Override
-        public IPreviewExtenderImpl initializePreviewExtension(int extensionType)
+        public IPreviewExtenderImpl initializePreviewExtension(@Extension int extensionType)
                 throws RemoteException {
             // Basic Extension API is not supported
             return null;
         }
 
         @Override
-        public IImageCaptureExtenderImpl initializeImageExtension(int extensionType)
+        public IImageCaptureExtenderImpl initializeImageExtension(@Extension int extensionType)
                 throws RemoteException {
             // Basic Extension API is not supported
             return null;
         }
 
         @Override
-        public IAdvancedExtenderImpl initializeAdvancedExtension(int extensionType)
+        public IAdvancedExtenderImpl initializeAdvancedExtension(@Extension int extensionType)
                 throws RemoteException {
-            return CameraExtensionService.this.onInitializeAdvancedExtension(
-                    extensionType).getAdvancedExtenderBinder();
+            AdvancedExtender extender =  CameraExtensionService.this.onInitializeAdvancedExtension(
+                    extensionType);
+            extender.setCameraUsageTracker(mCameraUsageTracker);
+            return extender.getAdvancedExtenderBinder();
         }
     }
 
@@ -166,5 +206,5 @@ public abstract class CameraExtensionService extends Service {
      */
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     @NonNull
-    public abstract AdvancedExtender onInitializeAdvancedExtension(int extensionType);
+    public abstract AdvancedExtender onInitializeAdvancedExtension(@Extension int extensionType);
 }

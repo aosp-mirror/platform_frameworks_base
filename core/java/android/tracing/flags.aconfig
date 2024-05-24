@@ -9,8 +9,9 @@ flag {
 }
 
 flag {
-    name: "perfetto_protolog"
+    name: "perfetto_protolog_tracing"
     namespace: "windowing_tools"
     description: "Migrate protolog to Perfetto"
     bug: "276432490"
+    is_fixed_read_only: true
 }

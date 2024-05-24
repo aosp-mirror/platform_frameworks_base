@@ -44,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Šis naudotojas negali diegti nežinomų programų"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Šiam naudotojui neleidžiama diegti programų"</string>
     <string name="ok" msgid="7871959885003339302">"Gerai"</string>
+    <string name="archive" msgid="4447791830199354721">"Archyvuoti"</string>
     <string name="update_anyway" msgid="8792432341346261969">"Vis tiek atnaujinti"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Tvark. progr."</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Nėra vietos"</string>
@@ -58,6 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Pašalinti naujinį"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"Veikla „<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g>“ yra toliau nurodytos programos dalis."</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Ar norite pašalinti šią programą?"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"Jūsų asmens duomenys bus išsaugoti"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"Archyvuoti šią programą visiems naudotojams? Jūsų asmens duomenys bus išsaugoti"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Archyvuoti šią programą darbo profilyje? Jūsų asmens duomenys bus išsaugoti"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"Archyvuoti šią programą naudotojui (-ai) (<xliff:g id="USERNAME">%1$s</xliff:g>)? Jūsų asmens duomenys bus išsaugoti"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Ar norite archyvuoti šią programą iš privačios erdvės? Jūsų asmens duomenys bus išsaugoti"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Ar norite pašalinti šią programą "<b>"visiems"</b>" naudotojams? Programa ir jos duomenys bus pašalinti "<b>"visiems"</b>" įrenginio naudotojams."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Ar norite pašalinti šią naudotojo <xliff:g id="USERNAME">%1$s</xliff:g> programą?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Ar norite pašalinti šią programą iš savo darbo profilio?"</string>
@@ -86,8 +92,6 @@
     <string name="manage_users" msgid="1243995386982560813">"Tvarkyti naudotojus"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"Nepavyko pašalinti „<xliff:g id="APP_NAME">%1$s</xliff:g>“."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Analizuojant paketą kilo problema."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Diegimo / pašalinimo veiksmai nepalaikomi sistemoje „Wear“."</string>
     <string name="message_staging" msgid="8032722385658438567">"Programa pateikiama etapais…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Nežinoma"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Saugos sumetimais šiuo metu planšetiniame kompiuteryje neleidžiama diegti nežinomų programų iš šio šaltinio. Tai galite pakeisti nustatymuose."</string>
@@ -98,17 +102,18 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Planšetinis kompiuteris ir asmens duomenys labiau pažeidžiami įdiegus nežinomų programų. Įdiegdami šią programą sutinkate, kad patys esate atsakingi už žalą planšetiniam kompiuteriui arba prarastus duomenis dėl šios programos naudojimo."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV ir asmens duomenys labiau pažeidžiami įdiegus nežinomų programų. Įdiegdami šią programą sutinkate, kad patys esate atsakingi už žalą TV arba prarastus duomenis dėl šios programos naudojimo."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"„<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“ kopija"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"Archyvuoti „<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Tęsti"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Nustatymai"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Įdiegiamos / pašalinamos „Wear“ program."</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Pranešimas apie įdiegtą programą"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Sėkmingai įdiegta"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"„<xliff:g id="APPNAME">%1$s</xliff:g>“ sėkmingai įdiegta"</string>
-    <string name="unarchive_application_title" msgid="7958278328280721421">"Atkurti „<xliff:g id="APPNAME">%1$s</xliff:g>“ iš „<xliff:g id="INSTALLERNAME">%1$s</xliff:g>“?"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Atkurti „<xliff:g id="APPNAME">%1$s</xliff:g>“ iš „<xliff:g id="INSTALLERNAME">%2$s</xliff:g>“?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"Šios programos atsisiuntimas bus pradėtas fone"</string>
     <string name="restore" msgid="8460854736328970444">"Atkurti"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Esate neprisijungę"</string>
-    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Ši programa bus automatiškai atkurta, kai prisijungsite prie interneto"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"Jei norite atkurti šią programą, patikrinkite interneto ryšį ir bandykite dar kartą"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Kažkas nepavyko"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Bandant atkurti šią programą iškilo problema"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Trūksta saugyklos vietos"</string>
@@ -116,8 +121,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"Būtina imtis veiksmų"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"Atlikite toliau nurodytus veiksmus, kad atkurtumėte šią programą"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"„<xliff:g id="INSTALLERNAME">%1$s</xliff:g>“ išjungta"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"Kad atkurtumėte šią programą, įgalinkite „<xliff:g id="INSTALLERNAME">%1$s</xliff:g>“ nustatymuose"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"„<xliff:g id="INSTALLERNAME">%1$s</xliff:g>“ pašalinta"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Kad atkurtumėte šią programą, turėsite įdiegti „<xliff:g id="INSTALLERNAME">%1$s</xliff:g>“"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Tęsti"</string>

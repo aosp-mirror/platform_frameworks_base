@@ -20,9 +20,9 @@ import android.graphics.Rect
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
-import android.tools.common.datatypes.Size
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
-import android.tools.device.traces.monitors.withSFTracing
+import android.tools.datatypes.Size
+import android.tools.flicker.subject.layers.LayersTraceSubject
+import android.tools.traces.monitors.withSFTracing
 import org.junit.After
 import org.junit.Before
 import org.junit.FixMethodOrder

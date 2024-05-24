@@ -20,17 +20,19 @@ import android.app.StatusBarManager.WINDOW_STATE_HIDDEN
 import android.app.StatusBarManager.WINDOW_STATE_HIDING
 import android.app.StatusBarManager.WINDOW_STATE_SHOWING
 import android.app.StatusBarManager.WINDOW_STATUS_BAR
+import android.view.InputDevice
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.OnPreDrawListener
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeControllerImpl
@@ -48,8 +50,6 @@ import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
-import java.util.Optional
-import javax.inject.Provider
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
@@ -60,6 +60,8 @@ import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import java.util.Optional
+import javax.inject.Provider
 
 @SmallTest
 class PhoneStatusBarViewControllerTest : SysuiTestCase() {
@@ -98,7 +100,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             val parent = FrameLayout(mContext) // add parent to keep layout params
             view =
                 LayoutInflater.from(mContext).inflate(R.layout.status_bar, parent, false)
-                    as PhoneStatusBarView
+                        as PhoneStatusBarView
             controller = createAndInitController(view)
         }
     }
@@ -229,6 +231,48 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         controller.onTouch(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
 
         verify(centralSurfacesImpl).setInteracting(any(), any())
+    }
+
+    @Test
+    fun shadeIsExpandedOnStatusIconMouseClick() {
+        val view = createViewMock()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            controller = createAndInitController(view)
+        }
+        val statusContainer = view.requireViewById<View>(R.id.system_icons)
+        statusContainer.dispatchTouchEvent(
+            getActionUpEventFromSource(InputDevice.SOURCE_MOUSE)
+        )
+        verify(shadeControllerImpl).animateExpandShade()
+    }
+
+    @Test
+    fun statusIconContainerIsNotHandlingTouchScreenTouches() {
+        val view = createViewMock()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            controller = createAndInitController(view)
+        }
+        val statusContainer = view.requireViewById<View>(R.id.system_icons)
+        val handled = statusContainer.dispatchTouchEvent(
+            getActionUpEventFromSource(InputDevice.SOURCE_TOUCHSCREEN)
+        )
+        assertThat(handled).isFalse()
+    }
+
+    private fun getActionUpEventFromSource(source: Int): MotionEvent {
+        val ev = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0f, 0f, 0)
+        ev.source = source
+        return ev
+    }
+
+    @Test
+    fun shadeIsNotExpandedOnStatusBarGeneralClick() {
+        val view = createViewMock()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            controller = createAndInitController(view)
+        }
+        view.performClick()
+        verify(shadeControllerImpl, never()).animateExpandShade()
     }
 
     private fun getCommandQueueCallback(): CommandQueue.Callbacks {

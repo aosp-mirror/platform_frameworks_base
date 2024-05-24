@@ -26,10 +26,12 @@ package {
 soong_config_module_type {
     name: "custom_platform_bootclasspath",
     module_type: "platform_bootclasspath",
-    config_namespace: "AUTO",
+    config_namespace: "bootclasspath",
     bool_variables: [
         "car_bootclasspath_fragment",
+        "nfc_apex_bootclasspath_fragment",
         "release_crashrecovery_module",
+        "release_package_profiling_module",
     ],
     properties: [
         "fragments",
@@ -156,12 +158,30 @@ custom_platform_bootclasspath {
                 },
             ],
         },
+        nfc_apex_bootclasspath_fragment: {
+            fragments: [
+                // only used if NFC mainline is enabled.
+                {
+                    apex: "com.android.nfcservices",
+                    module: "com.android.nfcservices-bootclasspath-fragment",
+                },
+            ],
+        },
         release_crashrecovery_module: {
             fragments: [
                 // only used when crashrecovery is enabled
                 {
                     apex: "com.android.crashrecovery",
                     module: "com.android.crashrecovery-bootclasspath-fragment",
+                },
+            ],
+        },
+        release_package_profiling_module: {
+            fragments: [
+                // only used if profiling is enabled.
+                {
+                    apex: "com.android.profiling",
+                    module: "com.android.profiling-bootclasspath-fragment",
                 },
             ],
         },

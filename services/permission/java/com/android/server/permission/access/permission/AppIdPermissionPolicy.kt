@@ -138,7 +138,9 @@ class AppIdPermissionPolicy : SchemePolicy() {
     ) {
         val changedPermissionNames = MutableIndexedSet<String>()
         packageNames.forEachIndexed { _, packageName ->
-            val packageState = newState.externalState.packageStates[packageName]!!
+            // The package may still be removed even if it was once notified as installed.
+            val packageState = newState.externalState.packageStates[packageName]
+                ?: return@forEachIndexed
             adoptPermissions(packageState, changedPermissionNames)
             addPermissionGroups(packageState)
             addPermissions(packageState, changedPermissionNames)
@@ -151,12 +153,14 @@ class AppIdPermissionPolicy : SchemePolicy() {
         }
 
         packageNames.forEachIndexed { _, packageName ->
-            val packageState = newState.externalState.packageStates[packageName]!!
+            val packageState = newState.externalState.packageStates[packageName]
+                ?: return@forEachIndexed
             val installedPackageState = if (isSystemUpdated) packageState else null
             evaluateAllPermissionStatesForPackage(packageState, installedPackageState)
         }
         packageNames.forEachIndexed { _, packageName ->
-            val packageState = newState.externalState.packageStates[packageName]!!
+            val packageState = newState.externalState.packageStates[packageName]
+                ?: return@forEachIndexed
             newState.externalState.userIds.forEachIndexed { _, userId ->
                 inheritImplicitPermissionStates(packageState.appId, userId)
             }
@@ -1220,15 +1224,80 @@ class AppIdPermissionPolicy : SchemePolicy() {
             newState.externalState.packageStates[PLATFORM_PACKAGE_NAME]!!
                 .androidPackage!!
                 .signingDetails
-        return sourceSigningDetails?.hasCommonSignerWithCapability(
-            packageSigningDetails,
-            SigningDetails.CertCapabilities.PERMISSION
-        ) == true ||
-            packageSigningDetails.hasAncestorOrSelf(platformSigningDetails) ||
-            platformSigningDetails.checkCapability(
+        val hasCommonSigner =
+            sourceSigningDetails?.hasCommonSignerWithCapability(
                 packageSigningDetails,
                 SigningDetails.CertCapabilities.PERMISSION
-            )
+            ) == true ||
+                packageSigningDetails.hasAncestorOrSelf(platformSigningDetails) ||
+                platformSigningDetails.checkCapability(
+                    packageSigningDetails,
+                    SigningDetails.CertCapabilities.PERMISSION
+                )
+        if (!Flags.signaturePermissionAllowlistEnabled()) {
+            return hasCommonSigner;
+        }
+        if (!hasCommonSigner) {
+            return false
+        }
+        // A platform signature permission also needs to be allowlisted on non-debuggable builds.
+        if (permission.packageName == PLATFORM_PACKAGE_NAME) {
+            val isRequestedByFactoryApp =
+                if (packageState.isSystem) {
+                    // For updated system applications, a signature permission still needs to be
+                    // allowlisted if it wasn't requested by the original application.
+                    if (packageState.isUpdatedSystemApp) {
+                        val disabledSystemPackage =
+                            newState.externalState.disabledSystemPackageStates[
+                                    packageState.packageName]
+                                ?.androidPackage
+                        disabledSystemPackage != null &&
+                            permission.name in disabledSystemPackage.requestedPermissions
+                    } else {
+                        true
+                    }
+                } else {
+                    false
+                }
+            if (
+                !(isRequestedByFactoryApp ||
+                    getSignaturePermissionAllowlistState(packageState, permission.name) == true)
+            ) {
+                Slog.w(
+                    LOG_TAG,
+                    "Signature permission ${permission.name} for package" +
+                        " ${packageState.packageName} (${packageState.path}) not in" +
+                        " signature permission allowlist"
+                )
+                if (!Build.isDebuggable()) {
+                    return false
+                }
+            }
+        }
+        return true
+    }
+
+    private fun MutateStateScope.getSignaturePermissionAllowlistState(
+        packageState: PackageState,
+        permissionName: String
+    ): Boolean? {
+        val permissionAllowlist = newState.externalState.permissionAllowlist
+        val packageName = packageState.packageName
+        return when {
+            packageState.isVendor || packageState.isOdm ->
+                permissionAllowlist.getVendorSignatureAppAllowlistState(packageName, permissionName)
+            packageState.isProduct ->
+                permissionAllowlist.getProductSignatureAppAllowlistState(
+                    packageName,
+                    permissionName
+                )
+            packageState.isSystemExt ->
+                permissionAllowlist.getSystemExtSignatureAppAllowlistState(
+                    packageName,
+                    permissionName
+                )
+            else -> permissionAllowlist.getSignatureAppAllowlistState(packageName, permissionName)
+        }
     }
 
     private fun MutateStateScope.checkPrivilegedPermissionAllowlist(
@@ -1289,7 +1358,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         val apexModuleName = packageState.apexModuleName
         val packageName = packageState.packageName
         return when {
-            packageState.isVendor ->
+            packageState.isVendor || packageState.isOdm ->
                 permissionAllowlist.getVendorPrivilegedAppAllowlistState(
                     packageName,
                     permissionName
@@ -1498,12 +1567,15 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     // In any case, don't grant a privileged permission to privileged vendor apps,
                     // if the permission's protectionLevel does not have the extra vendorPrivileged
                     // flag.
-                    if (packageState.isVendor && !permission.isVendorPrivileged) {
+                    if (
+                        (packageState.isVendor || packageState.isOdm) &&
+                            !permission.isVendorPrivileged
+                    ) {
                         Slog.w(
                             LOG_TAG,
                             "Permission $permissionName cannot be granted to privileged" +
-                                " vendor app $packageName because it isn't a vendorPrivileged" +
-                                " permission"
+                                " vendor (or odm) app $packageName because it isn't a" +
+                                " vendorPrivileged permission"
                         )
                         return false
                     }
@@ -1616,6 +1688,9 @@ class AppIdPermissionPolicy : SchemePolicy() {
     ): Int =
         state.userStates[userId]?.appIdPermissionFlags?.get(appId).getWithDefault(permissionName, 0)
 
+    fun GetStateScope.getAllPermissionFlags(appId: Int, userId: Int): IndexedMap<String, Int>? =
+        state.userStates[userId]?.appIdPermissionFlags?.get(appId)
+
     fun MutateStateScope.setPermissionFlags(
         appId: Int,
         userId: Int,
@@ -1631,6 +1706,13 @@ class AppIdPermissionPolicy : SchemePolicy() {
         flagMask: Int,
         flagValues: Int
     ): Boolean {
+        if (userId !in newState.userStates) {
+            // Despite that we check UserManagerInternal.exists() in PermissionService, we may still
+            // sometimes get race conditions between that check and the actual mutateState() call.
+            // This should rarely happen but at least we should not crash.
+            Slog.e(LOG_TAG, "Unable to update permission flags for missing user $userId")
+            return false
+        }
         val oldFlags =
             newState.userStates[userId]!!
                 .appIdPermissionFlags[appId]

@@ -22,23 +22,28 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.VisibleForTesting
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import com.android.settingslib.spa.R
 import com.android.settingslib.spa.framework.common.LogCategory
 import com.android.settingslib.spa.framework.common.NullPageProvider
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.common.SettingsPageProvider.NavType
 import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.createSettingsPage
@@ -127,24 +132,29 @@ private fun NavControllerWrapperImpl.NavContent(
     allProvider: Collection<SettingsPageProvider>,
     content: @Composable (SettingsPage) -> Unit,
 ) {
-    // TODO(b/298520326): Remove Box after the issue is fixed.
-    // Wrap the top level node into a Box to workaround an issue of Compose 1.6.0-alpha03.
-    Box {
-        NavHost(
-            navController = navController,
-            startDestination = NullPageProvider.name,
-        ) {
-            composable(NullPageProvider.name) {}
-            for (spp in allProvider) {
-                animatedComposable(
-                    route = spp.name + spp.parameter.navRoute(),
-                    arguments = spp.parameter,
-                ) { navBackStackEntry ->
-                    val page = remember { spp.createSettingsPage(navBackStackEntry.arguments) }
-                    content(page)
-                }
+    NavHost(
+        navController = navController,
+        startDestination = NullPageProvider.name,
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        composable(NullPageProvider.name) {}
+        for (spp in allProvider) {
+            destination(spp) { navBackStackEntry ->
+                val page = remember { spp.createSettingsPage(navBackStackEntry.arguments) }
+                content(page)
             }
         }
+    }
+}
+
+private fun NavGraphBuilder.destination(
+    spp: SettingsPageProvider,
+    content: @Composable (NavBackStackEntry) -> Unit,
+) {
+    val route = spp.name + spp.parameter.navRoute()
+    when (spp.navType) {
+        NavType.Page -> animatedComposable(route, spp.parameter) { content(it) }
+        NavType.Dialog -> dialog(route, spp.parameter) { content(it) }
     }
 }
 

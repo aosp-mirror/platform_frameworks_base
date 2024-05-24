@@ -41,22 +41,45 @@ public final class BackgroundInstallControlServiceHostTest extends BaseHostJUnit
     private static final String MOCK_APK_FILE_1 = "BackgroundInstallControlMockApp1.apk";
     private static final String MOCK_APK_FILE_2 = "BackgroundInstallControlMockApp2.apk";
 
+    // TODO: Move the silent installs to test-app using {@link
+    // BackgroundInstallControlServiceTest#installPackage(String, String)} and remove deviceConfig
+    // branch in BICS.
+    // b/310983905
     @Test
     public void testGetMockBackgroundInstalledPackages() throws Exception {
-        installPackage(TEST_DATA_DIR  + MOCK_APK_FILE_1);
+        installPackage(TEST_DATA_DIR + MOCK_APK_FILE_1);
         installPackage(TEST_DATA_DIR + MOCK_APK_FILE_2);
 
         assertThat(getDevice().getAppPackageInfo(MOCK_PACKAGE_NAME_1)).isNotNull();
         assertThat(getDevice().getAppPackageInfo(MOCK_PACKAGE_NAME_2)).isNotNull();
 
-        assertThat(getDevice().setProperty("debug.transparency.bg-install-apps",
-                    MOCK_PACKAGE_NAME_1 + "," + MOCK_PACKAGE_NAME_2)).isTrue();
-        runDeviceTest("testGetMockBackgroundInstalledPackages");
+        assertThat(
+                getDevice()
+                        .setProperty(
+                                "debug.transparency.bg-install-apps",
+                                MOCK_PACKAGE_NAME_1 + "," + MOCK_PACKAGE_NAME_2))
+                .isTrue();
+        runDeviceTest(
+                "BackgroundInstallControlServiceTest", "testGetMockBackgroundInstalledPackages");
         assertThat(getDevice().uninstallPackage(MOCK_PACKAGE_NAME_1)).isNull();
         assertThat(getDevice().uninstallPackage(MOCK_PACKAGE_NAME_2)).isNull();
 
         assertThat(getDevice().getAppPackageInfo(MOCK_PACKAGE_NAME_1)).isNull();
         assertThat(getDevice().getAppPackageInfo(MOCK_PACKAGE_NAME_2)).isNull();
+    }
+
+    @Test
+    public void testRegisterCallback() throws Exception {
+        runDeviceTest(
+                "BackgroundInstallControlServiceTest",
+                "testRegisterBackgroundInstallControlCallback");
+    }
+
+    @Test
+    public void testUnregisterCallback() throws Exception {
+        runDeviceTest(
+                "BackgroundInstallControlServiceTest",
+                "testUnregisterBackgroundInstallControlCallback");
     }
 
     private void installPackage(String path) throws DeviceNotAvailableException {
@@ -65,9 +88,9 @@ public final class BackgroundInstallControlServiceHostTest extends BaseHostJUnit
         assertThat(result.getStatus() == CommandStatus.SUCCESS).isTrue();
     }
 
-    private void runDeviceTest(String method) throws DeviceNotAvailableException {
+    private void runDeviceTest(String testName, String method) throws DeviceNotAvailableException {
         var options = new DeviceTestRunOptions(PACKAGE_NAME);
-        options.setTestClassName(PACKAGE_NAME + ".BackgroundInstallControlServiceTest");
+        options.setTestClassName(PACKAGE_NAME + "." + testName);
         options.setTestMethodName(method);
         runDeviceTests(options);
     }

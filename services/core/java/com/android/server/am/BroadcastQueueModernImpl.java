@@ -542,8 +542,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 updateOomAdj |= queue.runningOomAdjusted;
                 try {
                     completed = scheduleReceiverWarmLocked(queue);
-                } catch (BroadcastDeliveryFailedException e) {
-                    reEnqueueActiveBroadcast(queue);
+                } catch (BroadcastRetryException e) {
+                    finishOrReEnqueueActiveBroadcast(queue);
                     completed = true;
                 }
             } else {
@@ -586,7 +586,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     private void clearInvalidPendingColdStart() {
         logw("Clearing invalid pending cold start: " + mRunningColdStart);
-        mRunningColdStart.reEnqueueActiveBroadcast();
+        if (mRunningColdStart.wasActiveBroadcastReEnqueued()) {
+            finishReceiverActiveLocked(mRunningColdStart, BroadcastRecord.DELIVERY_FAILURE,
+                    "invalid start with re-enqueued broadcast");
+        } else {
+            mRunningColdStart.reEnqueueActiveBroadcast();
+        }
         demoteFromRunningLocked(mRunningColdStart);
         clearRunningColdStart();
         enqueueUpdateRunningList();
@@ -613,19 +618,26 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
-    private void reEnqueueActiveBroadcast(@NonNull BroadcastProcessQueue queue) {
+    private void finishOrReEnqueueActiveBroadcast(@NonNull BroadcastProcessQueue queue) {
         checkState(queue.isActive(), "isActive");
 
-        final BroadcastRecord record = queue.getActive();
-        final int index = queue.getActiveIndex();
-        setDeliveryState(queue, queue.app, record, index, record.receivers.get(index),
-                BroadcastRecord.DELIVERY_PENDING, "reEnqueueActiveBroadcast");
-        queue.reEnqueueActiveBroadcast();
+        if (queue.wasActiveBroadcastReEnqueued()) {
+            // If the broadcast was already re-enqueued previously, finish it to avoid repeated
+            // delivery attempts
+            finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_FAILURE,
+                    "re-enqueued broadcast delivery failed");
+        } else {
+            final BroadcastRecord record = queue.getActive();
+            final int index = queue.getActiveIndex();
+            setDeliveryState(queue, queue.app, record, index, record.receivers.get(index),
+                    BroadcastRecord.DELIVERY_PENDING, "reEnqueueActiveBroadcast");
+            queue.reEnqueueActiveBroadcast();
+        }
     }
 
     @Override
     public boolean onApplicationAttachedLocked(@NonNull ProcessRecord app)
-            throws BroadcastDeliveryFailedException {
+            throws BroadcastRetryException {
         if (DEBUG_BROADCAST) {
             logv("Process " + app + " is attached");
         }
@@ -653,8 +665,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 if (scheduleReceiverWarmLocked(queue)) {
                     demoteFromRunningLocked(queue);
                 }
-            } catch (BroadcastDeliveryFailedException e) {
-                reEnqueueActiveBroadcast(queue);
+            } catch (BroadcastRetryException e) {
+                finishOrReEnqueueActiveBroadcast(queue);
                 demoteFromRunningLocked(queue);
                 throw e;
             }
@@ -983,7 +995,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @CheckResult
     @GuardedBy("mService")
     private boolean scheduleReceiverWarmLocked(@NonNull BroadcastProcessQueue queue)
-            throws BroadcastDeliveryFailedException {
+            throws BroadcastRetryException {
         checkState(queue.isActive(), "isActive");
 
         final int cookie = traceBegin("scheduleReceiverWarmLocked");
@@ -1065,7 +1077,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     @CheckResult
     private boolean dispatchReceivers(@NonNull BroadcastProcessQueue queue,
-            @NonNull BroadcastRecord r, int index) throws BroadcastDeliveryFailedException {
+            @NonNull BroadcastRecord r, int index) throws BroadcastRetryException {
         final ProcessRecord app = queue.app;
         final Object receiver = r.receivers.get(index);
 
@@ -1157,7 +1169,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 // to try redelivering the broadcast to this receiver.
                 if (receiver instanceof ResolveInfo) {
                     cancelDeliveryTimeoutLocked(queue);
-                    throw new BroadcastDeliveryFailedException(e);
+                    throw new BroadcastRetryException(e);
                 }
                 finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_FAILURE,
                         "remote app");
@@ -1244,9 +1256,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     private void deliveryTimeout(@NonNull BroadcastProcessQueue queue) {
+        final int cookie = traceBegin("deliveryTimeout");
         synchronized (mService) {
             deliveryTimeoutLocked(queue);
         }
+        traceEnd(cookie);
     }
 
     private void deliveryTimeoutLocked(@NonNull BroadcastProcessQueue queue) {
@@ -1314,8 +1328,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 demoteFromRunningLocked(queue);
                 return true;
             }
-        } catch (BroadcastDeliveryFailedException e) {
-            reEnqueueActiveBroadcast(queue);
+        } catch (BroadcastRetryException e) {
+            finishOrReEnqueueActiveBroadcast(queue);
             demoteFromRunningLocked(queue);
             return true;
         }

@@ -41,13 +41,6 @@ public class DeviceConfigParameterProvider {
         mDeviceConfig = deviceConfig;
     }
 
-    // feature: revamping_display_power_controller_feature
-    // parameter: use_newly_structured_display_power_controller
-    public boolean isNewPowerControllerFeatureEnabled() {
-        return mDeviceConfig.getBoolean(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
-                DisplayManager.DeviceConfig.KEY_NEW_POWER_CONTROLLER, true);
-    }
-
     // feature: hdr_output_control
     // parameter: enable_hdr_output_control
     public boolean isHdrOutputControlFeatureEnabled() {

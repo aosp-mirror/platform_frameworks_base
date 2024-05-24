@@ -1681,6 +1681,10 @@ public class PhoneStateListener {
                 @EmergencyCallbackModeStopReason int reason) {
             // not support. Can't override. Use TelephonyCallback.
         }
+
+        public final void onSimultaneousCallingStateChanged(int[] subIds) {
+            // not supported on the deprecated interface - Use TelephonyCallback instead
+        }
     }
 
     private void log(String s) {

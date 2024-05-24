@@ -25,7 +25,8 @@ import android.hardware.biometrics.face.ISession;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
@@ -85,14 +86,6 @@ public class FaceGenerateChallengeClientTest {
 
         verify(mListener).onChallengeGenerated(SENSOR_ID, USER_ID, CHALLENGE);
         verify(mCallback).onClientFinished(mClient, true);
-    }
-
-    @Test
-    public void generateChallenge_nullListener() {
-        createClient(null);
-        mClient.start(mCallback);
-
-        verify(mCallback).onClientFinished(mClient, false);
     }
 
     private void createClient(ClientMonitorCallbackConverter listener) {

@@ -14,7 +14,10 @@ android_test {
     dxflags: ["--core-library"],
     static_libs: [
         "android-common",
+        "androidx.test.rules",
+        "androidx.test.ext.junit",
         "frameworks-core-util-lib",
+        "ravenwood-junit",
     ],
     libs: [
         "android.test.runner",
@@ -22,4 +25,23 @@ android_test {
     ],
     platform_apis: true,
     certificate: "platform",
+}
+
+android_ravenwood_test {
+    name: "FrameworksCoreSystemPropertiesTestsRavenwood",
+    static_libs: [
+        "android-common",
+        "frameworks-core-util-lib",
+        "androidx.test.rules",
+        "androidx.test.ext.junit",
+        "ravenwood-junit",
+    ],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+    ],
+    srcs: [
+        "src/**/*.java",
+    ],
+    auto_gen_config: true,
 }

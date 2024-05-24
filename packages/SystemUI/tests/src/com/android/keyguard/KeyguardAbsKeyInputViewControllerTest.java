@@ -37,11 +37,11 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardAbsKeyInputView.KeyDownListener;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.res.R;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
@@ -98,7 +98,6 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
                 .thenReturn(mKeyguardMessageArea);
         when(mAbsKeyInputView.getResources()).thenReturn(getContext().getResources());
         mFeatureFlags = new FakeFeatureFlags();
-        mFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, false);
         mKeyguardAbsKeyInputViewController = createTestObject();
         mKeyguardAbsKeyInputViewController.init();
         reset(mKeyguardMessageAreaController);  // Clear out implicit call to init.
@@ -127,7 +126,7 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
 
     @Test
     public void withFeatureFlagOn_oldMessage_isHidden() {
-        mFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true);
+        mSetFlagsRule.enableFlags(Flags.FLAG_REVAMPED_BOUNCER_MESSAGES);
         KeyguardAbsKeyInputViewController underTest = createTestObject();
 
         underTest.init();

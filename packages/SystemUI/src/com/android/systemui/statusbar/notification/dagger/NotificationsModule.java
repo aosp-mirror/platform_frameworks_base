@@ -16,15 +16,19 @@
 
 package com.android.systemui.statusbar.notification.dagger;
 
+import android.app.NotificationManager;
 import android.content.Context;
+import android.service.notification.NotificationListenerService;
 
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.settingslib.statusbar.notification.data.repository.NotificationsSoundPolicyRepository;
+import com.android.settingslib.statusbar.notification.data.repository.NotificationsSoundPolicyRepositoryImpl;
+import com.android.settingslib.statusbar.notification.domain.interactor.NotificationsSoundPolicyInteractor;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.dagger.qualifiers.Application;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
@@ -53,6 +57,7 @@ import com.android.systemui.statusbar.notification.collection.render.NotifGutsVi
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.data.NotificationDataLayerModule;
+import com.android.systemui.statusbar.notification.domain.NotificationDomainLayerModule;
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor;
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModelModule;
 import com.android.systemui.statusbar.notification.icon.ConversationIconManager;
@@ -67,7 +72,6 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProviderImpl;
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor;
-import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerImpl;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -80,17 +84,16 @@ import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.util.kotlin.JavaAdapter;
+
+import javax.inject.Provider;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
-
-import java.util.concurrent.Executor;
-
-import javax.inject.Provider;
+import kotlin.coroutines.CoroutineContext;
+import kotlinx.coroutines.CoroutineScope;
 
 /**
  * Dagger Module for classes found within the com.android.systemui.statusbar.notification package.
@@ -100,10 +103,12 @@ import javax.inject.Provider;
         FooterViewModelModule.class,
         KeyguardNotificationVisibilityProviderModule.class,
         NotificationDataLayerModule.class,
+        NotificationDomainLayerModule.class,
         NotifPipelineChoreographerModule.class,
         NotificationSectionHeadersModule.class,
         ActivatableNotificationViewModelModule.class,
         NotificationMemoryModule.class,
+        NotificationStatsLoggerModule.class,
 })
 public interface NotificationsModule {
     @Binds
@@ -127,39 +132,6 @@ public interface NotificationsModule {
     @Binds
     VisibilityLocationProvider bindVisibilityLocationProvider(
             VisibilityLocationProviderDelegator visibilityLocationProviderDelegator);
-
-    /** Provides an instance of {@link NotificationLogger} */
-    @SysUISingleton
-    @Provides
-    static NotificationLogger provideNotificationLogger(
-            NotificationListener notificationListener,
-            @UiBackground Executor uiBgExecutor,
-            NotifLiveDataStore notifLiveDataStore,
-            NotificationVisibilityProvider visibilityProvider,
-            NotifPipeline notifPipeline,
-            StatusBarStateController statusBarStateController,
-            WindowRootViewVisibilityInteractor windowRootViewVisibilityInteractor,
-            JavaAdapter javaAdapter,
-            NotificationLogger.ExpansionStateLogger expansionStateLogger,
-            NotificationPanelLogger notificationPanelLogger) {
-        return new NotificationLogger(
-                notificationListener,
-                uiBgExecutor,
-                notifLiveDataStore,
-                visibilityProvider,
-                notifPipeline,
-                statusBarStateController,
-                windowRootViewVisibilityInteractor,
-                javaAdapter,
-                expansionStateLogger,
-                notificationPanelLogger);
-    }
-
-    /** Binds {@link NotificationLogger} as a {@link CoreStartable}. */
-    @Binds
-    @IntoMap
-    @ClassKey(NotificationLogger.class)
-    CoreStartable bindsNotificationLogger(NotificationLogger notificationLogger);
 
     /** Provides an instance of {@link NotificationPanelLogger} */
     @SysUISingleton
@@ -205,11 +177,12 @@ public interface NotificationsModule {
     /** Provides notification launch animator. */
     @Provides
     @SysUISingleton
-    static NotificationLaunchAnimatorControllerProvider provideNotifLaunchAnimControllerProvider(
-            NotificationLaunchAnimationInteractor notificationLaunchAnimationInteractor,
-            NotificationListContainer notificationListContainer,
-            HeadsUpManager headsUpManager,
-            InteractionJankMonitor jankMonitor) {
+    static NotificationLaunchAnimatorControllerProvider
+            provideNotificationTransitionAnimatorControllerProvider(
+                    NotificationLaunchAnimationInteractor notificationLaunchAnimationInteractor,
+                    NotificationListContainer notificationListContainer,
+                    HeadsUpManager headsUpManager,
+                    InteractionJankMonitor jankMonitor) {
         return new NotificationLaunchAnimatorControllerProvider(
                 notificationLaunchAnimationInteractor,
                 notificationListContainer,
@@ -272,6 +245,10 @@ public interface NotificationsModule {
     NotifLiveDataStore bindNotifLiveDataStore(NotifLiveDataStoreImpl notifLiveDataStoreImpl);
 
     /** */
+    @Binds
+    NotificationListenerService bindNotificationListener(NotificationListener notificationListener);
+
+    /** */
     @Provides
     @SysUISingleton
     static VisualInterruptionDecisionProvider provideVisualInterruptionDecisionProvider(
@@ -290,4 +267,22 @@ public interface NotificationsModule {
     @ClassKey(VisualInterruptionDecisionProvider.class)
     CoreStartable startVisualInterruptionDecisionProvider(
             VisualInterruptionDecisionProvider provider);
+
+    @Provides
+    @SysUISingleton
+    public static NotificationsSoundPolicyRepository provideNotificationsSoundPolicyRepository(
+            Context context,
+            NotificationManager notificationManager,
+            @Application CoroutineScope coroutineScope,
+            @Background CoroutineContext coroutineContext) {
+        return new NotificationsSoundPolicyRepositoryImpl(context, notificationManager,
+                coroutineScope, coroutineContext);
+    }
+
+    @Provides
+    @SysUISingleton
+    public static NotificationsSoundPolicyInteractor provideNotificationsSoundPolicyInteractror(
+            NotificationsSoundPolicyRepository repository) {
+        return new NotificationsSoundPolicyInteractor(repository);
+    }
 }

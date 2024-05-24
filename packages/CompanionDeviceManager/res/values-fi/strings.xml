@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofoni"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Puhelulokit"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Lähellä olevat laitteet"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Median ulostulon muuttaminen"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Kuvat ja media"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Ilmoitukset"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Ilmoitukset"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Sovellukset"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Striimaus"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Voi soittaa ja hallinnoida puheluita"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Voi lukea puhelulokia ja kirjoittaa siihen"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Voi lähettää ja nähdä tekstiviestejä"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Voi nähdä yhteystietosi"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Voi nähdä kalenterisi"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Voi tallentaa audiota"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Voi löytää lähellä olevia laitteita, muodostaa niihin yhteyden ja määrittää niiden suhteellisen sijainnin"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Voi lukea kaikkia ilmoituksia, esim. kontakteihin, viesteihin ja kuviin liittyviä tietoja"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"soittaa ja hallinnoida puheluita"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"lukea puhelulokia ja kirjoittaa siihen"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"lähettää ja lukea tekstiviestejä"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"käyttää yhteystietoja"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"käyttää kalenteria"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"tallentaa audiota"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"löytää lähellä olevia laitteita, muodostaa niihin yhteyden ja määrittää niiden suhteellisen sijainnin"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"lukea kaikkia ilmoituksia, esim. yhteystietoihin, viesteihin ja kuviin liittyviä tietoja"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• lukea kaikkia ilmoituksia, esim. yhteystietoihin, viesteihin ja kuviin liittyviä tietoja&lt;br/&gt;• lähettää ilmoituksia.&lt;br/&gt;&lt;br/&gt;Voit milloin tahansa valita, saako sovellus lukea ja lähettää ilmoituksia, avaamalla Asetukset &gt; Ilmoitukset."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Striimaa puhelimen sovelluksia"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Striimaa sovelluksia ja muita järjestelmän ominaisuuksia puhelimesta"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Näkee saatavilla olevat laitteet ja voi ohjata sitä, millä niistä striimataan muiden sovellusten audiota tai videota"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"puhelin"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tabletti"</string>
 </resources>

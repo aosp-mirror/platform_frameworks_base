@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Micròfon"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Registres de trucades"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Dispositius propers"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Canvia la sortida multimèdia"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotos i contingut multimèdia"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Notificacions"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Notificacions"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Aplicacions"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Reproducció en línia"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Pot fer i gestionar trucades"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Pot llegir i escriure el registre de trucades del telèfon"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Pot enviar i consultar missatges SMS"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Pot accedir als contactes"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Pot accedir al calendari"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Pot gravar àudio"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Pot determinar la posició relativa dels dispositius propers, cercar-los i connectar-s\'hi"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Pot llegir totes les notificacions, inclosa informació com ara els contactes, els missatges i les fotos"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Fer i gestionar trucades telefòniques"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Llegir i escriure el registre de trucades del telèfon"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Enviar i llegir missatges SMS"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Accedir als contactes"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Accedir al calendari"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Gravar àudio"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Determinar la posició relativa dels dispositius propers, trobar-los i connectar-s\'hi"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Llegir totes les notificacions, inclosa informació com ara els contactes, els missatges i les fotos"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Llegir totes les notificacions, inclosa informació com ara els contactes, els missatges i les fotos.&lt;br/&gt;• Enviar notificacions.&lt;br/&gt;&lt;br/&gt;A Configuració &gt; Notificacions, pots gestionar en qualsevol moment els permisos de l\'aplicació per llegir i enviar notificacions."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Reprodueix en continu aplicacions del telèfon"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Reprodueix en continu aplicacions i altres funcions del sistema des del telèfon"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Accedeix a una llista de dispositius disponibles i controla quin reprodueix o emet àudio o vídeo des d\'altres aplicacions"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telèfon"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tauleta"</string>
 </resources>

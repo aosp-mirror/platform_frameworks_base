@@ -18,18 +18,23 @@ package com.android.wm.shell.dagger.pip;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.os.Handler;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipMediaController;
+import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.dagger.WMShellBaseModule;
 import com.android.wm.shell.dagger.WMSingleton;
+import com.android.wm.shell.pip2.phone.PhonePipMenuController;
 import com.android.wm.shell.pip2.phone.PipController;
 import com.android.wm.shell.pip2.phone.PipScheduler;
 import com.android.wm.shell.pip2.phone.PipTransition;
@@ -50,15 +55,16 @@ import java.util.Optional;
 public abstract class Pip2Module {
     @WMSingleton
     @Provides
-    static PipTransition providePipTransition(@NonNull ShellInit shellInit,
+    static PipTransition providePipTransition(Context context,
+            @NonNull ShellInit shellInit,
             @NonNull ShellTaskOrganizer shellTaskOrganizer,
             @NonNull Transitions transitions,
             PipBoundsState pipBoundsState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             Optional<PipController> pipController,
             @NonNull PipScheduler pipScheduler) {
-        return new PipTransition(shellInit, shellTaskOrganizer, transitions, pipBoundsState, null,
-                pipBoundsAlgorithm, pipScheduler);
+        return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
+                pipBoundsState, null, pipBoundsAlgorithm, pipScheduler);
     }
 
     @WMSingleton
@@ -68,13 +74,18 @@ public abstract class Pip2Module {
             ShellController shellController,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
-            PipDisplayLayoutState pipDisplayLayoutState) {
+            PipBoundsState pipBoundsState,
+            PipBoundsAlgorithm pipBoundsAlgorithm,
+            PipDisplayLayoutState pipDisplayLayoutState,
+            PipScheduler pipScheduler,
+            @ShellMainThread ShellExecutor mainExecutor) {
         if (!PipUtils.isPip2ExperimentEnabled()) {
             return Optional.empty();
         } else {
             return Optional.ofNullable(PipController.create(
                     context, shellInit, shellController, displayController, displayInsetsController,
-                    pipDisplayLayoutState));
+                    pipBoundsState, pipBoundsAlgorithm, pipDisplayLayoutState, pipScheduler,
+                    mainExecutor));
         }
     }
 
@@ -84,5 +95,17 @@ public abstract class Pip2Module {
             PipBoundsState pipBoundsState,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipScheduler(context, pipBoundsState, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static PhonePipMenuController providePipPhoneMenuController(Context context,
+            PipBoundsState pipBoundsState, PipMediaController pipMediaController,
+            SystemWindows systemWindows,
+            PipUiEventLogger pipUiEventLogger,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler) {
+        return new PhonePipMenuController(context, pipBoundsState, pipMediaController,
+                systemWindows, pipUiEventLogger, mainExecutor, mainHandler);
     }
 }

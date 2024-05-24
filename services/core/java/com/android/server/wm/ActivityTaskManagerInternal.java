@@ -275,6 +275,19 @@ public abstract class ActivityTaskManagerInternal {
             int startFlags, @Nullable Bundle options, int userId);
 
     /**
+     * Start activity {@code intent} with initially under screenshot. The screen of launching
+     * display will be frozen before transition occur.
+     *
+     * - DO NOT call it with the calling UID cleared.
+     * - The caller must do the calling user ID check.
+     *
+     * @return error codes used by {@link IActivityManager#startActivity} and its siblings.
+     */
+    public abstract int startActivityWithScreenshot(@NonNull Intent intent,
+            @NonNull String callingPackage, int callingUid, int callingPid,
+            @Nullable IBinder resultTo, @Nullable Bundle options, int userId);
+
+    /**
      * Called after virtual display Id is updated by
      * {@link com.android.server.vr.Vr2dDisplay} with a specific
      * {@param vr2dDisplayId}.
@@ -796,4 +809,20 @@ public abstract class ActivityTaskManagerInternal {
      * @param token The activity token.
      */
     public abstract int getDisplayId(IBinder token);
+
+    /**
+     * Register a {@link CompatScaleProvider}.
+     */
+    public abstract void registerCompatScaleProvider(
+            @CompatScaleProvider.CompatScaleModeOrderId int id,
+            @NonNull CompatScaleProvider provider);
+
+    /**
+     * Unregister a {@link CompatScaleProvider}.
+     */
+    public abstract void unregisterCompatScaleProvider(
+            @CompatScaleProvider.CompatScaleModeOrderId int id);
+
+    /** Returns whether assist data is allowed. */
+    public abstract boolean isAssistDataAllowed();
 }

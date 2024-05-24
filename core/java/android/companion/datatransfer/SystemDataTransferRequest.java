@@ -103,4 +103,15 @@ public abstract class SystemDataTransferRequest {
     public int describeContents() {
         return 0;
     }
+
+    /**
+     * Creates a copy of itself with new association ID.
+     *
+     * This method must be implemented to ensure that backup-and-restore can correctly re-map
+     * the restored requests to the restored associations that can potentially have different
+     * IDs than what was originally backed up.
+     *
+     * @hide
+     */
+    public abstract SystemDataTransferRequest copyWithNewId(int associationId);
 }

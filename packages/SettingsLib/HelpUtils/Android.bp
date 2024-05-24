@@ -10,6 +10,9 @@ package {
 android_library {
     name: "SettingsLibHelpUtils",
     use_resource_processor: true,
+    defaults: [
+        "SettingsLintDefaults",
+    ],
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],

@@ -50,6 +50,7 @@ import java.util.HashMap;
  * Customize the XML file for different devices.
  * [hidden]
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PowerProfile {
 
     public static final String TAG = "PowerProfile";
@@ -321,6 +322,13 @@ public class PowerProfile {
     private int mCpuPowerBracketCount;
 
     @VisibleForTesting
+    public PowerProfile() {
+        synchronized (sLock) {
+            initLocked();
+        }
+    }
+
+    @VisibleForTesting
     @UnsupportedAppUsage
     public PowerProfile(Context context) {
         this(context, false);
@@ -358,6 +366,10 @@ public class PowerProfile {
         if (sPowerItemMap.size() == 0 && sPowerArrayMap.size() == 0) {
             readPowerValuesFromXml(context, xmlId);
         }
+        initLocked();
+    }
+
+    private void initLocked() {
         initCpuClusters();
         initCpuScalingPolicies();
         initCpuPowerBrackets();

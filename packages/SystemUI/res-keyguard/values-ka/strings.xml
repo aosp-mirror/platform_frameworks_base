@@ -33,8 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • იტენება"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • სწრაფად იტენება"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ნელა იტენება"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • დატენვა ოპტიმიზირებულია ბატარეის დასაცავად"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • დამტენი დამხმარე მოწყობილობის პრობლემა"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • დატენვა შეჩერებულია ბატარეის დასაცავად"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • შეამოწმეთ დამტენი აქსესუარი"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ქსელი ჩაკეტილია"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM არ არის"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"გამოუყენებელი SIM."</string>

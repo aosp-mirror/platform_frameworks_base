@@ -25,13 +25,15 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.IntentSender;
+import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Process;
+import android.text.TextUtils;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -76,7 +78,7 @@ public class UnarchiveActivity extends Activity {
         boolean hasRequestInstallPermission = Arrays.asList(getRequestedPermissions(callingPackage))
                 .contains(permission.REQUEST_INSTALL_PACKAGES);
         boolean hasInstallPermission = getBaseContext().checkPermission(permission.INSTALL_PACKAGES,
-                0 /* random value for pid */, callingUid) != PackageManager.PERMISSION_GRANTED;
+                0 /* random value for pid */, callingUid) == PackageManager.PERMISSION_GRANTED;
         if (!hasRequestInstallPermission && !hasInstallPermission) {
             Log.e(TAG, "Uid " + callingUid + " does not have "
                     + permission.REQUEST_INSTALL_PACKAGES + " or "
@@ -97,15 +99,31 @@ public class UnarchiveActivity extends Activity {
             String appTitle = pm.getApplicationInfo(mPackageName,
                     PackageManager.ApplicationInfoFlags.of(
                             MATCH_ARCHIVED_PACKAGES)).loadLabel(pm).toString();
-            // TODO(ag/25387215) Get the real installer title here after fixing getInstallSource for
-            //  archived apps.
-            showDialogFragment(appTitle, "installerTitle");
+            String installerTitle = getResponsibleInstallerTitle(pm,
+                    pm.getInstallSourceInfo(mPackageName));
+            showDialogFragment(appTitle, installerTitle);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Invalid packageName: " + e.getMessage());
         }
     }
 
-    @Nullable
+    private String getResponsibleInstallerTitle(PackageManager pm,
+            InstallSourceInfo installSource)
+            throws PackageManager.NameNotFoundException {
+        String packageName = TextUtils.isEmpty(installSource.getUpdateOwnerPackageName())
+                ? installSource.getInstallingPackageName()
+                : installSource.getUpdateOwnerPackageName();
+        if (packageName == null) {
+            // Should be unreachable.
+            Log.e(TAG, "Installer not found.");
+            setResult(Activity.RESULT_FIRST_USER);
+            finish();
+            return "";
+        }
+        return pm.getApplicationInfo(packageName, /* flags= */ 0).loadLabel(pm).toString();
+    }
+
+    @NonNull
     private String[] getRequestedPermissions(String callingPackage) {
         String[] requestedPermissions = null;
         try {
@@ -115,7 +133,7 @@ public class UnarchiveActivity extends Activity {
             // Should be unreachable because we've just fetched the packageName above.
             Log.e(TAG, "Package not found for " + callingPackage);
         }
-        return requestedPermissions;
+        return requestedPermissions == null ? new String[]{} : requestedPermissions;
     }
 
     void startUnarchive() {

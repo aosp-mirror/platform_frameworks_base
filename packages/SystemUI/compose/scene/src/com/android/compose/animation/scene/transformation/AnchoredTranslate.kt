@@ -35,13 +35,13 @@ internal class AnchoredTranslate(
         layoutImpl: SceneTransitionLayoutImpl,
         scene: Scene,
         element: Element,
-        sceneValues: Element.TargetValues,
+        sceneState: Element.SceneState,
         transition: TransitionState.Transition,
         value: Offset,
     ): Offset {
         val anchor = layoutImpl.elements[anchor] ?: return value
         fun anchorOffsetIn(scene: SceneKey): Offset? {
-            return anchor.sceneValues[scene]?.targetOffset?.takeIf { it.isSpecified }
+            return anchor.sceneStates[scene]?.targetOffset?.takeIf { it.isSpecified }
         }
 
         // [element] will move the same amount as [anchor] does.

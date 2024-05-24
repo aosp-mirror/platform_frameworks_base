@@ -17,6 +17,7 @@
 package android.content.pm.verify.domain;
 
 import android.annotation.CheckResult;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -25,15 +26,21 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.UriRelativeFilterGroup;
+import android.content.UriRelativeFilterGroupParcel;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 
 import com.android.internal.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
@@ -153,6 +160,74 @@ public final class DomainVerificationManager {
             IDomainVerificationManager domainVerificationManager) {
         mContext = context;
         mDomainVerificationManager = domainVerificationManager;
+    }
+
+    /**
+     * Update the URI relative filter groups for a package. All previously existing groups
+     * will be cleared before the new groups will be applied.
+     *
+     * @param packageName The name of the package.
+     * @param domainToGroupsMap A map of domains to a list of {@link UriRelativeFilterGroup}s that
+     *                         should apply to them. Groups for each domain will replace any groups
+     *                         provided for that domain in a prior call to this method. Groups will
+     *                         be evaluated in the order they are provided.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT)
+    @FlaggedApi(android.content.pm.Flags.FLAG_RELATIVE_REFERENCE_INTENT_FILTERS)
+    public void setUriRelativeFilterGroups(@NonNull String packageName,
+            @NonNull Map<String, List<UriRelativeFilterGroup>> domainToGroupsMap) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(domainToGroupsMap);
+        Bundle bundle = new Bundle();
+        for (String domain : domainToGroupsMap.keySet()) {
+            List<UriRelativeFilterGroup> groups = domainToGroupsMap.get(domain);
+            bundle.putParcelableList(domain, UriRelativeFilterGroup.groupsToParcels(groups));
+        }
+        try {
+            mDomainVerificationManager.setUriRelativeFilterGroups(packageName, bundle);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves a map of a package's verified domains to a list of {@link UriRelativeFilterGroup}s
+     * that applies to them.
+     *
+     * @param packageName The name of the package.
+     * @param domains List of domains for which to retrieve group matches.
+     * @return A map of domains to the lists of {@link UriRelativeFilterGroup}s that apply to them.
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    @FlaggedApi(android.content.pm.Flags.FLAG_RELATIVE_REFERENCE_INTENT_FILTERS)
+    public Map<String, List<UriRelativeFilterGroup>> getUriRelativeFilterGroups(
+            @NonNull String packageName,
+            @NonNull List<String> domains) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(domains);
+        if (domains.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        try {
+            Bundle bundle = mDomainVerificationManager.getUriRelativeFilterGroups(packageName,
+                    domains);
+            ArrayMap<String, List<UriRelativeFilterGroup>> map = new ArrayMap<>();
+            if (!bundle.isEmpty()) {
+                for (String domain : bundle.keySet()) {
+                    List<UriRelativeFilterGroupParcel> parcels =
+                            bundle.getParcelableArrayList(domain,
+                                    UriRelativeFilterGroupParcel.class);
+                    map.put(domain, UriRelativeFilterGroup.parcelsToGroups(parcels));
+                }
+            }
+            return map;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

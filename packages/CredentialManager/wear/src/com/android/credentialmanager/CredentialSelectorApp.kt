@@ -19,5 +19,6 @@ package com.android.credentialmanager
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 
+/** [Application] of credential selector. */
 @HiltAndroidApp(Application::class)
 class CredentialSelectorApp : Hilt_CredentialSelectorApp()

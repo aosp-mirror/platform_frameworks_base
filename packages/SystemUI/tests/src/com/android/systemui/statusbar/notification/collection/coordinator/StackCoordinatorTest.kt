@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.notification.collection.render.NotifStackC
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.RenderNotificationListInteractor
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
@@ -88,12 +89,20 @@ class StackCoordinatorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(NotificationIconContainerRefactor.FLAG_NAME)
-    fun testSetRenderedListOnInteractor() {
+    fun testSetRenderedListOnInteractor_iconContainerFlagOn() {
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(renderListInteractor).setRenderedList(eq(listOf(entry)))
     }
 
     @Test
+    @EnableFlags(FooterViewRefactor.FLAG_NAME)
+    fun testSetRenderedListOnInteractor_footerFlagOn() {
+        afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
+        verify(renderListInteractor).setRenderedList(eq(listOf(entry)))
+    }
+
+    @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     fun testSetNotificationStats_clearableAlerting() {
         whenever(section.bucket).thenReturn(BUCKET_ALERTING)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
@@ -101,6 +110,7 @@ class StackCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     fun testSetNotificationStats_clearableSilent() {
         whenever(section.bucket).thenReturn(BUCKET_SILENT)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)

@@ -31,6 +31,8 @@ import androidx.core.math.MathUtils.clamp
 import java.lang.Float.max
 import kotlin.math.sqrt
 
+import com.android.egg.flags.Flags.flagFlag
+
 const val DRAW_ORBITS = true
 const val DRAW_GRAVITATIONAL_FIELDS = true
 const val DRAW_STAR_GRAVITATIONAL_FIELDS = true
@@ -279,8 +281,23 @@ fun ZoomedDrawScope.drawSpacecraft(ship: Spacecraft) {
 
 fun ZoomedDrawScope.drawLanding(landing: Landing) {
     val v = landing.planet.pos + Vec2.makeWithAngleMag(landing.angle, landing.planet.radius)
-    drawLine(Color.Red, v + Vec2(-5f, -5f), v + Vec2(5f, 5f), strokeWidth = 1f / zoom)
-    drawLine(Color.Red, v + Vec2(5f, -5f), v + Vec2(-5f, 5f), strokeWidth = 1f / zoom)
+
+    if (flagFlag()) {
+        val strokeWidth = 2f / zoom
+        val height = 80f
+        rotateRad(landing.angle, pivot = v) {
+            translate(v.x, v.y) {
+                drawPath(
+                    Path().apply {
+                        moveTo(0f, 0f)
+                        lineTo(height, 0f)
+                        lineTo(height * 0.875f, height * 0.25f)
+                        lineTo(height * 0.75f, 0f)
+                        close()
+                    }, Color.Yellow, style = Stroke(width = strokeWidth))
+            }
+        }
+    }
 }
 
 fun ZoomedDrawScope.drawSpark(spark: Spark) {

@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
@@ -26,7 +25,6 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 /**
  * Breaks down LOCKSCREEN->PRIMARY BOUNCER transition into discrete steps for corresponding views to
@@ -37,21 +35,23 @@ import kotlinx.coroutines.flow.map
 class LockscreenToPrimaryBouncerTransitionViewModel
 @Inject
 constructor(
-    interactor: KeyguardTransitionInteractor,
     shadeDependentFlows: ShadeDependentFlows,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
         animationFlow.setup(
             duration = FromLockscreenTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
-            stepFlow =
-                interactor.transition(KeyguardState.LOCKSCREEN, KeyguardState.PRIMARY_BOUNCER),
+            from = KeyguardState.LOCKSCREEN,
+            to = KeyguardState.PRIMARY_BOUNCER,
         )
 
     val shortcutsAlpha: Flow<Float> =
-        interactor.transition(KeyguardState.LOCKSCREEN, KeyguardState.PRIMARY_BOUNCER).map {
-            1 - it.value
-        }
+        transitionAnimation.sharedFlow(
+            duration = FromLockscreenTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
+            onStep = { 1f - it }
+        )
+
+    val lockscreenAlpha: Flow<Float> = shortcutsAlpha
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         shadeDependentFlows.transitionFlow(

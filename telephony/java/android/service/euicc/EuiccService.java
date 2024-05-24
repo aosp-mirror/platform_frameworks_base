@@ -19,6 +19,7 @@ import static android.telephony.euicc.EuiccCardManager.ResetOption;
 
 import android.Manifest;
 import android.annotation.CallSuper;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,6 +38,8 @@ import android.telephony.euicc.EuiccManager;
 import android.telephony.euicc.EuiccManager.OtaStatus;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -759,6 +762,20 @@ public abstract class EuiccService extends Service {
     public abstract int onRetainSubscriptionsForFactoryReset(int slotId);
 
     /**
+     * Return the available memory in bytes of the eUICC.
+     *
+     * @param slotId ID of the SIM slot being queried.
+     * @return the available memory in bytes.
+     * @see android.telephony.euicc.EuiccManager#getAvailableMemoryInBytes
+     */
+    @FlaggedApi(Flags.FLAG_ESIM_AVAILABLE_MEMORY)
+    public long onGetAvailableMemoryInBytes(int slotId) {
+        // stub implementation, LPA needs to implement this
+        throw new UnsupportedOperationException("The connected LPA does not implement"
+                + "EuiccService#onGetAvailableMemoryInBytes(int)");
+    }
+
+    /**
      * Dump to a provided printWriter.
      */
     public void dump(@NonNull PrintWriter printWriter) {
@@ -831,6 +848,34 @@ public abstract class EuiccService extends Service {
                     }
                 }
             });
+        }
+
+        @Override
+        @FlaggedApi(Flags.FLAG_ESIM_AVAILABLE_MEMORY)
+        public void getAvailableMemoryInBytes(
+                int slotId, IGetAvailableMemoryInBytesCallback callback) {
+            mExecutor.execute(
+                    () -> {
+                        long availableMemoryInBytes = EuiccManager.EUICC_MEMORY_FIELD_UNAVAILABLE;
+                        String unsupportedOperationMessage = "";
+                        try {
+                            availableMemoryInBytes =
+                                    EuiccService.this.onGetAvailableMemoryInBytes(slotId);
+                        } catch (UnsupportedOperationException e) {
+                            unsupportedOperationMessage = e.getMessage();
+                        }
+
+                        try {
+                            if (!unsupportedOperationMessage.isEmpty()) {
+                                callback.onUnsupportedOperationException(
+                                        unsupportedOperationMessage);
+                            } else {
+                                callback.onSuccess(availableMemoryInBytes);
+                            }
+                        } catch (RemoteException e) {
+                            // Can't communicate with the phone process; ignore.
+                        }
+                    });
         }
 
         @Override

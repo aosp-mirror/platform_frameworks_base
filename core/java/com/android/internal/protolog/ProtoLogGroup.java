@@ -94,6 +94,8 @@ public enum ProtoLogGroup implements IProtoLogGroup {
 
     WM_DEBUG_DIMMER(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false, Consts.TAG_WM),
     WM_DEBUG_TPL(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false, Consts.TAG_WM),
+    WM_DEBUG_EMBEDDED_WINDOWS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
+            Consts.TAG_WM),
     TEST_GROUP(true, true, false, "WindowManagerProtoLogTest");
 
     private final boolean mEnabled;

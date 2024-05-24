@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"ማይክሮፎን"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"የጥሪ ምዝገባ ማስታወሻዎች"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"በአቅራቢያ ያሉ መሣሪያዎች"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"የሚዲያ ውጤትን ይቀይሩ"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ፎቶዎች እና ሚዲያ"</string>
-    <string name="permission_notification" msgid="693762568127741203">"ማሳወቂያዎች"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"ማሳወቂያዎች"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"መተግበሪያዎች"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"በዥረት መልቀቅ"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"የስልክ ጥሪዎችን ማድረግ እና ማስተዳደር ይችላል"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"የስልክ ጥሪ ምዝገባ ማስታወሻን ማንበብ እና መጻፍ ይችላል"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"የኤስኤምኤስ መልዕክቶችን መላክ እና ማየት ይችላል"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"ዕውቂያዎችዎን መድረስ ይችላል"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"የቀን መቁጠሪያዎን መድረስ ይችላል"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"ኦዲዮ መቅዳት ይችላል"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"በአቅራቢያ ያሉ መሣሪያዎችን ማግኘት፣ ከእነሱ ጋር መገናኘት እና አንጻራዊ ቦታቸውን መወሰን ይችላል"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"እንደ እውቂያዎች፣ መልዕክቶች እና ፎቶዎች ያሉ መረጃዎችን ጨምሮ ሁሉንም ማሳወቂያዎች ማንበብ ይችላል"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"የስልክ ጥሪዎች ያድርጉ እና ያስተዳድሩ"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"የስልክ ጥሪ ምዝግብ ማስታወሻን ያንብቡ እና ይጻፉ"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"የኤስኤምኤስ መልዕክቶችን ይላኩና ይመልከቱ"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"የእርስዎን እውቂያዎች ይድረሱባቸው"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"የእርስዎን ቀን መቁጠሪያ ይድረሱበት"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"ኦዲዮ ቅረጽ"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"በአቅራቢያ ያሉ መሣሪያዎችን ማግኘት፣ ከእነሱ ጋር መገናኘት እና አንጻራዊ ቦታቸውን መወሰን"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"እንደ እውቂያዎች፣ መልዕክቶች እና ፎቶዎች ያሉ መረጃዎችን ጨምሮ ሁሉንም ማሳወቂያዎች ማንበብ"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• እንደ እውቂያዎች፣ መልዕክቶች እና ፎቶዎች ያሉ መረጃዎችን ጨምሮ ሁሉንም ማሳወቂያዎች ያንብቡ&lt;br/&gt;• ማሳወቂያዎችን መላክ&lt;br/&gt;&lt;br/&gt;የዚህን መተግበሪያ ማሳወቂያዎችን የማንበብ እና የመላክ ችሎታን በቅንብሮች &gt; ማሳወቂያዎች ውስጥ ማስተዳደር ይችላሉ።"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"የስልክዎን መተግበሪያዎች በዥረት ይልቀቁ"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"ከስልክዎ ሆነው መተግበሪያዎች እና ሌሎች የስርዓት ባህሪያትን በዥረት ይልቀቁ"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"የሚገኙትን መሣሪያዎች ዝርዝር ይድረሱ እና የትኛዎቹ ኦዲዮን ወይም ቪዲዮን ከሌሎች መተግበሪያዎች በዥረት እንደሚለቅቁ ይቆጣጠሩ"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"ስልክ"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"ጡባዊ"</string>
 </resources>

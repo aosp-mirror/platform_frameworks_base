@@ -34,7 +34,8 @@ import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.CoreStartable;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingModule;
@@ -50,7 +51,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WindowManagerLockscreenVisibilityManager;
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardDataQuickAffordanceModule;
-import com.android.systemui.keyguard.data.repository.KeyguardFaceAuthModule;
+import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthModule;
 import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionModule;
@@ -72,6 +73,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.DeviceConfigProxy;
+import com.android.systemui.util.ThreadAssert;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.settings.SystemSettings;
@@ -79,17 +81,22 @@ import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
+import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
 import java.util.concurrent.Executor;
 
 import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * Dagger Module providing keyguard.
  */
+@ExperimentalCoroutinesApi
 @Module(subcomponents = {
         KeyguardQsUserSwitchComponent.class,
         KeyguardStatusBarViewComponent.class,
@@ -100,18 +107,18 @@ import kotlinx.coroutines.CoroutineDispatcher;
             FalsingModule.class,
             KeyguardDataQuickAffordanceModule.class,
             KeyguardRepositoryModule.class,
-            KeyguardFaceAuthModule.class,
+            DeviceEntryFaceAuthModule.class,
             KeyguardDisplayModule.class,
             StartKeyguardTransitionModule.class,
             ResourceTrimmerModule.class,
         })
-public class KeyguardModule {
+public interface KeyguardModule {
     /**
      * Provides our instance of KeyguardViewMediator which is considered optional.
      */
     @Provides
     @SysUISingleton
-    public static KeyguardViewMediator newKeyguardViewMediator(
+    static KeyguardViewMediator newKeyguardViewMediator(
             Context context,
             UiEventLogger uiEventLogger,
             SessionTracker sessionTracker,
@@ -144,7 +151,7 @@ public class KeyguardModule {
             WallpaperRepository wallpaperRepository,
             Lazy<ShadeController> shadeController,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
-            Lazy<ActivityLaunchAnimator> activityLaunchAnimator,
+            Lazy<ActivityTransitionAnimator> activityTransitionAnimator,
             Lazy<ScrimController> scrimControllerLazy,
             IActivityTaskManager activityTaskManagerService,
             FeatureFlags featureFlags,
@@ -190,7 +197,7 @@ public class KeyguardModule {
                 wallpaperRepository,
                 shadeController,
                 notificationShadeWindowController,
-                activityLaunchAnimator,
+                activityTransitionAnimator,
                 scrimControllerLazy,
                 activityTaskManagerService,
                 featureFlags,
@@ -207,13 +214,26 @@ public class KeyguardModule {
 
     /** */
     @Provides
-    public ViewMediatorCallback providesViewMediatorCallback(KeyguardViewMediator viewMediator) {
+    static ViewMediatorCallback providesViewMediatorCallback(KeyguardViewMediator viewMediator) {
         return viewMediator.getViewMediatorCallback();
     }
 
     /** */
     @Provides
-    public KeyguardQuickAffordancesMetricsLogger providesKeyguardQuickAffordancesMetricsLogger() {
+    static KeyguardQuickAffordancesMetricsLogger providesKeyguardQuickAffordancesMetricsLogger() {
         return new KeyguardQuickAffordancesMetricsLoggerImpl();
     }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    static ThreadAssert providesThreadAssert() {
+        return new ThreadAssert();
+    }
+
+    /** Binds {@link KeyguardUpdateMonitor} as a {@link CoreStartable}. */
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardUpdateMonitor.class)
+    CoreStartable bindsKeyguardUpdateMonitor(KeyguardUpdateMonitor keyguardUpdateMonitor);
 }

@@ -38,7 +38,7 @@ import android.view.animation.TranslateAnimation;
 import android.window.TransitionInfo;
 
 import com.android.internal.policy.TransitionAnimation;
-import com.android.wm.shell.util.TransitionUtil;
+import com.android.wm.shell.shared.TransitionUtil;
 
 /** Animation spec for ActivityEmbedding transition. */
 // TODO(b/206557124): provide an easier way to customize animation

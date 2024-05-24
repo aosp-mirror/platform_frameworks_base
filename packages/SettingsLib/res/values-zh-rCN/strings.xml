@@ -154,6 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"成像设备"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"耳机"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"外围输入设备"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"助听器"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"蓝牙"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"WLAN 已关闭。"</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"WLAN 连接已断开。"</string>
@@ -455,6 +456,8 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"“色彩校正”功能适用于以下情况：&lt;br/&gt; &lt;ol&gt; &lt;li&gt;您想更准确地查看颜色&lt;/li&gt; &lt;li&gt;您想移除颜色以提高专注程度&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"已被“<xliff:g id="TITLE">%1$s</xliff:g>”覆盖"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - 为保护电池，已暂停充电"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> - 请检查充电配件"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"大约还可使用<xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"大约还可使用<xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"根据您的使用情况，大约还可使用<xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -475,7 +478,7 @@
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"还需<xliff:g id="TIME">%1$s</xliff:g>充满"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - 还需<xliff:g id="TIME">%2$s</xliff:g>充满"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充电方式已优化"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充电方式已优化"</string>
+    <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - 正在充电"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"未知"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"正在充电"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"正在快速充电"</string>
@@ -483,9 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"正在无线充电"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"正在充电"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"未在充电"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"已连接，未充电"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"已连接，但未充电"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"已充满电"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"已充满电"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"充电已暂停"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"由管理员控制"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"由受限设置控制"</string>
     <string name="disabled" msgid="8017887509554714950">"已停用"</string>
@@ -547,9 +551,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"每次都询问"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"直到您将其关闭"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"刚刚"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"这部手机"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"这台平板电脑"</string>
-    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"这部手机"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"这部平板电脑"</string>
+    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"基座音箱"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"外部设备"</string>
@@ -615,6 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"无法创建新用户"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"未能创建新的访客"</string>
     <string name="user_nickname" msgid="262624187455825083">"昵称"</string>
+    <string name="edit_user_info_message" msgid="5199468585059260053">"所有使用此设备的用户都将可以看到您的姓名和照片。"</string>
     <string name="user_add_user" msgid="7876449291500212468">"添加用户"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"添加访客"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"移除访客"</string>

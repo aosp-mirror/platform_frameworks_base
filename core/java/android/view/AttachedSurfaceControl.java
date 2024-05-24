@@ -19,10 +19,12 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
+import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.HardwareBuffer;
-import android.os.IBinder;
+import android.os.Looper;
+import android.window.InputTransferToken;
 import android.window.SurfaceSyncGroup;
 
 import com.android.window.flags.Flags;
@@ -179,32 +181,25 @@ public interface AttachedSurfaceControl {
     }
 
     /**
-     * Gets the token used for associating this {@link AttachedSurfaceControl} with
-     * {@link SurfaceControlViewHost} instances.
+     * Gets the token used for associating this {@link AttachedSurfaceControl} with an embedded
+     * {@link SurfaceControlViewHost} or {@link SurfaceControl}
      *
-     * <p>This token should be passed to {@link SurfaceControlViewHost}'s constructor.
+     * <p>This token should be passed to
+     * {@link SurfaceControlViewHost#SurfaceControlViewHost(Context, Display, InputTransferToken)}
+     * or
+     * {@link WindowManager#registerBatchedSurfaceControlInputReceiver(int, InputTransferToken,
+     * SurfaceControl, Choreographer, SurfaceControlInputReceiver)} or
+     * {@link WindowManager#registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken,
+     * SurfaceControl, Looper, SurfaceControlInputReceiver)}
      *
-     * @return The SurfaceControlViewHost link token.
+     * @return The {@link InputTransferToken} for the {@link AttachedSurfaceControl}
+     * @throws IllegalStateException if the {@link AttachedSurfaceControl} was created with no
+     * registered input
      */
-    @Nullable
-    @FlaggedApi(Flags.FLAG_GET_HOST_TOKEN_API)
-    default IBinder getHostToken() {
-        throw new UnsupportedOperationException("The getHostToken needs to be "
-            + "implemented before making this call.");
-    }
-
-    /**
-     * Transfer the currently in progress touch gesture from the host to the requested
-     * {@link SurfaceControlViewHost.SurfacePackage}. This requires that the
-     * SurfaceControlViewHost was created with the current host's inputToken.
-     *
-     * @param surfacePackage The SurfacePackage to transfer the gesture to.
-     * @return Whether the touch stream was transferred.
-     */
-    @FlaggedApi(Flags.FLAG_TRANSFER_GESTURE_TO_EMBEDDED)
-    default boolean transferHostTouchGestureToEmbedded(
-            @NonNull SurfaceControlViewHost.SurfacePackage surfacePackage) {
-        throw new UnsupportedOperationException(
-                "transferHostTouchGestureToEmbedded is unimplemented");
+    @NonNull
+    @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
+    default InputTransferToken getInputTransferToken() {
+        throw new UnsupportedOperationException("The getInputTransferToken needs to be "
+                + "implemented before making this call.");
     }
 }

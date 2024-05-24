@@ -16,14 +16,13 @@
 
 package android.app.servertransaction;
 
-import static com.android.window.flags.Flags.syncWindowConfigUpdateFlag;
+import static com.android.window.flags.Flags.bundleClientTransactionFlag;
 
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.hardware.display.DisplayManagerGlobal;
-import android.os.Process;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -67,7 +66,7 @@ public class ClientTransactionListenerController {
      * window configuration.
      */
     public void onDisplayChanged(int displayId) {
-        if (!isSyncWindowConfigUpdateFlagEnabled()) {
+        if (!bundleClientTransactionFlag()) {
             return;
         }
         if (ActivityThread.isSystem()) {
@@ -75,11 +74,5 @@ public class ClientTransactionListenerController {
             return;
         }
         mDisplayManager.handleDisplayChangeFromWindowManager(displayId);
-    }
-
-    /** Whether {@link #syncWindowConfigUpdateFlag} feature flag is enabled. */
-    public boolean isSyncWindowConfigUpdateFlagEnabled() {
-        // Can't read flag from isolated process.
-        return !Process.isIsolated() && syncWindowConfigUpdateFlag();
     }
 }

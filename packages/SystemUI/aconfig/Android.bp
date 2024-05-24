@@ -20,10 +20,14 @@
  */
 
 package {
+    default_team: "trendy_team_system_ui_please_use_a_more_specific_subteam_if_possible_",
     default_visibility: [
         "//visibility:override",
         "//frameworks/base/packages/SystemUI:__subpackages__",
+        "//frameworks/libs/systemui/tracinglib:__subpackages__",
         "//platform_testing:__subpackages__",
+        "//vendor:__subpackages__",
+        "//cts:__subpackages__",
     ],
 }
 

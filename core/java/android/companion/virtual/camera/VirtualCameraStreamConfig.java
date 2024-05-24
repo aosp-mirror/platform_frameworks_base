@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.companion.virtual.camera;
 
 import android.annotation.FlaggedApi;
@@ -24,6 +25,10 @@ import android.graphics.ImageFormat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Objects;
+
 /**
  * The configuration of a single virtual camera stream.
  *
@@ -32,32 +37,47 @@ import android.os.Parcelable;
 @SystemApi
 @FlaggedApi(Flags.FLAG_VIRTUAL_CAMERA)
 public final class VirtualCameraStreamConfig implements Parcelable {
+    // TODO(b/310857519): Check if we should increase the fps upper limit in future.
+    static final int MAX_FPS_UPPER_LIMIT = 60;
+    // This is the minimum guaranteed upper bound of texture size supported by all devices.
+    // Keep this in sync with kMaxTextureSize from services/camera/virtualcamera/util/Util.cc
+    // TODO(b/310857519): Remove this once we add support for fetching the maximum texture size
+    // supported by the current device.
+    static final int DIMENSION_UPPER_LIMIT = 2048;
 
     private final int mWidth;
     private final int mHeight;
     private final int mFormat;
+    private final int mMaxFps;
 
     /**
      * Construct a new instance of {@link VirtualCameraStreamConfig} initialized with the provided
-     * width, height and {@link ImageFormat}
+     * width, height and {@link ImageFormat}.
      *
      * @param width The width of the stream.
      * @param height The height of the stream.
      * @param format The {@link ImageFormat} of the stream.
+     * @param maxFps The maximum frame rate (in frames per second) for the stream.
+     *
+     * @hide
      */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public VirtualCameraStreamConfig(
             @IntRange(from = 1) int width,
             @IntRange(from = 1) int height,
-            @ImageFormat.Format int format) {
+            @ImageFormat.Format int format,
+            @IntRange(from = 1) int maxFps) {
         this.mWidth = width;
         this.mHeight = height;
         this.mFormat = format;
+        this.mMaxFps = maxFps;
     }
 
     private VirtualCameraStreamConfig(@NonNull Parcel in) {
         mWidth = in.readInt();
         mHeight = in.readInt();
         mFormat = in.readInt();
+        mMaxFps = in.readInt();
     }
 
     @Override
@@ -70,6 +90,7 @@ public final class VirtualCameraStreamConfig implements Parcelable {
         dest.writeInt(mWidth);
         dest.writeInt(mHeight);
         dest.writeInt(mFormat);
+        dest.writeInt(mMaxFps);
     }
 
     @NonNull
@@ -98,9 +119,29 @@ public final class VirtualCameraStreamConfig implements Parcelable {
         return mHeight;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VirtualCameraStreamConfig that = (VirtualCameraStreamConfig) o;
+        return mWidth == that.mWidth && mHeight == that.mHeight && mFormat == that.mFormat
+                && mMaxFps == that.mMaxFps;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mWidth, mHeight, mFormat, mMaxFps);
+    }
+
     /** Returns the {@link ImageFormat} of this stream. */
     @ImageFormat.Format
     public int getFormat() {
         return mFormat;
+    }
+
+    /** Returns the maximum frame rate (in frames per second) of this stream. */
+    @IntRange(from = 1)
+    public int getMaximumFramesPerSecond() {
+        return mMaxFps;
     }
 }

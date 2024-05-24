@@ -306,6 +306,7 @@ public final class UserTypeFactory {
                 .setDarkThemeBadgeColors(
                         R.color.white)
                 .setDefaultRestrictions(getDefaultProfileRestrictions())
+                .setDefaultCrossProfileIntentFilters(getDefaultPrivateCrossProfileIntentFilter())
                 .setDefaultUserProperties(new UserProperties.Builder()
                         .setStartWithParent(true)
                         .setCredentialShareableWithParent(true)
@@ -322,7 +323,10 @@ public final class UserTypeFactory {
                                 UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM)
                         .setInheritDevicePolicy(UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT)
                         .setCrossProfileContentSharingStrategy(
-                                UserProperties.CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT));
+                                UserProperties.CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT)
+                        .setProfileApiVisibility(
+                                UserProperties.PROFILE_API_VISIBILITY_HIDDEN)
+                        .setItemsRestrictedOnHomeScreen(true));
     }
 
     /**
@@ -441,6 +445,11 @@ public final class UserTypeFactory {
 
     private static List<DefaultCrossProfileIntentFilter> getDefaultCloneCrossProfileIntentFilter() {
         return DefaultCrossProfileIntentFiltersUtils.getDefaultCloneProfileFilters();
+    }
+
+    private static List<DefaultCrossProfileIntentFilter> getDefaultPrivateCrossProfileIntentFilter()
+    {
+        return DefaultCrossProfileIntentFiltersUtils.getDefaultPrivateProfileFilters();
     }
 
     /** Gets a default bundle, keyed by Settings.Secure String names, for non-managed profiles. */

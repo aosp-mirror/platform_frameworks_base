@@ -44,6 +44,7 @@ public abstract class BindStage<Params> extends BindRequester {
     /**
      * Execute the stage asynchronously.
      *
+     * @param entry the NotificationEntry to bind
      * @param row notification top-level view to bind views to
      * @param callback callback after stage finishes
      */

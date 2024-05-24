@@ -27,7 +27,7 @@ constructor(
     private val context: Context,
     private val scrimController: ScrimController,
     private val statusBarStateController: SysuiStatusBarStateController,
-    @Assisted private val qSProvider: () -> QS,
+    @Assisted private val qSProvider: () -> QS?,
     @Assisted private val nsslControllerProvider: () -> NotificationStackScrollLayoutController
 ) : LockScreenShadeOverScroller {
 
@@ -37,7 +37,7 @@ constructor(
     private var maxOverScrollAmount = 0
     private var previousOverscrollAmount = 0
 
-    private val qS: QS
+    private val qS: QS?
         get() = qSProvider()
 
     private val nsslController: NotificationStackScrollLayoutController
@@ -90,7 +90,7 @@ constructor(
     }
 
     private fun applyOverscroll(overscrollAmount: Int) {
-        qS.setOverScrollAmount(overscrollAmount)
+        qS?.setOverScrollAmount(overscrollAmount)
         scrimController.setNotificationsOverScrollAmount(overscrollAmount)
         nsslController.setOverScrollAmount(overscrollAmount)
     }
@@ -109,7 +109,7 @@ constructor(
         val animator = ValueAnimator.ofInt(previousOverscrollAmount, 0)
         animator.addUpdateListener {
             val overScrollAmount = it.animatedValue as Int
-            qS.setOverScrollAmount(overScrollAmount)
+            qS?.setOverScrollAmount(overScrollAmount)
             scrimController.setNotificationsOverScrollAmount(overScrollAmount)
             nsslController.setOverScrollAmount(overScrollAmount)
         }
@@ -143,7 +143,7 @@ constructor(
     @AssistedFactory
     fun interface Factory {
         fun create(
-            qSProvider: () -> QS,
+            qSProvider: () -> QS?,
             nsslControllerProvider: () -> NotificationStackScrollLayoutController
         ): SplitShadeLockScreenOverScroller
     }

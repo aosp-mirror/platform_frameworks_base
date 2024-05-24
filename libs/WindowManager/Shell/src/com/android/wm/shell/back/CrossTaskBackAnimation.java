@@ -91,7 +91,8 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
     private final PointF mInitialTouchPos = new PointF();
     private final Interpolator mPostAnimationInterpolator = Interpolators.EMPHASIZED;
-    private final Interpolator mProgressInterpolator = new DecelerateInterpolator();
+    private final Interpolator mProgressInterpolator = Interpolators.STANDARD_DECELERATE;
+    private final Interpolator mVerticalMoveInterpolator = new DecelerateInterpolator();
     private final Matrix mTransformMatrix = new Matrix();
 
     private final float[] mTmpFloat9 = new float[9];
@@ -136,6 +137,9 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         mStartTaskRect.set(mClosingTarget.windowConfiguration.getBounds());
         mStartTaskRect.offsetTo(0, 0);
 
+        // inset bottom in case of pinned taskbar being present
+        mStartTaskRect.inset(0, 0, 0, mClosingTarget.contentInsets.bottom);
+
         // Draw background.
         mBackground.ensureBackground(mClosingTarget.windowConfiguration.getBounds(),
                 BACKGROUNDCOLOR, mTransaction);
@@ -166,7 +170,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         float yDirection = rawYDelta < 0 ? -1 : 1;
         // limit yDelta interpretation to 1/2 of screen height in either direction
         float deltaYRatio = Math.min(height / 2f, Math.abs(rawYDelta)) / (height / 2f);
-        float interpolatedYRatio = mProgressInterpolator.getInterpolation(deltaYRatio);
+        float interpolatedYRatio = mVerticalMoveInterpolator.getInterpolation(deltaYRatio);
         // limit y-shift so surface never passes 8dp screen margin
         float deltaY = yDirection * interpolatedYRatio * Math.max(0f,
                 (height - scaledHeight) / 2f - mVerticalMargin);
@@ -205,7 +209,9 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         float top = mapRange(progress, mClosingStartRect.top, targetTop);
         float width = mapRange(progress, mClosingStartRect.width(), targetWidth);
         float height = mapRange(progress, mClosingStartRect.height(), targetHeight);
-        mTransaction.setLayer(mClosingTarget.leash, 0);
+        if (mClosingTarget.leash != null && mClosingTarget.leash.isValid()) {
+            mTransaction.setLayer(mClosingTarget.leash, 0);
+        }
 
         mClosingCurrentRect.set(left, top, left + width, top + height);
         applyTransform(mClosingTarget.leash, mClosingCurrentRect, mCornerRadius);
@@ -223,7 +229,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
     /** Transform the target window to match the target rect. */
     private void applyTransform(SurfaceControl leash, RectF targetRect, float cornerRadius) {
-        if (leash == null) {
+        if (leash == null || !leash.isValid()) {
             return;
         }
 

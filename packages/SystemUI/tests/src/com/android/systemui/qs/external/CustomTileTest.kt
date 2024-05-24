@@ -38,7 +38,7 @@ import android.view.IWindowManager
 import android.view.View
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.view.LaunchableFrameLayout
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
@@ -372,7 +372,7 @@ class CustomTileTest : SysuiTestCase() {
 
         verify(activityStarter)
             .startPendingIntentMaybeDismissingKeyguard(
-                eq(pi), nullable(), nullable<ActivityLaunchAnimator.Controller>())
+                eq(pi), nullable(), nullable<ActivityTransitionAnimator.Controller>())
     }
 
     @Test

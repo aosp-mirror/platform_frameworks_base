@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
+import android.platform.test.annotations.EnableFlags
 import android.telephony.CellSignalStrength
 import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
@@ -159,10 +160,13 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun numberOfLevels_comesFromRepo() =
+    fun numberOfLevels_comesFromRepo_whenApplicable() =
         testScope.runTest {
             var latest: Int? = null
-            val job = underTest.signalLevelIcon.onEach { latest = it.numberOfLevels }.launchIn(this)
+            val job =
+                underTest.signalLevelIcon
+                    .onEach { latest = (it as? SignalIconModel.Cellular)?.numberOfLevels }
+                    .launchIn(this)
 
             connectionRepository.numberOfLevels.value = 5
             assertThat(latest).isEqualTo(5)
@@ -491,14 +495,19 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun iconId_correctLevel_notCutout() =
+    fun cellBasedIconId_correctLevel_notCutout() =
         testScope.runTest {
+            connectionRepository.isNonTerrestrial.value = false
             connectionRepository.isInService.value = true
             connectionRepository.primaryLevel.value = 1
             connectionRepository.setDataEnabled(false)
+            connectionRepository.isNonTerrestrial.value = false
 
-            var latest: SignalIconModel? = null
-            val job = underTest.signalLevelIcon.onEach { latest = it }.launchIn(this)
+            var latest: SignalIconModel.Cellular? = null
+            val job =
+                underTest.signalLevelIcon
+                    .onEach { latest = it as? SignalIconModel.Cellular }
+                    .launchIn(this)
 
             assertThat(latest?.level).isEqualTo(1)
             assertThat(latest?.showExclamationMark).isFalse()
@@ -509,6 +518,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun icon_usesLevelFromInteractor() =
         testScope.runTest {
+            connectionRepository.isNonTerrestrial.value = false
             connectionRepository.isInService.value = true
 
             var latest: SignalIconModel? = null
@@ -524,10 +534,15 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun icon_usesNumberOfLevelsFromInteractor() =
+    fun cellBasedIcon_usesNumberOfLevelsFromInteractor() =
         testScope.runTest {
-            var latest: SignalIconModel? = null
-            val job = underTest.signalLevelIcon.onEach { latest = it }.launchIn(this)
+            connectionRepository.isNonTerrestrial.value = false
+
+            var latest: SignalIconModel.Cellular? = null
+            val job =
+                underTest.signalLevelIcon
+                    .onEach { latest = it as? SignalIconModel.Cellular }
+                    .launchIn(this)
 
             connectionRepository.numberOfLevels.value = 5
             assertThat(latest!!.numberOfLevels).isEqualTo(5)
@@ -539,12 +554,16 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun icon_defaultDataDisabled_showExclamationTrue() =
+    fun cellBasedIcon_defaultDataDisabled_showExclamationTrue() =
         testScope.runTest {
+            connectionRepository.isNonTerrestrial.value = false
             mobileIconsInteractor.activeDataConnectionHasDataEnabled.value = false
 
-            var latest: SignalIconModel? = null
-            val job = underTest.signalLevelIcon.onEach { latest = it }.launchIn(this)
+            var latest: SignalIconModel.Cellular? = null
+            val job =
+                underTest.signalLevelIcon
+                    .onEach { latest = it as? SignalIconModel.Cellular }
+                    .launchIn(this)
 
             assertThat(latest!!.showExclamationMark).isTrue()
 
@@ -552,12 +571,16 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun icon_defaultConnectionFailed_showExclamationTrue() =
+    fun cellBasedIcon_defaultConnectionFailed_showExclamationTrue() =
         testScope.runTest {
+            connectionRepository.isNonTerrestrial.value = false
             mobileIconsInteractor.isDefaultConnectionFailed.value = true
 
-            var latest: SignalIconModel? = null
-            val job = underTest.signalLevelIcon.onEach { latest = it }.launchIn(this)
+            var latest: SignalIconModel.Cellular? = null
+            val job =
+                underTest.signalLevelIcon
+                    .onEach { latest = it as? SignalIconModel.Cellular }
+                    .launchIn(this)
 
             assertThat(latest!!.showExclamationMark).isTrue()
 
@@ -565,14 +588,18 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun icon_enabledAndNotFailed_showExclamationFalse() =
+    fun cellBasedIcon_enabledAndNotFailed_showExclamationFalse() =
         testScope.runTest {
+            connectionRepository.isNonTerrestrial.value = false
             connectionRepository.isInService.value = true
             mobileIconsInteractor.activeDataConnectionHasDataEnabled.value = true
             mobileIconsInteractor.isDefaultConnectionFailed.value = false
 
-            var latest: SignalIconModel? = null
-            val job = underTest.signalLevelIcon.onEach { latest = it }.launchIn(this)
+            var latest: SignalIconModel.Cellular? = null
+            val job =
+                underTest.signalLevelIcon
+                    .onEach { latest = it as? SignalIconModel.Cellular }
+                    .launchIn(this)
 
             assertThat(latest!!.showExclamationMark).isFalse()
 
@@ -580,11 +607,15 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun icon_usesEmptyState_whenNotInService() =
+    fun cellBasedIcon_usesEmptyState_whenNotInService() =
         testScope.runTest {
-            var latest: SignalIconModel? = null
-            val job = underTest.signalLevelIcon.onEach { latest = it }.launchIn(this)
+            var latest: SignalIconModel.Cellular? = null
+            val job =
+                underTest.signalLevelIcon
+                    .onEach { latest = it as? SignalIconModel.Cellular }
+                    .launchIn(this)
 
+            connectionRepository.isNonTerrestrial.value = false
             connectionRepository.isInService.value = false
 
             assertThat(latest?.level).isEqualTo(0)
@@ -604,11 +635,15 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun icon_usesCarrierNetworkState_whenInCarrierNetworkChangeMode() =
+    fun cellBasedIcon_usesCarrierNetworkState_whenInCarrierNetworkChangeMode() =
         testScope.runTest {
-            var latest: SignalIconModel? = null
-            val job = underTest.signalLevelIcon.onEach { latest = it }.launchIn(this)
+            var latest: SignalIconModel.Cellular? = null
+            val job =
+                underTest.signalLevelIcon
+                    .onEach { latest = it as? SignalIconModel.Cellular? }
+                    .launchIn(this)
 
+            connectionRepository.isNonTerrestrial.value = false
             connectionRepository.isInService.value = true
             connectionRepository.carrierNetworkChangeActive.value = true
             connectionRepository.primaryLevel.value = 1
@@ -624,6 +659,20 @@ class MobileIconInteractorTest : SysuiTestCase() {
             assertThat(latest!!.carrierNetworkChange).isTrue()
 
             job.cancel()
+        }
+
+    @EnableFlags(com.android.internal.telephony.flags.Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    @Test
+    fun satBasedIcon_isUsedWhenNonTerrestrial() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.signalLevelIcon)
+
+            // Start off using cellular
+            assertThat(latest).isInstanceOf(SignalIconModel.Cellular::class.java)
+
+            connectionRepository.isNonTerrestrial.value = true
+
+            assertThat(latest).isInstanceOf(SignalIconModel.Satellite::class.java)
         }
 
     private fun createInteractor(

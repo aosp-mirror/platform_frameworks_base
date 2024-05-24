@@ -21,3 +21,10 @@ flag {
     description: "Enable reporting USB data compliance warnings from HAL when set"
     bug: "296119135"
 }
+
+flag {
+    name: "enable_usb_data_signal_staking"
+    namespace: "preload_safety"
+    description: "Enables signal API with staking"
+    bug: "296119135"
+}

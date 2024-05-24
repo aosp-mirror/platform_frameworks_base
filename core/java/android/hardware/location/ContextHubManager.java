@@ -29,15 +29,15 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
+import android.chre.flags.Flags;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.contexthub.ErrorCode;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -456,32 +456,6 @@ public final class ContextHubManager {
         }
     }
 
-    /**
-     * Helper function to generate a stub for a non-query transaction callback.
-     *
-     * @param transaction the transaction to unblock when complete
-     *
-     * @return the callback
-     *
-     * @hide
-     */
-    private IContextHubTransactionCallback createTransactionCallback(
-            ContextHubTransaction<Void> transaction) {
-        return new IContextHubTransactionCallback.Stub() {
-            @Override
-            public void onQueryResponse(int result, List<NanoAppState> nanoappList) {
-                Log.e(TAG, "Received a query callback on a non-query request");
-                transaction.setResponse(new ContextHubTransaction.Response<Void>(
-                        ContextHubTransaction.RESULT_FAILED_SERVICE_INTERNAL_FAILURE, null));
-            }
-
-            @Override
-            public void onTransactionComplete(int result) {
-                transaction.setResponse(new ContextHubTransaction.Response<Void>(result, null));
-            }
-        };
-    }
-
    /**
     * Helper function to generate a stub for a query transaction callback.
     *
@@ -532,7 +506,8 @@ public final class ContextHubManager {
 
         ContextHubTransaction<Void> transaction =
                 new ContextHubTransaction<>(ContextHubTransaction.TYPE_LOAD_NANOAPP);
-        IContextHubTransactionCallback callback = createTransactionCallback(transaction);
+        IContextHubTransactionCallback callback =
+                ContextHubTransactionHelper.createTransactionCallback(transaction);
 
         try {
             mService.loadNanoAppOnHub(hubInfo.getId(), callback, appBinary);
@@ -560,7 +535,8 @@ public final class ContextHubManager {
 
         ContextHubTransaction<Void> transaction =
                 new ContextHubTransaction<>(ContextHubTransaction.TYPE_UNLOAD_NANOAPP);
-        IContextHubTransactionCallback callback = createTransactionCallback(transaction);
+        IContextHubTransactionCallback callback =
+                ContextHubTransactionHelper.createTransactionCallback(transaction);
 
         try {
             mService.unloadNanoAppFromHub(hubInfo.getId(), callback, nanoAppId);
@@ -588,7 +564,8 @@ public final class ContextHubManager {
 
         ContextHubTransaction<Void> transaction =
                 new ContextHubTransaction<>(ContextHubTransaction.TYPE_ENABLE_NANOAPP);
-        IContextHubTransactionCallback callback = createTransactionCallback(transaction);
+        IContextHubTransactionCallback callback =
+                ContextHubTransactionHelper.createTransactionCallback(transaction);
 
         try {
             mService.enableNanoApp(hubInfo.getId(), callback, nanoAppId);
@@ -616,7 +593,8 @@ public final class ContextHubManager {
 
         ContextHubTransaction<Void> transaction =
                 new ContextHubTransaction<>(ContextHubTransaction.TYPE_DISABLE_NANOAPP);
-        IContextHubTransactionCallback callback = createTransactionCallback(transaction);
+        IContextHubTransactionCallback callback =
+                ContextHubTransactionHelper.createTransactionCallback(transaction);
 
         try {
             mService.disableNanoApp(hubInfo.getId(), callback, nanoAppId);
@@ -732,7 +710,14 @@ public final class ContextHubManager {
                 executor.execute(
                         () -> {
                             callback.onMessageFromNanoApp(client, message);
-                            client.callbackFinished();
+                            if (Flags.reliableMessage()
+                                        && Flags.reliableMessageImplementation()
+                                        && message.isReliable()) {
+                                client.reliableMessageCallbackFinished(
+                                        message.getMessageSequenceNumber(), ErrorCode.OK);
+                            } else {
+                                client.callbackFinished();
+                            }
                         });
             }
 

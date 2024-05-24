@@ -18,14 +18,14 @@ package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
-import android.tools.common.NavBar
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
-import android.tools.common.flicker.subject.region.RegionSubject
-import android.tools.common.traces.component.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.NavBar
+import android.tools.flicker.subject.layers.LayersTraceSubject
+import android.tools.flicker.subject.region.RegionSubject
+import android.tools.traces.component.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
+import android.tools.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.splitscreen.benchmark.UnlockKeyguardToSplitScreenBenchmark
@@ -113,7 +113,6 @@ class UnlockKeyguardToSplitScreen(override val flicker: LegacyFlickerTest) :
                             subject.name.contains(primaryApp.toLayerName()) && subject.isVisible
                         }
                         .mapNotNull { primaryApp -> primaryApp.layer.visibleRegion }
-                        .toTypedArray()
 
                 val primaryAppRegionArea = RegionSubject(primaryAppRegions, it.timestamp)
                 it.visibleRegion(secondaryApp).notOverlaps(primaryAppRegionArea.region)

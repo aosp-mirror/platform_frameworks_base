@@ -32,7 +32,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.controls.ui.MediaHost;
+import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
@@ -43,15 +43,16 @@ import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
 
 /**
  * Controller for QSPanel views.
@@ -76,6 +77,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private Consumer<Boolean> mMediaVisibilityChangedListener;
     @Orientation
     private int mLastOrientation;
+    private int mLastScreenLayout;
     private String mCachedSpecs = "";
     @Nullable
     private QSTileRevealController mQsTileRevealController;
@@ -92,15 +94,19 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 public void onConfigurationChange(Configuration newConfig) {
                     final boolean previousSplitShadeState = mShouldUseSplitNotificationShade;
                     final int previousOrientation = mLastOrientation;
+                    final int previousScreenLayout = mLastScreenLayout;
                     mShouldUseSplitNotificationShade = mSplitShadeStateController
                             .shouldUseSplitNotificationShade(getResources());
                     mLastOrientation = newConfig.orientation;
+                    mLastScreenLayout = newConfig.screenLayout;
 
                     mQSLogger.logOnConfigurationChanged(
                         /* oldOrientation= */ previousOrientation,
                         /* newOrientation= */ mLastOrientation,
                         /* oldShouldUseSplitShade= */ previousSplitShadeState,
                         /* newShouldUseSplitShade= */ mShouldUseSplitNotificationShade,
+                        /* oldScreenLayout= */ previousScreenLayout,
+                        /* newScreenLayout= */ mLastScreenLayout,
                         /* containerName= */ mView.getDumpableTag());
 
                     switchTileLayoutIfNeeded();
@@ -197,6 +203,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
         setTiles();
         mLastOrientation = getResources().getConfiguration().orientation;
+        mLastScreenLayout = getResources().getConfiguration().screenLayout;
         mQSLogger.logOnViewAttached(mLastOrientation, mView.getDumpableTag());
         switchTileLayout(true);
 
@@ -231,21 +238,39 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         if (!collapsedView && mQsTileRevealController != null) {
             mQsTileRevealController.updateRevealedTiles(tiles);
         }
-        boolean shouldChange = false;
-        if (tiles.size() == mRecords.size()) {
+        boolean shouldChangeAll = false;
+        // If the new tiles are a prefix of the old tiles, we delete the extra tiles (from the old).
+        // If not (even if they share a prefix) we remove all and add all the new ones.
+        if (tiles.size() <= mRecords.size()) {
             int i = 0;
+            // Iterate through the requested tiles and check if they are the same as the existing
+            // tiles.
             for (QSTile tile : tiles) {
                 if (tile != mRecords.get(i).tile) {
-                    shouldChange = true;
+                    shouldChangeAll = true;
                     break;
                 }
                 i++;
             }
+
+            // If the first tiles are the same as the new ones, we reuse them and remove any extra
+            // tiles.
+            if (!shouldChangeAll && i < mRecords.size()) {
+                List<TileRecord> extraRecords = mRecords.subList(i, mRecords.size());
+                for (QSPanelControllerBase.TileRecord record : extraRecords) {
+                    mView.removeTile(record);
+                    record.tile.removeCallback(record.callback);
+                }
+                extraRecords.clear();
+                mCachedSpecs = getTilesSpecs();
+            }
         } else {
-            shouldChange = true;
+            shouldChangeAll = true;
         }
 
-        if (shouldChange) {
+        // If we detected that the existing tiles are different than the requested tiles, clear them
+        // and add the new tiles.
+        if (shouldChangeAll) {
             for (QSPanelControllerBase.TileRecord record : mRecords) {
                 mView.removeTile(record);
                 record.tile.removeCallback(record.callback);
@@ -424,11 +449,13 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     boolean shouldUseHorizontalLayout() {
-        if (mShouldUseSplitNotificationShade)  {
+        if (mShouldUseSplitNotificationShade) {
             return false;
         }
         return mUsingMediaPlayer && mMediaHost.getVisible()
-                && mLastOrientation == Configuration.ORIENTATION_LANDSCAPE;
+                && mLastOrientation == Configuration.ORIENTATION_LANDSCAPE
+                && (mLastScreenLayout & Configuration.SCREENLAYOUT_LONG_MASK)
+                == Configuration.SCREENLAYOUT_LONG_YES;
     }
 
     private void logTiles() {

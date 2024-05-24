@@ -27,7 +27,7 @@
     <com.android.keyguard.KeyguardStatusView
         android:id="@+id/clock"
         android:orientation="vertical"
-        android:layout_width="410dp"
+        android:layout_width="@dimen/keyguard_presentation_width"
         android:layout_height="wrap_content">
         <LinearLayout
             android:layout_width="match_parent"

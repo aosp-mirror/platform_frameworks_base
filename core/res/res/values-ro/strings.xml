@@ -154,6 +154,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> după <xliff:g id="TIME_DELAY">{2}</xliff:g>   secunde"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: neredirecționat"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: neredirecționat"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Securitatea rețelei de date mobile"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Examinează setările"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"A fost accesat identificatorul dispozitivului"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"O rețea conectată la <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> a înregistrat identificatorul unic (IMSI) al dispozitivului tău de <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> ori în intervalul <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> – <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Conexiune criptată la <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Te-ai conectat la o rețea de date mobile mai sigură."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Conexiune necriptată la <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Te-ai conectat la o rețea de date mobile necriptată. Apelurile, mesajele și datele tale ar putea fi interceptate."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Setările de securitate a rețelei de date mobile"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Află mai multe"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Cod de funcție complet."</string>
     <string name="fcError" msgid="5325116502080221346">"Problemă de conectare sau cod de funcție nevalid."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -371,6 +381,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Permite aplicației să se conecteze la modulul de transmisie celulară pentru a redirecționa mesajele cu transmisie celulară pe măsură ce le primește. Alertele cu transmisie celulară sunt difuzate în unele locații pentru a te avertiza cu privire la situațiile de urgență. Aplicațiile rău intenționate pot afecta performanța sau funcționarea dispozitivului când e primită o transmisie celulară de urgență."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Să gestioneze apelurile în desfășurare"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Permite unei aplicații să vadă detalii despre apelurile în desfășurare de pe dispozitiv și să gestioneze apelurile respective."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Accesează ultimul identificator celular cunoscut."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Permite unei aplicații să acceseze ultimul identificator celular cunoscut oferit de serviciile de telefonie."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"citește mesajele cu transmisie celulară"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Permite aplicației să citească mesajele primite prin transmisie celulară de dispozitiv. Alertele cu transmisie celulară sunt difuzate în unele locații pentru a te avertiza cu privire la situațiile de urgență. Aplicațiile rău intenționate pot afecta performanța sau funcționarea dispozitivului când e primită o transmisie celulară de urgență."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"citire feeduri abonat"</string>
@@ -435,6 +447,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Permite aplicației să folosească serviciile în prim-plan cu tipul „systemExempted”"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"să folosească serviciile în prim-plan cu tipul „fileManagement”"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Permite aplicației să folosească serviciile în prim-plan cu tipul „fileManagement”"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"să folosească serviciile în prim-plan cu tipul „mediaProcessing”"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Permite aplicației să folosească serviciile în prim-plan cu tipul „mediaProcessing”"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"să folosească serviciile în prim-plan cu tipul „specialUse”"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Permite aplicației să folosească serviciile în prim-plan cu tipul „specialUse”"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"măsurare spațiu de stocare al aplicației"</string>
@@ -540,6 +554,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Permite aplicației să utilizeze transmițătorul prin infraroșii al telefonului."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"setare imagine de fundal"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Permite aplicației să seteze imaginea de fundal a sistemului."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Să acceseze profilurile ascunse"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Permite aplicației să acceseze profilurile ascunse."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"ajustează dimensiunea imaginii de fundal"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Permite aplicației să seteze sugestiile privind dimensiunile imaginii de fundal a sistemului."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"setare fus orar"</string>
@@ -633,7 +649,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Folosește blocarea ecranului"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Introdu blocarea ecranului pentru a continua"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Apasă ferm pe senzor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Amprenta nu a fost recunoscută. Încearcă din nou."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Amprenta nu a fost recunoscută. Încearcă din nou."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Curăță senzorul de amprentă și încearcă din nou"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Curăță senzorul și încearcă din nou"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Apasă ferm pe senzor"</string>
@@ -651,18 +667,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Amprentă autentificată"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Chip autentificat"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Chip autentificat, apasă pe Confirmă"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardware-ul pentru amprentă nu este disponibil."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Hardware-ul pentru amprentă nu este disponibil"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Nu se poate configura amprenta"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Configurarea amprentei a expirat. Încearcă din nou."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operațiunea privind amprenta a fost anulată."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Operațiunea privind amprenta a fost anulată de utilizator."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Operațiunea privind amprenta a fost anulată"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Operațiunea privind amprenta a fost anulată de utilizator"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Prea multe încercări. Folosește blocarea ecranului."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Prea multe încercări. Folosește blocarea ecranului."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Nu putem procesa amprenta. Încearcă din nou."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nu au fost înregistrate amprente."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Dispozitivul nu are senzor de amprentă."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Senzorul este dezactivat temporar."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Nu se poate folosi senzorul de amprentă. Vizitează un furnizor de servicii de reparații."</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Nu au fost înregistrate amprente"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Acest dispozitiv nu are senzor de amprentă"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Senzor dezactivat temporar"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Nu se poate folosi senzorul de amprentă. Vizitează un furnizor de servicii de reparații."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"A fost apăsat butonul de pornire"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Degetul <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Folosește amprenta"</string>
@@ -697,7 +713,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Nu ți se vede fața. Ține telefonul la nivelul ochilor."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Prea multă mișcare. Ține telefonul nemișcat."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Reînregistrează-ți chipul."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Chipul nu a fost recunoscut. Reîncearcă."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Fața nu a fost recunoscută. Încearcă din nou."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Schimbă ușor poziția capului"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Privește mai direct spre telefon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Privește mai direct spre telefon"</string>
@@ -808,6 +824,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permite aplicației să colecteze date de la senzori la o rată de eșantionare de peste 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"să actualizeze aplicația fără acțiuni din partea utilizatorului"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Permite deținătorului să actualizeze aplicația pe care a instalat-o anterior fără acțiuni din partea utilizatorului"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"Să actualizeze starea verificării cheilor E2EE deținute de alte aplicații"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Permite aplicației să actualizeze starea verificării cheilor E2EE deținute de alte aplicații"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Să seteze reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Stabilește lungimea și tipul de caractere permise pentru parolele și codurile PIN de blocare a ecranului."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Să monitorizeze încercările de deblocare a ecranului"</string>
@@ -1148,7 +1166,7 @@
     <string name="Midnight" msgid="8176019203622191377">"Miezul nopții"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="8689459651807876423">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="1532369154488982046">"Selectează-le pe toate"</string>
+    <string name="selectAll" msgid="1532369154488982046">"Selectează tot"</string>
     <string name="cut" msgid="2561199725874745819">"Decupează"</string>
     <string name="copy" msgid="5472512047143665218">"Copiază"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Eroare la copierea în clipboard"</string>
@@ -1907,6 +1925,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Eveniment"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Somn"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Gestionat de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activată"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Dezactivată"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> dezactivează anumite sunete"</string>
@@ -1926,6 +1945,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Confirmat"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Extinde"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Restrânge"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Restrâns"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Extins"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"extinde/restrânge"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Port USB Android periferic"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1966,6 +1987,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Reactivezi aplicații de lucru?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Reactivează"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Urgență"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Setează o blocare a ecranului"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Setează blocarea ecranului"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Ca să folosești spațiul privat, setează blocarea ecranului pe acest dispozitiv"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplicația nu este disponibilă"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nu este disponibilă momentan."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nu este disponibilă"</string>
@@ -2342,8 +2366,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Nu se poate oglindi pe ecran"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Folosește alt cablu și încearcă din nou"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Dispozitivul este prea cald și nu poate oglindi ecranul până când nu se răcește"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Cablul poate să nu fie compatibil cu ecranele"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Cablul USB-C poate să nu se conecteze corespunzător la ecrane"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Funcția Dual screen este activată"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> folosește ambele ecrane pentru a afișa conținut"</string>
@@ -2367,4 +2389,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Serviciu 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Comun"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"S-a conectat automat la satelit"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Poți să trimiți și să primești mesaje fără o rețea mobilă sau Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Deschide Mesaje"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cum funcționează"</string>
 </resources>

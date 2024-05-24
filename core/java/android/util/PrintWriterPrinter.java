@@ -22,6 +22,7 @@ import java.io.PrintWriter;
  * Implementation of a {@link android.util.Printer} that sends its output
  * to a {@link java.io.PrintWriter}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PrintWriterPrinter implements Printer {
     private final PrintWriter mPW;
     

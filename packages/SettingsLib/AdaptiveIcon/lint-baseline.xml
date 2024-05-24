@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="5" by="lint 4.1.0" client="cli" variant="all" version="4.1.0">
+<issues format="6" by="lint 8.4.0-alpha01" type="baseline" client="" dependencies="true" name="" variant="all" version="8.4.0-alpha01">
 
     <issue
         id="NewApi"
@@ -8,7 +8,7 @@
         errorLine2="                                 ~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/AdaptiveIcon/src/com/android/settingslib/widget/AdaptiveIcon.java"
-            line="78"
+            line="79"
             column="34"/>
     </issue>
 
@@ -19,7 +19,7 @@
         errorLine2="                                   ~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/AdaptiveIcon/src/com/android/settingslib/widget/AdaptiveIcon.java"
-            line="90"
+            line="91"
             column="36"/>
     </issue>
 
@@ -30,7 +30,7 @@
         errorLine2="                                             ~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/AdaptiveIcon/src/com/android/settingslib/widget/AdaptiveOutlineDrawable.java"
-            line="43"
+            line="45"
             column="46"/>
     </issue>
 
@@ -41,7 +41,7 @@
         errorLine2="        ~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/AdaptiveIcon/src/com/android/settingslib/widget/AdaptiveOutlineDrawable.java"
-            line="65"
+            line="67"
             column="9"/>
     </issue>
 
@@ -52,7 +52,7 @@
         errorLine2="        ~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/AdaptiveIcon/src/com/android/settingslib/widget/AdaptiveOutlineDrawable.java"
-            line="72"
+            line="74"
             column="9"/>
     </issue>
 
@@ -63,7 +63,7 @@
         errorLine2="        ~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/AdaptiveIcon/src/com/android/settingslib/widget/AdaptiveOutlineDrawable.java"
-            line="80"
+            line="82"
             column="9"/>
     </issue>
 
@@ -74,7 +74,7 @@
         errorLine2="                         ~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/AdaptiveIcon/src/com/android/settingslib/widget/AdaptiveOutlineDrawable.java"
-            line="105"
+            line="107"
             column="26"/>
     </issue>
 

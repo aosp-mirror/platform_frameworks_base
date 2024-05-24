@@ -16,6 +16,7 @@
   -->
 <com.android.wm.shell.windowdecor.WindowDecorLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/desktop_mode_caption"
     android:layout_width="match_parent"
@@ -27,31 +28,33 @@
         android:id="@+id/open_menu_button"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:tint="?androidprv:attr/materialColorOnSurface"
+        android:background="?android:selectableItemBackground"
         android:orientation="horizontal"
         android:clickable="true"
         android:focusable="true"
-        android:paddingStart="16dp">
-
+        android:paddingStart="12dp">
         <ImageView
             android:id="@+id/application_icon"
             android:layout_width="@dimen/desktop_mode_caption_icon_radius"
             android:layout_height="@dimen/desktop_mode_caption_icon_radius"
             android:layout_gravity="center_vertical"
-            android:contentDescription="@string/app_icon_text" />
+            android:contentDescription="@string/app_icon_text"
+            android:layout_marginStart="6dp"
+            android:scaleType="centerCrop"/>
 
         <TextView
             android:id="@+id/application_name"
             android:layout_width="0dp"
             android:layout_height="20dp"
-            android:minWidth="80dp"
+            android:maxWidth="86dp"
             android:textAppearance="@android:style/TextAppearance.Material.Title"
             android:textSize="14sp"
             android:textFontWeight="500"
             android:lineHeight="20dp"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
+            android:layout_marginStart="8dp"
             tools:text="Gmail"/>
 
         <ImageButton
@@ -64,6 +67,7 @@
             android:scaleType="fitCenter"
             android:clickable="false"
             android:focusable="false"
+            android:layout_marginHorizontal="8dp"
             android:layout_gravity="center_vertical"/>
 
     </LinearLayout>
@@ -74,27 +78,25 @@
         android:layout_height="40dp"
         android:layout_weight="1"/>
 
-    <ImageButton
-        android:id="@+id/maximize_window"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:padding="9dp"
-        android:layout_marginEnd="8dp"
-        android:contentDescription="@string/maximize_button_text"
-        android:src="@drawable/decor_desktop_mode_maximize_button_dark"
-        android:scaleType="fitCenter"
-        android:gravity="end"
-        android:background="@null"/>
+    <com.android.wm.shell.windowdecor.MaximizeButtonView
+        android:id="@+id/maximize_button_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:clickable="true"
+        android:focusable="true" />
 
     <ImageButton
         android:id="@+id/close_window"
-        android:layout_width="40dp"
+        android:layout_width="44dp"
         android:layout_height="40dp"
-        android:padding="4dp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="8dp"
         android:layout_marginEnd="8dp"
+        android:tint="?androidprv:attr/materialColorOnSurface"
+        android:background="?android:selectableItemBackgroundBorderless"
         android:contentDescription="@string/close_button_text"
-        android:src="@drawable/decor_close_button_dark"
-        android:scaleType="fitCenter"
-        android:gravity="end"
-        android:background="@null"/>
+        android:src="@drawable/desktop_mode_header_ic_close"
+        android:scaleType="centerCrop"
+        android:gravity="end"/>
 </com.android.wm.shell.windowdecor.WindowDecorLinearLayout>

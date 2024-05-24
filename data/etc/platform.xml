@@ -351,7 +351,9 @@
     <!-- Allow IMS service entitlement app to schedule jobs to run when app in background. -->
     <allow-in-power-save-except-idle package="com.android.imsserviceentitlement" />
 
-    <!-- Allow device lock controller app to schedule jobs and alarms when app in background,
-        otherwise, it may not be able to enforce provision for managed devices. -->
+    <!-- Allow device lock controller app to schedule jobs and alarms, and have network access
+         when app in background; otherwise, it may not be able to enforce provision for managed
+         devices. -->
     <allow-in-power-save package="com.android.devicelockcontroller" />
+    <allow-in-data-usage-save package="com.android.devicelockcontroller" />
 </permissions>

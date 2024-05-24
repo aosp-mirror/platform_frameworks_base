@@ -30,6 +30,8 @@ import android.os.Parcelable;
 import android.util.Log;
 import android.view.SurfaceControl;
 
+import com.android.window.flags.Flags;
+
 import libcore.util.NativeAllocationRegistry;
 
 import java.util.concurrent.CountDownLatch;
@@ -48,7 +50,7 @@ public class ScreenCapture {
     private static native int nativeCaptureDisplay(DisplayCaptureArgs captureArgs,
             long captureListener);
     private static native int nativeCaptureLayers(LayerCaptureArgs captureArgs,
-            long captureListener);
+            long captureListener, boolean sync);
     private static native long nativeCreateScreenCaptureListener(
             ObjIntConsumer<ScreenshotHardwareBuffer> consumer);
     private static native void nativeWriteListenerToParcel(long nativeObject, Parcel out);
@@ -134,7 +136,8 @@ public class ScreenCapture {
      */
     public static ScreenshotHardwareBuffer captureLayers(LayerCaptureArgs captureArgs) {
         SynchronousScreenCaptureListener syncScreenCapture = createSyncCaptureListener();
-        int status = captureLayers(captureArgs, syncScreenCapture);
+        int status = nativeCaptureLayers(captureArgs, syncScreenCapture.mNativeObject,
+                Flags.syncScreenCapture());
         if (status != 0) {
             return null;
         }
@@ -171,7 +174,7 @@ public class ScreenCapture {
      */
     public static int captureLayers(@NonNull LayerCaptureArgs captureArgs,
             @NonNull ScreenCaptureListener captureListener) {
-        return nativeCaptureLayers(captureArgs, captureListener.mNativeObject);
+        return nativeCaptureLayers(captureArgs, captureListener.mNativeObject, false /* sync */);
     }
 
     /**
@@ -674,7 +677,7 @@ public class ScreenCapture {
      * This listener can only be used for a single call to capture content call.
      */
     public static class ScreenCaptureListener implements Parcelable {
-        private final long mNativeObject;
+        final long mNativeObject;
         private static final NativeAllocationRegistry sRegistry =
                 NativeAllocationRegistry.createMalloced(
                         ScreenCaptureListener.class.getClassLoader(), getNativeListenerFinalizer());

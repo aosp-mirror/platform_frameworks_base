@@ -88,12 +88,12 @@ package android.location {
   public final class Geocoder {
     ctor public Geocoder(@NonNull android.content.Context);
     ctor public Geocoder(@NonNull android.content.Context, @NonNull java.util.Locale);
-    method @Deprecated @Nullable public java.util.List<android.location.Address> getFromLocation(@FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @IntRange int) throws java.io.IOException;
-    method public void getFromLocation(@FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @IntRange int, @NonNull android.location.Geocoder.GeocodeListener);
-    method @Deprecated @Nullable public java.util.List<android.location.Address> getFromLocationName(@NonNull String, @IntRange int) throws java.io.IOException;
-    method public void getFromLocationName(@NonNull String, @IntRange int, @NonNull android.location.Geocoder.GeocodeListener);
-    method @Deprecated @Nullable public java.util.List<android.location.Address> getFromLocationName(@NonNull String, @IntRange int, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double) throws java.io.IOException;
-    method public void getFromLocationName(@NonNull String, @IntRange int, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @NonNull android.location.Geocoder.GeocodeListener);
+    method @Deprecated @Nullable public java.util.List<android.location.Address> getFromLocation(@FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @IntRange(from=1) int) throws java.io.IOException;
+    method public void getFromLocation(@FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @IntRange(from=1) int, @NonNull android.location.Geocoder.GeocodeListener);
+    method @Deprecated @Nullable public java.util.List<android.location.Address> getFromLocationName(@NonNull String, @IntRange(from=1) int) throws java.io.IOException;
+    method public void getFromLocationName(@NonNull String, @IntRange(from=1) int, @NonNull android.location.Geocoder.GeocodeListener);
+    method @Deprecated @Nullable public java.util.List<android.location.Address> getFromLocationName(@NonNull String, @IntRange(from=1) int, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double) throws java.io.IOException;
+    method public void getFromLocationName(@NonNull String, @IntRange(from=1) int, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @NonNull android.location.Geocoder.GeocodeListener);
     method public static boolean isPresent();
   }
 
@@ -414,7 +414,7 @@ package android.location {
     field public static final int TYPE_GPS_L5CNAV = 259; // 0x103
     field @FlaggedApi("android.location.flags.gnss_api_navic_l1") public static final int TYPE_IRN_L1 = 1795; // 0x703
     field @FlaggedApi("android.location.flags.gnss_api_navic_l1") public static final int TYPE_IRN_L5 = 1794; // 0x702
-    field @Deprecated public static final int TYPE_IRN_L5CA = 1793; // 0x701
+    field public static final int TYPE_IRN_L5CA = 1793; // 0x701
     field public static final int TYPE_QZS_L1CA = 1025; // 0x401
     field public static final int TYPE_SBS = 513; // 0x201
     field public static final int TYPE_UNKNOWN = 0; // 0x0
@@ -682,6 +682,7 @@ package android.location.altitude {
   public final class AltitudeConverter {
     ctor public AltitudeConverter();
     method @WorkerThread public void addMslAltitudeToLocation(@NonNull android.content.Context, @NonNull android.location.Location) throws java.io.IOException;
+    method @FlaggedApi("android.location.flags.geoid_heights_via_altitude_hal") public boolean tryAddMslAltitudeToLocation(@NonNull android.location.Location);
   }
 
 }

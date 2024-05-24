@@ -20,8 +20,6 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
 
-import android.graphics.Bitmap;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -88,12 +86,6 @@ public final class DefaultRadioTunerTest {
             return 0;
         }
 
-        @Nullable
-        @Override
-        public Bitmap getMetadataImage(int id) {
-            return null;
-        }
-
         @Override
         public boolean startBackgroundScan() {
             return false;
@@ -135,6 +127,16 @@ public final class DefaultRadioTunerTest {
 
         assertWithMessage("Exception for seeking on default radio tuner")
                 .that(thrown).hasMessageThat().contains("Seeking is not supported");
+    }
+
+    @Test
+    public void getMetadataImage_forRadioTuner_throwsException() {
+        UnsupportedOperationException thrown = assertThrows(UnsupportedOperationException.class,
+                () -> DEFAULT_RADIO_TUNER.getMetadataImage(/* id= */ 1));
+
+        assertWithMessage("Exception for getting metadata image from default radio tuner")
+                .that(thrown).hasMessageThat()
+                .contains("Getting metadata image must be implemented in child classes");
     }
 
     @Test

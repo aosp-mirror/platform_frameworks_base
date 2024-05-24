@@ -134,7 +134,6 @@ public class SystemServicesTestRule implements TestRule {
     private StaticMockitoSession mMockitoSession;
     private ActivityTaskManagerService mAtmService;
     private WindowManagerService mWmService;
-    private WindowState.PowerManagerWrapper mPowerManagerWrapper;
     private InputManagerService mImService;
     private InputChannel mInputChannel;
     private Runnable mOnBeforeServicesCreated;
@@ -347,6 +346,7 @@ public class SystemServicesTestRule implements TestRule {
         doReturn(true).when(amInternal).hasStartedUserState(anyInt());
         doReturn(false).when(amInternal).shouldConfirmCredentials(anyInt());
         doReturn(false).when(amInternal).isActivityStartsLoggingEnabled();
+        doReturn(true).when(amInternal).isThemeOverlayReady(anyInt());
         LocalServices.addService(ActivityManagerInternal.class, amInternal);
 
         final ActivityManagerService amService =
@@ -360,7 +360,6 @@ public class SystemServicesTestRule implements TestRule {
     }
 
     private void setUpWindowManagerService() {
-        mPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
         TestWindowManagerPolicy wmPolicy = new TestWindowManagerPolicy();
         TestDisplayWindowSettingsProvider testDisplayWindowSettingsProvider =
                 new TestDisplayWindowSettingsProvider();
@@ -377,8 +376,7 @@ public class SystemServicesTestRule implements TestRule {
         // Always keep things awake.
         doReturn(true).when(mWmService.mRoot).hasAwakeDisplay();
         // Called when moving activity to pinned stack.
-        doNothing().when(mWmService.mRoot).ensureActivitiesVisible(any(),
-                anyInt(), anyBoolean(), anyBoolean());
+        doNothing().when(mWmService.mRoot).ensureActivitiesVisible(any(), anyBoolean());
         spyOn(mWmService.mDisplayWindowSettings);
         spyOn(mWmService.mDisplayWindowSettingsProvider);
 
@@ -485,10 +483,6 @@ public class SystemServicesTestRule implements TestRule {
         return mAtmService;
     }
 
-    WindowState.PowerManagerWrapper getPowerManagerWrapper() {
-        return mPowerManagerWrapper;
-    }
-
     /** Creates a no-op wakelock object. */
     PowerManager.WakeLock createStubbedWakeLock(boolean needVerification) {
         if (needVerification) {
@@ -552,7 +546,7 @@ public class SystemServicesTestRule implements TestRule {
         // This makes sure all previous messages in the handler are fully processed vs. just popping
         // them from the message queue.
         final AtomicBoolean currentMessagesProcessed = new AtomicBoolean(false);
-        wm.mAnimator.getChoreographer().postFrameCallback(time -> {
+        wm.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
             synchronized (currentMessagesProcessed) {
                 currentMessagesProcessed.set(true);
                 currentMessagesProcessed.notifyAll();

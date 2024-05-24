@@ -18,7 +18,9 @@ package com.android.systemui.log.dagger;
 
 import android.os.Build;
 
+import com.android.systemui.common.data.repository.PackageChangeRepository;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepositoryImpl;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogBufferFactory;
 import com.android.systemui.log.LogcatEchoTracker;
@@ -26,6 +28,7 @@ import com.android.systemui.log.echo.LogcatEchoTrackerDebug;
 import com.android.systemui.log.echo.LogcatEchoTrackerProd;
 import com.android.systemui.log.table.TableLogBuffer;
 import com.android.systemui.log.table.TableLogBufferFactory;
+import com.android.systemui.plugins.clocks.ClockMessageBuffers;
 import com.android.systemui.qs.QSFragmentLegacy;
 import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository;
 import com.android.systemui.qs.pipeline.shared.TileSpec;
@@ -114,6 +117,16 @@ public class LogModule {
     @LSShadeTransitionLog
     public static LogBuffer provideLSShadeTransitionControllerBuffer(LogBufferFactory factory) {
         return factory.create("LSShadeTransitionLog", 50);
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    @SensitiveNotificationProtectionLog
+    public static LogBuffer provideSensitiveNotificationProtectionLogBuffer(
+            LogBufferFactory factory
+    ) {
+        return factory.create("SensitiveNotificationProtectionLog", 10);
     }
 
     /** Provides a logging buffer for shade window messages. */
@@ -330,7 +343,7 @@ public class LogModule {
     /**
      * Provides a buffer for our connections and disconnections to MediaBrowserService.
      *
-     * See {@link com.android.systemui.media.controls.resume.ResumeMediaBrowser}.
+     * See {@link com.android.systemui.media.controls.domain.resume.ResumeMediaBrowser}.
      */
     @Provides
     @SysUISingleton
@@ -342,7 +355,7 @@ public class LogModule {
     /**
      * Provides a buffer for updates to the media carousel.
      *
-     * See {@link com.android.systemui.media.controls.ui.MediaCarouselController}.
+     * See {@link com.android.systemui.media.controls.ui.controller.MediaCarouselController}.
      */
     @Provides
     @SysUISingleton
@@ -417,6 +430,18 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link ClockMessageBuffers} which contains the keyguard clock message buffers.
+     */
+    @Provides
+    public static ClockMessageBuffers provideKeyguardClockMessageBuffers(
+            @KeyguardClockLog LogBuffer infraClockLog,
+            @KeyguardSmallClockLog LogBuffer smallClockLog,
+            @KeyguardLargeClockLog LogBuffer largeClockLog
+    ) {
+        return new ClockMessageBuffers(infraClockLog, smallClockLog, largeClockLog);
+    }
+
+    /**
      * Provides a {@link LogBuffer} for use by {@link com.android.keyguard.KeyguardUpdateMonitor}.
      */
     @Provides
@@ -448,7 +473,7 @@ public class LogModule {
 
     /**
      * Provides a {@link LogBuffer} for use by
-     * {@link com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepositoryImpl}.
+     * {@link DeviceEntryFaceAuthRepositoryImpl}.
      */
     @Provides
     @SysUISingleton
@@ -521,7 +546,7 @@ public class LogModule {
     @SysUISingleton
     @KeyguardLog
     public static LogBuffer provideKeyguardLogBuffer(LogBufferFactory factory) {
-        return factory.create("KeyguardLog", 250);
+        return factory.create("KeyguardLog", 500);
     }
 
     /**
@@ -564,6 +589,16 @@ public class LogModule {
         return factory.create("CommunalLog", 250);
     }
 
+    /**
+     * Provides a {@link TableLogBuffer} for communal-related logs.
+     */
+    @Provides
+    @SysUISingleton
+    @CommunalTableLog
+    public static TableLogBuffer provideCommunalTableLogBuffer(TableLogBufferFactory factory) {
+        return factory.create("CommunalTableLog", 250);
+    }
+
     /** Provides a {@link LogBuffer} for display metrics related logs. */
     @Provides
     @SysUISingleton
@@ -586,5 +621,37 @@ public class LogModule {
     @BluetoothTileDialogLog
     public static LogBuffer provideQBluetoothTileDialogLogBuffer(LogBufferFactory factory) {
         return factory.create("BluetoothTileDialogLog", 50);
+    }
+
+    /** Provides a {@link LogBuffer} for the keyboard functionalities. */
+    @Provides
+    @SysUISingleton
+    @KeyboardLog
+    public static LogBuffer provideKeyboardLogBuffer(LogBufferFactory factory) {
+        return factory.create("KeyboardLog", 50);
+    }
+
+    /** Provides a {@link LogBuffer} for {@link PackageChangeRepository} */
+    @Provides
+    @SysUISingleton
+    @PackageChangeRepoLog
+    public static LogBuffer providePackageChangeRepoLogBuffer(LogBufferFactory factory) {
+        return factory.create("PackageChangeRepo", 50);
+    }
+
+    /** Provides a {@link LogBuffer} for NavBarButtonClicks. */
+    @Provides
+    @SysUISingleton
+    @NavBarButtonClickLog
+    public static LogBuffer provideNavBarButtonClickLogBuffer(LogBufferFactory factory) {
+        return factory.create("NavBarButtonClick", 50);
+    }
+
+    /** Provides a {@link LogBuffer} for NavBar Orientation Tracking. */
+    @Provides
+    @SysUISingleton
+    @NavbarOrientationTrackingLog
+    public static LogBuffer provideNavbarOrientationTrackingLogBuffer(LogBufferFactory factory) {
+        return factory.create("NavbarOrientationTrackingLog", 50);
     }
 }

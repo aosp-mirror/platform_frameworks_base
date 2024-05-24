@@ -23,6 +23,7 @@ cc_library_shared {
         ":lib_cachedAppOptimizer_native",
         ":lib_gameManagerService_native",
         ":lib_oomConnection_native",
+        ":lib_anrTimer_native",
         "onload.cpp",
     ],
 

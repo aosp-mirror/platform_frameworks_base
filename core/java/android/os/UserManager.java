@@ -88,6 +88,7 @@ import java.util.Set;
  * See {@link DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE} for more on managed profiles.
  */
 @SystemService(Context.USER_SERVICE)
+@android.ravenwood.annotation.RavenwoodKeepPartialClass
 public class UserManager {
 
     private static final String TAG = "UserManager";
@@ -105,6 +106,21 @@ public class UserManager {
 
     /** Whether the device is in headless system user mode; null until cached. */
     private static Boolean sIsHeadlessSystemUser = null;
+
+    /** Maximum length of username.
+     * @hide
+     */
+    public static final int MAX_USER_NAME_LENGTH = 100;
+
+    /** Maximum length of user property String value.
+     * @hide
+     */
+    public static final int MAX_ACCOUNT_STRING_LENGTH = 500;
+
+    /** Maximum length of account options String values.
+     * @hide
+     */
+    public static final int MAX_ACCOUNT_OPTIONS_LENGTH = 1000;
 
     /**
      * User type representing a {@link UserHandle#USER_SYSTEM system} user that is a human user.
@@ -147,28 +163,26 @@ public class UserManager {
      * User type representing a managed profile, which is a profile that is to be managed by a
      * device policy controller (DPC).
      * The intended purpose is for work profiles, which are managed by a corporate entity.
-     * @hide
      */
-    @SystemApi
+    @FlaggedApi(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE)
     public static final String USER_TYPE_PROFILE_MANAGED = "android.os.usertype.profile.MANAGED";
 
     /**
      * User type representing a clone profile. Clone profile is a user profile type used to run
      * second instance of an otherwise single user App (eg, messengers). Currently only the
      * {@link android.content.pm.UserInfo#isMain()} user can have a clone profile.
-     *
-     * @hide
      */
-    @SystemApi
+    @FlaggedApi(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE)
     public static final String USER_TYPE_PROFILE_CLONE = "android.os.usertype.profile.CLONE";
 
 
     /**
-     * User type representing a private profile.
-     * @hide
+     * User type representing a private profile. Private profile is a user profile that can be used
+     * as an alternative user-space to install and use sensitive apps.
+     * UI surfaces can adopt an alternative strategy to show apps belonging to this profile, in line
+     * with their sensitive nature.
      */
     @FlaggedApi(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE)
-    @TestApi
     public static final String USER_TYPE_PROFILE_PRIVATE = "android.os.usertype.profile.PRIVATE";
 
     /**
@@ -1408,8 +1422,8 @@ public class UserManager {
     public static final String DISALLOW_RECORD_AUDIO = "no_record_audio";
 
     /**
-     * Specifies if a user is not allowed to run in the background and should be stopped during
-     * user switch. The default value is <code>false</code>.
+     * Specifies if a user is not allowed to run in the background and should be stopped and locked
+     * during user switch. The default value is <code>false</code>.
      *
      * <p>This restriction can be set by device owners and profile owners.
      *
@@ -1766,7 +1780,11 @@ public class UserManager {
     /**
      * Specifies whether the user is allowed to modify default apps in settings.
      *
-     * <p>This restriction can be set by device or profile owner.
+     * <p>A device owner and a profile owner can set this restriction. When it is set by a
+     * device owner, it applies globally - i.e., modifying of default apps in Settings for all
+     * users is disallowed. When it is set by a profile owner on the primary user or by a profile
+     * owner of an organization-owned managed profile on the parent profile, modifying of
+     * default apps in Settings for the primary user is disallowed.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -1906,6 +1924,56 @@ public class UserManager {
     public static final String DISALLOW_THREAD_NETWORK = "no_thread_network";
 
     /**
+     * This user restriction specifies if the user is able to add SIMs to the device.
+     *
+     * <p>
+     * This restriction blocks the download of embedded SIMs, and disables any physical SIMs.
+     * If any embedded SIMs are already on the device, then they are removed. This restriction
+     * does not affect SIMs provisioned to the device by device owners or profile owners.
+     *
+     * <p>
+     * This restriction can only be set by a device owner or a profile owner of an
+     * organization-owned managed profile.
+     * In both cases, the restriction applies globally on the device.
+     *
+     * <p>
+     * Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
+     * <p>Default is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    @FlaggedApi(android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED)
+    public static final String DISALLOW_SIM_GLOBALLY =
+            "no_sim_globally";
+
+    /**
+     * This user restriction specifies if assist content is disallowed from being sent to
+     * a privileged app such as the Assistant app. Assist content includes screenshots and
+     * information about an app, such as package name.
+     *
+     * <p>This restriction can only be set by a device owner or a profile owner. When it is set
+     * by a device owner, it disables the assist contextual data on the entire device. When it is
+     * set by a profile owner, it disables assist content on the profile.
+     *
+     * <p>Default is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    @FlaggedApi(android.app.admin.flags.Flags.FLAG_ASSIST_CONTENT_USER_RESTRICTION_ENABLED)
+    public static final String DISALLOW_ASSIST_CONTENT = "no_assist_content";
+
+    /**
      * List of key values that can be passed into the various user restriction related methods
      * in {@link UserManager} & {@link DevicePolicyManager}.
      * Note: This is slightly different from the real set of user restrictions listed in {@link
@@ -1992,6 +2060,8 @@ public class UserManager {
             DISALLOW_GRANT_ADMIN,
             DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
             DISALLOW_THREAD_NETWORK,
+            DISALLOW_SIM_GLOBALLY,
+            DISALLOW_ASSIST_CONTENT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}
@@ -2931,6 +3001,7 @@ public class UserManager {
      * {@link UserManager#USER_TYPE_PROFILE_MANAGED managed profile}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isUserTypeManagedProfile(@Nullable String userType) {
         return USER_TYPE_PROFILE_MANAGED.equals(userType);
     }
@@ -2939,6 +3010,7 @@ public class UserManager {
      * Returns whether the user type is a {@link UserManager#USER_TYPE_FULL_GUEST guest user}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isUserTypeGuest(@Nullable String userType) {
         return USER_TYPE_FULL_GUEST.equals(userType);
     }
@@ -2948,6 +3020,7 @@ public class UserManager {
      * {@link UserManager#USER_TYPE_FULL_RESTRICTED restricted user}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isUserTypeRestricted(@Nullable String userType) {
         return USER_TYPE_FULL_RESTRICTED.equals(userType);
     }
@@ -2956,6 +3029,7 @@ public class UserManager {
      * Returns whether the user type is a {@link UserManager#USER_TYPE_FULL_DEMO demo user}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isUserTypeDemo(@Nullable String userType) {
         return USER_TYPE_FULL_DEMO.equals(userType);
     }
@@ -2964,6 +3038,7 @@ public class UserManager {
      * Returns whether the user type is a {@link UserManager#USER_TYPE_PROFILE_CLONE clone user}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isUserTypeCloneProfile(@Nullable String userType) {
         return USER_TYPE_PROFILE_CLONE.equals(userType);
     }
@@ -2973,6 +3048,7 @@ public class UserManager {
      * {@link UserManager#USER_TYPE_PROFILE_COMMUNAL communal profile}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isUserTypeCommunalProfile(@Nullable String userType) {
         return USER_TYPE_PROFILE_COMMUNAL.equals(userType);
     }
@@ -2983,6 +3059,7 @@ public class UserManager {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isUserTypePrivateProfile(@Nullable String userType) {
         return USER_TYPE_PROFILE_PRIVATE.equals(userType);
     }
@@ -3181,7 +3258,11 @@ public class UserManager {
         return isProfile(mUserId);
     }
 
-    private boolean isProfile(@UserIdInt int userId) {
+    /**
+     * Returns whether the specified user is a profile.
+     * @hide
+     */
+    public boolean isProfile(@UserIdInt int userId) {
         final String profileType = getProfileType(userId);
         return profileType != null && !profileType.equals("");
     }
@@ -3415,6 +3496,7 @@ public class UserManager {
     }
 
     /**
+     * @see #isVisibleBackgroundUsersSupported()
      * @hide
      */
     public static boolean isVisibleBackgroundUsersEnabled() {
@@ -3424,14 +3506,21 @@ public class UserManager {
     }
 
     /**
-     * Returns whether the device allows (full) users to be started in background visible in a given
+     * Returns whether the device allows full users to be started in background visible in a given
      * display (which would allow them to launch activities in that display).
      *
-     * @return {@code false} for most devices, except on automotive builds for vehiches with
+     * Note that this is specifically about allowing <b>full</b> users to be background visible.
+     * Even if it is false, there can still be background visible users.
+     *
+     * In particular, the Communal Profile is a background visible user, and it can be supported
+     * unrelated to the value of this method.
+     *
+     * @return {@code false} for most devices, except on automotive builds for vehicles with
      * passenger displays.
      *
      * @hide
      */
+    // TODO(b/310249114): Rename to isVisibleBackgroundFullUsersSupported
     @TestApi
     public boolean isVisibleBackgroundUsersSupported() {
         return isVisibleBackgroundUsersEnabled();
@@ -3447,12 +3536,13 @@ public class UserManager {
     }
 
     /**
-     * Returns whether the device allows (full) users to be started in background visible in the
+     * Returns whether the device allows full users to be started in background visible in the
      * {@link android.view.Display#DEFAULT_DISPLAY default display}.
      *
      * @return {@code false} for most devices, except passenger-only automotive build (i.e., when
      * Android runs in a separate system in the back seat to manage the passenger displays).
      *
+     * @see #isVisibleBackgroundUsersSupported()
      * @hide
      */
     @TestApi
@@ -4448,15 +4538,15 @@ public class UserManager {
      * This API should only be called if the current user is an {@link #isAdminUser() admin} user,
      * as otherwise the returned intent will not be able to create a user.
      *
-     * @param userName Optional name to assign to the user.
+     * @param userName Optional name to assign to the user. Character limit is 100.
      * @param accountName Optional account name that will be used by the setup wizard to initialize
-     *                    the user.
+     *                    the user. Character limit is 500.
      * @param accountType Optional account type for the account to be created. This is required
-     *                    if the account name is specified.
+     *                    if the account name is specified. Character limit is 500.
      * @param accountOptions Optional bundle of data to be passed in during account creation in the
      *                       new user via {@link AccountManager#addAccount(String, String, String[],
      *                       Bundle, android.app.Activity, android.accounts.AccountManagerCallback,
-     *                       Handler)}.
+     *                       Handler)}. Character limit is 1000.
      * @return An Intent that can be launched from an Activity.
      * @see #USER_CREATION_FAILED_NOT_PERMITTED
      * @see #USER_CREATION_FAILED_NO_MORE_USERS
@@ -4618,6 +4708,9 @@ public class UserManager {
      * Sets the user as enabled, if such an user exists.
      *
      * <p>Note that the default is true, it's only that managed profiles might not be enabled.
+     * (Managed profiles created by DevicePolicyManager will start out disabled, and DPM will later
+     * toggle them to enabled once they are provisioned. This is the primary purpose of the
+     * {@link UserInfo#FLAG_DISABLED} flag.)
      * Also ephemeral users can be disabled to indicate that their removal is in progress and they
      * shouldn't be re-entered. Therefore ephemeral users should not be re-enabled once disabled.
      *
@@ -5169,7 +5262,7 @@ public class UserManager {
 
     /**
      * Returns list of the profiles of userId including userId itself.
-     * Note that this returns only enabled.
+     * Note that this returns only {@link UserInfo#isEnabled() enabled} profiles.
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} or
@@ -5322,6 +5415,25 @@ public class UserManager {
             Manifest.permission.QUERY_USERS}, conditional = true)
     public int[] getEnabledProfileIds(@UserIdInt int userId) {
         return getProfileIds(userId, true /* enabledOnly */);
+    }
+
+    /**
+     * @return A list of ids of profiles associated with the specified user excluding those with
+     * {@link UserProperties#getProfileApiVisibility()} set to hidden. The returned list includes
+     * the user itself.
+     * @hide
+     * @see #getProfileIds(int, boolean)
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS}, conditional = true)
+    public int[] getProfileIdsExcludingHidden(@UserIdInt int userId, boolean enabled) {
+        try {
+            return mService.getProfileIdsExcludingHidden(userId, enabled);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**

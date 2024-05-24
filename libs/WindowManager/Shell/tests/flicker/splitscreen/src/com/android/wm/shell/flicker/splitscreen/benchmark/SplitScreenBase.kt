@@ -17,8 +17,8 @@
 package com.android.wm.shell.flicker.splitscreen.benchmark
 
 import android.content.Context
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.wm.shell.flicker.BaseBenchmarkTest
 import com.android.wm.shell.flicker.utils.SplitScreenUtils

@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>  <xliff:g id="TIME_DELAY">{2}</xliff:g> soniyadan so‘ng"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yo‘naltirilmadi"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: yo‘naltirilmadi"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Mobil tarmoq xavfsizligi"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Sozlamalarni tekshirish"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Qurilma identifikatoriga kirildi"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> nomli tarmoqqa ulanish qurilmangiz unikal identifikatorini (IMSI) <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> va <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> orasida <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> marta qayd qilgan."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> nomli tarmoqqa shifrlangan ulanish"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Endi siz yanada xavfsizroq mobil tarmoqqa ulangansiz."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> nomli tarmoqqa shifrlanmagan ulanish"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Shifrlanmagan mobil tarmoqqa ulangansiz. Chaqiruvlaringiz, xabarlaringiz va maʼlumotlaringiz tutib qolinishidan himoyasi kuchsiz."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Mobil tarmoq xavfsizligi sozlamalari"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Batafsil"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Maxsus kod bajarildi."</string>
     <string name="fcError" msgid="5325116502080221346">"Tarmoqda xato yoki maxsus kod noto‘g‘ri."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -370,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Qabul qilingan aholini ogohlantirish xabarlarini shu holicha uzatish uchun ilovani aholini ogohlantirish moduliga bogʻlash imkonini beradi. Ilovaga ayrim mamlakatlarda aholini favqulodda vaziyatlarda ogohlantirish uchun yuboriladigan tarqatma xabarlarni oʻqish uchun ruxsat beradi. Zararli dasturlar bunday xabarlar kelayotgan qurilmaning ishlashiga xalaqit qilishi mumkin."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Amaldagi chaqiruvlarni boshqarish"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Ilovaga qurilmangizdagi amaldagi chaqiruv tafsilotlarini koʻrish va uni boshqarish huquqini beradi."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Oxirgi mobil tarmoq identifikatoriga ruxsat olish"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Ilova operator taqdim etgan oxirgi mobil tarmoq identifikatoridan foydalanishi mumkin."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"uyali tarmoq operatori xabarlarini o‘qish"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Ilovaga qurilmangiz tomonidan qabul qilingan uyali tarmoq operatori xabarlarini o‘qish uchun ruxsat beradi. Uyali tarmoq operatorining ogohlantiruvchi xabarlari ba’zi manzillarga favqulodda holatlar haqida ogohlantirish uchun jo‘natiladi. Zararli ilovalar uyali tarmoq orqali favqulodda xabar qabul qilinganda qurilmangizning ish faoliyati yoki amallariga xalaqit qilishi mumkin"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"obunalarni o‘qish"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Ilovaga “systemExempted” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"“fileManagement” turidagi faol xizmatni ishga tushirish"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Ilovaga “fileManagement” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"“mediaProcessing” turidagi faol xizmatni ishga tushirish"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Ilovaga “mediaProcessing” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"“specialUse” turidagi faol xizmatni ishga tushirish"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Ilovaga “specialUse” turidagi faol xizmatlardan foydalanishga ruxsat beradi"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ilovalar egallagan xotira joyini hisoblash"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Dasturga telefondagi infraqizil antenadan foydalanish ruxsatini beradi."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"fonga rasm tanlash"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Ilova tizim uchun orqa fon rasmlarini o‘rnatishi mumkin."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Yashirin profillarga kirish"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Ilovaga yashirin profillarga kirish uchun ruxsat beradi."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"fon rasmi o‘lchamini moslash"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Ilova tizimning orqa fon rasmlari uchun o‘lchamlarini ko‘rsatishi mumkin."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"vaqt mintaqasini sozlash"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekran qulfi"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Ekran qulfini kiritish bilan davom eting"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Sensorni mahkam bosing"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Bu barmoq izi notanish. Qayta urining."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Barmoq izi aniqlanmadi. Qayta urining."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Barmoq izi skanerini tozalang va qayta urining"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Sensorni tozalang va qayta urining"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Sensorni mahkam bosing"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Barmoq izi tekshirildi"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Yuzingiz aniqlandi"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Yuzingiz aniqlandi, tasdiqlash uchun bosing"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Barmoq izi skaneri ish holatida emas."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Barmoq izi skaneri ish holatida emas"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Barmoq izi sozlanmadi"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Barmoq izini sozlash vaqti tugadi. Qayta urining."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Barmoq izi tekshiruvi bekor qilindi."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Barmoq izi amali foydalanuvchi tomonidan bekor qilindi"</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Barmoq izi amali bekor qilindi"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Barmoq izi amali foydalanuvchi tomonidan bekor qilindi"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Juda koʻp urinildi. Ekran qulfi orqali urining."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Juda koʻp urinildi. Ekran qulfi orqali urining."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Barmoq izi tekshirilmadi. Qayta urining."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Hech qanday barmoq izi qayd qilinmagan."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Bu qurilmada barmoq izi skaneri mavjud emas."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor vaqtincha faol emas."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Barmoq izi skaneridan foydalanish imkonsiz. Xizmat koʻrsatish markaziga murojaat qiling"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Hech qanday barmoq izi qayd qilinmagan"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Bu qurilmada barmoq izi skaneri yo‘q"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Skaner vaqtincha faol emas"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Barmoq izi skaneridan foydalanish imkonsiz. Xizmat koʻrsatish markaziga murojaat qiling."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Quvvat tugmasi bosildi"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Barmoq izi <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Barmoq izi ishlatish"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Yuz koʻrinmayapti. Telefonni koʻz darajasida tuting."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Ortiqcha harakatlanmoqda. Qimirlatmasdan ushlang."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Yuzingizni qaytadan qayd qildiring."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Yuz aniqlanmadi. Qayta urining."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Yuz aniqlanmadi. Qayta urining."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Boshingiz holatini biroz oʻzgartiring"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Telefonga tik qarab turing"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Telefonga tik qarab turing"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Ilova sensor axborotini 200 Hz dan yuqori tezlikda hisoblashi mumkin"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ilovani foydalanuvchi ishtirokisiz yangilash"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Oldin oʻrnatilgan ilovani foydalanuvchi ishtirokisiz yangilash imkonini beradi."</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"boshqa ilovalarga tegishli E2EE kontakt kalitlarining tasdiqlash holatini yangilash"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Ilovaga boshqa ilovalarga tegishli E2EE kontakt kalitlarining tasdiqlash holatini yangilash imkonini beradi"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Parol qoidalarini o‘rnatish"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Ekran qulfi paroli va PIN kodlari uchun qo‘yiladigan talablarni (belgilar soni va uzunligi) nazorat qiladi."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekranni qulfdan chiqarishga urinishlarni nazorat qilish"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Dam olish kunlari"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Tadbir"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Uyquda"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> tomonidan boshqariladi"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Yoniq"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Oʻchiq"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ayrim tovushlarni ovozsiz qilgan"</string>
@@ -1925,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Tasdiqlangan"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Yoyish"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Yig‘ish"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Yigʻilgan"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Yoyilgan"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"ochish yoki yopish"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android tashqi USB porti"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Ishga oid ilovalar qaytarilsinmi?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Davom ettirish"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Favqulodda holat"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Ekran qulfini sozlash"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Ekran qulfini sozlash"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Maxfiy makon ishlatish uchun bu qurilma ekran qulfini sozlang"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Ilova ishlamayapti"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Ayni vaqtda <xliff:g id="APP_NAME">%1$s</xliff:g> ilovasi ishlamayapti."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> kanali ish faoliyatida emas"</string>
@@ -2341,8 +2365,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Displeyga translatsiya qilinmaydi"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Boshqa kabel yordamida qayta urining"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Qurilma qizib ketdi va u sovimaguncha displeyni aks ettirmaydi"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Kabel displeylar bilan ishlamasligi mumkin"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"USB-C kabelingiz displeylarga toʻgʻri ulanmasligi mumkin"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Ikkita ekran"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Ikki ekranli rejim yoniq"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> kontentni ikkala ekranda chiqarmoqda"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Ish 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Umumiy"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Sputnikka avtomatik ulandi"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Mobil yoki Wi-Fi tarmoqsiz xabarlarni yuborishingiz va qabul qilishingiz mumkin"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Xabarlar ilovasini ochish"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ishlash tartibi"</string>
 </resources>

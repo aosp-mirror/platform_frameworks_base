@@ -675,7 +675,8 @@ static jboolean android_location_gnss_hal_GnssNative_start_measurement_collectio
     options.enableCorrVecOutputs = enableCorrVecOutputs;
     options.intervalMs = intervalMs;
 
-    return gnssMeasurementIface->setCallback(std::make_unique<gnss::GnssMeasurementCallback>(),
+    return gnssMeasurementIface->setCallback(std::make_unique<gnss::GnssMeasurementCallback>(
+                                                     gnssMeasurementIface->getInterfaceVersion()),
                                              options);
 }
 

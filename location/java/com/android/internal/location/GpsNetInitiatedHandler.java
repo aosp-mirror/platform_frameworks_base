@@ -19,12 +19,15 @@ package com.android.internal.location;
 import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.SystemClock;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.telephony.emergency.EmergencyNumber;
 import android.util.Log;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.util.concurrent.TimeUnit;
 
@@ -139,8 +142,20 @@ public class GpsNetInitiatedHandler {
                 (mCallEndElapsedRealtimeMillis > 0)
                         && ((SystemClock.elapsedRealtime() - mCallEndElapsedRealtimeMillis)
                         < emergencyExtensionMillis);
-        boolean isInEmergencyCallback = mTelephonyManager.getEmergencyCallbackMode();
-        boolean isInEmergencySmsMode = mTelephonyManager.isInEmergencySmsMode();
+        boolean isInEmergencyCallback = false;
+        boolean isInEmergencySmsMode = false;
+        if (!Flags.enforceTelephonyFeatureMappingForPublicApis()) {
+            isInEmergencyCallback = mTelephonyManager.getEmergencyCallbackMode();
+            isInEmergencySmsMode = mTelephonyManager.isInEmergencySmsMode();
+        } else {
+            PackageManager pm = mContext.getPackageManager();
+            if (pm != null && pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_CALLING)) {
+                isInEmergencyCallback = mTelephonyManager.getEmergencyCallbackMode();
+            }
+            if (pm != null && pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)) {
+                isInEmergencySmsMode = mTelephonyManager.isInEmergencySmsMode();
+            }
+        }
         return mIsInEmergencyCall || isInEmergencyCallback || isInEmergencyExtension
                 || isInEmergencySmsMode;
     }

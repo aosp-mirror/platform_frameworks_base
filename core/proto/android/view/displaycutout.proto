@@ -32,4 +32,5 @@ message DisplayCutoutProto {
     optional .android.graphics.RectProto bound_right = 5;
     optional .android.graphics.RectProto bound_bottom = 6;
     optional .android.graphics.RectProto waterfall_insets = 7;
+    repeated int32 side_overrides = 8;
 }

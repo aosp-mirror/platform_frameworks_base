@@ -20,7 +20,8 @@ import android.app.IWallpaperManager;
 import android.app.backup.BackupAgentHelper;
 import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.BackupDataInput;
-import android.app.backup.BackupHelper;
+import android.app.backup.BackupHelperWithLogger;
+import android.app.backup.BackupRestoreEventLogger;
 import android.app.backup.FullBackup;
 import android.app.backup.FullBackupDataOutput;
 import android.app.backup.WallpaperBackupHelper;
@@ -33,8 +34,9 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
-
 import com.google.android.collect.Sets;
+
+import com.android.server.backup.Flags;
 
 import java.io.File;
 import java.io.IOException;
@@ -107,10 +109,12 @@ public class SystemBackupAgent extends BackupAgentHelper {
 
     private int mUserId = UserHandle.USER_SYSTEM;
     private boolean mIsProfileUser = false;
+    private BackupRestoreEventLogger mLogger;
 
     @Override
     public void onCreate(UserHandle user, @BackupDestination int backupDestination) {
         super.onCreate(user, backupDestination);
+        mLogger = this.getBackupRestoreEventLogger();
 
         mUserId = user.getIdentifier();
         if (mUserId != UserHandle.USER_SYSTEM) {
@@ -209,9 +213,12 @@ public class SystemBackupAgent extends BackupAgentHelper {
         }
     }
 
-    private void addHelperIfEligibleForUser(String keyPrefix, BackupHelper helper) {
+    private void addHelperIfEligibleForUser(String keyPrefix, BackupHelperWithLogger helper) {
         if (isHelperEligibleForUser(keyPrefix)) {
             addHelper(keyPrefix, helper);
+            if (Flags.enableMetricsSystemBackupAgents()) {
+                helper.setLogger(mLogger);
+            }
         }
     }
 

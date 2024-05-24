@@ -16,9 +16,12 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.AccessibilityContentDescriptions.WIFI_OTHER_DEVICE_CONNECTION
+import com.android.systemui.Flags.FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.coroutines.collectLastValue
@@ -183,7 +186,8 @@ class WifiViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun activity_nullSsid_outputsFalse() =
+    @DisableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
+    fun activity_nullSsid_outputsFalse_staticFlagOff() =
         testScope.runTest {
             whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
             createAndSetViewModel()
@@ -204,6 +208,33 @@ class WifiViewModelTest : SysuiTestCase() {
             assertThat(activityIn).isFalse()
             assertThat(activityOut).isFalse()
             assertThat(activityContainer).isFalse()
+        }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
+    fun activity_nullSsid_outputsFalse_staticFlagOn() =
+        testScope.runTest {
+            whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
+            createAndSetViewModel()
+
+            wifiRepository.setWifiNetwork(
+                WifiNetworkModel.Active(NETWORK_ID, ssid = null, level = 1)
+            )
+
+            val activityIn by collectLastValue(underTest.isActivityInViewVisible)
+            val activityOut by collectLastValue(underTest.isActivityOutViewVisible)
+            val activityContainer by collectLastValue(underTest.isActivityContainerVisible)
+
+            // WHEN we update the repo to have activity
+            val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = true)
+            wifiRepository.setWifiActivity(activity)
+
+            // THEN we still output false because our network's SSID is null
+            assertThat(activityIn).isFalse()
+            assertThat(activityOut).isFalse()
+
+            // THEN the inout indicators are sill showing due to the config being true
+            assertThat(activityContainer).isTrue()
         }
 
     @Test
@@ -335,7 +366,8 @@ class WifiViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun activityContainer_inAndOutFalse_outputsFalse() =
+    @DisableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
+    fun activityContainer_inAndOutFalse_outputsTrue_staticFlagOff() =
         testScope.runTest {
             whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
             createAndSetViewModel()
@@ -347,6 +379,24 @@ class WifiViewModelTest : SysuiTestCase() {
             wifiRepository.setWifiActivity(activity)
 
             assertThat(latest).isFalse()
+        }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
+    fun activityContainer_inAndOutFalse_outputsTrue_staticFlagOn() =
+        testScope.runTest {
+            whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
+            createAndSetViewModel()
+            wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
+
+            val latest by collectLastValue(underTest.isActivityContainerVisible)
+
+            val activity = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
+            wifiRepository.setWifiActivity(activity)
+
+            // The activity container should always be visible, since activity is
+            // shown in UI by changing opacity of the indicators.
+            assertThat(latest).isTrue()
         }
 
     @Test

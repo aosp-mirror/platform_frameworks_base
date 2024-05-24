@@ -118,6 +118,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     // In case the client doesn't explicitly enable repeating requests, the framework
     // will do so internally.
     private boolean mInternalRepeatingRequestEnabled = true;
+    private int mExtensionType;
 
     private final Context mContext;
 
@@ -244,7 +245,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 sessionId,
                 token,
                 extensionChars.getAvailableCaptureRequestKeys(config.getExtension()),
-                extensionChars.getAvailableCaptureResultKeys(config.getExtension()));
+                extensionChars.getAvailableCaptureResultKeys(config.getExtension()),
+                config.getExtension());
 
         session.mStatsAggregator.setClientName(ctx.getOpPackageName());
         session.mStatsAggregator.setExtensionType(config.getExtension());
@@ -266,7 +268,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             int sessionId,
             @NonNull IBinder token,
             @NonNull Set<CaptureRequest.Key> requestKeys,
-            @Nullable Set<CaptureResult.Key> resultKeys) {
+            @Nullable Set<CaptureResult.Key> resultKeys,
+            int extension) {
         mContext = ctx;
         mImageExtender = imageExtender;
         mPreviewExtender = previewExtender;
@@ -289,6 +292,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         mSupportedResultKeys = resultKeys;
         mCaptureResultsSupported = !resultKeys.isEmpty();
         mInterfaceLock = cameraDevice.mInterfaceLock;
+        mExtensionType = extension;
 
         mStatsAggregator = new ExtensionSessionStatsAggregator(mCameraDevice.getId(),
                 /*isAdvanced=*/false);
@@ -881,9 +885,9 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             if (mToken != null) {
                 if (mInitialized || (mCaptureSession != null)) {
                     notifyClose = true;
-                    CameraExtensionCharacteristics.releaseSession();
+                    CameraExtensionCharacteristics.releaseSession(mExtensionType);
                 }
-                CameraExtensionCharacteristics.unregisterClient(mContext, mToken);
+                CameraExtensionCharacteristics.unregisterClient(mContext, mToken, mExtensionType);
             }
             mInitialized = false;
             mToken = null;
@@ -1000,7 +1004,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 mStatsAggregator.commit(/*isFinal*/false);
                 try {
                     finishPipelineInitialization();
-                    CameraExtensionCharacteristics.initializeSession(mInitializeHandler);
+                    CameraExtensionCharacteristics.initializeSession(
+                            mInitializeHandler, mExtensionType);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to initialize session! Extension service does"
                             + " not respond!");

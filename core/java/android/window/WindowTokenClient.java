@@ -167,6 +167,11 @@ public class WindowTokenClient extends Binder {
                     + ", reported config=" + currentConfig
                     + ", updated config=" + newConfig);
         }
+        // Update display first. In case callers want to obtain display information(
+        // ex: DisplayMetrics) in #onConfigurationChanged callback.
+        if (displayChanged) {
+            context.updateDisplay(newDisplayId);
+        }
         if (shouldUpdateResources) {
             // TODO(ag/9789103): update resource manager logic to track non-activity tokens
             mResourcesManager.updateResourcesForActivity(this, newConfig, newDisplayId);
@@ -194,9 +199,6 @@ public class WindowTokenClient extends Binder {
                             + ", updated config=" + newConfig);
                 }
             }
-        }
-        if (displayChanged) {
-            context.updateDisplay(newDisplayId);
         }
     }
 

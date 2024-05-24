@@ -17,8 +17,15 @@
 package com.android.systemui.scene.data.repository
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.scene.shared.model.sceneContainerConfig
+import com.android.systemui.scene.sceneContainerConfig
+import com.android.systemui.scene.shared.model.sceneDataSource
 
-val Kosmos.sceneContainerRepository by
-    Kosmos.Fixture { SceneContainerRepository(applicationCoroutineScope, sceneContainerConfig) }
+val Kosmos.sceneContainerRepository by Fixture {
+    SceneContainerRepository(
+        applicationScope = applicationCoroutineScope,
+        config = sceneContainerConfig,
+        dataSource = sceneDataSource,
+    )
+}

@@ -16,17 +16,20 @@
 
 package com.android.wm.shell.windowdecor
 
+import android.annotation.IdRes
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.PixelFormat
 import android.graphics.PointF
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
 import android.view.SurfaceControlViewHost
-import android.view.View
 import android.view.View.OnClickListener
+import android.view.View.OnGenericMotionListener
+import android.view.View.OnTouchListener
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
 import android.widget.Button
@@ -49,6 +52,8 @@ class MaximizeMenu(
         private val displayController: DisplayController,
         private val taskInfo: RunningTaskInfo,
         private val onClickListener: OnClickListener,
+        private val onGenericMotionListener: OnGenericMotionListener,
+        private val onTouchListener: OnTouchListener,
         private val decorWindowContext: Context,
         private val menuPosition: PointF,
         private val transactionSupplier: Supplier<Transaction> = Supplier { Transaction() }
@@ -62,6 +67,8 @@ class MaximizeMenu(
     private val cornerRadius = loadDimensionPixelSize(
             R.dimen.desktop_mode_maximize_menu_corner_radius
     ).toFloat()
+    private val menuWidth = loadDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_width)
+    private val menuHeight = loadDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_height)
 
     /** Position the menu relative to the caption's position. */
     fun positionMenu(position: PointF, t: Transaction) {
@@ -95,8 +102,6 @@ class MaximizeMenu(
                 .setName("Maximize Menu")
                 .setContainerLayer()
                 .build()
-        val menuWidth = loadDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_width)
-        val menuHeight = loadDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_height)
         val lp = WindowManager.LayoutParams(
                 menuWidth,
                 menuHeight,
@@ -142,15 +147,26 @@ class MaximizeMenu(
     private fun setupMaximizeMenu() {
         val maximizeMenuView = maximizeMenu?.mWindowViewHost?.view ?: return
 
-        maximizeMenuView.requireViewById<Button>(
+        maximizeMenuView.setOnGenericMotionListener(onGenericMotionListener)
+        maximizeMenuView.setOnTouchListener(onTouchListener)
+
+        val maximizeButton = maximizeMenuView.requireViewById<Button>(
                 R.id.maximize_menu_maximize_button
-        ).setOnClickListener(onClickListener)
-        maximizeMenuView.requireViewById<Button>(
+        )
+        maximizeButton.setOnClickListener(onClickListener)
+        maximizeButton.setOnGenericMotionListener(onGenericMotionListener)
+
+        val snapRightButton = maximizeMenuView.requireViewById<Button>(
                 R.id.maximize_menu_snap_right_button
-        ).setOnClickListener(onClickListener)
-        maximizeMenuView.requireViewById<Button>(
+        )
+        snapRightButton.setOnClickListener(onClickListener)
+        snapRightButton.setOnGenericMotionListener(onGenericMotionListener)
+
+        val snapLeftButton = maximizeMenuView.requireViewById<Button>(
                 R.id.maximize_menu_snap_left_button
-        ).setOnClickListener(onClickListener)
+        )
+        snapLeftButton.setOnClickListener(onClickListener)
+        snapLeftButton.setOnGenericMotionListener(onGenericMotionListener)
     }
 
     /**
@@ -160,14 +176,11 @@ class MaximizeMenu(
      *
      * @param inputPoint the input to compare against.
      */
-    fun isValidMenuInput(inputPoint: PointF): Boolean {
-        val menuView = maximizeMenu?.mWindowViewHost?.view ?: return true
-        return !viewsLaidOut() || pointInView(menuView, inputPoint.x - menuPosition.x,
-                inputPoint.y - menuPosition.y)
-    }
-
-    private fun pointInView(v: View, x: Float, y: Float): Boolean {
-        return v.left <= x && v.right >= x && v.top <= y && v.bottom >= y
+    fun isValidMenuInput(ev: MotionEvent): Boolean {
+        val x = ev.rawX
+        val y = ev.rawY
+        return !viewsLaidOut() || (menuPosition.x <= x && menuPosition.x + menuWidth >= x &&
+                menuPosition.y <= y && menuPosition.y + menuHeight >= y)
     }
 
     /**
@@ -175,5 +188,13 @@ class MaximizeMenu(
      */
     private fun viewsLaidOut(): Boolean {
         return maximizeMenu?.mWindowViewHost?.view?.isLaidOut ?: false
+    }
+
+    companion object {
+        fun isMaximizeMenuView(@IdRes viewId: Int): Boolean {
+            return viewId == R.id.maximize_menu || viewId == R.id.maximize_menu_maximize_button ||
+                    viewId == R.id.maximize_menu_snap_left_button ||
+                    viewId == R.id.maximize_menu_snap_right_button
+        }
     }
 }

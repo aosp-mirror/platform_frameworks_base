@@ -26,6 +26,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -33,25 +34,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
-import com.android.compose.animation.scene.Back
-import com.android.compose.animation.scene.Edge as SceneTransitionEdge
-import com.android.compose.animation.scene.ObservableTransitionState as SceneTransitionObservableTransitionState
-import com.android.compose.animation.scene.SceneKey as SceneTransitionSceneKey
+import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
+import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
-import com.android.compose.animation.scene.SceneTransitionLayoutState
-import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
-import com.android.compose.animation.scene.UserAction as SceneTransitionUserAction
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.systemui.ribbon.ui.composable.BottomRightCornerRibbon
-import com.android.systemui.scene.shared.model.Direction
-import com.android.systemui.scene.shared.model.Edge
-import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
-import com.android.systemui.scene.shared.model.UserAction
+import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
-import kotlinx.coroutines.flow.map
 
 /**
  * Renders a container of a collection of "scenes" that the user can switch between using certain
@@ -75,17 +66,30 @@ import kotlinx.coroutines.flow.map
 fun SceneContainer(
     viewModel: SceneContainerViewModel,
     sceneByKey: Map<SceneKey, ComposableScene>,
+    dataSourceDelegator: SceneDataSourceDelegator,
     modifier: Modifier = Modifier,
 ) {
-    val currentSceneModel: SceneModel by viewModel.currentScene.collectAsState()
-    val currentSceneKey = currentSceneModel.key
+    val coroutineScope = rememberCoroutineScope()
+    val currentSceneKey: SceneKey by viewModel.currentScene.collectAsState()
     val currentScene = checkNotNull(sceneByKey[currentSceneKey])
-    val currentDestinations: Map<UserAction, SceneModel> by
+    val currentDestinations: Map<UserAction, UserActionResult> by
         currentScene.destinationScenes.collectAsState()
-    val state = remember { SceneTransitionLayoutState(currentSceneKey.toTransitionSceneKey()) }
+    val state: MutableSceneTransitionLayoutState = remember {
+        MutableSceneTransitionLayoutState(
+            initialScene = currentSceneKey,
+            canChangeScene = { toScene -> viewModel.canChangeScene(toScene) },
+            transitions = SceneContainerTransitions,
+        )
+    }
+
+    DisposableEffect(state) {
+        val dataSource = SceneTransitionLayoutDataSource(state, coroutineScope)
+        dataSourceDelegator.setDelegate(dataSource)
+        onDispose { dataSourceDelegator.setDelegate(null) }
+    }
 
     DisposableEffect(viewModel, state) {
-        viewModel.setTransitionState(state.observableTransitionState().map { it.toModel() })
+        viewModel.setTransitionState(state.observableTransitionState())
         onDispose { viewModel.setTransitionState(null) }
     }
 
@@ -93,9 +97,6 @@ fun SceneContainer(
         modifier = Modifier.fillMaxSize(),
     ) {
         SceneTransitionLayout(
-            currentScene = currentSceneKey.toTransitionSceneKey(),
-            onChangeScene = viewModel::onSceneChanged,
-            transitions = SceneContainerTransitions,
             state = state,
             modifier =
                 modifier
@@ -112,23 +113,17 @@ fun SceneContainer(
         ) {
             sceneByKey.forEach { (sceneKey, composableScene) ->
                 scene(
-                    key = sceneKey.toTransitionSceneKey(),
+                    key = sceneKey,
                     userActions =
                         if (sceneKey == currentSceneKey) {
-                                currentDestinations
-                            } else {
-                                composableScene.destinationScenes.value
-                            }
-                            .map { (userAction, destinationSceneModel) ->
-                                toTransitionModels(userAction, destinationSceneModel)
-                            }
-                            .toMap(),
+                            currentDestinations
+                        } else {
+                            composableScene.destinationScenes.value
+                        },
                 ) {
                     with(composableScene) {
                         this@scene.Content(
-                            modifier =
-                                Modifier.element(sceneKey.toTransitionSceneKey().rootElementKey)
-                                    .fillMaxSize(),
+                            modifier = Modifier.element(sceneKey.rootElementKey).fillMaxSize(),
                         )
                     }
                 }
@@ -145,63 +140,4 @@ fun SceneContainer(
             modifier = Modifier.align(Alignment.BottomEnd),
         )
     }
-}
-
-// TODO(b/293899074): remove this once we can use the one from SceneTransitionLayout.
-private fun SceneTransitionObservableTransitionState.toModel(): ObservableTransitionState {
-    return when (this) {
-        is SceneTransitionObservableTransitionState.Idle ->
-            ObservableTransitionState.Idle(scene.toModel().key)
-        is SceneTransitionObservableTransitionState.Transition ->
-            ObservableTransitionState.Transition(
-                fromScene = fromScene.toModel().key,
-                toScene = toScene.toModel().key,
-                progress = progress,
-                isInitiatedByUserInput = isInitiatedByUserInput,
-                isUserInputOngoing = isUserInputOngoing,
-            )
-    }
-}
-
-// TODO(b/293899074): remove this once we can use the one from SceneTransitionLayout.
-private fun toTransitionModels(
-    userAction: UserAction,
-    sceneModel: SceneModel,
-): Pair<SceneTransitionUserAction, SceneTransitionSceneKey> {
-    return userAction.toTransitionUserAction() to sceneModel.key.toTransitionSceneKey()
-}
-
-// TODO(b/293899074): remove this once we can use the one from SceneTransitionLayout.
-private fun SceneTransitionSceneKey.toModel(): SceneModel {
-    return SceneModel(key = identity as SceneKey)
-}
-
-// TODO(b/293899074): remove this once we can use the one from SceneTransitionLayout.
-private fun UserAction.toTransitionUserAction(): SceneTransitionUserAction {
-    return when (this) {
-        is UserAction.Swipe ->
-            Swipe(
-                pointerCount = pointerCount,
-                fromEdge =
-                    when (this.fromEdge) {
-                        null -> null
-                        Edge.LEFT -> SceneTransitionEdge.Left
-                        Edge.TOP -> SceneTransitionEdge.Top
-                        Edge.RIGHT -> SceneTransitionEdge.Right
-                        Edge.BOTTOM -> SceneTransitionEdge.Bottom
-                    },
-                direction =
-                    when (this.direction) {
-                        Direction.LEFT -> SwipeDirection.Left
-                        Direction.UP -> SwipeDirection.Up
-                        Direction.RIGHT -> SwipeDirection.Right
-                        Direction.DOWN -> SwipeDirection.Down
-                    }
-            )
-        is UserAction.Back -> Back
-    }
-}
-
-private fun SceneContainerViewModel.onSceneChanged(sceneKey: SceneTransitionSceneKey) {
-    onSceneChanged(sceneKey.toModel())
 }

@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> సెకన్ల తర్వాత <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ఫార్వర్డ్ చేయబడలేదు"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ఫార్వర్డ్ చేయబడలేదు"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"సెల్యులర్ నెట్‌వర్క్ సెక్యూరిటీ"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"సెట్టింగ్‌లను రివ్యూ చేయండి"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"పరికర ఐడెంటిఫయర్ యాక్సెస్ చేయబడింది"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> కనెక్షన్‌లోని నెట్‌వర్క్ మీ పరికరంకు సంబంధించిన ప్రత్యేక ఐడెంటిఫయర్‌ను (IMSI) <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> నుండి <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> మధ్య కాలంలో <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> సార్లు రికార్డ్ చేసింది."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>‌కు ఎన్‌క్రిప్ట్ చేసిన కనెక్షన్"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"మీరు ఇప్పుడు మరింత సురక్షితమైన సెల్యులార్ నెట్‌వర్క్‌కు కనెక్ట్ చేయబడ్డారు."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>‌కు ఎన్‌క్రిప్ట్ చేయని కనెక్షన్"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"మీరు ఎన్‌క్రిప్ట్ చేయని సెల్యులార్ నెట్‌వర్క్‌కు కనెక్ట్ చేయబడ్డారు. మీ కాల్స్, మెసేజ్‌లు, అలాగే డేటా అంతరాయానికి ఎక్కువగా గురవుతాయి."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"సెల్యులార్ సెక్యూరిటీ సెట్టింగ్‌లు"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"మరింత తెలుసుకోండి"</string>
     <string name="fcComplete" msgid="1080909484660507044">"లక్షణం కోడ్ పూర్తయింది."</string>
     <string name="fcError" msgid="5325116502080221346">"కనెక్షన్ సమస్య లేదా లక్షణం కోడ్ చెల్లదు."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"సరే"</string>
@@ -370,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"సెల్ ప్రసార మెసేజ్‌లను స్వీకరించినప్పుడు, వాటిని ఫార్వర్డ్ చేయడానికి సెల్ ప్రసార మాడ్యూల్‌కు కట్టుబడి ఉండేందుకు యాప్‌ను అనుమతిస్తుంది. ఎమర్జెన్సీ పరిస్థితుల గురించి మిమ్మల్ని హెచ్చరించడానికి కొన్ని లొకేషన్లలో సెల్ ప్రసార అలర్ట్‌లు డెలివరీ చేయబడతాయి. ఎమర్జెన్సీ సెల్ ప్రసార అలర్ట్‌ను స్వీకరించినప్పుడు హానికరమైన యాప్‌లు మీ పరికరం పనితీరుకు లేదా నిర్వహణకు ఆటంకం కలిగించే అవకాశం ఉంది."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"కొనసాగుతున్న కాల్స్‌ను మేనేజ్ చేయండి"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"మీ పరికరంలో కొనసాగుతున్న కాల్స్‌ను చూడటానికి అలాగే వాటిని కంట్రోల్ చేయడానికి ఒక యాప్‌కు అనుమతిస్తోంది."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"చివరిగా తెలిసిన సెల్ ఐడెంటిటీని యాక్సెస్ చేయండి."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"టెలిఫోన్ అందించిన చివరిగా తెలిసిన సెల్ ఐడెంటిటీని యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"సెల్ ప్రసార మెసేజ్‌లను చదవడం"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"మీ పరికరం స్వీకరించిన సెల్ ప్రసార మెసేజ్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది. ఎమర్జెన్సీ పరిస్థితుల గురించి మిమ్మల్ని హెచ్చరించడానికి కొన్ని లొకేషన్లలో సెల్ ప్రసార అలర్ట్‌లు డెలివరీ చేయబడతాయి. ఎమర్జెన్సీ సెల్ ప్రసార అలర్ట్‌ను స్వీకరించినప్పుడు హానికరమైన యాప్‌లు మీ పరికరం పనితీరుకు లేదా నిర్వహణకు ఆటంకం కలిగించే అవకాశం ఉంది."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"చందా చేయబడిన ఫీడ్‌లను చదవడం"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"\"systemExempted\" అనే రకంతో ఫోర్‌గ్రౌండ్ సర్వీస్‌లను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"\"fileManagement\" రకంతో ఫోర్‌గ్రౌండ్ సర్వీస్‌ను రన్ చేయండి"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"\"fileManagement\" అనే రకంతో ఫోర్‌గ్రౌండ్ సర్వీస్‌లను ఉపయోగించుకోవడానికి యాప్‌ను అనుమతిస్తుంది"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"\"mediaProcessing\" రకంతో ఫోర్‌గ్రౌండ్ సర్వీస్‌ను రన్ చేయండి"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"\"mediaProcessing\" అనే రకంతో ఫోర్‌గ్రౌండ్ సర్వీస్‌లను ఉపయోగించుకోవడానికి యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" రకంతో ఫోర్‌గ్రౌండ్ సర్వీస్‌ను రన్ చేయండి"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"\"specialUse\" అనే రకంతో ఫోర్‌గ్రౌండ్ సర్వీస్‌లను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"యాప్ స్టోరేజ్‌ స్థలాన్ని అంచనా వేయడం"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"ఫోన్ యొక్క ఇన్‌ఫ్రారెడ్ ట్రాన్స్‌మిటర్‌ను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"వాల్‌పేపర్‌ను సెట్ చేయడం"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"సిస్టమ్ వాల్‌పేపర్‌ను సెట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"దాచిన ప్రొఫైల్స్‌ను యాక్సెస్ చేయండి"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"దాచిన ప్రొఫైల్స్‌ను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"మీ వాల్‌పేపర్ పరిమాణాన్ని సర్దుబాటు చేయడం"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"సిస్టమ్ వాల్‌పేపర్ సైజ్‌ సూచనలను సెట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"సమయ మండలిని సెట్ చేయడం"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"కొనసాగించడానికి మీ స్క్రీన్ లాక్‌ను ఎంటర్ చేయండి"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"సెన్సార్ మీద గట్టిగా నొక్కండి"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"వేలిముద్రను గుర్తించడం సాధ్యపడదు. మళ్లీ ట్రై చేయండి."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"వేలిముద్ర గుర్తించబడలేదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"వేలిముద్ర సెన్సార్‌ను క్లీన్ చేసి, మళ్లీ ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"సెన్సార్‌ను క్లీన్ చేసి, మళ్లీ ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"సెన్సార్ మీద గట్టిగా నొక్కండి"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"వేలిముద్ర ప్రమాణీకరించబడింది"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ముఖం ప్రమాణీకరించబడింది"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ముఖం ప్రమాణీకరించబడింది, దయచేసి ధృవీకరించును నొక్కండి"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"వేలిముద్ర హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"వేలిముద్ర హార్డ్‌వేర్ అందుబాటులో లేదు"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"వేలిముద్రను సెటప్ చేయడం సాధ్యం కాదు"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"వేలిముద్ర సెటప్ సమయం ముగిసింది. మళ్లీ ట్రై చేయండి."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"వేలిముద్ర యాక్టివిటీ రద్దయింది."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"వేలిముద్ర చర్యని వినియోగదారు రద్దు చేశారు."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"వేలిముద్ర ఆపరేషన్ రద్దయింది"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"వేలిముద్ర ఆపరేషన్‌ను యూజర్ రద్దు చేశారు"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"చాలా ఎక్కువ సార్లు ప్రయత్నించారు. బదులుగా స్క్రీన్ లాక్‌ను ఉపయోగించండి."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"చాలా ఎక్కువ సార్లు ప్రయత్నించారు. బదులుగా స్క్రీన్ లాక్‌ను ఉపయోగించండి."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"వేలిముద్రను ప్రాసెస్ చేయడం సాధ్యపడదు. మళ్లీ ట్రై చేయండి."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"వేలిముద్రలు నమోదు చేయబడలేదు."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ఈ పరికరంలో వేలిముద్ర సెన్సార్ ఎంపిక లేదు."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"సెన్సార్ తాత్కాలికంగా డిజేబుల్ చేయబడింది."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"వేలిముద్ర సెన్సార్‌ను ఉపయోగించడం సాధ్యం కాదు. రిపెయిర్ ప్రొవైడర్‌ను సందర్శించండి"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"వేలిముద్రలు ఏవీ ఎన్‌రోల్ అవలేదు"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"ఈ పరికరంలో వేలిముద్ర సెన్సార్ లేదు"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"సెన్సార్ తాత్కాలికంగా డిజేబుల్ అయ్యింది"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"వేలిముద్ర సెన్సార్‌ను ఉపయోగించడం సాధ్యం కాదు. రిపెయిర్ ప్రొవైడర్‌ను చూడండి."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Power button pressed"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>వ వేలు"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"వేలిముద్రను ఉపయోగించండి"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"మీ ముఖం కనిపించడం లేదు. మీ ఫోన్‌ను కళ్లకు ఎదురుగా పట్టుకోండి."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"బాగా కదుపుతున్నారు. ఫోన్‌ను స్థిరంగా పట్టుకోండి"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"దయచేసి మీ ముఖాన్ని మళ్లీ నమోదు చేయండి."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"ముఖం గుర్తించబడలేదు. మళ్లీ ట్రై చేయండి."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"ముఖం గుర్తించబడలేదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"మీ తల స్థానాన్ని కొద్దిగా మార్చండి"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz కంటే ఎక్కువ రేట్ వద్ద శాంపిల్ సెన్సార్ డేటాకు యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"యూజర్ చర్య లేకుండా యాప్‌ను అప్‌డేట్ చేయండి"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"యూజర్ చర్య లేకుండా హోల్డర్ మునుపు ఇన్‌స్టాల్ చేసిన యాప్‌ను అప్‌డేట్ చేయడానికి హోల్డర్‌ను అనుమతిస్తుంది"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"మీకు సంబంధించిన ఇతర యాప్‌లలోని E2EE కాంటాక్ట్ కీల వెరిఫికేషన్ స్టేట్‌లను అప్‌డేట్ చేయండి"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"మీకు సంబంధించిన ఇతర యాప్‌లలోని E2EE కాంటాక్ట్ కీల వెరిఫికేషన్ స్టేట్‌లను అప్‌డేట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"పాస్‌వర్డ్ నియమాలను సెట్ చేయండి"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"స్క్రీన్ లాక్ పాస్‌వర్డ్‌లు మరియు PINల్లో అనుమతించబడిన పొడవు మరియు అక్షరాలను నియంత్రిస్తుంది."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"స్క్రీన్ అన్‌లాక్ ప్రయత్నాలను పర్యవేక్షించండి"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"వారాంతం"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ఈవెంట్"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"నిద్రావస్థ"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ద్వారా మేనేజ్ చేయబడుతోంది"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ఆన్‌లో ఉంది"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ఆఫ్‌లో ఉంది"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> కొన్ని ధ్వనులను మ్యూట్ చేస్తోంది"</string>
@@ -1925,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"వెరిఫై చేయబడింది"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"విస్తరింపజేయి"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"కుదించు"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"కుదించబడింది"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"విస్తరించబడింది"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"విస్తరణను టోగుల్ చేయండి"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB పెరిఫెరల్ పోర్ట్"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"వర్క్ యాప్స్ అన్‌పాజ్ చేయాలా?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"అన్‌పాజ్ చేయండి"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ఎమర్జెన్సీ"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"స్క్రీన్ లాక్‌ను సెట్ చేయండి"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"స్క్రీన్ లాక్‌ను సెట్ చేయండి"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"మీ ప్రైవేట్ స్పేస్‌ను ఉపయోగించడానికి, ఈ పరికరంలో స్క్రీన్ లాక్ సెట్ చేయండి"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"యాప్ అందుబాటులో లేదు"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ప్రస్తుతం అందుబాటులో లేదు."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> అందుబాటులో లేదు"</string>
@@ -2341,8 +2365,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"డిస్‌ప్లే చేయడానికి మిర్రర్ చేయడం సాధ్యపడదు"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"వేరే కేబుల్‌ను ఉపయోగించి, మళ్లీ ట్రై చేయండి"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"మీ పరికరం చాలా వెచ్చగా ఉంది, అది చల్లబడే వరకు డిస్‌ప్లే చేయడానికి మిర్రర్ చేయడం సాధ్యపడదు"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"డిస్‌ప్లేలను కేబుల్ సపోర్ట్ చేయకపోవచ్చు"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"మీ USB-C కేబుల్, డిస్‌ప్లేలకు సరిగ్గా కనెక్ట్ కాకపోవచ్చు"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen ఆన్‌లో ఉంది"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"కంటెంట్‌ను చూపడం కోసం <xliff:g id="APP_NAME">%1$s</xliff:g> రెండు డిస్‌ప్లేలనూ ఉపయోగిస్తోంది"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"ఆఫీస్ 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"పరీక్ష"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"కమ్యూనల్"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"శాటిలైట్‌కు ఆటోమేటిక్‌గా కనెక్ట్ చేయబడింది"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"మీరు మొబైల్ లేదా Wi-Fi నెట్‌వర్క్ లేకుండా మెసేజ్‌లను పంపవచ్చు, స్వీకరించవచ్చు"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messagesను తెరవండి"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ఇది ఎలా పని చేస్తుంది"</string>
 </resources>

@@ -1031,18 +1031,20 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
     private void recomputeComponentVisibility(
             ArrayMap<String, ? extends PackageStateInternal> existingSettings) {
         final WatchedArraySet<String> protectedBroadcasts;
-        final WatchedArraySet<Integer> forceQueryable;
+        final ArraySet<Integer> forceQueryable;
         synchronized (mProtectedBroadcastsLock) {
-            protectedBroadcasts = mProtectedBroadcasts.snapshot();
+            protectedBroadcasts = new WatchedArraySet<String>(mProtectedBroadcasts);
         }
         synchronized (mForceQueryableLock) {
-            forceQueryable = mForceQueryable.snapshot();
+            forceQueryable = new ArraySet<Integer>(mForceQueryable.untrackedStorage());
         }
         final ParallelComputeComponentVisibility computer = new ParallelComputeComponentVisibility(
                 existingSettings, forceQueryable, protectedBroadcasts);
         SparseSetArray<Integer> queriesViaComponent = computer.execute();
         synchronized (mQueriesViaComponentLock) {
-            mQueriesViaComponent.copyFrom(queriesViaComponent);
+            mQueriesViaComponent = new WatchedSparseSetArray<>(queriesViaComponent);
+            mQueriesViaComponentSnapshot = new SnapshotCache.Auto<>(
+                    mQueriesViaComponent, mQueriesViaComponent, "AppsFilter.mQueriesViaComponent");
         }
 
         mQueriesViaComponentRequireRecompute.set(false);

@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.data.repository
 
 import android.graphics.Rect
+import android.view.InsetsFlags
+import android.view.ViewDebug
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS
@@ -305,8 +307,8 @@ constructor(
         letterboxDetails.isNotEmpty()
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println("originalStatusBarAttributes: ${_originalStatusBarAttributes.value}")
-        pw.println("modifiedStatusBarAttributes: ${modifiedStatusBarAttributes.value}")
+        pw.println("${_originalStatusBarAttributes.value}")
+        pw.println("${modifiedStatusBarAttributes.value}")
         pw.println("statusBarMode: ${statusBarMode.value}")
     }
 
@@ -320,7 +322,20 @@ constructor(
         val navbarColorManagedByIme: Boolean,
         @WindowInsets.Type.InsetsType val requestedVisibleTypes: Int,
         val letterboxDetails: List<LetterboxDetails>,
-    )
+    ) {
+        override fun toString(): String {
+            return """
+                StatusBarAttributes(
+                    appearance=${appearance.toAppearanceString()},
+                    appearanceRegions=$appearanceRegions,
+                    navbarColorManagedByIme=$navbarColorManagedByIme,
+                    requestedVisibleTypes=${requestedVisibleTypes.toWindowInsetsString()},
+                    letterboxDetails=$letterboxDetails
+                    )
+                    """
+                .trimIndent()
+        }
+    }
 
     /**
      * Internal class keeping track of how [StatusBarAttributes] were transformed into new
@@ -331,8 +346,30 @@ constructor(
         val appearanceRegions: List<AppearanceRegion>,
         val navbarColorManagedByIme: Boolean,
         val statusBarBounds: BoundsPair,
-    )
+    ) {
+        override fun toString(): String {
+            return """
+                ModifiedStatusBarAttributes(
+                    appearance=${appearance.toAppearanceString()},
+                    appearanceRegions=$appearanceRegions,
+                    navbarColorManagedByIme=$navbarColorManagedByIme,
+                    statusBarBounds=$statusBarBounds
+                    )
+                    """
+                .trimIndent()
+        }
+    }
 }
+
+private fun @receiver:WindowInsets.Type.InsetsType Int.toWindowInsetsString() =
+    "[${WindowInsets.Type.toString(this).replace(" ", ", ")}]"
+
+private fun @receiver:Appearance Int.toAppearanceString() =
+    if (this == 0) {
+        "NONE"
+    } else {
+        ViewDebug.flagsToString(InsetsFlags::class.java, "appearance", this)
+    }
 
 @AssistedFactory
 interface StatusBarModePerDisplayRepositoryFactory {

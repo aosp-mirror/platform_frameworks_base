@@ -40,24 +40,33 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
+import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.IBiometricService;
+import android.hardware.biometrics.fingerprint.IFingerprint;
+import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
+import android.hardware.fingerprint.FingerprintSensorConfigurations;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.os.Binder;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.testing.TestableContext;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.R;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.LocalServices;
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintProvider;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
@@ -85,9 +94,13 @@ public class FingerprintServiceTest {
     private static final String NAME_VIRTUAL = "virtual";
     private static final List<FingerprintSensorPropertiesInternal> HIDL_AUTHENTICATORS =
             List.of();
+    private static final String OP_PACKAGE_NAME = "FingerprintServiceTest/SystemUi";
 
     @Rule
     public final MockitoRule mMockito = MockitoJUnit.rule();
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
     @Rule
     public final TestableContext mContext = new TestableContext(
             InstrumentationRegistry.getInstrumentation().getTargetContext(), null);
@@ -110,6 +123,10 @@ public class FingerprintServiceTest {
     private IBinder mToken;
     @Mock
     private VirtualDeviceManagerInternal mVdmInternal;
+    @Mock
+    private IFingerprint mDefaultFingerprintDaemon;
+    @Mock
+    private IFingerprint mVirtualFingerprintDaemon;
 
     @Captor
     private ArgumentCaptor<FingerprintAuthenticateOptions> mAuthenticateOptionsCaptor;
@@ -126,7 +143,10 @@ public class FingerprintServiceTest {
                     List.of(),
                     TYPE_UDFPS_OPTICAL,
                     false /* resetLockoutRequiresHardwareAuthToken */);
+    private FingerprintSensorConfigurations mFingerprintSensorConfigurations;
     private FingerprintService mService;
+    private final SensorProps mDefaultSensorProps = new SensorProps();
+    private final SensorProps mVirtualSensorProps = new SensorProps();
 
     @Before
     public void setup() throws Exception {
@@ -139,6 +159,10 @@ public class FingerprintServiceTest {
                 .thenAnswer(i -> i.getArguments()[0].equals(ID_DEFAULT));
         when(mFingerprintVirtual.containsSensor(anyInt()))
                 .thenAnswer(i -> i.getArguments()[0].equals(ID_VIRTUAL));
+        when(mDefaultFingerprintDaemon.getSensorProps()).thenReturn(
+                new SensorProps[]{mDefaultSensorProps});
+        when(mVirtualFingerprintDaemon.getSensorProps()).thenReturn(
+                new SensorProps[]{mVirtualSensorProps});
 
         mContext.addMockSystemService(AppOpsManager.class, mAppOpsManager);
         for (int permission : List.of(OP_USE_BIOMETRIC, OP_USE_FINGERPRINT)) {
@@ -150,6 +174,18 @@ public class FingerprintServiceTest {
             mContext.getTestablePermissions().setPermission(
                     permission, PackageManager.PERMISSION_GRANTED);
         }
+
+        mFingerprintSensorConfigurations = new FingerprintSensorConfigurations(
+                true /* resetLockoutRequiresHardwareAuthToken */);
+        mFingerprintSensorConfigurations.addAidlSensors(new String[]{NAME_DEFAULT, NAME_VIRTUAL},
+                (name) -> {
+                    if (name.equals(IFingerprint.DESCRIPTOR + "/" + NAME_DEFAULT)) {
+                        return mDefaultFingerprintDaemon;
+                    } else if (name.equals(IFingerprint.DESCRIPTOR + "/" + NAME_VIRTUAL)) {
+                        return mVirtualFingerprintDaemon;
+                    }
+                    return null;
+                });
     }
 
     private void initServiceWith(String... aidlInstances) {
@@ -159,6 +195,10 @@ public class FingerprintServiceTest {
                 (name) -> {
                     if (NAME_DEFAULT.equals(name)) return mFingerprintDefault;
                     if (NAME_VIRTUAL.equals(name)) return mFingerprintVirtual;
+                    return null;
+                }, (sensorPropsPair, resetLockoutRequiresHardwareAuthToken) -> {
+                    if (NAME_DEFAULT.equals(sensorPropsPair.first)) return mFingerprintDefault;
+                    if (NAME_VIRTUAL.equals(sensorPropsPair.first)) return mFingerprintVirtual;
                     return null;
                 });
     }
@@ -180,6 +220,17 @@ public class FingerprintServiceTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    public void registerAuthenticatorsLegacy_defaultOnly() throws Exception {
+        initServiceWith(NAME_DEFAULT, NAME_VIRTUAL);
+
+        mService.mServiceWrapper.registerAuthenticatorsLegacy(mFingerprintSensorConfigurations);
+        waitForRegistration();
+
+        verify(mIBiometricService).registerAuthenticator(eq(ID_DEFAULT), anyInt(), anyInt(), any());
+    }
+
+    @Test
     public void registerAuthenticators_virtualOnly() throws Exception {
         initServiceWith(NAME_DEFAULT, NAME_VIRTUAL);
         Settings.Secure.putInt(mSettingsRule.mockContentResolver(mContext),
@@ -192,10 +243,45 @@ public class FingerprintServiceTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    public void registerAuthenticatorsLegacy_virtualOnly() throws Exception {
+        initServiceWith(NAME_DEFAULT, NAME_VIRTUAL);
+        Settings.Secure.putInt(mSettingsRule.mockContentResolver(mContext),
+                Settings.Secure.BIOMETRIC_VIRTUAL_ENABLED, 1);
+
+        mService.mServiceWrapper.registerAuthenticatorsLegacy(mFingerprintSensorConfigurations);
+        waitForRegistration();
+
+        verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL), anyInt(), anyInt(), any());
+    }
+
+    @Test
     public void registerAuthenticators_virtualAlwaysWhenNoOther() throws Exception {
         initServiceWith(NAME_VIRTUAL);
 
         mService.mServiceWrapper.registerAuthenticators(HIDL_AUTHENTICATORS);
+        waitForRegistration();
+
+        verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL), anyInt(), anyInt(), any());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    public void registerAuthenticatorsLegacy_virtualAlwaysWhenNoOther() throws Exception {
+        mFingerprintSensorConfigurations =
+                new FingerprintSensorConfigurations(true);
+        mFingerprintSensorConfigurations.addAidlSensors(new String[]{NAME_VIRTUAL},
+                        (name) -> {
+                            if (name.equals(IFingerprint.DESCRIPTOR + "/" + NAME_DEFAULT)) {
+                                return mDefaultFingerprintDaemon;
+                            } else if (name.equals(IFingerprint.DESCRIPTOR + "/" + NAME_VIRTUAL)) {
+                                return mVirtualFingerprintDaemon;
+                            }
+                            return null;
+                        });
+        initServiceWith(NAME_VIRTUAL);
+
+        mService.mServiceWrapper.registerAuthenticatorsLegacy(mFingerprintSensorConfigurations);
         waitForRegistration();
 
         verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL), anyInt(), anyInt(), any());
@@ -258,6 +344,24 @@ public class FingerprintServiceTest {
         ArgumentCaptor<Integer> uidCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(mVdmInternal).onAuthenticationPrompt(uidCaptor.capture());
         assertEquals((int) (uidCaptor.getValue()), Binder.getCallingUid());
+    }
+
+    @Test
+    public void testOptionsForDetect() throws Exception {
+        FingerprintAuthenticateOptions fingerprintAuthenticateOptions =
+                new FingerprintAuthenticateOptions.Builder()
+                        .setOpPackageName(ComponentName.unflattenFromString(
+                                OP_PACKAGE_NAME).getPackageName())
+                        .build();
+
+        mContext.getOrCreateTestableResources().addOverride(
+                R.string.config_keyguardComponent,
+                OP_PACKAGE_NAME);
+        initServiceWithAndWait(NAME_DEFAULT);
+        mService.mServiceWrapper.detectFingerprint(mToken, mServiceReceiver,
+                fingerprintAuthenticateOptions);
+
+        assertThat(fingerprintAuthenticateOptions.getSensorId()).isEqualTo(ID_DEFAULT);
     }
 
 

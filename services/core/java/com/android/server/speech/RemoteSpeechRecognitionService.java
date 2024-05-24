@@ -68,12 +68,14 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
     private final ComponentName mComponentName;
 
     RemoteSpeechRecognitionService(
-            Context context, ComponentName serviceName, int userId, int callingUid) {
+            Context context,
+            ComponentName serviceName,
+            int userId,
+            int callingUid,
+            boolean isPrivileged) {
         super(context,
                 new Intent(RecognitionService.SERVICE_INTERFACE).setComponent(serviceName),
-                Context.BIND_AUTO_CREATE
-                        | Context.BIND_FOREGROUND_SERVICE
-                        | Context.BIND_INCLUDE_CAPABILITIES,
+                getBindingFlags(isPrivileged),
                 userId,
                 IRecognitionService.Stub::asInterface);
 
@@ -83,6 +85,14 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
         if (DEBUG) {
             Slog.i(TAG, "Bound to recognition service at: " + serviceName.flattenToString() + ".");
         }
+    }
+
+    private static int getBindingFlags(boolean isPrivileged) {
+        int bindingFlags = Context.BIND_AUTO_CREATE;
+        if (isPrivileged) {
+            bindingFlags |= Context.BIND_INCLUDE_CAPABILITIES | Context.BIND_FOREGROUND_SERVICE;
+        }
+        return bindingFlags;
     }
 
     ComponentName getServiceComponentName() {

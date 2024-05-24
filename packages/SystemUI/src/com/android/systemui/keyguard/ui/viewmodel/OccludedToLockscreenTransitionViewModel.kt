@@ -21,7 +21,7 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromOccludedTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.res.R
@@ -29,7 +29,6 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 
 /**
@@ -41,7 +40,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 class OccludedToLockscreenTransitionViewModel
 @Inject
 constructor(
-    interactor: KeyguardTransitionInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     configurationInteractor: ConfigurationInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
@@ -50,7 +48,8 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_LOCKSCREEN_DURATION,
-            stepFlow = interactor.occludedToLockscreenTransition,
+            from = KeyguardState.OCCLUDED,
+            to = KeyguardState.LOCKSCREEN,
         )
 
     /** Lockscreen views y-translation */
@@ -79,19 +78,11 @@ constructor(
             startTime = 233.milliseconds,
             duration = 250.milliseconds,
             onStep = { it },
-            onStart = { 0f },
             name = "OCCLUDED->LOCKSCREEN: lockscreenAlpha",
         )
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
-        deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled.flatMapLatest {
-            isUdfpsEnrolledAndEnabled ->
-            if (isUdfpsEnrolledAndEnabled) {
-                transitionAnimation.immediatelyTransitionTo(1f)
-            } else {
-                emptyFlow()
-            }
-        }
+        transitionAnimation.immediatelyTransitionTo(1f)
 
     override val deviceEntryParentViewAlpha: Flow<Float> = lockscreenAlpha
 }

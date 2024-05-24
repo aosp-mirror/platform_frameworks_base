@@ -30,6 +30,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.os.Environment;
+import android.permission.flags.Flags;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -368,6 +369,7 @@ public class RoleServicePlatformHelperImpl implements RoleServicePlatformHelper 
             dataOutputStream.writeUTF(profileOwner);
             dataOutputStream.writeInt(Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.DEVICE_DEMO_MODE, 0));
+            dataOutputStream.writeBoolean(Flags.walletRoleEnabled());
             dataOutputStream.flush();
         } catch (IOException e) {
             // Never happens for MessageDigestOutputStream and DataOutputStream.

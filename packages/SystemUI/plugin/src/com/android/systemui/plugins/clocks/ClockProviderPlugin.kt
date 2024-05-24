@@ -41,14 +41,11 @@ interface ClockProviderPlugin : Plugin, ClockProvider {
 
 /** Interface for building clocks and providing information about those clocks */
 interface ClockProvider {
+    /** Initializes the clock provider with debug log buffers */
+    fun initialize(buffers: ClockMessageBuffers?)
+
     /** Returns metadata for all clocks this provider knows about */
     fun getClocks(): List<ClockMetadata>
-
-    /** Initializes and returns the target clock design */
-    @Deprecated("Use overload with ClockSettings")
-    fun createClock(id: ClockId): ClockController {
-        return createClock(ClockSettings(id, null))
-    }
 
     /** Initializes and returns the target clock design */
     fun createClock(settings: ClockSettings): ClockController
@@ -98,10 +95,19 @@ interface ClockFaceController {
 
     /** Triggers for various animations */
     val animations: ClockAnimations
-
-    /** Some clocks may log debug information */
-    var messageBuffer: MessageBuffer?
 }
+
+/** For clocks that want to report debug information */
+data class ClockMessageBuffers(
+    /** Message buffer for general infra */
+    val infraMessageBuffer: MessageBuffer,
+
+    /** Message buffer for small clock renering */
+    val smallClockMessageBuffer: MessageBuffer,
+
+    /** Message buffer for large clock rendering */
+    val largeClockMessageBuffer: MessageBuffer,
+)
 
 /** Specifies layout information for the */
 interface ClockFaceLayout {
@@ -110,6 +116,8 @@ interface ClockFaceLayout {
 
     /** Custom constraints to apply to Lockscreen ConstraintLayout. */
     fun applyConstraints(constraints: ConstraintSet): ConstraintSet
+
+    fun applyPreviewConstraints(constraints: ConstraintSet): ConstraintSet
 }
 
 /** A ClockFaceLayout that applies the default lockscreen layout to a single view */
@@ -123,6 +131,10 @@ class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
                 "Should have only one container view when using DefaultClockFaceLayout"
             )
         }
+        return constraints
+    }
+
+    override fun applyPreviewConstraints(constraints: ConstraintSet): ConstraintSet {
         return constraints
     }
 }

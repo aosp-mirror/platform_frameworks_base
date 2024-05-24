@@ -47,6 +47,7 @@ import android.media.AudioDeviceInfo;
 import android.media.AudioProfile;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager.TvInputCallback;
+import android.os.Handler;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 
@@ -97,8 +98,14 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private boolean mSystemAudioMute = false;
 
     // If true, do not do routing control/send active source for internal source.
-    // Set to true when the device was woken up by <Text/Image View On>.
+    // Set to true for a short duration when the device is woken up by <Text/Image View On>.
     private boolean mSkipRoutingControl;
+
+    // Handler for posting a runnable to set `mSkipRoutingControl` to false after a delay
+    private final Handler mSkipRoutingControlHandler;
+
+    // Runnable that sets `mSkipRoutingControl` to false
+    private final Runnable mResetSkipRoutingControlRunnable = () -> mSkipRoutingControl = false;
 
     // Message buffer used to buffer selected messages to process later. <Active Source>
     // from a source device, for instance, needs to be buffered if the device is not
@@ -162,6 +169,7 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL)
                     == HdmiControlManager.SYSTEM_AUDIO_CONTROL_ENABLED;
         mStandbyHandler = new HdmiCecStandbyModeHandler(service, this);
+        mSkipRoutingControlHandler = new Handler(service.getServiceLooper());
     }
 
     @Override
@@ -184,7 +192,14 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         mService.getHdmiCecNetwork().addCecSwitch(
                 mService.getHdmiCecNetwork().getPhysicalAddress());  // TV is a CEC switch too.
         mTvInputs.clear();
+
         mSkipRoutingControl = (reason == HdmiControlService.INITIATED_BY_WAKE_UP_MESSAGE);
+        mSkipRoutingControlHandler.removeCallbacks(mResetSkipRoutingControlRunnable);
+        if (mSkipRoutingControl) {
+            mSkipRoutingControlHandler.postDelayed(mResetSkipRoutingControlRunnable,
+                    HdmiConfig.TIMEOUT_MS);
+        }
+
         launchRoutingControl(reason != HdmiControlService.INITIATED_BY_ENABLE_CEC &&
                 reason != HdmiControlService.INITIATED_BY_BOOT_UP);
         resetSelectRequestBuffer();
@@ -462,6 +477,22 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             mDelayedMessageBuffer.add(message);
         }
         return Constants.HANDLED;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    @Constants.HandleMessageResult
+    protected int handleStandby(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+
+        // Ignore <Standby> from non-active source device.
+        if (getActiveSource().logicalAddress != message.getSource()) {
+            Slog.d(TAG, "<Standby> was not sent by the current active source, ignoring."
+                    + " Current active source has logical address "
+                    + getActiveSource().logicalAddress);
+            return Constants.HANDLED;
+        }
+        return super.handleStandby(message);
     }
 
     @Override
@@ -1290,15 +1321,19 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             mService.getHdmiCecNetwork().removeCecSwitches(portId);
         }
 
-        // Turning System Audio Mode off when the AVR is unlugged or standby.
-        // When the device is not unplugged but reawaken from standby, we check if the System
-        // Audio Control Feature is enabled or not then decide if turning SAM on/off accordingly.
-        if (getAvrDeviceInfo() != null && portId == getAvrDeviceInfo().getPortId()) {
-            HdmiLogger.debug("Port ID:%d, 5v=%b", portId, connected);
-            if (!connected) {
-                setSystemAudioMode(false);
-            } else {
-                onNewAvrAdded(getAvrDeviceInfo());
+        if (!mService.isEarcEnabled() || !mService.isEarcSupported()) {
+            HdmiDeviceInfo avr = getAvrDeviceInfo();
+            if (avr != null
+                    && portId == avr.getPortId()
+                    && isConnectedToArcPort(avr.getPhysicalAddress())) {
+                HdmiLogger.debug("Port ID:%d, 5v=%b", portId, connected);
+                if (connected) {
+                    if (mArcEstablished) {
+                        enableAudioReturnChannel(true);
+                    }
+                } else {
+                    enableAudioReturnChannel(false);
+                }
             }
         }
 
@@ -1336,7 +1371,6 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(OneTouchRecordAction.class);
         removeAction(TimerRecordingAction.class);
         removeAction(NewDeviceAction.class);
-        removeAction(AbsoluteVolumeAudioStatusAction.class);
         // Remove pending actions.
         removeAction(RequestActiveSourceAction.class);
 

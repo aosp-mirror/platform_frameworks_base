@@ -107,6 +107,7 @@ import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.server.adaptiveauth.AdaptiveAuthService;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.appbinding.AppBindingService;
 import com.android.server.appop.AppOpMigrationHelper;
@@ -203,6 +204,7 @@ import com.android.server.security.FileIntegrityService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.security.rkp.RemoteProvisioningService;
+import com.android.server.selinux.SelinuxAuditLogsService;
 import com.android.server.sensorprivacy.SensorPrivacyService;
 import com.android.server.sensors.SensorService;
 import com.android.server.signedconfig.SignedConfigService;
@@ -268,6 +270,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.backup.BackupManagerService$Lifecycle";
     private static final String APPWIDGET_SERVICE_CLASS =
             "com.android.server.appwidget.AppWidgetService";
+    private static final String ARC_NETWORK_SERVICE_CLASS =
+            "com.android.server.arc.net.ArcNetworkService";
     private static final String ARC_PERSISTENT_DATA_BLOCK_SERVICE_CLASS =
             "com.android.server.arc.persistent_data_block.ArcPersistentDataBlockService";
     private static final String ARC_SYSTEM_HEALTH_SERVICE =
@@ -433,6 +437,9 @@ public final class SystemServer implements Dumpable {
     private static final String ROLE_SERVICE_CLASS = "com.android.role.RoleService";
     private static final String GAME_MANAGER_SERVICE_CLASS =
             "com.android.server.app.GameManagerService$Lifecycle";
+    private static final String ENHANCED_CONFIRMATION_SERVICE_CLASS =
+            "com.android.ecm.EnhancedConfirmationService";
+
     private static final String UWB_APEX_SERVICE_JAR_PATH =
             "/apex/com.android.uwb/javalib/service-uwb.jar";
     private static final String UWB_SERVICE_CLASS = "com.android.server.uwb.UwbService";
@@ -456,6 +463,11 @@ public final class SystemServer implements Dumpable {
             "com.android.server.devicelock.DeviceLockService";
     private static final String DEVICE_LOCK_APEX_PATH =
             "/apex/com.android.devicelock/javalib/service-devicelock.jar";
+
+    private static final String PROFILING_SERVICE_LIFECYCLE_CLASS =
+            "android.os.profiling.ProfilingService$Lifecycle";
+    private static final String PROFILING_SERVICE_JAR_PATH =
+            "/apex/com.android.profiling/javalib/service-profiling.jar";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -1474,7 +1486,6 @@ public final class SystemServer implements Dumpable {
         VcnManagementService vcnManagement = null;
         NetworkPolicyManagerService networkPolicy = null;
         WindowManagerService wm = null;
-        SerialService serial = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
@@ -1591,6 +1602,12 @@ public final class SystemServer implements Dumpable {
             t.traceBegin("StartDropBoxManager");
             mSystemServiceManager.startService(DropBoxManagerService.class);
             t.traceEnd();
+
+            if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()) {
+                t.traceBegin("StartEnhancedConfirmationService");
+                mSystemServiceManager.startService(ENHANCED_CONFIRMATION_SERVICE_CLASS);
+                t.traceEnd();
+            }
 
             // Grants default permissions and defines roles
             t.traceBegin("StartRoleManagerService");
@@ -2059,13 +2076,24 @@ public final class SystemServer implements Dumpable {
             if (context.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_WIFI)) {
                 // Wifi Service must be started first for wifi-related services.
-                t.traceBegin("StartWifi");
-                mSystemServiceManager.startServiceFromJar(
-                        WIFI_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
-                t.traceEnd();
-                t.traceBegin("StartWifiScanning");
-                mSystemServiceManager.startServiceFromJar(
-                        WIFI_SCANNING_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
+                if (!isArc) {
+                    t.traceBegin("StartWifi");
+                    mSystemServiceManager.startServiceFromJar(
+                            WIFI_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
+                    t.traceEnd();
+                    t.traceBegin("StartWifiScanning");
+                    mSystemServiceManager.startServiceFromJar(
+                            WIFI_SCANNING_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
+                    t.traceEnd();
+                }
+            }
+
+            // ARC - ArcNetworkService registers the ARC network stack and replaces the
+            // stock WiFi service in both ARC++ container and ARCVM. Always starts the ARC network
+            // stack regardless of whether FEATURE_WIFI is enabled/disabled (b/254755875).
+            if (isArc) {
+                t.traceBegin("StartArcNetworking");
+                mSystemServiceManager.startService(ARC_NETWORK_SERVICE_CLASS);
                 t.traceEnd();
             }
 
@@ -2333,13 +2361,7 @@ public final class SystemServer implements Dumpable {
 
             if (!isWatch) {
                 t.traceBegin("StartSerialService");
-                try {
-                    // Serial port support
-                    serial = new SerialService(context);
-                    ServiceManager.addService(Context.SERIAL_SERVICE, serial);
-                } catch (Throwable e) {
-                    Slog.e(TAG, "Failure starting SerialService", e);
-                }
+                mSystemServiceManager.startService(SerialService.Lifecycle.class);
                 t.traceEnd();
             }
 
@@ -2587,6 +2609,12 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(AuthService.class);
             t.traceEnd();
 
+            if (android.adaptiveauth.Flags.enableAdaptiveAuth()) {
+                t.traceBegin("StartAdaptiveAuthService");
+                mSystemServiceManager.startService(AdaptiveAuthService.class);
+                t.traceEnd();
+            }
+
             if (!isWatch) {
                 // We don't run this on watches as there are no plans to use the data logged
                 // on watch devices.
@@ -2608,6 +2636,14 @@ public final class SystemServer implements Dumpable {
                 }
                 t.traceEnd();
             }
+
+            t.traceBegin("StartSelinuxAuditLogsService");
+            try {
+                SelinuxAuditLogsService.schedule(context);
+            } catch (Throwable e) {
+                reportWtf("starting SelinuxAuditLogsService", e);
+            }
+            t.traceEnd();
 
             // LauncherAppsService uses ShortcutService.
             t.traceBegin("StartShortcutServiceLifecycle");
@@ -2734,17 +2770,21 @@ public final class SystemServer implements Dumpable {
 
         // AdServicesManagerService (PP API service)
         t.traceBegin("StartAdServicesManagerService");
-        SystemService adServices = mSystemServiceManager
-                .startService(AD_SERVICES_MANAGER_SERVICE_CLASS);
-        if (adServices instanceof Dumpable) {
-            mDumper.addDumpable((Dumpable) adServices);
-        }
+        mSystemServiceManager.startService(AD_SERVICES_MANAGER_SERVICE_CLASS);
         t.traceEnd();
 
         // OnDevicePersonalizationSystemService
         t.traceBegin("StartOnDevicePersonalizationSystemService");
         mSystemServiceManager.startService(ON_DEVICE_PERSONALIZATION_SYSTEM_SERVICE_CLASS);
         t.traceEnd();
+
+        // Profiling
+        if (android.server.Flags.telemetryApisService()) {
+            t.traceBegin("StartProfilingCompanion");
+            mSystemServiceManager.startServiceFromJar(PROFILING_SERVICE_LIFECYCLE_CLASS,
+                    PROFILING_SERVICE_JAR_PATH);
+            t.traceEnd();
+        }
 
         if (safeMode) {
             mActivityManagerService.enterSafeMode();
@@ -2768,9 +2808,14 @@ public final class SystemServer implements Dumpable {
                     DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CREDENTIAL,
                     CredentialManager.DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER, true);
             if (credentialManagerEnabled) {
-                t.traceBegin("StartCredentialManagerService");
-                mSystemServiceManager.startService(CREDENTIAL_MANAGER_SERVICE_CLASS);
-                t.traceEnd();
+                if(isWatch &&
+                  !android.credentials.flags.Flags.wearCredentialManagerEnabled()) {
+                  Slog.d(TAG, "CredentialManager disabled on wear.");
+                } else {
+                  t.traceBegin("StartCredentialManagerService");
+                  mSystemServiceManager.startService(CREDENTIAL_MANAGER_SERVICE_CLASS);
+                  t.traceEnd();
+                }
             } else {
                 Slog.d(TAG, "CredentialManager disabled.");
             }
@@ -2966,6 +3011,13 @@ public final class SystemServer implements Dumpable {
             t.traceBegin("DeviceLockService");
             mSystemServiceManager.startServiceFromJar(DEVICE_LOCK_SERVICE_CLASS,
                     DEVICE_LOCK_APEX_PATH);
+            t.traceEnd();
+        }
+
+        if (android.permission.flags.Flags.sensitiveNotificationAppProtection()
+                || android.view.flags.Flags.sensitiveContentAppProtection()) {
+            t.traceBegin("StartSensitiveContentProtectionManager");
+            mSystemServiceManager.startService(SensitiveContentProtectionManagerService.class);
             t.traceEnd();
         }
 

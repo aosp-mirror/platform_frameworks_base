@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.view
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.widget.ImageView
+import com.android.settingslib.flags.Flags.newStatusBarIcons
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView.getVisibleStateString
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
@@ -59,6 +61,18 @@ class ModernStatusBarMobileView(
                     .inflate(R.layout.status_bar_mobile_signal_group_new, null)
                     as ModernStatusBarMobileView)
                 .also {
+                    // Flag-specific configuration
+                    if (newStatusBarIcons()) {
+                        // New icon (with no embedded whitespace) is slightly shorter
+                        // (but actually taller)
+                        val iconView = it.requireViewById<ImageView>(R.id.mobile_signal)
+                        val lp = iconView.layoutParams
+                        lp.height =
+                            context.resources.getDimensionPixelSize(
+                                R.dimen.status_bar_mobile_signal_size_updated
+                            )
+                    }
+
                     it.subId = viewModel.subscriptionId
                     it.initView(slot) {
                         MobileIconBinder.bind(view = it, viewModel = viewModel, logger = logger)

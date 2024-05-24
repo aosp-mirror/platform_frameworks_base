@@ -28,5 +28,10 @@
                 }
             ]
         }
+    ],
+    "postsubmit": [
+        {
+            "name": "CtsDeviceConfigTestCases"
+        }
     ]
 }

@@ -55,11 +55,12 @@ import libcore.util.NativeAllocationRegistry;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
+@android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
+        "com.android.platform.test.ravenwood.nativesubstitution.LongMultiStateCounter_host")
 public final class LongMultiStateCounter implements Parcelable {
 
-    private static final NativeAllocationRegistry sRegistry =
-            NativeAllocationRegistry.createMalloced(
-                    LongMultiStateCounter.class.getClassLoader(), native_getReleaseFunc());
+    private static NativeAllocationRegistry sRegistry;
 
     private final int mStateCount;
 
@@ -71,14 +72,31 @@ public final class LongMultiStateCounter implements Parcelable {
         Preconditions.checkArgumentPositive(stateCount, "stateCount must be greater than 0");
         mStateCount = stateCount;
         mNativeObject = native_init(stateCount);
-        sRegistry.registerNativeAllocation(this, mNativeObject);
+        registerNativeAllocation();
     }
 
     private LongMultiStateCounter(Parcel in) {
         mNativeObject = native_initFromParcel(in);
-        sRegistry.registerNativeAllocation(this, mNativeObject);
+        registerNativeAllocation();
 
         mStateCount = native_getStateCount(mNativeObject);
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private void registerNativeAllocation() {
+        if (sRegistry == null) {
+            synchronized (LongMultiStateCounter.class) {
+                if (sRegistry == null) {
+                    sRegistry = NativeAllocationRegistry.createMalloced(
+                            LongMultiStateCounter.class.getClassLoader(), native_getReleaseFunc());
+                }
+            }
+        }
+        sRegistry.registerNativeAllocation(this, mNativeObject);
+    }
+
+    private void registerNativeAllocation$ravenwood() {
+        // No-op under ravenwood
     }
 
     public int getStateCount() {
@@ -221,10 +239,10 @@ public final class LongMultiStateCounter implements Parcelable {
     private static native long native_getCount(long nativeObject, int state);
 
     @FastNative
-    private native String native_toString(long nativeObject);
+    private static native String native_toString(long nativeObject);
 
     @FastNative
-    private native void native_writeToParcel(long nativeObject, Parcel dest, int flags);
+    private static native void native_writeToParcel(long nativeObject, Parcel dest, int flags);
 
     @FastNative
     private static native long native_initFromParcel(Parcel parcel);

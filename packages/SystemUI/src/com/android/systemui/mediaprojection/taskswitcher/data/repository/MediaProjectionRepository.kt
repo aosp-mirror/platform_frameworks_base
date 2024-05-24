@@ -16,11 +16,15 @@
 
 package com.android.systemui.mediaprojection.taskswitcher.data.repository
 
+import android.app.ActivityManager.RunningTaskInfo
 import com.android.systemui.mediaprojection.taskswitcher.data.model.MediaProjectionState
 import kotlinx.coroutines.flow.Flow
 
 /** Represents a repository to retrieve and change data related to media projection. */
 interface MediaProjectionRepository {
+
+    /** Switches the task that should be projected. */
+    suspend fun switchProjectedTask(task: RunningTaskInfo)
 
     /** Represents the current [MediaProjectionState]. */
     val mediaProjectionState: Flow<MediaProjectionState>

@@ -18,39 +18,75 @@ package com.android.internal.os;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.util.Xml;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class MonotonicClockTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private final MockClock mClock = new MockClock();
+    private File mFile;
+
+    @Before
+    public void setup() throws IOException {
+        File systemDir = Files.createTempDirectory("MonotonicClockTest").toFile();
+        mFile = new File(systemDir, "test_monotonic_clock.xml");
+        if (mFile.exists()) {
+            assertThat(mFile.delete()).isTrue();
+        }
+    }
 
     @Test
     public void persistence() throws IOException {
-        MonotonicClock monotonicClock = new MonotonicClock(1000, mClock);
+        MonotonicClock monotonicClock = new MonotonicClock(mFile, 1000, mClock);
         mClock.realtime = 234;
 
         assertThat(monotonicClock.monotonicTime()).isEqualTo(1234);
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        monotonicClock.writeXml(out, Xml.newBinarySerializer());
+        monotonicClock.write();
 
         mClock.realtime = 42;
-        MonotonicClock newMonotonicClock = new MonotonicClock(0, mClock);
-        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-        newMonotonicClock.readXml(in, Xml.newBinaryPullParser());
+        MonotonicClock newMonotonicClock = new MonotonicClock(mFile, 0, mClock);
 
         mClock.realtime = 2000;
         assertThat(newMonotonicClock.monotonicTime()).isEqualTo(1234 - 42 + 2000);
+    }
+
+    @Test
+    public void constructor() {
+        MonotonicClock monotonicClock = new MonotonicClock(null, 1000, mClock);
+        mClock.realtime = 234;
+
+        assertThat(monotonicClock.monotonicTime()).isEqualTo(1234);
+    }
+
+    @Test
+    @IgnoreUnderRavenwood(reason = "b/321832617")
+    public void corruptedFile() throws IOException {
+        // Create an invalid binary XML file to cause IOException: "Unexpected magic number"
+        try (FileWriter w = new FileWriter(mFile)) {
+            w.write("garbage");
+        }
+
+        MonotonicClock monotonicClock = new MonotonicClock(mFile, 1000, mClock);
+        mClock.realtime = 234;
+
+        assertThat(monotonicClock.monotonicTime()).isEqualTo(1234);
     }
 }

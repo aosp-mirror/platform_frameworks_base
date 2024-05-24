@@ -21,6 +21,8 @@ java_library_static {
     ],
     lint: {
         error_checks: ["MissingPermissionAnnotation"],
+        baseline_filename: "lint-baseline.xml",
+
     },
     srcs: [
         ":services.accessibility-sources",

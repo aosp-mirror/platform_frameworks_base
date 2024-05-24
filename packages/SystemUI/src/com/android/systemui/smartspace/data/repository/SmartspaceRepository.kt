@@ -21,7 +21,9 @@ import android.os.Parcelable
 import android.widget.RemoteViews
 import com.android.systemui.communal.smartspace.CommunalSmartspaceController
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +43,7 @@ class SmartspaceRepositoryImpl
 @Inject
 constructor(
     private val communalSmartspaceController: CommunalSmartspaceController,
+    @Main private val uiExecutor: Executor,
 ) : SmartspaceRepository, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
     override val isSmartspaceRemoteViewsEnabled: Boolean
@@ -51,12 +54,18 @@ constructor(
     override val communalSmartspaceTargets: Flow<List<SmartspaceTarget>> =
         _communalSmartspaceTargets
             .onStart {
-                communalSmartspaceController.addListener(listener = this@SmartspaceRepositoryImpl)
+                uiExecutor.execute {
+                    communalSmartspaceController.addListener(
+                        listener = this@SmartspaceRepositoryImpl
+                    )
+                }
             }
             .onCompletion {
-                communalSmartspaceController.removeListener(
-                    listener = this@SmartspaceRepositoryImpl
-                )
+                uiExecutor.execute {
+                    communalSmartspaceController.removeListener(
+                        listener = this@SmartspaceRepositoryImpl
+                    )
+                }
             }
 
     override fun onSmartspaceTargetsUpdated(targetsNullable: MutableList<out Parcelable>?) {

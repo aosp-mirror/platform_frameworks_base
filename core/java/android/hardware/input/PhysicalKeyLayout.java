@@ -23,8 +23,6 @@ import android.util.SparseIntArray;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
-import java.util.Locale;
-
 /**
  * A complimentary class to {@link KeyboardLayoutPreviewDrawable} describing the physical key layout
  * of a Physical keyboard and provides information regarding the scan codes produced by the physical
@@ -338,11 +336,13 @@ final class PhysicalKeyLayout {
             return "";
         }
         int utf8Char = (kcm.get(keyCode, modifierState) & KeyCharacterMap.COMBINING_ACCENT_MASK);
-        if (Character.isValidCodePoint(utf8Char)) {
-            return String.valueOf(Character.toChars(utf8Char)).toUpperCase(Locale.getDefault());
-        } else {
-            return String.valueOf(kcm.getDisplayLabel(keyCode)).toUpperCase(Locale.getDefault());
+        if (utf8Char == 0) {
+            return "";
         }
+        if (Character.isValidCodePoint(utf8Char)) {
+            return String.valueOf(Character.toChars(utf8Char));
+        }
+        return "□";
     }
 
     private static LayoutKey getKey(int keyCode, float keyWeight) {
@@ -398,13 +398,17 @@ final class PhysicalKeyLayout {
         private final String mBaseText;
         private final String mShiftText;
         private final String mAltGrText;
+        private final String mAltGrShiftText;
 
         public KeyGlyph(KeyCharacterMap kcm, int keyCode) {
-            mBaseText = getKeyText(kcm, keyCode, 0);
+            mBaseText = getKeyText(kcm, keyCode, KeyEvent.META_CAPS_LOCK_ON);
             mShiftText = getKeyText(kcm, keyCode,
                     KeyEvent.META_SHIFT_ON | KeyEvent.META_SHIFT_LEFT_ON);
             mAltGrText = getKeyText(kcm, keyCode,
-                    KeyEvent.META_ALT_ON | KeyEvent.META_ALT_RIGHT_ON);
+                    KeyEvent.META_ALT_ON | KeyEvent.META_ALT_RIGHT_ON | KeyEvent.META_CAPS_LOCK_ON);
+            mAltGrShiftText = getKeyText(kcm, keyCode,
+                    KeyEvent.META_ALT_ON | KeyEvent.META_ALT_RIGHT_ON | KeyEvent.META_SHIFT_LEFT_ON
+                            | KeyEvent.META_SHIFT_ON);
         }
 
         public String getBaseText() {
@@ -419,6 +423,10 @@ final class PhysicalKeyLayout {
             return mAltGrText;
         }
 
+        public String getAltGrShiftText() {
+            return mAltGrShiftText;
+        }
+
         public boolean hasBaseText() {
             return !TextUtils.isEmpty(mBaseText);
         }
@@ -428,7 +436,15 @@ final class PhysicalKeyLayout {
         }
 
         public boolean hasValidAltGrText() {
-            return !TextUtils.isEmpty(mAltGrText) && !TextUtils.equals(mBaseText, mAltGrText);
+            return !TextUtils.isEmpty(mAltGrText) && !TextUtils.equals(mBaseText, mAltGrText)
+                    && !TextUtils.equals(mShiftText, mAltGrText);
+        }
+
+        public boolean hasValidAltGrShiftText() {
+            return !TextUtils.isEmpty(mAltGrShiftText)
+                    && !TextUtils.equals(mBaseText, mAltGrShiftText)
+                    && !TextUtils.equals(mAltGrText, mAltGrShiftText)
+                    && !TextUtils.equals(mShiftText, mAltGrShiftText);
         }
     }
 }

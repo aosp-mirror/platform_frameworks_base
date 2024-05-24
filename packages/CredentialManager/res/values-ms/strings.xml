@@ -39,8 +39,10 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Meskipun masa depan kita nanti tidak memerlukan kata laluan, kata laluan masih akan tersedia bersama dengan kunci laluan."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Pilih tempat untuk menyimpan <xliff:g id="CREATETYPES">%1$s</xliff:g> anda"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Pilih Password Manager untuk menyimpan maklumat anda dan log masuk lebih pantas pada kali seterusnya"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Cipta kunci laluan untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Simpan kata laluan untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
+    <skip />
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Simpan maklumat log masuk untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"kunci laluan"</string>
     <string name="password" msgid="6738570945182936667">"kata laluan"</string>
@@ -92,4 +94,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Daripada peranti lain"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Gunakan peranti yang lain"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Permintaan dibatalkan oleh <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Pilihan log masuk"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Lagi"</string>
 </resources>

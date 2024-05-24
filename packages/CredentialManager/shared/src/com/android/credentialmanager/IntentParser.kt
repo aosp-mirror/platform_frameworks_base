@@ -19,7 +19,7 @@ package com.android.credentialmanager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.credentials.ui.RequestInfo
+import android.credentials.selection.RequestInfo
 import android.util.Log
 import com.android.credentialmanager.ktx.appLabel
 import com.android.credentialmanager.ktx.cancelUiRequest
@@ -36,11 +36,11 @@ fun Intent.parse(
 
 fun Intent.parseCancelUiRequest(packageManager: PackageManager): Request? =
     this.cancelUiRequest?.let { cancelUiRequest ->
-        val showCancel = cancelUiRequest.shouldShowCancellationUi().apply {
+        val showCancel = cancelUiRequest.shouldShowCancellationExplanation().apply {
             Log.d(TAG, "Received UI cancel request, shouldShowCancellationUi: $this")
         }
         if (showCancel) {
-            val appLabel = packageManager.appLabel(cancelUiRequest.appPackageName)
+            val appLabel = packageManager.appLabel(cancelUiRequest.packageName)
             if (appLabel == null) {
                 Log.d(TAG, "Received UI cancel request with an invalid package name.")
                 null

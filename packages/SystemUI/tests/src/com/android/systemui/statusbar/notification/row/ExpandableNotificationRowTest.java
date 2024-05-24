@@ -16,10 +16,9 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
-
-import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL;
+import static com.android.systemui.statusbar.notification.row.NotificationTestHelper.PKG;
+import static com.android.systemui.statusbar.notification.row.NotificationTestHelper.USER_HANDLE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -40,11 +39,13 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -57,6 +58,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.R;
 import com.android.internal.widget.CachingIconView;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -67,6 +69,7 @@ import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
+import com.android.systemui.statusbar.notification.shared.NotificationContentAlphaOptimization;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
@@ -325,6 +328,61 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         group.setUserLocked(false);
         assertFalse("The childrencontainer should not be userlocked but is, the state "
                 + "seems out of sync.", group.getChildrenContainer().isUserLocked());
+    }
+
+    @Test
+    @EnableFlags(NotificationContentAlphaOptimization.FLAG_NAME)
+    public void setHideSensitive_shouldNotDisturbAnimation() throws Exception {
+        //Given: A row that is during alpha animation
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+
+        assertEquals(row.getPrivateLayout(), row.getContentView());
+        row.setContentAlpha(0.5f);
+
+        //When: Set its hideSensitive without changing the content view to show
+        row.setHideSensitive(
+                /* hideSensitive= */ false,
+                /* animated= */ false,
+                /* delay=  */ 0L,
+                /* duration=  */ 0L
+        );
+        assertEquals(row.getPrivateLayout(), row.getContentView());
+
+        //Then: The alpha value should not be reset
+        assertEquals(0.5f, row.getPrivateLayout().getAlpha(), 0);
+    }
+
+    @Test
+    @EnableFlags(NotificationContentAlphaOptimization.FLAG_NAME)
+    public void setHideSensitive_changeContent_shouldNotDisturbAnimation() throws Exception {
+
+        // Given: A sensitive row that has public version but is not hiding sensitive,
+        // and is during an animation that sets its alpha value to be 0.5f
+        Notification publicNotif = mNotificationTestHelper.createNotification();
+        publicNotif.publicVersion = mNotificationTestHelper.createNotification();
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow(publicNotif);
+        row.setSensitive(true, false);
+        row.setContentAlpha(0.5f);
+
+        assertEquals(0.5f, row.getPrivateLayout().getAlpha(), 0);
+        assertEquals(View.VISIBLE, row.getPrivateLayout().getVisibility());
+
+        // When: Change its hideSensitive and changes the content view to show the public version
+        row.setHideSensitive(
+                /* hideSensitive= */ true,
+                /* animated= */ false,
+                /* delay=  */ 0L,
+                /* duration=  */ 0L
+        );
+
+        // Then: The alpha value of private layout should be reset to 1, private layout be
+        // INVISIBLE;
+        // The alpha value of public layout should be 0.5 to preserve the animation state, public
+        // layout should be VISIBLE
+        assertEquals(View.INVISIBLE, row.getPrivateLayout().getVisibility());
+        assertEquals(1f, row.getPrivateLayout().getAlpha(), 0);
+        assertEquals(View.VISIBLE, row.getPublicLayout().getVisibility());
+        assertEquals(0.5f, row.getPublicLayout().getAlpha(), 0);
     }
 
     @Test
@@ -804,6 +862,27 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
         waitForIdleSync();
         assertThat(row.isDrawingAppearAnimation()).isFalse();
+    }
+
+    @Test
+    public void imageResolver_sameNotificationUser_usesContext() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow(PKG,
+                USER_HANDLE.getUid(1234), USER_HANDLE);
+
+        assertThat(row.getImageResolver().getContext()).isSameInstanceAs(mContext);
+    }
+
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_NOTIFICATION_ROW_USER_CONTEXT)
+    public void imageResolver_differentNotificationUser_createsUserContext() throws Exception {
+        UserHandle user = new UserHandle(33);
+        Context userContext = new SysuiTestableContext(mContext);
+        mContext.prepareCreateContextAsUser(user, userContext);
+
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow(PKG,
+                user.getUid(1234), user);
+
+        assertThat(row.getImageResolver().getContext()).isSameInstanceAs(userContext);
     }
 
     private void setDrawableIconsInImageView(CachingIconView icon, Drawable iconDrawable,

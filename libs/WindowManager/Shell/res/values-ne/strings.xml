@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"बन्द गर्नुहोस्"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"विस्तृत गर्नुहोस्"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"सेटिङहरू"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"स्प्लिट स्क्रिन मोड प्रयोग गर्नुहोस्"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"मेनु"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"\"picture-in-picture\" मेनु"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> Picture-in-picture मा छ"</string>

@@ -104,7 +104,9 @@ public class SQLiteRawStatementTest {
     private void createComplexDatabase() {
         mDatabase.beginTransaction();
         try {
-            mDatabase.execSQL("CREATE TABLE t1 (i int, d double, t text);");
+            // Column "l" is used to test the long variants.  The underlying sqlite type is int,
+            // which is the same as a java long.
+            mDatabase.execSQL("CREATE TABLE t1 (i int, d double, t text, l int);");
             mDatabase.setTransactionSuccessful();
         } finally {
             mDatabase.endTransaction();
@@ -115,7 +117,7 @@ public class SQLiteRawStatementTest {
      * A three-value insert for the complex database.
      */
     private String createComplexInsert() {
-        return "INSERT INTO t1 (i, d, t) VALUES (?1, ?2, ?3)";
+        return "INSERT INTO t1 (i, d, t, l) VALUES (?1, ?2, ?3, ?4)";
     }
 
     /**
@@ -209,22 +211,25 @@ public class SQLiteRawStatementTest {
         mDatabase.beginTransaction();
         try {
             try (SQLiteRawStatement s = mDatabase.createRawStatement(createComplexInsert())) {
-                for (int i = 0; i < 9; i++) {
-                    int vi = i * 3;
-                    double vd = i * 2.5;
-                    String vt = String.format("text%02dvalue", i);
+                for (int row = 0; row < 9; row++) {
+                    int vi = row * 3;
+                    double vd = row * 2.5;
+                    String vt = String.format("text%02dvalue", row);
+                    long vl = Long.MAX_VALUE - row;
                     s.bindInt(1, vi);
                     s.bindDouble(2, vd);
                     s.bindText(3, vt);
+                    s.bindLong(4, vl);
                     boolean r = s.step();
                     // No row is returned by this query.
                     assertFalse(r);
                     s.reset();
                 }
-                // The last row has a null double and a null text.
+                // The last row has a null double, null text, and null long.
                 s.bindInt(1, 20);
                 s.bindNull(2);
                 s.bindNull(3);
+                s.bindNull(4);
                 assertFalse(s.step());
                 s.reset();
             }
@@ -248,19 +253,31 @@ public class SQLiteRawStatementTest {
             mDatabase.endTransaction();
         }
 
-        // Verify that the element created with i == 3 is correct.
+        // Verify that the element created with row == 3 is correct.
         mDatabase.beginTransactionReadOnly();
         try {
-            final String query = "SELECT i, d, t FROM t1 WHERE t = 'text03value'";
+            final String query = "SELECT i, d, t, l FROM t1 WHERE t = 'text03value'";
             try (SQLiteRawStatement s = mDatabase.createRawStatement(query)) {
                 assertTrue(s.step());
-                assertEquals(3, s.getResultColumnCount());
+                assertEquals(4, s.getResultColumnCount());
                 int vi = s.getColumnInt(0);
                 double vd = s.getColumnDouble(1);
                 String vt = s.getColumnText(2);
-                assertEquals(3 * 3, vi);
-                assertEquals(2.5 * 3, vd, 0.1);
+                long vl = s.getColumnLong(3);
+                // The query extracted the third generated row.
+                final int row = 3;
+                assertEquals(3 * row, vi);
+                assertEquals(2.5 * row, vd, 0.1);
                 assertEquals("text03value", vt);
+                assertEquals(Long.MAX_VALUE - row, vl);
+
+                // Verify the column types.  Remember that sqlite integers are the same as Java
+                // long, so the integer and long columns have type INTEGER.
+                assertEquals(SQLiteRawStatement.SQLITE_DATA_TYPE_INTEGER, s.getColumnType(0));
+                assertEquals(SQLiteRawStatement.SQLITE_DATA_TYPE_FLOAT, s.getColumnType(1));
+                assertEquals(SQLiteRawStatement.SQLITE_DATA_TYPE_TEXT, s.getColumnType(2));
+                assertEquals(SQLiteRawStatement.SQLITE_DATA_TYPE_INTEGER, s.getColumnType(3));
+
                 // No more rows.
                 assertFalse(s.step());
             }
@@ -268,15 +285,24 @@ public class SQLiteRawStatementTest {
             mDatabase.endTransaction();
         }
 
+        // Verify that null columns are returned properly.
         mDatabase.beginTransactionReadOnly();
         try {
-            final String query = "SELECT i, d, t FROM t1 WHERE i == 20";
+            final String query = "SELECT i, d, t, l FROM t1 WHERE i == 20";
             try (SQLiteRawStatement s = mDatabase.createRawStatement(query)) {
                 assertTrue(s.step());
-                assertEquals(3, s.getResultColumnCount());
+                assertEquals(4, s.getResultColumnCount());
                 assertEquals(20, s.getColumnInt(0));
                 assertEquals(0.0, s.getColumnDouble(1), 0.01);
                 assertEquals(null, s.getColumnText(2));
+                assertEquals(0, s.getColumnLong(3));
+
+                // Verify the column types.
+                assertEquals(SQLiteRawStatement.SQLITE_DATA_TYPE_INTEGER, s.getColumnType(0));
+                assertEquals(SQLiteRawStatement.SQLITE_DATA_TYPE_NULL, s.getColumnType(1));
+                assertEquals(SQLiteRawStatement.SQLITE_DATA_TYPE_NULL, s.getColumnType(2));
+                assertEquals(SQLiteRawStatement.SQLITE_DATA_TYPE_NULL, s.getColumnType(3));
+
                 // No more rows.
                 assertFalse(s.step());
             }
@@ -495,6 +521,8 @@ public class SQLiteRawStatementTest {
                 // Fetch the entire reference array.
                 s.bindInt(1, 1);
                 assertTrue(s.step());
+                assertEquals(SQLiteRawStatement.SQLITE_DATA_TYPE_BLOB, s.getColumnType(0));
+
                 byte[] a = s.getColumnBlob(0);
                 assertTrue(Arrays.equals(src, a));
                 s.reset();

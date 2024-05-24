@@ -17,6 +17,7 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityOptions.SceneTransitionInfo;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.DestroyActivityItem;
@@ -29,6 +30,7 @@ import android.content.res.Configuration;
 import android.os.IBinder;
 import android.util.MergedConfiguration;
 import android.view.SurfaceControl;
+import android.window.ActivityWindowInfo;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.WindowContext;
 import android.window.WindowContextInfo;
@@ -165,11 +167,12 @@ public abstract class ClientTransactionHandler {
 
     /** Set pending activity configuration in case it will be updated by other transaction item. */
     public abstract void updatePendingActivityConfiguration(@NonNull IBinder token,
-            Configuration overrideConfig);
+            @NonNull Configuration overrideConfig);
 
     /** Deliver activity (override) configuration change. */
     public abstract void handleActivityConfigurationChanged(@NonNull ActivityClientRecord r,
-            Configuration overrideConfig, int displayId);
+            @NonNull Configuration overrideConfig, int displayId,
+            @NonNull ActivityWindowInfo activityWindowInfo);
 
     /** Deliver {@link android.window.WindowContextInfo} change. */
     public abstract void handleWindowContextInfoChanged(@NonNull IBinder clientToken,
@@ -207,7 +210,7 @@ public abstract class ClientTransactionHandler {
 
     /** Perform activity start. */
     public abstract void handleStartActivity(@NonNull ActivityClientRecord r,
-            PendingTransactionActions pendingActions, ActivityOptions activityOptions);
+            PendingTransactionActions pendingActions, SceneTransitionInfo sceneTransitionInfo);
 
     /** Get package info. */
     public abstract LoadedApk getPackageInfoNoCheck(ApplicationInfo ai);
@@ -231,12 +234,15 @@ public abstract class ClientTransactionHandler {
      * @param config New configuration applied to the activity.
      * @param preserveWindow Whether the activity should try to reuse the window it created,
      *                        including the decor view after the relaunch.
+     * @param activityWindowInfo Window information about the relaunched Activity.
      * @return An initialized instance of {@link ActivityThread.ActivityClientRecord} to use during
      *         relaunch, or {@code null} if relaunch cancelled.
      */
-    public abstract ActivityClientRecord prepareRelaunchActivity(IBinder token,
-            List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
-            int configChanges, MergedConfiguration config, boolean preserveWindow);
+    public abstract ActivityClientRecord prepareRelaunchActivity(@NonNull IBinder token,
+            @Nullable List<ResultInfo> pendingResults,
+            @Nullable List<ReferrerIntent> pendingNewIntents, int configChanges,
+            @NonNull MergedConfiguration config, boolean preserveWindow,
+            @NonNull ActivityWindowInfo activityWindowInfo);
 
     /**
      * Perform activity relaunch.
@@ -244,7 +250,7 @@ public abstract class ClientTransactionHandler {
      * @param pendingActions Pending actions to be used on later stages of activity transaction.
      * */
     public abstract void handleRelaunchActivity(@NonNull ActivityClientRecord r,
-            PendingTransactionActions pendingActions);
+            @NonNull PendingTransactionActions pendingActions);
 
     /**
      * Report that relaunch request was handled.

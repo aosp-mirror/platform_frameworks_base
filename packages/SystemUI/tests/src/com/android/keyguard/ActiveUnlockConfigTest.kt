@@ -51,6 +51,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import dagger.Lazy
 
 @SmallTest
 class ActiveUnlockConfigTest : SysuiTestCase() {
@@ -60,6 +61,7 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+    @Mock private lateinit var lazyKeyguardUpdateMonitor: Lazy<KeyguardUpdateMonitor>
     @Mock private lateinit var mockPrintWriter: PrintWriter
 
     @Captor private lateinit var settingsObserverCaptor: ArgumentCaptor<ContentObserver>
@@ -72,6 +74,7 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         whenever(selectedUserInteractor.getSelectedUserId()).thenReturn(currentUser)
+        whenever(lazyKeyguardUpdateMonitor.get()).thenReturn(keyguardUpdateMonitor)
         secureSettings = FakeSettings()
         activeUnlockConfig =
             ActiveUnlockConfig(
@@ -79,6 +82,7 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
                 secureSettings,
                 contentResolver,
                 selectedUserInteractor,
+                lazyKeyguardUpdateMonitor,
                 dumpManager
             )
     }
@@ -260,7 +264,6 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
         updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL))
 
         // GIVEN fingerprint and face are NOT enrolled
-        activeUnlockConfig.keyguardUpdateMonitor = keyguardUpdateMonitor
         `when`(keyguardUpdateMonitor.isFaceEnabledAndEnrolled).thenReturn(false)
         `when`(keyguardUpdateMonitor.isUnlockWithFingerprintPossible(0)).thenReturn(false)
 
@@ -290,7 +293,6 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
         updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL))
 
         // GIVEN fingerprint and face are both enrolled
-        activeUnlockConfig.keyguardUpdateMonitor = keyguardUpdateMonitor
         `when`(keyguardUpdateMonitor.isFaceEnabledAndEnrolled).thenReturn(true)
         `when`(keyguardUpdateMonitor.isUnlockWithFingerprintPossible(0)).thenReturn(true)
 

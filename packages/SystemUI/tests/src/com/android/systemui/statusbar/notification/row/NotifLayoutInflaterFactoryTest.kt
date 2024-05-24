@@ -62,7 +62,7 @@ class NotifLayoutInflaterFactoryTest : SysuiTestCase() {
     fun onCreateView_noMatchingViewForName_returnNull() {
         // GIVEN we have ViewFactories that replaces TextViews in expanded and collapsed layouts
         val layoutType = FLAG_CONTENT_VIEW_EXPANDED
-        inflaterFactory = NotifLayoutInflaterFactory(row, layoutType, viewFactorySpies)
+        inflaterFactory = createNotifLayoutInflaterFactory(row, layoutType, viewFactorySpies)
 
         // WHEN we try to inflate an ImageView for the expanded layout
         val createdView = inflaterFactory.onCreateView("ImageView", context, attrs)
@@ -78,7 +78,7 @@ class NotifLayoutInflaterFactoryTest : SysuiTestCase() {
     fun onCreateView_noMatchingViewForLayoutType_returnNull() {
         // GIVEN we have ViewFactories that replaces TextViews in expanded and collapsed layouts
         val layoutType = FLAG_CONTENT_VIEW_HEADS_UP
-        inflaterFactory = NotifLayoutInflaterFactory(row, layoutType, viewFactorySpies)
+        inflaterFactory = createNotifLayoutInflaterFactory(row, layoutType, viewFactorySpies)
 
         // WHEN we try to inflate a TextView for the heads-up layout
         val createdView = inflaterFactory.onCreateView("TextView", context, attrs)
@@ -94,7 +94,7 @@ class NotifLayoutInflaterFactoryTest : SysuiTestCase() {
     fun onCreateView_matchingViews_returnReplacementView() {
         // GIVEN we have ViewFactories that replaces TextViews in expanded and collapsed layouts
         val layoutType = FLAG_CONTENT_VIEW_EXPANDED
-        inflaterFactory = NotifLayoutInflaterFactory(row, layoutType, viewFactorySpies)
+        inflaterFactory = createNotifLayoutInflaterFactory(row, layoutType, viewFactorySpies)
 
         // WHEN we try to inflate a TextView for the expanded layout
         val createdView = inflaterFactory.onCreateView("TextView", context, attrs)
@@ -110,7 +110,7 @@ class NotifLayoutInflaterFactoryTest : SysuiTestCase() {
         // GIVEN we have two factories that replaces TextViews in expanded layouts
         val layoutType = FLAG_CONTENT_VIEW_EXPANDED
         inflaterFactory =
-            NotifLayoutInflaterFactory(
+            createNotifLayoutInflaterFactory(
                 row,
                 layoutType,
                 setOf(
@@ -147,4 +147,18 @@ class NotifLayoutInflaterFactoryTest : SysuiTestCase() {
                     null
                 }
         }
+
+    private fun createNotifLayoutInflaterFactory(
+        row: ExpandableNotificationRow,
+        layoutType: Int,
+        notifRemoteViewsFactoryContainer: Set<NotifRemoteViewsFactory>
+    ) =
+        NotifLayoutInflaterFactory(
+            row,
+            layoutType,
+            object : NotifRemoteViewsFactoryContainer {
+                override val factories: Set<NotifRemoteViewsFactory> =
+                    notifRemoteViewsFactoryContainer
+            }
+        )
 }

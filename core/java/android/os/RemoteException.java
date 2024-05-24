@@ -28,6 +28,7 @@ import android.util.AndroidException;
  *
  * One common subclass is {@link DeadObjectException}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class RemoteException extends AndroidException {
     public RemoteException() {
         super();

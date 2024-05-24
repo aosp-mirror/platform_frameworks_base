@@ -264,6 +264,25 @@ public class Lnb implements AutoCloseable {
         }
     }
 
+    /* package */ void closeInternal() {
+        synchronized (mLock) {
+            if (mIsClosed) {
+                return;
+            }
+            int res = nativeClose();
+            if (res != Tuner.RESULT_SUCCESS) {
+                TunerUtils.throwExceptionForResult(res, "Failed to close LNB");
+            } else {
+                mIsClosed = true;
+                if (mOwner != null) {
+                    mOwner.releaseLnb();
+                    mOwner = null;
+                }
+                mCallbackMap.clear();
+            }
+        }
+    }
+
     /**
      * Sets the LNB's power voltage.
      *
@@ -330,22 +349,7 @@ public class Lnb implements AutoCloseable {
     public void close() {
         acquireTRMSLock("close()");
         try {
-            synchronized (mLock) {
-                if (mIsClosed) {
-                    return;
-                }
-                int res = nativeClose();
-                if (res != Tuner.RESULT_SUCCESS) {
-                    TunerUtils.throwExceptionForResult(res, "Failed to close LNB");
-                } else {
-                    mIsClosed = true;
-                    if (mOwner != null) {
-                        mOwner.releaseLnb();
-                        mOwner = null;
-                    }
-                    mCallbackMap.clear();
-                }
-            }
+            closeInternal();
         } finally {
             releaseTRMSLock();
         }

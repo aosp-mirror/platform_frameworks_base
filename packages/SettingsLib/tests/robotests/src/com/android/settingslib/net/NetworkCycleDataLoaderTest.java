@@ -26,7 +26,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.annotation.NonNull;
 import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
@@ -36,6 +35,8 @@ import android.net.NetworkPolicyManager;
 import android.net.NetworkTemplate;
 import android.text.format.DateUtils;
 import android.util.Range;
+
+import androidx.annotation.NonNull;
 
 import org.junit.Before;
 import org.junit.Test;

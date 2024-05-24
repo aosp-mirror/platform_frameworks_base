@@ -17,6 +17,8 @@
 package android.content.pm;
 
 import static android.Manifest.permission;
+import static android.Manifest.permission.ACCESS_HIDDEN_PROFILES;
+import static android.Manifest.permission.ACCESS_HIDDEN_PROFILES_FULL;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 
 import android.annotation.CallbackExecutor;
@@ -693,12 +695,23 @@ public class LauncherApps {
      * Otherwise it'll return the same list as {@link UserManager#getUserProfiles()} would.
      */
     public List<UserHandle> getProfiles() {
-        if (mUserManager.isManagedProfile()) {
-            // If it's a managed profile, only return the current profile.
-            final List result =  new ArrayList(1);
+        if (mUserManager.isManagedProfile()
+                || (android.multiuser.Flags.enableLauncherAppsHiddenProfileChecks()
+                        && android.os.Flags.allowPrivateProfile()
+                        && mUserManager.isPrivateProfile())) {
+            // If it's a managed or private profile, only return the current profile.
+            final List result = new ArrayList(1);
             result.add(android.os.Process.myUserHandle());
             return result;
         } else {
+            if (android.multiuser.Flags.enableLauncherAppsHiddenProfileChecks()) {
+                try {
+                    return mService.getUserProfiles();
+                } catch (RemoteException re) {
+                    throw re.rethrowFromSystemServer();
+                }
+            }
+
             return mUserManager.getUserProfiles();
         }
     }
@@ -779,15 +792,20 @@ public class LauncherApps {
 
     /**
      * Returns information related to a user which is useful for displaying UI elements
-     * to distinguish it from other users (eg, badges). Only system launchers should
-     * call this API.
+     * to distinguish it from other users (eg, badges).
      *
-     * @param userHandle user handle of the user for which LauncherUserInfo is requested
-     * @return the LauncherUserInfo object related to the user specified.
-     * @hide
+     * <p>If the user in question is a hidden profile like
+     * {@link UserManager.USER_TYPE_PROFILE_PRIVATE}, caller should have
+     * {@link android.app.role.RoleManager.ROLE_HOME} and either of the permissions required.
+     *
+     * @param userHandle user handle of the user for which LauncherUserInfo is requested.
+     * @return the {@link LauncherUserInfo} object related to the user specified, null in case
+     * the user is inaccessible.
      */
     @Nullable
     @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    @RequiresPermission(conditional = true,
+            anyOf = {ACCESS_HIDDEN_PROFILES_FULL, ACCESS_HIDDEN_PROFILES})
     public final LauncherUserInfo getLauncherUserInfo(@NonNull UserHandle userHandle) {
         if (DEBUG) {
             Log.i(TAG, "getLauncherUserInfo " + userHandle);
@@ -823,17 +841,20 @@ public class LauncherApps {
      * </ul>
      * </p>
      *
-     *
+     * <p>If the user in question is a hidden profile
+     * {@link UserManager.USER_TYPE_PROFILE_PRIVATE}, caller should have
+     * {@link android.app.role.RoleManager.ROLE_HOME} and either of the permissions required.
      *
      * @param packageName the package for which intent sender to launch App Market Activity is
      *                    required.
      * @param user the profile for which intent sender to launch App Market Activity is required.
      * @return {@link IntentSender} object which launches the App Market Activity, null in case
      *         there is no such activity.
-     * @hide
      */
     @Nullable
     @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    @RequiresPermission(conditional = true,
+            anyOf = {ACCESS_HIDDEN_PROFILES_FULL, ACCESS_HIDDEN_PROFILES})
     public IntentSender getAppMarketActivityIntent(@Nullable String packageName,
             @NonNull UserHandle user) {
         if (DEBUG) {
@@ -851,21 +872,49 @@ public class LauncherApps {
     /**
      * Returns the list of the system packages that are installed at user creation.
      *
-     * <p>An empty list denotes that all system packages are installed for that user at creation.
-     * This behaviour is inherited from the underlining UserManager API.
+     * <p>An empty list denotes that all system packages should be treated as pre-installed for that
+     * user at creation.
+     *
+     * <p>If the user in question is a hidden profile like
+     * {@link UserManager.USER_TYPE_PROFILE_PRIVATE}, caller should have
+     * {@link android.app.role.RoleManager.ROLE_HOME} and either of the permissions required.
      *
      * @param userHandle the user for which installed system packages are required.
      * @return {@link List} of {@link String}, representing the package name of the installed
      *        package. Can be empty but not null.
-     * @hide
      */
     @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    @NonNull
+    @RequiresPermission(conditional = true,
+            anyOf = {ACCESS_HIDDEN_PROFILES_FULL, ACCESS_HIDDEN_PROFILES})
     public List<String> getPreInstalledSystemPackages(@NonNull UserHandle userHandle) {
         if (DEBUG) {
             Log.i(TAG, "getPreInstalledSystemPackages for user: " + userHandle);
         }
         try {
             return mService.getPreInstalledSystemPackages(userHandle);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns {@link IntentSender} which can be used to start the Private Space Settings Activity.
+     *
+     * <p> Caller should have {@link android.app.role.RoleManager.ROLE_HOME} and either of the
+     * permissions required.</p>
+     *
+     * @return {@link IntentSender} object which launches the Private Space Settings Activity, if
+     * successful, null otherwise.
+     * @hide
+     */
+    @Nullable
+    @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    @RequiresPermission(conditional = true,
+            anyOf = {ACCESS_HIDDEN_PROFILES_FULL, ACCESS_HIDDEN_PROFILES})
+    public IntentSender getPrivateSpaceSettingsIntent() {
+        try {
+            return mService.getPrivateSpaceSettingsIntent();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -1801,6 +1850,22 @@ public class LauncherApps {
         }
     }
 
+    /**
+     * Disable different archive compatibility options of the launcher for the caller of this
+     * method.
+     *
+     * @see ArchiveCompatibilityParams for individual options.
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
+    public void setArchiveCompatibility(@NonNull ArchiveCompatibilityParams params) {
+        try {
+            mService.setArchiveCompatibilityOptions(params.isEnableIconOverlay(),
+                    params.isEnableUnarchivalConfirmation());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
     /** @return position in mCallbacks for callback or -1 if not present. */
     private int findCallbackLocked(Callback callback) {
         if (callback == null) {
@@ -1956,6 +2021,50 @@ public class LauncherApps {
             }
         }
     };
+
+    /**
+     * Used to enable Archiving compatibility options with {@link #setArchiveCompatibility}.
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
+    public static class ArchiveCompatibilityParams {
+        private boolean mEnableIconOverlay = true;
+
+        private boolean mEnableUnarchivalConfirmation = true;
+
+        /** @hide */
+        public boolean isEnableIconOverlay() {
+            return mEnableIconOverlay;
+        }
+
+        /** @hide */
+        public boolean isEnableUnarchivalConfirmation() {
+            return mEnableUnarchivalConfirmation;
+        }
+
+        /**
+         * If true, provides a cloud overlay for archived apps to ensure users are aware that a
+         * certain app is archived. True by default.
+         *
+         * <p> Launchers might want to disable this operation if they want to provide custom user
+         * experience to differentiate archived apps.
+         */
+        public void setEnableIconOverlay(boolean enableIconOverlay) {
+            this.mEnableIconOverlay = enableIconOverlay;
+        }
+
+        /**
+         * If true, the user is shown a confirmation dialog when they click an archived app, which
+         * explains that the app will be downloaded and restored in the background. True by default.
+         *
+         * <p> Launchers might want to disable this operation if they provide sufficient,
+         * alternative user guidance to highlight that an unarchival is starting and ongoing once an
+         * archived app is tapped. E.g., this could be achieved by showing the unarchival progress
+         * around the icon.
+         */
+        public void setEnableUnarchivalConfirmation(boolean enableUnarchivalConfirmation) {
+            this.mEnableUnarchivalConfirmation = enableUnarchivalConfirmation;
+        }
+    }
 
     private static class CallbackMessageHandler extends Handler {
         private static final int MSG_ADDED = 1;

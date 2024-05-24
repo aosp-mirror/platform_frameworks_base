@@ -23,6 +23,7 @@ import android.companion.virtual.sensor.IVirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorEvent;
+import android.content.AttributionSource;
 import android.hardware.SensorDirectChannel;
 import android.os.Binder;
 import android.os.IBinder;
@@ -35,6 +36,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.expresslog.Counter;
 import com.android.server.LocalServices;
 import com.android.server.sensors.SensorManagerInternal;
 
@@ -71,14 +73,18 @@ public class SensorController {
     private List<VirtualSensor> mVirtualSensorList = null;
 
     @NonNull
+    private final AttributionSource mAttributionSource;
+    @NonNull
     private final SensorManagerInternal.RuntimeSensorCallback mRuntimeSensorCallback;
     private final SensorManagerInternal mSensorManagerInternal;
     private final VirtualDeviceManagerInternal mVdmInternal;
 
     public SensorController(@NonNull IVirtualDevice virtualDevice, int virtualDeviceId,
+            @NonNull AttributionSource attributionSource,
             @Nullable IVirtualSensorCallback virtualSensorCallback,
             @NonNull List<VirtualSensorConfig> sensors) {
         mVirtualDeviceId = virtualDeviceId;
+        mAttributionSource = attributionSource;
         mRuntimeSensorCallback = new RuntimeSensorCallbackWrapper(virtualSensorCallback);
         mSensorManagerInternal = LocalServices.getService(SensorManagerInternal.class);
         mVdmInternal = LocalServices.getService(VirtualDeviceManagerInternal.class);
@@ -138,6 +144,11 @@ public class SensorController {
         synchronized (mLock) {
             mSensorDescriptors.put(sensorToken, sensorDescriptor);
             mVirtualSensors.put(handle, sensor);
+        }
+        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
+            Counter.logIncrementWithUid(
+                    "virtual_devices.value_virtual_sensors_created_count",
+                    mAttributionSource.getUid());
         }
     }
 

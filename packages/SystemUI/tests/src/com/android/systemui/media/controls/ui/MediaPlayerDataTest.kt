@@ -20,7 +20,9 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.controls.MediaTestUtils
-import com.android.systemui.media.controls.models.player.MediaData
+import com.android.systemui.media.controls.shared.model.MediaData
+import com.android.systemui.media.controls.ui.controller.MediaControlPanel
+import com.android.systemui.media.controls.ui.controller.MediaPlayerData
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before

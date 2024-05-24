@@ -2614,6 +2614,567 @@ SourceFile: "TinyFrameworkPackageRedirect.java"
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/C1.class
+  Compiled from "C1.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.C1
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/C1
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.C1();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/C1;
+}
+SourceFile: "C1.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/C2.class
+  Compiled from "C2.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.C2 extends com.android.hoststubgen.test.tinyframework.subclasstest.C1
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/C2
+  super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/C1
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.C2();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method com/android/hoststubgen/test/tinyframework/subclasstest/C1."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/C2;
+}
+SourceFile: "C2.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/C3.class
+  Compiled from "C3.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.C3 extends com.android.hoststubgen.test.tinyframework.subclasstest.C2
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/C3
+  super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/C2
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.C3();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method com/android/hoststubgen/test/tinyframework/subclasstest/C2."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/C3;
+}
+SourceFile: "C3.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/CA.class
+  Compiled from "CA.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.CA
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/CA
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.CA();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/CA;
+}
+SourceFile: "CA.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/CB.class
+  Compiled from "CB.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.CB
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/CB
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.CB();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/CB;
+}
+SourceFile: "CB.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_C1.class
+  Compiled from "Class_C1.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_C1 extends com.android.hoststubgen.test.tinyframework.subclasstest.C1
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_C1
+  super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/C1
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_C1();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method com/android/hoststubgen/test/tinyframework/subclasstest/C1."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_C1;
+}
+SourceFile: "Class_C1.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_C2.class
+  Compiled from "Class_C2.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_C2 extends com.android.hoststubgen.test.tinyframework.subclasstest.C2
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_C2
+  super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/C2
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_C2();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method com/android/hoststubgen/test/tinyframework/subclasstest/C2."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_C2;
+}
+SourceFile: "Class_C2.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_C3.class
+  Compiled from "Class_C3.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_C3 extends com.android.hoststubgen.test.tinyframework.subclasstest.C3
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_C3
+  super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/C3
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_C3();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method com/android/hoststubgen/test/tinyframework/subclasstest/C3."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_C3;
+}
+SourceFile: "Class_C3.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_CA.class
+  Compiled from "Class_CA.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_CA extends com.android.hoststubgen.test.tinyframework.subclasstest.CA
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_CA
+  super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/CA
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_CA();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method com/android/hoststubgen/test/tinyframework/subclasstest/CA."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_CA;
+}
+SourceFile: "Class_CA.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_CB.class
+  Compiled from "Class_CB.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_CB extends com.android.hoststubgen.test.tinyframework.subclasstest.CB
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_CB
+  super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/CB
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_CB();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method com/android/hoststubgen/test/tinyframework/subclasstest/CB."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_CB;
+}
+SourceFile: "Class_CB.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_CB_IA.class
+  Compiled from "Class_CB_IA.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_CB_IA extends com.android.hoststubgen.test.tinyframework.subclasstest.CB implements com.android.hoststubgen.test.tinyframework.subclasstest.IA
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_CB_IA
+  super_class: #x                         // com/android/hoststubgen/test/tinyframework/subclasstest/CB
+  interfaces: 1, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_CB_IA();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method com/android/hoststubgen/test/tinyframework/subclasstest/CB."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_CB_IA;
+}
+SourceFile: "Class_CB_IA.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_I1.class
+  Compiled from "Class_I1.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_I1 implements com.android.hoststubgen.test.tinyframework.subclasstest.I1
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_I1
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_I1();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_I1;
+}
+SourceFile: "Class_I1.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_I1_IA.class
+  Compiled from "Class_I1_IA.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_I1_IA implements com.android.hoststubgen.test.tinyframework.subclasstest.I1,com.android.hoststubgen.test.tinyframework.subclasstest.IA
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_I1_IA
+  super_class: #x                         // java/lang/Object
+  interfaces: 2, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_I1_IA();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_I1_IA;
+}
+SourceFile: "Class_I1_IA.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_I2.class
+  Compiled from "Class_I2.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_I2 implements com.android.hoststubgen.test.tinyframework.subclasstest.I2
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_I2
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_I2();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_I2;
+}
+SourceFile: "Class_I2.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_I3.class
+  Compiled from "Class_I3.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_I3 implements com.android.hoststubgen.test.tinyframework.subclasstest.I3
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_I3
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_I3();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_I3;
+}
+SourceFile: "Class_I3.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_I3_IA.class
+  Compiled from "Class_I3_IA.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_I3_IA implements com.android.hoststubgen.test.tinyframework.subclasstest.I3,com.android.hoststubgen.test.tinyframework.subclasstest.IA
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_I3_IA
+  super_class: #x                         // java/lang/Object
+  interfaces: 2, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_I3_IA();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_I3_IA;
+}
+SourceFile: "Class_I3_IA.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_IA.class
+  Compiled from "Class_IA.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_IA implements com.android.hoststubgen.test.tinyframework.subclasstest.IA
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_IA
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_IA();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_IA;
+}
+SourceFile: "Class_IA.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_IA_I1.class
+  Compiled from "Class_IA_I1.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_IA_I1 implements com.android.hoststubgen.test.tinyframework.subclasstest.IA,com.android.hoststubgen.test.tinyframework.subclasstest.I1
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_IA_I1
+  super_class: #x                         // java/lang/Object
+  interfaces: 2, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_IA_I1();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_IA_I1;
+}
+SourceFile: "Class_IA_I1.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_IA_I3.class
+  Compiled from "Class_IA_I3.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_IA_I3 implements com.android.hoststubgen.test.tinyframework.subclasstest.IA,com.android.hoststubgen.test.tinyframework.subclasstest.I3
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_IA_I3
+  super_class: #x                         // java/lang/Object
+  interfaces: 2, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_IA_I3();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_IA_I3;
+}
+SourceFile: "Class_IA_I3.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_IB.class
+  Compiled from "Class_IB.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_IB implements com.android.hoststubgen.test.tinyframework.subclasstest.IB
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_IB
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_IB();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_IB;
+}
+SourceFile: "Class_IB.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_IB_IA.class
+  Compiled from "Class_IB_IA.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_IB_IA implements com.android.hoststubgen.test.tinyframework.subclasstest.IB,com.android.hoststubgen.test.tinyframework.subclasstest.IA
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_IB_IA
+  super_class: #x                         // java/lang/Object
+  interfaces: 2, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_IB_IA();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_IB_IA;
+}
+SourceFile: "Class_IB_IA.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/Class_None.class
+  Compiled from "Class_None.java"
+public class com.android.hoststubgen.test.tinyframework.subclasstest.Class_None
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/Class_None
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 1
+  public com.android.hoststubgen.test.tinyframework.subclasstest.Class_None();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/subclasstest/Class_None;
+}
+SourceFile: "Class_None.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/I1.class
+  Compiled from "I1.java"
+public interface com.android.hoststubgen.test.tinyframework.subclasstest.I1
+  minor version: 0
+  major version: 61
+  flags: (0x0601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/I1
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 0, attributes: 1
+}
+SourceFile: "I1.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/I2.class
+  Compiled from "I2.java"
+public interface com.android.hoststubgen.test.tinyframework.subclasstest.I2 extends com.android.hoststubgen.test.tinyframework.subclasstest.I1
+  minor version: 0
+  major version: 61
+  flags: (0x0601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/I2
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 0, attributes: 1
+}
+SourceFile: "I2.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/I3.class
+  Compiled from "I3.java"
+public interface com.android.hoststubgen.test.tinyframework.subclasstest.I3 extends com.android.hoststubgen.test.tinyframework.subclasstest.I2
+  minor version: 0
+  major version: 61
+  flags: (0x0601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/I3
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 0, attributes: 1
+}
+SourceFile: "I3.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/IA.class
+  Compiled from "IA.java"
+public interface com.android.hoststubgen.test.tinyframework.subclasstest.IA
+  minor version: 0
+  major version: 61
+  flags: (0x0601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/IA
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 0, attributes: 1
+}
+SourceFile: "IA.java"
+## Class: com/android/hoststubgen/test/tinyframework/subclasstest/IB.class
+  Compiled from "IB.java"
+public interface com.android.hoststubgen.test.tinyframework.subclasstest.IB
+  minor version: 0
+  major version: 61
+  flags: (0x0601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/subclasstest/IB
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 0, attributes: 1
+}
+SourceFile: "IB.java"
 ## Class: com/supported/UnsupportedClass.class
   Compiled from "UnsupportedClass.java"
 public class com.supported.UnsupportedClass

@@ -71,7 +71,6 @@ public class UserManagerServiceUserTypeTest {
     public void setup() {
         mResources = InstrumentationRegistry.getTargetContext().getResources();
     }
-
     @Test
     public void testUserTypeBuilder_createUserType() {
         final Bundle restrictions = makeRestrictionsBundle("r1", "r2");
@@ -97,7 +96,9 @@ public class UserManagerServiceUserTypeTest {
                 .setInheritDevicePolicy(340)
                 .setDeleteAppWithParent(true)
                 .setAlwaysVisible(true)
-                .setCrossProfileContentSharingStrategy(1);
+                .setCrossProfileContentSharingStrategy(1)
+                .setProfileApiVisibility(34)
+                .setItemsRestrictedOnHomeScreen(true);
 
         final UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("a.name")
@@ -180,6 +181,8 @@ public class UserManagerServiceUserTypeTest {
         assertTrue(type.getDefaultUserPropertiesReference().getAlwaysVisible());
         assertEquals(1, type.getDefaultUserPropertiesReference()
                 .getCrossProfileContentSharingStrategy());
+        assertEquals(34, type.getDefaultUserPropertiesReference().getProfileApiVisibility());
+        assertTrue(type.getDefaultUserPropertiesReference().areItemsRestrictedOnHomeScreen());
 
         assertEquals(23, type.getBadgeLabel(0));
         assertEquals(24, type.getBadgeLabel(1));
@@ -238,6 +241,8 @@ public class UserManagerServiceUserTypeTest {
                 props.getShowInQuietMode());
         assertEquals(UserProperties.CROSS_PROFILE_CONTENT_SHARING_NO_DELEGATION,
                 props.getCrossProfileContentSharingStrategy());
+        assertEquals(UserProperties.PROFILE_API_VISIBILITY_VISIBLE,
+                props.getProfileApiVisibility());
 
         assertFalse(type.hasBadge());
     }
@@ -332,7 +337,9 @@ public class UserManagerServiceUserTypeTest {
                 .setShowInQuietMode(24)
                 .setDeleteAppWithParent(true)
                 .setAlwaysVisible(false)
-                .setCrossProfileContentSharingStrategy(1);
+                .setCrossProfileContentSharingStrategy(1)
+                .setProfileApiVisibility(36)
+                .setItemsRestrictedOnHomeScreen(false);
 
         final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
         builders.put(userTypeAosp1, new UserTypeDetails.Builder()
@@ -383,6 +390,8 @@ public class UserManagerServiceUserTypeTest {
         assertFalse(aospType.getDefaultUserPropertiesReference().getAlwaysVisible());
         assertEquals(1, aospType.getDefaultUserPropertiesReference()
                 .getCrossProfileContentSharingStrategy());
+        assertEquals(36, aospType.getDefaultUserPropertiesReference().getProfileApiVisibility());
+        assertFalse(aospType.getDefaultUserPropertiesReference().areItemsRestrictedOnHomeScreen());
 
         // userTypeAosp2 should be modified.
         aospType = builders.get(userTypeAosp2).createUserTypeDetails();
@@ -439,6 +448,8 @@ public class UserManagerServiceUserTypeTest {
         assertTrue(aospType.getDefaultUserPropertiesReference().getAlwaysVisible());
         assertEquals(0, aospType.getDefaultUserPropertiesReference()
                 .getCrossProfileContentSharingStrategy());
+        assertEquals(36, aospType.getDefaultUserPropertiesReference().getProfileApiVisibility());
+        assertTrue(aospType.getDefaultUserPropertiesReference().areItemsRestrictedOnHomeScreen());
 
         // userTypeOem1 should be created.
         UserTypeDetails.Builder customType = builders.get(userTypeOem1);

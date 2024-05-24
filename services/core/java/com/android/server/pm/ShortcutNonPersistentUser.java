@@ -31,7 +31,6 @@ import java.io.PrintWriter;
  * The access to it must be guarded with the shortcut manager lock.
  */
 public class ShortcutNonPersistentUser {
-    private final ShortcutService mService;
 
     private final int mUserId;
 
@@ -49,8 +48,7 @@ public class ShortcutNonPersistentUser {
      */
     private final ArraySet<String> mHostPackageSet = new ArraySet<>();
 
-    public ShortcutNonPersistentUser(ShortcutService service, int userId) {
-        mService = service;
+    public ShortcutNonPersistentUser(int userId) {
         mUserId = userId;
     }
 

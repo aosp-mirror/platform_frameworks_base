@@ -166,6 +166,17 @@ interface Vote {
         return new BaseModeRefreshRateVote(baseModeRefreshRate);
     }
 
+    static Vote forSupportedModes(List<SupportedModesVote.SupportedMode> supportedModes) {
+        return new SupportedModesVote(supportedModes);
+    }
+
+
+    static Vote forSupportedModesAndDisableRefreshRateSwitching(
+            List<SupportedModesVote.SupportedMode> supportedModes) {
+        return new CombinedVote(
+                List.of(forDisableRefreshRateSwitching(), forSupportedModes(supportedModes)));
+    }
+
     static String priorityToString(int priority) {
         switch (priority) {
             case PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE:

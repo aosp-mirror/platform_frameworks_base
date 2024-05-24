@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> másodperc után"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nincs átirányítva"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nincs átirányítva"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Mobilhálózat biztonsága"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Beállítások áttekintése"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Hozzáférés az eszközazonosítóhoz"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"A(z) <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> kapcsolat egyik hálózata <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> alkalommal rögzítette az Ön eszközének egyedi azonosítóját (IMSI) a következő időszakban: <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> – <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Titkosított kapcsolat ezzel: <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Mostantól biztonságosabb mobilhálózathoz csatlakozik."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Nem titkosított kapcsolat ezzel: <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Nem titkosított mobilhálózathoz van csatlakozva. Könnyebben elfoghatják a hívásait, üzeneteit és adatait."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Mobilhálózat-biztonsági beállítások"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"További információ"</string>
     <string name="fcComplete" msgid="1080909484660507044">"A funkciókód kész."</string>
     <string name="fcError" msgid="5325116502080221346">"Kapcsolódási probléma vagy érvénytelen funkciókód."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -370,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Az alkalmazás összekapcsolódhat a cellán belüli üzenetszórás moduljával, hogy az érkezésükkor továbbítani tudja a cellán belüli üzeneteket. Bizonyos helyeken figyelmeztető üzeneteket kaphat a cellán belül a vészhelyzetekről. A rosszindulatú alkalmazások vészhelyzeti cellaüzenet érkezésekor befolyásolhatják az eszköz teljesítményét és működését."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Folyamatban lévő hívások kezelése"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Engedélyezi az alkalmazásnak, hogy az eszközén folyamatban lévő hívások részleteihez hozzáférjen, és vezérelje ezeket a hívásokat."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Hozzáférés az utolsó ismert cellainformációhoz."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen a telefonos szolgáltatás által biztosított utolsó ismert cellainformációhoz."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"cellán belüli üzenetek olvasása"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Lehetővé teszi az alkalmazás számára az eszközre érkező cellán belüli üzenetek olvasását. Bizonyos helyeken figyelmeztető üzeneteket kaphat a cellán belül a vészhelyzetekről. A rosszindulatú alkalmazások befolyásolhatják az eszköz  teljesítményét vagy működését vészhelyzeti cellaüzenet érkezésekor."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"feliratkozott hírcsatornák olvasása"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Engedélyezi az alkalmazásnak az előtérben lévő szolgáltatások használatát a következő típussal: „systemExempted”"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"előtérben lévő szolgáltatás futtatása a következő típussal: „fileManagement\""</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Lehetővé teszi az alkalmazásnak az előtérben futó szolgáltatások használatát a következő típussal: „fileManagement”"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"előtérben lévő szolgáltatás futtatása a következő típussal: „mediaProcessing\""</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Engedélyezi az alkalmazásnak az előtérben lévő szolgáltatások használatát a következő típussal: „mediaProcessing”"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"előtérben lévő szolgáltatás futtatása a következő típussal: „specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Engedélyezi az alkalmazásnak az előtérben lévő szolgáltatások használatát a következő típussal: „specialUse”"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"alkalmazás-tárhely felmérése"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Engedélyezi, hogy az alkalmazás használhassa a telefon infravörös érzékelőjét."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"háttérkép beállítása"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Lehetővé teszi az alkalmazás számára, hogy beállítása a rendszer háttérképét."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Hozzáférés rejtett profilokhoz"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen rejtett profilokhoz."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"háttérkép méretének módosítása"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Lehetővé teszi az alkalmazás számára, hogy beállítsa a rendszer háttérképének méretével kapcsolatos tippeket."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"időzóna beállítása"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Képernyőzár használata"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"A folytatáshoz adja meg a képernyőzár hitelesítési adatait"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Nyomja meg határozottan az érzékelőt"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Az ujjlenyomat nem ismerhető fel. Próbálkozzon újra."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Ismeretlen ujjlenyomat. Próbálkozzon újra."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Tisztítsa meg az ujjlenyomat-érzékelőt, majd próbálja újra"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Tisztítsa meg az érzékelőt, majd próbálja újra"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Nyomja meg határozottan az érzékelőt"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Ujjlenyomat hitelesítve"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Arc hitelesítve"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Arc hitelesítve; nyomja meg a Megerősítés lehetőséget"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Az ujjlenyomathoz szükséges hardver nem érhető el."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Az ujjlenyomat-olvasó hardverhez nem lehet hozzáférni."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Nem sikerült beállítani az ujjlenyomatot"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Lejárt az ujjlenyomat-beállítás időkorlátja. Próbálkozzon újra."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Ujjlenyomattal kapcsolatos művelet megszakítva"</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Az ujjlenyomattal kapcsolatos műveletet a felhasználó megszakította."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Ujjlenyomattal kapcsolatos művelet megszakítva."</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Az ujjlenyomattal kapcsolatos műveletet a felhasználó megszakította."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Túl sokszor próbálkozott. Használja inkább a képernyőzárat."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Túl sok próbálkozás. Használja inkább a képernyőzárat."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Nem sikerült feldolgozni az ujjlenyomatot. Próbálkozzon újra."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nincsenek regisztrált ujjlenyomatok."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Ez az eszköz nem rendelkezik ujjlenyomat-érzékelővel."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Az érzékelő átmenetileg le van tiltva."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Nem lehet használni az ujjlenyomat-érzékelőt. Keresse fel a szervizt."</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Nincsenek regisztrált ujjlenyomatok."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Ez az eszköz nem rendelkezik ujjlenyomat-érzékelővel"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Az érzékelő átmenetileg le van tiltva."</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Nem lehet használni az ujjlenyomat-érzékelőt. Keresse fel a szervizt."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Bekapcsológomb megnyomva"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>. ujj"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Ujjlenyomat használata"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Nem látszik az arca. Tartsa szemmagasságban a telefonját."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Túl sok a mozgás. Tartsa stabilan a telefont."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Rögzítsen újra képet az arcáról."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Az arc nem felismerhető. Próbálja újra."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Sikertelen arcfelismerés. Próbálkozzon újra."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Egy kicsit mozdítsa el a fejét"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Nézzen egyenesen a telefonjára"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Nézzen egyenesen a telefonjára"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Lehetővé teszi az alkalmazás számára, hogy 200 Hz-nél magasabb gyakorisággal vegyen mintát a szenzoradatokból"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"alkalmazás frissítése felhasználói művelet nélkül"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Lehetővé teszi az engedély tulajdonosa számára, hogy felhasználói művelet nélkül frissítse a korábban általa telepített alkalmazást"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"Az egyéb alkalmazásokhoz tartozó, végpontok közti titkosítással rendelkező kapcsolatkulcsok ellenőrzési állapotának frissítése"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Lehetővé teszi az alkalmazás számára, hogy frissítse az egyéb alkalmazásokhoz tartozó, végpontok közti titkosítással rendelkező kapcsolatkulcsok ellenőrzési állapotát."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Jelszavakkal kapcsolatos szabályok beállítása"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"A képernyőzár jelszavaiban és PIN kódjaiban engedélyezett karakterek és hosszúság vezérlése."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Képernyőzár-feloldási kísérletek figyelése"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Hétvége"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Esemény"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Alvás"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Kezelő: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Bekapcsolva"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Kikapcsolva"</string>
     <string name="muted_by" msgid="91464083490094950">"A(z) <xliff:g id="THIRD_PARTY">%1$s</xliff:g> lenémít néhány hangot"</string>
@@ -1925,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Ellenőrizve"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Kibontás"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Összecsukás"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Összecsukva"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Kibontva"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"kibontás be- és kikapcsolása"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB-perifériaport"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Feloldja a munkahelyi appokat?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Szüneteltetés feloldása"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Vészhelyzet"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Állítson be képernyőzárat"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Képernyőzár beállítása"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"A magánterület használatához állítson be képernyőzárat"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Az alkalmazás nem hozzáférhető"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> jelenleg nem hozzáférhető."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"A(z) <xliff:g id="ACTIVITY">%1$s</xliff:g> nem áll rendelkezése"</string>
@@ -2341,8 +2365,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Nem lehet tükrözni a kijelzőre"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Használjon másik kábelt, és próbálja újra"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Az eszköz túl meleg – csak a lehűlése után tud tükrözni a kijelzőre."</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Előfordulhat, hogy a kábel nem támogatja a kijelzőket"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Előfordulhat, hogy az USB-C kábellel nem csatlakoztathatók megfelelően a kijelzők"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"A Dual Screen funkció be van kapcsolva"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> mindkét kijelzőt használja a tartalmak megjelenítésére"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"3. munkahelyi"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Teszt"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Közös"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Automatikusan csatlakozva a műholdhoz"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Küldhet és fogadhat üzeneteket mobil- és Wi-Fi-hálózat nélkül is"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"A Messages megnyitása"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Hogyan működik?"</string>
 </resources>

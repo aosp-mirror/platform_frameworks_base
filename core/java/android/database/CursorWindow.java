@@ -22,14 +22,8 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteClosable;
 import android.database.sqlite.SQLiteException;
-import android.os.Binder;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Process;
-import android.util.Log;
-import android.util.LongSparseArray;
-import android.util.SparseIntArray;
 
 import dalvik.annotation.optimization.FastNative;
 import dalvik.system.CloseGuard;
@@ -44,6 +38,9 @@ import dalvik.system.CloseGuard;
  * consumer for reading.
  * </p>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
+@android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
+        "com.android.platform.test.ravenwood.nativesubstitution.CursorWindow_host")
 public class CursorWindow extends SQLiteClosable implements Parcelable {
     private static final String STATS_TAG = "CursorWindowStats";
 
@@ -61,7 +58,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     private int mStartPos;
     private final String mName;
 
-    private final CloseGuard mCloseGuard = CloseGuard.get();
+    private final CloseGuard mCloseGuard;
 
     // May throw CursorWindowAllocationException
     private static native long nativeCreate(String name, int cursorWindowSize);
@@ -147,7 +144,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         if (mWindowPtr == 0) {
             throw new AssertionError(); // Not possible, the native code won't return it.
         }
-        mCloseGuard.open("CursorWindow.close");
+        mCloseGuard = createCloseGuard();
     }
 
     /**
@@ -175,7 +172,18 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
             throw new AssertionError(); // Not possible, the native code won't return it.
         }
         mName = nativeGetName(mWindowPtr);
-        mCloseGuard.open("CursorWindow.close");
+        mCloseGuard = createCloseGuard();
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private CloseGuard createCloseGuard() {
+        final CloseGuard closeGuard = CloseGuard.get();
+        closeGuard.open("CursorWindow.close");
+        return closeGuard;
+    }
+
+    private CloseGuard createCloseGuard$ravenwood() {
+        return null;
     }
 
     @Override
@@ -749,6 +757,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         dispose();
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     private static int getCursorWindowSize() {
         if (sCursorWindowSize < 0) {
             // The cursor window size. resource xml file specifies the value in kB.
@@ -757,6 +766,10 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
                     com.android.internal.R.integer.config_cursorWindowSize) * 1024;
         }
         return sCursorWindowSize;
+    }
+
+    private static int getCursorWindowSize$ravenwood() {
+        return 1024;
     }
 
     @Override

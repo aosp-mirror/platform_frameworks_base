@@ -49,8 +49,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -83,7 +84,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
 import java.io.File;
 import java.io.InputStream;
@@ -111,14 +111,14 @@ public class LogicalDisplayMapperTest {
     private final DisplayIdProducer mIdProducer = (isDefault) ->
             isDefault ? DEFAULT_DISPLAY : sNextNonDefaultDisplayId++;
 
+    private DeviceStateToLayoutMap mDeviceStateToLayoutMapSpy;
+
     @Mock LogicalDisplayMapper.Listener mListenerMock;
     @Mock Context mContextMock;
     @Mock FoldSettingProvider mFoldSettingProviderMock;
     @Mock Resources mResourcesMock;
     @Mock IPowerManager mIPowerManagerMock;
     @Mock IThermalService mIThermalServiceMock;
-    @Spy DeviceStateToLayoutMap mDeviceStateToLayoutMapSpy =
-            new DeviceStateToLayoutMap(mIdProducer, NON_EXISTING_FILE);
     @Mock DisplayManagerFlags mFlagsMock;
     @Mock DisplayAdapter mDisplayAdapterMock;
 
@@ -131,6 +131,8 @@ public class LogicalDisplayMapperTest {
         System.setProperty("dexmaker.share_classloader", "true");
         MockitoAnnotations.initMocks(this);
 
+        mDeviceStateToLayoutMapSpy =
+                spy(new DeviceStateToLayoutMap(mIdProducer, mFlagsMock, NON_EXISTING_FILE));
         mDisplayDeviceRepo = new DisplayDeviceRepository(
                 new DisplayManagerService.SyncRoot(),
                 new PersistentDataStore(new PersistentDataStore.Injector() {

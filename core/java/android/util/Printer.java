@@ -22,6 +22,7 @@ package android.util;
  * {@link android.util.StringBuilderPrinter}, and
  * {@link android.util.PrintWriterPrinter}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public interface Printer {
     /**
      * Write a line of text to the output.  There is no need to terminate

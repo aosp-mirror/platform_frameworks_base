@@ -167,10 +167,10 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
 
     /** {@inheritDoc} */
     @Override
-    public int interceptMotionBeforeQueueingNonInteractive(int displayId, long whenNanos,
-            int policyFlags) {
+    public int interceptMotionBeforeQueueingNonInteractive(int displayId, int source, int action,
+            long whenNanos, int policyFlags) {
         return mService.mPolicy.interceptMotionBeforeQueueingNonInteractive(
-                displayId, whenNanos, policyFlags);
+                displayId, source, action, whenNanos, policyFlags);
     }
 
     /**

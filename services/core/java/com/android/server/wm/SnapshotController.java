@@ -25,6 +25,7 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import android.os.Trace;
+import android.util.ArrayMap;
 import android.view.WindowManager;
 import android.window.TaskSnapshot;
 
@@ -80,6 +81,7 @@ class SnapshotController {
         if (!isTransitionOpen && !isTransitionClose && type < TRANSIT_FIRST_CUSTOM) {
             return;
         }
+        ActivitiesByTask activityTargets = null;
         for (int i = changeInfos.size() - 1; i >= 0; --i) {
             Transition.ChangeInfo info = changeInfos.get(i);
             // Intentionally skip record snapshot for changes originated from PiP.
@@ -98,15 +100,67 @@ class SnapshotController {
                 final TaskFragment tf = info.mContainer.asTaskFragment();
                 final ActivityRecord ar = tf != null ? tf.getTopMostActivity()
                         : info.mContainer.asActivityRecord();
-                if (ar != null && !ar.isVisibleRequested() && ar.getTask().isVisibleRequested()) {
-                    final WindowState mainWindow = ar.findMainWindow(false);
-                    // Only capture activity snapshot if this app has adapted to back predict
-                    if (mainWindow != null
-                            && mainWindow.getOnBackInvokedCallbackInfo() != null
-                            && mainWindow.getOnBackInvokedCallbackInfo().isSystemCallback()) {
-                        mActivitySnapshotController.recordSnapshot(ar);
+                if (ar != null && ar.getTask().isVisibleRequested()) {
+                    if (activityTargets == null) {
+                        activityTargets = new ActivitiesByTask();
+                    }
+                    activityTargets.put(ar);
+                }
+            }
+        }
+        if (activityTargets != null) {
+            activityTargets.recordSnapshot(mActivitySnapshotController);
+        }
+    }
+
+    private static class ActivitiesByTask {
+        final ArrayMap<Task, OpenCloseActivities> mActivitiesMap = new ArrayMap<>();
+
+        void put(ActivityRecord ar) {
+            OpenCloseActivities activities = mActivitiesMap.get(ar.getTask());
+            if (activities == null) {
+                activities = new OpenCloseActivities();
+                mActivitiesMap.put(ar.getTask(), activities);
+            }
+            activities.add(ar);
+        }
+
+        void recordSnapshot(ActivitySnapshotController controller) {
+            for (int i = mActivitiesMap.size() - 1; i >= 0; i--) {
+                final OpenCloseActivities pair = mActivitiesMap.valueAt(i);
+                pair.recordSnapshot(controller);
+            }
+        }
+
+        static class OpenCloseActivities {
+            final ArrayList<ActivityRecord> mOpenActivities = new ArrayList<>();
+            final ArrayList<ActivityRecord> mCloseActivities = new ArrayList<>();
+
+            void add(ActivityRecord ar) {
+                if (ar.isVisibleRequested()) {
+                    mOpenActivities.add(ar);
+                } else {
+                    mCloseActivities.add(ar);
+                }
+            }
+
+            boolean allOpensOptInOnBackInvoked() {
+                if (mOpenActivities.isEmpty()) {
+                    return false;
+                }
+                for (int i = mOpenActivities.size() - 1; i >= 0; --i) {
+                    if (!mOpenActivities.get(i).mOptInOnBackInvoked) {
+                        return false;
                     }
                 }
+                return true;
+            }
+
+            void recordSnapshot(ActivitySnapshotController controller) {
+                if (!allOpensOptInOnBackInvoked() || mCloseActivities.isEmpty()) {
+                    return;
+                }
+                controller.recordSnapshot(mCloseActivities);
             }
         }
     }
@@ -157,5 +211,6 @@ class SnapshotController {
     void dump(PrintWriter pw, String prefix) {
         mTaskSnapshotController.dump(pw, prefix);
         mActivitySnapshotController.dump(pw, prefix);
+        mSnapshotPersistQueue.dump(pw, prefix);
     }
 }

@@ -16,6 +16,7 @@
 
 package android.hardware.radio;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.os.RemoteException;
@@ -251,10 +252,18 @@ final class TunerAdapter extends RadioTuner {
     }
 
     @Override
-    @Nullable
+    @NonNull
     public Bitmap getMetadataImage(int id) {
+        if (id == 0) {
+            throw new IllegalArgumentException("Invalid metadata image id 0");
+        }
         try {
-            return mTuner.getImage(id);
+            Bitmap bitmap = mTuner.getImage(id);
+            if (bitmap == null) {
+                throw new IllegalArgumentException("Metadata image with id " + id
+                        + " is not available");
+            }
+            return bitmap;
         } catch (RemoteException e) {
             throw new RuntimeException("Service died", e);
         }

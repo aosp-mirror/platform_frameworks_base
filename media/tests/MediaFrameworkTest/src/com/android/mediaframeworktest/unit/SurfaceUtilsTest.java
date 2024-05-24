@@ -19,8 +19,9 @@ package com.android.mediaframeworktest.unit;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.media.ImageReader;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.view.Surface;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.Assert;
 

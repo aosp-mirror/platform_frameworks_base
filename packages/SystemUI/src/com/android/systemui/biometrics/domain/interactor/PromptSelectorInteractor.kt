@@ -32,6 +32,7 @@ import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -70,12 +71,25 @@ interface PromptSelectorInteractor {
     /** Fingerprint sensor type */
     val sensorType: Flow<FingerprintSensorType>
 
+    /**
+     * If biometric prompt without icon needs to show for displaying content prior to credential
+     * view.
+     */
+    val showBpWithoutIconForCredential: StateFlow<Boolean>
+
+    /**
+     * Update whether biometric prompt without icon needs to show for displaying content prior to
+     * credential view, which should be set before [PromptRepository.setPrompt].
+     */
+    fun setShouldShowBpWithoutIconForCredential(promptInfo: PromptInfo)
+
     /** Use biometrics for authentication. */
     fun useBiometricsForAuthentication(
         promptInfo: PromptInfo,
         userId: Int,
         challenge: Long,
         modalities: BiometricModalities,
+        opPackageName: String,
     )
 
     /** Use credential-based authentication instead of biometrics. */
@@ -84,6 +98,7 @@ interface PromptSelectorInteractor {
         @Utils.CredentialType kind: Int,
         userId: Int,
         challenge: Long,
+        opPackageName: String,
     )
 
     /** Unset the current authentication request. */
@@ -104,9 +119,12 @@ constructor(
             promptRepository.promptInfo,
             promptRepository.challenge,
             promptRepository.userId,
-            promptRepository.kind
-        ) { promptInfo, challenge, userId, kind ->
-            if (promptInfo == null || userId == null || challenge == null) {
+            promptRepository.kind,
+            promptRepository.opPackageName,
+        ) { promptInfo, challenge, userId, kind, opPackageName ->
+            if (
+                promptInfo == null || userId == null || challenge == null || opPackageName == null
+            ) {
                 return@combine null
             }
 
@@ -117,6 +135,7 @@ constructor(
                         userInfo = BiometricUserInfo(userId = userId),
                         operationInfo = BiometricOperationInfo(gatekeeperChallenge = challenge),
                         modalities = kind.activeModalities,
+                        opPackageName = opPackageName,
                     )
                 else -> null
             }
@@ -148,17 +167,25 @@ constructor(
 
     override val sensorType: Flow<FingerprintSensorType> = fingerprintPropertyRepository.sensorType
 
+    override val showBpWithoutIconForCredential = promptRepository.showBpWithoutIconForCredential
+
+    override fun setShouldShowBpWithoutIconForCredential(promptInfo: PromptInfo) {
+        promptRepository.setShouldShowBpWithoutIconForCredential(promptInfo)
+    }
+
     override fun useBiometricsForAuthentication(
         promptInfo: PromptInfo,
         userId: Int,
         challenge: Long,
-        modalities: BiometricModalities
+        modalities: BiometricModalities,
+        opPackageName: String,
     ) {
         promptRepository.setPrompt(
             promptInfo = promptInfo,
             userId = userId,
             gatekeeperChallenge = challenge,
             kind = PromptKind.Biometric(modalities),
+            opPackageName = opPackageName,
         )
     }
 
@@ -167,12 +194,14 @@ constructor(
         @Utils.CredentialType kind: Int,
         userId: Int,
         challenge: Long,
+        opPackageName: String,
     ) {
         promptRepository.setPrompt(
             promptInfo = promptInfo,
             userId = userId,
             gatekeeperChallenge = challenge,
             kind = kind.asBiometricPromptCredential(),
+            opPackageName = opPackageName,
         )
     }
 

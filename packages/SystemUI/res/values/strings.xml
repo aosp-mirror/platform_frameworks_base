@@ -34,6 +34,10 @@
         remaining [CHAR LIMIT=none]-->
     <string name="battery_low_percent_format"><xliff:g id="percentage">%s</xliff:g> remaining</string>
 
+    <!-- SVG path description for the battery frame of the unified battery drawable
+    (BatteryLayersDrawable.kt). Drawn on a 24x14 canvas. Not suitable outside in any other context -->
+    <string name="battery_unified_frame_path_string" translatable="false">M2.75,3C2.75,1.757 3.757,0.75 5,0.75H20C21.795,0.75 23.25,2.205 23.25,4V10C23.25,11.795 21.795,13.25 20,13.25H5C3.757,13.25 2.75,12.243 2.75,11V3Z </string>
+
     <!-- A message that appears when the battery remaining estimate is low in a dialog.  This is
     appended to the subtitle of the low battery alert.  "percentage" is the percentage of battery
     remaining. "time" is the amount of time remaining before the phone runs out of battery [CHAR LIMIT=none]-->
@@ -305,6 +309,27 @@
     <!-- A toast message shown when the screen recording cannot be started due to a generic error [CHAR LIMIT=NONE] -->
     <string name="screenrecord_start_error">Error starting screen recording</string>
 
+    <!-- Notification title displayed for issue recording [CHAR LIMIT=50]-->
+    <string name="issuerecord_title">Issue Recorder</string>
+    <!-- Processing issue recoding data in the background [CHAR LIMIT=30]-->
+    <string name="issuerecord_background_processing_label">Processing issue recording</string>
+    <!-- Description of the screen recording notification channel [CHAR LIMIT=NONE]-->
+    <string name="issuerecord_channel_description">Ongoing notification for an issue collection session</string>
+
+    <!-- Notification text displayed when we are recording the screen [CHAR LIMIT=100]-->
+    <string name="issuerecord_ongoing_screen_only">Recording issue</string>
+    <!-- Label for notification action to share issue recording [CHAR LIMIT=35] -->
+    <string name="issuerecord_share_label">Share</string>
+    <!-- A toast message shown after successfully canceling a issue recording [CHAR LIMIT=NONE] -->
+    <!-- Notification text shown after saving a issue recording [CHAR LIMIT=100] -->
+    <string name="issuerecord_save_title">Issue recording saved</string>
+    <!-- Subtext for a notification shown after saving a issue recording to prompt the user to view it [CHAR_LIMIT=100] -->
+    <string name="issuerecord_save_text">Tap to view</string>
+    <!-- A toast message shown when there is an error saving a issue recording [CHAR LIMIT=NONE] -->
+    <string name="issuerecord_save_error">Error saving issue recording</string>
+    <!-- A toast message shown when the issue recording cannot be started due to a generic error [CHAR LIMIT=NONE] -->
+    <string name="issuerecord_start_error">Error starting issue recording</string>
+
     <!-- Cling help message title when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
     <string name="immersive_cling_title">Viewing full screen</string>
     <!-- Cling help message description when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
@@ -449,11 +474,11 @@
     <!-- Content description after successful auth when confirmation required -->
     <string name="fingerprint_dialog_authenticated_confirmation">Press the unlock icon to continue</string>
     <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
-    <string name="fingerprint_dialog_use_fingerprint_instead">Can\u2019t recognize face. Use fingerprint instead.</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead">Face not recognized. Use fingerprint instead.</string>
     <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
     <string name="keyguard_face_failed_use_fp">@string/fingerprint_dialog_use_fingerprint_instead</string>
     <!-- Message shown to inform the user a face cannot be recognized. [CHAR LIMIT=25] -->
-    <string name="keyguard_face_failed">Can\u2019t recognize face</string>
+    <string name="keyguard_face_failed">Face not recognized</string>
     <!-- Message shown to suggest using fingerprint sensor to authenticate after another biometric failed. [CHAR LIMIT=25] -->
     <string name="keyguard_suggest_fingerprint">Use fingerprint instead</string>
     <!-- Message shown to inform the user that face unlock is not available. [CHAR LIMIT=59] -->
@@ -648,6 +673,10 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect">disconnect</string>
     <!-- QuickSettings: Accessibility label to activate a device [CHAR LIMIT=NONE]-->
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate">activate</string>
+    <!-- QuickSettings: Bluetooth auto on tomorrow [CHAR LIMIT=NONE]-->
+    <string name="turn_on_bluetooth_auto_tomorrow">Automatically turn on again tomorrow</string>
+    <!-- QuickSettings: Bluetooth auto on info text [CHAR LIMIT=NONE]-->
+    <string name="turn_on_bluetooth_auto_info">Features like Quick Share, Find My Device, and device location use Bluetooth</string>
 
     <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
     <string name="quick_settings_bluetooth_secondary_label_battery_level"><xliff:g id="battery_level_as_percentage">%s</xliff:g> battery</string>
@@ -1077,8 +1106,22 @@
     <!-- Indicator on keyguard to start the communal tutorial. [CHAR LIMIT=100] -->
     <string name="communal_tutorial_indicator_text">Swipe left to start the communal tutorial</string>
 
-    <!-- Description for the button that opens the widget editor on click. [CHAR LIMIT=50] -->
-    <string name="button_to_open_widget_editor">Open the widget editor</string>
+    <!-- Text for CTA button that launches the hub mode widget editor on click. [CHAR LIMIT=50] -->
+    <string name="cta_tile_button_to_open_widget_editor">Customize</string>
+    <!-- Text for CTA button that dismisses the tile on click. [CHAR LIMIT=50] -->
+    <string name="cta_tile_button_to_dismiss">Dismiss</string>
+    <!-- Label for CTA tile to edit the glanceable hub [CHAR LIMIT=100] -->
+    <string name="cta_label_to_edit_widget">Add, remove, and reorder your widgets in this space</string>
+    <!-- Label for CTA tile that opens widget picker on click in edit mode [CHAR LIMIT=50] -->
+    <string name="cta_label_to_open_widget_picker">Add more widgets</string>
+    <!-- Text for the popup to be displayed after dismissing the CTA tile. [CHAR LIMIT=50] -->
+    <string name="popup_on_dismiss_cta_tile_text">Long press to customize widgets</string>
+    <!-- Text for the button to configure widgets after long press. [CHAR LIMIT=50] -->
+    <string name="button_to_configure_widgets_text">Customize widgets</string>
+    <!-- Description for the App icon of disabled widget. [CHAR LIMIT=NONE] -->
+    <string name="icon_description_for_disabled_widget">App icon for disabled widget</string>
+    <!-- Label for the button which configures widgets [CHAR LIMIT=NONE] -->
+    <string name="edit_widget">Edit widget</string>
     <!-- Description for the button that removes a widget on click. [CHAR LIMIT=50] -->
     <string name="button_to_remove_widget">Remove</string>
     <!-- Text for the button that launches the hub mode widget picker. [CHAR LIMIT=50] -->
@@ -1379,6 +1422,9 @@
     <!-- Indication on the keyguard that appears when a trust agents unlocks the device. [CHAR LIMIT=40] -->
     <string name="keyguard_indication_trust_unlocked">Kept unlocked by TrustAgent</string>
 
+    <!-- Message asking the user to authenticate with primary authentication methods (PIN/pattern/password) or biometrics after the device is locked by adaptive auth. [CHAR LIMIT=60] -->
+    <string name="kg_prompt_after_adaptive_auth_lock">Theft protection\nDevice locked, too many unlock attempts</string>
+
     <!-- Accessibility string for current zen mode and selected exit condition. A template that simply concatenates existing mode string and the current condition description. [CHAR LIMIT=20] -->
     <string name="zen_mode_and_condition"><xliff:g id="zen_mode" example="Priority interruptions only">%1$s</xliff:g>. <xliff:g id="exit_condition" example="For one hour">%2$s</xliff:g></string>
 
@@ -1403,6 +1449,8 @@
     <string name="sound_settings">Sound &amp; vibration</string>
     <!-- Label for button to go to sound settings screen [CHAR_LIMIT=30] -->
     <string name="volume_panel_dialog_settings_button">Settings</string>
+
+    <string name="volume_panel_captioning_title">Live Caption</string>
 
     <!-- Title for notification after audio lowers -->
     <string name="csd_lowered_title" product="default">Volume lowered to safer level</string>
@@ -1471,6 +1519,11 @@
     <string name="volume_ringer_status_vibrate">Vibrate</string>
     <string name="volume_ringer_status_silent">Mute</string>
 
+    <!-- Media device casting volume slider label [CHAR_LIMIT=20] -->
+    <string name="media_device_cast">Cast</string>
+    <!-- A message shown when the notification volume changing is disabled because of the muted ring stream [CHAR_LIMIT=40]-->
+    <string name="stream_notification_unavailable">Unavailable because ring is muted</string>
+
     <!-- Shown in the header of quick settings to indicate to the user that their phone ringer is on vibrate. [CHAR_LIMIT=NONE] -->
     <!-- Shown in the header of quick settings to indicate to the user that their phone ringer is on silent (muted). [CHAR_LIMIT=NONE] -->
 
@@ -1479,6 +1532,9 @@
     <string name="volume_stream_content_description_mute">%1$s. Tap to mute. Accessibility services may be muted.</string>
     <string name="volume_stream_content_description_vibrate_a11y">%1$s. Tap to set to vibrate.</string>
     <string name="volume_stream_content_description_mute_a11y">%1$s. Tap to mute.</string>
+
+    <!-- Label for button to enabled/disable live caption [CHAR_LIMIT=30] -->
+    <string name="volume_panel_noise_control_title">Noise Control</string>
 
     <string name="volume_ringer_change">Tap to change ringer mode</string>
 
@@ -1492,6 +1548,12 @@
     <string name="volume_dialog_title">%s volume controls</string>
 
     <string name="volume_dialog_ringer_guidance_ring">Calls and notifications will ring (<xliff:g id="volume level" example="56">%1$s</xliff:g>)</string>
+
+    <!-- Title with application label for media output settings. [CHAR LIMIT=20] -->
+    <string name="media_output_label_title">Playing <xliff:g id="label" example="Music Player">%s</xliff:g> on</string>
+
+    <!-- Title for media output settings without media is playing. [CHAR LIMIT=20] -->
+    <string name="media_output_title_without_playing">Audio will play on</string>
 
     <!-- Name of special SystemUI debug settings -->
     <string name="system_ui_tuner">System UI Tuner</string>
@@ -1566,6 +1628,15 @@
     <!-- Accessibility label for hotspot icon [CHAR LIMIT=NONE] -->
     <string name="accessibility_status_bar_hotspot">Hotspot</string>
 
+    <!-- Accessibility label for no satellite connection [CHAR LIMIT=NONE] -->
+    <string name="accessibility_status_bar_satellite_no_connection">Satellite, no connection</string>
+    <!-- Accessibility label for poor satellite connection [CHAR LIMIT=NONE] -->
+    <string name="accessibility_status_bar_satellite_poor_connection">Satellite, poor connection</string>
+    <!-- Accessibility label for good satellite connection [CHAR LIMIT=NONE] -->
+    <string name="accessibility_status_bar_satellite_good_connection">Satellite, good connection</string>
+    <!-- Accessibility label for available satellite connection [CHAR LIMIT=NONE] -->
+    <string name="accessibility_status_bar_satellite_available">Satellite, connection available</string>
+
     <!-- Accessibility label for managed profile icon (not shown on screen) [CHAR LIMIT=NONE] -->
     <string name="accessibility_managed_profile">Work profile</string>
 
@@ -1602,36 +1673,8 @@
     <!-- Bluetooth enablement ok text [CHAR LIMIT=40] -->
     <string name="enable_bluetooth_confirmation_ok">Turn on</string>
 
-    <!-- [CHAR LIMIT=NONE] Importance Tuner setting title -->
-    <string name="tuner_full_importance_settings">Power notification controls</string>
-
     <!-- [CHAR LIMIT=NONE] Notification camera based rotation enabled description -->
     <string name="rotation_lock_camera_rotation_on">On - Face-based</string>
-
-    <string name="power_notification_controls_description">With power notification controls, you can set an importance level from 0 to 5 for an app\'s notifications.
-        \n\n<b>Level 5</b>
-        \n- Show at the top of the notification list
-        \n- Allow full screen interruption
-        \n- Always peek
-        \n\n<b>Level 4</b>
-        \n- Prevent full screen interruption
-        \n- Always peek
-        \n\n<b>Level 3</b>
-        \n- Prevent full screen interruption
-        \n- Never peek
-        \n\n<b>Level 2</b>
-        \n- Prevent full screen interruption
-        \n- Never peek
-        \n- Never make sound and vibration
-        \n\n<b>Level 1</b>
-        \n- Prevent full screen interruption
-        \n- Never peek
-        \n- Never make sound or vibrate
-        \n- Hide from lock screen and status bar
-        \n- Show at the bottom of the notification list
-        \n\n<b>Level 0</b>
-        \n- Block all notifications from the app
-    </string>
 
     <!-- Notification Inline controls: button to dismiss the blocking helper [CHAR_LIMIT=20] -->
     <string name="inline_done_button">Done</string>
@@ -1763,6 +1806,9 @@
 
     <!-- Notification: Snooze panel: Snooze undo button label. [CHAR LIMIT=50]-->
     <string name="snooze_undo">Undo</string>
+
+    <!-- Notification: Snooze panel: Snooze undo content description for a11y. [CHAR LIMIT=NONE]-->
+    <string name="snooze_undo_content_description">Undo notification snooze</string>
 
     <!-- Notification: Snooze panel: message indicating how long the notification was snoozed for. [CHAR LIMIT=100]-->
     <string name="snoozed_for_time">Snoozed for <xliff:g id="time_amount" example="15 minutes">%1$s</xliff:g></string>
@@ -1915,7 +1961,7 @@
     <!-- User visible title for the keyboard shortcut that locks screen. [CHAR LIMIT=70] -->
     <string name="group_system_lock_screen">Lock screen</string>
     <!-- User visible title for the keyboard shortcut that pulls up Notes app for quick memo. [CHAR LIMIT=70] -->
-    <string name="group_system_quick_memo">Open notes</string>
+    <string name="group_system_quick_memo">Take a note</string>
 
     <!-- User visible title for the system multitasking keyboard shortcuts list. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_system_multitasking">System multitasking</string>
@@ -2196,6 +2242,11 @@
     <!-- Tuner string -->
     <!-- Tuner string -->
 
+    <!-- Message shown during shutdown when Find My Device with Dead Battery Finder is active  [CHAR LIMIT=300] -->
+    <string name="finder_active">You can locate this phone with Find My Device even when powered off</string>
+    <!-- Shutdown Progress Dialog. This is shown if the user chooses to power off the phone. [CHAR LIMIT=60] -->
+    <string name="shutdown_progress">Shutting down\u2026</string>
+
     <!-- Text help link for care instructions for overheating devices [CHAR LIMIT=40] -->
     <string name="thermal_shutdown_dialog_help_text">See care steps</string>
     <!-- URL for care instructions for overheating devices -->
@@ -2274,6 +2325,8 @@
     <string name="notification_channel_storage">Storage</string>
     <!-- Title for the notification channel for hints and suggestions. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_hints">Hints</string>
+    <!-- Title for the notification channel for accessibility related (i.e. accessibility floating menu). [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_accessibility">Accessibility</string>
 
     <!-- App label of the instant apps notification [CHAR LIMIT=60] -->
     <string name="instant_apps">Instant Apps</string>
@@ -2396,10 +2449,6 @@
 
     <!-- URl of the webpage that explains battery saver. -->
     <string name="help_uri_battery_saver_learn_more_link_target" translatable="false"></string>
-
-    <!-- Name for a quick settings tile, used only by platform developers, to extract the SystemUI process memory and send it to another
-         app for debugging. Will not be seen by users. [CHAR LIMIT=20] -->
-    <string name="heap_dump_tile_name">Dump SysUI Heap</string>
 
     <!-- Title for the privacy indicators dialog, only appears as part of a11y descriptions [CHAR LIMIT=NONE] -->
     <string name="ongoing_privacy_dialog_a11y_title">In use</string>
@@ -2548,6 +2597,11 @@
     <string name="accessibility_floating_button_docking_tooltip">Move button to the edge to hide it temporarily</string>
     <!-- Text for the undo action button of the message view of the accessibility floating menu to perform undo operation. [CHAR LIMIT=30]-->
     <string name="accessibility_floating_button_undo">Undo</string>
+    <!-- Notification title shown when accessibility floating button is in hidden state. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_floating_button_hidden_notification_title">Accessibility button hidden</string>
+    <!-- Notification content text to explain user can tap notification to bring back accessibility floating button. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_floating_button_hidden_notification_text">Tap to show accessibility button</string>
+
     <!-- Text for the message view with undo action of the accessibility floating menu to show which feature shortcut was removed. [CHAR LIMIT=30]-->
     <string name="accessibility_floating_button_undo_message_label_text"><xliff:g id="feature name" example="Magnification">%s</xliff:g> shortcut removed</string>
     <!-- Text for the message view with undo action of the accessibility floating menu to show how many features shortcuts were removed. [CHAR LIMIT=30]-->
@@ -2571,6 +2625,8 @@
     <string name="accessibility_floating_button_action_remove_menu">Remove</string>
     <!-- Action in accessibility menu to toggle on/off the accessibility feature. [CHAR LIMIT=30]-->
     <string name="accessibility_floating_button_action_double_tap_to_toggle">toggle</string>
+    <!-- Action in accessibility menu to open the shortcut edit menu" [CHAR LIMIT=30]-->
+    <string name="accessibility_floating_button_action_edit">Edit</string>
 
     <!-- Device Controls strings -->
     <!-- Device Controls, Quick Settings tile title [CHAR LIMIT=30] -->
@@ -3089,6 +3145,8 @@
     <!-- [CHAR LIMIT=25] Long label used by Note Task Shortcut -->
     <string name="note_task_shortcut_long_label">Note-taking, <xliff:g id="note_taking_app" example="Note-taking App">%1$s</xliff:g></string>
 
+    <!-- [CHAR LIMIT=NONE] Output switch chip text during broadcasting -->
+    <string name="audio_sharing_description">Sharing audio</string>
     <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, media app is broadcasting -->
     <string name="broadcasting_description_is_broadcasting">Broadcasting</string>
     <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, title -->
@@ -3196,6 +3254,12 @@
     <!-- Text for education page content description for unfolded animation. [CHAR_LIMIT=NONE] -->
     <string name="rear_display_accessibility_unfolded_animation">Foldable device being flipped around</string>
 
+    <!-- QuickSettings: Additional label for the auto-rotation quicksettings tile indicating that the setting corresponds to the folded posture for a foldable device [CHAR LIMIT=32] -->
+    <string name="quick_settings_rotation_posture_folded">folded</string>
+    <!-- QuickSettings: Additional label for the auto-rotation quicksettings tile indicating that the setting corresponds to the unfolded posture for a foldable device [CHAR LIMIT=32] -->
+    <string name="quick_settings_rotation_posture_unfolded">unfolded</string>
+    <!-- QuickSettings: template for rotation tile foldable secondary label [CHAR LIMIT=64] !-->
+    <string name="rotation_tile_with_posture_secondary_label_template">%1$s / %2$s</string>
     <!-- Title for notification of low stylus battery with percentage. "percentage" is
         the value of the battery capacity remaining [CHAR LIMIT=none]-->
     <string name="stylus_battery_low_percentage"><xliff:g id="percentage" example="16%">%s</xliff:g> battery remaining</string>
@@ -3266,10 +3330,13 @@
     <!-- Label for a button that, when clicked, sends the user to the app store to install an app. [CHAR LIMIT=64]. -->
     <string name="install_app">Install app</string>
 
+    <!-- Instructions informing the user they can swipe up on the lockscreen to dismiss [CHAR LIMIT=48]-->
+    <string name="dismissible_keyguard_swipe">Swipe up to continue</string>
+
     <!--- Title of the dialog appearing when an external display is connected, asking whether to start mirroring [CHAR LIMIT=NONE]-->
     <string name="connected_display_dialog_start_mirroring">Mirror to external display?</string>
     <!--- Body of the mirroring dialog, shown when dual display is enabled. This signals that enabling mirroring will stop concurrent displays on a foldable device. [CHAR LIMIT=NONE]-->
-    <string name="connected_display_dialog_dual_display_stop_warning">Any dual screen activity currently running will be stopped</string>
+    <string name="connected_display_dialog_dual_display_stop_warning">Your inner display will be mirrored. Your front display will be turned off.</string>
     <!--- Label of the "enable display" button of the dialog appearing when an external display is connected [CHAR LIMIT=NONE]-->
     <string name="mirror_display">Mirror display</string>
     <!--- Label of the dismiss button of the dialog appearing when an external display is connected [CHAR LIMIT=NONE]-->
@@ -3319,4 +3386,8 @@
     <string name="keyboard_backlight_dialog_title">Keyboard backlight</string>
     <!-- Content description for keyboard backlight brightness value [CHAR LIMIT=NONE] -->
     <string name="keyboard_backlight_value">Level %1$d of %2$d</string>
+    <!-- Label for home control panel [CHAR LIMIT=30] -->
+    <string name="home_controls_dream_label">Home Controls</string>
+    <!-- Description for home control panel [CHAR LIMIT=67] -->
+    <string name="home_controls_dream_description">Quickly access your home controls as a screensaver</string>
 </resources>

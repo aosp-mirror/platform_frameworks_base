@@ -18,5 +18,6 @@ package com.android.internal.app;
 
 // Iterface to observe op note/checks of ops
 oneway interface IAppOpsNotedCallback {
-    void opNoted(int op, int uid, String packageName, String attributionTag, int flags, int mode);
+    void opNoted(int op, int uid, String packageName, String attributionTag, int virtualDeviceId,
+     int flags, int mode);
 }

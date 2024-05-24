@@ -19,6 +19,7 @@ package android.appwidget;
 import static android.appwidget.flags.Flags.remoteAdapterConversion;
 
 import android.annotation.BroadcastBehavior;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
@@ -30,6 +31,7 @@ import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.IServiceConnection;
 import android.app.PendingIntent;
+import android.appwidget.flags.Flags;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -820,18 +822,7 @@ public class AppWidgetManager {
      *
      * @param appWidgetIds  The AppWidget instances to notify of view data changes.
      * @param viewId        The collection view id.
-     * @deprecated The corresponding API
-     * {@link RemoteViews#setRemoteAdapter(int, Intent)} associated with this method has been
-     * deprecated. Moving forward please use
-     * {@link RemoteViews#setRemoteAdapter(int, android.widget.RemoteViews.RemoteCollectionItems)}
-     * instead to set {@link android.widget.RemoteViews.RemoteCollectionItems} for the remote
-     * adapter and update the widget views by calling {@link #updateAppWidget(int[], RemoteViews)},
-     * {@link #updateAppWidget(int, RemoteViews)},
-     * {@link #updateAppWidget(ComponentName, RemoteViews)},
-     * {@link #partiallyUpdateAppWidget(int[], RemoteViews)},
-     * or {@link #partiallyUpdateAppWidget(int, RemoteViews)}, whichever applicable.
      */
-    @Deprecated
     public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, int viewId) {
         if (mService == null) {
             return;
@@ -882,18 +873,7 @@ public class AppWidgetManager {
      *
      * @param appWidgetId  The AppWidget instance to notify of view data changes.
      * @param viewId       The collection view id.
-     * @deprecated The corresponding API
-     * {@link RemoteViews#setRemoteAdapter(int, Intent)} associated with this method has been
-     * deprecated. Moving forward please use
-     * {@link RemoteViews#setRemoteAdapter(int, android.widget.RemoteViews.RemoteCollectionItems)}
-     * instead to set {@link android.widget.RemoteViews.RemoteCollectionItems} for the remote
-     * adapter and update the widget views by calling {@link #updateAppWidget(int[], RemoteViews)},
-     * {@link #updateAppWidget(int, RemoteViews)},
-     * {@link #updateAppWidget(ComponentName, RemoteViews)},
-     * {@link #partiallyUpdateAppWidget(int[], RemoteViews)},
-     * or {@link #partiallyUpdateAppWidget(int, RemoteViews)}, whichever applicable.
      */
-    @Deprecated
     public void notifyAppWidgetViewDataChanged(int appWidgetId, int viewId) {
         if (mService == null) {
             return;
@@ -1414,6 +1394,89 @@ public class AppWidgetManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Set a preview for this widget. This preview will be used instead of the provider's {@link
+     * AppWidgetProviderInfo#previewLayout previewLayout} or {@link
+     * AppWidgetProviderInfo#previewImage previewImage} for previewing the widget in the widget
+     * picker and pin app widget flow.
+     *
+     * @param provider The {@link ComponentName} for the {@link android.content.BroadcastReceiver
+     *    BroadcastReceiver} provider for the AppWidget you intend to provide a preview for.
+     * @param widgetCategories The categories that this preview should be used for. This can be a
+     *    single category or combination of categories. If multiple categories are specified,
+     *    then this preview will be used for each of those categories. For example, if you
+     *    set a preview for WIDGET_CATEGORY_HOME_SCREEN | WIDGET_CATEGORY_KEYGUARD, the preview will
+     *    be used when picking widgets for the home screen and keyguard.
+     *
+     *    <p>Note: You should only use the widget categories that the provider supports, as defined
+     *    in {@link AppWidgetProviderInfo#widgetCategory}.
+     * @param preview This preview will be used for previewing the provider when picking widgets for
+     *    the selected categories.
+     *
+     * @see AppWidgetProviderInfo#WIDGET_CATEGORY_HOME_SCREEN
+     * @see AppWidgetProviderInfo#WIDGET_CATEGORY_KEYGUARD
+     * @see AppWidgetProviderInfo#WIDGET_CATEGORY_SEARCHBOX
+     */
+    @FlaggedApi(Flags.FLAG_GENERATED_PREVIEWS)
+    public void setWidgetPreview(@NonNull ComponentName provider,
+            @AppWidgetProviderInfo.CategoryFlags int widgetCategories,
+            @NonNull RemoteViews preview) {
+        try {
+            mService.setWidgetPreview(provider, widgetCategories, preview);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the RemoteViews previews for this widget.
+     *
+     * @param provider The {@link ComponentName} for the {@link android.content.BroadcastReceiver
+     *    BroadcastReceiver} provider for the AppWidget you intend to get a preview for.
+     * @param profile The profile in which the provider resides. Passing null is equivalent
+     *        to querying for only the calling user.
+     * @param widgetCategory The widget category for which you want to display previews. This should
+     *    be a single category. If a combination of categories is provided, this function will
+     *    return a preview that matches at least one of the categories.
+     *
+     * @return The widget preview for the selected category, if available.
+     * @see AppWidgetProviderInfo#generatedPreviewCategories
+     */
+    @Nullable
+    @FlaggedApi(Flags.FLAG_GENERATED_PREVIEWS)
+    public RemoteViews getWidgetPreview(@NonNull ComponentName provider,
+            @Nullable UserHandle profile, @AppWidgetProviderInfo.CategoryFlags int widgetCategory) {
+        try {
+            if (profile == null) {
+                profile = mContext.getUser();
+            }
+            return mService.getWidgetPreview(mPackageName, provider, profile.getIdentifier(),
+                    widgetCategory);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Remove this provider's preview for the specified widget categories. If the provider does not
+     * have a preview for the specified widget category, this is a no-op.
+     *
+     * @param provider The AppWidgetProvider to remove previews for.
+     * @param widgetCategories The categories of the preview to remove. For example, removing the
+     *    preview for WIDGET_CATEGORY_HOME_SCREEN | WIDGET_CATEGORY_KEYGUARD will remove the
+     *    previews for both categories.
+     */
+    @FlaggedApi(Flags.FLAG_GENERATED_PREVIEWS)
+    public void removeWidgetPreview(@NonNull ComponentName provider,
+            @AppWidgetProviderInfo.CategoryFlags int widgetCategories) {
+        try {
+            mService.removeWidgetPreview(provider, widgetCategories);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
 
     @UiThread
     private static @NonNull Executor createUpdateExecutorIfNull() {

@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> ছেকেণ্ডৰ পাছত"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ফৰৱাৰ্ড কৰা নহ\'ল"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ফৰৱাৰ্ড কৰা নহ\'ল"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"চেলুলাৰ নেটৱৰ্কৰ সুৰক্ষা"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"ছেটিং পৰ্যালোচনা কৰক"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"ডিভাইচৰ চিনাক্তকৰ্তা এক্সেছ কৰা হৈছে"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> সংযোগত এটা নেটৱৰ্কে আপোনাৰ ডিভাইচৰ অদ্বিতীয় চিনাক্তকৰ্তা (IMSI)ক <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> আৰু <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>ৰ মাজৰ সময় অৱধিত<xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> বাৰ ৰেকৰ্ড কৰিছে।"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>ৰ সৈতে এনক্ৰিপ্ট কৰা সংযোগ"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"আপুনি এতিয়া এটা অধিক সুৰক্ষিত চেলুলাৰ নেটৱৰ্কৰ সৈতে সংযুক্ত হৈছে।"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>ৰ সৈতে এনক্ৰিপ্ট নকৰা সংযোগ"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"আপুনি এটা এনক্ৰিপ্ট নকৰা চেলুলাৰ নেটৱৰ্কৰ সৈতে সংযুক্ত হৈছে। আপোনাৰ কল, বাৰ্তা আৰু ডেটা বাধাগ্ৰস্ত হ’ব পাৰে।"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"চেলুলাৰ সুৰক্ষাৰ ছেটিং"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"অধিক জানক"</string>
     <string name="fcComplete" msgid="1080909484660507044">"সুবিধাৰ ক\'ড সম্পূর্ণ হ’ল।"</string>
     <string name="fcError" msgid="5325116502080221346">"সংযোগত সমস্যা হৈছে বা সুবিধাৰ ক\'ড অমান্য।"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ঠিক আছে"</string>
@@ -370,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"চেল সম্প্ৰচাৰ বাৰ্তাসমূহ লাভ কৰিলে সেইবোৰ ফৰৱাৰ্ড কৰিবলৈ এপ্‌টোক চেল সম্প্ৰচাৰ মডিউলটোৰ সৈতে সংযুক্ত হ\'বলৈ অনুমতি দিয়ে। আপোনাক জৰুৰীকালীন পৰিস্থিতিসমূহৰ বিষয়ে সতৰ্ক কৰিবলৈ কিছুমান অৱস্থানত চেল সম্প্ৰচাৰ সতৰ্কবাৰ্তাসমূহ ডেলিভাৰ কৰা হয়। কোনো জৰুৰীকালীন চেল সম্প্ৰচাৰ লাভ কৰিলে ক্ষতিকাৰক এপ্‌সমূহে আপোনাৰ ডিভাইচটোৰ কাৰ্যক্ষমতা অথবা কাৰ্যপ্ৰণালীত হস্তক্ষেপ কৰিব পাৰে।"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"চলি থকা কলসমূহ পৰিচালনা কৰক"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"এটা এপক আপোনাৰ ডিভাইচত চলি থকা কলৰ সবিশেষ চাবলৈ আৰু এই কলসমূহ নিয়ন্ত্ৰণ কৰিবলৈ অনুমতি দিয়ে।"</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"অন্তিম জ্ঞাত চেলৰ পৰিচয় এক্সেছ কৰক।"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"কোনো এপক টেলিফ’নীয়ে প্ৰদান কৰা অন্তিম জ্ঞাত চেলৰ পৰিচয়টো এক্সেছ কৰাৰ অনুমতি দিয়ে।"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"চেল সম্প্ৰচাৰৰ বার্তাবোৰ পঢ়ক"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"আপোনাৰ ডিভাইচে লাভ কৰা চেল সম্প্ৰচাৰৰ বার্তাবোৰ পঢ়িবলৈ এপক অনুমতি দিয়ে। আপোনাক জৰুৰীকালীন পৰিস্থিতিবোৰত সর্তক কৰিবলৈ চেল সম্প্ৰচাৰৰ বার্তাবোৰ প্ৰেৰণ কৰা হয়। জৰুৰীকালীন চেল সম্প্ৰচাৰ লাভ কৰাৰ সময়ত আপোনাৰ ডিভাইচৰ কাৰ্যদক্ষতা বা কাৰ্যপ্ৰণালীত ক্ষতিকাৰক এপবোৰে হস্তক্ষেপ কৰিব পাৰে।"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"আপুনি সদস্যভুক্ত হোৱা ফীডসমূহ পঢ়ক"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"এপ্‌টোক \"systemExempted\" সম্পৰ্কীয় অগ্ৰভূমি সেৱাসমূহ ব্যৱহাৰ কৰিবলৈ অনুমতি দিয়ে"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"\"fileManagement\" সম্পৰ্কীয় অগ্ৰভূমি সেৱাসমূহ চলাওক"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"এপ্‌টোক \"fileManagement\" সম্পৰ্কীয় অগ্ৰভূমি সেৱাসমূহ ব্যৱহাৰ কৰিবলৈ অনুমতি দিয়ে"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"\"mediaProcessing\" সম্পৰ্কীয় অগ্ৰভূমি সেৱাসমূহ চলাওক"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"এপ্‌টোক \"mediaProcessing\" সম্পৰ্কীয় অগ্ৰভূমি সেৱাসমূহ ব্যৱহাৰ কৰিবলৈ অনুমতি দিয়ে"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" সম্পৰ্কীয় অগ্ৰভূমি সেৱাসমূহ চলাওক"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"এপ্‌টোক \"specialUse\" সম্পৰ্কীয় অগ্ৰভূমি সেৱাসমূহ ব্যৱহাৰ কৰিবলৈ অনুমতি দিয়ে"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"এপৰ ষ্ট’ৰেজৰ খালী ঠাই হিচাপ কৰক"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"ফ\'নৰ ইনফ্ৰাৰেড ট্ৰান্সমিটাৰ ব্যৱহাৰ কৰিবলৈ এপক অনুমতি দিয়ে।"</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"ৱালপেপাৰ ছেট কৰক"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"ছিষ্টেমৰ ৱালপেপাৰ ছেট কৰিবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"লুকুৱাই ৰখা প্ৰ’ফাইলসমূহ এক্সেছ কৰা"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"এপ্‌টোক লুকুৱাই ৰখা প্ৰ’ফাইলসমূহ এক্সেছ কৰিবলৈ দিয়ে।"</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"আপোনাৰ ৱালপেপাৰৰ আকাৰ মিলাওক"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"ছিষ্টেমৰ ৱালপেপাৰৰ আকাৰ হিণ্ট ছেট কৰিবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"সময় মণ্ডল ছেট কৰক"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"স্ক্ৰীন ল\'ক ব্যৱহাৰ কৰক"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"অব্যাহত ৰাখিবলৈ আপোনাৰ স্ক্ৰীন লক দিয়ক"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"ছেন্সৰটোত ভালকৈ টিপক"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ফিংগাৰপ্ৰিণ্ট চিনাক্ত কৰিব পৰা নাই। পুনৰ চেষ্টা কৰক।"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"ফিংগাৰপ্ৰিণ্ট চিনাক্ত কৰিব পৰা নাই। পুনৰ চেষ্টা কৰক।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰটো মচি পুনৰ চেষ্টা কৰক"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"ছেন্সৰটো মচি পুনৰ চেষ্টা কৰক"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"ছেন্সৰটোত ভালকৈ টিপক"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ফিংগাৰপ্ৰিণ্টৰ সত্যাপন কৰা হ’ল"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল, অনুগ্ৰহ কৰি ‘নিশ্চিত কৰক’ বুটামটো টিপক"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ফিংগাৰপ্ৰিণ্ট হাৰ্ডৱেৰ নাই।"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"ফিংগাৰপ্ৰিণ্ট হাৰ্ডৱেৰ নাই"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ফিংগাৰপ্ৰিণ্ট ছেট আপ কৰিব নোৱাৰি"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ফিংগাৰপ্ৰিণ্ট ছেটআপ কৰাৰ সময় উকলি গৈছে। পুনৰ চেষ্টা কৰক।"</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"ফিংগাৰপ্ৰিণ্ট কাৰ্য বাতিল কৰা হ’ল।"</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ব্যৱহাৰকাৰীয়ে ফিংগাৰপ্ৰিণ্ট ক্ৰিয়া বাতিল কৰিছে।"</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"ফিংগাৰপ্ৰিণ্টৰ দ্বাৰা বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কাৰ্যটো বাতিল কৰা হৈছে"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"ব্যৱহাৰকাৰীয়ে ফিংগাৰপ্ৰিণ্টৰ দ্বাৰা বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কাৰ্য বাতিল কৰিছে"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"অতি বেছিসংখ্যক প্ৰয়াস। ইয়াৰ সলনি স্ক্ৰীন লক ব্যৱহাৰ কৰক।"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"অতি বেছিসংখ্যক প্ৰয়াস। ইয়াৰ সলনি স্ক্ৰীন লক ব্যৱহাৰ কৰক।"</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ফিংগাৰপ্ৰিণ্ট চিনাক্তকৰণ প্ৰক্ৰিয়া কৰিব পৰা নাই। পুনৰ চেষ্টা কৰক।"</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"কোনো ফিংগাৰপ্ৰিণ্ট যোগ কৰা নহ\'ল।"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"এই ডিভাইচটোত ফিংগাৰপ্ৰিণ্ট ছেন্সৰ নাই।"</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ছেন্সৰটো সাময়িকভাৱে অক্ষম হৈ আছে।"</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰ ব্যৱহাৰ কৰিব নোৱাৰি। মেৰামতি সেৱা প্ৰদানকাৰী কোনো প্ৰতিষ্ঠানলৈ যাওক"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"কোনো ফিংগাৰপ্ৰিণ্ট পঞ্জীয়ন কৰা হোৱা নাই"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"এই ডিভাইচটোত ফিংগাৰপ্ৰিণ্ট ছেন্সৰ নাই"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"ছেন্সৰটো সাময়িকভাৱে অক্ষম হৈ আছে"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰ ব্যৱহাৰ কৰিব নোৱাৰি। মেৰামতি সেৱা প্ৰদানকাৰী কোনো প্ৰতিষ্ঠানলৈ যাওক।"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"পাৱাৰ বুটাম টিপা হৈছে"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g> আঙুলি"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ফিংগাৰপ্ৰিণ্ট ব্যৱহাৰ কৰক"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"আপোনাৰ মুখাৱয়ব দেখা নাই। আপোনাৰ ফ’নটো চকুৰ স্তৰত ধৰি ৰাখক।"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"বেছি লৰচৰ কৰি আছে। ফ’নটো স্থিৰকৈ ধৰক।"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"আপোনাৰ মুখমণ্ডল পুনৰ পঞ্জীয়ন কৰক।"</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"মুখাৱয়ব চিনিব নোৱাৰি। পুনৰ চেষ্টা কৰক।"</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"মুখাৱয়ব চিনাক্ত কৰিব পৰা নাই। পুনৰ চেষ্টা কৰক।"</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"আপোনাৰ মূৰটোৰ স্থান সামান্য সলনি কৰক"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"আপোনাৰ ফ’নটোলৈ আৰু পোনপটীয়াকৈ চাওক"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"আপোনাৰ ফ’নটোলৈ আৰু পোনপটীয়াকৈ চাওক"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"এপ্‌টোক ২০০ হাৰ্টজতকৈ অধিক হাৰত ছেন্সৰৰ ডেটাৰ নমুনা ল’বলৈ অনুমতি দিয়ে"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ব্যৱহাৰকাৰীৰ কাৰ্য অবিহনে এপ্‌টো আপডে’ট কৰক"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"ব্যৱহাৰকাৰীৰ কাৰ্য অবিহনে ধাৰকক তেওঁ পূৰ্বে ইনষ্টল কৰা এপ্‌টো আপডে’ট কৰাৰ অনুমতি দিয়ে"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"আন এপৰ মালিকানাধীন E2EE সম্পৰ্কৰ কীসমূহৰ সত্যাপনৰ স্থিতি আপডে’ট কৰা"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"এপ্‌টোক আন এপৰ মালিকানাধীন E2EE সম্পৰ্কৰ কীসমূহৰ সত্যাপনৰ স্থিতি আপডে’ট কৰিবলৈ দিয়ে"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"পাছৱর্ডৰ নিয়ম ছেট কৰক"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"স্ক্ৰীন লক পাছৱৰ্ড আৰু পিনত অনুমোদিত দৈৰ্ঘ্য আৰু বৰ্ণবোৰ নিয়ন্ত্ৰণ কৰক।।"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"স্ক্ৰীন আনলক কৰা প্ৰয়াসবোৰ নিৰীক্ষণ কৰক"</string>
@@ -1177,7 +1195,7 @@
     <string name="yes" msgid="9069828999585032361">"ঠিক আছে"</string>
     <string name="no" msgid="5122037903299899715">"বাতিল কৰক"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"মনোযোগ দিব"</string>
-    <string name="loading" msgid="3138021523725055037">"ল\'ড কৰি থকা হৈছে…"</string>
+    <string name="loading" msgid="3138021523725055037">"ল’ড হৈ আছে…"</string>
     <string name="capital_on" msgid="2770685323900821829">"অন কৰক"</string>
     <string name="capital_off" msgid="7443704171014626777">"অফ কৰক"</string>
     <string name="checked" msgid="9179896827054513119">"টিক চিহ্ন দিয়া হৈছে"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"সপ্তাহ অন্ত"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"কার্যক্ৰম"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"নিদ্ৰাৰত"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ পৰিচালনা কৰা"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"অন আছে"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"অফ আছে"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>এ কিছুমান ধ্বনি মিউট কৰি আছে"</string>
@@ -1925,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"সত্যাপিত"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"বিস্তাৰ কৰক"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"সংকুচিত কৰক"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"সংকোচন কৰা আছে"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"বিস্তাৰ কৰা আছে"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"সম্প্ৰসাৰণ ট’গল কৰক"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Androidৰ ইউএছবি পেৰিফেৰেল প\'ৰ্ট"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"কাম সম্পৰ্কীয় এপ্ আনপজ কৰিবনে?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"আনপজ কৰক"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"জৰুৰীকালীন"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"এটা স্ক্ৰীন লক ছেট কৰক"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"স্ক্ৰীন লক ছেট কৰা"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"আপোনাৰ প্ৰাইভেট স্পেচ ব্যৱহাৰ কৰিবলৈ এই ডিভাইচটোত স্ক্ৰীন লক ছেট কৰক"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"এপ্‌টো উপলব্ধ নহয়"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"এই মুহূৰ্তত <xliff:g id="APP_NAME">%1$s</xliff:g> উপলব্ধ নহয়।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> উপলব্ধ নহয়"</string>
@@ -2341,8 +2365,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"সংযুক্ত ডিছপ্লে’ উপলব্ধ নহয়"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"অন্য এডাল কে’বল ব্যৱহাৰ কৰি পুনৰ চেষ্টা কৰক"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"আপোনাৰ ডিভাইচটো অত্যধিক গৰম হৈছে আৰু এইটো ঠাণ্ডা নোহোৱালৈকে ডিছপ্লে’ত প্ৰতিবিম্বকৰণ কৰিব নোৱাৰি"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"কে’বলে ডিছপ্লে’ সমৰ্থন নকৰিবও পাৰে"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"আপোনাৰ USB-C কে’বল ডিছপ্লে’ৰ সৈতে সঠিকভাৱে সংযোগ নহ’বও পাৰে"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen অন আছে"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ সমল দেখুৱাবলৈ দুয়োখন ডিছপ্লে’ ব্যৱহাৰ কৰি আছে"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"কৰ্মস্থান ৩"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"পৰীক্ষা"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"শ্বেয়াৰ কৰা"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"উপগ্ৰহৰ সৈতে স্বয়ংক্ৰিয়ভাৱে সংযুক্ত হৈছে"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"আপুনি ম’বাইল বা ৱাই-ফাই নেটৱৰ্কৰ জৰিয়তে পাঠ বাৰ্তা পঠিয়াব বা লাভ কৰিব পাৰে"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages খোলক"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ই কেনেকৈ কাম কৰে"</string>
 </resources>

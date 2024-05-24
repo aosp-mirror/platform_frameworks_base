@@ -26,11 +26,13 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,26 +54,44 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
             val pixels = -100f
             val enterFromTopTranslationY by
                 collectLastValue(underTest.enterFromTopTranslationY(pixels.toInt()))
+            runCurrent()
 
             // The animation should only start > .4f way through
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            assertThat(enterFromTopTranslationY).isEqualTo(pixels)
+            assertThat(enterFromTopTranslationY)
+                .isEqualTo(
+                    StateToValue(
+                        from = KeyguardState.GONE,
+                        to = KeyguardState.AOD,
+                        transitionState = TransitionState.STARTED,
+                        value = pixels
+                    )
+                )
 
-            repository.sendTransitionStep(step(0.4f))
-            assertThat(enterFromTopTranslationY).isEqualTo(pixels)
+            repository.sendTransitionStep(step(.55f))
+            assertThat(enterFromTopTranslationY!!.value ?: -1f).isIn(Range.closed(pixels, 0f))
 
             repository.sendTransitionStep(step(.85f))
-            assertThat(enterFromTopTranslationY).isIn(Range.closed(pixels, 0f))
+            assertThat(enterFromTopTranslationY!!.value ?: -1f).isIn(Range.closed(pixels, 0f))
 
             // At the end, the translation should be complete and set to zero
             repository.sendTransitionStep(step(1f))
-            assertThat(enterFromTopTranslationY).isEqualTo(0f)
+            assertThat(enterFromTopTranslationY)
+                .isEqualTo(
+                    StateToValue(
+                        from = KeyguardState.GONE,
+                        to = KeyguardState.AOD,
+                        transitionState = TransitionState.RUNNING,
+                        value = 0f
+                    )
+                )
         }
 
     @Test
     fun enterFromTopAnimationAlpha() =
         testScope.runTest {
             val enterFromTopAnimationAlpha by collectLastValue(underTest.enterFromTopAnimationAlpha)
+            runCurrent()
 
             // The animation should only start > .4f way through
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
@@ -92,6 +112,7 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val deviceEntryBackgroundViewAlpha by
                 collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
+            runCurrent()
 
             // immediately 0f
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
@@ -113,6 +134,7 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
             fingerprintPropertyRepository.supportsUdfps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
             val deviceEntryParentViewAlpha by collectLastValue(underTest.deviceEntryParentViewAlpha)
+            runCurrent()
 
             // animation doesn't start until the end
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
@@ -137,6 +159,7 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
             fingerprintPropertyRepository.supportsRearFps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
             val deviceEntryParentViewAlpha by collectLastValue(underTest.deviceEntryParentViewAlpha)
+            runCurrent()
 
             // animation doesn't start until the end
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
@@ -161,6 +184,7 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
             fingerprintPropertyRepository.supportsUdfps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
             val deviceEntryParentViewAlpha by collectLastValue(underTest.deviceEntryParentViewAlpha)
+            runCurrent()
 
             // animation doesn't start until the end
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))

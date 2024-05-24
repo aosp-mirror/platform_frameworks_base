@@ -19,6 +19,7 @@ package android.media;
 import android.media.MediaRoute2Info;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
+import android.os.UserHandle;
 
 /**
  * @hide
@@ -35,5 +36,6 @@ oneway interface IMediaRouter2 {
      * Call MediaRouterService#requestCreateSessionWithRouter2 to pass the result.
      */
     void requestCreateSessionByManager(long uniqueRequestId, in RoutingSessionInfo oldSession,
-        in MediaRoute2Info route);
+        in MediaRoute2Info route, in UserHandle transferInitiatorUserHandle,
+        in String transferInitiatorPackageName);
 }

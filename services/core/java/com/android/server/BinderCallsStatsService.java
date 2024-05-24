@@ -288,22 +288,23 @@ public class BinderCallsStatsService extends Binder {
                         CachedDeviceState.Readonly.class);
                 mBinderCallsStats.setDeviceState(deviceState);
 
-                BatteryStatsInternal batteryStatsInternal = getLocalService(
-                        BatteryStatsInternal.class);
-                mBinderCallsStats.setCallStatsObserver(new BinderInternal.CallStatsObserver() {
-                    @Override
-                    public void noteCallStats(int workSourceUid, long incrementalCallCount,
-                            Collection<BinderCallsStats.CallStat> callStats) {
-                        batteryStatsInternal.noteBinderCallStats(workSourceUid,
-                                incrementalCallCount, callStats);
-                    }
+                if (!com.android.server.power.optimization.Flags.disableSystemServicePowerAttr()) {
+                    BatteryStatsInternal batteryStatsInternal = getLocalService(
+                            BatteryStatsInternal.class);
+                    mBinderCallsStats.setCallStatsObserver(new BinderInternal.CallStatsObserver() {
+                        @Override
+                        public void noteCallStats(int workSourceUid, long incrementalCallCount,
+                                Collection<BinderCallsStats.CallStat> callStats) {
+                            batteryStatsInternal.noteBinderCallStats(workSourceUid,
+                                    incrementalCallCount, callStats);
+                        }
 
-                    @Override
-                    public void noteBinderThreadNativeIds(int[] binderThreadNativeTids) {
-                        batteryStatsInternal.noteBinderThreadNativeIds(binderThreadNativeTids);
-                    }
-                });
-
+                        @Override
+                        public void noteBinderThreadNativeIds(int[] binderThreadNativeTids) {
+                            batteryStatsInternal.noteBinderThreadNativeIds(binderThreadNativeTids);
+                        }
+                    });
+                }
                 // It needs to be called before mService.systemReady to make sure the observer is
                 // initialized before installing it.
                 mWorkSourceProvider.systemReady(getContext());

@@ -19,13 +19,14 @@ package com.android.systemui.biometrics.domain.interactor
 import android.app.ActivityManager
 import android.app.ActivityTaskManager
 import android.content.ComponentName
-import android.platform.test.annotations.RequiresFlagsEnabled
+import android.hardware.biometrics.BiometricFingerprintConstants
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
 import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.AuthenticationReason.SettingsOperations
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,7 +45,6 @@ import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
-@RequiresFlagsEnabled(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
@@ -59,6 +59,7 @@ class BiometricStatusInteractorImplTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
         biometricStatusRepository = FakeBiometricStatusRepository()
         underTest = BiometricStatusInteractorImpl(activityTaskManager, biometricStatusRepository)
     }
@@ -162,6 +163,27 @@ class BiometricStatusInteractorImplTest : SysuiTestCase() {
                 AuthenticationReason.NotRunning
             )
             assertThat(sfpsAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
+        }
+
+    @Test
+    fun updatesFingerprintAcquiredStatusWhenBiometricPromptAuthenticationAcquired() =
+        testScope.runTest {
+            val fingerprintAcquiredStatus by collectLastValue(underTest.fingerprintAcquiredStatus)
+            runCurrent()
+
+            biometricStatusRepository.setFingerprintAcquiredStatus(
+                AcquiredFingerprintAuthenticationStatus(
+                    AuthenticationReason.BiometricPromptAuthentication,
+                    BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
+                )
+            )
+            assertThat(fingerprintAcquiredStatus)
+                .isEqualTo(
+                    AcquiredFingerprintAuthenticationStatus(
+                        AuthenticationReason.BiometricPromptAuthentication,
+                        BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
+                    )
+                )
         }
 }
 

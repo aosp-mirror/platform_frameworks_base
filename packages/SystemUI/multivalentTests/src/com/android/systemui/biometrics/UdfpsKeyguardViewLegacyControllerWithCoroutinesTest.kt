@@ -16,40 +16,27 @@
 
 package com.android.systemui.biometrics
 
-import android.os.Handler
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.keyguard.KeyguardSecurityModel
 import com.android.systemui.biometrics.UdfpsKeyguardViewLegacy.ANIMATE_APPEAR_ON_SCREEN_OFF
 import com.android.systemui.biometrics.UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN
-import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
-import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
-import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepositoryImpl
-import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.biometrics.domain.interactor.udfpsOverlayInteractor
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.primaryBouncerInteractor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
-import com.android.systemui.bouncer.ui.BouncerView
-import com.android.systemui.classifier.FalsingCollector
-import com.android.systemui.keyguard.DismissCallbackRegistry
-import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.data.repository.FakeTrustRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.StatusBarState
-import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.time.FakeSystemClock
-import com.android.systemui.util.time.SystemClock
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
@@ -60,9 +47,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -73,63 +58,24 @@ import org.mockito.MockitoAnnotations
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
     UdfpsKeyguardViewLegacyControllerBaseTest() {
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
-    private lateinit var keyguardBouncerRepository: KeyguardBouncerRepository
-    private lateinit var transitionRepository: FakeKeyguardTransitionRepository
-
-    @Mock private lateinit var bouncerLogger: TableLogBuffer
+    private val keyguardBouncerRepository = kosmos.fakeKeyguardBouncerRepository
+    private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
 
     @Before
     override fun setUp() {
         allowTestableLooperAsMainThread() // repeatWhenAttached requires the main thread
         MockitoAnnotations.initMocks(this)
-        keyguardBouncerRepository =
-            KeyguardBouncerRepositoryImpl(
-                FakeSystemClock(),
-                testScope.backgroundScope,
-                bouncerLogger,
-            )
-        transitionRepository = FakeKeyguardTransitionRepository()
         super.setUp()
     }
 
     override fun createUdfpsKeyguardViewController(): UdfpsKeyguardViewControllerLegacy {
-        mPrimaryBouncerInteractor =
-            PrimaryBouncerInteractor(
-                keyguardBouncerRepository,
-                mock(BouncerView::class.java),
-                mock(Handler::class.java),
-                mKeyguardStateController,
-                mock(KeyguardSecurityModel::class.java),
-                mock(PrimaryBouncerCallbackInteractor::class.java),
-                mock(FalsingCollector::class.java),
-                mock(DismissCallbackRegistry::class.java),
-                context,
-                mKeyguardUpdateMonitor,
-                FakeTrustRepository(),
-                testScope.backgroundScope,
-                mSelectedUserInteractor,
-                mock(KeyguardFaceAuthInteractor::class.java),
-            )
-        mAlternateBouncerInteractor =
-            AlternateBouncerInteractor(
-                mock(StatusBarStateController::class.java),
-                mock(KeyguardStateController::class.java),
-                keyguardBouncerRepository,
-                FakeFingerprintPropertyRepository(),
-                mock(BiometricSettingsRepository::class.java),
-                mock(SystemClock::class.java),
-                mKeyguardUpdateMonitor,
-                testScope.backgroundScope,
-            )
-        mKeyguardTransitionInteractor =
-            KeyguardTransitionInteractorFactory.create(
-                    scope = testScope.backgroundScope,
-                    repository = transitionRepository,
-                )
-                .keyguardTransitionInteractor
+        mPrimaryBouncerInteractor = kosmos.primaryBouncerInteractor
+        mAlternateBouncerInteractor = kosmos.alternateBouncerInteractor
+        mKeyguardTransitionInteractor = kosmos.keyguardTransitionInteractor
+        mUdfpsOverlayInteractor = kosmos.udfpsOverlayInteractor
         return createUdfpsKeyguardViewController(/* useModernBouncer */ true)
     }
 
@@ -238,6 +184,57 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
             job.cancel()
         }
 
+    @Test
+    fun shouldHandleTouchesChange() =
+        testScope.runTest {
+            val shouldHandleTouches by collectLastValue(mUdfpsOverlayInteractor.shouldHandleTouches)
+
+            // GIVEN view is attached + on the keyguard
+            mController.onViewAttached()
+            captureStatusBarStateListeners()
+            sendStatusBarStateChanged(StatusBarState.KEYGUARD)
+            whenever(mView.setPauseAuth(true)).thenReturn(true)
+            whenever(mView.unpausedAlpha).thenReturn(0)
+
+            // WHEN panelViewExpansion changes to expanded
+            val job = mController.listenForBouncerExpansion(this)
+            keyguardBouncerRepository.setPrimaryShow(true)
+            keyguardBouncerRepository.setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
+            runCurrent()
+
+            // THEN UDFPS auth is paused and should not handle touches
+            assertThat(mController.shouldPauseAuth()).isTrue()
+            assertThat(shouldHandleTouches!!).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun shouldHandleTouchesOnDetach() =
+        testScope.runTest {
+            val shouldHandleTouches by collectLastValue(mUdfpsOverlayInteractor.shouldHandleTouches)
+
+            // GIVEN view is attached + on the keyguard
+            mController.onViewAttached()
+            captureStatusBarStateListeners()
+            sendStatusBarStateChanged(StatusBarState.KEYGUARD)
+            whenever(mView.setPauseAuth(true)).thenReturn(true)
+            whenever(mView.unpausedAlpha).thenReturn(0)
+
+            // WHEN panelViewExpansion changes to expanded
+            val job = mController.listenForBouncerExpansion(this)
+            keyguardBouncerRepository.setPrimaryShow(true)
+            keyguardBouncerRepository.setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
+            runCurrent()
+
+            mController.onViewDetached()
+
+            // THEN UDFPS auth is paused and should not handle touches
+            assertThat(mController.shouldPauseAuth()).isTrue()
+            assertThat(shouldHandleTouches!!).isFalse()
+
+            job.cancel()
+        }
     @Test
     fun fadeFromDialogSuggestedAlpha() =
         testScope.runTest {
@@ -614,6 +611,30 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
             // THEN doze amount is updated to
             verify(mView)
                 .onDozeAmountChanged(eq(.3f), eq(.3f), eq(ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN))
+            job.cancel()
+        }
+
+    @Test
+    fun bouncerToAod_dozeAmountChanged() =
+        testScope.runTest {
+            // GIVEN view is attached
+            mController.onViewAttached()
+            Mockito.reset(mView)
+
+            val job = mController.listenForPrimaryBouncerToAodTransitions(this)
+            // WHEN alternate bouncer to aod transition in progress
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = KeyguardState.AOD,
+                    value = .3f,
+                    transitionState = TransitionState.RUNNING
+                )
+            )
+            runCurrent()
+
+            // THEN doze amount is updated to
+            verify(mView).onDozeAmountChanged(eq(.3f), eq(.3f), eq(ANIMATE_APPEAR_ON_SCREEN_OFF))
             job.cancel()
         }
 }

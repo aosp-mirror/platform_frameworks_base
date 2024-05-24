@@ -43,6 +43,7 @@ import java.util.stream.Stream;
  * Unless a method specifies otherwise, a null value for a collection is treated as an empty
  * collection of that type.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class CollectionUtils {
     private CollectionUtils() { /* cannot be instantiated */ }
 
@@ -120,8 +121,9 @@ public class CollectionUtils {
     public static @NonNull <I, O> List<O> map(@Nullable List<I> cur,
             Function<? super I, ? extends O> f) {
         if (isEmpty(cur)) return Collections.emptyList();
-        final ArrayList<O> result = new ArrayList<>();
-        for (int i = 0; i < cur.size(); i++) {
+        final int size = cur.size();
+        final ArrayList<O> result = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
             result.add(f.apply(cur.get(i)));
         }
         return result;
@@ -133,7 +135,7 @@ public class CollectionUtils {
     public static @NonNull <I, O> Set<O> map(@Nullable Set<I> cur,
             Function<? super I, ? extends O> f) {
         if (isEmpty(cur)) return emptySet();
-        ArraySet<O> result = new ArraySet<>();
+        ArraySet<O> result = new ArraySet<>(cur.size());
         if (cur instanceof ArraySet) {
             ArraySet<I> arraySet = (ArraySet<I>) cur;
             int size = arraySet.size();
@@ -163,7 +165,7 @@ public class CollectionUtils {
             Function<? super I, ? extends O> f) {
         if (isEmpty(cur)) return Collections.emptyList();
         List<O> result = null;
-        for (int i = 0; i < cur.size(); i++) {
+        for (int i = 0, size = cur.size(); i < size; i++) {
             O transformed = f.apply(cur.get(i));
             if (transformed != null) {
                 result = add(result, transformed);
@@ -239,7 +241,7 @@ public class CollectionUtils {
     public static @NonNull <T> List<T> filter(@Nullable List<?> list, Class<T> c) {
         if (isEmpty(list)) return Collections.emptyList();
         ArrayList<T> result = null;
-        for (int i = 0; i < list.size(); i++) {
+        for (int i = 0, size = list.size(); i < size; i++) {
             final Object item = list.get(i);
             if (c.isInstance(item)) {
                 result = ArrayUtils.add(result, (T) item);
@@ -273,7 +275,7 @@ public class CollectionUtils {
     public static @Nullable <T> T find(@Nullable List<T> items,
             java.util.function.Predicate<T> predicate) {
         if (isEmpty(items)) return null;
-        for (int i = 0; i < items.size(); i++) {
+        for (int i = 0, size = items.size(); i < size; i++) {
             final T item = items.get(i);
             if (predicate.test(item)) return item;
         }

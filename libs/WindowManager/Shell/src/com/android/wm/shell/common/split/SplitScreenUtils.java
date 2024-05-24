@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.common.split;
 
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_ALL_KINDS_WITH_ALL_PINNED;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
 import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
@@ -24,18 +24,26 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
-import android.content.Context;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.LauncherApps;
+import android.content.pm.ShortcutInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.UserHandle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.wm.shell.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
+
+import java.util.Arrays;
+import java.util.List;
 
 /** Helper utility class for split screen components to use. */
 public class SplitScreenUtils {
@@ -89,12 +97,6 @@ public class SplitScreenUtils {
     public static int getUserId(int taskId, ShellTaskOrganizer taskOrganizer) {
         final ActivityManager.RunningTaskInfo taskInfo = taskOrganizer.getRunningTaskInfo(taskId);
         return taskInfo != null ? taskInfo.userId : -1;
-    }
-
-    /** Returns true if package names and user ids match. */
-    public static boolean samePackage(String packageName1, String packageName2,
-            int userId1, int userId2) {
-        return (packageName1 != null && packageName1.equals(packageName2)) && (userId1 == userId2);
     }
 
     /** Generates a common log message for split screen failures */

@@ -23,10 +23,12 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.os.Build.VERSION_CODES.S;
+import static android.permission.flags.Flags.serverSideAttributionRegistration;
 
 import android.Manifest;
 import android.annotation.CheckResult;
 import android.annotation.DurationMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -44,6 +46,8 @@ import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.PropertyInvalidatedCache;
+import android.companion.virtual.VirtualDevice;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.AttributionSource;
@@ -59,13 +63,17 @@ import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.permission.flags.Flags;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -83,6 +91,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -614,15 +623,50 @@ public final class PermissionManager {
     //@SystemApi
     public void grantRuntimePermission(@NonNull String packageName,
             @NonNull String permissionName, @NonNull UserHandle user) {
+        String persistentDeviceId = getPersistentDeviceId(mContext.getDeviceId());
+        if (persistentDeviceId == null) {
+            return;
+        }
+
+        grantRuntimePermissionInternal(packageName, permissionName, persistentDeviceId, user);
+    }
+
+    /**
+     * Grant a runtime permission to an application which the application does not already have. The
+     * permission must have been requested by the application. If the application is not allowed to
+     * hold the permission, a {@link java.lang.SecurityException} is thrown. If the package or
+     * permission is invalid, a {@link java.lang.IllegalArgumentException} is thrown.
+     *
+     * @param packageName the package to which to grant the permission
+     * @param permissionName the permission name to grant
+     * @param persistentDeviceId the device Id to which to grant the permission
+     *
+     * @see #revokeRuntimePermission(String, String, String, String)
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public void grantRuntimePermission(@NonNull String packageName,
+            @NonNull String permissionName, @NonNull String persistentDeviceId) {
+        grantRuntimePermissionInternal(packageName, permissionName, persistentDeviceId,
+                mContext.getUser());
+    }
+
+    private void grantRuntimePermissionInternal(@NonNull String packageName,
+            @NonNull String permissionName, @NonNull String persistentDeviceId,
+            @NonNull UserHandle user) {
         if (DEBUG_TRACE_GRANTS
                 && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
             Log.i(LOG_TAG_TRACE_GRANTS, "App " + mContext.getPackageName() + " is granting "
                     + packageName + " "
-                    + permissionName + " for user " + user.getIdentifier(), new RuntimeException());
+                    + permissionName + " for user " + user.getIdentifier()
+                    + " for persistent device " + persistentDeviceId, new RuntimeException());
         }
         try {
             mPermissionManager.grantRuntimePermission(packageName, permissionName,
-                    mContext.getDeviceId(), user.getIdentifier());
+                    persistentDeviceId, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -640,7 +684,7 @@ public final class PermissionManager {
      * user {@code android.permission.INTERACT_ACROSS_USERS_FULL}.
      *
      * @param packageName the package from which to revoke the permission
-     * @param permName the permission name to revoke
+     * @param permissionName the permission name to revoke
      * @param user the user for which to revoke the permission
      * @param reason the reason for the revoke, or {@code null} for unspecified
      *
@@ -651,16 +695,56 @@ public final class PermissionManager {
     @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
     //@SystemApi
     public void revokeRuntimePermission(@NonNull String packageName,
-            @NonNull String permName, @NonNull UserHandle user, @Nullable String reason) {
+            @NonNull String permissionName, @NonNull UserHandle user, @Nullable String reason) {
+        String persistentDeviceId = getPersistentDeviceId(mContext.getDeviceId());
+        if (persistentDeviceId == null) {
+            return;
+        }
+
+        revokeRuntimePermissionInternal(packageName, permissionName, persistentDeviceId, user,
+                reason);
+    }
+
+    /**
+     * Revoke a runtime permission that was previously granted by
+     * {@link #grantRuntimePermission(String, String, String)}. The permission must
+     * have been requested by and granted to the application. If the application is not allowed to
+     * hold the permission, a {@link java.lang.SecurityException} is thrown. If the package or
+     * permission is invalid, a {@link java.lang.IllegalArgumentException} is thrown.
+     *
+     * @param packageName the package from which to revoke the permission
+     * @param permissionName the permission name to revoke
+     * @param persistentDeviceId the persistent device id for which to revoke the permission
+     * @param reason the reason for the revoke, or {@code null} for unspecified
+     *
+     * @see #grantRuntimePermission(String, String, String)
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public void revokeRuntimePermission(@NonNull String packageName,
+            @NonNull String permissionName, @NonNull String persistentDeviceId,
+            @Nullable String reason) {
+        revokeRuntimePermissionInternal(packageName, permissionName, persistentDeviceId,
+                mContext.getUser(), reason);
+    }
+
+    private void revokeRuntimePermissionInternal(@NonNull String packageName,
+            @NonNull String permissionName, @NonNull String persistentDeviceId,
+            @NonNull UserHandle user, @Nullable String reason) {
         if (DEBUG_TRACE_PERMISSION_UPDATES
-                && shouldTraceGrant(packageName, permName, user.getIdentifier())) {
+                && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
             Log.i(LOG_TAG, "App " + mContext.getPackageName() + " is revoking " + packageName + " "
-                    + permName + " for user " + user.getIdentifier() + " with reason "
+                    + permissionName + " for user " + user.getIdentifier()
+                    + " for persistent device "
+                    + persistentDeviceId + " with reason "
                     + reason, new RuntimeException());
         }
         try {
-            mPermissionManager.revokeRuntimePermission(packageName, permName,
-                    mContext.getDeviceId(), user.getIdentifier(), reason);
+            mPermissionManager.revokeRuntimePermission(packageName, permissionName,
+                    persistentDeviceId, user.getIdentifier(), reason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -685,9 +769,44 @@ public final class PermissionManager {
     //@SystemApi
     public int getPermissionFlags(@NonNull String packageName, @NonNull String permissionName,
             @NonNull UserHandle user) {
+        String persistentDeviceId = getPersistentDeviceId(mContext.getDeviceId());
+        if (persistentDeviceId == null) {
+            return 0;
+        }
+
+        return getPermissionFlagsInternal(packageName, permissionName, persistentDeviceId, user);
+    }
+
+    /**
+     * Gets the state flags associated with a permission.
+     *
+     * @param packageName the package name for which to get the flags
+     * @param permissionName the permission for which to get the flags
+     * @param persistentDeviceId the persistent device Id for which to get permission flags
+     * @return the permission flags
+     *
+     * @hide
+     */
+    @PackageManager.PermissionFlags
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.GET_RUNTIME_PERMISSIONS
+    })
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public int getPermissionFlags(@NonNull String packageName, @NonNull String permissionName,
+            @NonNull String persistentDeviceId) {
+        return getPermissionFlagsInternal(packageName, permissionName, persistentDeviceId,
+                mContext.getUser());
+    }
+
+    private int getPermissionFlagsInternal(@NonNull String packageName,
+            @NonNull String permissionName, @NonNull String persistentDeviceId,
+            @NonNull UserHandle user) {
         try {
             return mPermissionManager.getPermissionFlags(packageName, permissionName,
-                    mContext.getDeviceId(), user.getIdentifier());
+                    persistentDeviceId, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -713,21 +832,63 @@ public final class PermissionManager {
     public void updatePermissionFlags(@NonNull String packageName, @NonNull String permissionName,
             @PackageManager.PermissionFlags int flagMask,
             @PackageManager.PermissionFlags int flagValues, @NonNull UserHandle user) {
+        String persistentDeviceId = getPersistentDeviceId(mContext.getDeviceId());
+        if (persistentDeviceId == null) {
+            return;
+        }
+
+        updatePermissionFlagsInternal(packageName, permissionName, flagMask, flagValues,
+                persistentDeviceId, user);
+    }
+
+    /**
+     * Updates the flags associated with a permission by replacing the flags in the specified mask
+     * with the provided flag values.
+     *
+     * @param packageName The package name for which to update the flags
+     * @param permissionName The permission for which to update the flags
+     * @param persistentDeviceId The persistent device for which to update the permission flags
+     * @param flagMask The flags which to replace
+     * @param flagValues The flags with which to replace
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
+    })
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public void updatePermissionFlags(@NonNull String packageName, @NonNull String permissionName,
+            @NonNull String persistentDeviceId,
+            @PackageManager.PermissionFlags int flagMask,
+            @PackageManager.PermissionFlags int flagValues
+    ) {
+        updatePermissionFlagsInternal(packageName, permissionName, flagMask, flagValues,
+                persistentDeviceId, mContext.getUser());
+    }
+
+    private void updatePermissionFlagsInternal(@NonNull String packageName,
+            @NonNull String permissionName,
+            @PackageManager.PermissionFlags int flagMask,
+            @PackageManager.PermissionFlags int flagValues, @NonNull String persistentDeviceId,
+            @NonNull UserHandle user
+    ) {
         if (DEBUG_TRACE_PERMISSION_UPDATES && shouldTraceGrant(packageName, permissionName,
                 user.getIdentifier())) {
             Log.i(LOG_TAG, "App " + mContext.getPackageName() + " is updating flags for "
                     + packageName + " " + permissionName + " for user "
-                    + user.getIdentifier() + ": " + DebugUtils.flagsToString(
-                    PackageManager.class, "FLAG_PERMISSION_", flagMask) + " := "
-                    + DebugUtils.flagsToString(PackageManager.class, "FLAG_PERMISSION_",
-                    flagValues), new RuntimeException());
+                    + user.getIdentifier() + " for persistentDeviceId " + persistentDeviceId + ": "
+                    + DebugUtils.flagsToString(PackageManager.class, "FLAG_PERMISSION_", flagMask)
+                    + " := " + DebugUtils.flagsToString(PackageManager.class, "FLAG_PERMISSION_",
+                            flagValues), new RuntimeException());
         }
         try {
             final boolean checkAdjustPolicyFlagPermission =
                     mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.Q;
             mPermissionManager.updatePermissionFlags(packageName, permissionName, flagMask,
                     flagValues, checkAdjustPolicyFlagPermission,
-                    mContext.getDeviceId(), user.getIdentifier());
+                    persistentDeviceId, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1165,7 +1326,9 @@ public final class PermissionManager {
     public List<PermissionGroupUsage> getIndicatorAppOpUsageData(boolean micMuted) {
         // Lazily initialize the usage helper
         initializeUsageHelper();
-        return mUsageHelper.getOpUsageData(micMuted);
+        boolean includeMicrophoneUsage = !micMuted;
+        return mUsageHelper.getOpUsageDataByDevice(includeMicrophoneUsage,
+                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
     }
 
     /**
@@ -1464,13 +1627,19 @@ public final class PermissionManager {
         // We use a shared static token for sources that are not registered since the token's
         // only used for process death detection. If we are about to use the source for security
         // enforcement we need to replace the binder with a unique one.
-        final AttributionSource registeredSource = source.withToken(new Binder());
         try {
-            mPermissionManager.registerAttributionSource(registeredSource.asState());
+            if (serverSideAttributionRegistration()) {
+                IBinder newToken = mPermissionManager.registerAttributionSource(source.asState());
+                return source.withToken(newToken);
+            } else {
+                AttributionSource registeredSource = source.withToken(new Binder());
+                mPermissionManager.registerAttributionSource(registeredSource.asState());
+                return registeredSource;
+            }
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-        return registeredSource;
+        return source;
     }
 
     /**
@@ -1618,6 +1787,29 @@ public final class PermissionManager {
     }
 
     /**
+     * Gets the permission states for requested package and persistent device.
+     *
+     * @param packageName name of the package you are checking against
+     * @param persistentDeviceId id of the persistent device you are checking against
+     * @return mapping of all permission states keyed by their permission names
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS)
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public Map<String, PermissionState> getAllPermissionStates(@NonNull String packageName,
+            @NonNull String persistentDeviceId) {
+        try {
+            return mPermissionManager.getAllPermissionStates(packageName, persistentDeviceId,
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Make checkPermission() above bypass the permission cache in this process.
      *
      * @hide
@@ -1634,15 +1826,15 @@ public final class PermissionManager {
     private static final class PackageNamePermissionQuery {
         final String permName;
         final String pkgName;
-        final int deviceId;
+        final String persistentDeviceId;
         @UserIdInt
         final int userId;
 
         PackageNamePermissionQuery(@Nullable String permName, @Nullable String pkgName,
-                int deviceId, @UserIdInt int userId) {
+                @Nullable String persistentDeviceId, @UserIdInt int userId) {
             this.permName = permName;
             this.pkgName = pkgName;
-            this.deviceId = deviceId;
+            this.persistentDeviceId = persistentDeviceId;
             this.userId = userId;
         }
 
@@ -1650,13 +1842,13 @@ public final class PermissionManager {
         public String toString() {
             return TextUtils.formatSimple(
                     "PackageNamePermissionQuery(pkgName=\"%s\", permName=\"%s\", "
-                            + "deviceId=%s, userId=%s\")",
-                    pkgName, permName, deviceId, userId);
+                            + "persistentDeviceId=%s, userId=%s\")",
+                    pkgName, permName, persistentDeviceId, userId);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(permName, pkgName, deviceId, userId);
+            return Objects.hash(permName, pkgName, persistentDeviceId, userId);
         }
 
         @Override
@@ -1672,17 +1864,17 @@ public final class PermissionManager {
             }
             return Objects.equals(permName, other.permName)
                     && Objects.equals(pkgName, other.pkgName)
-                    && deviceId == other.deviceId
+                    && Objects.equals(persistentDeviceId, other.persistentDeviceId)
                     && userId == other.userId;
         }
     }
 
     /* @hide */
     private static int checkPackageNamePermissionUncached(
-            String permName, String pkgName, int deviceId, @UserIdInt int userId) {
+            String permName, String pkgName, String persistentDeviceId, @UserIdInt int userId) {
         try {
             return ActivityThread.getPermissionManager().checkPermission(
-                    pkgName, permName, deviceId, userId);
+                    pkgName, permName, persistentDeviceId, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1696,7 +1888,7 @@ public final class PermissionManager {
                 @Override
                 public Integer recompute(PackageNamePermissionQuery query) {
                     return checkPackageNamePermissionUncached(
-                            query.permName, query.pkgName, query.deviceId, query.userId);
+                            query.permName, query.pkgName, query.persistentDeviceId, query.userId);
                 }
                 @Override
                 public boolean bypass(PackageNamePermissionQuery query) {
@@ -1709,10 +1901,71 @@ public final class PermissionManager {
      *
      * @hide
      */
-    public static int checkPackageNamePermission(String permName, String pkgName, int deviceId,
-            @UserIdInt int userId) {
+    public int checkPackageNamePermission(String permName, String pkgName,
+            int deviceId, @UserIdInt int userId) {
+        String persistentDeviceId = getPersistentDeviceId(deviceId);
         return sPackageNamePermissionCache.query(
-                new PackageNamePermissionQuery(permName, pkgName, deviceId, userId));
+                new PackageNamePermissionQuery(permName, pkgName, persistentDeviceId, userId));
+    }
+
+    @Nullable
+    private String getPersistentDeviceId(int deviceId) {
+        String persistentDeviceId = null;
+
+        if (deviceId == Context.DEVICE_ID_DEFAULT) {
+            persistentDeviceId = VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT;
+        } else if (android.companion.virtual.flags.Flags.vdmPublicApis()) {
+            VirtualDeviceManager virtualDeviceManager = mContext.getSystemService(
+                    VirtualDeviceManager.class);
+            if (virtualDeviceManager != null) {
+                VirtualDevice virtualDevice = virtualDeviceManager.getVirtualDevice(deviceId);
+                if (virtualDevice == null) {
+                    Slog.e(LOG_TAG, "Virtual device is not found with device Id " + deviceId);
+                    return null;
+                }
+                persistentDeviceId = virtualDevice.getPersistentDeviceId();
+                if (persistentDeviceId == null) {
+                    Slog.e(LOG_TAG, "Cannot find persistent device Id for " + deviceId);
+                }
+            }
+        } else {
+            Slog.e(LOG_TAG, "vdmPublicApis flag is not enabled when device Id " + deviceId
+                    + "is not default.");
+        }
+        return persistentDeviceId;
+    }
+
+    /**
+     * Check whether a package has been granted a permission on a given device.
+     * <p>
+     * <strong>Note: </strong>This API returns the underlying permission state
+     * as-is and is mostly intended for permission managing system apps. To
+     * perform an access check for a certain app, please use the
+     * {@link Context#checkPermission} APIs instead.
+     *
+     * @param permissionName The name of the permission you are checking for.
+     * @param packageName The name of the package you are checking against.
+     * @param persistentDeviceId The id of the physical device that you are checking permission
+     *                           against.
+     *
+     * @return If the package has the permission on the device, PERMISSION_GRANTED is
+     * returned.  If it does not have the permission on the device, PERMISSION_DENIED
+     * is returned.
+     *
+     * @see VirtualDevice#getPersistentDeviceId()
+     * @see PackageManager#PERMISSION_GRANTED
+     * @see PackageManager#PERMISSION_DENIED
+     *
+     * @hide
+     */
+    @SystemApi
+    @PermissionResult
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public int checkPermission(@NonNull String permissionName, @NonNull String packageName,
+            @NonNull String persistentDeviceId) {
+        return sPackageNamePermissionCache.query(
+                new PackageNamePermissionQuery(permissionName, packageName, persistentDeviceId,
+                        mContext.getUserId()));
     }
 
     /**
@@ -1756,5 +2009,69 @@ public final class PermissionManager {
                     return false;
             }
         }
+    }
+
+    /**
+     * Data class for the state of a permission requested by a package
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public static final class PermissionState implements Parcelable {
+        private final boolean mGranted;
+        private final int mFlags;
+
+        /** @hide */
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        public PermissionState(boolean granted, int flags) {
+            mGranted = granted;
+            mFlags = flags;
+        }
+
+        /**
+         * Returns whether this permission is granted
+         */
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        public boolean isGranted() {
+            return mGranted;
+        }
+
+        /**
+         * Returns the flags associated with this permission state
+         * @see PackageManager#getPermissionFlags
+         */
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        public int getFlags() {
+            return mFlags;
+        }
+
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        @Override
+        public void writeToParcel(@NonNull Parcel parcel, int flags) {
+            parcel.writeBoolean(mGranted);
+            parcel.writeInt(mFlags);
+        }
+
+        private PermissionState(Parcel parcel) {
+            this(parcel.readBoolean(), parcel.readInt());
+        }
+
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        public static final @NonNull Creator<PermissionState> CREATOR = new Creator<>() {
+            public PermissionState createFromParcel(Parcel source) {
+                return new PermissionState(source);
+            }
+
+            public PermissionState[] newArray(int size) {
+                return new PermissionState[size];
+            }
+        };
     }
 }

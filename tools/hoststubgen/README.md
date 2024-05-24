@@ -34,11 +34,6 @@ AndroidHeuristicsFilter has hardcoded heuristics to detect AIDL generated classe
 
   - `test-tiny-framework/` See `README.md` in it.
 
-  - `test-framework`
-    This directory was used during the prototype phase, but now that we have real ravenwood tests,
-    this directory is obsolete and should be deleted.
-
-
 - `scripts`
   - `dump-jar.sh`
 

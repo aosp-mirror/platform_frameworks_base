@@ -29,8 +29,6 @@ import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseBooleanArray;
 
-import androidx.test.filters.FlakyTest;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -81,7 +79,7 @@ public class TaskPersisterTest {
         }
         mTaskPersister.writePersistedTaskIdsForUser(taskIdsOnFile, mTestUserId);
         SparseBooleanArray newTaskIdsOnFile = mTaskPersister
-                .loadPersistedTaskIdsForUser(mTestUserId);
+                .readPersistedTaskIdsFromFileForUser(mTestUserId);
         assertEquals("TaskIds written differ from TaskIds read back from file",
                 taskIdsOnFile, newTaskIdsOnFile);
     }

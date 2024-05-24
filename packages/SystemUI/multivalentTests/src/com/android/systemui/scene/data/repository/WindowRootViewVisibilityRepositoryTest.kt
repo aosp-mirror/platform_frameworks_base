@@ -30,6 +30,7 @@ import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@android.platform.test.annotations.EnabledOnRavenwood
 class WindowRootViewVisibilityRepositoryTest : SysuiTestCase() {
     private val iStatusBarService = mock<IStatusBarService>()
     private val executor = FakeExecutor(FakeSystemClock())

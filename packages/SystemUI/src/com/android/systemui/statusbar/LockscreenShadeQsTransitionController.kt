@@ -21,9 +21,9 @@ import android.util.IndentingPrintWriter
 import android.util.MathUtils
 import androidx.annotation.FloatRange
 import androidx.annotation.Px
-import com.android.systemui.res.R
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import dagger.assisted.Assisted
@@ -38,7 +38,7 @@ constructor(
     context: Context,
     configurationController: ConfigurationController,
     dumpManager: DumpManager,
-    @Assisted private val qsProvider: () -> QS,
+    @Assisted private val qsProvider: () -> QS?,
     splitShadeStateController: SplitShadeStateController
 ) :
     AbstractLockscreenShadeTransitionController(
@@ -48,7 +48,7 @@ constructor(
         splitShadeStateController
     ) {
 
-    private val qs: QS
+    private val qs: QS?
         get() = qsProvider()
 
     /**
@@ -135,7 +135,7 @@ constructor(
                 /* amount= */ MathUtils.saturate(qsDragDownAmount / qsSquishTransitionDistance)
             )
         isTransitioningToFullShade = dragDownAmount > 0.0f
-        qs.setTransitionToFullShadeProgress(
+        qs?.setTransitionToFullShadeProgress(
             isTransitioningToFullShade,
             qsTransitionFraction,
             qsSquishTransitionFraction
@@ -163,6 +163,6 @@ constructor(
 
     @AssistedFactory
     fun interface Factory {
-        fun create(qsProvider: () -> QS): LockscreenShadeQsTransitionController
+        fun create(qsProvider: () -> QS?): LockscreenShadeQsTransitionController
     }
 }

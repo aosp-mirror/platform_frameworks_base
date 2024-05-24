@@ -16,10 +16,10 @@
 
 package com.android.systemui.scene.shared.logger
 
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.SceneFrameworkLog
-import com.android.systemui.scene.shared.model.SceneKey
 import javax.inject.Inject
 
 class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: LogBuffer) {
@@ -62,7 +62,6 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
     fun logSceneChangeCommitted(
         from: SceneKey,
         to: SceneKey,
-        reason: String,
     ) {
         logBuffer.log(
             tag = TAG,
@@ -70,9 +69,8 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
             messageInitializer = {
                 str1 = from.toString()
                 str2 = to.toString()
-                str3 = reason
             },
-            messagePrinter = { "Scene change committed: $str1 → $str2, reason: $str3" },
+            messagePrinter = { "Scene change committed: $str1 → $str2" },
         )
     }
 
@@ -94,6 +92,26 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
                 str3 = reason
             },
             messagePrinter = { "$str1 → $str2, reason: $str3" },
+        )
+    }
+
+    fun logRemoteUserInteractionStarted(
+        reason: String,
+    ) {
+        logBuffer.log(
+            tag = TAG,
+            level = LogLevel.INFO,
+            messageInitializer = { str1 = reason },
+            messagePrinter = { "remote user interaction started, reason: $str3" },
+        )
+    }
+
+    fun logUserInteractionFinished() {
+        logBuffer.log(
+            tag = TAG,
+            level = LogLevel.INFO,
+            messageInitializer = {},
+            messagePrinter = { "user interaction finished" },
         )
     }
 

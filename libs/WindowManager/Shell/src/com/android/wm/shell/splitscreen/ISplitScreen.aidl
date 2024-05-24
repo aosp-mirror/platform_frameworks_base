@@ -158,5 +158,10 @@ interface ISplitScreen {
      * does not expect split to currently be running.
      */
     RemoteAnimationTarget[] onStartingSplitLegacy(in RemoteAnimationTarget[] appTargets) = 14;
+
+    /**
+     * Reverse the split.
+     */
+    oneway void switchSplitPosition() = 22;
 }
-// Last id = 21
+// Last id = 22

@@ -17,11 +17,12 @@
 package com.android.systemui.scene
 
 import com.android.systemui.CoreStartable
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlagsModule
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.shared.flag.SceneContainerFlagsModule
 import com.android.systemui.scene.shared.model.SceneContainerConfig
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -34,6 +35,7 @@ import dagger.multibindings.IntoMap
         [
             BouncerSceneModule::class,
             CommunalSceneModule::class,
+            ComposeBouncerFlagsModule::class,
             EmptySceneModule::class,
             GoneSceneModule::class,
             LockscreenSceneModule::class,
@@ -65,14 +67,14 @@ interface SceneContainerFrameworkModule {
                 // last one is top-most.
                 sceneKeys =
                     listOf(
-                        SceneKey.Gone,
-                        SceneKey.Communal,
-                        SceneKey.Lockscreen,
-                        SceneKey.Bouncer,
-                        SceneKey.Shade,
-                        SceneKey.QuickSettings,
+                        Scenes.Gone,
+                        Scenes.Communal,
+                        Scenes.Lockscreen,
+                        Scenes.Bouncer,
+                        Scenes.QuickSettings,
+                        Scenes.Shade,
                     ),
-                initialSceneKey = SceneKey.Lockscreen,
+                initialSceneKey = Scenes.Lockscreen,
             )
         }
     }

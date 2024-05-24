@@ -88,6 +88,13 @@ final class PackageHandler extends Handler {
                 final boolean didRestore = (msg.arg2 != 0);
                 mPm.mRunningInstalls.delete(msg.arg1);
 
+                if (request == null) {
+                    if (DEBUG_INSTALL) {
+                        Slog.i(TAG, "InstallRequest is null. Nothing to do for post-install "
+                                + "token " + msg.arg1);
+                    }
+                    break;
+                }
                 request.closeFreezer();
                 request.onInstallCompleted();
                 request.runPostInstallRunnable();
@@ -101,9 +108,10 @@ final class PackageHandler extends Handler {
                 Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "postInstall", msg.arg1);
             } break;
             case DEFERRED_NO_KILL_POST_DELETE: {
-                InstallArgs args = (InstallArgs) msg.obj;
+                CleanUpArgs args = (CleanUpArgs) msg.obj;
                 if (args != null) {
-                    mPm.cleanUpResources(args.mCodeFile, args.mInstructionSets);
+                    mPm.cleanUpResources(args.getPackageName(), args.getCodeFile(),
+                            args.getInstructionSets());
                 }
             } break;
             case DEFERRED_NO_KILL_INSTALL_OBSERVER:
@@ -115,10 +123,19 @@ final class PackageHandler extends Handler {
                 }
             } break;
             case WRITE_SETTINGS: {
-                mPm.writeSettings(/*sync=*/false);
+                if (!mPm.tryWriteSettings(/*sync=*/false)) {
+                    // Failed to write.
+                    this.removeMessages(WRITE_SETTINGS);
+                    mPm.scheduleWriteSettings();
+                }
             } break;
             case WRITE_PACKAGE_LIST: {
-                mPm.writePackageList(msg.arg1);
+                int userId = msg.arg1;
+                if (!mPm.tryWritePackageList(userId)) {
+                    // Failed to write.
+                    this.removeMessages(WRITE_PACKAGE_LIST);
+                    mPm.scheduleWritePackageList(userId);
+                }
             } break;
             case CHECK_PENDING_VERIFICATION: {
                 final int verificationId = msg.arg1;

@@ -60,6 +60,7 @@ import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.SearchManager;
+import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -73,6 +74,7 @@ import android.media.AudioManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
@@ -123,6 +125,8 @@ import java.util.function.Supplier;
 class TestPhoneWindowManager {
     private static final long TEST_SINGLE_KEY_DELAY_MILLIS
             = SingleKeyGestureDetector.MULTI_PRESS_TIMEOUT + 1000L * HW_TIMEOUT_MULTIPLIER;
+    private static final String TEST_BROWSER_ROLE_PACKAGE_NAME = "com.browser";
+    private static final String TEST_SMS_ROLE_PACKAGE_NAME = "com.sms";
 
     private PhoneWindowManager mPhoneWindowManager;
     private Context mContext;
@@ -150,6 +154,7 @@ class TestPhoneWindowManager {
     @Mock private UserManagerInternal mUserManagerInternal;
     @Mock private AudioManagerInternal mAudioManagerInternal;
     @Mock private SearchManager mSearchManager;
+    @Mock private RoleManager mRoleManager;
 
     @Mock private Display mDisplay;
     @Mock private DisplayRotation mDisplayRotation;
@@ -165,6 +170,7 @@ class TestPhoneWindowManager {
 
     @Mock
     private PhoneWindowManager.ButtonOverridePermissionChecker mButtonOverridePermissionChecker;
+    @Mock private WindowWakeUpPolicy mWindowWakeUpPolicy;
 
     @Mock private IBinder mInputToken;
     @Mock private IBinder mImeTargetWindowToken;
@@ -176,8 +182,14 @@ class TestPhoneWindowManager {
     private Handler mHandler;
 
     private boolean mIsTalkBackEnabled;
+    private boolean mIsTalkBackShortcutGestureEnabled;
 
-    class TestTalkbackShortcutController extends TalkbackShortcutController {
+    private Intent mBrowserIntent;
+    private Intent mSmsIntent;
+
+    private int mKeyEventPolicyFlags = FLAG_INTERACTIVE;
+
+    private class TestTalkbackShortcutController extends TalkbackShortcutController {
         TestTalkbackShortcutController(Context context) {
             super(context);
         }
@@ -190,13 +202,18 @@ class TestPhoneWindowManager {
 
         @Override
         boolean isTalkBackShortcutGestureEnabled() {
-            return true;
+            return mIsTalkBackShortcutGestureEnabled;
         }
     }
 
     private class TestInjector extends PhoneWindowManager.Injector {
         TestInjector(Context context, WindowManagerPolicy.WindowManagerFuncs funcs) {
-            super(context, funcs, mTestLooper.getLooper());
+            super(context, funcs);
+        }
+
+        @Override
+        Looper getLooper() {
+            return mTestLooper.getLooper();
         }
 
         AccessibilityShortcutController getAccessibilityShortcutController(
@@ -222,6 +239,10 @@ class TestPhoneWindowManager {
 
         TalkbackShortcutController getTalkbackShortcutController() {
             return new TestTalkbackShortcutController(mContext);
+        }
+
+        WindowWakeUpPolicy getWindowWakeUpPolicy() {
+            return mWindowWakeUpPolicy;
         }
     }
 
@@ -276,6 +297,7 @@ class TestPhoneWindowManager {
         doReturn(mSensorPrivacyManager).when(mContext).getSystemService(
                 eq(SensorPrivacyManager.class));
         doReturn(mSearchManager).when(mContext).getSystemService(eq(SearchManager.class));
+        doReturn(mRoleManager).when(mContext).getSystemService(eq(RoleManager.class));
         doReturn(false).when(mPackageManager).hasSystemFeature(any());
         try {
             doThrow(new PackageManager.NameNotFoundException("test")).when(mPackageManager)
@@ -346,6 +368,21 @@ class TestPhoneWindowManager {
         doReturn(interceptionInfo)
                 .when(mWindowManagerInternal).getKeyInterceptionInfoFromToken(any());
 
+        doReturn(true).when(mRoleManager).isRoleAvailable(eq(RoleManager.ROLE_BROWSER));
+        doReturn(true).when(mRoleManager).isRoleAvailable(eq(RoleManager.ROLE_SMS));
+        doReturn(TEST_BROWSER_ROLE_PACKAGE_NAME).when(mRoleManager).getDefaultApplication(
+                eq(RoleManager.ROLE_BROWSER));
+        doReturn(TEST_SMS_ROLE_PACKAGE_NAME).when(mRoleManager).getDefaultApplication(
+                eq(RoleManager.ROLE_SMS));
+        mBrowserIntent = new Intent(Intent.ACTION_MAIN);
+        mBrowserIntent.setPackage(TEST_BROWSER_ROLE_PACKAGE_NAME);
+        mSmsIntent = new Intent(Intent.ACTION_MAIN);
+        mSmsIntent.setPackage(TEST_SMS_ROLE_PACKAGE_NAME);
+        doReturn(mBrowserIntent).when(mPackageManager).getLaunchIntentForPackage(
+                eq(TEST_BROWSER_ROLE_PACKAGE_NAME));
+        doReturn(mSmsIntent).when(mPackageManager).getLaunchIntentForPackage(
+                eq(TEST_SMS_ROLE_PACKAGE_NAME));
+
         Mockito.reset(mContext);
     }
 
@@ -367,12 +404,12 @@ class TestPhoneWindowManager {
     }
 
     int interceptKeyBeforeQueueing(KeyEvent event) {
-        return mPhoneWindowManager.interceptKeyBeforeQueueing(event, FLAG_INTERACTIVE);
+        return mPhoneWindowManager.interceptKeyBeforeQueueing(event, mKeyEventPolicyFlags);
     }
 
     long interceptKeyBeforeDispatching(KeyEvent event) {
         return mPhoneWindowManager.interceptKeyBeforeDispatching(mInputToken, event,
-                FLAG_INTERACTIVE);
+                mKeyEventPolicyFlags);
     }
 
     void dispatchUnhandledKey(KeyEvent event) {
@@ -408,6 +445,10 @@ class TestPhoneWindowManager {
 
     void overrideShouldEarlyShortPressOnStemPrimary(boolean shouldEarlyShortPress) {
         mPhoneWindowManager.mShouldEarlyShortPressOnStemPrimary = shouldEarlyShortPress;
+    }
+
+    void overrideTalkbackShortcutGestureEnabled(boolean enabled) {
+        mIsTalkBackShortcutGestureEnabled = enabled;
     }
 
      // Override assist perform function.
@@ -572,12 +613,21 @@ class TestPhoneWindowManager {
                 .when(mButtonOverridePermissionChecker).canAppOverrideSystemKey(any(), anyInt());
     }
 
+    void overrideKeyEventPolicyFlags(int flags) {
+        mKeyEventPolicyFlags = flags;
+    }
+
     /**
      * Below functions will check the policy behavior could be invoked.
      */
     void assertTakeScreenshotCalled() {
         mTestLooper.dispatchAll();
         verify(mDisplayPolicy).takeScreenshot(anyInt(), anyInt());
+    }
+
+    void assertTakeScreenshotNotCalled() {
+        mTestLooper.dispatchAll();
+        verify(mDisplayPolicy, never()).takeScreenshot(anyInt(), anyInt());
     }
 
     void assertShowGlobalActionsCalled() {
@@ -609,7 +659,8 @@ class TestPhoneWindowManager {
 
     void assertPowerWakeUp() {
         mTestLooper.dispatchAll();
-        verify(mPowerManager).wakeUp(anyLong(), anyInt(), anyString());
+        verify(mWindowWakeUpPolicy)
+                .wakeUpFromKey(anyLong(), eq(KeyEvent.KEYCODE_POWER), anyBoolean());
     }
 
     void assertNoPowerSleep() {
@@ -641,6 +692,29 @@ class TestPhoneWindowManager {
         // Reset verifier for next call.
         Mockito.reset(mContext);
     }
+
+    void assertLaunchRole(String role) {
+        mTestLooper.dispatchAll();
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        try {
+            verify(mContext).startActivityAsUser(intentCaptor.capture(), any());
+            switch (role) {
+                case RoleManager.ROLE_BROWSER:
+                    Assert.assertEquals(intentCaptor.getValue(), mBrowserIntent);
+                    break;
+                case RoleManager.ROLE_SMS:
+                    Assert.assertEquals(intentCaptor.getValue(), mSmsIntent);
+                    break;
+                default:
+                    throw new AssertionError("Role " + role + " not supported in tests.");
+            }
+        } catch (Throwable t) {
+            throw new AssertionError("failed to assert " + role, t);
+        }
+        // Reset verifier for next call.
+        Mockito.reset(mContext);
+    }
+
 
     void assertShowRecentApps() {
         mTestLooper.dispatchAll();
@@ -714,7 +788,7 @@ class TestPhoneWindowManager {
     }
 
     void assertOpenAllAppView() {
-        mTestLooper.dispatchAll();
+        moveTimeForward(TEST_SINGLE_KEY_DELAY_MILLIS);
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         verify(mContext, timeout(TEST_SINGLE_KEY_DELAY_MILLIS))
                 .startActivityAsUser(intentCaptor.capture(), isNull(), any(UserHandle.class));
@@ -728,7 +802,7 @@ class TestPhoneWindowManager {
     }
 
     void assertActivityTargetLaunched(ComponentName targetActivity) {
-        mTestLooper.dispatchAll();
+        moveTimeForward(TEST_SINGLE_KEY_DELAY_MILLIS);
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         verify(mContext, timeout(TEST_SINGLE_KEY_DELAY_MILLIS))
                 .startActivityAsUser(intentCaptor.capture(), isNull(), any(UserHandle.class));
@@ -743,10 +817,15 @@ class TestPhoneWindowManager {
                         expectedModifierState, deviceBus), description(errorMsg));
     }
 
-    void assertSwitchToRecent(int persistentId) throws RemoteException {
+    void assertSwitchToTask(int persistentId) throws RemoteException {
         mTestLooper.dispatchAll();
         verify(mActivityManagerService,
                 timeout(TEST_SINGLE_KEY_DELAY_MILLIS)).startActivityFromRecents(eq(persistentId),
                 isNull());
+    }
+
+    void assertTalkBack(boolean expectEnabled) {
+        mTestLooper.dispatchAll();
+        Assert.assertEquals(expectEnabled, mIsTalkBackEnabled);
     }
 }

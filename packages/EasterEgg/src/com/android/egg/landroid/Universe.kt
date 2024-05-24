@@ -174,7 +174,9 @@ open class Universe(val namer: Namer, randomSeed: Long) : Simulator(randomSeed) 
 
         ship = Spacecraft()
 
-        ship.pos = star.pos + Vec2.makeWithAngleMag(PIf / 4, PLANET_ORBIT_RANGE.start)
+        // in the test universe, start the ship near the outermost planet
+        ship.pos = planets.last().pos + Vec2(planets.first().radius * 1.5f, 0f)
+
         ship.angle = 0f
         add(ship)
 

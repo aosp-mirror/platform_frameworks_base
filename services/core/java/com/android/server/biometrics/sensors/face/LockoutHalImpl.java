@@ -24,7 +24,8 @@ import com.android.server.biometrics.sensors.LockoutTracker;
  * the user changes.
  */
 public class LockoutHalImpl implements LockoutTracker {
-    private @LockoutMode int mCurrentUserLockoutMode;
+    @LockoutMode
+    private int mCurrentUserLockoutMode;
 
     @Override
     public int getLockoutModeForUser(int userId) {

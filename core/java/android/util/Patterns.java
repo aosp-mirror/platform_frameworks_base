@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 /**
  * Commonly used regular expression patterns.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Patterns {
     /**
      *  Regular expression to match all IANA top-level domains.

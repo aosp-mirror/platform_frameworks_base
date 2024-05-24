@@ -36,6 +36,7 @@ import dalvik.annotation.optimization.FastNative;
  * href="{@docRoot}tools/debugging/systrace.html">Analyzing Display and Performance
  * with Systrace</a>.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class Trace {
     /*
      * Writes trace events to the kernel trace buffer.  These trace events can be
@@ -123,9 +124,25 @@ public final class Trace {
 
     @UnsupportedAppUsage
     @CriticalNative
+    @android.ravenwood.annotation.RavenwoodReplace
     private static native long nativeGetEnabledTags();
+    @android.ravenwood.annotation.RavenwoodReplace
     private static native void nativeSetAppTracingAllowed(boolean allowed);
+    @android.ravenwood.annotation.RavenwoodReplace
     private static native void nativeSetTracingEnabled(boolean allowed);
+
+    private static long nativeGetEnabledTags$ravenwood() {
+        // Tracing currently completely disabled under Ravenwood
+        return 0;
+    }
+
+    private static void nativeSetAppTracingAllowed$ravenwood(boolean allowed) {
+        // Tracing currently completely disabled under Ravenwood
+    }
+
+    private static void nativeSetTracingEnabled$ravenwood(boolean allowed) {
+        // Tracing currently completely disabled under Ravenwood
+    }
 
     @FastNative
     private static native void nativeTraceCounter(long tag, String name, long value);

@@ -36,10 +36,12 @@ public class DataSaverControllerImpl implements DataSaverController {
     }
 
     private void handleRestrictBackgroundChanged(boolean isDataSaving) {
+        ArrayList<DataSaverController.Listener> copy;
         synchronized (mListeners) {
-            for (int i = 0; i < mListeners.size(); i++) {
-                mListeners.get(i).onDataSaverChanged(isDataSaving);
-            }
+            copy = new ArrayList<>(mListeners);
+        }
+        for (int i = 0; i < copy.size(); i++) {
+            copy.get(i).onDataSaverChanged(isDataSaving);
         }
     }
 

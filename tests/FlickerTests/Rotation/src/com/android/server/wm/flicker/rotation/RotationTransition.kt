@@ -17,10 +17,13 @@
 package com.android.server.wm.flicker.rotation
 
 import android.platform.test.annotations.Presubmit
-import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.subject.layers.LayerTraceEntrySubject
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.traces.component.IComponentMatcher
+import android.tools.traces.surfaceflinger.Display
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.Test
@@ -57,9 +60,8 @@ abstract class RotationTransition(flicker: LegacyFlickerTest) : BaseTest(flicker
     @Test
     open fun appLayerRotates_StartingPos() {
         flicker.assertLayersStart {
-            this.entry.displays.map { display ->
-                this.visibleRegion(testApp).coversExactly(display.layerStackSpace)
-            }
+            val display = getDisplay(testApp)
+            this.visibleRegion(testApp).coversAtLeast(display.layerStackSpace)
         }
     }
 
@@ -68,10 +70,18 @@ abstract class RotationTransition(flicker: LegacyFlickerTest) : BaseTest(flicker
     @Test
     open fun appLayerRotates_EndingPos() {
         flicker.assertLayersEnd {
-            this.entry.displays.map { display ->
-                this.visibleRegion(testApp).coversExactly(display.layerStackSpace)
-            }
+            val display = getDisplay(testApp)
+            this.visibleRegion(testApp).coversAtLeast(display.layerStackSpace)
         }
+    }
+
+    private fun LayerTraceEntrySubject.getDisplay(componentMatcher: IComponentMatcher): Display {
+        val stackId =
+            this.layer { componentMatcher.layerMatchesAnyOf(it) && it.isVisible }?.layer?.stackId
+                ?: -1
+
+        return this.entry.displays.firstOrNull { it.layerStackId == stackId }
+            ?: error("Unable to find visible layer for $componentMatcher")
     }
 
     override fun cujCompleted() {

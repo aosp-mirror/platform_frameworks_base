@@ -16,70 +16,70 @@
 
 package com.android.wm.shell.bubbles.bar
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.graphics.PointF
-import android.graphics.Rect
+import android.annotation.SuppressLint
 import android.view.MotionEvent
 import android.view.View
-import com.android.wm.shell.animation.Interpolators
 import com.android.wm.shell.common.bubbles.DismissView
 import com.android.wm.shell.common.bubbles.RelativeTouchListener
+import com.android.wm.shell.common.magnetictarget.MagnetizedObject
 
 /** Controller for handling drag interactions with [BubbleBarExpandedView] */
+@SuppressLint("ClickableViewAccessibility")
 class BubbleBarExpandedViewDragController(
     private val expandedView: BubbleBarExpandedView,
     private val dismissView: DismissView,
+    private val animationHelper: BubbleBarAnimationHelper,
     private val onDismissed: () -> Unit
 ) {
 
+    var isStuckToDismiss: Boolean = false
+        private set
+
+    private var expandedViewInitialTranslationX = 0f
+    private var expandedViewInitialTranslationY = 0f
+    private val magnetizedExpandedView: MagnetizedObject<BubbleBarExpandedView> =
+        MagnetizedObject.magnetizeView(expandedView)
+    private val magnetizedDismissTarget: MagnetizedObject.MagneticTarget
+
     init {
-        expandedView.handleView.setOnTouchListener(HandleDragListener())
-    }
-
-    private fun finishDrag(x: Float, y: Float, viewInitialX: Float, viewInitialY: Float) {
-        val dismissCircleBounds = Rect().apply { dismissView.circle.getBoundsOnScreen(this) }
-        if (dismissCircleBounds.contains(x.toInt(), y.toInt())) {
-            onDismissed()
-        } else {
-            resetExpandedViewPosition(viewInitialX, viewInitialY)
-        }
-        dismissView.hide()
-    }
-
-    private fun resetExpandedViewPosition(initialX: Float, initialY: Float) {
-        val listener =
-            object : AnimatorListenerAdapter() {
-                override fun onAnimationStart(animation: Animator) {
-                    expandedView.isAnimating = true
-                }
-
-                override fun onAnimationEnd(animation: Animator) {
-                    expandedView.isAnimating = false
-                }
+        magnetizedExpandedView.magnetListener = MagnetListener()
+        magnetizedExpandedView.animateStuckToTarget =
+            {
+                    target: MagnetizedObject.MagneticTarget,
+                    _: Float,
+                    _: Float,
+                    _: Boolean,
+                    after: (() -> Unit)? ->
+                animationHelper.animateIntoTarget(target, after)
             }
-        expandedView
-            .animate()
-            .translationX(initialX)
-            .translationY(initialY)
-            .setDuration(RESET_POSITION_ANIM_DURATION)
-            .setInterpolator(Interpolators.EMPHASIZED_DECELERATE)
-            .setListener(listener)
-            .start()
+
+        magnetizedDismissTarget =
+            MagnetizedObject.MagneticTarget(dismissView.circle, dismissView.circle.width)
+        magnetizedExpandedView.addTarget(magnetizedDismissTarget)
+
+        val dragMotionEventHandler = HandleDragListener()
+
+        expandedView.handleView.setOnTouchListener { view, event ->
+            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                expandedViewInitialTranslationX = expandedView.translationX
+                expandedViewInitialTranslationY = expandedView.translationY
+            }
+            val magnetConsumed = magnetizedExpandedView.maybeConsumeMotionEvent(event)
+            // Move events can be consumed by the magnetized object
+            if (event.actionMasked == MotionEvent.ACTION_MOVE && magnetConsumed) {
+                return@setOnTouchListener true
+            }
+            return@setOnTouchListener dragMotionEventHandler.onTouch(view, event) || magnetConsumed
+        }
     }
 
     private inner class HandleDragListener : RelativeTouchListener() {
 
-        private val expandedViewRestPosition = PointF()
+        private var isMoving = false
 
         override fun onDown(v: View, ev: MotionEvent): Boolean {
             // While animating, don't allow new touch events
-            if (expandedView.isAnimating) {
-                return false
-            }
-            expandedViewRestPosition.x = expandedView.translationX
-            expandedViewRestPosition.y = expandedView.translationY
-            return true
+            return !expandedView.isAnimating
         }
 
         override fun onMove(
@@ -90,8 +90,12 @@ class BubbleBarExpandedViewDragController(
             dx: Float,
             dy: Float
         ) {
-            expandedView.translationX = expandedViewRestPosition.x + dx
-            expandedView.translationY = expandedViewRestPosition.y + dy
+            if (!isMoving) {
+                isMoving = true
+                animationHelper.animateStartDrag()
+            }
+            expandedView.translationX = expandedViewInitialTranslationX + dx
+            expandedView.translationY = expandedViewInitialTranslationY + dy
             dismissView.show()
         }
 
@@ -105,16 +109,48 @@ class BubbleBarExpandedViewDragController(
             velX: Float,
             velY: Float
         ) {
-            finishDrag(ev.rawX, ev.rawY, expandedViewRestPosition.x, expandedViewRestPosition.y)
+            finishDrag()
         }
 
         override fun onCancel(v: View, ev: MotionEvent, viewInitialX: Float, viewInitialY: Float) {
-            resetExpandedViewPosition(expandedViewRestPosition.x, expandedViewRestPosition.y)
-            dismissView.hide()
+            finishDrag()
+        }
+
+        private fun finishDrag() {
+            if (!isStuckToDismiss) {
+                animationHelper.animateToRestPosition()
+                dismissView.hide()
+            }
+            isMoving = false
         }
     }
 
-    companion object {
-        const val RESET_POSITION_ANIM_DURATION = 300L
+    private inner class MagnetListener : MagnetizedObject.MagnetListener {
+        override fun onStuckToTarget(
+                target: MagnetizedObject.MagneticTarget,
+                draggedObject: MagnetizedObject<*>
+        ) {
+            isStuckToDismiss = true
+        }
+
+        override fun onUnstuckFromTarget(
+                target: MagnetizedObject.MagneticTarget,
+                draggedObject: MagnetizedObject<*>,
+                velX: Float,
+                velY: Float,
+                wasFlungOut: Boolean
+        ) {
+            isStuckToDismiss = false
+            animationHelper.animateUnstuckFromDismissView(target)
+        }
+
+        override fun onReleasedInTarget(
+                target: MagnetizedObject.MagneticTarget,
+                draggedObject: MagnetizedObject<*>
+        ) {
+            onDismissed()
+            dismissView.hide()
+        }
     }
 }
+

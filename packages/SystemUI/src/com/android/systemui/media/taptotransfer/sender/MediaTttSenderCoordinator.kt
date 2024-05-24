@@ -25,12 +25,12 @@ import com.android.internal.logging.UiEventLogger
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.CoreStartable
 import com.android.systemui.Dumpable
-import com.android.systemui.res.R
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.temporarydisplay.ViewPriority
@@ -162,7 +162,7 @@ constructor(
         logger: MediaTttSenderLogger,
         instanceId: InstanceId,
     ): ChipbarInfo {
-        val packageName = checkNotNull(routeInfo.clientPackageName)
+        val packageName = routeInfo.clientPackageName
         val otherDeviceName =
             if (routeInfo.name.isBlank()) {
                 context.getString(R.string.media_ttt_default_device_type)
@@ -171,7 +171,7 @@ constructor(
             }
         val icon =
             MediaTttUtils.getIconInfoFromPackageName(context, packageName, isReceiver = false) {
-                logger.logPackageNotFound(packageName)
+                packageName?.let { logger.logPackageNotFound(it) }
             }
 
         val timeout =

@@ -127,6 +127,25 @@ public class CastControllerImplTest extends SysuiTestCase {
         }
     }
 
+    /** Regression test for b/317700495 */
+    @Test
+    public void removeCallbackWhileIterating_doesntCrash() {
+        final AtomicBoolean remove = new AtomicBoolean(false);
+        Callback callback = new Callback() {
+            @Override
+            public void onCastDevicesChanged() {
+                if (remove.get()) {
+                    mController.removeCallback(this);
+                }
+            }
+        };
+        mController.addCallback(callback);
+        // Add another callback so the iteration continues
+        mController.addCallback(() -> {});
+        remove.set(true);
+        mController.fireOnCastDevicesChanged();
+    }
+
     @Test
     public void hasConnectedCastDevice_connected() {
         CastController.CastDevice castDevice = new CastController.CastDevice();

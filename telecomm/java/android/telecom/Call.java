@@ -210,100 +210,6 @@ public final class Call {
             "android.telecom.extra.SILENT_RINGING_REQUESTED";
 
     /**
-     * Call event sent from a {@link Call} via {@link #sendCallEvent(String, Bundle)} to inform
-     * Telecom that the user has requested that the current {@link Call} should be handed over
-     * to another {@link ConnectionService}.
-     * <p>
-     * The caller must specify the {@link #EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE} to indicate to
-     * Telecom which {@link PhoneAccountHandle} the {@link Call} should be handed over to.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EVENT_REQUEST_HANDOVER =
-            "android.telecom.event.REQUEST_HANDOVER";
-
-    /**
-     * Extra key used with the {@link #EVENT_REQUEST_HANDOVER} call event.  Specifies the
-     * {@link PhoneAccountHandle} to which a call should be handed over to.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE =
-            "android.telecom.extra.HANDOVER_PHONE_ACCOUNT_HANDLE";
-
-    /**
-     * Integer extra key used with the {@link #EVENT_REQUEST_HANDOVER} call event.  Specifies the
-     * video state of the call when it is handed over to the new {@link PhoneAccount}.
-     * <p>
-     * Valid values: {@link VideoProfile#STATE_AUDIO_ONLY},
-     * {@link VideoProfile#STATE_BIDIRECTIONAL}, {@link VideoProfile#STATE_RX_ENABLED}, and
-     * {@link VideoProfile#STATE_TX_ENABLED}.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EXTRA_HANDOVER_VIDEO_STATE =
-            "android.telecom.extra.HANDOVER_VIDEO_STATE";
-
-    /**
-     * Extra key used with the {@link #EVENT_REQUEST_HANDOVER} call event.  Used by the
-     * {@link InCallService} initiating a handover to provide a {@link Bundle} with extra
-     * information to the handover {@link ConnectionService} specified by
-     * {@link #EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE}.
-     * <p>
-     * This {@link Bundle} is not interpreted by Telecom, but passed as-is to the
-     * {@link ConnectionService} via the request extras when
-     * {@link ConnectionService#onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}
-     * is called to initate the handover.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EXTRA_HANDOVER_EXTRAS = "android.telecom.extra.HANDOVER_EXTRAS";
-
-    /**
-     * Call event sent from Telecom to the handover {@link ConnectionService} via
-     * {@link Connection#onCallEvent(String, Bundle)} to inform a {@link Connection} that a handover
-     * to the {@link ConnectionService} has completed successfully.
-     * <p>
-     * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EVENT_HANDOVER_COMPLETE =
-            "android.telecom.event.HANDOVER_COMPLETE";
-
-    /**
-     * Call event sent from Telecom to the handover destination {@link ConnectionService} via
-     * {@link Connection#onCallEvent(String, Bundle)} to inform the handover destination that the
-     * source connection has disconnected.  The {@link Bundle} parameter for the call event will be
-     * {@code null}.
-     * <p>
-     * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EVENT_HANDOVER_SOURCE_DISCONNECTED =
-            "android.telecom.event.HANDOVER_SOURCE_DISCONNECTED";
-
-    /**
-     * Call event sent from Telecom to the handover {@link ConnectionService} via
-     * {@link Connection#onCallEvent(String, Bundle)} to inform a {@link Connection} that a handover
-     * to the {@link ConnectionService} has failed.
-     * <p>
-     * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EVENT_HANDOVER_FAILED =
-            "android.telecom.event.HANDOVER_FAILED";
-
-    /**
      * Event reported from the Telecom stack to report an in-call diagnostic message which the
      * dialer app may opt to display to the user.  A diagnostic message is used to communicate
      * scenarios the device has detected which may impact the quality of the ongoing call.
@@ -361,6 +267,27 @@ public final class Call {
      */
     public static final String EXTRA_DIAGNOSTIC_MESSAGE =
             "android.telecom.extra.DIAGNOSTIC_MESSAGE";
+
+    /**
+     * Boolean indicating that the call is a verified business call.
+     *
+     * {@link Connection#setExtras(Bundle)} or {@link Connection#putExtras(Bundle)}
+     * should be used to notify Telecom this extra has been set.
+     */
+    @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
+    public static final String EXTRA_IS_BUSINESS_CALL =
+            "android.telecom.extra.IS_BUSINESS_CALL";
+
+    /**
+     * String value indicating the asserted display name reported via
+     * ImsCallProfile#EXTRA_ASSERTED_DISPLAY_NAME.
+     *
+     * {@link Connection#setExtras(Bundle)} or {@link Connection#putExtras(Bundle)}
+     * should be used to notify Telecom this extra has been set.
+     */
+    @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
+    public static final String EXTRA_ASSERTED_DISPLAY_NAME =
+            "android.telecom.extra.ASSERTED_DISPLAY_NAME";
 
     /**
      * Reject reason used with {@link #reject(int)} to indicate that the user is rejecting this

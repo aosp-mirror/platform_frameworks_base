@@ -52,23 +52,26 @@
     <string name="permission_contacts" msgid="3858319347208004438">"Anwani"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Kalenda"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"Maikrofoni"</string>
-    <string name="permission_call_logs" msgid="5546761417694586041">"Rekodi za nambari za simu"</string>
+    <string name="permission_call_logs" msgid="5546761417694586041">"Rekodi za namba za simu"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Vifaa vilivyo karibu"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Badilisha tokeo la maudhui"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Picha na maudhui"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Arifa"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Arifa"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Programu"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Kutiririsha maudhui"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Inaweza kupiga na kudhibiti simu"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Inaweza kusoma na kuandika rekodi ya nambari za simu"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Inaweza kutuma na kuangalia ujumbe wa SMS"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Inaweza kufikia anwani zako"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Inaweza kufikia kalenda yako"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Inaweza kurekodi sauti"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Inaweza kutafuta, kuunganisha na kubaini nafasi ya makadirio ya vifaa vilivyo karibu"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Inaweza kusoma arifa zote, ikiwa ni pamoja na maelezo kama vile anwani, ujumbe na picha"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Kupiga na kudhibiti simu"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Kusoma na kuandika rekodi ya namba za simu"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Kutuma na kuona ujumbe wa SMS"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Kufikia anwani zako"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Kufikia kalenda yako"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Kurekodi sauti"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Kutafuta, kuunganisha na kubaini nafasi ya makadirio ya vifaa vilivyo karibu"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Kusoma arifa zote, ikiwa ni pamoja na maelezo kama vile anwani, ujumbe na picha"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Soma arifa zote, ikiwa ni pamoja na maelezo kama vile anwani, ujumbe na picha&lt;br/&gt;• Tuma arifa&lt;br/&gt;&lt;br/&gt;Unaweza kudhibiti uwezo wa programu hii wa kusoma na kutuma arifa wakati wowote katika Mipangilio &gt; Arifa."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Tiririsha programu za simu yako"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Kutiririsha programu na vipengele vya mfumo kwenye simu yako"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Fikia orodha ya vifaa vinavyopatikana na udhibiti unavyotumia kutiririsha au kutuma maudhui ya sauti au video kutoka kwenye programu nyingine`"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"simu"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"kompyuta kibao"</string>
 </resources>

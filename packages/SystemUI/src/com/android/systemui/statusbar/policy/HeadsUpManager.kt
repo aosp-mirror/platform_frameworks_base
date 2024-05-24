@@ -61,17 +61,17 @@ interface HeadsUpManager : Dumpable {
     fun getTouchableRegion(): Region?
 
     /**
-     * Whether or not there are any active alerting notifications.
+     * Whether or not there are any entries managed by HeadsUpManager.
      *
-     * @return true if there is an alert, false otherwise
+     * @return true if there is a heads up entry, false otherwise
      */
     fun hasNotifications(): Boolean = false
 
     /** Returns whether there are any pinned Heads Up Notifications or not. */
     fun hasPinnedHeadsUp(): Boolean
 
-    /** Returns whether or not the given notification is alerting and managed by this manager. */
-    fun isAlerting(key: String): Boolean
+    /** Returns whether or not the given notification is managed by this manager. */
+    fun isHeadsUpEntry(key: String): Boolean
 
     fun isHeadsUpGoingAway(): Boolean
 
@@ -182,7 +182,7 @@ interface HeadsUpManager : Dumpable {
      */
     fun unpinAll(userUnPinned: Boolean)
 
-    fun updateNotification(key: String, alert: Boolean)
+    fun updateNotification(key: String, shouldHeadsUpAgain: Boolean)
 }
 
 /** Sets the animation state of the HeadsUpManager. */
@@ -213,7 +213,7 @@ class HeadsUpManagerEmptyImpl @Inject constructor() : HeadsUpManager {
     override fun getTouchableRegion(): Region? = null
     override fun getTopEntry() = null
     override fun hasPinnedHeadsUp() = false
-    override fun isAlerting(key: String) = false
+    override fun isHeadsUpEntry(key: String) = false
     override fun isHeadsUpGoingAway() = false
     override fun isSnoozed(packageName: String) = false
     override fun isSticky(key: String?) = false

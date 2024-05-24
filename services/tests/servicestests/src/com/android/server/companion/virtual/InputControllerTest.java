@@ -19,13 +19,13 @@ package com.android.server.companion.virtual;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
+import android.content.AttributionSource;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManagerGlobal;
@@ -33,19 +33,21 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.WindowManager;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.input.flags.Flags;
 import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -57,6 +59,9 @@ import org.mockito.MockitoAnnotations;
 public class InputControllerTest {
     private static final String LANGUAGE_TAG = "en-US";
     private static final String LAYOUT_TYPE = "qwerty";
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
     private InputManagerInternal mInputManagerInternalMock;
@@ -72,17 +77,17 @@ public class InputControllerTest {
 
     @Before
     public void setUp() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_POINTER_CHOREOGRAPHER);
+
         MockitoAnnotations.initMocks(this);
         mInputManagerMockHelper = new InputManagerMockHelper(
                 TestableLooper.get(this), mNativeWrapperMock, mIInputManagerMock);
 
-        doReturn(true).when(mInputManagerInternalMock).setVirtualMousePointerDisplayId(anyInt());
         LocalServices.removeServiceForTest(InputManagerInternal.class);
         LocalServices.addService(InputManagerInternal.class, mInputManagerInternalMock);
 
-        final DisplayInfo displayInfo = new DisplayInfo();
-        displayInfo.uniqueId = "uniqueId";
-        doReturn(displayInfo).when(mDisplayManagerInternalMock).getDisplayInfo(anyInt());
+        setUpDisplay(1 /* displayId */);
+        setUpDisplay(2 /* displayId */);
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
 
@@ -91,7 +96,18 @@ public class InputControllerTest {
         mInputController = new InputController(mNativeWrapperMock,
                 new Handler(TestableLooper.get(this).getLooper()),
                 InstrumentationRegistry.getTargetContext().getSystemService(WindowManager.class),
+                AttributionSource.myAttributionSource(),
                 threadVerifier);
+    }
+
+    void setUpDisplay(int displayId) {
+        final String uniqueId = "uniqueId:" + displayId;
+        doAnswer((inv) -> {
+            final DisplayInfo displayInfo = new DisplayInfo();
+            displayInfo.uniqueId = uniqueId;
+            return displayInfo;
+        }).when(mDisplayManagerInternalMock).getDisplayInfo(eq(displayId));
+        mInputManagerMockHelper.addDisplayIdMapping(uniqueId, displayId);
     }
 
     @After
@@ -129,11 +145,7 @@ public class InputControllerTest {
         mInputController.createMouse("name", /*vendorId= */ 1, /*productId= */ 1, deviceToken,
                 /* displayId= */ 1);
         verify(mNativeWrapperMock).openUinputMouse(eq("name"), eq(1), eq(1), anyString());
-        verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(1));
-        doReturn(1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
         mInputController.unregisterInputDevice(deviceToken);
-        verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(
-                eq(Display.INVALID_DISPLAY));
     }
 
     @Test
@@ -143,14 +155,11 @@ public class InputControllerTest {
         mInputController.createMouse("mouse1", /*vendorId= */ 1, /*productId= */ 1, deviceToken,
                 /* displayId= */ 1);
         verify(mNativeWrapperMock).openUinputMouse(eq("mouse1"), eq(1), eq(1), anyString());
-        verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(1));
         final IBinder deviceToken2 = new Binder();
         mInputController.createMouse("mouse2", /*vendorId= */ 1, /*productId= */ 1, deviceToken2,
                 /* displayId= */ 2);
         verify(mNativeWrapperMock).openUinputMouse(eq("mouse2"), eq(1), eq(1), anyString());
-        verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(2));
         mInputController.unregisterInputDevice(deviceToken);
-        verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(1));
     }
 
     @Test

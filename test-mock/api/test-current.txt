@@ -3,6 +3,7 @@ package android.test.mock {
 
   public class MockContext extends android.content.Context {
     method public int getDisplayId();
+    method public void updateDisplay(int);
   }
 
   @Deprecated public class MockPackageManager extends android.content.pm.PackageManager {

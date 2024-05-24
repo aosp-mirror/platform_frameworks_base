@@ -36,7 +36,6 @@ import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.os.RemoteException;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Rational;
@@ -44,6 +43,8 @@ import android.util.Size;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.window.WindowContainerToken;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.MockSurfaceControlHelper;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -118,7 +119,8 @@ public class PipTaskOrganizerTest extends ShellTestCase {
                 mPipTransitionState, mPipBoundsState, mPipDisplayLayoutState,
                 mPipBoundsAlgorithm, mMockPhonePipMenuController, mMockPipAnimationController,
                 mMockPipSurfaceTransactionHelper, mMockPipTransitionController,
-                mMockPipParamsChangedForwarder, mMockOptionalSplitScreen, mMockDisplayController,
+                mMockPipParamsChangedForwarder, mMockOptionalSplitScreen,
+                Optional.empty() /* pipPerfHintControllerOptional */, mMockDisplayController,
                 mMockPipUiEventLogger, mMockShellTaskOrganizer, mMainExecutor);
         mMainExecutor.flushAll();
         preparePipTaskOrg();

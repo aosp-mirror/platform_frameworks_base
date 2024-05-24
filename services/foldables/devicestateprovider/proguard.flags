@@ -1,1 +1,1 @@
--keep,allowoptimization,allowaccessmodification class com.android.server.policy.TentModeDeviceStatePolicy { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.policy.BookStyleDeviceStatePolicy { *; }

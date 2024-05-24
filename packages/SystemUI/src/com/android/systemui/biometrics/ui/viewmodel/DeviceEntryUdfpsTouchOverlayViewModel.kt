@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics.ui.viewmodel
 
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.hideAffordancesRequest
@@ -26,22 +27,30 @@ import kotlinx.coroutines.flow.combine
 
 /**
  * View model for the UdfpsTouchOverlay for when UDFPS is being requested for device entry. Handles
- * touches as long as the device entry views are visible.
+ * touches as long as the device entry view is visible (the lockscreen or the alternate bouncer
+ * view).
  */
 @ExperimentalCoroutinesApi
 class DeviceEntryUdfpsTouchOverlayViewModel
 @Inject
 constructor(
     deviceEntryIconViewModel: DeviceEntryIconViewModel,
+    alternateBouncerInteractor: AlternateBouncerInteractor,
     systemUIDialogManager: SystemUIDialogManager,
 ) : UdfpsTouchOverlayViewModel {
-    // TODO (b/305234447): AlternateBouncer showing overrides sysuiDialogHideAffordancesRequest
-    override val shouldHandleTouches: Flow<Boolean> =
+    private val showingUdfpsAffordance: Flow<Boolean> =
         combine(
             deviceEntryIconViewModel.deviceEntryViewAlpha,
+            alternateBouncerInteractor.isVisible,
+        ) { deviceEntryViewAlpha, alternateBouncerVisible ->
+            deviceEntryViewAlpha > ALLOW_TOUCH_ALPHA_THRESHOLD || alternateBouncerVisible
+        }
+    override val shouldHandleTouches: Flow<Boolean> =
+        combine(
+            showingUdfpsAffordance,
             systemUIDialogManager.hideAffordancesRequest,
-        ) { deviceEntryViewAlpha, dialogRequestingHideAffordances ->
-            deviceEntryViewAlpha > ALLOW_TOUCH_ALPHA_THRESHOLD && !dialogRequestingHideAffordances
+        ) { showingUdfpsAffordance, dialogRequestingHideAffordances ->
+            showingUdfpsAffordance && !dialogRequestingHideAffordances
         }
 
     companion object {

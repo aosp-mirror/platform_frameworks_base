@@ -18,13 +18,13 @@ package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
-import android.tools.common.Rotation
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import android.tools.device.traces.parsers.toFlickerComponent
-import androidx.test.filters.FlakyTest
+import android.tools.Rotation
+import android.tools.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.flicker.subject.layers.LayersTraceSubject.Companion.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS
+import android.tools.traces.parsers.toFlickerComponent
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
@@ -58,9 +58,10 @@ class CloseImeToHomeOnFinishActivityTest(flicker: LegacyFlickerTest) : BaseTest(
         }
         transitions {
             broadcastActionTrigger.doAction(ACTION_FINISH_ACTIVITY)
-            wmHelper.StateSyncBuilder()
-                    .withActivityRemoved(ActivityOptions.Ime.Default.COMPONENT.toFlickerComponent())
-                    .waitForAndVerify()
+            wmHelper
+                .StateSyncBuilder()
+                .withActivityRemoved(ActivityOptions.Ime.Default.COMPONENT.toFlickerComponent())
+                .waitForAndVerify()
         }
         teardown { simpleApp.exit(wmHelper) }
     }
@@ -69,10 +70,16 @@ class CloseImeToHomeOnFinishActivityTest(flicker: LegacyFlickerTest) : BaseTest(
 
     @Presubmit @Test fun imeLayerBecomesInvisible() = flicker.imeLayerBecomesInvisible()
 
-    @FlakyTest(bugId = 246284124)
+    @Presubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+        flicker.assertLayers {
+            this.visibleLayersShownMoreThanOneConsecutiveEntry(
+                VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS.toMutableList().also {
+                    it.add(simpleApp.componentMatcher)
+                }
+            )
+        }
     }
 
     @Presubmit

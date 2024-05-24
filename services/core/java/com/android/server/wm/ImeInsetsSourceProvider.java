@@ -215,15 +215,15 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
      * when {@link android.inputmethodservice.InputMethodService} requests to show IME
      * on {@param imeTarget}.
      *
-     * @param imeTarget imeTarget on which IME show request is coming from.
-     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
+     * @param imeTarget imeTarget on which IME request is coming from.
+     * @param statsToken the token tracking the current IME request.
      */
     void scheduleShowImePostLayout(InsetsControlTarget imeTarget,
-            @Nullable ImeTracker.Token statsToken) {
+            @NonNull ImeTracker.Token statsToken) {
         boolean targetChanged = isTargetChangedWithinActivity(imeTarget);
         mImeRequester = imeTarget;
-        // There was still a stats token, so that request presumably failed.
-        ImeTracker.forLogging().onFailed(
+        // Cancel the pre-existing stats token, if any.
+        ImeTracker.forLogging().onCancelled(
                 mImeRequesterStatsToken, ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
         mImeRequesterStatsToken = statsToken;
         if (targetChanged) {
@@ -300,8 +300,8 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         mImeRequester = null;
         mIsImeLayoutDrawn = false;
         mShowImeRunner = null;
-        ImeTracker.forLogging().onCancelled(
-                mImeRequesterStatsToken, ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
+        ImeTracker.forLogging().onFailed(
+                mImeRequesterStatsToken, ImeTracker.PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT);
         mImeRequesterStatsToken = null;
     }
 

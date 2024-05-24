@@ -33,7 +33,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -157,7 +157,7 @@ public class RecordingController
      *  If screen capturing is currently not allowed it will return a dialog
      *  that warns users about it. */
     public Dialog createScreenRecordDialog(Context context, FeatureFlags flags,
-                                           DialogLaunchAnimator dialogLaunchAnimator,
+                                           DialogTransitionAnimator dialogTransitionAnimator,
                                            ActivityStarter activityStarter,
                                            @Nullable Runnable onStartRecordingClicked) {
         if (mFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)

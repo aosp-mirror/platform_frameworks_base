@@ -234,7 +234,7 @@ public class ConditionProviders extends ManagedServices {
             if (pkgList != null && (pkgList.length > 0)) {
                 for (String pkgName : pkgList) {
                     try {
-                        inm.removeAutomaticZenRules(pkgName);
+                        inm.removeAutomaticZenRules(pkgName, /* fromUser= */ false);
                         inm.setNotificationPolicyAccessGranted(pkgName, false);
                     } catch (Exception e) {
                         Slog.e(TAG, "Failed to clean up rules for " + pkgName, e);

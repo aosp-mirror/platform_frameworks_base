@@ -20,8 +20,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.ui.data.repository.configurationRepository
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -34,10 +37,11 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@android.platform.test.annotations.EnabledOnRavenwood
 class EmergencyServicesRepositoryImplTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
     private lateinit var underTest: EmergencyServicesRepository
 
@@ -52,7 +56,7 @@ class EmergencyServicesRepositoryImplTest : SysuiTestCase() {
             EmergencyServicesRepository(
                 resources = context.resources,
                 applicationScope = testScope.backgroundScope,
-                configurationRepository = utils.configurationRepository,
+                configurationRepository = kosmos.configurationRepository,
             )
     }
 
@@ -71,7 +75,7 @@ class EmergencyServicesRepositoryImplTest : SysuiTestCase() {
 
     private fun TestScope.setEmergencyCallWhileSimLocked(isEnabled: Boolean) {
         overrideResource(R.bool.config_enable_emergency_call_while_sim_locked, isEnabled)
-        utils.configurationRepository.onConfigurationChange()
+        kosmos.fakeConfigurationRepository.onConfigurationChange()
         runCurrent()
     }
 

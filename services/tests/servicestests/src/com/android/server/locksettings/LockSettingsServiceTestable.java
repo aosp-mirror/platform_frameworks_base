@@ -21,12 +21,14 @@ import static org.mockito.Mockito.mock;
 import android.app.IActivityManager;
 import android.app.admin.DeviceStateCache;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.hardware.authsecret.IAuthSecret;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.storage.IStorageManager;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.service.gatekeeper.IGateKeeperService;
@@ -41,6 +43,9 @@ import java.io.FileNotFoundException;
 import java.security.KeyStore;
 
 public class LockSettingsServiceTestable extends LockSettingsService {
+    private Intent mSavedFrpNotificationIntent = null;
+    private UserHandle mSavedFrpNotificationUserHandle = null;
+    private String mSavedFrpNotificationPermission = null;
 
     public static class MockInjector extends LockSettingsService.Injector {
 
@@ -209,5 +214,30 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         synchronized (mHeadlessAuthSecretLock) {
             mAuthSecret = null;
         }
+    }
+
+    @Override
+    void sendBroadcast(Intent intent, UserHandle userHandle, String permission) {
+        mSavedFrpNotificationIntent = intent;
+        mSavedFrpNotificationUserHandle = userHandle;
+        mSavedFrpNotificationPermission = permission;
+    }
+
+    String getSavedFrpNotificationPermission() {
+        return mSavedFrpNotificationPermission;
+    }
+
+    UserHandle getSavedFrpNotificationUserHandle() {
+        return mSavedFrpNotificationUserHandle;
+    }
+
+    Intent getSavedFrpNotificationIntent() {
+        return mSavedFrpNotificationIntent;
+    }
+
+    void clearRecordedFrpNotificationData() {
+        mSavedFrpNotificationIntent = null;
+        mSavedFrpNotificationPermission = null;
+        mSavedFrpNotificationUserHandle = null;
     }
 }

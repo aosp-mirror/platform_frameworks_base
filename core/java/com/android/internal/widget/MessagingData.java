@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import android.annotation.Nullable;
 import android.app.Person;
 
 import java.util.List;
@@ -28,24 +29,37 @@ final class MessagingData {
     private final boolean mShowSpinner;
     private final List<MessagingMessage> mHistoricMessagingMessages;
     private final List<MessagingMessage> mNewMessagingMessages;
+    private final List<List<MessagingMessage>> mGroups;
+    private final List<Person> mSenders;
     private final int mUnreadCount;
+
+    private ConversationHeaderData mConversationHeaderData;
 
     MessagingData(Person user, boolean showSpinner,
             List<MessagingMessage> historicMessagingMessages,
-            List<MessagingMessage> newMessagingMessages) {
+            List<MessagingMessage> newMessagingMessages, List<List<MessagingMessage>> groups,
+            List<Person> senders) {
         this(user, showSpinner, /* unreadCount= */0,
-                historicMessagingMessages, newMessagingMessages);
+                historicMessagingMessages, newMessagingMessages,
+                groups,
+                senders, null);
     }
 
     MessagingData(Person user, boolean showSpinner,
             int unreadCount,
             List<MessagingMessage> historicMessagingMessages,
-            List<MessagingMessage> newMessagingMessages) {
+            List<MessagingMessage> newMessagingMessages,
+            List<List<MessagingMessage>> groups,
+            List<Person> senders,
+            @Nullable ConversationHeaderData conversationHeaderData) {
         mUser = user;
         mShowSpinner = showSpinner;
         mUnreadCount = unreadCount;
         mHistoricMessagingMessages = historicMessagingMessages;
         mNewMessagingMessages = newMessagingMessages;
+        mGroups = groups;
+        mSenders = senders;
+        mConversationHeaderData = conversationHeaderData;
     }
 
     public Person getUser() {
@@ -66,5 +80,18 @@ final class MessagingData {
 
     public int getUnreadCount() {
         return mUnreadCount;
+    }
+
+    public List<Person> getSenders() {
+        return mSenders;
+    }
+
+    public List<List<MessagingMessage>> getGroups() {
+        return mGroups;
+    }
+
+    @Nullable
+    public ConversationHeaderData getConversationHeaderData() {
+        return mConversationHeaderData;
     }
 }

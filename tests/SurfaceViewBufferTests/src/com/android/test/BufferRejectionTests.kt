@@ -16,7 +16,7 @@
 package com.android.test
 
 import android.graphics.Point
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
+import android.tools.flicker.subject.layers.LayersTraceSubject
 import com.android.test.SurfaceViewBufferTestBase.Companion.ScalingMode
 import com.android.test.SurfaceViewBufferTestBase.Companion.Transform
 import junit.framework.Assert.assertEquals

@@ -12,14 +12,14 @@ java_library {
     visibility: ["//visibility:private"],
     srcs: ["interface-src/**/*.java"],
     host_supported: true,
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 android_library {
     name: "SettingsLib-search",
     use_resource_processor: true,
+    defaults: [
+        "SettingsLintDefaults",
+    ],
     static_libs: [
         "SettingsLib-search-interface",
     ],

@@ -40,6 +40,7 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@android.platform.test.annotations.EnabledOnRavenwood
 class DevicePostureRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: DevicePostureRepository
     private lateinit var testScope: TestScope

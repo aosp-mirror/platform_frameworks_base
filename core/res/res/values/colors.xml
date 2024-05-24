@@ -438,7 +438,47 @@
      This value can be overlaid at runtime by OverlayManager RROs. -->
     <color name="system_neutral2_1000">#000000</color>
 
-    <!-- Colors used in Android system, from Material design system.
+    <!-- Lightest shade of the error color used by the system. White.
+ This value can be overlaid at runtime by OverlayManager RROs. -->
+    <color name="system_error_0">#ffffff</color>
+    <!-- Shade of the error system color at 99% perceptual luminance (L* in L*a*b* color space).
+     This value can be overlaid at runtime by OverlayManager RROs. -->
+    <color name="system_error_10">#FFFBF9</color>
+    <!-- Shade of the error system color at 95% perceptual luminance (L* in L*a*b* color space).
+     This value can be overlaid at runtime by OverlayManager RROs. -->
+    <color name="system_error_50">#FCEEEE</color>
+    <!-- Shade of the error system color at 90% perceptual luminance (L* in L*a*b* color space).
+     This value can be overlaid at runtime by OverlayManager RROs. -->
+    <color name="system_error_100">#F9DEDC</color>
+    <!-- Shade of the error system color at 80% perceptual luminance (L* in L*a*b* color space).
+     This value can be overlaid at runtime by OverlayManager RROs. -->
+    <color name="system_error_200">#F2B8B5</color>
+    <!-- Shade of the error system color at 70% perceptual luminance (L* in L*a*b* color space).
+     This value can be overlaid at runtime by OverlayManager RROs. -->
+    <color name="system_error_300">#EC928E</color>
+    <!-- Shade of the error system color at 60% perceptual luminance (L* in L*a*b* color space).
+     This value can be overlaid at runtime by OverlayManager RROs. -->
+    <color name="system_error_400">#E46962</color>
+    <!-- Shade of the error system color at 49% perceptual luminance (L* in L*a*b* color space).
+     This value can be overlaid at runtime by OverlayManager RROs. -->
+    <color name="system_error_500">#DC362E</color>
+    <!-- Shade of the error system color at 40% perceptual luminance (L* in L*a*b* color space).
+     This value can be overlaid at runtime by OverlayManager RROs. -->
+    <color name="system_error_600">#B3261E</color>
+    <!-- Shade of the error system color at 30% perceptual luminance (L* in L*a*b* color space).
+     This value can be overlaid at runtime by OverlayManager RROs. -->
+    <color name="system_error_700">#8C1D18</color>
+    <!-- Shade of the error system color at 20% perceptual luminance (L* in L*a*b* color space).
+     This value can be overlaid at runtime by OverlayManager RROs. -->
+    <color name="system_error_800">#601410</color>
+    <!-- Shade of the error system color at 10% perceptual luminance (L* in L*a*b* color space).
+     This value can be overlaid at runtime by OverlayManager RROs. -->
+    <color name="system_error_900">#410E0B</color>
+    <!-- Darkest shade of the error color used by the system. Black.
+     This value can be overlaid at runtime by OverlayManager RROs. -->
+    <color name="system_error_1000">#000000</color>
+
+    <!-- Colors used in Android system, from design system.
      These values can be overlaid at runtime by OverlayManager RROs. -->
     <color name="system_primary_container_light">#D8E2FF</color>
     <color name="system_on_primary_container_light">#001A41</color>
@@ -568,10 +608,6 @@
     <color name="side_fps_button_color">#00677E</color>
 
     <!-- Color for system bars -->
-    <color name="status_bar_compatible">@android:color/black</color>
-    <!-- This uses non-regular transparent intentionally. It is used to tell if the transparent
-         color is set by the framework or not. -->
-    <color name="status_bar_default">#00808080</color>
     <color name="navigation_bar_compatible">@android:color/black</color>
     <!-- This uses non-regular transparent intentionally. It is used to tell if the transparent
          color is set by the framework or not. -->

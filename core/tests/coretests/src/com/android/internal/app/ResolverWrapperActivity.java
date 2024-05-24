@@ -88,6 +88,10 @@ public class ResolverWrapperActivity extends ResolverActivity {
         return ((ResolverListAdapter) mMultiProfilePagerAdapter.getAdapterForIndex(1));
     }
 
+    int getMultiProfilePagerAdapterCount(){
+        return mMultiProfilePagerAdapter.getCount();
+    }
+
     @Override
     public boolean isVoiceInteraction() {
         if (sOverrides.isVoiceInteraction != null) {
@@ -144,6 +148,11 @@ public class ResolverWrapperActivity extends ResolverActivity {
     }
 
     @Override
+    protected UserHandle getPrivateProfileUserHandle() {
+        return sOverrides.privateProfileUserHandle;
+    }
+
+    @Override
     protected UserHandle getTabOwnerUserHandleForLaunch() {
         if (sOverrides.tabOwnerUserHandleForLaunch == null) {
             return super.getTabOwnerUserHandleForLaunch();
@@ -176,6 +185,7 @@ public class ResolverWrapperActivity extends ResolverActivity {
         public Boolean isVoiceInteraction;
         public UserHandle workProfileUserHandle;
         public UserHandle cloneProfileUserHandle;
+        public UserHandle privateProfileUserHandle;
         public UserHandle tabOwnerUserHandleForLaunch;
         public Integer myUserId;
         public boolean hasCrossProfileIntents;
@@ -191,6 +201,7 @@ public class ResolverWrapperActivity extends ResolverActivity {
             workResolverListController = mock(ResolverListController.class);
             workProfileUserHandle = null;
             cloneProfileUserHandle = null;
+            privateProfileUserHandle = null;
             tabOwnerUserHandleForLaunch = null;
             myUserId = null;
             hasCrossProfileIntents = true;

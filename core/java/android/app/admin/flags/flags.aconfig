@@ -37,6 +37,48 @@ flag {
 }
 
 flag {
+  name: "dedicated_device_control_api_enabled"
+  namespace: "enterprise"
+  description: "(API) Allow the device management role holder to control which platform features are available on dedicated devices."
+  bug: "281964214"
+}
+
+flag {
+  name: "permission_migration_for_zero_trust_api_enabled"
+  namespace: "enterprise"
+  description: "(API) Migrate existing APIs to permission based, and enable DMRH to call them to collect Zero Trust signals."
+  bug: "289520697"
+}
+
+flag {
+  name: "permission_migration_for_zero_trust_impl_enabled"
+  namespace: "enterprise"
+  description: "(Implementation) Migrate existing APIs to permission based, and enable DMRH to call them to collect Zero Trust signals."
+  bug: "289520697"
+}
+
+flag {
+  name: "device_theft_api_enabled"
+  namespace: "enterprise"
+  description: "Add new API for theft detection."
+  bug: "325073410"
+}
+
+flag {
+  name: "device_theft_impl_enabled"
+  namespace: "enterprise"
+  description: "Implementing new API for theft detection."
+  bug: "325073410"
+}
+
+flag {
+  name: "coexistence_migration_for_non_emm_management_enabled"
+  namespace: "enterprise"
+  description: "Migrate existing APIs to be coexistable, and enable DMRH to call them to support non-EMM device management."
+  bug: "289520697"
+}
+
+flag {
   name: "security_log_v2_enabled"
   namespace: "enterprise"
   description: "Improve access to security logging in the context of Zero Trust."
@@ -61,8 +103,67 @@ flag {
 }
 
 flag {
+    name: "allow_querying_profile_type"
+    namespace: "enterprise"
+    description: "Public APIs to query if a user is a profile and what kind of profile type it is."
+    bug: "323001115"
+}
+
+flag {
   name: "quiet_mode_credential_bug_fix"
   namespace: "enterprise"
   description: "Guards a bugfix that ends the credential input flow if the managed user has not stopped."
   bug: "293441361"
+}
+
+flag {
+  name: "assist_content_user_restriction_enabled"
+  namespace: "enterprise"
+  description: "Prevent work data leakage by sending assist content to privileged apps."
+  bug: "322975406"
+}
+
+flag {
+    name: "default_sms_personal_app_suspension_fix_enabled"
+    namespace: "enterprise"
+    description: "Exempt the default sms app of the context user for suspension when calling setPersonalAppsSuspended"
+    bug: "309183330"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+  name: "backup_service_security_log_event_enabled"
+  namespace: "enterprise"
+  description: "Emit a security log event when DPM.setBackupServiceEnabled is called"
+  bug: "304999634"
+}
+
+flag {
+  name: "esim_management_enabled"
+  namespace: "enterprise"
+  description: "Enable APIs to provision and manage eSIMs"
+  bug: "295301164"
+}
+
+flag {
+  name: "headless_device_owner_single_user_enabled"
+  namespace: "enterprise"
+  description: "Add Headless DO support."
+  bug: "289515470"
+}
+
+flag {
+  name: "is_mte_policy_enforced"
+  namespace: "enterprise"
+  description: "Allow to query whether MTE is enabled or not to check for compliance for enterprise policy"
+  bug: "322777918"
+}
+
+flag {
+  name: "esim_management_ux_enabled"
+  namespace: "enterprise"
+  description: "Enable UX changes for esim management"
+  bug: "295301164"
 }

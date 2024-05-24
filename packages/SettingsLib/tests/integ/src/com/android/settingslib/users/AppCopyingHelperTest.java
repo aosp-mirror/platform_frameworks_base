@@ -37,8 +37,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.UserHandle;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.BaseTest;
 

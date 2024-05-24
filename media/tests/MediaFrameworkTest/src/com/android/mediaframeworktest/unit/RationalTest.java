@@ -16,8 +16,11 @@
 
 package com.android.mediaframeworktest.unit;
 
-import android.test.suitebuilder.annotation.SmallTest;
+import static android.util.Rational.*;
+
 import android.util.Rational;
+
+import androidx.test.filters.SmallTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,8 +30,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
-
-import static android.util.Rational.*;
 
 /**
  * <pre>

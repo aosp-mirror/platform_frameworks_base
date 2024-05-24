@@ -16,10 +16,12 @@
 
 package android.hardware.camera2;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.InputConfiguration;
@@ -35,6 +37,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * <p>The CameraDevice class is a representation of a single camera connected to an
@@ -897,7 +900,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * supported sizes.
      * Camera clients that register a Jpeg/R output within a stream combination that doesn't fit
      * in the mandatory stream table above can call
-     * {@link CameraManager#isSessionConfigurationWithParametersSupported} to ensure that this particular
+     * {@link #isSessionConfigurationSupported} to ensure that this particular
      * configuration is supported.</p>
      *
      * <h5>STREAM_USE_CASE capability additional guaranteed configurations</h5>
@@ -970,7 +973,7 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * <p>Since the capabilities of camera devices vary greatly, a given camera device may support
      * target combinations with sizes outside of these guarantees, but this can only be tested for
-     * by calling {@link CameraManager#isSessionConfigurationWithParametersSupported} or attempting
+     * by calling {@link #isSessionConfigurationSupported} or attempting
      * to create a session with such targets.</p>
      *
      * <p>Exception on 176x144 (QCIF) resolution:
@@ -1395,8 +1398,12 @@ public abstract class CameraDevice implements AutoCloseable {
      * {@link android.hardware.camera2.params.MandatoryStreamCombination} are better suited for this
      * purpose.</p>
      *
-     * <p>Note that session parameters will be ignored and calls to
-     * {@link SessionConfiguration#setSessionParameters} are not required.</p>
+     * <p><b>NOTE:</b>
+     * For apps targeting {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} and above,
+     * this method will ensure session parameters set through calls to
+     * {@link SessionConfiguration#setSessionParameters} are also supported if the Camera Device
+     * supports it. For apps targeting {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and
+     * below, session parameters will be ignored.</p>
      *
      * @return {@code true} if the given session configuration is supported by the camera device
      *         {@code false} otherwise.
@@ -1406,44 +1413,14 @@ public abstract class CameraDevice implements AutoCloseable {
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
-     * @deprecated Please use {@link CameraManager#isSessionConfigurationWithParametersSupported}
-     * to check whether a SessionConfiguration is supported by the device.
+     *
      */
-    @Deprecated
     public boolean isSessionConfigurationSupported(
             @NonNull SessionConfiguration sessionConfig) throws CameraAccessException {
         throw new UnsupportedOperationException("Subclasses must override this method");
     }
 
-  /**
-   * <p>Get camera characteristics for a particular session configuration by the camera device.</p>
-   *
-   * <p>The camera characteristics returned here is typically more limited than the characteristics
-   * returned from {@link CameraManager#getCameraCharacteristics}. The keys that have more limited
-   * values are listed in
-   * {@link CameraCharacteristics#getAvailableSessionCharacteristicsKeys}. </p>
-   *
-   * <p>Other than that, the characteristics returned here can be used in the same way as those
-   * returned from {@link CameraManager#getCameraCharacteristics}.</p>
-   *
-   * @param sessionConfig : The session configuration for which characteristics are fetched.
-   * @return CameraCharacteristics specific to a given session configuration.
-   * @throws UnsupportedOperationException if the query operation is not supported by the camera
-   *                                       device
-   * @throws IllegalArgumentException if the session configuration is invalid
-   * @throws CameraAccessException if the camera device is no longer connected or has
-   *                               encountered a fatal error
-   * @throws IllegalStateException if the camera device has been closed
-   * @see android.hardware.camera2.CameraCharacteristics#getAvailableSessionCharacteristicsKeys
-   */
-    @NonNull
-    @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
-    public CameraCharacteristics getSessionCharacteristics(
-            @NonNull SessionConfiguration sessionConfig) throws CameraAccessException {
-        throw new UnsupportedOperationException("Subclasses must override this method");
-    }
-
-  /**
+    /**
      * A callback objects for receiving updates about the state of a camera device.
      *
      * <p>A callback instance must be provided to the {@link CameraManager#openCamera} method to
@@ -1624,6 +1601,182 @@ public abstract class CameraDevice implements AutoCloseable {
          */
         public abstract void onError(@NonNull CameraDevice camera,
                 @ErrorCode int error); // Must implement
+    }
+
+    /**
+     * CameraDeviceSetup is a limited representation of {@link CameraDevice} that can be used to
+     * query device specific information which would otherwise need a CameraDevice instance.
+     * This class can be constructed without calling {@link CameraManager#openCamera} and paying
+     * the latency cost of CameraDevice creation. Use {@link CameraManager#getCameraDeviceSetup}
+     * to get an instance of this class.
+     *
+     * <p>Can only be instantiated for camera devices for which
+     * {@link CameraManager#isCameraDeviceSetupSupported} returns true.</p>
+     *
+     * @see CameraManager#isCameraDeviceSetupSupported(String)
+     * @see CameraManager#getCameraDeviceSetup(String)
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+    public abstract static class CameraDeviceSetup {
+        /**
+         * Create a {@link CaptureRequest.Builder} for new capture requests,
+         * initialized with a template for target use case.
+         *
+         * <p>The settings are chosen to be the best options for the specific camera device,
+         * so it is not recommended to reuse the same request for a different camera device;
+         * create a builder specific for that device and template and override the
+         * settings as desired, instead.</p>
+         *
+         * <p>Supported if {@link CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION}
+         * is at least {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}. If less or equal to
+         * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, this function throws an
+         * {@link UnsupportedOperationException}.</p>
+         *
+         * @param templateType An enumeration selecting the use case for this request. Not all
+         *                     template types are supported on every device. See the documentation
+         *                     for each template type for details.
+         *
+         * @return a builder for a capture request, initialized with default settings for that
+         * template, and no output streams
+         *
+         * @throws CameraAccessException if the querying the camera device failed or there has been
+         * a fatal error
+         * @throws IllegalArgumentException if the templateType is not supported by this device
+         */
+        @NonNull
+        @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+        public abstract CaptureRequest.Builder createCaptureRequest(
+                @RequestTemplate int templateType) throws CameraAccessException;
+
+        /**
+         * Checks whether a particular {@link SessionConfiguration} is supported by the camera
+         * device.
+         *
+         * <p>This method performs a runtime check of a given {@link SessionConfiguration}. The
+         * result confirms whether or not the {@code SessionConfiguration}, <b>including the
+         * parameters specified via {@link SessionConfiguration#setSessionParameters}</b>, can
+         * be used to create a camera capture session using
+         * {@link CameraDevice#createCaptureSession(SessionConfiguration)}.</p>
+         *
+         * <p>This method is supported if the
+         * {@link CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION}
+         * is at least {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}. If less or equal
+         * to {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, this function throws
+         * {@link UnsupportedOperationException}.</p>
+         *
+         * <p>Although this method is much faster than creating a new capture session, it can still
+         * take a few milliseconds per call. Applications should therefore not use this method to
+         * explore the entire space of supported session combinations.</p>
+         *
+         * <p>Instead, applications should use this method to query whether combinations of
+         * certain features are supported. {@link
+         * CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION} provides the list of
+         * feature combinations the camera device will reliably report.</p>
+         *
+         * <p><b>IMPORTANT:</b></p>
+         * <ul>
+         * <li>If a feature support can be queried via
+         * {@link CameraCharacteristics#SCALER_MANDATORY_STREAM_COMBINATIONS} or
+         * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP}, applications should
+         * directly use it rather than calling this function as: (1) using
+         * {@code CameraCharacteristics} is more efficient, and (2) calling this function with on
+         * non-supported devices will throw a {@link UnsupportedOperationException}.
+         *
+         * <li>To minimize latency of {@link SessionConfiguration} creation, applications can
+         * use deferred surfaces for SurfaceView and SurfaceTexture to avoid waiting for UI
+         * creation before setting up the camera. For {@link android.media.MediaRecorder} and
+         * {@link android.media.MediaCodec} uses, applications can use {@code ImageReader} with
+         * {@link android.hardware.HardwareBuffer#USAGE_VIDEO_ENCODE}. The lightweight nature of
+         * {@code ImageReader} helps minimize the latency cost.
+         * </ul>
+         *
+         * @return {@code true} if the given session configuration is supported by the camera
+         * device, {@code false} otherwise.
+         *
+         * @throws CameraAccessException if the camera device is no longer connected or has
+         * encountered a fatal error
+         * @throws IllegalArgumentException if the session configuration is invalid
+         *
+         * @see CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION
+         * @see SessionConfiguration
+         * @see android.media.ImageReader
+         */
+        @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+        public abstract boolean isSessionConfigurationSupported(
+                @NonNull SessionConfiguration config) throws CameraAccessException;
+
+        /**
+         * <p>Get camera characteristics for a particular session configuration for this camera
+         * device</p>
+         *
+         * <p>The camera characteristics returned by this method are different from those returned
+         * from {@link CameraManager#getCameraCharacteristics}. The characteristics returned here
+         * reflect device capabilities more accurately if the device were to be configured with
+         * {@code sessionConfig}. The keys that may get updated are listed in
+         * {@link CameraCharacteristics#getAvailableSessionCharacteristicsKeys}.</p>
+         *
+         * <p>Other than that, the characteristics returned here can be used in the same way as
+         * those returned from {@link CameraManager#getCameraCharacteristics}.</p>
+         *
+         * @param sessionConfig The session configuration for which characteristics are fetched.
+         * @return CameraCharacteristics specific to a given session configuration.
+         *
+         * @throws IllegalArgumentException      if the session configuration is invalid
+         * @throws CameraAccessException         if the camera device is no longer connected or has
+         *                                       encountered a fatal error
+         *
+         * @see CameraCharacteristics#getAvailableSessionCharacteristicsKeys
+         */
+        @NonNull
+        @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+        public abstract CameraCharacteristics getSessionCharacteristics(
+                @NonNull SessionConfiguration sessionConfig) throws CameraAccessException;
+
+        /**
+         * Utility function to forward the call to
+         * {@link CameraManager#openCamera(String, Executor, StateCallback)}. This function simply
+         * calls {@code CameraManager.openCamera} for the cameraId for which this class was
+         * constructed. All semantics are consistent with {@code CameraManager.openCamera}.
+         *
+         * @param executor The executor which will be used when invoking the callback.
+         * @param callback The callback which is invoked once the camera is opened
+         *
+         * @throws CameraAccessException if the camera is disabled by device policy,
+         * has been disconnected, or is being used by a higher-priority camera API client.
+         *
+         * @throws IllegalArgumentException if cameraId, the callback or the executor was null,
+         * or the cameraId does not match any currently or previously available
+         * camera device.
+         *
+         * @throws SecurityException if the application does not have permission to
+         * access the camera
+         *
+         * @see CameraManager#openCamera(String, Executor, StateCallback)
+         */
+        @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+        @RequiresPermission(android.Manifest.permission.CAMERA)
+        public abstract void openCamera(@NonNull @CallbackExecutor Executor executor,
+                @NonNull StateCallback callback) throws CameraAccessException;
+
+        /**
+         * Get the ID of this camera device.
+         *
+         * <p>This matches the ID given to {@link CameraManager#getCameraDeviceSetup} to instantiate
+         * this object.</p>
+         *
+         * @return the ID for this camera device
+         *
+         * @see CameraManager#getCameraIdList
+         */
+        @NonNull
+        @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+        public abstract String getId();
+
+        /**
+         * To be implemented by camera2 classes only.
+         * @hide
+         */
+        public CameraDeviceSetup() {}
     }
 
     /**

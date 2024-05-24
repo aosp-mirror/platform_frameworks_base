@@ -75,7 +75,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.same;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
@@ -116,6 +115,9 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -147,6 +149,7 @@ import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.WmDisplayCutout;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -172,6 +175,10 @@ import java.util.concurrent.TimeoutException;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class DisplayContentTests extends WindowTestsBase {
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @SetupWindows(addAllCommonWindows = true)
     @Test
@@ -490,7 +497,7 @@ public class DisplayContentTests extends WindowTestsBase {
         newOverrideConfig.fontScale += 0.3;
 
         defaultDisplay.updateDisplayOverrideConfigurationLocked(newOverrideConfig,
-                null /* starting */, false /* deferResume */, null /* result */);
+                null /* starting */, false /* deferResume */);
 
         // Check that global configuration is updated, as we've updated default display's config.
         Configuration globalConfig = mWm.mRoot.getConfiguration();
@@ -499,7 +506,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // Return back to original values.
         defaultDisplay.updateDisplayOverrideConfigurationLocked(currentConfig,
-                null /* starting */, false /* deferResume */, null /* result */);
+                null /* starting */, false /* deferResume */);
         globalConfig = mWm.mRoot.getConfiguration();
         assertEquals(currentConfig.densityDpi, globalConfig.densityDpi);
         assertEquals(currentConfig.fontScale, globalConfig.fontScale, 0.1 /* delta */);
@@ -509,6 +516,7 @@ public class DisplayContentTests extends WindowTestsBase {
      * Tests tapping on a root task in different display results in window gaining focus.
      */
     @Test
+    @RequiresFlagsDisabled(com.android.input.flags.Flags.FLAG_REMOVE_POINTER_EVENT_TRACKING_IN_WM)
     public void testInputEventBringsCorrectDisplayInFocus() {
         DisplayContent dc0 = mWm.getDefaultDisplayContentLocked();
         // Create a second display
@@ -995,7 +1003,13 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.computeScreenConfiguration(config, ROTATION_0);
         dc.onRequestedOverrideConfigurationChanged(config);
         assertEquals(Configuration.ORIENTATION_LANDSCAPE, config.orientation);
-        assertEquals(Configuration.ORIENTATION_LANDSCAPE, dc.getNaturalOrientation());
+        assertEquals(Configuration.ORIENTATION_LANDSCAPE, dc.getNaturalConfigurationOrientation());
+        window.setOverrideOrientation(SCREEN_ORIENTATION_NOSENSOR);
+        assertEquals(Configuration.ORIENTATION_LANDSCAPE,
+                window.getRequestedConfigurationOrientation());
+        // Note that getNaturalOrientation is based on logical display size. So it is portrait if
+        // the display width equals to height.
+        assertEquals(Configuration.ORIENTATION_PORTRAIT, dc.getNaturalOrientation());
     }
 
     @Test
@@ -1176,7 +1190,7 @@ public class DisplayContentTests extends WindowTestsBase {
         activity.setRequestedOrientation(newOrientation);
 
         verify(dc, never()).updateDisplayOverrideConfigurationLocked(any(), eq(activity),
-                anyBoolean(), same(null));
+                anyBoolean());
         assertEquals(ROTATION_180, dc.getRotation());
     }
 
@@ -2123,10 +2137,8 @@ public class DisplayContentTests extends WindowTestsBase {
         // Once transition starts, rotation is applied and transition shows DC rotating.
         testPlayer.startTransition();
         waitUntilHandlersIdle();
-        verify(activity1).ensureActivityConfiguration(anyInt(), anyBoolean(), anyBoolean(),
-                anyBoolean());
-        verify(activity2).ensureActivityConfiguration(anyInt(), anyBoolean(), anyBoolean(),
-                anyBoolean());
+        verify(activity1).ensureActivityConfiguration(anyBoolean());
+        verify(activity2).ensureActivityConfiguration(anyBoolean());
         assertNotEquals(origRot, dc.getConfiguration().windowConfiguration.getRotation());
         assertNotNull(testPlayer.mLastReady);
         assertTrue(testPlayer.mController.isPlaying());
@@ -2248,11 +2260,11 @@ public class DisplayContentTests extends WindowTestsBase {
             // The assertion will fail if DisplayArea#ensureActivitiesVisible is called twice.
             assertFalse(called[0]);
             called[0] = true;
-            mDisplayContent.ensureActivitiesVisible(null, 0, false, false);
+            mDisplayContent.ensureActivitiesVisible(null, false);
             return null;
-        }).when(mockTda).ensureActivitiesVisible(any(), anyInt(), anyBoolean(), anyBoolean());
+        }).when(mockTda).ensureActivitiesVisible(any(), anyBoolean());
 
-        mDisplayContent.ensureActivitiesVisible(null, 0, false, false);
+        mDisplayContent.ensureActivitiesVisible(null, false);
     }
 
     @Test

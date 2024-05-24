@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> หลังผ่านไป <xliff:g id="TIME_DELAY">{2}</xliff:g> วินาที"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ไม่ได้โอนสาย"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ไม่ได้โอนสาย"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"การรักษาความปลอดภัยของเครือข่ายมือถือ"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"ตรวจสอบการตั้งค่า"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"เข้าถึงตัวระบุของอุปกรณ์แล้ว"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"เครือข่ายในการเชื่อมต่อ <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> จะบันทึกตัวระบุที่ไม่ซ้ำ (IMSI) ของอุปกรณ์จำนวน <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> ครั้งในช่วงเวลาระหว่าง<xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> ถึง <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"การเชื่อมต่อกับ <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ที่เข้ารหัส"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"ตอนนี้คุณเชื่อมต่อกับเครือข่ายมือถือที่ปลอดภัยยิ่งขึ้นแล้ว"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"การเชื่อมต่อกับ <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ที่ไม่ได้เข้ารหัส"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"คุณเชื่อมต่อกับเครือข่ายมือถือที่ไม่ได้เข้ารหัสอยู่ การโทร ข้อความ และข้อมูลของคุณเสี่ยงต่อการถูกดักข้อมูล"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"การตั้งค่าความปลอดภัยเครือข่ายมือถือ"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"ดูข้อมูลเพิ่มเติม"</string>
     <string name="fcComplete" msgid="1080909484660507044">"รหัสฟีเจอร์เสร็จสมบูรณ์"</string>
     <string name="fcError" msgid="5325116502080221346">"พบปัญหาในการเชื่อมต่อหรือรหัสฟีเจอร์ไม่ถูกต้อง"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ตกลง"</string>
@@ -370,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"อนุญาตให้แอปเชื่อมโยงกับโมดูลการส่งข้อมูลเตือนภัยทางมือถือ (CB) เพื่อส่งต่อข้อความจากการส่งข้อมูลเตือนภัยทางมือถือ (CB) ทันทีที่ได้รับ ระบบจะส่งการแจ้งเตือนจากการส่งข้อมูลเตือนภัยทางมือถือ (CB) ในบางตำแหน่งเพื่อแจ้งเตือนคุณเกี่ยวกับสถานการณ์ฉุกเฉิน แอปที่เป็นอันตรายอาจรบกวนประสิทธิภาพหรือการทำงานของอุปกรณ์เมื่อได้รับการส่งข้อมูลเตือนภัยทางมือถือ (CB) ในกรณีฉุกเฉิน"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"จัดการสายที่สนทนา"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"อนุญาตแอปเพื่อดูรายละเอียดเกี่ยวกับสายที่สนทนาอยู่บนโทรศัพท์และเพื่อควบคุมสายสนทนาเหล่านี้"</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"เข้าถึงรหัสเสาสัญญาณโทรศัพท์ที่ทราบล่าสุด"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"อนุญาตให้แอปเข้าถึงรหัสเสาสัญญาณโทรศัพท์ที่ทราบล่าสุดซึ่งได้รับจากโทรศัพท์"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"อ่านข้อความที่ได้รับจากสถานีมือถือ"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"อนุญาตให้แอปอ่านข้อความจากสถานีมือถือที่อุปกรณ์ได้รับ การแจ้งเตือนทางมือถือมีให้บริการในบางพื้นที่ โดยจะแจ้งเตือนคุณเกี่ยวกับสถานการณ์ฉุกเฉิน แอปที่เป็นอันตรายอาจเข้าแทรกแซงการทำงานของอุปกรณ์เมื่อได้รับข้อความแจ้งเตือนฉุกเฉิน"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"อ่านฟีดข้อมูลที่สมัครไว้"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"อนุญาตให้แอปใช้ประโยชน์จากบริการที่ทำงานอยู่เบื้องหน้าโดยมีประเภทเป็น \"ได้รับการยกเว้นจากระบบ\""</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"เรียกใช้บริการที่ทำงานอยู่เบื้องหน้าโดยมีประเภทเป็น \"การจัดการไฟล์\""</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"อนุญาตให้แอปใช้ประโยชน์จากบริการที่ทำงานอยู่เบื้องหน้าโดยมีประเภทเป็น \"การจัดการไฟล์\""</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"เรียกใช้บริการที่ทำงานอยู่เบื้องหน้าซึ่งเป็นประเภท \"ประมวลผลสื่อ\""</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"อนุญาตให้แอปใช้ประโยชน์จากบริการที่ทำงานอยู่เบื้องหน้าซึ่งเป็นประเภท \"การประมวลผลสื่อ\""</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"เรียกใช้บริการที่ทำงานอยู่เบื้องหน้าโดยมีประเภทเป็น \"การใช้งานพิเศษ\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"อนุญาตให้แอปใช้ประโยชน์จากบริการที่ทำงานอยู่เบื้องหน้าโดยมีประเภทเป็น \"การใช้งานพิเศษ\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"วัดพื้นที่เก็บข้อมูลของแอปพลิเคชัน"</string>
@@ -500,8 +514,8 @@
     <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"แอปนี้ถ่ายภาพและวิดีโอด้วยกล้องได้ทุกเมื่อ"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"อนุญาตให้แอปพลิเคชันหรือบริการเข้าถึงกล้องของระบบเพื่อถ่ายภาพและวิดีโอ"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"แอปของระบบหรือที่ได้รับสิทธิ์นี้จะถ่ายภาพและบันทึกวิดีโอโดยใช้กล้องของระบบได้ทุกเมื่อ แอปต้องมีสิทธิ์ android.permission.CAMERA ด้วย"</string>
-    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"อนุญาตให้แอปพลิเคชันหรือบริการได้รับโค้ดเรียกกลับเมื่อมีการเปิดหรือปิดอุปกรณ์กล้อง"</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"แอปนี้จะได้รับโค้ดเรียกกลับเมื่อมีการปิดหรือเปิดอุปกรณ์กล้อง (โดยแอปพลิเคชันที่เปิด)"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"อนุญาตให้แอปพลิเคชันหรือบริการได้รับ Callback เมื่อมีการเปิดหรือปิดอุปกรณ์กล้อง"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"แอปนี้จะได้รับ Callback เมื่อมีการปิดหรือเปิดอุปกรณ์กล้อง (โดยแอปพลิเคชันที่เปิด)"</string>
     <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"อนุญาตให้แอปพลิเคชันหรือบริการเข้าถึงกล้องในฐานะผู้ใช้ระบบแบบไม่มีส่วนหัว"</string>
     <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"แอปนี้เข้าถึงกล้องในฐานะผู้ใช้ระบบแบบไม่มีส่วนหัว"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ควบคุมการสั่นเตือน"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"อนุญาตให้แอปใช้ตัวส่งสัญญาณอินฟราเรดของโทรศัพท์"</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"ตั้งค่าวอลเปเปอร์"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"อนุญาตให้แอปพลิเคชันตั้งค่าวอลเปเปอร์ระบบ"</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"เข้าถึงโปรไฟล์ที่ซ่อนอยู่"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"อนุญาตให้แอปเข้าถึงโปรไฟล์ที่ซ่อนอยู่"</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"ปรับขนาดวอลเปเปอร์ของคุณ"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"อนุญาตให้แอปพลิเคชันตั้งค่าคำแนะนำขนาดวอลเปเปอร์ของระบบ"</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"ตั้งค่าเขตเวลา"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ใช้การล็อกหน้าจอ"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ป้อนข้อมูลการล็อกหน้าจอเพื่อดำเนินการต่อ"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"กดเซ็นเซอร์ให้แน่น"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ไม่รู้จักลายนิ้วมือ โปรดลองอีกครั้ง"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"ไม่รู้จักลายนิ้วมือ โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ทำความสะอาดเซ็นเซอร์ลายนิ้วมือแล้วลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"ทำความสะอาดเซ็นเซอร์แล้วลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"กดเซ็นเซอร์ให้แน่น"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ตรวจสอบสิทธิ์ลายนิ้วมือแล้ว"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ตรวจสอบสิทธิ์ใบหน้าแล้ว"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ตรวจสอบสิทธิ์ใบหน้าแล้ว โปรดกดยืนยัน"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ฮาร์ดแวร์ลายนิ้วมือไม่พร้อมใช้งาน"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"ฮาร์ดแวร์อ่านลายนิ้วมือไม่พร้อมใช้งาน"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ตั้งค่าลายนิ้วมือไม่ได้"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"การตั้งค่าลายนิ้วมือหมดเวลา โปรดลองอีกครั้ง"</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"ยกเลิกการทำงานของลายนิ้วมือ"</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ผู้ใช้ยกเลิกการทำงานของลายนิ้วมือ"</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"การทำงานของลายนิ้วมือถูกยกเลิก"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"ผู้ใช้ยกเลิกการทำงานของลายนิ้วมือ"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"ลองหลายครั้งเกินไป ใช้การล็อกหน้าจอแทน"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"ลองหลายครั้งเกินไป ใช้การล็อกหน้าจอแทน"</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ประมวลผลลายนิ้วมือไม่ได้ โปรดลองอีกครั้ง"</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ไม่มีลายนิ้วมือที่ลงทะเบียน"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"อุปกรณ์นี้ไม่มีเซ็นเซอร์ลายนิ้วมือ"</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ปิดใช้เซ็นเซอร์ชั่วคราวแล้ว"</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ใช้เซ็นเซอร์ลายนิ้วมือไม่ได้ โปรดติดต่อผู้ให้บริการซ่อม"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"ไม่มีลายนิ้วมือที่ลงทะเบียน"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"อุปกรณ์นี้ไม่มีเซ็นเซอร์ลายนิ้วมือ"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"เซ็นเซอร์ถูกปิดใช้ชั่วคราว"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"ใช้เซ็นเซอร์ลายนิ้วมือไม่ได้ โปรดติดต่อผู้ให้บริการซ่อม"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"กดปุ่มเปิด/ปิดแล้ว"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"นิ้วมือ <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ใช้ลายนิ้วมือ"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"ไม่เห็นใบหน้า ถือโทรศัพท์ไว้ที่ระดับสายตา"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"มีการเคลื่อนไหวมากเกินไป ถือโทรศัพท์นิ่งๆ"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"โปรดลงทะเบียนใบหน้าอีกครั้ง"</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"ไม่รู้จักใบหน้า โปรดลองอีกครั้ง"</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"ไม่รู้จักใบหน้า โปรดลองอีกครั้ง"</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"เปลี่ยนตำแหน่งของศีรษะเล็กน้อย"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"โปรดมองตรงมาที่โทรศัพท์"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"โปรดมองตรงมาที่โทรศัพท์"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"อนุญาตให้แอปสุ่มตัวอย่างข้อมูลเซ็นเซอร์ที่อัตราสูงกว่า 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"อัปเดตแอปโดยที่ผู้ใช้ไม่ต้องดำเนินการใดๆ"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"อนุญาตให้ผู้ให้บริการอัปเดตแอปที่ติดตั้งไว้ก่อนหน้านี้โดยที่ผู้ใช้ไม่ต้องดำเนินการใดๆ"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"อัปเดตสถานะการยืนยันคีย์ผู้ติดต่อ E2EE ที่แอปอื่นเป็นเจ้าของ"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"อนุญาตให้แอปอัปเดตสถานะการยืนยันคีย์ผู้ติดต่อ E2EE ที่แอปอื่นเป็นเจ้าของ"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ตั้งค่ากฎรหัสผ่าน"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ควบคุมความยาวและอักขระที่สามารถใช้ในรหัสผ่านของการล็อกหน้าจอและ PIN"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"สุดสัปดาห์"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"กิจกรรม"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"นอนหลับ"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"จัดการโดย <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"เปิด"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ปิด"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> กำลังปิดเสียงบางรายการ"</string>
@@ -1925,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"ยืนยันแล้ว"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ขยาย"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"ยุบ"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"ยุบแล้ว"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"ขยายแล้ว"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"สลับการขยาย"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"อุปกรณ์สำหรับต่อพอร์ต USB ของ Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"ยกเลิกการหยุดแอปงานชั่วคราวไหม"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"ยกเลิกการหยุดชั่วคราว"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ฉุกเฉิน"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"ตั้งล็อกหน้าจอ"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"ตั้งล็อกหน้าจอ"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"หากต้องการใช้พื้นที่ส่วนตัว ให้ตั้งการล็อกหน้าจอในอุปกรณ์นี้"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"แอปไม่พร้อมใช้งาน"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ไม่พร้อมใช้งานในขณะนี้"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ไม่พร้อมใช้งาน"</string>
@@ -2341,8 +2365,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"มิเรอร์ไปยังจอแสดงผลไม่ได้"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"โปรดใช้สายอื่นและลองอีกครั้ง"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"อุปกรณ์ร้อนเกินไปและไม่สามารถมิเรอร์ไปยังจอแสดงผลได้จนกว่าจะเย็นลง"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"สายสัญญาณอาจไม่รองรับจอแสดงผล"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"สาย USB-C อาจเชื่อมต่อกับจอแสดงผลอย่างไม่ถูกต้อง"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen เปิดอยู่"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังใช้จอแสดงผลทั้งสองจอเพื่อแสดงเนื้อหา"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"งาน 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"ทดสอบ"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"ส่วนกลาง"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"เชื่อมต่อกับดาวเทียมโดยอัตโนมัติ"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"คุณรับส่งข้อความผ่านดาวเทียมได้โดยไม่ต้องใช้เครือข่ายมือถือหรือ Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"เปิด Messages"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"วิธีการทำงาน"</string>
 </resources>

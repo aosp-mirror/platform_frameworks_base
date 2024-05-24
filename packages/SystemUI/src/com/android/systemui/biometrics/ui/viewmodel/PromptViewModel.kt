@@ -13,11 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.systemui.biometrics.ui.viewmodel
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.graphics.Rect
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.hardware.biometrics.BiometricPrompt
+import android.hardware.biometrics.Flags.customBiometricPrompt
+import android.hardware.biometrics.PromptContentView
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
@@ -40,12 +47,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /** ViewModel for BiometricPrompt. */
@@ -76,10 +85,23 @@ constructor(
     val faceIconHeight: Int =
         context.resources.getDimensionPixelSize(R.dimen.biometric_dialog_face_icon_size)
 
+    val fingerprintSensorDiameter: Flow<Int> =
+        combine(modalities, udfpsOverlayInteractor.udfpsOverlayParams) { modalities, overlayParams
+            ->
+            if (modalities.hasUdfps) {
+                overlayParams.sensorBounds.width()
+            } else {
+                fingerprintIconWidth
+            }
+        }
+
     private val _accessibilityHint = MutableSharedFlow<String>()
 
     /** Hint for talkback directional guidance */
     val accessibilityHint: Flow<String> = _accessibilityHint.asSharedFlow()
+
+    val promptMargin: Int =
+        context.resources.getDimensionPixelSize(R.dimen.biometric_dialog_border_padding)
 
     private val _isAuthenticating: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
@@ -103,6 +125,9 @@ constructor(
     /** The kind of credential the user has. */
     val credentialKind: Flow<PromptKind> = promptSelectorInteractor.credentialKind
 
+    val showBpWithoutIconForCredential: StateFlow<Boolean> =
+        promptSelectorInteractor.showBpWithoutIconForCredential
+
     /** The label to use for the cancel button. */
     val negativeButtonText: Flow<String> =
         promptSelectorInteractor.prompt.map { it?.negativeButtonText ?: "" }
@@ -125,10 +150,28 @@ constructor(
     private val _forceLargeSize = MutableStateFlow(false)
     private val _forceMediumSize = MutableStateFlow(false)
 
-    private val _hapticsToPlay = MutableStateFlow(HapticFeedbackConstants.NO_HAPTICS)
+    private val _hapticsToPlay =
+        MutableStateFlow(HapticsToPlay(HapticFeedbackConstants.NO_HAPTICS, /* flag= */ null))
 
-    /** Event fired to the view indicating a [HapticFeedbackConstants] to be played */
+    /** Event fired to the view indicating a [HapticsToPlay] */
     val hapticsToPlay = _hapticsToPlay.asStateFlow()
+
+    /** The current position of the prompt */
+    val position: Flow<PromptPosition> =
+        combine(
+                _forceLargeSize,
+                displayStateInteractor.isLargeScreen,
+                displayStateInteractor.currentRotation
+            ) { forceLarge, isLargeScreen, rotation ->
+                when {
+                    forceLarge || isLargeScreen -> PromptPosition.Bottom
+                    rotation == DisplayRotation.ROTATION_90 -> PromptPosition.Right
+                    rotation == DisplayRotation.ROTATION_270 -> PromptPosition.Left
+                    rotation == DisplayRotation.ROTATION_180 -> PromptPosition.Top
+                    else -> PromptPosition.Bottom
+                }
+            }
+            .distinctUntilChanged()
 
     /** The size of the prompt. */
     val size: Flow<PromptSize> =
@@ -190,7 +233,34 @@ constructor(
             .distinctUntilChanged()
 
     val iconViewModel: PromptIconViewModel =
-        PromptIconViewModel(this, displayStateInteractor, promptSelectorInteractor)
+        PromptIconViewModel(
+            this,
+            displayStateInteractor,
+            promptSelectorInteractor,
+            udfpsOverlayInteractor
+        )
+
+    private val _isIconViewLoaded = MutableStateFlow(false)
+
+    /**
+     * For prompts with an iconView, false until the prompt's iconView animation has been loaded in
+     * the view, otherwise true by default. Used for BiometricViewSizeBinder to wait for the icon
+     * asset to be loaded before determining the prompt size.
+     */
+    val isIconViewLoaded: Flow<Boolean> =
+        combine(credentialKind, _isIconViewLoaded.asStateFlow()) { credentialKind, isIconViewLoaded
+            ->
+            if (credentialKind is PromptKind.Biometric) {
+                isIconViewLoaded
+            } else {
+                true
+            }
+        }
+
+    // Sets whether the prompt's iconView animation has been loaded in the view yet.
+    fun setIsIconViewLoaded(iconViewLoaded: Boolean) {
+        _isIconViewLoaded.value = iconViewLoaded
+    }
 
     /** Padding for prompt UI elements */
     val promptPadding: Flow<Rect> =
@@ -209,6 +279,45 @@ constructor(
             }
         }
 
+    /** Logo for the prompt. */
+    val logo: Flow<Drawable?> =
+        promptSelectorInteractor.prompt
+            .map {
+                when {
+                    !customBiometricPrompt() || it == null -> null
+                    it.logoRes != -1 -> context.resources.getDrawable(it.logoRes, context.theme)
+                    it.logoBitmap != null -> BitmapDrawable(context.resources, it.logoBitmap)
+                    else ->
+                        try {
+                            val info = context.getApplicationInfo(it.opPackageName)
+                            context.packageManager.getApplicationIcon(info)
+                        } catch (e: Exception) {
+                            Log.w(TAG, "Cannot find icon for package " + it.opPackageName, e)
+                            null
+                        }
+                }
+            }
+            .distinctUntilChanged()
+
+    /** Logo description for the prompt. */
+    val logoDescription: Flow<String> =
+        promptSelectorInteractor.prompt
+            .map {
+                when {
+                    !customBiometricPrompt() || it == null -> ""
+                    it.logoDescription != null -> it.logoDescription
+                    else ->
+                        try {
+                            val info = context.getApplicationInfo(it.opPackageName)
+                            context.packageManager.getApplicationLabel(info).toString()
+                        } catch (e: Exception) {
+                            Log.w(TAG, "Cannot find name for package " + it.opPackageName, e)
+                            ""
+                        }
+                }
+            }
+            .distinctUntilChanged()
+
     /** Title for the prompt. */
     val title: Flow<String> =
         promptSelectorInteractor.prompt.map { it?.title ?: "" }.distinctUntilChanged()
@@ -217,29 +326,42 @@ constructor(
     val subtitle: Flow<String> =
         promptSelectorInteractor.prompt.map { it?.subtitle ?: "" }.distinctUntilChanged()
 
-    /** Description for the prompt. */
-    val description: Flow<String> =
+    /** Custom content view for the prompt. */
+    val contentView: Flow<PromptContentView?> =
+        promptSelectorInteractor.prompt
+            .map { if (customBiometricPrompt()) it?.contentView else null }
+            .distinctUntilChanged()
+
+    private val originalDescription =
         promptSelectorInteractor.prompt.map { it?.description ?: "" }.distinctUntilChanged()
+    /**
+     * Description for the prompt. Description view and contentView is mutually exclusive. Pass
+     * description down only when contentView is null.
+     */
+    val description: Flow<String> =
+        combine(contentView, originalDescription) { contentView, description ->
+            if (contentView == null) description else ""
+        }
 
     /** If the indicator (help, error) message should be shown. */
     val isIndicatorMessageVisible: Flow<Boolean> =
         combine(
-                size,
-                message,
-            ) { size, message ->
-                size.isNotSmall && message.message.isNotBlank()
-            }
-            .distinctUntilChanged()
+            size,
+            position,
+            message,
+        ) { size, _, message ->
+            size.isNotSmall && message.message.isNotBlank()
+        }
 
     /** If the auth is pending confirmation and the confirm button should be shown. */
     val isConfirmButtonVisible: Flow<Boolean> =
         combine(
-                size,
-                isPendingConfirmation,
-            ) { size, isPendingConfirmation ->
-                size.isNotSmall && isPendingConfirmation
-            }
-            .distinctUntilChanged()
+            size,
+            position,
+            isPendingConfirmation,
+        ) { size, _, isPendingConfirmation ->
+            size.isNotSmall && isPendingConfirmation
+        }
 
     /** If the icon can be used as a confirmation button. */
     val isIconConfirmButton: Flow<Boolean> = size.map { it.isNotSmall }.distinctUntilChanged()
@@ -247,28 +369,25 @@ constructor(
     /** If the negative button should be shown. */
     val isNegativeButtonVisible: Flow<Boolean> =
         combine(
-                size,
-                isAuthenticated,
-                promptSelectorInteractor.isCredentialAllowed,
-            ) { size, authState, credentialAllowed ->
-                size.isNotSmall && authState.isNotAuthenticated && !credentialAllowed
-            }
-            .distinctUntilChanged()
+            size,
+            position,
+            isAuthenticated,
+            promptSelectorInteractor.isCredentialAllowed,
+        ) { size, _, authState, credentialAllowed ->
+            size.isNotSmall && authState.isNotAuthenticated && !credentialAllowed
+        }
 
     /** If the cancel button should be shown (. */
     val isCancelButtonVisible: Flow<Boolean> =
         combine(
-                size,
-                isAuthenticated,
-                isNegativeButtonVisible,
-                isConfirmButtonVisible,
-            ) { size, authState, showNegativeButton, showConfirmButton ->
-                size.isNotSmall &&
-                    authState.isAuthenticated &&
-                    !showNegativeButton &&
-                    showConfirmButton
-            }
-            .distinctUntilChanged()
+            size,
+            position,
+            isAuthenticated,
+            isNegativeButtonVisible,
+            isConfirmButtonVisible,
+        ) { size, _, authState, showNegativeButton, showConfirmButton ->
+            size.isNotSmall && authState.isAuthenticated && !showNegativeButton && showConfirmButton
+        }
 
     private val _canTryAgainNow = MutableStateFlow(false)
     /**
@@ -277,35 +396,34 @@ constructor(
      */
     val canTryAgainNow: Flow<Boolean> =
         combine(
-                _canTryAgainNow,
-                size,
-                isAuthenticated,
-                isRetrySupported,
-            ) { readyToTryAgain, size, authState, supportsRetry ->
-                readyToTryAgain && size.isNotSmall && supportsRetry && authState.isNotAuthenticated
-            }
-            .distinctUntilChanged()
+            _canTryAgainNow,
+            size,
+            position,
+            isAuthenticated,
+            isRetrySupported,
+        ) { readyToTryAgain, size, _, authState, supportsRetry ->
+            readyToTryAgain && size.isNotSmall && supportsRetry && authState.isNotAuthenticated
+        }
 
     /** If the try again button show be shown (only the button, see [canTryAgainNow]). */
     val isTryAgainButtonVisible: Flow<Boolean> =
         combine(
-                canTryAgainNow,
-                modalities,
-            ) { tryAgainIsPossible, modalities ->
-                tryAgainIsPossible && modalities.hasFaceOnly
-            }
-            .distinctUntilChanged()
+            canTryAgainNow,
+            modalities,
+        ) { tryAgainIsPossible, modalities ->
+            tryAgainIsPossible && modalities.hasFaceOnly
+        }
 
     /** If the credential fallback button show be shown. */
     val isCredentialButtonVisible: Flow<Boolean> =
         combine(
-                size,
-                isAuthenticated,
-                promptSelectorInteractor.isCredentialAllowed,
-            ) { size, authState, credentialAllowed ->
-                size.isNotSmall && authState.isNotAuthenticated && credentialAllowed
-            }
-            .distinctUntilChanged()
+            size,
+            position,
+            isAuthenticated,
+            promptSelectorInteractor.isCredentialAllowed,
+        ) { size, _, authState, credentialAllowed ->
+            size.isNotSmall && authState.isNotAuthenticated && credentialAllowed
+        }
 
     private val history = PromptHistoryImpl()
     private var messageJob: Job? = null
@@ -572,22 +690,38 @@ constructor(
     }
 
     private fun vibrateOnSuccess() {
-        _hapticsToPlay.value = HapticFeedbackConstants.CONFIRM
+        _hapticsToPlay.value =
+            HapticsToPlay(
+                HapticFeedbackConstants.CONFIRM,
+                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
+            )
     }
 
     private fun vibrateOnError() {
-        _hapticsToPlay.value = HapticFeedbackConstants.REJECT
+        _hapticsToPlay.value =
+            HapticsToPlay(
+                HapticFeedbackConstants.REJECT,
+                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
+            )
     }
 
-    /** Clears the [hapticsToPlay] variable by setting it to the NO_HAPTICS default. */
+    /** Clears the [hapticsToPlay] variable by setting its constant to the NO_HAPTICS default. */
     fun clearHaptics() {
-        _hapticsToPlay.value = HapticFeedbackConstants.NO_HAPTICS
+        _hapticsToPlay.update { previous ->
+            HapticsToPlay(HapticFeedbackConstants.NO_HAPTICS, previous.flag)
+        }
     }
 
     companion object {
         private const val TAG = "PromptViewModel"
     }
 }
+
+private fun Context.getApplicationInfo(packageName: String): ApplicationInfo =
+    packageManager.getApplicationInfo(
+        packageName,
+        PackageManager.MATCH_DISABLED_COMPONENTS or PackageManager.MATCH_ANY_USER
+    )
 
 /** How the fingerprint sensor was started for the prompt. */
 enum class FingerprintStartMode {
@@ -604,3 +738,9 @@ enum class FingerprintStartMode {
     val isStarted: Boolean
         get() = this == Normal || this == Delayed
 }
+
+/**
+ * The state of haptic feedback to play. It is composed by a [HapticFeedbackConstants] and a
+ * [HapticFeedbackConstants] flag.
+ */
+data class HapticsToPlay(val hapticFeedbackConstant: Int, val flag: Int?)

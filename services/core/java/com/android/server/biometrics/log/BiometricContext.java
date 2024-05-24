@@ -77,6 +77,9 @@ public interface BiometricContext {
     @AuthenticateOptions.DisplayState
     int getDisplayState();
 
+    /** Gets whether touches on sensor are ignored by HAL */
+    boolean isHardwareIgnoringTouches();
+
     /**
      * Subscribe to context changes.
      *
@@ -84,9 +87,29 @@ public interface BiometricContext {
      *
      * @param context context that will be modified when changed
      * @param consumer callback when the context is modified
+     *
+     * @deprecated instead use {@link BiometricContext#subscribe(OperationContextExt, Consumer,
+     *                                                           Consumer, AuthenticateOptions)}
+     * TODO (b/294161627): Delete this API once Flags.DE_HIDL is removed.
      */
+    @Deprecated
     void subscribe(@NonNull OperationContextExt context,
             @NonNull Consumer<OperationContext> consumer);
+
+    /**
+     * Subscribe to context changes and start the HAL operation.
+     *
+     * Note that this method only notifies for properties that are visible to the HAL.
+     *
+     * @param context               context that will be modified when changed
+     * @param startHalConsumer      callback to start HAL operation after subscription is done
+     * @param updateContextConsumer callback when the context is modified
+     * @param options               authentication options for updating the context
+     */
+    void subscribe(@NonNull OperationContextExt context,
+            @NonNull Consumer<OperationContext> startHalConsumer,
+            @NonNull Consumer<OperationContext> updateContextConsumer,
+            @Nullable AuthenticateOptions options);
 
     /** Unsubscribe from context changes. */
     void unsubscribe(@NonNull OperationContextExt context);

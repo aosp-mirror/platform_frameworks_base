@@ -92,7 +92,8 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
-        if (mService.getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT) {
+        HdmiPortInfo portInfo = mService.getPortInfo(portId);
+        if (portInfo != null && portInfo.getType() == HdmiPortInfo.PORT_OUTPUT) {
             mCecMessageCache.flushAll();
         }
         // We'll not invalidate the active source on the hotplug event to pass CETC 11.2.2-2 ~ 3.
@@ -307,7 +308,6 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
         removeAction(OneTouchPlayAction.class);
         removeAction(DevicePowerStatusAction.class);
-        removeAction(AbsoluteVolumeAudioStatusAction.class);
 
         super.disableDevice(initiatedByCec, callback);
     }

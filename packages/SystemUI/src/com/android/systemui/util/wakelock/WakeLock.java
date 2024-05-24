@@ -22,6 +22,8 @@ import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.systemui.Flags;
+
 import java.util.HashMap;
 
 import javax.inject.Inject;
@@ -112,6 +114,11 @@ public interface WakeLock {
     @VisibleForTesting
     static WakeLock wrap(
             final PowerManager.WakeLock inner, WakeLockLogger logger, long maxTimeout) {
+        if (Flags.delayedWakelockReleaseOnBackgroundThread()) {
+            return new ClientTrackingWakeLock(inner, logger, maxTimeout);
+        }
+
+        // Non-thread safe implementation, remove when flag above is removed.
         return new WakeLock() {
             private final HashMap<String, Integer> mActiveClients = new HashMap<>();
 

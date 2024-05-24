@@ -30,7 +30,6 @@ import java.io.PrintWriter;
  * An interface to manage the display's power state and brightness
  */
 public interface DisplayPowerControllerInterface {
-    int DEFAULT_USER_SERIAL = -1;
     /**
      * Notified when the display is changed.
      *
@@ -69,9 +68,10 @@ public interface DisplayPowerControllerInterface {
 
     /**
      * Used to decide the associated AutomaticBrightnessController's BrightnessMode
-     * @param isIdle Flag which represents if the Idle BrightnessMode is to be set
+     * @param mode The auto-brightness mode
      */
-    void setAutomaticScreenBrightnessMode(boolean isIdle);
+    void setAutomaticScreenBrightnessMode(
+            @AutomaticBrightnessController.AutomaticBrightnessMode int mode);
 
     /**
      * Used to enable/disable the logging of the WhileBalance associated entities
@@ -99,15 +99,12 @@ public interface DisplayPowerControllerInterface {
      * Set the screen brightness of the associated display
      * @param brightness The value to which the brightness is to be set
      */
-    default void setBrightness(float brightness) {
-        setBrightness(brightness, DEFAULT_USER_SERIAL);
-    }
+    void setBrightness(float brightness);
 
     /**
      * Set the screen brightness of the associated display
      * @param brightness The value to which the brightness is to be set
-     * @param userSerial The user for which the brightness value is to be set. Use userSerial = -1,
-     * if brightness needs to be updated for the current user.
+     * @param userSerial The user for which the brightness value is to be set.
      */
     void setBrightness(float brightness, int userSerial);
 
@@ -187,8 +184,10 @@ public interface DisplayPowerControllerInterface {
     /**
      * Handles the changes to be done to update the brightness when the user is changed
      * @param newUserId The new userId
+     * @param userSerial The serial number of the new user
+     * @param newBrightness The brightness for the new user
      */
-    void onSwitchUser(int newUserId);
+    void onSwitchUser(int newUserId, int userSerial, float newBrightness);
 
     /**
      * Get the ID of the display associated with this DPC.
@@ -236,4 +235,21 @@ public interface DisplayPowerControllerInterface {
      * Indicate that boot has been completed and the screen is ready to update.
      */
     void onBootCompleted();
+
+    /**
+     * Get the brightness levels used to determine automatic brightness based on lux levels.
+     * @param mode The auto-brightness mode
+     * @return The brightness levels for the specified mode. The values are between
+     * {@link PowerManager.BRIGHTNESS_MIN} and {@link PowerManager.BRIGHTNESS_MAX}.
+     */
+    float[] getAutoBrightnessLevels(
+            @AutomaticBrightnessController.AutomaticBrightnessMode int mode);
+
+    /**
+     * Get the lux levels used to determine automatic brightness.
+     * @param mode The auto-brightness mode
+     * @return The lux levels for the specified mode
+     */
+    float[] getAutoBrightnessLuxLevels(
+            @AutomaticBrightnessController.AutomaticBrightnessMode int mode);
 }

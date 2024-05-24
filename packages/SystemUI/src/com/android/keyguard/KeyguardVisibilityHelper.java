@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
@@ -23,7 +24,6 @@ import android.util.Property;
 import android.view.View;
 
 import com.android.app.animation.Interpolators;
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.statusbar.StatusBarState;
@@ -88,6 +88,10 @@ public class KeyguardVisibilityHelper {
             boolean keyguardFadingAway,
             boolean goingToFullShade,
             int oldStatusBarState) {
+        if (migrateClocksToBlueprint()) {
+            log("Ignoring all of KeyguardVisibilityelper");
+            return;
+        }
         Assert.isMainThread();
         PropertyAnimator.cancelAnimation(mView, AnimatableProperty.ALPHA);
         boolean isOccluded = mKeyguardStateController.isOccluded();
@@ -109,8 +113,12 @@ public class KeyguardVisibilityHelper {
                 animProps.setDelay(0).setDuration(160);
                 log("goingToFullShade && !keyguardFadingAway");
             }
-            PropertyAnimator.setProperty(
-                    mView, AnimatableProperty.ALPHA, 0f, animProps, true /* animate */);
+            if (migrateClocksToBlueprint()) {
+                log("Using LockscreenToGoneTransition 1");
+            } else {
+                PropertyAnimator.setProperty(
+                        mView, AnimatableProperty.ALPHA, 0f, animProps, true /* animate */);
+            }
         } else if (oldStatusBarState == StatusBarState.SHADE_LOCKED && statusBarState == KEYGUARD) {
             mView.setVisibility(View.VISIBLE);
             mKeyguardViewVisibilityAnimating = true;
@@ -163,7 +171,7 @@ public class KeyguardVisibilityHelper {
                         animProps,
                         true /* animate */);
             } else if (mScreenOffAnimationController.shouldAnimateInKeyguard()) {
-                if (KeyguardShadeMigrationNssl.isEnabled()) {
+                if (migrateClocksToBlueprint()) {
                     log("Using GoneToAodTransition");
                     mKeyguardViewVisibilityAnimating = false;
                 } else {
@@ -179,9 +187,13 @@ public class KeyguardVisibilityHelper {
                 mView.setVisibility(View.VISIBLE);
             }
         } else {
-            log("Direct set Visibility to GONE");
-            mView.setVisibility(View.GONE);
-            mView.setAlpha(1f);
+            if (migrateClocksToBlueprint()) {
+                log("Using LockscreenToGoneTransition 2");
+            } else {
+                log("Direct set Visibility to GONE");
+                mView.setVisibility(View.GONE);
+                mView.setAlpha(1f);
+            }
         }
 
         mLastOccludedState = isOccluded;

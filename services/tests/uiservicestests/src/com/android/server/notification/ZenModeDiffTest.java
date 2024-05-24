@@ -65,18 +65,24 @@ import java.util.Set;
 @TestableLooper.RunWithLooper
 public class ZenModeDiffTest extends UiServiceTestCase {
     // Base set of exempt fields independent of fields that are enabled/disabled via flags.
-    // version is not included in the diff; manual & automatic rules have special handling
+    // version is not included in the diff; manual & automatic rules have special handling;
+    // deleted rules are not included in the diff.
     public static final Set<String> ZEN_MODE_CONFIG_EXEMPT_FIELDS =
-            Set.of("version", "manualRule", "automaticRules");
+            android.app.Flags.modesApi()
+                    ? Set.of("version", "manualRule", "automaticRules", "deletedRules")
+                    : Set.of("version", "manualRule", "automaticRules");
 
     // Differences for flagged fields are only generated if the flag is enabled.
-    // TODO: b/310620812 - Remove this exempt list when flag is inlined.
+    // "Metadata" fields (userModifiedFields & co, deletionInstant) are not compared.
     private static final Set<String> ZEN_RULE_EXEMPT_FIELDS =
             android.app.Flags.modesApi()
-                    ? Set.of()
+                    ? Set.of("userModifiedFields", "zenPolicyUserModifiedFields",
+                            "zenDeviceEffectsUserModifiedFields", "deletionInstant")
                     : Set.of(RuleDiff.FIELD_TYPE, RuleDiff.FIELD_TRIGGER_DESCRIPTION,
                             RuleDiff.FIELD_ICON_RES, RuleDiff.FIELD_ALLOW_MANUAL,
-                            RuleDiff.FIELD_ZEN_DEVICE_EFFECTS);
+                            RuleDiff.FIELD_ZEN_DEVICE_EFFECTS, "userModifiedFields",
+                            "zenPolicyUserModifiedFields", "zenDeviceEffectsUserModifiedFields",
+                            "deletionInstant");
 
     // allowPriorityChannels is flagged by android.app.modes_api
     public static final Set<String> ZEN_MODE_CONFIG_FLAGGED_FIELDS =
@@ -304,6 +310,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
             rule.zenDeviceEffects = new ZenDeviceEffects.Builder()
                     .setShouldDimWallpaper(true)
                     .build();
+            rule.userModifiedFields = AutomaticZenRule.FIELD_NAME;
         }
         return rule;
     }

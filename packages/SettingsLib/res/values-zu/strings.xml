@@ -154,6 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Ukwenza isithombe"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Amahedfoni"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Okokufaka okulawulwa yikhompuyutha"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"Imishini Yezindlebe"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"I-Bluetooth"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"I-Wifi ivaliwe."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"I-Wifi inqanyuliwe."</string>
@@ -455,6 +456,8 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Ukulungiswa kombala kungasiza uma ufuna ukwenza lokhu:<br/><br/> <ol> <li>&amp;nbsp;Ukubona imibala ngokunembe kakhulu</li> <li>&amp;nbsp;Ukususa imibala ukukusiza ukuthi ugxile</li> </ol>"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Igitshezwe ngaphezulu yi-<xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ukushaja kumisiwe ukuze kuvikelwe ibhethri"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> - Hlola insiza yokushaja"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Cishe u-<xliff:g id="TIME_REMAINING">%1$s</xliff:g> osele"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Cishe u-<xliff:g id="TIME_REMAINING">%1$s</xliff:g> osele (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Cishe u-<xliff:g id="TIME_REMAINING">%1$s</xliff:g> osele ngokususelwe ekusebenziseni wakho"</string>
@@ -475,7 +478,7 @@
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> okusele kuze kugcwale"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> okusele kuze kugcwale"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ukushaja kuthuthukisiwe"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ukushaja kuthuthukisiwe"</string>
+    <string name="power_charging_future_paused" msgid="1809543660923642799">"Iku-<xliff:g id="LEVEL">%1$s</xliff:g> ‑ Iyashaja"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Akwaziwa"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Iyashaja"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Ishaja ngokushesha"</string>
@@ -483,9 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Iyashaja ngaphandle kwentambo"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Iyashaja"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ayishaji"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Ixhunyiwe, ayishaji"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Ixhunyiwe, kodwa ayishaji"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Kushajiwe"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Ishaje Ngokuphelele"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Ukushaja kumisiwe"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kulawulwa umqondisi"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Kulawulwe Isethingi Elikhawulelwe"</string>
     <string name="disabled" msgid="8017887509554714950">"Akusebenzi"</string>
@@ -547,9 +551,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Buza njalo"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Uze uvale isikrini"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Khona manje"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Le foni"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Le thebulethi"</string>
-    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Le foni"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Le thebhulethi"</string>
+    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Isipikha sentuba"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Idivayisi Yangaphandle"</string>
@@ -615,6 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Yehlulekile ukudala umsebenzisi omusha"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Yehlulekile ukusungula isimenywa esisha"</string>
     <string name="user_nickname" msgid="262624187455825083">"Isiteketiso"</string>
+    <string name="edit_user_info_message" msgid="5199468585059260053">"Igama nesithombe sakho kuzobonakala kunoma ubani osebenzisa le divayisi."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Engeza umsebenzisi"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Engeza isivakashi"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Susa isihambeli"</string>

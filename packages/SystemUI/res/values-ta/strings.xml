@@ -120,6 +120,15 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"பார்க்கத் தட்டவும்"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"ஸ்கிரீன் ரெக்கார்டிங்கைச் சேமிப்பதில் பிழை ஏற்பட்டது"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ஸ்கிரீன் ரெக்கார்டிங்கைத் தொடங்குவதில் பிழை"</string>
+    <string name="issuerecord_title" msgid="286627115110121849">"சிக்கல் ரெக்கார்டர்"</string>
+    <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"சிக்கல் ரெக்கார்டிங்கைச் செயலாக்குகிறது"</string>
+    <string name="issuerecord_channel_description" msgid="6142326363431474632">"சிக்கல் சேகரிப்பு அமர்வுக்கான பின்னணிச் செயல்பாட்டின் அறிவிப்பு"</string>
+    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"சிக்கல் ரெக்கார்டு செய்யப்படுகிறது"</string>
+    <string name="issuerecord_share_label" msgid="3992657993619876199">"பகிர்"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"சிக்கல் தொடர்பான ரெக்கார்டிங் சேமிக்கப்பட்டது"</string>
+    <string name="issuerecord_save_text" msgid="1205985304551521495">"பார்க்க தட்டவும்"</string>
+    <string name="issuerecord_save_error" msgid="6913040083446722726">"சிக்கல் தொடர்பான ரெக்கார்டிங்கைச் சேமிப்பதில் பிழை ஏற்பட்டது"</string>
+    <string name="issuerecord_start_error" msgid="3402782952722871190">"சிக்கலை ரெக்கார்டிங் செய்யத் தொடங்குவதில் பிழை ஏற்பட்டது"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"முழுத் திரையில் காட்டுகிறது"</string>
     <string name="immersive_cling_description" msgid="6913958856085185775">"வெளியேற, மேலிருந்து கீழே ஸ்வைப் செய்யவும்."</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"சரி"</string>
@@ -188,10 +197,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை அமைக்க முடியவில்லை. அமைப்புகளுக்குச் சென்று மீண்டும் முயலவும்."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"கைரேகை சென்சாரைத் தொடவும்"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"தொடர, அன்லாக் ஐகானை அழுத்துங்கள்"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"முகத்தை அடையாளம் காண முடியவில்லை. கைரேகையைப் பயன்படுத்தவும்."</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"முகத்தைக் கண்டறிய முடியவில்லை. கைரேகை பயன்படுத்துக"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <string name="keyguard_face_failed" msgid="9044619102286917151">"முகத்தை கண்டறிய இயலவில்லை"</string>
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"முகம் கண்டறிய முடியவில்லை"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"கைரேகையை உபயோகிக்கவும்"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"முகம் காட்டித் திறத்தல் அம்சம் கிடைக்கவில்லை"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"புளூடூத் இணைக்கப்பட்டது."</string>
@@ -259,6 +268,8 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"சேமிக்கப்பட்டது"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"இணைப்பு நீக்கும்"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"செயல்படுத்தும்"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"நாளைக்குத் தானாகவே மீண்டும் இயக்கப்படும்"</string>
+    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"விரைவுப் பகிர்தல், Find My Device போன்ற அம்சங்களும் சாதன இருப்பிடமும் புளூடூத்தைப் பயன்படுத்துகின்றன"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> பேட்டரி"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ஆடியோ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ஹெட்செட்"</string>
@@ -330,6 +341,17 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"ஸ்கிரீன் ரெக்கார்டு"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"தொடங்கு"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"நிறுத்து"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"சிக்கலை ரெக்கார்டு செய்தல்"</string>
+    <string name="qs_record_issue_start" msgid="2979831312582567056">"தொடங்குங்கள்"</string>
+    <string name="qs_record_issue_stop" msgid="3531747965741982657">"நிறுத்துங்கள்"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"சாதன அனுபவத்தின் எந்தப் பகுதி பாதிக்கப்பட்டது?"</string>
+    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"சிக்கல் வகையைத் தேர்வுசெய்க"</string>
+    <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"ஸ்கிரீன் ரெக்கார்டு"</string>
+  <string-array name="qs_record_issue_types">
+    <item msgid="2947988124014085798">"செயல்திறன்"</item>
+    <item msgid="1627504621139124393">"பயனர் இடைமுகம்"</item>
+    <item msgid="8309220355268900335">"பேட்டரி"</item>
+  </string-array>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"ஒற்றைக் கைப் பயன்முறை"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"ஒளி மாறுபாடு"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"இயல்புநிலை"</string>
@@ -401,9 +423,18 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • மெதுவாக சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுதும் சார்ஜாகும்"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுவதும் சார்ஜாகும்"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"சமூகப் பயிற்சியைத் தொடங்க இடதுபுறம் ஸ்வைப் செய்யுங்கள்"</string>
-    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"விட்ஜெட் எடிட்டரைத் திறக்கும்"</string>
-    <string name="button_to_remove_widget" msgid="1511255853677835341">"விட்ஜெட்டை அகற்றும்"</string>
-    <string name="hub_mode_add_widget_button_text" msgid="3956587989338301487">"விட்ஜெட்டைச் சேர்"</string>
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"பிரத்தியேகமாக்குங்கள்"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"மூடுக"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"இந்த இடத்தில் உங்கள் விட்ஜெட்களைச் சேர்க்கலாம், அகற்றலாம், மறுவரிசைப்படுத்தலாம்"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"கூடுதல் விட்ஜெட்களைச் சேருங்கள்"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"விட்ஜெட்களைப் பிரத்தியேகமாக்க நீண்ட நேரம் அழுத்துக"</string>
+    <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"விட்ஜெட்களைப் பிரத்தியேகமாக்குங்கள்"</string>
+    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
+    <skip />
+    <string name="edit_widget" msgid="9030848101135393954">"விட்ஜெட்டைத் திருத்து"</string>
+    <string name="button_to_remove_widget" msgid="3948204829181214098">"அகற்றும்"</string>
+    <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"விட்ஜெட்டைச் சேர்"</string>
+    <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"முடிந்தது"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"பயனரை மாற்று"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"கீழ் இழுக்கும் மெனு"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"இந்த அமர்வின் எல்லா ஆப்ஸும் தரவும் நீக்கப்படும்."</string>
@@ -501,6 +532,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"இந்தச் சாதனம் உங்கள் பெற்றோரால் நிர்வகிக்கப்படுகிறது. நீங்கள் பயன்படுத்தும் ஆப்ஸ், இருப்பிடம், பயன்படுத்திய நேரம் ஆகியவற்றைப் பார்க்கவும் நிர்வகிக்கவும் உங்கள் பெற்றோரால் முடியும்."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent இதைத் திறந்தே வைத்துள்ளது"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"திருட்டைத் தடுக்க\nசாதனம் பூட்டப்பட்டது, அதிகமான அன்லாக் முயற்சிகள்"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"ஒலி அமைப்புகள்"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"வசன உரைகளைத் தானாக எழுதும்"</string>
@@ -510,6 +542,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"முடக்கும்"</string>
     <string name="sound_settings" msgid="8874581353127418308">"ஒலி &amp; அதிர்வு"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"அமைப்புகள்"</string>
+    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"உடனடி வசனம்"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"பாதுகாப்பான நிலைக்கு ஒலியளவு குறைக்கப்பட்டது"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"ஹெட்ஃபோன் ஒலியளவு பரிந்துரைக்கப்பட்டதைவிட அதிகளவில் நீண்ட நேரமாக உள்ளது"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"இந்த வாரம் ஹெட்ஃபோன் ஒலியளவு பாதுகாப்பு வரம்பைக் கடந்துவிட்டது"</string>
@@ -542,17 +575,22 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"ஒலி"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"அதிர்வு"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"அமைதி"</string>
+    <string name="media_device_cast" msgid="4786241789687569892">"அலைபரப்பு"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"\'ரிங்\' மியூட்டில் உள்ளதால் கிடைக்கவில்லை"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. ஒலி இயக்க, தட்டவும்."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. அதிர்விற்கு அமைக்க, தட்டவும். அணுகல்தன்மை சேவைகள் ஒலியடக்கப்படக்கூடும்."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. ஒலியடக்க, தட்டவும். அணுகல்தன்மை சேவைகள் ஒலியடக்கப்படக்கூடும்."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. அதிர்விற்கு அமைக்க, தட்டவும்."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. ஒலியடக்க, தட்டவும்."</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"இரைச்சல் கட்டுப்பாடு"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ரிங்கர் பயன்முறையை மாற்ற தட்டவும்"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ஒலியடக்கும்"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ஒலி இயக்கும்"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"அதிர்வுறும்"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s ஒலியளவுக் கட்டுப்பாடுகள்"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"அழைப்புகளும் அறிவிப்புகளும் வரும்போது ஒலிக்கச் செய்யும் (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"இதில் <xliff:g id="LABEL">%s</xliff:g> பிளே ஆகிறது"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"இல் ஆடியோ பிளே ஆகும்"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"நிலைப் பட்டி"</string>
     <string name="demo_mode" msgid="263484519766901593">"சிஸ்டம் பயனர் இடைமுக டெமோ பயன்முறை"</string>
@@ -576,6 +614,10 @@
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> மணிக்கு"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> மணிக்கு"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"ஹாட்ஸ்பாட்"</string>
+    <string name="accessibility_status_bar_satellite_no_connection" msgid="3001571744269917762">"சாட்டிலைட், இணைப்பு இல்லை"</string>
+    <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"சாட்டிலைட், மோசமான இணைப்பு"</string>
+    <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"சாட்டிலைட், நிலையான இணைப்பு"</string>
+    <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"சாட்டிலைட், இணைப்பு கிடைக்கிறது"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"பணிக் கணக்கு"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"சில வேடிக்கையாக இருந்தாலும் கவனம் தேவை"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner, Android பயனர் இடைமுகத்தை மாற்றவும் தனிப்பயனாக்கவும் கூடுதல் வழிகளை வழங்குகிறது. இந்தப் பரிசோதனைக்குரிய அம்சங்கள் எதிர்கால வெளியீடுகளில் மாற்றப்படலாம், இடைநிறுத்தப்படலாம் அல்லது தோன்றாமல் போகலாம். கவனத்துடன் தொடரவும்."</string>
@@ -587,9 +629,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"புளூடூத்தை இயக்கவா?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"உங்கள் டேப்லெட்டுடன் கீபோர்டை இணைக்க, முதலில் புளூடூத்தை இயக்க வேண்டும்."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"இயக்கு"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ஆற்றல்மிக்க அறிவிப்புக் கட்டுப்பாடுகள்"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"ஆன் - முகம் அடிப்படையிலானது"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"ஆற்றல்மிக்க அறிவிப்புக் கட்டுப்பாடுகள் மூலம், ஆப்ஸின் அறிவிப்புகளுக்கு முக்கியத்துவ நிலையை (0-5) அமைக்கலாம். \n\n"<b>"நிலை 5"</b>" \n- அறிவிப்புப் பட்டியலின் மேலே காட்டும் \n- முழுத் திரைக் குறுக்கீட்டை அனுமதிக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 4"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 3"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n\n"<b>"நிலை 2"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது, அதிர்வுறாது \n\n"<b>"நிலை 1"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது அல்லது அதிர்வுறாது \n- லாக் ஸ்கிரீன் மற்றும் நிலைப்பட்டியிலிருந்து மறைக்கும் \n- அறிவிப்புகள் பட்டியலின் கீழே காட்டும் \n\n"<b>"நிலை 0"</b>" \n- ஆப்ஸின் எல்லா அறிவிப்புகளையும் தடுக்கும்"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"முடிந்தது"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"பயன்படுத்து"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"அறிவிப்புகளை முடக்கு"</string>
@@ -633,6 +673,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"அறிவிப்பை உறக்கநிலையாக்கும் விருப்பங்கள்"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"எனக்கு நினைவூட்டு"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"செயல்தவிர்"</string>
+    <string name="snooze_undo_content_description" msgid="2711656788917580801">"அறிவிப்பை ஒத்திவைப்பதைச் செயல்தவிர்க்கும்"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"உறக்கநிலையில் வைத்திருந்த நேரம்: <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# மணிநேரம்}=2{# மணிநேரம்}other{# மணிநேரம்}}"</string>
     <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# நிமிடம்}other{# நிமிடங்கள்}}"</string>
@@ -698,7 +739,7 @@
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"அமைப்புகளைத் திறத்தல்"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistantடைத் திறத்தல்"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"பூட்டுத் திரை"</string>
-    <string name="group_system_quick_memo" msgid="6257072703041301265">"குறிப்புகளைத் திறத்தல்"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"குறிப்பெடுத்தல்"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"சிஸ்டம் பல வேலைகளைச் செய்தல்"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"வலதுபுறத்தில் தற்போதைய ஆப்ஸ் தோன்றுமாறு திரைப் பிரிப்பை அமைத்தல்"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"இடதுபுறத்தில் தற்போதைய ஆப்ஸ் தோன்றுமாறு திரைப் பிரிப்பை அமைத்தல்"</string>
@@ -796,6 +837,10 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"பவர் மெனு"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"பக்கம் <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"லாக் ஸ்கிரீன்"</string>
+    <!-- no translation found for finder_active (7907846989716941952) -->
+    <skip />
+    <!-- no translation found for shutdown_progress (5464239146561542178) -->
+    <skip />
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"மேலும் விவரங்களுக்கு இதைப் பார்க்கவும்"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"மேலும் விவரங்களுக்கு இதைப் பார்க்கவும்"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"சாதன இணைப்பைத் துண்டித்தல்"</string>
@@ -822,6 +867,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"அமைவு"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"சேமிப்பிடம்"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"குறிப்புகள்"</string>
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"அணுகல்தன்மை"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> இயங்குகிறது"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"நிறுவ வேண்டிய தேவையில்லாமல் ஆப்ஸ் திறக்கப்பட்டது."</string>
@@ -857,7 +903,6 @@
     <string name="auto_saver_title" msgid="6873691178754086596">"பேட்டரி சேமிப்பானை ஆன் செய்வது தொடர்பாகத் திட்டமிட, தட்டவும்"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"பேட்டரி தீர்ந்துபோகும் நிலையில் இருக்கும் போது ஆன் செய்யப்படும்"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"வேண்டாம்"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
     <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"உபயோகத்தில் உள்ளது"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"உங்கள் <xliff:g id="TYPES_LIST">%s</xliff:g> ஆகியவற்றை ஆப்ஸ் பயன்படுத்துகின்றன."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
@@ -918,6 +963,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"அணுகல்தன்மை அம்சத்தை திறக்க தட்டவும். அமைப்பில் பட்டனை பிரத்தியேகமாக்கலாம்/மாற்றலாம்.\n\n"<annotation id="link">"அமைப்பில் காண்க"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"பட்டனைத் தற்காலிகமாக மறைக்க ஓரத்திற்கு நகர்த்தும்"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"செயல்தவிர்"</string>
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"அணுகல்தன்மை பட்டன் மறைக்கப்பட்டுள்ளது"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"அணுகல்தன்மை பட்டனைக் காட்ட தட்டவும்"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> ஷார்ட்கட் அகற்றப்பட்டது"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# ஷார்ட்கட் அகற்றப்பட்டது}other{# ஷார்ட்கட்கள் அகற்றப்பட்டன}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"மேலே இடதுபுறத்திற்கு நகர்த்து"</string>
@@ -928,6 +975,7 @@
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ஓரத்திற்கு நகர்த்தி, காட்டு"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"அகற்று"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"நிலைமாற்று"</string>
+    <string name="accessibility_floating_button_action_edit" msgid="1688227814600463987">"திருத்தம் செய்யும்"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"சாதனக் கட்டுப்பாடுகள்"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"கட்டுப்பாடுகளைச் சேர்க்க வேண்டிய ஆப்ஸைத் தேர்ந்தெடுங்கள்"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# கட்டுப்பாடு சேர்க்கப்பட்டது.}other{# கட்டுப்பாடுகள் சேர்க்கப்பட்டன.}}"</string>
@@ -1147,6 +1195,7 @@
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"குறிப்பெடுத்தல்"</string>
     <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"குறிப்பெடுத்தல், <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
+    <string name="audio_sharing_description" msgid="8849060142768870004">"ஆடியோ பகிரப்படுகிறது"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ஒலிபரப்புதல்"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் ஒலிபரப்பப்படுவதை நிறுத்தவா?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"நீங்கள் <xliff:g id="SWITCHAPP">%1$s</xliff:g> ஆப்ஸை ஒலிபரப்பினாலோ அவுட்புட்டை மாற்றினாலோ உங்களின் தற்போதைய ஒலிபரப்பு நிறுத்தப்படும்"</string>
@@ -1196,7 +1245,9 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"பயனர் கண்டறியப்பட்டுள்ளார்"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"குறிப்பு எடுப்பதற்கான இயல்புநிலை ஆப்ஸை அமைப்புகளில் அமையுங்கள்"</string>
     <string name="install_app" msgid="5066668100199613936">"ஆப்ஸை நிறுவுங்கள்"</string>
+    <string name="dismissible_keyguard_swipe" msgid="8377597870094949432">"தொடர மேல்நோக்கி ஸ்வைப் செய்யுங்கள்"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"வெளிப்புறக் காட்சிக்கு மிரர் செய்யவா?"</string>
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"உங்கள் உட்புற டிஸ்பிளே பிரதிபலிக்கப்படும். உங்கள் முன்புற டிஸ்பிளே முடக்கப்படும்."</string>
     <string name="mirror_display" msgid="2515262008898122928">"டிஸ்பிளேயை மிரர் செய்"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"வேண்டாம்"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"டிஸ்ப்ளே இணைக்கப்பட்டது"</string>
@@ -1220,4 +1271,6 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ஆப்ஸால் சமீபத்தில் பயன்படுத்தப்பட்டது"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"கீபோர்டு பேக்லைட்"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"நிலை, %2$d இல் %1$d"</string>
+    <string name="home_controls_dream_label" msgid="6567105701292324257">"ஹோம் கன்ட்ரோல்கள்"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"ஹோம் கன்ட்ரோல்களை ஸ்கிரீன் சேவராக விரைவாக அணுகலாம்"</string>
 </resources>

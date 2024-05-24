@@ -17,6 +17,7 @@
 package com.android.wm.shell.transition;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 
 import static com.android.wm.shell.transition.Transitions.TransitionObserver;
@@ -31,11 +32,12 @@ import android.window.TransitionInfo;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
-import com.android.wm.shell.util.TransitionUtil;
+import com.android.wm.shell.shared.TransitionUtil;
 
 /**
  * The {@link TransitionObserver} that observes for transitions involving the home
- * activity. It reports transitions to the caller via {@link IHomeTransitionListener}.
+ * activity on the {@link android.view.Display#DEFAULT_DISPLAY} only.
+ * It reports transitions to the caller via {@link IHomeTransitionListener}.
  */
 public class HomeTransitionObserver implements TransitionObserver,
         RemoteCallable<HomeTransitionObserver> {
@@ -58,6 +60,7 @@ public class HomeTransitionObserver implements TransitionObserver,
         for (TransitionInfo.Change change : info.getChanges()) {
             final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
             if (taskInfo == null
+                    || taskInfo.displayId != DEFAULT_DISPLAY
                     || taskInfo.taskId == -1
                     || !taskInfo.isRunning) {
                 continue;

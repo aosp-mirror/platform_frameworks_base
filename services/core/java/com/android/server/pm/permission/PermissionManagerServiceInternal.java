@@ -46,14 +46,14 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      *
      * @param packageName the name of the package you are checking against
      * @param permissionName the name of the permission you are checking for
-     * @param deviceId the device ID
+     * @param persistentDeviceId the persistent device ID to check permission for
      * @param userId the user ID
      * @return {@code PERMISSION_GRANTED} if the permission is granted, or {@code PERMISSION_DENIED}
      *         otherwise
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    int checkPermission(@NonNull String packageName, @NonNull String permissionName, int deviceId,
-            @UserIdInt int userId);
+    int checkPermission(@NonNull String packageName, @NonNull String permissionName,
+            @NonNull String persistentDeviceId, @UserIdInt int userId);
 
     /**
      * Check whether a particular UID has been granted a particular permission.

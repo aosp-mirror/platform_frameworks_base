@@ -37,6 +37,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class UidBatteryConsumer extends BatteryConsumer {
 
     static final int CONSUMER_TYPE_UID = 1;
@@ -223,6 +224,7 @@ public final class UidBatteryConsumer extends BatteryConsumer {
     /**
      * Builder for UidBatteryConsumer.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class Builder extends BaseBuilder<Builder> {
         private static final String PACKAGE_NAME_UNINITIALIZED = "";
         private final BatteryStats.Uid mBatteryStatsUid;

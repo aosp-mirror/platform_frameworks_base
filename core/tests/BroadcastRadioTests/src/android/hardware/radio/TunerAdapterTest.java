@@ -125,12 +125,28 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void close_forTunerAdapterCalledTwice() throws Exception {
+        mRadioTuner.close();
+        verify(mTunerMock).close();
+
+        mRadioTuner.close();
+
+        verify(mTunerMock).close();
+    }
+
+    @Test
     public void setConfiguration_forTunerAdapter() throws Exception {
         int status = mRadioTuner.setConfiguration(TEST_BAND_CONFIG);
 
         verify(mTunerMock).setConfiguration(TEST_BAND_CONFIG);
         assertWithMessage("Status for setting configuration")
                 .that(status).isEqualTo(RadioManager.STATUS_OK);
+    }
+
+    @Test
+    public void setConfiguration_withNull_fails() throws Exception {
+        assertWithMessage("Status for setting configuration with null")
+                .that(mRadioTuner.setConfiguration(null)).isEqualTo(RadioManager.STATUS_BAD_VALUE);
     }
 
     @Test
@@ -498,6 +514,26 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void getMetadataImage_withImageIdUnavailable_fails() throws Exception {
+        int nonExistImageId = 2;
+        when(mTunerMock.getImage(nonExistImageId)).thenReturn(null);
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> mRadioTuner.getMetadataImage(nonExistImageId));
+
+        assertWithMessage("Exception for getting metadata image with non-existing id")
+                .that(thrown).hasMessageThat().contains("is not available");
+    }
+
+    @Test
+    public void getMetadataImage_withInvalidId_fails() {
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> mRadioTuner.getMetadataImage(/* id= */ 0));
+
+        assertWithMessage("Exception for getting metadata image for id 0").that(thrown)
+                .hasMessageThat().contains("Invalid metadata image id 0");
+    }
+
+    @Test
     public void getMetadataImage_whenServiceDied_fails() throws Exception {
         when(mTunerMock.getImage(anyInt())).thenThrow(new RemoteException());
 
@@ -837,6 +873,15 @@ public final class TunerAdapterTest {
         verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onTuneFailed(
                 RadioTuner.TUNER_RESULT_CANCELED, FM_SELECTOR);
         verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onError(RadioTuner.ERROR_CANCELLED);
+    }
+
+    @Test
+    public void onTuneFailed_withDeadService() throws Exception {
+        mTunerCallback.onTuneFailed(RadioManager.STATUS_DEAD_OBJECT, FM_SELECTOR);
+
+        verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onTuneFailed(
+                RadioManager.STATUS_DEAD_OBJECT, FM_SELECTOR);
+        verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onError(RadioTuner.ERROR_SERVER_DIED);
     }
 
     @Test

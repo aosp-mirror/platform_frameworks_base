@@ -27,18 +27,22 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -51,10 +55,18 @@ class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
             fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
     private val testScope = kosmos.testScope
-    private val repository = kosmos.fakeKeyguardTransitionRepository
-    private val shadeRepository = kosmos.shadeRepository
-    private val keyguardRepository = kosmos.fakeKeyguardRepository
-    private val underTest = kosmos.lockscreenToDreamingTransitionViewModel
+    private lateinit var repository: FakeKeyguardTransitionRepository
+    private lateinit var shadeRepository: ShadeRepository
+    private lateinit var keyguardRepository: FakeKeyguardRepository
+    private lateinit var underTest: LockscreenToDreamingTransitionViewModel
+
+    @Before
+    fun setUp() {
+        repository = kosmos.fakeKeyguardTransitionRepository
+        shadeRepository = kosmos.shadeRepository
+        keyguardRepository = kosmos.fakeKeyguardRepository
+        underTest = kosmos.lockscreenToDreamingTransitionViewModel
+    }
 
     @Test
     fun lockscreenFadeOut() =
@@ -73,7 +85,7 @@ class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
                 testScope = testScope,
             )
 
-            // Only three values should be present, since the dream overlay runs for a small
+            // Only five values should be present, since the dream overlay runs for a small
             // fraction of the overall animation time
             assertThat(values.size).isEqualTo(5)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }

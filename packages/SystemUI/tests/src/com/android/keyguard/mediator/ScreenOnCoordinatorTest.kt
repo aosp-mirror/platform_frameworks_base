@@ -16,16 +16,21 @@
 
 package com.android.keyguard.mediator
 
-import android.os.Handler
 import android.os.Looper
+import android.platform.test.flag.junit.SetFlagsRule
+import android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.FoldAodAnimationController
+import com.android.systemui.unfold.FullscreenLightRevealAnimation
 import com.android.systemui.unfold.SysUIUnfoldComponent
-import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.utils.os.FakeHandler
+import com.android.systemui.utils.os.FakeHandler.Mode.QUEUEING
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -48,20 +53,25 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
     @Mock
     private lateinit var foldAodAnimationController: FoldAodAnimationController
     @Mock
-    private lateinit var unfoldAnimation: UnfoldLightRevealOverlayAnimation
+    private lateinit var fullscreenLightRevealAnimation: FullscreenLightRevealAnimation
+    @Mock
+    private lateinit var fullScreenLightRevealAnimations: Set<FullscreenLightRevealAnimation>
     @Captor
     private lateinit var readyCaptor: ArgumentCaptor<Runnable>
 
-    private val testHandler = Handler(Looper.getMainLooper())
+    private val testHandler = FakeHandler(Looper.getMainLooper()).apply { setMode(QUEUEING) }
 
     private lateinit var screenOnCoordinator: ScreenOnCoordinator
+
+    @get:Rule
+    val setFlagsRule = SetFlagsRule(DEVICE_DEFAULT)
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        `when`(unfoldComponent.getUnfoldLightRevealOverlayAnimation())
-                .thenReturn(unfoldAnimation)
+        fullScreenLightRevealAnimations = setOf(fullscreenLightRevealAnimation)
+        `when`(unfoldComponent.getFullScreenLightRevealAnimations())
+                .thenReturn(fullScreenLightRevealAnimations)
         `when`(unfoldComponent.getFoldAodAnimationController())
                 .thenReturn(foldAodAnimationController)
 
@@ -77,7 +87,7 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
 
         onUnfoldOverlayReady()
         onFoldAodReady()
-        waitHandlerIdle(testHandler)
+        waitHandlerIdle()
 
         // Should be called when both unfold overlay and keyguard drawn ready
         verify(runnable).run()
@@ -90,7 +100,7 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
 
         onUnfoldOverlayReady()
         onFoldAodReady()
-        waitHandlerIdle(testHandler)
+        waitHandlerIdle()
 
         // Should be called when both unfold overlay and keyguard drawn ready
         verify(runnable).run()
@@ -104,7 +114,8 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
 
         onUnfoldOverlayReady()
         onFoldAodReady()
-        waitHandlerIdle(testHandler)
+        waitHandlerIdle()
+
 
         // Should not be called because this screen turning on call is not valid anymore
         verify(runnable, never()).run()
@@ -112,20 +123,50 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testUnfoldTransitionDisabledDrawnTasksReady_onScreenTurningOn_callsDrawnCallback() {
+        setFlagsRule.disableFlags(Flags.FLAG_ENABLE_BACKGROUND_KEYGUARD_ONDRAWN_CALLBACK)
         // Recreate with empty unfoldComponent
         screenOnCoordinator = ScreenOnCoordinator(
             Optional.empty(),
             testHandler
         )
         screenOnCoordinator.onScreenTurningOn(runnable)
-        waitHandlerIdle(testHandler)
+        waitHandlerIdle()
+
+        // Should be called when only keyguard drawn
+        verify(runnable).run()
+    }
+    @Test
+    fun testUnfoldTransitionDisabledDrawnTasksReady_onScreenTurningOn_usesMainHandler() {
+        setFlagsRule.disableFlags(Flags.FLAG_ENABLE_BACKGROUND_KEYGUARD_ONDRAWN_CALLBACK)
+        // Recreate with empty unfoldComponent
+        screenOnCoordinator = ScreenOnCoordinator(
+                Optional.empty(),
+                testHandler
+        )
+        screenOnCoordinator.onScreenTurningOn(runnable)
+
+        // Never called as the main handler didn't schedule it yet.
+        verify(runnable, never()).run()
+    }
+
+    @Test
+    fun unfoldTransitionDisabledDrawnTasksReady_onScreenTurningOn_bgCallback_callsDrawnCallback() {
+        setFlagsRule.enableFlags(Flags.FLAG_ENABLE_BACKGROUND_KEYGUARD_ONDRAWN_CALLBACK)
+        // Recreate with empty unfoldComponent
+        screenOnCoordinator = ScreenOnCoordinator(
+                Optional.empty(),
+                testHandler
+        )
+        screenOnCoordinator.onScreenTurningOn(runnable)
+        // No need to wait for the handler to be idle, as it shouldn't be used
+        // waitHandlerIdle()
 
         // Should be called when only keyguard drawn
         verify(runnable).run()
     }
 
     private fun onUnfoldOverlayReady() {
-        verify(unfoldAnimation).onScreenTurningOn(capture(readyCaptor))
+        verify(fullscreenLightRevealAnimation).onScreenTurningOn(capture(readyCaptor))
         readyCaptor.value.run()
     }
 
@@ -134,7 +175,7 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
         readyCaptor.value.run()
     }
 
-    private fun waitHandlerIdle(handler: Handler) {
-        handler.runWithScissors({},  /* timeout= */ 0)
+    private fun waitHandlerIdle() {
+        testHandler.dispatchQueuedMessages()
     }
 }

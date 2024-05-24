@@ -10,6 +10,9 @@ package {
 android_library {
     name: "SettingsLibMainSwitchPreference",
     use_resource_processor: true,
+    defaults: [
+        "SettingsLintDefaults",
+    ],
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
@@ -28,7 +31,4 @@ android_library {
         "com.android.extservices",
         "com.android.healthfitness",
     ],
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }

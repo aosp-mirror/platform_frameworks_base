@@ -37,6 +37,7 @@ import java.util.concurrent.Executor;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@android.platform.test.annotations.EnabledOnRavenwood
 public class DreamOverlayStatusBarItemsProviderTest extends SysuiTestCase {
     @Mock
     DreamOverlayStatusBarItemsProvider.Callback mCallback;

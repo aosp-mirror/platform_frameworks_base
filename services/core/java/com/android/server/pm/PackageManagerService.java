@@ -18,6 +18,8 @@ package com.android.server.pm;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.app.AppOpsManager.MODE_IGNORED;
+import static android.content.pm.PackageManager.APP_METADATA_SOURCE_APK;
+import static android.content.pm.PackageManager.APP_METADATA_SOURCE_UNKNOWN;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
@@ -65,6 +67,7 @@ import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
 import android.app.backup.IBackupManager;
 import android.app.role.RoleManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
@@ -181,6 +184,7 @@ import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.F2fsUtils;
 import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.content.om.OverlayConfig;
+import com.android.internal.pm.parsing.PackageParser2;
 import com.android.internal.pm.parsing.pkg.AndroidPackageInternal;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.component.ParsedInstrumentation;
@@ -221,8 +225,8 @@ import com.android.server.pm.dex.ArtUtils;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DynamicCodeLogger;
 import com.android.server.pm.local.PackageManagerLocalImpl;
+import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.pm.permission.LegacyPermissionManagerService;
@@ -488,6 +492,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      */
     static final long WATCHDOG_TIMEOUT = 1000*60*10;     // ten minutes
 
+    // How long to wait for Lock in async writeSettings and writePackageList.
+    private static final long WRITE_LOCK_TIMEOUT_MS = 1000 * 10;   // 10 seconds
+
     /**
      * Default IncFs timeouts. Maximum values in IncFs is 1hr.
      *
@@ -565,7 +572,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      * target sdk apps as malware can target older sdk versions to avoid
      * the enforcement of new API behavior.
      */
-    public static final int MIN_INSTALLABLE_TARGET_SDK = Build.VERSION_CODES.M;
+    public static final int MIN_INSTALLABLE_TARGET_SDK =
+            Flags.minTargetSdk24() ? Build.VERSION_CODES.N : Build.VERSION_CODES.M;
 
     // Compilation reasons.
     // TODO(b/260124949): Clean this up with the legacy dexopt code.
@@ -590,7 +598,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final String RANDOM_DIR_PREFIX = "~~";
     static final char RANDOM_CODEPATH_PREFIX = '-';
 
-    static final String APP_METADATA_FILE_NAME = "app.metadata";
+    public static final String APP_METADATA_FILE_NAME = "app.metadata";
+    public static final String APP_METADATA_FILE_IN_APK_PATH = "assets/" + APP_METADATA_FILE_NAME;
+
+    static final int DEFAULT_FILE_ACCESS_MODE = 0644;
+
+    static final int DEFAULT_NATIVE_LIBRARY_FILE_ACCESS_MODE = 0755;
 
     final Handler mHandler;
     final Handler mBackgroundHandler;
@@ -606,6 +619,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final boolean mIsUpgrade;
     private final boolean mIsPreNMR1Upgrade;
     private final boolean mIsPreQUpgrade;
+    // If mIsUpgrade == true, contains the prior SDK version, else -1.
+    private final int mPriorSdkVersion;
 
     // Used for privilege escalation. MUST NOT BE CALLED WITH mPackages
     // LOCK HELD.  Can be called with mInstallLock held.
@@ -709,7 +724,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     PackageManagerInternal.ExternalSourcesPolicy mExternalSourcesPolicy;
 
-    @GuardedBy("mAvailableFeatures")
     private final ArrayMap<String, FeatureInfo> mAvailableFeatures;
 
     @Watched
@@ -1294,7 +1308,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mHandler.sendMessageDelayed(message, DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS);
     }
 
-    void scheduleDeferredNoKillPostDelete(InstallArgs args) {
+    void scheduleDeferredNoKillPostDelete(CleanUpArgs args) {
         Message message = mHandler.obtainMessage(DEFERRED_NO_KILL_POST_DELETE, args);
         // If the feature flag is on, retain the old files for a day. Otherwise, delete the old
         // files after a few seconds.
@@ -1527,6 +1541,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             return;
         }
 
+        // Initialize all necessary settings for archival installation.
+        pkgSetting
+                // No package.
+                .setPkg(null)
+                // Mark for later restore.
+                .setPendingRestore(true);
+        for (int userId : userIds) {
+            // Unmark "installed" for all users.
+            pkgSetting
+                    .modifyUserState(userId)
+                    .setInstalled(false);
+        }
+
         String responsibleInstallerPackage = PackageArchiver.getResponsibleInstallerPackage(
                 pkgSetting);
         // TODO(b/278553670) Check if responsibleInstallerPackage supports unarchival.
@@ -1537,14 +1564,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         for (int userId : userIds) {
             var archiveState = mInstallerService.mPackageArchiver.createArchiveState(
                     archivePackage, userId, responsibleInstallerPackage);
-            if (archiveState == null) {
-                continue;
-            }
-            pkgSetting
-                    .setPkg(null)
+            if (archiveState != null) {
+                pkgSetting
                     .modifyUserState(userId)
-                    .setInstalled(false)
                     .setArchiveState(archiveState);
+            }
         }
     }
 
@@ -1559,7 +1583,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
-    private void scheduleWritePackageListLocked(int userId) {
+    void scheduleWritePackageList(int userId) {
         invalidatePackageInfoCache();
         if (!mHandler.hasMessages(WRITE_PACKAGE_LIST)) {
             Message msg = mHandler.obtainMessage(WRITE_PACKAGE_LIST);
@@ -1611,22 +1635,41 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mSettings.writePackageRestrictions(dirtyUsers);
     }
 
-    void writeSettings(boolean sync) {
-        synchronized (mLock) {
+    private boolean tryUnderLock(boolean sync, long timeoutMs, Runnable runnable) {
+        try {
+            if (sync) {
+                mLock.lock();
+            } else if (!mLock.tryLock(timeoutMs, TimeUnit.MILLISECONDS)) {
+                return false;
+            }
+            try {
+                runnable.run();
+                return true;
+            } finally {
+                mLock.unlock();
+            }
+        } catch (InterruptedException e) {
+            Slog.e(TAG, "Failed to obtain mLock", e);
+        }
+        return false;
+    }
+
+    boolean tryWriteSettings(boolean sync) {
+        return tryUnderLock(sync, WRITE_LOCK_TIMEOUT_MS, () -> {
             mHandler.removeMessages(WRITE_SETTINGS);
             mBackgroundHandler.removeMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS);
             writeSettingsLPrTEMP(sync);
             synchronized (mDirtyUsers) {
                 mDirtyUsers.clear();
             }
-        }
+        });
     }
 
-    void writePackageList(int userId) {
-        synchronized (mLock) {
+    boolean tryWritePackageList(int userId) {
+        return tryUnderLock(/*sync=*/false, WRITE_LOCK_TIMEOUT_MS, () -> {
             mHandler.removeMessages(WRITE_PACKAGE_LIST);
             mSettings.writePackageListLPr(userId);
-        }
+        });
     }
 
     private static final Handler.Callback BACKGROUND_HANDLER_CALLBACK = new Handler.Callback() {
@@ -1698,7 +1741,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         () -> LocalServices.getService(UserManagerInternal.class)),
                 (i, pm) -> new DisplayMetrics(),
                 (i, pm) -> new PackageParser2(pm.mSeparateProcesses, i.getDisplayMetrics(),
-                        pm.mCacheDir,
+                        new PackageCacher(pm.mCacheDir),
                         pm.mPackageParserCallback) /* scanningCachingPackageParserProducer */,
                 (i, pm) -> new PackageParser2(pm.mSeparateProcesses, i.getDisplayMetrics(), null,
                         pm.mPackageParserCallback) /* scanningPackageParserProducer */,
@@ -1890,6 +1933,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mInstantAppResolverSettingsComponent = testParams.instantAppResolverSettingsComponent;
         mIsPreNMR1Upgrade = testParams.isPreNmr1Upgrade;
         mIsPreQUpgrade = testParams.isPreQupgrade;
+        mPriorSdkVersion = testParams.priorSdkVersion;
         mIsUpgrade = testParams.isUpgrade;
         mMetrics = testParams.Metrics;
         mModuleInfoProvider = testParams.moduleInfoProvider;
@@ -2229,7 +2273,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         "Upgrading from " + ver.fingerprint + " (" + ver.buildFingerprint + ") to "
                                 + PackagePartitions.FINGERPRINT + " (" + Build.FINGERPRINT + ")");
             }
-
+            mPriorSdkVersion = mIsUpgrade ? ver.sdkVersion : -1;
             mInitAppsHelper = new InitAppsHelper(this, mApexManager, mInstallPackageHelper,
                     mInjector.getSystemPartitions());
 
@@ -2527,12 +2571,20 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         PackageSetting pkgSetting = mSettings.getPackageLPr(pkgName);
                         if (pkgSetting != null) {
                             pkgSetting.setAppMetadataFilePath(path);
+                            if (Flags.aslInApkAppMetadataSource()) {
+                                pkgSetting.setAppMetadataSource(
+                                        PackageManager.APP_METADATA_SOURCE_SYSTEM_IMAGE);
+                            }
                         } else {
                             Slog.w(TAG, "Cannot set app metadata file for nonexistent package "
                                     + pkgName);
                         }
                     } else {
                         disabledPkgSetting.setAppMetadataFilePath(path);
+                        if (Flags.aslInApkAppMetadataSource()) {
+                            disabledPkgSetting.setAppMetadataSource(
+                                    PackageManager.APP_METADATA_SOURCE_SYSTEM_IMAGE);
+                        }
                     }
                 }
             }
@@ -2941,20 +2993,18 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     public boolean hasSystemFeature(String name, int version) {
         // allow instant applications
-        synchronized (mAvailableFeatures) {
-            final FeatureInfo feat = mAvailableFeatures.get(name);
-            if (feat == null) {
-                return false;
-            } else {
-                return feat.version >= version;
-            }
+        final FeatureInfo feat = mAvailableFeatures.get(name);
+        if (feat == null) {
+            return false;
+        } else {
+            return feat.version >= version;
         }
     }
 
     // NOTE: Can't remove due to unsupported app usage
     public int checkPermission(String permName, String pkgName, int userId) {
-        return mPermissionManager.checkPermission(pkgName, permName, Context.DEVICE_ID_DEFAULT,
-                userId);
+        return mPermissionManager.checkPermission(pkgName, permName,
+                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId);
     }
 
     public String getSdkSandboxPackageName() {
@@ -3050,7 +3100,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             if (mHandler.hasMessages(WRITE_SETTINGS)
                     || mBackgroundHandler.hasMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS)
                     || mHandler.hasMessages(WRITE_PACKAGE_LIST)) {
-                writeSettings(/*sync=*/true);
+                while (!tryWriteSettings(/*sync=*/true)) {
+                    Slog.wtf(TAG, "Failed to write settings on shutdown");
+                }
             }
         }
     }
@@ -4330,11 +4382,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mDirtyUsers.remove(userId);
             }
             mUserNeedsBadging.delete(userId);
-            mPermissionManager.onUserRemoved(userId);
+            mDeletePackageHelper.removeUnusedPackagesLPw(userManager, userId);
             mSettings.removeUserLPw(userId);
             mPendingBroadcasts.remove(userId);
-            mDeletePackageHelper.removeUnusedPackagesLPw(userManager, userId);
             mAppsFilter.onUserDeleted(snapshotComputer(), userId);
+            mPermissionManager.onUserRemoved(userId);
         }
         mInstantAppRegistry.onUserRemoved(userId);
         mPackageMonitorCallbackHelper.onUserRemoved(userId);
@@ -4357,7 +4409,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
         synchronized (mLock) {
             scheduleWritePackageRestrictions(userId);
-            scheduleWritePackageListLocked(userId);
+            scheduleWritePackageList(userId);
             mAppsFilter.onUserCreated(snapshotComputer(), userId);
         }
     }
@@ -4604,6 +4656,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             });
             // Send UNSTOPPED broadcast if necessary
             if (wasStopped && Flags.stayStopped()) {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "unstoppedBroadcast");
                 final PackageManagerInternal pmi =
                         mInjector.getLocalService(PackageManagerInternal.class);
                 final int [] userIds = resolveUserIds(userId);
@@ -4622,7 +4675,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 });
                 mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_UNSTOPPED,
                         packageName, extras, userIds, null /* instantUserIds */,
-                        broadcastAllowList, mHandler);
+                        broadcastAllowList, mHandler, null /* filterExtras */);
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
         }
     }
@@ -4655,8 +4709,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     mPreferredActivityHelper, mResolveIntentHelper, mDomainVerificationManager,
                     mDomainVerificationConnection, mInstallerService, mPackageProperty,
                     mResolveComponentName, mInstantAppResolverSettingsComponent,
-                    mRequiredSdkSandboxPackage, mServicesExtensionPackageName,
-                    mSharedSystemSharedLibraryPackageName);
+                    mServicesExtensionPackageName, mSharedSystemSharedLibraryPackageName);
         }
 
         @Override
@@ -5185,15 +5238,45 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         new PackageManager.NameNotFoundException(packageName));
             }
             String filePath = ps.getAppMetadataFilePath();
-            if (filePath != null) {
-                File file = new File(filePath);
-                try {
-                    return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-                } catch (FileNotFoundException e) {
+            if (filePath == null) {
+                return null;
+            }
+            File file = new File(filePath);
+            if (Flags.aslInApkAppMetadataSource() && !file.exists()
+                    && ps.getAppMetadataSource() == APP_METADATA_SOURCE_APK) {
+                String apkPath = ps.getPkg().getSplits().get(0).getPath();
+                if (!PackageManagerServiceUtils.extractAppMetadataFromApk(apkPath, file)) {
+                    if (file.exists()) {
+                        file.delete();
+                    }
+                    synchronized (mLock) {
+                        PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);
+                        pkgSetting.setAppMetadataFilePath(null);
+                        pkgSetting.setAppMetadataSource(APP_METADATA_SOURCE_UNKNOWN);
+                    }
                     return null;
                 }
             }
-            return null;
+            try {
+                return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+            } catch (FileNotFoundException e) {
+                return null;
+            }
+        }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.GET_APP_METADATA)
+        @Override
+        public int getAppMetadataSource(String packageName, int userId) {
+            getAppMetadataSource_enforcePermission();
+            final int callingUid = Binder.getCallingUid();
+            final Computer snapshot = snapshotComputer();
+            final PackageStateInternal ps = snapshot.getPackageStateForInstalledAndFiltered(
+                    packageName, callingUid, userId);
+            if (ps == null) {
+                throw new ParcelableException(
+                        new PackageManager.NameNotFoundException(packageName));
+            }
+            return ps.getAppMetadataSource();
         }
 
         @Override
@@ -5275,10 +5358,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public @NonNull ParceledListSlice<FeatureInfo> getSystemAvailableFeatures() {
             // allow instant applications
             ArrayList<FeatureInfo> res;
-            synchronized (mAvailableFeatures) {
-                res = new ArrayList<>(mAvailableFeatures.size() + 1);
-                res.addAll(mAvailableFeatures.values());
-            }
+            res = new ArrayList<>(mAvailableFeatures.size() + 1);
+            res.addAll(mAvailableFeatures.values());
             final FeatureInfo fi = new FeatureInfo();
             fi.reqGlEsVersion = SystemProperties.getInt("ro.opengles.version",
                     FeatureInfo.GL_ES_VERSION_UNDEFINED);
@@ -6383,8 +6464,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user) {
-            return mInstallerService.mPackageArchiver.getArchivedAppIcon(packageName, user);
+        public Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user,
+                @NonNull String callingPackageName) {
+            return mInstallerService.mPackageArchiver.getArchivedAppIcon(packageName, user,
+                    callingPackageName);
         }
 
         @Override
@@ -6420,6 +6503,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 }
             }
             return true;
+        }
+
+        @Override
+        @Nullable
+        public ComponentName getDomainVerificationAgent() {
+            final int callerUid = Binder.getCallingUid();
+            if (!PackageManagerServiceUtils.isRootOrShell(callerUid)) {
+                throw new SecurityException("Not allowed to query domain verification agent");
+            }
+            final Computer snapshot = snapshotComputer();
+            return getDomainVerificationAgentComponentNameLPr(snapshot);
         }
 
         @Override
@@ -6469,9 +6563,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     mOverlayConfigSignaturePackage,
                     mRecentsPackage);
             final ArrayMap<String, FeatureInfo> availableFeatures;
-            synchronized (mAvailableFeatures) {
-                availableFeatures = new ArrayMap<>(mAvailableFeatures);
-            }
+            availableFeatures = new ArrayMap<>(mAvailableFeatures);
             final ArraySet<String> protectedBroadcasts;
             synchronized (mProtectedBroadcasts) {
                 protectedBroadcasts = new ArraySet<>(mProtectedBroadcasts);
@@ -7072,7 +7164,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
             mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_RESTARTED,
                     packageName, extras, userIds, null /* instantUserIds */,
-                    broadcastAllowList, mHandler);
+                    broadcastAllowList, mHandler, null /* filterExtras */);
         }
 
         @Override
@@ -7097,6 +7189,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     null /* filterExtrasForReceiver */, null /* bOptions */);
             mPackageMonitorCallbackHelper.notifyPackageMonitorWithIntent(intent, userId,
                     visibilityAllowList, mHandler);
+        }
+
+        @Override
+        public boolean isUpgradingFromLowerThan(int sdkVersion) {
+            final boolean isUpgrading = mPriorSdkVersion != -1;
+            return isUpgrading && mPriorSdkVersion < sdkVersion;
         }
     }
 
@@ -7770,7 +7868,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
                     | ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS
-                    | ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
+                    | ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES
+                    | ActivityInfo.FLAG_HARDWARE_ACCELERATED;
             mResolveActivity.theme = 0;
             mResolveActivity.exported = true;
             mResolveActivity.enabled = true;
@@ -7804,7 +7903,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mResolveActivity.documentLaunchMode = ActivityInfo.DOCUMENT_LAUNCH_NEVER;
                 mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
                         | ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY
-                        | ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
+                        | ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES
+                        | ActivityInfo.FLAG_HARDWARE_ACCELERATED;
                 mResolveActivity.theme = R.style.Theme_Material_Dialog_Alert;
                 mResolveActivity.exported = true;
                 mResolveActivity.enabled = true;
@@ -7986,8 +8086,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mRemovePackageHelper.removeCodePath(codePath);
     }
 
-    void cleanUpResources(@Nullable File codeFile, @Nullable String[] instructionSets) {
-        mRemovePackageHelper.cleanUpResources(codeFile, instructionSets);
+    void cleanUpResources(@NonNull String packageName, @NonNull File codeFile,
+                          @NonNull String[] instructionSets) {
+        mRemovePackageHelper.cleanUpResources(packageName, codeFile, instructionSets);
     }
 
     void cleanUpForMoveInstall(String volumeUuid, String packageName, String fromCodePath) {

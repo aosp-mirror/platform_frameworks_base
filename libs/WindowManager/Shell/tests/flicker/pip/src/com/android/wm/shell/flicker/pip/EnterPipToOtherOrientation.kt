@@ -19,14 +19,14 @@ package com.android.wm.shell.flicker.pip
 import android.app.Activity
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
-import android.tools.common.Rotation
-import android.tools.common.flicker.assertions.FlickerTest
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import android.tools.device.helpers.WindowUtils
+import android.tools.Rotation
+import android.tools.flicker.assertions.FlickerTest
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.helpers.WindowUtils
 import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
@@ -60,7 +60,7 @@ import org.junit.runners.Parameterized
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited [PipTransition]
  *     2. Part of the test setup occurs automatically via
- *        [android.tools.device.flicker.legacy.runner.TransitionRunner],
+ *        [android.tools.flicker.legacy.runner.TransitionRunner],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
  * ```
@@ -86,6 +86,8 @@ class EnterPipToOtherOrientation(flicker: LegacyFlickerTest) : PipTransition(fli
                 .withNavOrTaskBarVisible()
                 .withStatusBarVisible()
                 .waitForAndVerify()
+
+            pipApp.tapPipToShowMenu(wmHelper)
         }
     }
 
@@ -191,6 +193,28 @@ class EnterPipToOtherOrientation(flicker: LegacyFlickerTest) : PipTransition(fli
         flicker.assertLayersEnd {
             val pipRegion = visibleRegion(pipApp).region
             visibleRegion(testApp).plus(pipRegion).coversExactly(endingBounds)
+        }
+    }
+
+    @Postsubmit
+    @Test
+    fun menuOverlayMatchesTaskSurface() {
+        flicker.assertLayersEnd {
+            val pipAppRegion = visibleRegion(pipApp)
+            val pipMenuRegion = visibleRegion(ComponentNameMatcher.PIP_MENU_OVERLAY)
+            pipAppRegion.coversExactly(pipMenuRegion.region)
+        }
+    }
+
+    @Presubmit
+    @Test
+    fun pipLayerRemainInsideVisibleBounds() {
+        // during the transition we assert the center point is within the display bounds, since it
+        // might go outside of bounds as we resize from landscape fullscreen to destination bounds,
+        // and once the animation is over we assert that it's fully within the display bounds, at
+        // which point the device also performs orientation change from landscape to portrait
+        flicker.assertLayersVisibleRegion(pipApp.or(ComponentNameMatcher.PIP_CONTENT_OVERLAY)) {
+            regionsCenterPointInside(startingBounds).then().coversAtMost(endingBounds)
         }
     }
 

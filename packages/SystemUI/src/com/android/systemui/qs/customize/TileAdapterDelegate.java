@@ -119,6 +119,8 @@ class TileAdapterDelegate extends AccessibilityDelegateCompat {
                     info.removeAction(listOfActions.get(i));
                 }
             }
+            // We really don't want it to be clickable in this case.
+            info.setClickable(false);
             return;
         }
 
@@ -126,6 +128,7 @@ class TileAdapterDelegate extends AccessibilityDelegateCompat {
                 new AccessibilityNodeInfoCompat.AccessibilityActionCompat(
                         AccessibilityNodeInfo.ACTION_CLICK, clickActionString);
         info.addAction(action);
+        info.setClickable(true);
     }
 
     private void maybeAddActionMoveToPosition(

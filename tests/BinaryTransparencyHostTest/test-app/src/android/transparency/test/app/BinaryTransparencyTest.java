@@ -16,6 +16,8 @@
 
 package android.transparency.test.app;
 
+import static android.Manifest.permission.GET_BACKGROUND_INSTALLED_PACKAGES;
+
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -27,6 +29,7 @@ import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.compatibility.common.util.ShellIdentityUtils;
 import com.android.internal.os.IBinaryTransparencyService.AppInfo;
 
 import org.junit.Before;
@@ -116,7 +119,12 @@ public class BinaryTransparencyTest {
     @Test
     public void testCollectAllSilentInstalledMbaInfo() {
         // Action
-        var appInfoList = mBt.collectAllSilentInstalledMbaInfo(new Bundle());
+        var appInfoList =
+                ShellIdentityUtils.invokeMethodWithShellPermissions(
+                        mBt,
+                        (Bt) ->
+                                mBt.collectAllSilentInstalledMbaInfo(new Bundle()),
+                        GET_BACKGROUND_INSTALLED_PACKAGES);
 
         // Verify
         assertThat(appInfoList).isNotEmpty();  // because we just installed from the host side

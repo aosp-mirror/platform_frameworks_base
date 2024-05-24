@@ -16,10 +16,10 @@
 
 package android.os.vibrator.persistence;
 
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.os.VibrationEffect;
 import android.util.Slog;
@@ -116,8 +116,8 @@ import java.util.List;
  *
  * @hide
  */
-@FlaggedApi(android.os.vibrator.Flags.FLAG_ENABLE_VIBRATION_SERIALIZATION_APIS)
 @TestApi
+@SuppressLint("UnflaggedApi") // @TestApi without associated feature.
 public final class VibrationXmlParser {
     private static final String TAG = "VibrationXmlParser";
 

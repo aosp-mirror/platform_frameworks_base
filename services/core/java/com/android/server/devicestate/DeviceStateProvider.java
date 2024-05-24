@@ -16,11 +16,13 @@
 
 package com.android.server.devicestate;
 
-import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
-import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE_IDENTIFIER;
+import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.hardware.devicestate.DeviceState;
+import android.util.Dumpable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,7 +33,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @see DeviceStatePolicy
  */
-public interface DeviceStateProvider {
+public interface DeviceStateProvider extends Dumpable {
     int SUPPORTED_DEVICE_STATES_CHANGED_DEFAULT = 0;
 
     /**
@@ -131,10 +133,12 @@ public interface DeviceStateProvider {
          *
          * @param identifier the identifier of the new device state.
          *
-         * @throws IllegalArgumentException if the state is less than {@link MINIMUM_DEVICE_STATE}
-         * or greater than {@link MAXIMUM_DEVICE_STATE}.
+         * @throws IllegalArgumentException if the state is less than
+         * {@link MINIMUM_DEVICE_STATE_IDENTIFIER} or greater than
+         * {@link MAXIMUM_DEVICE_STATE_IDENTIFIER}.
          */
         void onStateChanged(
-                @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int identifier);
+                @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to =
+                        MAXIMUM_DEVICE_STATE_IDENTIFIER) int identifier);
     }
 }

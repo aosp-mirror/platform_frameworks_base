@@ -17,11 +17,12 @@
 #include "RenderThread.h"
 
 #include <GrContextOptions.h>
-#include <include/gpu/ganesh/gl/GrGLDirectContext.h>
 #include <android-base/properties.h>
 #include <dlfcn.h>
 #include <gl/GrGLInterface.h>
 #include <gui/TraceUtils.h>
+#include <include/gpu/ganesh/gl/GrGLDirectContext.h>
+#include <private/android/choreographer.h>
 #include <sys/resource.h>
 #include <ui/FatVector.h>
 #include <utils/Condition.h>

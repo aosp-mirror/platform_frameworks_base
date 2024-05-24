@@ -367,7 +367,7 @@ class AnrController {
                 Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "dumpAnrStateLocked()");
                 synchronized (mService.mGlobalLock) {
                     mService.saveANRStateLocked(activity, windowState, reason);
-                    mService.mAtmService.saveANRState(reason);
+                    mService.mAtmService.saveANRState(activity, reason);
                 }
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);

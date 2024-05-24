@@ -26,7 +26,7 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-val Kosmos.burnInInteractor by Fixture {
+var Kosmos.burnInInteractor by Fixture {
     BurnInInteractor(
         context = applicationContext,
         burnInHelperWrapper = burnInHelperWrapper,

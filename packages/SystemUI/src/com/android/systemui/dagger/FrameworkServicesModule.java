@@ -71,6 +71,7 @@ import android.media.MediaRouter2Manager;
 import android.media.projection.IMediaProjectionManager;
 import android.media.projection.MediaProjectionManager;
 import android.media.session.MediaSessionManager;
+import android.nearby.NearbyManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
@@ -91,6 +92,7 @@ import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.satellite.SatelliteManager;
 import android.view.Choreographer;
 import android.view.CrossWindowBlurListeners;
 import android.view.IWindowManager;
@@ -440,6 +442,12 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    static NearbyManager provideNearbyManager(Context context) {
+        return context.getSystemService(NearbyManager.class);
+    }
+
+    @Provides
+    @Singleton
     static NetworkScoreManager provideNetworkScoreManager(Context context) {
         return context.getSystemService(NetworkScoreManager.class);
     }
@@ -555,7 +563,7 @@ public class FrameworkServicesModule {
     @Provides
     @Singleton
     static SubscriptionManager provideSubscriptionManager(Context context) {
-        return context.getSystemService(SubscriptionManager.class);
+        return context.getSystemService(SubscriptionManager.class).createForAllUserProfiles();
     }
 
     @Provides
@@ -711,5 +719,11 @@ public class FrameworkServicesModule {
         return IUriGrantsManager.Stub.asInterface(
                 ServiceManager.getService(Context.URI_GRANTS_SERVICE)
         );
+    }
+
+    @Provides
+    @Singleton
+    static Optional<SatelliteManager> provideSatelliteManager(Context context) {
+        return Optional.ofNullable(context.getSystemService(SatelliteManager.class));
     }
 }

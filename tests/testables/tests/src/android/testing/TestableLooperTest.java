@@ -30,9 +30,10 @@ import static org.mockito.Mockito.when;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableLooper.MessageHandler;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -131,6 +131,37 @@ public class RampSegmentTest {
     }
 
     @Test
+    public void testScaleLinearly() {
+        RampSegment initial = new RampSegment(0, 1, 0, 0, 0);
+
+        assertEquals(0f, initial.scaleLinearly(1f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0f, initial.scaleLinearly(0.5f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0f, initial.scaleLinearly(1.5f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0f, initial.scaleLinearly(1.5f).scaleLinearly(2 / 3f).getStartAmplitude(),
+                TOLERANCE);
+        assertEquals(0f, initial.scaleLinearly(0.8f).scaleLinearly(1.25f).getStartAmplitude(),
+                TOLERANCE);
+
+        assertEquals(1f, initial.scaleLinearly(1f).getEndAmplitude(), TOLERANCE);
+        assertEquals(0.5f, initial.scaleLinearly(0.5f).getEndAmplitude(), TOLERANCE);
+        assertEquals(1f, initial.scaleLinearly(1.5f).getEndAmplitude(), TOLERANCE);
+        assertEquals(0.8f, initial.scaleLinearly(0.8f).getEndAmplitude(), TOLERANCE);
+        // Restores back to the exact original value since this is a linear scaling.
+        assertEquals(0.8f, initial.scaleLinearly(1.5f).scaleLinearly(0.8f).getEndAmplitude(),
+                TOLERANCE);
+
+        initial = new RampSegment(0.5f, 1, 0, 0, 0);
+
+        assertEquals(0.5f, initial.scaleLinearly(1).getStartAmplitude(), TOLERANCE);
+        assertEquals(0.25f, initial.scaleLinearly(0.5f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0.75f, initial.scaleLinearly(1.5f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0.4f, initial.scaleLinearly(0.8f).getStartAmplitude(), TOLERANCE);
+        // Restores back to the exact original value since this is a linear scaling.
+        assertEquals(0.5f, initial.scaleLinearly(0.8f).scaleLinearly(1.25f).getStartAmplitude(),
+                TOLERANCE);
+    }
+
+    @Test
     public void testDuration() {
         assertEquals(10, new RampSegment(0.5f, 1, 0, 0, 10).getDuration());
     }

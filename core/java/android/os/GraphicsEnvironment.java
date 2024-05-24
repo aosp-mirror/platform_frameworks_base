@@ -120,7 +120,6 @@ public class GraphicsEnvironment {
     private ClassLoader mClassLoader;
     private String mLibrarySearchPaths;
     private String mLibraryPermittedPaths;
-    private GameManager mGameManager;
 
     private int mAngleOptInIndex = -1;
     private boolean mShouldUseAngle = false;
@@ -133,8 +132,6 @@ public class GraphicsEnvironment {
         final String packageName = context.getPackageName();
         final ApplicationInfo appInfoWithMetaData =
                 getAppInfoWithMetadata(context, pm, packageName);
-
-        mGameManager = context.getSystemService(GameManager.class);
 
         Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "setupGpuLayers");
         setupGpuLayers(context, coreSettings, pm, packageName, appInfoWithMetaData);
@@ -161,9 +158,11 @@ public class GraphicsEnvironment {
         Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
 
         Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "notifyGraphicsEnvironmentSetup");
-        if (mGameManager != null
-                && appInfoWithMetaData.category == ApplicationInfo.CATEGORY_GAME) {
-            mGameManager.notifyGraphicsEnvironmentSetup();
+        if (appInfoWithMetaData.category == ApplicationInfo.CATEGORY_GAME) {
+            final GameManager gameManager = context.getSystemService(GameManager.class);
+            if (gameManager != null) {
+                gameManager.notifyGraphicsEnvironmentSetup();
+            }
         }
         Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
     }

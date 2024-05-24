@@ -1176,7 +1176,6 @@ public class AppTransitionController {
                 mDisplayContent.mNoAnimationNotifyOnTransitionFinished.add(app.token);
             }
             app.updateReportedVisibilityLocked();
-            app.waitingToShow = false;
             app.showAllWindowsLocked();
 
             if (mDisplayContent.mAppTransition.isNextAppTransitionThumbnailUp()) {

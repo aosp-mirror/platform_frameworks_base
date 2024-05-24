@@ -20,7 +20,7 @@ import android.app.AppOpsManager
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.settingslib.spa.framework.util.asyncMapItem
 import com.android.settingslib.spa.framework.util.filterItem
 import com.android.settingslib.spaprivileged.model.app.AppOpsController
@@ -166,7 +166,7 @@ internal fun isAllowed(
         return { true }
     }
 
-    val mode = appOpsController.mode.observeAsState()
+    val mode = appOpsController.mode.collectAsStateWithLifecycle(initialValue = null)
     return {
         when (mode.value) {
             null -> null

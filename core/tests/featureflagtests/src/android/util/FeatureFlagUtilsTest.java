@@ -24,9 +24,9 @@ import static junit.framework.Assert.assertTrue;
 import android.content.Context;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;

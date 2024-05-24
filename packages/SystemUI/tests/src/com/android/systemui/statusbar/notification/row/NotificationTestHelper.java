@@ -21,7 +21,7 @@ import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
-import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 
 import static org.junit.Assert.assertEquals;
@@ -57,7 +57,6 @@ import com.android.systemui.TestableDependency;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -66,6 +65,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -568,12 +568,12 @@ public class NotificationTestHelper {
             NotificationEntry entry,
             @InflationFlag int extraInflationFlags)
             throws Exception {
-        // NOTE: This flag is read when the ExpandableNotificationRow is inflated, so it needs to be
-        //  set, but we do not want to override an existing value that is needed by a specific test.
-        mFeatureFlags.setDefault(Flags.IMPROVED_HUN_ANIMATIONS);
 
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
-                mContext.LAYOUT_INFLATER_SERVICE);
+                Context.LAYOUT_INFLATER_SERVICE);
+        if (com.android.systemui.Flags.notificationRowUserContext()) {
+            inflater.setFactory2(new RowInflaterTask.RowAsyncLayoutInflater(entry));
+        }
         mRow = (ExpandableNotificationRow) inflater.inflate(
                 R.layout.status_bar_notification_row,
                 null /* root */,
@@ -608,6 +608,7 @@ public class NotificationTestHelper {
                 mDismissibilityProvider,
                 mock(MetricsLogger.class),
                 new NotificationChildrenContainerLogger(logcatLogBuffer()),
+                mock(ColorUpdateLogger.class),
                 mock(SmartReplyConstants.class),
                 mock(SmartReplyController.class),
                 mFeatureFlags,

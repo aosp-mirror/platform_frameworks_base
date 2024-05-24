@@ -23,7 +23,10 @@ import javax.inject.Inject
 
 class KeyguardBlueprintViewModel
 @Inject
-constructor(keyguardBlueprintInteractor: KeyguardBlueprintInteractor) {
+constructor(
+    keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
+) {
     var currentBluePrint: KeyguardBlueprint? = null
     val blueprint = keyguardBlueprintInteractor.blueprint
+    val refreshTransition = keyguardBlueprintInteractor.refreshTransition
 }

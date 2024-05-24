@@ -23,11 +23,13 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
 
+import com.android.systemui.Flags;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.BroadcastRunning;
 import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.NotifInflation;
 
 import dagger.Module;
 import dagger.Provides;
@@ -50,6 +52,8 @@ public abstract class SysUIConcurrencyModule {
     private static final Long LONG_SLOW_DELIVERY_THRESHOLD = 2500L;
     private static final Long BROADCAST_SLOW_DISPATCH_THRESHOLD = 1000L;
     private static final Long BROADCAST_SLOW_DELIVERY_THRESHOLD = 1000L;
+    private static final Long NOTIFICATION_INFLATION_SLOW_DISPATCH_THRESHOLD = 1000L;
+    private static final Long NOTIFICATION_INFLATION_SLOW_DELIVERY_THRESHOLD = 1000L;
 
     /** Background Looper */
     @Provides
@@ -90,6 +94,24 @@ public abstract class SysUIConcurrencyModule {
         return thread.getLooper();
     }
 
+    /** Notification inflation Looper */
+    @Provides
+    @SysUISingleton
+    @NotifInflation
+    public static Looper provideNotifInflationLooper(@Background Looper bgLooper) {
+        if (!Flags.dedicatedNotifInflationThread()) {
+            return bgLooper;
+        }
+
+        final HandlerThread thread = new HandlerThread("NotifInflation",
+                Process.THREAD_PRIORITY_BACKGROUND);
+        thread.start();
+        final Looper looper = thread.getLooper();
+        looper.setSlowLogThresholdMs(NOTIFICATION_INFLATION_SLOW_DISPATCH_THRESHOLD,
+                NOTIFICATION_INFLATION_SLOW_DELIVERY_THRESHOLD);
+        return looper;
+    }
+
     /**
      * Background Handler.
      *
@@ -99,15 +121,6 @@ public abstract class SysUIConcurrencyModule {
     @Background
     public static Handler provideBgHandler(@Background Looper bgLooper) {
         return new Handler(bgLooper);
-    }
-
-    /**
-     * Provide a Background-Thread Executor by default.
-     */
-    @Provides
-    @SysUISingleton
-    public static Executor provideExecutor(@Background Looper looper) {
-        return new ExecutorImpl(looper);
     }
 
     /**
@@ -152,15 +165,6 @@ public abstract class SysUIConcurrencyModule {
     }
 
     /**
-     * Provide a Background-Thread Executor by default.
-     */
-    @Provides
-    @SysUISingleton
-    public static DelayableExecutor provideDelayableExecutor(@Background Looper looper) {
-        return new ExecutorImpl(looper);
-    }
-
-    /**
      * Provide a Background-Thread Executor.
      */
     @Provides
@@ -168,15 +172,6 @@ public abstract class SysUIConcurrencyModule {
     @Background
     public static DelayableExecutor provideBackgroundDelayableExecutor(@Background Looper looper) {
         return new ExecutorImpl(looper);
-    }
-
-    /**
-     * Provide a Background-Thread Executor by default.
-     */
-    @Provides
-    @SysUISingleton
-    public static RepeatableExecutor provideRepeatableExecutor(@Background DelayableExecutor exec) {
-        return new RepeatableExecutorImpl(exec);
     }
 
     /**
@@ -224,5 +219,13 @@ public abstract class SysUIConcurrencyModule {
         HandlerThread thread = new HandlerThread("TimeTick");
         thread.start();
         return new Handler(thread.getLooper());
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    @NotifInflation
+    public static Executor provideNotifInflationExecutor(@NotifInflation Looper looper) {
+        return new ExecutorImpl(looper);
     }
 }

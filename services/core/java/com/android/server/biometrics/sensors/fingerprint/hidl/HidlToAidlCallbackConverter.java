@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprintClientCallback;
 
 import com.android.server.biometrics.HardwareAuthTokenUtils;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.fingerprint.aidl.AidlResponseHandler;
 
 import java.util.ArrayList;
@@ -73,12 +74,12 @@ public class HidlToAidlCallbackConverter extends IBiometricsFingerprintClientCal
 
     @Override
     public void onRemoved(long deviceId, int fingerId, int groupId, int remaining) {
-        mAidlResponseHandler.onEnrollmentsRemoved(new int[]{fingerId});
+        mAidlResponseHandler.onEnrollmentRemoved(fingerId, remaining);
     }
 
     @Override
     public void onEnumerate(long deviceId, int fingerId, int groupId, int remaining) {
-        mAidlResponseHandler.onEnrollmentsEnumerated(new int[]{fingerId});
+        mAidlResponseHandler.onEnrollmentEnumerated(fingerId, remaining);
     }
 
     void onChallengeGenerated(long challenge) {
@@ -91,5 +92,9 @@ public class HidlToAidlCallbackConverter extends IBiometricsFingerprintClientCal
 
     void onResetLockout() {
         mAidlResponseHandler.onLockoutCleared();
+    }
+
+    <T extends BaseClientMonitor> void unsupportedClientScheduled(Class<T> className) {
+        mAidlResponseHandler.onUnsupportedClientScheduled(className);
     }
 }

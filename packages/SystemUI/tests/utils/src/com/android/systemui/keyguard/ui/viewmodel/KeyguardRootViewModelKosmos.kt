@@ -18,14 +18,13 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.common.ui.domain.interactor.configurationInteractor
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
-import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.keyguard.domain.interactor.burnInInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.dozeParameters
 import com.android.systemui.statusbar.phone.screenOffAnimationController
@@ -33,18 +32,37 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.keyguardRootViewModel by Fixture {
     KeyguardRootViewModel(
-        configurationInteractor = configurationInteractor,
         deviceEntryInteractor = deviceEntryInteractor,
         dozeParameters = dozeParameters,
         keyguardInteractor = keyguardInteractor,
+        communalInteractor = communalInteractor,
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         notificationsKeyguardInteractor = notificationsKeyguardInteractor,
-        burnInInteractor = burnInInteractor,
-        goneToAodTransitionViewModel = goneToAodTransitionViewModel,
+        alternateBouncerToGoneTransitionViewModel = alternateBouncerToGoneTransitionViewModel,
+        aodToGoneTransitionViewModel = aodToGoneTransitionViewModel,
         aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
+        dozingToGoneTransitionViewModel = dozingToGoneTransitionViewModel,
+        dozingToLockscreenTransitionViewModel = dozingToLockscreenTransitionViewModel,
+        glanceableHubToLockscreenTransitionViewModel = glanceableHubToLockscreenTransitionViewModel,
+        goneToAodTransitionViewModel = goneToAodTransitionViewModel,
+        goneToDozingTransitionViewModel = goneToDozingTransitionViewModel,
+        lockscreenToAodTransitionViewModel = lockscreenToAodTransitionViewModel,
+        lockscreenToDozingTransitionViewModel = lockscreenToDozingTransitionViewModel,
+        lockscreenToDreamingTransitionViewModel = lockscreenToDreamingTransitionViewModel,
+        lockscreenToGlanceableHubTransitionViewModel = lockscreenToGlanceableHubTransitionViewModel,
+        lockscreenToGoneTransitionViewModel = lockscreenToGoneTransitionViewModel,
+        lockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel,
+        lockscreenToPrimaryBouncerTransitionViewModel =
+            lockscreenToPrimaryBouncerTransitionViewModel,
+        occludedToAodTransitionViewModel = occludedToAodTransitionViewModel,
         occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
+        primaryBouncerToAodTransitionViewModel = primaryBouncerToAodTransitionViewModel,
+        primaryBouncerToGoneTransitionViewModel = primaryBouncerToGoneTransitionViewModel,
+        primaryBouncerToLockscreenTransitionViewModel =
+            primaryBouncerToLockscreenTransitionViewModel,
         screenOffAnimationController = screenOffAnimationController,
-        keyguardClockViewModel = keyguardClockViewModel,
-        featureFlags = FakeFeatureFlagsClassic(),
+        aodBurnInViewModel = aodBurnInViewModel,
+        aodAlphaViewModel = aodAlphaViewModel,
+        shadeInteractor = shadeInteractor,
     )
 }

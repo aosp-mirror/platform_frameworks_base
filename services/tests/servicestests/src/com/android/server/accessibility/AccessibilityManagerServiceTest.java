@@ -22,6 +22,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 import static android.view.accessibility.Flags.FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG;
+import static android.view.accessibility.Flags.FLAG_SKIP_ACCESSIBILITY_WARNING_DIALOG_FOR_TRUSTED_SERVICES;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
@@ -82,6 +83,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 
 import com.android.compatibility.common.util.TestUtils;
+import com.android.internal.R;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService.AccessibilityDisplayListener;
@@ -857,8 +859,7 @@ public class AccessibilityManagerServiceTest {
     @RequiresFlagsEnabled(FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
     public void testIsAccessibilityServiceWarningRequired_requiredByDefault() {
         mockManageAccessibilityGranted(mTestableContext);
-        final AccessibilityServiceInfo info = new AccessibilityServiceInfo();
-        info.setComponentName(COMPONENT_NAME);
+        final AccessibilityServiceInfo info = mockAccessibilityServiceInfo(COMPONENT_NAME);
 
         assertThat(mA11yms.isAccessibilityServiceWarningRequired(info)).isTrue();
     }
@@ -867,10 +868,9 @@ public class AccessibilityManagerServiceTest {
     @RequiresFlagsEnabled(FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
     public void testIsAccessibilityServiceWarningRequired_notRequiredIfAlreadyEnabled() {
         mockManageAccessibilityGranted(mTestableContext);
-        final AccessibilityServiceInfo info_a = new AccessibilityServiceInfo();
-        info_a.setComponentName(COMPONENT_NAME);
-        final AccessibilityServiceInfo info_b = new AccessibilityServiceInfo();
-        info_b.setComponentName(new ComponentName("package_b", "class_b"));
+        final AccessibilityServiceInfo info_a = mockAccessibilityServiceInfo(COMPONENT_NAME);
+        final AccessibilityServiceInfo info_b = mockAccessibilityServiceInfo(
+                new ComponentName("package_b", "class_b"));
         final AccessibilityUserState userState = mA11yms.getCurrentUserState();
         userState.mEnabledServices.clear();
         userState.mEnabledServices.add(info_b.getComponentName());
@@ -883,12 +883,12 @@ public class AccessibilityManagerServiceTest {
     @RequiresFlagsEnabled(FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
     public void testIsAccessibilityServiceWarningRequired_notRequiredIfExistingShortcut() {
         mockManageAccessibilityGranted(mTestableContext);
-        final AccessibilityServiceInfo info_a = new AccessibilityServiceInfo();
-        info_a.setComponentName(new ComponentName("package_a", "class_a"));
-        final AccessibilityServiceInfo info_b = new AccessibilityServiceInfo();
-        info_b.setComponentName(new ComponentName("package_b", "class_b"));
-        final AccessibilityServiceInfo info_c = new AccessibilityServiceInfo();
-        info_c.setComponentName(new ComponentName("package_c", "class_c"));
+        final AccessibilityServiceInfo info_a = mockAccessibilityServiceInfo(
+                new ComponentName("package_a", "class_a"));
+        final AccessibilityServiceInfo info_b = mockAccessibilityServiceInfo(
+                new ComponentName("package_b", "class_b"));
+        final AccessibilityServiceInfo info_c = mockAccessibilityServiceInfo(
+                new ComponentName("package_c", "class_c"));
         final AccessibilityUserState userState = mA11yms.getCurrentUserState();
         userState.mAccessibilityButtonTargets.clear();
         userState.mAccessibilityButtonTargets.add(info_b.getComponentName().flattenToString());
@@ -898,6 +898,51 @@ public class AccessibilityManagerServiceTest {
         assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_a)).isTrue();
         assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_b)).isFalse();
         assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_c)).isFalse();
+    }
+
+    @Test
+    @RequiresFlagsEnabled({
+            FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG,
+            FLAG_SKIP_ACCESSIBILITY_WARNING_DIALOG_FOR_TRUSTED_SERVICES})
+    public void testIsAccessibilityServiceWarningRequired_notRequiredIfAllowlisted() {
+        mockManageAccessibilityGranted(mTestableContext);
+        final AccessibilityServiceInfo info_a = mockAccessibilityServiceInfo(
+                new ComponentName("package_a", "class_a"), true);
+        final AccessibilityServiceInfo info_b = mockAccessibilityServiceInfo(
+                new ComponentName("package_b", "class_b"), false);
+        final AccessibilityServiceInfo info_c = mockAccessibilityServiceInfo(
+                new ComponentName("package_c", "class_c"), true);
+        mTestableContext.getOrCreateTestableResources().addOverride(
+                R.array.config_trustedAccessibilityServices,
+                new String[]{
+                        info_b.getComponentName().flattenToString(),
+                        info_c.getComponentName().flattenToString()});
+
+        // info_a is not in the allowlist => require the warning
+        assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_a)).isTrue();
+        // info_b is not preinstalled => require the warning
+        assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_b)).isTrue();
+        // info_c is both in the allowlist and preinstalled => do not require the warning
+        assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_c)).isFalse();
+    }
+
+    private static AccessibilityServiceInfo mockAccessibilityServiceInfo(
+            ComponentName componentName) {
+        return mockAccessibilityServiceInfo(componentName, false);
+    }
+
+    private static AccessibilityServiceInfo mockAccessibilityServiceInfo(
+            ComponentName componentName,
+            boolean isSystemApp) {
+        AccessibilityServiceInfo accessibilityServiceInfo =
+                Mockito.spy(new AccessibilityServiceInfo());
+        accessibilityServiceInfo.setComponentName(componentName);
+        ResolveInfo mockResolveInfo = Mockito.mock(ResolveInfo.class);
+        when(accessibilityServiceInfo.getResolveInfo()).thenReturn(mockResolveInfo);
+        mockResolveInfo.serviceInfo = Mockito.mock(ServiceInfo.class);
+        mockResolveInfo.serviceInfo.applicationInfo = Mockito.mock(ApplicationInfo.class);
+        when(mockResolveInfo.serviceInfo.applicationInfo.isSystemApp()).thenReturn(isSystemApp);
+        return accessibilityServiceInfo;
     }
 
     // Single package intents can trigger multiple PackageMonitor callbacks.

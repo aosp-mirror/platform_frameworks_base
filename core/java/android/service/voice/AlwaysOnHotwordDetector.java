@@ -22,6 +22,7 @@ import static android.service.voice.SoundTriggerFailure.ERROR_CODE_UNKNOWN;
 import static android.service.voice.VoiceInteractionService.MULTIPLE_ACTIVE_HOTWORD_DETECTORS;
 
 import android.annotation.ElapsedRealtimeLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -306,7 +307,6 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     private static final int MSG_DETECTION_HOTWORD_DETECTION_SERVICE_FAILURE = 9;
     private static final int MSG_DETECTION_SOUND_TRIGGER_FAILURE = 10;
     private static final int MSG_DETECTION_UNKNOWN_FAILURE = 11;
-    private static final int MSG_HOTWORD_TRAINING_DATA = 12;
 
     private final String mText;
     private final Locale mLocale;
@@ -433,7 +433,10 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         @ElapsedRealtimeLong
         private final long mHalEventReceivedMillis;
 
-        private EventPayload(boolean captureAvailable,
+        private final boolean mIsRecognitionStopped;
+
+        private EventPayload(
+                boolean captureAvailable,
                 @Nullable AudioFormat audioFormat,
                 int captureSession,
                 @DataFormat int dataFormat,
@@ -441,7 +444,8 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                 @Nullable HotwordDetectedResult hotwordDetectedResult,
                 @Nullable ParcelFileDescriptor audioStream,
                 @NonNull List<KeyphraseRecognitionExtra> keyphraseExtras,
-                @ElapsedRealtimeLong long halEventReceivedMillis) {
+                @ElapsedRealtimeLong long halEventReceivedMillis,
+                boolean isRecognitionStopped) {
             mCaptureAvailable = captureAvailable;
             mCaptureSession = captureSession;
             mAudioFormat = audioFormat;
@@ -451,6 +455,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
             mAudioStream = audioStream;
             mKephraseExtras = keyphraseExtras;
             mHalEventReceivedMillis = halEventReceivedMillis;
+            mIsRecognitionStopped = isRecognitionStopped;
         }
 
         /**
@@ -593,6 +598,12 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
             return mHalEventReceivedMillis;
         }
 
+        /** Returns whether the system has stopped hotword recognition because of this detection. */
+        @FlaggedApi(android.app.wearable.Flags.FLAG_ENABLE_HOTWORD_WEARABLE_SENSING_API)
+        public boolean isRecognitionStopped() {
+            return mIsRecognitionStopped;
+        }
+
         /**
          * Builder class for {@link EventPayload} objects
          *
@@ -611,6 +622,8 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
             private List<KeyphraseRecognitionExtra> mKeyphraseExtras = Collections.emptyList();
             @ElapsedRealtimeLong
             private long mHalEventReceivedMillis = -1;
+            // default to true to keep prior behavior
+            private boolean mIsRecognitionStopped = true;
 
             public Builder() {}
 
@@ -747,13 +760,31 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
             }
 
             /**
+             * Sets whether the system has stopped hotword recognition because of this detection.
+             */
+            @FlaggedApi(android.app.wearable.Flags.FLAG_ENABLE_HOTWORD_WEARABLE_SENSING_API)
+            @NonNull
+            public Builder setIsRecognitionStopped(boolean isRecognitionStopped) {
+                mIsRecognitionStopped = isRecognitionStopped;
+                return this;
+            }
+
+            /**
              * Builds an {@link EventPayload} instance
              */
             @NonNull
             public EventPayload build() {
-                return new EventPayload(mCaptureAvailable, mAudioFormat, mCaptureSession,
-                        mDataFormat, mData, mHotwordDetectedResult, mAudioStream,
-                        mKeyphraseExtras, mHalEventReceivedMillis);
+                return new EventPayload(
+                        mCaptureAvailable,
+                        mAudioFormat,
+                        mCaptureSession,
+                        mDataFormat,
+                        mData,
+                        mHotwordDetectedResult,
+                        mAudioStream,
+                        mKeyphraseExtras,
+                        mHalEventReceivedMillis,
+                        mIsRecognitionStopped);
             }
         }
     }
@@ -787,14 +818,20 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
 
         /**
          * Called when the keyphrase is spoken.
-         * This implicitly stops listening for the keyphrase once it's detected.
-         * Clients should start a recognition again once they are done handling this
-         * detection.
          *
-         * @param eventPayload Payload data for the detection event.
-         *        This may contain the trigger audio, if requested when calling
-         *        {@link AlwaysOnHotwordDetector#startRecognition(int)}.
+         * <p>This implicitly stops listening for the keyphrase once it's detected. Clients should
+         * start a recognition again once they are done handling this detection.
+         *
+         * @param eventPayload Payload data for the detection event. This may contain the trigger
+         *     audio, if requested when calling {@link
+         *     AlwaysOnHotwordDetector#startRecognition(int)}.
          */
+        // TODO(b/324635656): Update Javadoc for 24Q3 release:
+        // 1. Prepend to the first paragraph:
+        //     If {@code eventPayload.isRecognitionStopped()} returns true, this...
+        // 2. Append to the description for @param eventPayload:
+        //     ...or if the audio comes from {@link
+        //     android.service.wearable.WearableSensingService}.
         public abstract void onDetected(@NonNull EventPayload eventPayload);
 
         /**
@@ -960,8 +997,8 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                 mKeyphraseMetadata = new KeyphraseMetadata(1, mText, fakeSupportedLocales,
                         AlwaysOnHotwordDetector.RECOGNITION_MODE_VOICE_TRIGGER);
             }
+            notifyStateChangedLocked();
         }
-        notifyStateChanged(availability);
     }
 
     /**
@@ -1371,8 +1408,8 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
 
             mAvailability = STATE_INVALID;
             mIsAvailabilityOverriddenByTestApi = false;
+            notifyStateChangedLocked();
         }
-        notifyStateChanged(STATE_INVALID);
         super.destroy();
     }
 
@@ -1402,8 +1439,6 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
      */
     // TODO(b/281608561): remove the enrollment flow from AlwaysOnHotwordDetector
     void onSoundModelsChanged() {
-        boolean notifyError = false;
-
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID
                     || mAvailability == STATE_HARDWARE_UNAVAILABLE
@@ -1444,9 +1479,6 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                     // calling stopRecognition where there is no started session.
                     Log.w(TAG, "Failed to stop recognition after enrollment update: code="
                             + result);
-
-                    // Execute a refresh availability task - which should then notify of a change.
-                    new RefreshAvailabilityTask().execute();
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to stop recognition after enrollment update", e);
                     if (CompatChanges.isChangeEnabled(SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS)) {
@@ -1455,14 +1487,14 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                                         + Log.getStackTraceString(e),
                                 FailureSuggestedAction.RECREATE_DETECTOR));
                     } else {
-                        notifyError = true;
+                        updateAndNotifyStateChangedLocked(STATE_ERROR);
                     }
+                    return;
                 }
             }
-        }
 
-        if (notifyError) {
-            updateAndNotifyStateChanged(STATE_ERROR);
+            // Execute a refresh availability task - which should then notify of a change.
+            new RefreshAvailabilityTask().execute();
         }
     }
 
@@ -1578,11 +1610,10 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
     }
 
-    private void updateAndNotifyStateChanged(int availability) {
-        synchronized (mLock) {
-            updateAvailabilityLocked(availability);
-        }
-        notifyStateChanged(availability);
+    @GuardedBy("mLock")
+    private void updateAndNotifyStateChangedLocked(int availability) {
+        updateAvailabilityLocked(availability);
+        notifyStateChangedLocked();
     }
 
     @GuardedBy("mLock")
@@ -1596,17 +1627,17 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
     }
 
-    private void notifyStateChanged(int newAvailability) {
+    @GuardedBy("mLock")
+    private void notifyStateChangedLocked() {
         Message message = Message.obtain(mHandler, MSG_AVAILABILITY_CHANGED);
-        message.arg1 = newAvailability;
+        message.arg1 = mAvailability;
         message.sendToTarget();
     }
 
+    @GuardedBy("mLock")
     private void sendUnknownFailure(String failureMessage) {
-        synchronized (mLock) {
-            // update but do not call onAvailabilityChanged callback for STATE_ERROR
-            updateAvailabilityLocked(STATE_ERROR);
-        }
+        // update but do not call onAvailabilityChanged callback for STATE_ERROR
+        updateAvailabilityLocked(STATE_ERROR);
         Message.obtain(mHandler, MSG_DETECTION_UNKNOWN_FAILURE, failureMessage).sendToTarget();
     }
 
@@ -1639,6 +1670,20 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
 
         @Override
+        public void onKeyphraseDetectedFromExternalSource(HotwordDetectedResult result) {
+            Slog.i(TAG, "onKeyphraseDetectedFromExternalSource");
+            EventPayload.Builder eventPayloadBuilder = new EventPayload.Builder();
+            if (android.app.wearable.Flags.enableHotwordWearableSensingApi()) {
+                eventPayloadBuilder.setIsRecognitionStopped(false);
+            }
+            Message.obtain(
+                            mHandler,
+                            MSG_HOTWORD_DETECTED,
+                            eventPayloadBuilder.setHotwordDetectedResult(result).build())
+                    .sendToTarget();
+        }
+
+        @Override
         public void onGenericSoundTriggerDetected(SoundTrigger.GenericRecognitionEvent event) {
             Slog.w(TAG, "Generic sound trigger event detected at AOHD: " + event);
         }
@@ -1651,16 +1696,6 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                 Slog.i(TAG, "onRejected");
             }
             Message.obtain(mHandler, MSG_HOTWORD_REJECTED, result).sendToTarget();
-        }
-
-        @Override
-        public void onTrainingData(@NonNull HotwordTrainingData data) {
-            if (DBG) {
-                Slog.d(TAG, "onTrainingData(" + data + ")");
-            } else {
-                Slog.i(TAG, "onTrainingData");
-            }
-            Message.obtain(mHandler, MSG_HOTWORD_TRAINING_DATA, data).sendToTarget();
         }
 
         @Override
@@ -1794,9 +1829,6 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                     case MSG_DETECTION_UNKNOWN_FAILURE:
                         mExternalCallback.onUnknownFailure((String) message.obj);
                         break;
-                    case MSG_HOTWORD_TRAINING_DATA:
-                        mExternalCallback.onTrainingData((HotwordTrainingData) message.obj);
-                        break;
                     default:
                         super.handleMessage(message);
                 }
@@ -1822,17 +1854,19 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                             availability = STATE_KEYPHRASE_UNENROLLED;
                         }
                     }
+                    updateAndNotifyStateChangedLocked(availability);
                 }
-                updateAndNotifyStateChanged(availability);
             } catch (Exception e) {
                 // Any exception here not caught will crash the process because AsyncTask does not
                 // bubble up the exceptions to the client app, so we must propagate it to the app.
                 Slog.w(TAG, "Failed to refresh availability", e);
-                if (CompatChanges.isChangeEnabled(SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS)) {
-                    sendUnknownFailure(
-                            "Failed to refresh availability: " + Log.getStackTraceString(e));
-                } else {
-                    updateAndNotifyStateChanged(STATE_ERROR);
+                synchronized (mLock) {
+                    if (CompatChanges.isChangeEnabled(SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS)) {
+                        sendUnknownFailure(
+                                "Failed to refresh availability: " + Log.getStackTraceString(e));
+                    } else {
+                        updateAndNotifyStateChangedLocked(STATE_ERROR);
+                    }
                 }
             }
 

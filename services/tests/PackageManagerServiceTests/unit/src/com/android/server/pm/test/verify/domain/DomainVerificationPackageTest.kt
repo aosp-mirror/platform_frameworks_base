@@ -21,6 +21,7 @@ import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.content.pm.SigningDetails
 import android.content.pm.verify.domain.DomainOwner
+import android.content.pm.verify.domain.DomainSet
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_MODIFIABLE_VERIFIED
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_NO_RESPONSE
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_SUCCESS
@@ -48,16 +49,16 @@ import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.spy
 import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.security.PublicKey
-import java.util.UUID
 import org.junit.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.doReturn
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.security.PublicKey
+import java.util.UUID
 
 class DomainVerificationPackageTest {
 
@@ -88,7 +89,7 @@ class DomainVerificationPackageTest {
     @Test
     fun addPackageFirstTime() {
         val service = makeService(pkg1, pkg2)
-        service.addPackage(pkg1)
+        service.addPackage(pkg1, null)
         val info = service.getInfo(pkg1.packageName)
         assertThat(info.packageName).isEqualTo(pkg1.packageName)
         assertThat(info.identifier).isEqualTo(pkg1.domainSetId)
@@ -120,8 +121,8 @@ class DomainVerificationPackageTest {
             systemConfiguredPackageNames = ArraySet(setOf(pkg1.packageName, pkg2.packageName)),
             pkg1, pkg2
         )
-        service.addPackage(pkg1)
-        service.addPackage(pkg2)
+        service.addPackage(pkg1, null)
+        service.addPackage(pkg2, null)
 
         service.getInfo(pkg1.packageName).apply {
             assertThat(packageName).isEqualTo(pkg1.packageName)
@@ -198,7 +199,7 @@ class DomainVerificationPackageTest {
         val service = makeService(pkg1, pkg2)
         val computer = mockComputer(pkg1, pkg2)
         service.restoreSettings(computer, Xml.resolvePullParser(xml.byteInputStream()))
-        service.addPackage(pkg1)
+        service.addPackage(pkg1, null)
         val info = service.getInfo(pkg1.packageName)
         assertThat(info.packageName).isEqualTo(pkg1.packageName)
         assertThat(info.identifier).isEqualTo(pkg1.domainSetId)
@@ -248,7 +249,7 @@ class DomainVerificationPackageTest {
         val service = makeService(pkg1, pkg2)
         val computer = mockComputer(pkg1, pkg2)
         service.restoreSettings(computer, Xml.resolvePullParser(xml.byteInputStream()))
-        service.addPackage(pkg1)
+        service.addPackage(pkg1, null)
         val info = service.getInfo(pkg1.packageName)
         assertThat(info.packageName).isEqualTo(pkg1.packageName)
         assertThat(info.identifier).isEqualTo(pkg1.domainSetId)
@@ -307,7 +308,7 @@ class DomainVerificationPackageTest {
             service.readSettings(computer, Xml.resolvePullParser(it))
         }
 
-        service.addPackage(pkg1)
+        service.addPackage(pkg1, null)
 
         assertAddPackageActivePendingRestoredState(service)
     }
@@ -321,7 +322,7 @@ class DomainVerificationPackageTest {
             service.readSettings(computer, Xml.resolvePullParser(it))
         }
 
-        service.addPackage(pkg1)
+        service.addPackage(pkg1, null)
 
         val userState = service.getUserState(pkg1.packageName)
         assertThat(userState.packageName).isEqualTo(pkg1.packageName)
@@ -345,9 +346,53 @@ class DomainVerificationPackageTest {
             service.restoreSettings(computer, Xml.resolvePullParser(it))
         }
 
-        service.addPackage(pkg1)
+        service.addPackage(pkg1, null)
 
         assertAddPackageActivePendingRestoredState(service, expectRestore = true)
+    }
+
+    @Test
+    fun addPackageWithPreVerifiedDomains() {
+        val service = makeService(pkg1)
+        val pkg1 = mockPkgState(
+                PKG_ONE,
+                UUID_ONE,
+                SIGNATURE_ONE,
+                autoVerifyDomains = listOf(DOMAIN_1, DOMAIN_2),
+                otherDomains = listOf(DOMAIN_3, DOMAIN_4))
+        service.addPackage(pkg1, DomainSet(setOf(DOMAIN_1, DOMAIN_3)))
+        val info = service.getInfo(pkg1.packageName)
+        assertThat(info.packageName).isEqualTo(pkg1.packageName)
+        assertThat(info.identifier).isEqualTo(pkg1.domainSetId)
+        // Test that DOMAIN_1 is pre-verified and DOMAIN_3 is ignored because autoVerify=false
+        assertThat(info.hostToStateMap).containsExactlyEntriesIn(mapOf(
+                DOMAIN_1 to STATE_MODIFIABLE_VERIFIED,
+                DOMAIN_2 to STATE_NO_RESPONSE,
+        ))
+
+        val userState = service.getUserState(pkg1.packageName)
+        assertThat(userState.packageName).isEqualTo(pkg1.packageName)
+        assertThat(userState.identifier).isEqualTo(pkg1.domainSetId)
+        assertThat(userState.isLinkHandlingAllowed).isEqualTo(true)
+        assertThat(userState.user.identifier).isEqualTo(USER_ID)
+        assertThat(userState.hostToStateMap).containsExactlyEntriesIn(mapOf(
+                DOMAIN_1 to DOMAIN_STATE_VERIFIED,
+                DOMAIN_2 to DOMAIN_STATE_NONE,
+        ))
+
+        assertThat(service.queryValidVerificationPackageNames())
+                .containsExactly(pkg1.packageName)
+
+        // Test that the pre-verified state can be overwritten to be disapproved
+        service.setDomainVerificationStatusInternal(
+                PKG_ONE,
+                DomainVerificationState.STATE_DENIED,
+                ArraySet(setOf(DOMAIN_1, DOMAIN_2)))
+        val infoUpdated = service.getInfo(pkg1.packageName)
+        assertThat(infoUpdated.hostToStateMap).containsExactlyEntriesIn(mapOf(
+                DOMAIN_1 to STATE_UNMODIFIABLE,
+                DOMAIN_2 to STATE_UNMODIFIABLE,
+        ))
     }
 
     /**
@@ -447,7 +492,7 @@ class DomainVerificationPackageTest {
 
         val map = mutableMapOf<String, PackageStateInternal>()
         val service = makeService { map[it] }
-        service.addPackage(pkgBefore)
+        service.addPackage(pkgBefore, null)
 
         // Only insert the package after addPackage call to ensure the service doesn't access
         // a live package inside the addPackage logic. It should only use the provided input.
@@ -482,7 +527,7 @@ class DomainVerificationPackageTest {
 
         map[pkgName] = pkgAfter
 
-        service.migrateState(pkgBefore, pkgAfter)
+        service.migrateState(pkgBefore, pkgAfter, null)
 
         assertThat(service.getInfo(pkgName).hostToStateMap).containsExactlyEntriesIn(mapOf(
                 DOMAIN_1 to STATE_UNMODIFIABLE,
@@ -503,7 +548,7 @@ class DomainVerificationPackageTest {
 
         val map = mutableMapOf<String, PackageStateInternal>()
         val service = makeService { map[it] }
-        service.addPackage(pkgBefore)
+        service.addPackage(pkgBefore, null)
 
         // Only insert the package after addPackage call to ensure the service doesn't access
         // a live package inside the addPackage logic. It should only use the provided input.
@@ -522,7 +567,7 @@ class DomainVerificationPackageTest {
         // Now remove the package because migrateState shouldn't use it either
         map.remove(pkgName)
 
-        service.migrateState(pkgBefore, pkgAfter)
+        service.migrateState(pkgBefore, pkgAfter, null)
 
         map[pkgName] = pkgAfter
 
@@ -550,7 +595,7 @@ class DomainVerificationPackageTest {
 
         val map = mutableMapOf<String, PackageStateInternal>()
         val service = makeService { map[it] }
-        service.addPackage(pkgBefore)
+        service.addPackage(pkgBefore, null)
 
         // Only insert the package after addPackage call to ensure the service doesn't access
         // a live package inside the addPackage logic. It should only use the provided input.
@@ -571,7 +616,7 @@ class DomainVerificationPackageTest {
         // Now remove the package because migrateState shouldn't use it either
         map.remove(pkgName)
 
-        service.migrateState(pkgBefore, pkgAfter)
+        service.migrateState(pkgBefore, pkgAfter, null)
 
         map[pkgName] = pkgAfter
 
@@ -596,7 +641,7 @@ class DomainVerificationPackageTest {
 
         val map = mutableMapOf<String, PackageStateInternal>()
         val service = makeService { map[it] }
-        service.addPackage(pkgBefore)
+        service.addPackage(pkgBefore, null)
 
         // Only insert the package after addPackage call to ensure the service doesn't access
         // a live package inside the addPackage logic. It should only use the provided input.
@@ -615,7 +660,7 @@ class DomainVerificationPackageTest {
         // Now remove the package because migrateState shouldn't use it either
         map.remove(pkgName)
 
-        service.migrateState(pkgBefore, pkgAfter)
+        service.migrateState(pkgBefore, pkgAfter, null)
 
         map[pkgName] = pkgAfter
 
@@ -640,7 +685,7 @@ class DomainVerificationPackageTest {
 
         val map = mutableMapOf<String, PackageStateInternal>()
         val service = makeService { map[it] }
-        service.addPackage(pkgBefore)
+        service.addPackage(pkgBefore, null)
 
         // Only insert the package after addPackage call to ensure the service doesn't access
         // a live package inside the addPackage logic. It should only use the provided input.
@@ -667,7 +712,7 @@ class DomainVerificationPackageTest {
         // Now remove the package because migrateState shouldn't use it either
         map.remove(pkgName)
 
-        service.migrateState(pkgBefore, pkgAfter)
+        service.migrateState(pkgBefore, pkgAfter, null)
 
         map[pkgName] = pkgAfter
 
@@ -685,6 +730,30 @@ class DomainVerificationPackageTest {
     }
 
     @Test
+    fun migratePackageWithPreVerifiedDomains() {
+        val pkgName = PKG_ONE
+        val pkgBefore = mockPkgState(pkgName, UUID_ONE, SIGNATURE_ONE, emptyList())
+        val pkgAfter = mockPkgState(pkgName, UUID_TWO, SIGNATURE_TWO, listOf(DOMAIN_1, DOMAIN_2))
+
+        val map = mutableMapOf<String, PackageStateInternal>()
+        val service = makeService { map[it] }
+        service.addPackage(pkgBefore, null)
+        service.migrateState(pkgBefore, pkgAfter, DomainSet(setOf(DOMAIN_1, DOMAIN_3)))
+
+        map[pkgName] = pkgAfter
+
+        assertThat(service.getInfo(pkgName).hostToStateMap).containsExactlyEntriesIn(mapOf(
+                DOMAIN_1 to STATE_MODIFIABLE_VERIFIED,
+                DOMAIN_2 to STATE_NO_RESPONSE,
+        ))
+        assertThat(service.getUserState(pkgName).hostToStateMap).containsExactlyEntriesIn(mapOf(
+                DOMAIN_1 to DOMAIN_STATE_VERIFIED,
+                DOMAIN_2 to DOMAIN_STATE_NONE,
+        ))
+        assertThat(service.queryValidVerificationPackageNames()).containsExactly(pkgName)
+    }
+
+    @Test
     fun backupAndRestore() {
         // This test acts as a proxy for true user restore through PackageManager,
         // as that's much harder to test for real.
@@ -694,8 +763,8 @@ class DomainVerificationPackageTest {
             listOf(DOMAIN_1, DOMAIN_2, DOMAIN_3))
         val serviceBefore = makeService(pkg1, pkg2)
         val computerBefore = mockComputer(pkg1, pkg2)
-        serviceBefore.addPackage(pkg1)
-        serviceBefore.addPackage(pkg2)
+        serviceBefore.addPackage(pkg1, null)
+        serviceBefore.addPackage(pkg2, null)
 
         serviceBefore.setStatus(pkg1.domainSetId, setOf(DOMAIN_1), STATE_SUCCESS)
         serviceBefore.setDomainVerificationLinkHandlingAllowed(pkg1.packageName, false, 10)
@@ -748,8 +817,8 @@ class DomainVerificationPackageTest {
 
         val serviceAfter = makeService(pkg1, pkg2)
         val computerAfter = mockComputer(pkg1, pkg2)
-        serviceAfter.addPackage(pkg1)
-        serviceAfter.addPackage(pkg2)
+        serviceAfter.addPackage(pkg1, null)
+        serviceAfter.addPackage(pkg2, null)
 
         // Check the state is default before the restoration applies
         listOf(0, 10).forEach {
@@ -858,8 +927,8 @@ class DomainVerificationPackageTest {
         )
 
         val service = makeService(pkg1, pkg2)
-        service.addPackage(pkg1)
-        service.addPackage(pkg2)
+        service.addPackage(pkg1, null)
+        service.addPackage(pkg2, null)
 
         // Approve domain 1, 3, and 4 for package 2 for both users
         USER_IDS.forEach {

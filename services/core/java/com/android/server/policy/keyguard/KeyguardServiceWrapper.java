@@ -209,6 +209,16 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    // Binder interface
+    @Override
+    public void showDismissibleKeyguard() {
+        try {
+            mService.showDismissibleKeyguard();
+        } catch (RemoteException e) {
+            Slog.w(TAG , "Remote Exception", e);
+        }
+    }
+
     @Override // Binder interface
     public void setSwitchingUser(boolean switching) {
         try {

@@ -38,7 +38,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration;
+import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,13 +54,11 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
     private final Transitions mTransitions;
     private final Supplier<SurfaceControl.Transaction> mTransactionSupplier;
 
-    // The size of the screen after drag relative to the fullscreen size
-    public static final float FINAL_FREEFORM_SCALE = 0.6f;
     public static final int FREEFORM_ANIMATION_DURATION = 336;
 
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
-    private DesktopModeWindowDecoration mDesktopModeWindowDecoration;
 
+    private OnTaskResizeAnimationListener mOnTaskResizeAnimationListener;
     public EnterDesktopTaskTransitionHandler(
             Transitions transitions) {
         this(transitions, SurfaceControl.Transaction::new);
@@ -73,14 +71,15 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
         mTransactionSupplier = supplier;
     }
 
+    void setOnTaskResizeAnimationListener(OnTaskResizeAnimationListener listener) {
+        mOnTaskResizeAnimationListener =  listener;
+    }
+
     /**
      * Starts Transition of type TRANSIT_MOVE_TO_DESKTOP
      * @param wct WindowContainerTransaction for transition
-     * @param decor {@link DesktopModeWindowDecoration} of task being animated
      */
-    public void moveToDesktop(@NonNull WindowContainerTransaction wct,
-            DesktopModeWindowDecoration decor) {
-        mDesktopModeWindowDecoration = decor;
+    public void moveToDesktop(@NonNull WindowContainerTransaction wct) {
         final IBinder token = mTransitions.startTransition(TRANSIT_MOVE_TO_DESKTOP, wct, this);
         mPendingTransitionTokens.add(token);
     }
@@ -136,33 +135,33 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
             @NonNull TransitionInfo.Change change,
             @NonNull SurfaceControl.Transaction startT,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        if (mDesktopModeWindowDecoration == null) {
-            Slog.e(TAG, "Window Decoration is not available for this transition");
+        final SurfaceControl leash = change.getLeash();
+        final Rect startBounds = change.getStartAbsBounds();
+        final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+        if (mOnTaskResizeAnimationListener == null) {
+            Slog.e(TAG, "onTaskResizeAnimationListener is not available for this transition");
             return false;
         }
 
-        final SurfaceControl leash = change.getLeash();
-        final Rect startBounds = change.getStartAbsBounds();
-        startT.setPosition(leash, startBounds.left, startBounds.right)
+        startT.setPosition(leash, startBounds.left, startBounds.top)
                 .setWindowCrop(leash, startBounds.width(), startBounds.height())
                 .show(leash);
-        mDesktopModeWindowDecoration.showResizeVeil(startT, startBounds);
-
+        mOnTaskResizeAnimationListener.onAnimationStart(taskInfo.taskId, startT, startBounds);
         final ValueAnimator animator = ValueAnimator.ofObject(new RectEvaluator(),
                 change.getStartAbsBounds(), change.getEndAbsBounds());
         animator.setDuration(FREEFORM_ANIMATION_DURATION);
         SurfaceControl.Transaction t = mTransactionSupplier.get();
         animator.addUpdateListener(animation -> {
             final Rect animationValue = (Rect) animator.getAnimatedValue();
-            t.setPosition(leash, animationValue.left, animationValue.right)
+            t.setPosition(leash, animationValue.left, animationValue.top)
                     .setWindowCrop(leash, animationValue.width(), animationValue.height())
                     .show(leash);
-            mDesktopModeWindowDecoration.updateResizeVeil(t, animationValue);
+            mOnTaskResizeAnimationListener.onBoundsChange(taskInfo.taskId, t, animationValue);
         });
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                mDesktopModeWindowDecoration.hideResizeVeil();
+                mOnTaskResizeAnimationListener.onAnimationEnd(taskInfo.taskId);
                 mTransitions.getMainExecutor().execute(
                         () -> finishCallback.onTransitionFinished(null));
             }

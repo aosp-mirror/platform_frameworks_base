@@ -36,6 +36,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.window.ClientWindowFrames;
+import android.window.InputTransferToken;
 import android.window.OnBackInvokedCallbackInfo;
 
 import java.util.List;
@@ -147,13 +148,13 @@ interface IWindowSession {
             int seqId);
 
     @UnsupportedAppUsage
-    boolean performHapticFeedback(int effectId, boolean always);
+    boolean performHapticFeedback(int effectId, boolean always, boolean fromIme);
 
     /**
      * Called by attached views to perform predefined haptic feedback without requiring VIBRATE
      * permission.
      */
-    oneway void performHapticFeedbackAsync(int effectId, boolean always);
+    oneway void performHapticFeedbackAsync(int effectId, boolean always, boolean fromIme);
 
     /**
      * Initiate the drag operation itself
@@ -235,7 +236,7 @@ interface IWindowSession {
      */
     oneway void setWallpaperDisplayOffset(IBinder windowToken, int x, int y);
 
-    Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
+    oneway void sendWallpaperCommand(IBinder window, String action, int x, int y,
             int z, in Bundle extras, boolean sync);
 
     @UnsupportedAppUsage
@@ -310,8 +311,9 @@ interface IWindowSession {
     * be used as unique identifier.
     */
     void grantInputChannel(int displayId, in SurfaceControl surface, in IBinder clientToken,
-            in IBinder hostInputToken, int flags, int privateFlags, int inputFeatures, int type,
-            in IBinder windowToken, in IBinder focusGrantToken, String inputHandleName,
+            in @nullable InputTransferToken hostInputTransferToken, int flags, int privateFlags,
+            int inputFeatures, int type, in IBinder windowToken,
+            in InputTransferToken embeddedInputTransferToken, String inputHandleName,
             out InputChannel outInputChannel);
 
     /**
@@ -332,7 +334,8 @@ interface IWindowSession {
      *                     should be transferred back to the host window. If there is no host
      *                     window, the system will try to find a new focus target.
      */
-    void grantEmbeddedWindowFocus(IWindow window, in IBinder inputToken, boolean grantFocus);
+    void grantEmbeddedWindowFocus(IWindow window, in InputTransferToken inputToken,
+            boolean grantFocus);
 
     /**
      * Generates an DisplayHash that can be used to validate whether specific content was on
@@ -367,7 +370,13 @@ interface IWindowSession {
      */
     boolean cancelDraw(IWindow window);
 
-    boolean transferEmbeddedTouchFocusToHost(IWindow embeddedWindow);
-
-    boolean transferHostTouchGestureToEmbedded(IWindow hostWindow, IBinder transferTouchToken);
+    /**
+     * Moves the focus to the adjacent window if there is one in the given direction. This can only
+     * move the focus to the window in the same leaf task.
+     *
+     * @param fromWindow The calling window that the focus is moved from.
+     * @param direction The {@link android.view.View.FocusDirection} that the new focus should go.
+     * @return {@code true} if the focus changes. Otherwise, {@code false}.
+     */
+    boolean moveFocusToAdjacentWindow(IWindow fromWindow, int direction);
 }

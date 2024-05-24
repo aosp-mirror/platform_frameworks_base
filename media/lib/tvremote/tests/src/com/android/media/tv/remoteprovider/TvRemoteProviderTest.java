@@ -29,7 +29,8 @@ import android.media.tv.ITvRemoteServiceInput;
 import android.os.Binder;
 import android.os.IBinder;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import java.util.ArrayList;
 

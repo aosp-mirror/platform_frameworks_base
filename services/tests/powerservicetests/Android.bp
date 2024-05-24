@@ -1,4 +1,5 @@
 package {
+    default_team: "trendy_team_powermanager_framework",
     // See: http://go/android-license-faq
     default_applicable_licenses: ["frameworks_base_license"],
 }

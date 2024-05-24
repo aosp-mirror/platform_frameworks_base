@@ -16,11 +16,11 @@
 
 package com.android.settingslib.enterprise;
 
-import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.DialogInterface;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.RestrictedLockUtils;

@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.os.IBinder;
 
 import com.android.server.biometrics.log.BiometricContext;
@@ -58,7 +59,8 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
         super(context, token, listener, userId, owner, cookie, sensorId,
                 biometricLogger, biometricContext);
         mLazyDaemon = lazyDaemon;
-        mOperationContext = new OperationContextExt(isBiometricPrompt());
+        int modality = listener != null ? listener.getModality() : BiometricAuthenticator.TYPE_NONE;
+        mOperationContext = new OperationContextExt(isBiometricPrompt(), modality);
     }
 
     @Nullable

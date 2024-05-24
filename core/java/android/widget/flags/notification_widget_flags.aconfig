@@ -1,0 +1,29 @@
+package: "android.widget.flags"
+container: "system"
+
+flag {
+   name: "notif_linearlayout_optimized"
+   namespace: "systemui"
+   description: "Enables notification specific LinearLayout optimization"
+   bug: "316110233"
+}
+
+flag {
+  name: "call_style_set_data_async"
+  namespace: "systemui"
+  description: "Offloads caller icon drawable loading to the background thread"
+  bug: "293961072"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "conversation_style_set_avatar_async"
+  namespace: "systemui"
+  description: "Offloads conversation avatar drawable loading to the background thread"
+  bug: "305540309"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

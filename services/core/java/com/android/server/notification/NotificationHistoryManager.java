@@ -108,7 +108,7 @@ public class NotificationHistoryManager {
                 for (int i = 0; i < pendingPackageRemovals.size(); i++) {
                     userHistory.onPackageRemoved(pendingPackageRemovals.get(i));
                 }
-                mUserPendingPackageRemovals.put(userId, null);
+                mUserPendingPackageRemovals.remove(userId);
             }
 
             // delete history if it was disabled when the user was locked
@@ -116,6 +116,10 @@ public class NotificationHistoryManager {
                 disableHistory(userHistory, userId);
             }
         }
+    }
+
+    public void onUserAdded(@UserIdInt int userId) {
+        mSettingsObserver.update(null, userId);
     }
 
     public void onUserStopped(@UserIdInt int userId) {
@@ -129,7 +133,7 @@ public class NotificationHistoryManager {
         synchronized (mLock) {
             // Actual data deletion is handled by other parts of the system (the entire directory is
             // removed) - we just need clean up our internal state for GC
-            mUserPendingPackageRemovals.put(userId, null);
+            mUserPendingPackageRemovals.remove(userId);
             mHistoryEnabled.put(userId, false);
             mUserPendingHistoryDisables.put(userId, false);
             onUserStopped(userId);
@@ -401,9 +405,7 @@ public class NotificationHistoryManager {
                     false, this, UserHandle.USER_ALL);
             synchronized (mLock) {
                 for (UserInfo userInfo : mUserManager.getUsers()) {
-                    if (!userInfo.isProfile()) {
-                        update(null, userInfo.id);
-                    }
+                    update(null, userInfo.id);
                 }
             }
         }
@@ -424,10 +426,7 @@ public class NotificationHistoryManager {
                 boolean historyEnabled = Settings.Secure.getIntForUser(resolver,
                         Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, userId)
                         != 0;
-                int[] profiles = mUserManager.getProfileIds(userId, true);
-                for (int profileId : profiles) {
-                    onHistoryEnabledChanged(profileId, historyEnabled);
-                }
+                onHistoryEnabledChanged(userId, historyEnabled);
             }
         }
     }

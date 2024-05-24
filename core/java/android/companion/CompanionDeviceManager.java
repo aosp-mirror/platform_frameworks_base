@@ -20,7 +20,6 @@ import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMIN
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER;
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH;
-import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
@@ -77,6 +76,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -219,32 +219,43 @@ public final class CompanionDeviceManager {
      *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
-    @TestApi public static final int MESSAGE_REQUEST_PING = 0x63807378; // ?PIN
+    public static final int MESSAGE_REQUEST_PING = 0x63807378; // ?PIN
+    /**
+     * Test message type without a response.
+     *
+     * @hide
+     */
+    public static final int MESSAGE_ONEWAY_PING = 0x43807378; // +PIN
     /**
      * Message header assigned to the remote authentication handshakes.
      *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
-    @SystemApi(client = MODULE_LIBRARIES)
     public static final int MESSAGE_REQUEST_REMOTE_AUTHENTICATION = 0x63827765; // ?RMA
     /**
      * Message header assigned to the telecom context sync metadata.
      *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
-    @SystemApi(client = MODULE_LIBRARIES)
     public static final int MESSAGE_REQUEST_CONTEXT_SYNC = 0x63678883; // ?CXS
     /**
      * Message header assigned to the permission restore request.
      *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
-    @SystemApi(client = MODULE_LIBRARIES)
     public static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 0x63826983; // ?RES
+    /**
+     * Message header assigned to the one-way message sent from the wearable device.
+     *
+     * @hide
+     */
+    public static final int MESSAGE_ONEWAY_FROM_WEARABLE = 0x43708287; // +FRW
+    /**
+     * Message header assigned to the one-way message sent to the wearable device.
+     *
+     * @hide
+     */
+    public static final int MESSAGE_ONEWAY_TO_WEARABLE = 0x43847987; // +TOW
 
     /**
      * The length limit of Association tag.
@@ -696,7 +707,9 @@ public final class CompanionDeviceManager {
      * Only components from the same {@link ComponentName#getPackageName package} as the calling app
      * are allowed.
      *
-     * Your app must have an association with a device before calling this API
+     * Your app must have an association with a device before calling this API.
+     *
+     * Side-loaded apps must allow restricted settings before requesting notification access.
      *
      * <p>Calling this API requires a uses-feature
      * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
@@ -710,6 +723,9 @@ public final class CompanionDeviceManager {
             IntentSender intentSender = mService
                     .requestNotificationAccess(component, mContext.getUserId())
                     .getIntentSender();
+            if (intentSender == null) {
+                return;
+            }
             mContext.startIntentSender(intentSender, null, 0, 0, 0,
                     ActivityOptions.makeBasic().setPendingIntentBackgroundActivityStartMode(
                             ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle());
@@ -899,38 +915,20 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Listener for any changes to the list of attached transports.
-     *
-     * @see com.android.server.companion.transport.Transport
-     *
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
-    @SystemApi(client = MODULE_LIBRARIES)
-    public interface OnTransportsChangedListener {
-        /**
-         * Invoked when a transport is attached or detached.
-         *
-         * @param associations all the associations which have connected transports.
-         */
-        void onTransportsChanged(@NonNull List<AssociationInfo> associations);
-    }
-
-    /**
      * Adds a listener for any changes to the list of attached transports.
-     * {@link OnTransportsChangedListener#onTransportsChanged(List)} will be triggered with a list
-     * of existing transports when a transport is detached or a new transport is attached.
+     * Registered listener will be triggered with a list of existing transports when a transport
+     * is detached or a new transport is attached.
      *
+     * @param executor The executor which will be used to invoke the listener.
+     * @param listener Called when a transport is attached or detached. Contains the updated list of
+     *                 associations which have connected transports.
      * @see com.android.server.companion.transport.Transport
-     *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
-    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS)
     public void addOnTransportsChangedListener(
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull OnTransportsChangedListener listener) {
+            @NonNull Consumer<List<AssociationInfo>> listener) {
         final OnTransportsChangedListenerProxy proxy = new OnTransportsChangedListenerProxy(
                 executor, listener);
         try {
@@ -947,11 +945,9 @@ public final class CompanionDeviceManager {
      *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
-    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS)
     public void removeOnTransportsChangedListener(
-            @NonNull OnTransportsChangedListener listener) {
+            @NonNull Consumer<List<AssociationInfo>> listener) {
         final OnTransportsChangedListenerProxy proxy = new OnTransportsChangedListenerProxy(
                 null, listener);
         try {
@@ -969,8 +965,6 @@ public final class CompanionDeviceManager {
      *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
-    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS)
     public void sendMessage(int messageType, @NonNull byte[] data, @NonNull int[] associationIds) {
         try {
@@ -981,32 +975,18 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Listener that triggers a callback when a message is received through a connected transport.
+     * Adds a listener that triggers when messages of given type are received.
      *
-     * @see #addOnMessageReceivedListener(Executor, int, OnMessageReceivedListener)
-     *
+     * @param executor The executor which will be used to invoke the listener.
+     * @param messageType Message type to be subscribed to.
+     * @param listener Called when a message is received. Contains the association ID of the message
+     *                 sender and the message payload as a byte array.
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
-    @SystemApi(client = MODULE_LIBRARIES)
-    public interface OnMessageReceivedListener {
-        /**
-         * Called when a message is received.
-         */
-        void onMessageReceived(int associationId, @NonNull byte[] data);
-    }
-
-    /**
-     * Adds a listener to trigger callbacks when messages of given type are received.
-     *
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
-    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS)
     public void addOnMessageReceivedListener(
             @NonNull @CallbackExecutor Executor executor, int messageType,
-            @NonNull OnMessageReceivedListener listener) {
+            @NonNull BiConsumer<Integer, byte[]> listener) {
         final OnMessageReceivedListenerProxy proxy = new OnMessageReceivedListenerProxy(
                 executor, listener);
         try {
@@ -1021,11 +1001,9 @@ public final class CompanionDeviceManager {
      *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_COMPANION_TRANSPORT_APIS)
-    @SystemApi(client = MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS)
     public void removeOnMessageReceivedListener(int messageType,
-            @NonNull OnMessageReceivedListener listener) {
+            @NonNull BiConsumer<Integer, byte[]> listener) {
         final OnMessageReceivedListenerProxy proxy = new OnMessageReceivedListenerProxy(
                 null, listener);
         try {
@@ -1065,6 +1043,7 @@ public final class CompanionDeviceManager {
         }
     }
 
+    // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
     /**
      * Register to receive callbacks whenever the associated device comes in and out of range.
      *
@@ -1121,7 +1100,7 @@ public final class CompanionDeviceManager {
                             callingUid, callingPid);
         }
     }
-
+    // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
     /**
      * Unregister for receiving callbacks whenever the associated device comes in and out of range.
      *
@@ -1160,6 +1139,64 @@ public final class CompanionDeviceManager {
             managerInternal
                     .logFgsApiEnd(ActivityManager.FOREGROUND_SERVICE_API_TYPE_CDM,
                             callingUid, callingPid);
+        }
+    }
+
+    /**
+     * Register to receive callbacks whenever the associated device comes in and out of range.
+     *
+     * <p>The app doesn't need to remain running in order to receive its callbacks.</p>
+     *
+     * <p>Calling app must check for feature presence of
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} before calling this API.</p>
+     *
+     * <p>For Bluetooth LE devices, this is based on scanning for device with the given address.
+     * The system will scan for the device when Bluetooth is ON or Bluetooth scanning is ON.</p>
+     *
+     * <p>For Bluetooth classic devices this is triggered when the device connects/disconnects.</p>
+     *
+     * <p>WiFi devices are not supported.</p>
+     *
+     * <p>If a Bluetooth LE device wants to use a rotating mac address, it is recommended to use
+     * Resolvable Private Address, and ensure the device is bonded to the phone so that android OS
+     * is able to resolve the address.</p>
+     *
+     * @param request A request for setting the types of device for observing device presence.
+     *
+     * @see ObservingDevicePresenceRequest.Builder
+     * @see CompanionDeviceService#onDevicePresenceEvent(DevicePresenceEvent)
+     */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
+    @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE)
+    public void startObservingDevicePresence(@NonNull ObservingDevicePresenceRequest request) {
+        Objects.requireNonNull(request, "request cannot be null");
+
+        try {
+            mService.startObservingDevicePresence(
+                    request, mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister for receiving callbacks whenever the associated device comes in and out of range.
+     *
+     * Calling app must check for feature presence of
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} before calling this API.
+     *
+     * @param request A request for setting the types of device for observing device presence.
+     */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
+    @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE)
+    public void stopObservingDevicePresence(@NonNull ObservingDevicePresenceRequest request) {
+        Objects.requireNonNull(request, "request cannot be null");
+
+        try {
+            mService.stopObservingDevicePresence(
+                    request, mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1600,34 +1637,34 @@ public final class CompanionDeviceManager {
     private static class OnTransportsChangedListenerProxy
             extends IOnTransportsChangedListener.Stub {
         private final Executor mExecutor;
-        private final OnTransportsChangedListener mListener;
+        private final Consumer<List<AssociationInfo>> mListener;
 
         private OnTransportsChangedListenerProxy(Executor executor,
-                OnTransportsChangedListener listener) {
+                Consumer<List<AssociationInfo>> listener) {
             mExecutor = executor;
             mListener = listener;
         }
 
         @Override
         public void onTransportsChanged(@NonNull List<AssociationInfo> associations) {
-            mExecutor.execute(() -> mListener.onTransportsChanged(associations));
+            mExecutor.execute(() -> mListener.accept(associations));
         }
     }
 
     private static class OnMessageReceivedListenerProxy
             extends IOnMessageReceivedListener.Stub {
         private final Executor mExecutor;
-        private final OnMessageReceivedListener mListener;
+        private final BiConsumer<Integer, byte[]> mListener;
 
         private OnMessageReceivedListenerProxy(Executor executor,
-                OnMessageReceivedListener listener) {
+                BiConsumer<Integer, byte[]> listener) {
             mExecutor = executor;
             mListener = listener;
         }
 
         @Override
         public void onMessageReceived(int associationId, byte[] data) {
-            mExecutor.execute(() -> mListener.onMessageReceived(associationId, data));
+            mExecutor.execute(() -> mListener.accept(associationId, data));
         }
     }
 

@@ -24,8 +24,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ToggleButton;
 
+import androidx.window.embedding.ActivityEmbeddingController;
 import androidx.window.embedding.SplitAttributes;
-import androidx.window.embedding.SplitAttributesCalculatorParams;
 import androidx.window.embedding.SplitController;
 
 /**
@@ -66,7 +66,9 @@ public class ActivityEmbeddingSecondaryActivity extends Activity {
                     @Override
                     public void onClick(View v) {
                         // This triggers a recalcuation of splitatributes.
-                        mSplitController.invalidateTopVisibleSplitAttributes();
+                        ActivityEmbeddingController
+                                .getInstance(ActivityEmbeddingSecondaryActivity.this)
+                                .invalidateVisibleActivityStacks();
                     }
         });
         findViewById(R.id.secondary_enter_pip_button).setOnClickListener(

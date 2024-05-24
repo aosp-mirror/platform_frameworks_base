@@ -146,7 +146,6 @@ public class BackupManagerMonitorDumpsysUtils {
                         + eventBundle.getString(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME));
             }
 
-            // TODO(b/296818666): add extras to the events
             addAgentLogsIfAvailable(eventBundle, pw);
             addExtrasIfAvailable(eventBundle, pw);
         } catch (java.io.IOException e) {
@@ -203,6 +202,11 @@ public class BackupManagerMonitorDumpsysUtils {
      * EXTRA_LOG_RESTORE_VERSION [int]: the version of the package on the source
      * EXTRA_LOG_RESTORE_ANYWAY [bool]: if the package allows restore any version
      * EXTRA_LOG_RESTORE_VERSION_TARGET [int]: an extra to record the package version on the target
+     *
+     * When we are performing a V to U downgrade (event with id V_TO_U_RESTORE_SET_LIST) we record
+     * the value of the V to U allowlist and denylist:
+     * EXTRA_LOG_V_TO_U_ALLOWLIST[string]
+     * EXTRA_LOG_V_TO_U_DENYLIST[string]
      */
     private void addExtrasIfAvailable(Bundle eventBundle, PrintWriter pw) {
         if (eventBundle.getInt(BackupManagerMonitor.EXTRA_LOG_EVENT_ID) ==
@@ -216,10 +220,27 @@ public class BackupManagerMonitorDumpsysUtils {
                         + eventBundle.getLong(BackupManagerMonitor.EXTRA_LOG_RESTORE_VERSION));
             }
             if (eventBundle.containsKey(
-                      BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION)) {
+                    BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION)) {
                 pw.println("\t\tPackage version on target: "
                         + eventBundle.getLong(
                         BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION));
+            }
+        }
+
+        if (eventBundle.getInt(BackupManagerMonitor.EXTRA_LOG_EVENT_ID)
+                == BackupManagerMonitor.LOG_EVENT_ID_V_TO_U_RESTORE_SET_LIST) {
+            if (eventBundle.containsKey(
+                    BackupManagerMonitor.EXTRA_LOG_V_TO_U_DENYLIST)) {
+                pw.println("\t\tV to U Denylist : "
+                        + eventBundle.getString(
+                        BackupManagerMonitor.EXTRA_LOG_V_TO_U_DENYLIST));
+            }
+
+            if (eventBundle.containsKey(
+                    BackupManagerMonitor.EXTRA_LOG_V_TO_U_ALLOWLIST)) {
+                pw.println("\t\tV to U Allowllist : "
+                        + eventBundle.getString(
+                        BackupManagerMonitor.EXTRA_LOG_V_TO_U_ALLOWLIST));
             }
         }
     }
@@ -342,10 +363,14 @@ public class BackupManagerMonitorDumpsysUtils {
             case BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_ERROR_FULL_RESTORE ->
                     "Transport error full restore";
             case BackupManagerMonitor.LOG_EVENT_ID_RESTORE_COMPLETE -> "Restore complete";
-            case BackupManagerMonitor.LOG_EVENT_ID_START_PACKAGE_RESTORE ->
-                    "Start package restore";
-            case BackupManagerMonitor.LOG_EVENT_ID_AGENT_FAILURE ->
-                    "Agent failure";
+            case BackupManagerMonitor.LOG_EVENT_ID_START_PACKAGE_RESTORE -> "Start package restore";
+            case BackupManagerMonitor.LOG_EVENT_ID_AGENT_FAILURE -> "Agent failure";
+            case BackupManagerMonitor.LOG_EVENT_ID_V_TO_U_RESTORE_PKG_ELIGIBLE ->
+                    "V to U restore pkg eligible";
+            case BackupManagerMonitor.LOG_EVENT_ID_V_TO_U_RESTORE_PKG_NOT_ELIGIBLE ->
+                    "V to U restore pkg not eligible";
+            case BackupManagerMonitor.LOG_EVENT_ID_V_TO_U_RESTORE_SET_LIST ->
+                    "V to U restore lists";
             default -> "Unknown log event ID: " + code;
         };
         return id;

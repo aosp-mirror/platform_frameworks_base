@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack
 
-import android.content.testableContext
+import android.content.applicationContext
 import com.android.systemui.dump.dumpManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -27,7 +27,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.ambientState by Fixture {
     AmbientState(
-        /*context=*/ testableContext,
+        /*context=*/ applicationContext,
         /*dumpManager=*/ dumpManager,
         /*sectionProvider=*/ stackScrollAlgorithmSectionProvider,
         /*bypassController=*/ stackScrollAlgorithmBypassController,

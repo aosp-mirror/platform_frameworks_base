@@ -17,7 +17,6 @@
 package com.android.settingslib.inputmethod;
 
 import android.annotation.AnyThread;
-import android.annotation.NonNull;
 import android.annotation.UiThread;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -25,6 +24,8 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.DirectBootAwareness;

@@ -19,6 +19,7 @@ package com.android.settingslib.spa.widget.editor
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
@@ -37,12 +39,13 @@ fun SettingsOutlinedTextField(
     errorMessage: String? = null,
     singleLine: Boolean = true,
     enabled: Boolean = true,
-    onTextChange: (String) -> Unit,
+    shape: Shape = OutlinedTextFieldDefaults.shape,
+    onTextChange: (String) -> Unit
 ) {
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(SettingsDimension.itemPadding),
+            .padding(SettingsDimension.textFieldPadding),
         value = value,
         onValueChange = onTextChange,
         label = {
@@ -55,7 +58,8 @@ fun SettingsOutlinedTextField(
             if (errorMessage != null) {
                 Text(text = errorMessage)
             }
-        }
+        },
+        shape = shape
     )
 }
 

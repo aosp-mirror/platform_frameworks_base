@@ -16,24 +16,26 @@
 
 package com.android.server.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.annotations.GuardedBy;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,6 +46,9 @@ import java.util.concurrent.TimeUnit;
 @Presubmit
 @RunWith(Parameterized.class)
 public class AnrTimerTest {
+
+    // A log tag.
+    private static final String TAG = "AnrTimerTest";
 
     // The commonly used message timeout key.
     private static final int MSG_TIMEOUT = 1;
@@ -63,9 +68,7 @@ public class AnrTimerTest {
         }
     }
 
-    /**
-     * The test handler is a self-contained object for a single test.
-     */
+    /** The test helper is a self-contained object for a single test. */
     private static class Helper {
         final Object mLock = new Object();
 
@@ -105,7 +108,7 @@ public class AnrTimerTest {
          */
         TestArg[] messages(int expected) {
             synchronized (mLock) {
-                assertEquals(expected, mMessages.size());
+                assertThat(mMessages.size()).isEqualTo(expected);
                 return mMessages.toArray(new TestArg[expected]);
             }
         }
@@ -114,7 +117,7 @@ public class AnrTimerTest {
     /**
      * Force AnrTimer to use the test parameter for the feature flag.
      */
-    class TestInjector extends AnrTimer.Injector {
+    private class TestInjector extends AnrTimer.Injector {
         @Override
         boolean anrTimerServiceEnabled() {
             return mEnabled;
@@ -124,9 +127,9 @@ public class AnrTimerTest {
     /**
      * An instrumented AnrTimer.
      */
-    private static class TestAnrTimer extends AnrTimer<TestArg> {
+    private class TestAnrTimer extends AnrTimer<TestArg> {
         private TestAnrTimer(Handler h, int key, String tag) {
-            super(h, key, tag);
+            super(h, key, tag, false, new TestInjector());
         }
 
         TestAnrTimer(Helper helper) {
@@ -144,13 +147,13 @@ public class AnrTimerTest {
             final int n = 4;
             StackTraceElement[] stack = Thread.currentThread().getStackTrace();
             if (stack.length < n+1) return "test";
-            return stack[n].getMethodName();
+            return stack[n].getClassName() + "." + stack[n].getMethodName();
         }
     }
 
     void validate(TestArg expected, TestArg actual) {
-        assertEquals(expected, actual);
-        assertEquals(actual.what, MSG_TIMEOUT);
+        assertThat(actual).isEqualTo(expected);
+        assertThat(actual.what).isEqualTo(MSG_TIMEOUT);
     }
 
     @Parameters(name = "featureEnabled={0}")
@@ -173,35 +176,103 @@ public class AnrTimerTest {
     @Test
     public void testSimpleTimeout() throws Exception {
         Helper helper = new Helper(1);
-        TestAnrTimer timer = new TestAnrTimer(helper);
-        TestArg t = new TestArg(1, 1);
-        timer.start(t, 10);
-        // Delivery is immediate but occurs on a different thread.
-        assertTrue(helper.await(5000));
-        TestArg[] result = helper.messages(1);
-        validate(t, result[0]);
+        try (TestAnrTimer timer = new TestAnrTimer(helper)) {
+            // One-time check that the injector is working as expected.
+            assertThat(mEnabled).isEqualTo(timer.serviceEnabled());
+            TestArg t = new TestArg(1, 1);
+            timer.start(t, 10);
+            // Delivery is immediate but occurs on a different thread.
+            assertThat(helper.await(5000)).isTrue();
+            TestArg[] result = helper.messages(1);
+            validate(t, result[0]);
+        }
     }
 
     /**
-     * Verify that if three timers are scheduled, they are delivered in time order.
+     * Verify that a restarted timer is delivered exactly once.  The initial timer value is very
+     * large, to ensure it does not expire before the timer can be restarted.
+     */
+    @Test
+    public void testTimerRestart() throws Exception {
+        Helper helper = new Helper(1);
+        try (TestAnrTimer timer = new TestAnrTimer(helper)) {
+            TestArg t = new TestArg(1, 1);
+            timer.start(t, 10000);
+            // Briefly pause.
+            assertThat(helper.await(10)).isFalse();
+            timer.start(t, 10);
+            // Delivery is immediate but occurs on a different thread.
+            assertThat(helper.await(5000)).isTrue();
+            TestArg[] result = helper.messages(1);
+            validate(t, result[0]);
+        }
+    }
+
+    /**
+     * Verify that a restarted timer is delivered exactly once.  The initial timer value is very
+     * large, to ensure it does not expire before the timer can be restarted.
+     */
+    @Test
+    public void testTimerZero() throws Exception {
+        Helper helper = new Helper(1);
+        try (TestAnrTimer timer = new TestAnrTimer(helper)) {
+            TestArg t = new TestArg(1, 1);
+            timer.start(t, 0);
+            // Delivery is immediate but occurs on a different thread.
+            assertThat(helper.await(5000)).isTrue();
+            TestArg[] result = helper.messages(1);
+            validate(t, result[0]);
+        }
+    }
+
+    /**
+     * Verify that if three timers are scheduled on a single AnrTimer, they are delivered in time
+     * order.
      */
     @Test
     public void testMultipleTimers() throws Exception {
         // Expect three messages.
         Helper helper = new Helper(3);
-        TestAnrTimer timer = new TestAnrTimer(helper);
         TestArg t1 = new TestArg(1, 1);
         TestArg t2 = new TestArg(1, 2);
         TestArg t3 = new TestArg(1, 3);
-        timer.start(t1, 50);
-        timer.start(t2, 60);
-        timer.start(t3, 40);
-        // Delivery is immediate but occurs on a different thread.
-        assertTrue(helper.await(5000));
-        TestArg[] result = helper.messages(3);
-        validate(t3, result[0]);
-        validate(t1, result[1]);
-        validate(t2, result[2]);
+        try (TestAnrTimer timer = new TestAnrTimer(helper)) {
+            timer.start(t1, 50);
+            timer.start(t2, 60);
+            timer.start(t3, 40);
+            // Delivery is immediate but occurs on a different thread.
+            assertThat(helper.await(5000)).isTrue();
+            TestArg[] result = helper.messages(3);
+            validate(t3, result[0]);
+            validate(t1, result[1]);
+            validate(t2, result[2]);
+        }
+    }
+
+    /**
+     * Verify that if three timers are scheduled on three separate AnrTimers, they are delivered
+     * in time order.
+     */
+    @Test
+    public void testMultipleServices() throws Exception {
+        // Expect three messages.
+        Helper helper = new Helper(3);
+        TestArg t1 = new TestArg(1, 1);
+        TestArg t2 = new TestArg(1, 2);
+        TestArg t3 = new TestArg(1, 3);
+        try (TestAnrTimer x1 = new TestAnrTimer(helper);
+             TestAnrTimer x2 = new TestAnrTimer(helper);
+             TestAnrTimer x3 = new TestAnrTimer(helper)) {
+            x1.start(t1, 50);
+            x2.start(t2, 60);
+            x3.start(t3, 40);
+            // Delivery is immediate but occurs on a different thread.
+            assertThat(helper.await(5000)).isTrue();
+            TestArg[] result = helper.messages(3);
+            validate(t3, result[0]);
+            validate(t1, result[1]);
+            validate(t2, result[2]);
+        }
     }
 
     /**
@@ -211,20 +282,120 @@ public class AnrTimerTest {
     public void testCancelTimer() throws Exception {
         // Expect two messages.
         Helper helper = new Helper(2);
-        TestAnrTimer timer = new TestAnrTimer(helper);
         TestArg t1 = new TestArg(1, 1);
         TestArg t2 = new TestArg(1, 2);
         TestArg t3 = new TestArg(1, 3);
-        timer.start(t1, 50);
-        timer.start(t2, 60);
-        timer.start(t3, 40);
-        // Briefly pause.
-        assertFalse(helper.await(10));
-        timer.cancel(t1);
-        // Delivery is immediate but occurs on a different thread.
-        assertTrue(helper.await(5000));
-        TestArg[] result = helper.messages(2);
-        validate(t3, result[0]);
-        validate(t2, result[1]);
+        try (TestAnrTimer timer = new TestAnrTimer(helper)) {
+            timer.start(t1, 50);
+            timer.start(t2, 60);
+            timer.start(t3, 40);
+            // Briefly pause.
+            assertThat(helper.await(10)).isFalse();
+            timer.cancel(t1);
+            // Delivery is immediate but occurs on a different thread.
+            assertThat(helper.await(5000)).isTrue();
+            TestArg[] result = helper.messages(2);
+            validate(t3, result[0]);
+            validate(t2, result[1]);
+        }
+    }
+
+    /**
+     * Return the dump string.
+     */
+    private String getDumpOutput() {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        AnrTimer.dump(pw, true, new TestInjector());
+        pw.close();
+        return sw.getBuffer().toString();
+    }
+
+    /**
+     * Verify the dump output.  This only applies when native timers are supported.
+     */
+    @Test
+    public void testDumpOutput() throws Exception {
+        if (!AnrTimer.nativeTimersSupported()) return;
+
+        // The timers in this class are named "class.method".
+        final String timerName = "timer: com.android.server.utils.AnrTimerTest";
+
+        String r1 = getDumpOutput();
+        assertThat(r1).doesNotContain(timerName);
+
+        Helper helper = new Helper(2);
+        TestArg t1 = new TestArg(1, 1);
+        TestArg t2 = new TestArg(1, 2);
+        TestArg t3 = new TestArg(1, 3);
+        try (TestAnrTimer timer = new TestAnrTimer(helper)) {
+            timer.start(t1, 5000);
+            timer.start(t2, 5000);
+            timer.start(t3, 5000);
+
+            String r2 = getDumpOutput();
+            // There are timers in the list if and only if the feature is enabled.
+            if (mEnabled) {
+                assertThat(r2).contains(timerName);
+            } else {
+                assertThat(r2).doesNotContain(timerName);
+            }
+        }
+
+        String r3 = getDumpOutput();
+        assertThat(r3).doesNotContain(timerName);
+    }
+
+    /**
+     * Verify that GC works as expected.  This test will almost certainly be flaky, since it
+     * relies on the finalizers running, which is a best-effort on the part of the JVM.
+     * Therefore, the test is marked @Ignore.  Remove that annotation to run the test locally.
+     */
+    @Ignore
+    @Test
+    public void testGarbageCollection() throws Exception {
+        if (!mEnabled) return;
+
+        String r1 = getDumpOutput();
+        assertThat(r1).doesNotContain("timer:");
+
+        Helper helper = new Helper(2);
+        TestArg t1 = new TestArg(1, 1);
+        TestArg t2 = new TestArg(1, 2);
+        TestArg t3 = new TestArg(1, 3);
+        // The timer is explicitly not closed.  It is, however, scoped to the next block.
+        {
+            TestAnrTimer timer = new TestAnrTimer(helper);
+            timer.start(t1, 5000);
+            timer.start(t2, 5000);
+            timer.start(t3, 5000);
+
+            String r2 = getDumpOutput();
+            // There are timers in the list if and only if the feature is enabled.
+            if (mEnabled) {
+              assertThat(r2).contains("timer:");
+            } else {
+              assertThat(r2).doesNotContain("timer:");
+            }
+        }
+
+        // Try to make finalizers run.  The timer object above should be a candidate.  Finalizers
+        // are run on their own thread, so pause this thread to give that thread some time.
+        String r3 = getDumpOutput();
+        for (int i = 0; i < 10 && r3.contains("timer:"); i++) {
+            Log.i(TAG, "requesting finalization " + i);
+            System.gc();
+            System.runFinalization();
+            Thread.sleep(4 * 1000);
+            r3 = getDumpOutput();
+        }
+
+        // The timer was not explicitly closed but it should have been implicitly closed by GC.
+        assertThat(r3).doesNotContain("timer:");
+    }
+
+    // TODO: [b/302724778] Remove manual JNI load
+    static {
+        System.loadLibrary("servicestestjni");
     }
 }

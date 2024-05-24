@@ -17,6 +17,7 @@
 package com.android.systemui.qs.pipeline.domain.autoaddable
 
 import android.content.pm.UserInfo
+import android.content.pm.UserInfo.FLAG_DISABLED
 import android.content.pm.UserInfo.FLAG_FULL
 import android.content.pm.UserInfo.FLAG_MANAGED_PROFILE
 import android.content.pm.UserInfo.FLAG_PRIMARY
@@ -73,14 +74,14 @@ class WorkTileAutoAddableTest : SysuiTestCase() {
     fun changeInProfiles_hasManagedProfile_sendsAddSignal() = runTest {
         val signal by collectLastValue(underTest.autoAddSignal(0))
 
-        userTracker.set(listOf(USER_INFO_0, USER_INFO_WORK), selectedUserIndex = 0)
+        userTracker.set(listOf(USER_INFO_0, USER_INFO_WORK_ENABLED), selectedUserIndex = 0)
 
         assertThat(signal).isEqualTo(AutoAddSignal.Add(SPEC))
     }
 
     @Test
     fun changeInProfiles_noManagedProfile_sendsRemoveSignal() = runTest {
-        userTracker.set(listOf(USER_INFO_0, USER_INFO_WORK), selectedUserIndex = 0)
+        userTracker.set(listOf(USER_INFO_0, USER_INFO_WORK_ENABLED), selectedUserIndex = 0)
 
         val signal by collectLastValue(underTest.autoAddSignal(0))
 
@@ -90,8 +91,17 @@ class WorkTileAutoAddableTest : SysuiTestCase() {
     }
 
     @Test
+    fun changeInProfile_hasDisabledManagedProfile_noAddSignal() = runTest {
+        val signal by collectLastValue(underTest.autoAddSignal(0))
+
+        userTracker.set(listOf(USER_INFO_0, USER_INFO_WORK_DISABLED), selectedUserIndex = 0)
+
+        assertThat(signal).isNotInstanceOf(AutoAddSignal.Add::class.java)
+    }
+
+    @Test
     fun startingWithManagedProfile_sendsAddSignal() = runTest {
-        userTracker.set(listOf(USER_INFO_0, USER_INFO_WORK), selectedUserIndex = 0)
+        userTracker.set(listOf(USER_INFO_0, USER_INFO_WORK_ENABLED), selectedUserIndex = 0)
 
         val signal by collectLastValue(underTest.autoAddSignal(0))
 
@@ -102,14 +112,14 @@ class WorkTileAutoAddableTest : SysuiTestCase() {
     fun userChangeToUserWithProfile_noSignalForOriginalUser() = runTest {
         val signal by collectLastValue(underTest.autoAddSignal(0))
 
-        userTracker.set(listOf(USER_INFO_1, USER_INFO_WORK), selectedUserIndex = 0)
+        userTracker.set(listOf(USER_INFO_1, USER_INFO_WORK_ENABLED), selectedUserIndex = 0)
 
         assertThat(signal).isNotEqualTo(AutoAddSignal.Add(SPEC))
     }
 
     @Test
     fun userChangeToUserWithoutProfile_noSignalForOriginalUser() = runTest {
-        userTracker.set(listOf(USER_INFO_0, USER_INFO_WORK), selectedUserIndex = 0)
+        userTracker.set(listOf(USER_INFO_0, USER_INFO_WORK_ENABLED), selectedUserIndex = 0)
         val signal by collectLastValue(underTest.autoAddSignal(0))
 
         userTracker.set(listOf(USER_INFO_1), selectedUserIndex = 0)
@@ -137,7 +147,7 @@ class WorkTileAutoAddableTest : SysuiTestCase() {
 
     @Test
     fun restoreDataWithWorkTile_currentlyManagedProfile_doesntTriggerRemove() = runTest {
-        userTracker.set(listOf(USER_INFO_0, USER_INFO_WORK), selectedUserIndex = 0)
+        userTracker.set(listOf(USER_INFO_0, USER_INFO_WORK_ENABLED), selectedUserIndex = 0)
         val userId = 0
         val signals by collectValues(underTest.autoAddSignal(userId))
         runCurrent()
@@ -164,7 +174,7 @@ class WorkTileAutoAddableTest : SysuiTestCase() {
 
     @Test
     fun restoreDataWithoutWorkTile_managedProfile_doesntTriggerRemove() = runTest {
-        userTracker.set(listOf(USER_INFO_0, USER_INFO_WORK), selectedUserIndex = 0)
+        userTracker.set(listOf(USER_INFO_0, USER_INFO_WORK_ENABLED), selectedUserIndex = 0)
         val userId = 0
         val signals by collectValues(underTest.autoAddSignal(userId))
         runCurrent()
@@ -180,7 +190,9 @@ class WorkTileAutoAddableTest : SysuiTestCase() {
         private val SPEC = TileSpec.create(WorkModeTile.TILE_SPEC)
         private val USER_INFO_0 = UserInfo(0, "", FLAG_PRIMARY or FLAG_FULL)
         private val USER_INFO_1 = UserInfo(1, "", FLAG_FULL)
-        private val USER_INFO_WORK = UserInfo(10, "", FLAG_PROFILE or FLAG_MANAGED_PROFILE)
+        private val USER_INFO_WORK_DISABLED =
+            UserInfo(10, "", FLAG_PROFILE or FLAG_MANAGED_PROFILE or FLAG_DISABLED)
+        private val USER_INFO_WORK_ENABLED = UserInfo(10, "", FLAG_PROFILE or FLAG_MANAGED_PROFILE)
 
         private fun createRestoreWithWorkTile(userId: Int): RestoreData {
             return RestoreData(

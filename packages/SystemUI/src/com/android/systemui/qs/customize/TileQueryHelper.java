@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
@@ -33,7 +32,6 @@ import android.widget.Button;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.qs.QSTile;
@@ -42,8 +40,8 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.util.leak.GarbageMonitor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -113,9 +111,6 @@ public class TileQueryHelper {
             if (!current.contains(spec)) {
                 possibleTiles.add(spec);
             }
-        }
-        if (Build.IS_DEBUGGABLE && !current.contains(GarbageMonitor.MemoryTile.TILE_SPEC)) {
-            possibleTiles.add(GarbageMonitor.MemoryTile.TILE_SPEC);
         }
 
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
@@ -264,7 +259,11 @@ public class TileQueryHelper {
     private State getState(Collection<QSTile> tiles, String spec) {
         for (QSTile tile : tiles) {
             if (spec.equals(tile.getTileSpec())) {
-                return tile.getState().copy();
+                if (tile.isTileReady()) {
+                    return tile.getState().copy();
+                } else {
+                    return null;
+                }
             }
         }
         return null;

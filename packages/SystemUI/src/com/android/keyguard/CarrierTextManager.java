@@ -17,9 +17,9 @@
 package com.android.keyguard;
 
 import static com.android.keyguard.logging.CarrierTextManagerLogger.REASON_ACTIVE_DATA_SUB_CHANGED;
-import static com.android.keyguard.logging.CarrierTextManagerLogger.REASON_ON_SIM_STATE_CHANGED;
 import static com.android.keyguard.logging.CarrierTextManagerLogger.REASON_ON_TELEPHONY_CAPABLE;
 import static com.android.keyguard.logging.CarrierTextManagerLogger.REASON_REFRESH_CARRIER_INFO;
+import static com.android.keyguard.logging.CarrierTextManagerLogger.REASON_SIM_ERROR_STATE_CHANGED;
 
 import android.content.Context;
 import android.content.Intent;
@@ -123,12 +123,15 @@ public class CarrierTextManager {
                 return;
             }
 
-            mLogger.logUpdateCarrierTextForReason(REASON_ON_SIM_STATE_CHANGED);
+
+            mLogger.logSimStateChangedCallback(subId, slotId, simState);
             if (getStatusForIccState(simState) == CarrierTextManager.StatusMode.SimIoError) {
                 mSimErrorState[slotId] = true;
+                mLogger.logUpdateCarrierTextForReason(REASON_SIM_ERROR_STATE_CHANGED);
                 updateCarrierText();
             } else if (mSimErrorState[slotId]) {
                 mSimErrorState[slotId] = false;
+                mLogger.logUpdateCarrierTextForReason(REASON_SIM_ERROR_STATE_CHANGED);
                 updateCarrierText();
             }
         }
@@ -206,6 +209,9 @@ public class CarrierTextManager {
                 // This will set/remove the listeners appropriately. Note that it will never double
                 // add the listeners.
                 handleSetListening(mCarrierTextCallback);
+                mainExecutor.execute(() -> {
+                    mKeyguardUpdateMonitor.registerCallback(mCallback);
+                });
             }
         });
     }
@@ -273,7 +279,6 @@ public class CarrierTextManager {
             if (mNetworkSupported.get()) {
                 // Keyguard update monitor expects callbacks from main thread
                 mMainExecutor.execute(() -> {
-                    mKeyguardUpdateMonitor.registerCallback(mCallback);
                     mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
                 });
                 mTelephonyListenerManager.addActiveDataSubscriptionIdListener(mPhoneStateListener);
@@ -286,7 +291,6 @@ public class CarrierTextManager {
         } else {
             mCarrierTextCallback = null;
             mMainExecutor.execute(() -> {
-                mKeyguardUpdateMonitor.removeCallback(mCallback);
                 mWakefulnessLifecycle.removeObserver(mWakefulnessObserver);
             });
             mTelephonyListenerManager.removeActiveDataSubscriptionIdListener(mPhoneStateListener);

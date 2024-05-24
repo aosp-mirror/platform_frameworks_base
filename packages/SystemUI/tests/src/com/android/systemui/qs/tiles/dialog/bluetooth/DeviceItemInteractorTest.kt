@@ -279,6 +279,7 @@ class DeviceItemInteractorTest : SysuiTestCase() {
     ): DeviceItemFactory {
         return object : DeviceItemFactory() {
             override fun isFilterMatched(
+                context: Context,
                 cachedDevice: CachedBluetoothDevice,
                 audioManager: AudioManager?
             ) = isFilterMatchFunc(cachedDevice)

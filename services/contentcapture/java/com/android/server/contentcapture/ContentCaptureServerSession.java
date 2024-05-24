@@ -35,8 +35,8 @@ import android.service.contentcapture.SnapshotData;
 import android.util.LocalLog;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
+import android.view.contentcapture.ContentCaptureSession;
 import android.view.contentcapture.ContentCaptureSessionId;
-import android.view.contentcapture.MainContentCaptureSession;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
@@ -123,7 +123,7 @@ final class ContentCaptureServerSession {
     public void setContentCaptureEnabledLocked(boolean enabled) {
         try {
             final Bundle extras = new Bundle();
-            extras.putBoolean(MainContentCaptureSession.EXTRA_ENABLED_STATE, true);
+            extras.putBoolean(ContentCaptureSession.EXTRA_ENABLED_STATE, true);
             mSessionStateReceiver.send(enabled ? RESULT_CODE_TRUE : RESULT_CODE_FALSE, extras);
         } catch (RemoteException e) {
             Slog.w(TAG, "Error async reporting result to client: " + e);

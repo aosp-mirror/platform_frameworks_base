@@ -19,10 +19,12 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
@@ -41,6 +43,7 @@ import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -50,9 +53,38 @@ import org.junit.runner.RunWith
 class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
-    private val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
-    private val underTest = kosmos.dreamingToLockscreenTransitionViewModel
+    private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
+    private lateinit var fingerprintPropertyRepository: FakeFingerprintPropertyRepository
+    private lateinit var underTest: DreamingToLockscreenTransitionViewModel
+
+    @Before
+    fun setUp() {
+        keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+        fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
+        underTest = kosmos.dreamingToLockscreenTransitionViewModel
+    }
+
+    @Test
+    fun shortcutsAlpha_bothShortcutsReceiveLastValue() =
+        testScope.runTest {
+            val valuesLeft by collectValues(underTest.shortcutsAlpha)
+            val valuesRight by collectValues(underTest.shortcutsAlpha)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                listOf(
+                    step(0f, TransitionState.STARTED),
+                    step(0.3f),
+                    step(0.5f),
+                    step(0.6f),
+                    step(0.8f),
+                    step(1f),
+                ),
+                testScope,
+            )
+
+            assertThat(valuesLeft.last()).isEqualTo(1f)
+            assertThat(valuesRight.last()).isEqualTo(1f)
+        }
 
     @Test
     fun dreamOverlayTranslationY() =
@@ -166,33 +198,6 @@ class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
 
             values.forEach { assertThat(it).isEqualTo(1f) }
         }
-
-    @Test
-    fun deviceEntryBackground_noUdfps_noUpdates() =
-        testScope.runTest {
-            fingerprintPropertyRepository.setProperties(
-                sensorId = 0,
-                strength = SensorStrength.STRONG,
-                sensorType = FingerprintSensorType.REAR,
-                sensorLocations = emptyMap(),
-            )
-            val values by collectValues(underTest.deviceEntryBackgroundViewAlpha)
-
-            keyguardTransitionRepository.sendTransitionSteps(
-                listOf(
-                    step(0f, TransitionState.STARTED),
-                    step(0f),
-                    step(0.1f),
-                    step(0.2f),
-                    step(0.3f),
-                    step(1f),
-                ),
-                testScope,
-            )
-
-            assertThat(values.size).isEqualTo(0) // no updates
-        }
-
     @Test
     fun lockscreenTranslationY() =
         testScope.runTest {

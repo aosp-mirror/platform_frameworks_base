@@ -19,7 +19,7 @@ package android.media.projection;
 import static android.Manifest.permission.MANAGE_MEDIA_PROJECTION;
 
 import android.annotation.EnforcePermission;
-import android.os.IBinder;
+import android.app.ActivityOptions.LaunchCookie;
 import android.os.PermissionEnforcer;
 import android.os.RemoteException;
 
@@ -29,7 +29,7 @@ import android.os.RemoteException;
  */
 public final class FakeIMediaProjection extends IMediaProjection.Stub {
     boolean mIsStarted = false;
-    IBinder mLaunchCookie = null;
+    LaunchCookie mLaunchCookie = null;
     IMediaProjectionCallback mIMediaProjectionCallback = null;
 
     FakeIMediaProjection(PermissionEnforcer enforcer) {
@@ -80,14 +80,14 @@ public final class FakeIMediaProjection extends IMediaProjection.Stub {
 
     @Override
     @EnforcePermission(MANAGE_MEDIA_PROJECTION)
-    public IBinder getLaunchCookie() throws RemoteException {
+    public LaunchCookie getLaunchCookie() throws RemoteException {
         getLaunchCookie_enforcePermission();
         return mLaunchCookie;
     }
 
     @Override
     @EnforcePermission(MANAGE_MEDIA_PROJECTION)
-    public void setLaunchCookie(IBinder launchCookie) throws RemoteException {
+    public void setLaunchCookie(LaunchCookie launchCookie) throws RemoteException {
         setLaunchCookie_enforcePermission();
         mLaunchCookie = launchCookie;
     }

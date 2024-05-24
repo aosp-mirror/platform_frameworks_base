@@ -110,6 +110,7 @@ public class TvPipBoundsState extends PipBoundsState {
 
     @Override
     public void onConfigurationChanged() {
+        super.onConfigurationChanged();
         updateDefaultGravity();
     }
 

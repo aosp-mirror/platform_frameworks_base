@@ -44,7 +44,6 @@ import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.FastPrintWriter;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
@@ -210,7 +209,7 @@ class RemoteAnimationController implements DeathRecipient {
                 Slog.e(TAG, "Failed to start remote animation", e);
                 onAnimationFinished();
             }
-            if (ProtoLogImpl.isEnabled(WM_DEBUG_REMOTE_ANIMATIONS)) {
+            if (ProtoLog.isEnabled(WM_DEBUG_REMOTE_ANIMATIONS)) {
                 ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "startAnimation(): Notify animation start:");
                 writeStartDebugStatement();
             }

@@ -20,7 +20,9 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
@@ -69,6 +71,8 @@ public final class RequestProcessor {
          *                  regular request, or the timestamp at the input
          *                  image's start of capture for a
          *                  reprocess request, in nanoseconds.
+         *                  The timestamp matches with and uses the same
+         *                  time base as {@link CaptureResult#SENSOR_TIMESTAMP}.
          * @param frameNumber the frame number for this capture
          *
          */
@@ -225,11 +229,12 @@ public final class RequestProcessor {
     public final static class Request {
         private final List<Integer> mOutputIds;
         private final List<Pair<CaptureRequest.Key, Object>> mParameters;
-        private final int mTemplateId;
+        private final @CameraDevice.RequestTemplate int mTemplateId;
 
         @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         public Request(@NonNull List<Integer> outputConfigIds,
-                @NonNull List<Pair<CaptureRequest.Key, Object>> parameters, int templateId) {
+                @NonNull List<Pair<CaptureRequest.Key, Object>> parameters,
+                @CameraDevice.RequestTemplate int templateId) {
             mOutputIds = outputConfigIds;
             mParameters = parameters;
             mTemplateId = templateId;
@@ -255,7 +260,10 @@ public final class RequestProcessor {
         }
 
         /**
-         * Gets the template id.
+         * Gets the request {@link android.hardware.camera2.CameraDevice.RequestTemplate template}
+         * id.
+         *
+         * @see CameraDevice.RequestTemplate
          */
         @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         Integer getTemplateId() {
@@ -310,26 +318,32 @@ public final class RequestProcessor {
      * Submit a capture request.
      * @param request  Capture request to queued in the Camera2 session
      * @param executor the executor which will be used for
-     *                 invoking the callbacks or null to use the
-     *                 current thread's looper
+     *                 invoking the callbacks
      * @param callback Request callback implementation
-     * @return the id of the capture sequence or -1 in case the processor
-     *         encounters a fatal error or receives an invalid argument.
+     * @return the id of the capture sequence
      */
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
-    public int submit(@NonNull Request request, @Nullable Executor executor,
-            @NonNull RequestCallback callback) {
+    public int submit(@NonNull Request request, @NonNull Executor executor,
+            @NonNull RequestCallback callback) throws CameraAccessException {
         ArrayList<Request> requests = new ArrayList<>(1);
         requests.add(0, request);
         List<android.hardware.camera2.extension.Request> parcelableRequests =
                 Request.initializeParcelable(mVendorId, requests);
 
+        int ret = -1;
         try {
-            return mRequestProcessor.submit(parcelableRequests.get(0),
+            ret = mRequestProcessor.submit(parcelableRequests.get(0),
                     new RequestCallbackImpl(requests, callback, executor));
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
+
+        if (ret == -1) {
+            throw new CameraAccessException(CameraAccessException.CAMERA_ERROR,
+                    "Failed to submit capture request");
+        }
+
+        return ret;
     }
 
     /**
@@ -337,24 +351,30 @@ public final class RequestProcessor {
      * @param requests List of capture requests to be queued in the
      *                 Camera2 session
      * @param executor the executor which will be used for
-     *                 invoking the callbacks or null to use the
-     *                 current thread's looper
+     *                 invoking the callbacks
      * @param callback Request callback implementation
-     * @return the id of the capture sequence or -1 in case the processor
-     *         encounters a fatal error or receives an invalid argument.
+     * @return the id of the capture sequence
      */
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
-    public int submitBurst(@NonNull List<Request> requests, @Nullable Executor executor,
-            @NonNull RequestCallback callback) {
+    public int submitBurst(@NonNull List<Request> requests, @NonNull Executor executor,
+            @NonNull RequestCallback callback) throws CameraAccessException {
         List<android.hardware.camera2.extension.Request> parcelableRequests =
                 Request.initializeParcelable(mVendorId, requests);
 
+        int ret = -1;
         try {
-            return mRequestProcessor.submitBurst(parcelableRequests,
+            ret = mRequestProcessor.submitBurst(parcelableRequests,
                     new RequestCallbackImpl(requests, callback, executor));
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
+
+        if (ret == -1) {
+            throw new CameraAccessException(CameraAccessException.CAMERA_ERROR,
+                    "Failed to submit burst request");
+        }
+
+        return ret;
     }
 
     /**
@@ -362,26 +382,32 @@ public final class RequestProcessor {
      * @param request  Repeating capture request to be se in the
      *                 Camera2 session
      * @param executor the executor which will be used for
-     *                 invoking the callbacks or null to use the
-     *                 current thread's looper
+     *                 invoking the callbacks
      * @param callback Request callback implementation
-     * @return the id of the capture sequence or -1 in case the processor
-     *         encounters a fatal error or receives an invalid argument.
+     * @return the id of the capture sequence
      */
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
-    public int setRepeating(@NonNull Request request, @Nullable Executor executor,
-            @NonNull RequestCallback callback) {
+    public int setRepeating(@NonNull Request request, @NonNull Executor executor,
+            @NonNull RequestCallback callback) throws CameraAccessException {
         ArrayList<Request> requests = new ArrayList<>(1);
         requests.add(0, request);
         List<android.hardware.camera2.extension.Request> parcelableRequests =
                 Request.initializeParcelable(mVendorId, requests);
 
+        int ret = -1;
         try {
-            return mRequestProcessor.setRepeating(parcelableRequests.get(0),
+            ret = mRequestProcessor.setRepeating(parcelableRequests.get(0),
                     new RequestCallbackImpl(requests, callback, executor));
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
+        if (ret == -1) {
+            throw new CameraAccessException(CameraAccessException.CAMERA_ERROR,
+                    "Failed to set the repeating request");
+
+        }
+
+        return ret;
     }
 
     /**
@@ -414,7 +440,7 @@ public final class RequestProcessor {
         private final Executor mExecutor;
 
         public RequestCallbackImpl(@NonNull List<Request> requests,
-                @NonNull RequestCallback callback, @Nullable Executor executor) {
+                @NonNull RequestCallback callback, @NonNull Executor executor) {
             mCallback = callback;
             mRequests = requests;
             mExecutor = executor;
@@ -425,13 +451,8 @@ public final class RequestProcessor {
             if (mRequests.get(requestId) != null) {
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    if (mExecutor != null) {
-                        mExecutor.execute(() -> mCallback.onCaptureStarted(
-                                mRequests.get(requestId), frameNumber, timestamp));
-                    } else {
-                        mCallback.onCaptureStarted(mRequests.get(requestId), frameNumber,
-                                timestamp);
-                    }
+                    mExecutor.execute(() -> mCallback.onCaptureStarted(
+                            mRequests.get(requestId), frameNumber, timestamp));
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -448,14 +469,9 @@ public final class RequestProcessor {
                         partialResult.frameNumber);
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    if (mExecutor != null) {
-                        mExecutor.execute(
-                                () -> mCallback.onCaptureProgressed(mRequests.get(requestId),
-                                        result));
-                    } else {
-                        mCallback.onCaptureProgressed(mRequests.get(requestId), result);
-                    }
-
+                    mExecutor.execute(
+                            () -> mCallback.onCaptureProgressed(mRequests.get(requestId),
+                                    result));
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -489,13 +505,9 @@ public final class RequestProcessor {
                         physicalResults);
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    if (mExecutor != null) {
-                        mExecutor.execute(
-                                () -> mCallback.onCaptureCompleted(mRequests.get(requestId),
-                                        result));
-                    } else {
-                        mCallback.onCaptureCompleted(mRequests.get(requestId), result);
-                    }
+                    mExecutor.execute(
+                            () -> mCallback.onCaptureCompleted(mRequests.get(requestId),
+                                    result));
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -515,12 +527,8 @@ public final class RequestProcessor {
                                 captureFailure.errorPhysicalCameraId);
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    if (mExecutor != null) {
-                        mExecutor.execute(() -> mCallback.onCaptureFailed(mRequests.get(requestId),
-                                failure));
-                    } else {
-                        mCallback.onCaptureFailed(mRequests.get(requestId), failure);
-                    }
+                    mExecutor.execute(() -> mCallback.onCaptureFailed(mRequests.get(requestId),
+                            failure));
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -534,14 +542,9 @@ public final class RequestProcessor {
             if (mRequests.get(requestId) != null) {
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    if (mExecutor != null) {
-                        mExecutor.execute(
-                                () -> mCallback.onCaptureBufferLost(mRequests.get(requestId),
-                                        frameNumber, outputStreamId));
-                    } else {
-                        mCallback.onCaptureBufferLost(mRequests.get(requestId), frameNumber,
-                                outputStreamId);
-                    }
+                    mExecutor.execute(
+                            () -> mCallback.onCaptureBufferLost(mRequests.get(requestId),
+                                    frameNumber, outputStreamId));
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -554,12 +557,8 @@ public final class RequestProcessor {
         public void onCaptureSequenceCompleted(int sequenceId, long frameNumber) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                if (mExecutor != null) {
-                    mExecutor.execute(() -> mCallback.onCaptureSequenceCompleted(sequenceId,
-                            frameNumber));
-                } else {
-                    mCallback.onCaptureSequenceCompleted(sequenceId, frameNumber);
-                }
+                mExecutor.execute(() -> mCallback.onCaptureSequenceCompleted(sequenceId,
+                        frameNumber));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -569,11 +568,7 @@ public final class RequestProcessor {
         public void onCaptureSequenceAborted(int sequenceId) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                if (mExecutor != null) {
-                    mExecutor.execute(() -> mCallback.onCaptureSequenceAborted(sequenceId));
-                } else {
-                    mCallback.onCaptureSequenceAborted(sequenceId);
-                }
+                mExecutor.execute(() -> mCallback.onCaptureSequenceAborted(sequenceId));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

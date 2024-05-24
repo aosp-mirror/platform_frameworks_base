@@ -19,6 +19,7 @@ package com.android.keyguard.mediator
 import android.annotation.BinderThread
 import android.os.Handler
 import android.os.Trace
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.unfold.SysUIUnfoldComponent
@@ -28,26 +29,28 @@ import java.util.Optional
 import javax.inject.Inject
 
 /**
- * Coordinates screen on/turning on animations for the KeyguardViewMediator. Specifically for
- * screen on events, this will invoke the onDrawn Runnable after all tasks have completed. This
- * should route back to the [com.android.systemui.keyguard.KeyguardService], which informs
- * the system_server that keyguard has drawn.
+ * Coordinates screen on/turning on animations for the KeyguardViewMediator. Specifically for screen
+ * on events, this will invoke the onDrawn Runnable after all tasks have completed. This should
+ * route back to the [com.android.systemui.keyguard.KeyguardService], which informs the
+ * system_server that keyguard has drawn.
  */
 @SysUISingleton
-class ScreenOnCoordinator @Inject constructor(
+class ScreenOnCoordinator
+@Inject
+constructor(
     unfoldComponent: Optional<SysUIUnfoldComponent>,
-    @Main private val mainHandler: Handler
+    @Main private val mainHandler: Handler,
 ) {
 
-    private val unfoldLightRevealAnimation = unfoldComponent.map(
-        SysUIUnfoldComponent::getUnfoldLightRevealOverlayAnimation).getOrNull()
-    private val foldAodAnimationController = unfoldComponent.map(
-        SysUIUnfoldComponent::getFoldAodAnimationController).getOrNull()
+    private val foldAodAnimationController =
+        unfoldComponent.map(SysUIUnfoldComponent::getFoldAodAnimationController).getOrNull()
+    private val fullScreenLightRevealAnimations =
+        unfoldComponent.map(SysUIUnfoldComponent::getFullScreenLightRevealAnimations).getOrNull()
     private val pendingTasks = PendingTasksContainer()
 
     /**
-     * When turning on, registers tasks that may need to run before invoking [onDrawn].
-     * This is called on a binder thread from [com.android.systemui.keyguard.KeyguardService].
+     * When turning on, registers tasks that may need to run before invoking [onDrawn]. This is
+     * called on a binder thread from [com.android.systemui.keyguard.KeyguardService].
      */
     @BinderThread
     fun onScreenTurningOn(onDrawn: Runnable) {
@@ -55,20 +58,25 @@ class ScreenOnCoordinator @Inject constructor(
 
         pendingTasks.reset()
 
-        unfoldLightRevealAnimation?.onScreenTurningOn(pendingTasks.registerTask("unfold-reveal"))
         foldAodAnimationController?.onScreenTurningOn(pendingTasks.registerTask("fold-to-aod"))
+        fullScreenLightRevealAnimations?.forEach {
+            it.onScreenTurningOn(pendingTasks.registerTask(it::class.java.simpleName))
+        }
 
         pendingTasks.onTasksComplete {
-            mainHandler.post {
+            if (Flags.enableBackgroundKeyguardOndrawnCallback()) {
+                // called by whatever thread completes the last task registered.
                 onDrawn.run()
+            } else {
+                mainHandler.post { onDrawn.run() }
             }
         }
         Trace.endSection()
     }
 
     /**
-     * Called when screen is fully turned on and screen on blocker is removed.
-     * This is called on a binder thread from [com.android.systemui.keyguard.KeyguardService].
+     * Called when screen is fully turned on and screen on blocker is removed. This is called on a
+     * binder thread from [com.android.systemui.keyguard.KeyguardService].
      */
     @BinderThread
     fun onScreenTurnedOn() {

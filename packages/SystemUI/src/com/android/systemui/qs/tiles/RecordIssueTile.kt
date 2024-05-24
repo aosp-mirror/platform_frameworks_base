@@ -17,6 +17,8 @@
 package com.android.systemui.qs.tiles
 
 import android.app.AlertDialog
+import android.app.BroadcastOptions
+import android.app.PendingIntent
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
@@ -29,7 +31,7 @@ import com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.Flags.recordIssueQsTile
 import com.android.systemui.animation.DialogCuj
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -40,10 +42,12 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.recordissue.IssueRecordingService
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
 import com.android.systemui.res.R
+import com.android.systemui.screenrecord.RecordingService
+import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
-import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
 
@@ -61,8 +65,9 @@ constructor(
     qsLogger: QSLogger,
     private val keyguardDismissUtil: KeyguardDismissUtil,
     private val keyguardStateController: KeyguardStateController,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
-    private val sysuiDialogFactory: SystemUIDialog.Factory,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
+    private val userContextProvider: UserContextProvider,
+    private val delegateFactory: RecordIssueDialogDelegate.Factory,
 ) :
     QSTileImpl<QSTile.BooleanState>(
         host,
@@ -80,7 +85,13 @@ constructor(
 
     override fun getTileLabel(): CharSequence = mContext.getString(R.string.qs_record_issue_label)
 
-    override fun isAvailable(): Boolean = recordIssueQsTile()
+    /**
+     * There are SELinux constraints that are stopping this tile from reaching production builds.
+     * Once those are resolved, this condition will be removed, but the solution (of properly
+     * creating a distince SELinux context for com.android.systemui) is complex and will take time
+     * to implement.
+     */
+    override fun isAvailable(): Boolean = android.os.Build.IS_DEBUGGABLE && recordIssueQsTile()
 
     override fun newTileState(): QSTile.BooleanState =
         QSTile.BooleanState().apply {
@@ -92,15 +103,26 @@ constructor(
     public override fun handleClick(view: View?) {
         if (isRecording) {
             isRecording = false
+            stopScreenRecord()
         } else {
             mUiHandler.post { showPrompt(view) }
         }
         refreshState()
     }
 
+    private fun stopScreenRecord() =
+        PendingIntent.getService(
+                userContextProvider.userContext,
+                RecordingService.REQUEST_CODE,
+                IssueRecordingService.getStopIntent(userContextProvider.userContext),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
+
     private fun showPrompt(view: View?) {
         val dialog: AlertDialog =
-            RecordIssueDialogDelegate(sysuiDialogFactory) {
+            delegateFactory
+                .create {
                     isRecording = true
                     refreshState()
                 }
@@ -110,7 +132,7 @@ constructor(
                 // We animate from the touched view only if we are not on the keyguard, given
                 // that if we are we will dismiss it which will also collapse the shade.
                 if (view != null && !keyguardStateController.isShowing) {
-                    dialogLaunchAnimator.showFromView(
+                    dialogTransitionAnimator.showFromView(
                         dialog,
                         view,
                         DialogCuj(CUJ_SHADE_DIALOG_OPEN, TILE_SPEC)

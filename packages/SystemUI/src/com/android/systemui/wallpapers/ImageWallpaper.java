@@ -210,7 +210,13 @@ public class ImageWallpaper extends WallpaperService {
             if (DEBUG) {
                 Log.i(TAG, "onSurfaceDestroyed");
             }
-            mSurfaceHolder = null;
+            mLongExecutor.execute(this::onSurfaceDestroyedSynchronized);
+        }
+
+        private void onSurfaceDestroyedSynchronized() {
+            synchronized (mLock) {
+                mSurfaceHolder = null;
+            }
         }
 
         @Override
@@ -241,7 +247,7 @@ public class ImageWallpaper extends WallpaperService {
 
         private void drawFrameInternal() {
             if (mSurfaceHolder == null) {
-                Log.e(TAG, "attempt to draw a frame without a valid surface");
+                Log.i(TAG, "attempt to draw a frame without a valid surface");
                 return;
             }
 
@@ -317,10 +323,11 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         private void loadWallpaperAndDrawFrameInternal() {
-            Trace.beginSection("ImageWallpaper.CanvasEngine#loadWallpaper");
+            Trace.beginSection("WPMS.ImageWallpaper.CanvasEngine#loadWallpaper");
             boolean loadSuccess = false;
             Bitmap bitmap;
             try {
+                Trace.beginSection("WPMS.getBitmapAsUser");
                 bitmap = mWallpaperManager.getBitmapAsUser(
                         mUserTracker.getUserId(), false, getSourceFlag(), true);
                 if (bitmap != null
@@ -333,15 +340,22 @@ public class ImageWallpaper extends WallpaperService {
                 // be loaded, we will go into a cycle. Don't do a build where the
                 // default wallpaper can't be loaded.
                 Log.w(TAG, "Unable to load wallpaper!", exception);
+                Trace.beginSection("WPMS.clearWallpaper");
                 mWallpaperManager.clearWallpaper(getWallpaperFlags(), mUserTracker.getUserId());
+                Trace.endSection();
 
                 try {
+                    Trace.beginSection("WPMS.getBitmapAsUser_defaultWallpaper");
                     bitmap = mWallpaperManager.getBitmapAsUser(
                             mUserTracker.getUserId(), false, getSourceFlag(), true);
                 } catch (RuntimeException | OutOfMemoryError e) {
                     Log.w(TAG, "Unable to load default wallpaper!", e);
                     bitmap = null;
+                } finally {
+                    Trace.endSection();
                 }
+            } finally {
+                Trace.endSection();
             }
 
             if (bitmap == null) {
@@ -355,15 +369,23 @@ public class ImageWallpaper extends WallpaperService {
                 loadSuccess = true;
                 // recycle the previously loaded bitmap
                 if (mBitmap != null) {
+                    Trace.beginSection("WPMS.mBitmap.recycle");
                     mBitmap.recycle();
+                    Trace.endSection();
                 }
                 mBitmap = bitmap;
+                Trace.beginSection("WPMS.wallpaperSupportsWcg");
                 mWideColorGamut = mWallpaperManager.wallpaperSupportsWcg(getSourceFlag());
+                Trace.endSection();
 
                 // +2 usages for the color extraction and the delayed unload.
                 mBitmapUsages += 2;
+                Trace.beginSection("WPMS.recomputeColorExtractorMiniBitmap");
                 recomputeColorExtractorMiniBitmap();
+                Trace.endSection();
+                Trace.beginSection("WPMS.drawFrameInternal");
                 drawFrameInternal();
+                Trace.endSection();
 
                 /*
                  * after loading, the bitmap will be unloaded after all these conditions:
@@ -454,10 +476,15 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onDisplayChanged(int displayId) {
-            // changes the display in the color extractor
-            // the new display dimensions will be used in the next color computation
-            if (displayId == getDisplayContext().getDisplayId()) {
-                getDisplaySizeAndUpdateColorExtractor();
+            Trace.beginSection("ImageWallpaper.CanvasEngine#onDisplayChanged");
+            try {
+                // changes the display in the color extractor
+                // the new display dimensions will be used in the next color computation
+                if (displayId == getDisplayContext().getDisplayId()) {
+                    getDisplaySizeAndUpdateColorExtractor();
+                }
+            } finally {
+                Trace.endSection();
             }
         }
 

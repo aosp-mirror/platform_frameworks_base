@@ -32,6 +32,7 @@ import java.util.Arrays;
  * @hide
  */
 @SystemApi
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class LogMaker {
     private static final String TAG = "LogBuilder";
 

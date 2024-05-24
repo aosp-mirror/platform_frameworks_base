@@ -26,6 +26,8 @@ import kotlinx.coroutines.flow.filterNotNull
 
 class FakeQSSceneAdapter(
     private val inflateDelegate: suspend (Context) -> View,
+    override val qqsHeight: Int = 0,
+    override val qsHeight: Int = 0,
 ) : QSSceneAdapter {
     private val _customizing = MutableStateFlow(false)
     override val isCustomizing: StateFlow<Boolean> = _customizing.asStateFlow()
@@ -35,6 +37,11 @@ class FakeQSSceneAdapter(
 
     private val _state = MutableStateFlow<QSSceneAdapter.State?>(null)
     val state = _state.filterNotNull()
+
+    private val _navBarPadding = MutableStateFlow<Int>(0)
+    val navBarPadding = _navBarPadding.asStateFlow()
+
+    override var isQsFullyCollapsed: Boolean = true
 
     override suspend fun inflate(context: Context) {
         _view.value = inflateDelegate(context)
@@ -48,5 +55,9 @@ class FakeQSSceneAdapter(
 
     fun setCustomizing(value: Boolean) {
         _customizing.value = value
+    }
+
+    override suspend fun applyBottomNavBarPadding(padding: Int) {
+        _navBarPadding.value = padding
     }
 }

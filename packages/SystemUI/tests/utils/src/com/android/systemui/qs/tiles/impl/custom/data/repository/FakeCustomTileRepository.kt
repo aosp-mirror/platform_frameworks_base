@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.Flow
 class FakeCustomTileRepository(
     tileSpec: TileSpec.CustomTileSpec,
     customTileStatePersister: FakeCustomTileStatePersister,
+    private val packageManagerAdapterFacade: FakePackageManagerAdapterFacade,
     testBackgroundContext: CoroutineContext,
 ) : CustomTileRepository {
 
@@ -34,8 +35,13 @@ class FakeCustomTileRepository(
         CustomTileRepositoryImpl(
             tileSpec,
             customTileStatePersister,
+            packageManagerAdapterFacade.packageManagerAdapter,
             testBackgroundContext,
         )
+
+    init {
+        require(tileSpec.componentName == packageManagerAdapterFacade.componentName)
+    }
 
     override suspend fun restoreForTheUserIfNeeded(user: UserHandle, isPersistable: Boolean) =
         realDelegate.restoreForTheUserIfNeeded(user, isPersistable)
@@ -43,6 +49,10 @@ class FakeCustomTileRepository(
     override fun getTiles(user: UserHandle): Flow<Tile> = realDelegate.getTiles(user)
 
     override fun getTile(user: UserHandle): Tile? = realDelegate.getTile(user)
+
+    override suspend fun isTileActive(): Boolean = realDelegate.isTileActive()
+
+    override suspend fun isTileToggleable(): Boolean = realDelegate.isTileToggleable()
 
     override suspend fun updateWithTile(
         user: UserHandle,
@@ -55,4 +65,8 @@ class FakeCustomTileRepository(
         defaults: CustomTileDefaults,
         isPersistable: Boolean,
     ) = realDelegate.updateWithDefaults(user, defaults, isPersistable)
+
+    fun setTileActive(isActive: Boolean) = packageManagerAdapterFacade.setIsActive(isActive)
+
+    fun setTileToggleable(isActive: Boolean) = packageManagerAdapterFacade.setIsToggleable(isActive)
 }

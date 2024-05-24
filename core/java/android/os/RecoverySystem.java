@@ -1436,8 +1436,11 @@ public class RecoverySystem {
      * @throws IOException if the recovery system service could not be contacted
      */
     private boolean requestLskf(String packageName, IntentSender sender) throws IOException {
+        Log.i(TAG, String.format("<%s> is requesting LSFK", packageName));
         try {
-            return mService.requestLskf(packageName, sender);
+            boolean validRequest = mService.requestLskf(packageName, sender);
+            Log.i(TAG, String.format("LSKF Request isValid = %b", validRequest));
+            return validRequest;
         } catch (RemoteException | SecurityException e) {
             throw new IOException("could not request LSKF capture", e);
         }

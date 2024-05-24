@@ -44,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"මෙම පරිශීලකයා මඟින් නොදන්නා යෙදුම් ස්ථාපනය කළ නොහැක"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"මෙම පරිශීලකයාට යෙදුම් ස්ථාපනය කිරීමට අවසර නැත"</string>
     <string name="ok" msgid="7871959885003339302">"හරි"</string>
+    <string name="archive" msgid="4447791830199354721">"ලේඛනාරක්ෂණය"</string>
     <string name="update_anyway" msgid="8792432341346261969">"කෙසේ වෙතත් යාවත්කාලීන කරන්න"</string>
     <string name="manage_applications" msgid="5400164782453975580">"යෙදුම් කළමනාකරණය කරන්න"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ඉඩ නොමැත"</string>
@@ -58,6 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"යාවත්කාලිනය අස්ථාපනය කරන්න"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> පහත යෙදුමේ කොටසකි:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"ඔබට මෙම යෙදුම අස්ථාපනය කිරීමට අවශ්‍යද?"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"ඔබේ පුද්ගලික දත්ත සුරැකෙනු ඇත"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"සියලු පරිශීලකයින් සඳහා මෙම යෙදුම ලේඛනාරක්ෂණයකරන්න ද? ඔබේ පුද්ගලික දත්ත සුරැකෙනු ඇත"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"මෙම යෙදුම ඔබේ කාර්යාල පැතිකඩෙහි ලේඛනාරක්ෂණය කරන්න ද? ඔබේ පුද්ගලික දත්ත සුරැකෙනු ඇත"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"<xliff:g id="USERNAME">%1$s</xliff:g> සඳහා මෙම යෙදුම ලේඛනාරක්ෂණය කරන්න ද? ඔබේ පුද්ගලික දත්ත සුරැකෙනු ඇත"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"ඔබට ඔබේ පෞද්ගලික අවකාශයෙන් මෙම යෙදුම ලේඛනාරක්ෂණය කිරීමට අවශ්‍ය ද? ඔබේ පුද්ගලික දත්ත සුරැකෙනු ඇත"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119"><b>"සියලු"</b>" පරිශීලකයන් සඳහා මෙම යෙදුම අස්ථාපනය කිරීමට ඔබට අවශ්‍යද? උපාංගයෙහි "<b>"සියලු"</b>" පරිශීලකයන් සඳහා යෙදුම සහ එහි දත්ත ඉවත්වනු ඇත."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> පරිශීලකයා සඳහා මෙම යෙදුම අස්ථාපනය කිරීමට ඔබට අවශ්‍යයද?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"ඔබට කාර්යාල පැතිකඩ වෙතින් මෙම යෙදුම අස්ථාපනය කිරීමට අවශ්‍යද?"</string>
@@ -86,8 +92,6 @@
     <string name="manage_users" msgid="1243995386982560813">"පරිශීලකයන් කළමනාකරණය කරන්න"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> අස්ථාපනය කල නොහැක."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"පැකේජය විග්‍රහ කිරීමේදී ගැටළුවක් ඇති විය."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear මත ස්ථාපන/අස්ථාපනය ක්‍රියා සහාය දක්වන්නේ නැත."</string>
     <string name="message_staging" msgid="8032722385658438567">"යෙදුම වේදිකාගත කරමින්..."</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"නොදනී"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"ඔබගේ ආරක්ෂාව සඳහා, ඔබගේ ටැබ්ලටයට දැනට මෙම මූලාශ්‍රයෙන් නොදන්නා යෙදුම් ස්ථාපනය කිරීමට ඉඩ නොදේ. ඔබට සැකසීම් තුළ මෙය වෙනස් කළ හැකිය."</string>
@@ -98,17 +102,18 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ඔබගේ ටැබ්ලට් පරිගණකය සහ පුද්ගලික දත්තවලට නොදන්නා යෙදුම් මඟින් තර්ජන එල්ල කිරීමේ හැකියාව වැඩිය. මෙම යෙදුම් ස්ථාපනය කිරීමෙන් සහ භාවිත කිරීමෙන් ඔබ ඔබේ ටැබ්ලට් පරිගණකය සඳහා සිදු වන යම් හානි හෝ එය භාවිත කිරීමේ ප්‍රතිඵලයක් ලෙස සිදු වන දත්ත හානි සඳහා ඔබ වගකිව යුතු බවට එකඟ වේ."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ඔබගේ TV සහ පුද්ගලික දත්තවලට නොදන්නා යෙදුම් මඟින් තර්ජන එල්ල කිරීමේ හැකියාව වැඩිය. මෙම යෙදුම් ස්ථාපනය කිරීමෙන් සහ භාවිත කිරීමෙන් ඔබ ඔබේ TV සඳහා සිදු වන යම් හානි හෝ එය භාවිත කිරීමේ ප්‍රතිඵලයක් ලෙස සිදු වන දත්ත හානි සඳහා ඔබ වගකිව යුතු බවට එකඟ වේ."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ක්ලෝනය"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ලේඛනාරක්ෂණය කරන්න ද?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ඉදිරියට යන්න"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"සැකසීම්"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear යෙදුම් ස්ථාපනය/අස්ථාපනය කරමින්"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"යෙදුම් ස්ථාපනය කළ දැනුම්දීම"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"සාර්ථකව ස්ථාපනය කරන ලදී"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"\"<xliff:g id="APPNAME">%1$s</xliff:g>\" සාර්ථකව ස්ථාපනය කරන ලදි"</string>
-    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> වෙතින් <xliff:g id="APPNAME">%1$s</xliff:g> ප්‍රතිසාධනය කරන්න ද?"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%2$s</xliff:g> වෙතින් <xliff:g id="APPNAME">%1$s</xliff:g> ප්‍රතිසාධනය කරන්න ද?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"මෙම යෙදුම පසුබිමේ බාගැනීම ආරම්භ කරනු ඇත"</string>
     <string name="restore" msgid="8460854736328970444">"ප්‍රතිසාධනය කරන්න"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"ඔබ නොබැඳි වේ"</string>
-    <string name="unarchive_error_offline_body" msgid="255717000519772755">"ඔබ අන්තර්ජාලයට සම්බන්ධ වූ විට මෙම යෙදුම ස්වයංක්‍රීයව ප්‍රතිසාධනය වනු ඇත"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"මෙම යෙදුම ප්‍රතිසාධනය කිරීම සඳහා, ඔබේ අන්තර්ජාල සම්බන්ධතාවය පරීක්ෂා කර නැවත උත්සාහ කරන්න"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"යමක් වැරදී ඇත"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"මෙම යෙදුම ප්‍රතිසාධනය කිරීමට උත්සාහ කිරීමේ ගැටලුවක් ඇති විය"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"ප්‍රමාණවත් ආචයනයක් නොමැත"</string>
@@ -116,8 +121,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"ක්‍රියාමාර්ගය අවශ්‍යයි"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"මෙම යෙදුම ප්‍රතිසාධනය කිරීමට මීළඟ පියවර අනුගමනය කරන්න"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> අබල කර ඇත"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"මෙම යෙදුම ප්‍රතිසාධනය කිරීම සඳහා, සැකසීම් තුළ <xliff:g id="INSTALLERNAME">%1$s</xliff:g> සබල කරන්න"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> අස්ථාපනය කර ඇත"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"මෙම යෙදුම ප්‍රතිසාධනය කිරීම සඳහා, ඔබට <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ස්ථාපනය කිරීමට අවශ්‍ය වනු ඇත"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"ඉදිරියට යන්න"</string>

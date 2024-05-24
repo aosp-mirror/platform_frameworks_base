@@ -45,7 +45,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.controls.ui.MediaHost;
+import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.logging.QSLogger;
@@ -246,8 +246,9 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
 
     @Test
-    public void testShouldUzeHorizontalLayout_falseForSplitShade() {
+    public void testShouldUseHorizontalLayout_falseForSplitShade() {
         mConfiguration.orientation = Configuration.ORIENTATION_LANDSCAPE;
+        mConfiguration.screenLayout = Configuration.SCREENLAYOUT_LONG_YES;
         when(mMediaHost.getVisible()).thenReturn(true);
 
         when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(false);
@@ -270,12 +271,13 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     }
 
     @Test
-    public void testChangeConfiguration_shouldUseHorizontalLayout() {
+    public void testChangeConfiguration_shouldUseHorizontalLayoutInLandscape_true() {
         when(mMediaHost.getVisible()).thenReturn(true);
         mController.setUsingHorizontalLayoutChangeListener(mHorizontalLayoutListener);
 
-        // When device is rotated to landscape
+        // When device is rotated to landscape and is long
         mConfiguration.orientation = Configuration.ORIENTATION_LANDSCAPE;
+        mConfiguration.screenLayout = Configuration.SCREENLAYOUT_LONG_YES;
         mController.mOnConfigurationChangedListener.onConfigurationChange(mConfiguration);
 
         // Then the layout changes
@@ -284,6 +286,29 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
         // When it is rotated back to portrait
         mConfiguration.orientation = Configuration.ORIENTATION_PORTRAIT;
+        mController.mOnConfigurationChangedListener.onConfigurationChange(mConfiguration);
+
+        // Then the layout changes back
+        assertThat(mController.shouldUseHorizontalLayout()).isFalse();
+        verify(mHorizontalLayoutListener, times(2)).run();
+    }
+
+    @Test
+    public void testChangeConfiguration_shouldUseHorizontalLayoutInLongDevices_true() {
+        when(mMediaHost.getVisible()).thenReturn(true);
+        mController.setUsingHorizontalLayoutChangeListener(mHorizontalLayoutListener);
+
+        // When device is rotated to landscape and is long
+        mConfiguration.orientation = Configuration.ORIENTATION_LANDSCAPE;
+        mConfiguration.screenLayout = Configuration.SCREENLAYOUT_LONG_YES;
+        mController.mOnConfigurationChangedListener.onConfigurationChange(mConfiguration);
+
+        // Then the layout changes
+        assertThat(mController.shouldUseHorizontalLayout()).isTrue();
+        verify(mHorizontalLayoutListener).run();
+
+        // When device changes to not-long
+        mConfiguration.screenLayout = Configuration.SCREENLAYOUT_LONG_NO;
         mController.mOnConfigurationChangedListener.onConfigurationChange(mConfiguration);
 
         // Then the layout changes back
@@ -310,6 +335,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mMediaHost.getVisible()).thenReturn(true);
         when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(false);
         mConfiguration.orientation = Configuration.ORIENTATION_LANDSCAPE;
+        mConfiguration.screenLayout = Configuration.SCREENLAYOUT_LONG_YES;
         mController.setUsingHorizontalLayoutChangeListener(mHorizontalLayoutListener);
         mController.mOnConfigurationChangedListener.onConfigurationChange(mConfiguration);
         assertThat(mController.shouldUseHorizontalLayout()).isTrue();
@@ -391,17 +417,19 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     }
 
     @Test
-    public void setTiles_differentTiles_allTilesRemovedAndNewTilesAdded() {
+    public void setTiles_differentTiles_extraTileRemoved() {
         when(mQSHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
         mController.setTiles();
+        assertEquals(2, mController.mRecords.size());
 
         clearInvocations(mQSPanel);
 
         when(mQSHost.getTiles()).thenReturn(List.of(mQSTile));
         mController.setTiles();
 
-        verify(mQSPanel, times(2)).removeTile(any());
-        verify(mQSPanel).addTile(any());
+        verify(mQSPanel, times(1)).removeTile(any());
+        verify(mQSPanel, never()).addTile(any());
+        assertEquals(1, mController.mRecords.size());
     }
 
     @Test
@@ -418,7 +446,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     }
 
     @Test
-    public void setTiles_sameTilesDifferentOrder_removesAndReadds() {
+    public void setTiles_sameTilesDifferentOrder_removesAndReads() {
         when(mQSHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
         mController.setTiles();
 

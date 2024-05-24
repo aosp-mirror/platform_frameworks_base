@@ -220,7 +220,7 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
         }
 
         for (int i = 0; i < listenersCopy.size(); i++) {
-            listenersCopy.get(i).onUidModeChanged(uid, op, mode);
+            listenersCopy.get(i).onUidModeChanged(uid, op, mode, persistentDeviceId);
         }
 
         return true;

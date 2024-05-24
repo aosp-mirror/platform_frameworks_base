@@ -276,7 +276,8 @@ public abstract class ApexManager {
      * Returns list of {@code packageName} of apks inside the given apex.
      * @param apexPackageName Package name of the apk container of apex
      */
-    abstract List<String> getApksInApex(String apexPackageName);
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public abstract List<String> getApksInApex(String apexPackageName);
 
     /**
      * Returns the apex module name for the given package name, if the package is an APEX. Otherwise
@@ -751,8 +752,9 @@ public abstract class ApexManager {
             }
         }
 
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
         @Override
-        List<String> getApksInApex(String apexPackageName) {
+        public List<String> getApksInApex(String apexPackageName) {
             synchronized (mLock) {
                 Preconditions.checkState(mPackageNameToApexModuleName != null,
                         "APEX packages have not been scanned");

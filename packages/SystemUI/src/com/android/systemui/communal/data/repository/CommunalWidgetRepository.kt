@@ -16,38 +16,30 @@
 
 package com.android.systemui.communal.data.repository
 
-import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetManager
-import android.content.BroadcastReceiver
 import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.os.UserManager
-import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
+import android.os.UserHandle
+import androidx.annotation.WorkerThread
 import com.android.systemui.communal.data.db.CommunalItemRank
 import com.android.systemui.communal.data.db.CommunalWidgetDao
 import com.android.systemui.communal.data.db.CommunalWidgetItem
-import com.android.systemui.communal.shared.CommunalWidgetHost
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
+import com.android.systemui.communal.widgets.CommunalAppWidgetHost
+import com.android.systemui.communal.widgets.CommunalWidgetHost
+import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
-import com.android.systemui.settings.UserTracker
+import com.android.systemui.util.kotlin.getValue
+import java.util.Optional
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -57,30 +49,38 @@ interface CommunalWidgetRepository {
     val communalWidgets: Flow<List<CommunalWidgetContentModel>>
 
     /** Add a widget at the specified position in the app widget service and the database. */
-    fun addWidget(provider: ComponentName, priority: Int) {}
+    fun addWidget(
+        provider: ComponentName,
+        user: UserHandle,
+        priority: Int,
+        configurator: WidgetConfigurator? = null
+    ) {}
 
-    /** Delete a widget by id from app widget service and the database. */
+    /**
+     * Delete a widget by id from the database and app widget host.
+     *
+     * @param widgetId id of the widget to remove.
+     */
     fun deleteWidget(widgetId: Int) {}
 
-    /** Update the order of widgets in the database. */
-    fun updateWidgetOrder(ids: List<Int>) {}
+    /**
+     * Update the order of widgets in the database.
+     *
+     * @param widgetIdToPriorityMap mapping of the widget ids to the priority of the widget.
+     */
+    fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) {}
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CommunalWidgetRepositoryImpl
 @Inject
 constructor(
-    private val appWidgetManager: AppWidgetManager,
-    private val appWidgetHost: AppWidgetHost,
-    @Application private val applicationScope: CoroutineScope,
+    appWidgetManagerOptional: Optional<AppWidgetManager>,
+    private val appWidgetHost: CommunalAppWidgetHost,
+    @Background private val bgScope: CoroutineScope,
     @Background private val bgDispatcher: CoroutineDispatcher,
-    broadcastDispatcher: BroadcastDispatcher,
-    communalRepository: CommunalRepository,
     private val communalWidgetHost: CommunalWidgetHost,
     private val communalWidgetDao: CommunalWidgetDao,
-    private val userManager: UserManager,
-    private val userTracker: UserTracker,
     @CommunalLog logBuffer: LogBuffer,
 ) : CommunalWidgetRepository {
     companion object {
@@ -89,120 +89,95 @@ constructor(
 
     private val logger = Logger(logBuffer, TAG)
 
-    // Whether the [AppWidgetHost] is listening for updates.
-    private var isHostListening = false
-
-    private val isUserUnlocked: Flow<Boolean> =
-        callbackFlow {
-                if (!communalRepository.isCommunalEnabled) {
-                    awaitClose()
-                }
-
-                fun isUserUnlockingOrUnlocked(): Boolean {
-                    return userManager.isUserUnlockingOrUnlocked(userTracker.userHandle)
-                }
-
-                fun send() {
-                    trySendWithFailureLogging(isUserUnlockingOrUnlocked(), TAG)
-                }
-
-                if (isUserUnlockingOrUnlocked()) {
-                    send()
-                    awaitClose()
-                } else {
-                    val receiver =
-                        object : BroadcastReceiver() {
-                            override fun onReceive(context: Context?, intent: Intent?) {
-                                send()
-                            }
-                        }
-
-                    broadcastDispatcher.registerReceiver(
-                        receiver,
-                        IntentFilter(Intent.ACTION_USER_UNLOCKED),
-                    )
-
-                    awaitClose { broadcastDispatcher.unregisterReceiver(receiver) }
-                }
-            }
-            .distinctUntilChanged()
-
-    private val isHostActive: Flow<Boolean> =
-        isUserUnlocked.map {
-            if (it) {
-                startListening()
-                true
-            } else {
-                stopListening()
-                false
-            }
-        }
+    private val appWidgetManager by appWidgetManagerOptional
 
     override val communalWidgets: Flow<List<CommunalWidgetContentModel>> =
-        isHostActive.flatMapLatest { isHostActive ->
-            if (!isHostActive) {
-                return@flatMapLatest flowOf(emptyList())
-            }
-            communalWidgetDao.getWidgets().map { it.map(::mapToContentModel) }
-        }
+        communalWidgetDao
+            .getWidgets()
+            .map { it.mapNotNull(::mapToContentModel) }
+            // As this reads from a database and triggers IPCs to AppWidgetManager,
+            // it should be executed in the background.
+            .flowOn(bgDispatcher)
 
-    override fun addWidget(provider: ComponentName, priority: Int) {
-        applicationScope.launch(bgDispatcher) {
-            val id = communalWidgetHost.allocateIdAndBindWidget(provider)
-            id?.let {
+    override fun addWidget(
+        provider: ComponentName,
+        user: UserHandle,
+        priority: Int,
+        configurator: WidgetConfigurator?
+    ) {
+        bgScope.launch {
+            val id = communalWidgetHost.allocateIdAndBindWidget(provider, user)
+            if (id == null) {
+                logger.e("Failed to allocate widget id to ${provider.flattenToString()}")
+                return@launch
+            }
+            val info = communalWidgetHost.getAppWidgetInfo(id)
+            val configured =
+                if (
+                    configurator != null &&
+                        info != null &&
+                        CommunalWidgetHost.requiresConfiguration(info)
+                ) {
+                    logger.i("Widget ${provider.flattenToString()} requires configuration.")
+                    try {
+                        configurator.configureWidget(id)
+                    } catch (ex: Exception) {
+                        // Cleanup the app widget id if an error happens during configuration.
+                        logger.e("Error during widget configuration, cleaning up id $id", ex)
+                        if (ex is CancellationException) {
+                            appWidgetHost.deleteAppWidgetId(id)
+                            // Re-throw cancellation to ensure the parent coroutine also gets
+                            // cancelled.
+                            throw ex
+                        } else {
+                            false
+                        }
+                    }
+                } else {
+                    logger.i("Skipping configuration for ${provider.flattenToString()}")
+                    true
+                }
+            if (configured) {
                 communalWidgetDao.addWidget(
-                    widgetId = it,
+                    widgetId = id,
                     provider = provider,
                     priority = priority,
                 )
+            } else {
+                appWidgetHost.deleteAppWidgetId(id)
             }
             logger.i("Added widget ${provider.flattenToString()} at position $priority.")
         }
     }
 
     override fun deleteWidget(widgetId: Int) {
-        applicationScope.launch(bgDispatcher) {
-            communalWidgetDao.deleteWidgetById(widgetId)
-            appWidgetHost.deleteAppWidgetId(widgetId)
-            logger.i("Deleted widget with id $widgetId.")
-        }
-    }
-
-    override fun updateWidgetOrder(ids: List<Int>) {
-        applicationScope.launch(bgDispatcher) {
-            communalWidgetDao.updateWidgetOrder(ids)
-            logger.i({ "Updated the order of widget list with ids: $str1." }) {
-                str1 = ids.toString()
+        bgScope.launch {
+            if (communalWidgetDao.deleteWidgetById(widgetId)) {
+                appWidgetHost.deleteAppWidgetId(widgetId)
+                logger.i("Deleted widget with id $widgetId.")
             }
         }
     }
 
+    override fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) {
+        bgScope.launch {
+            communalWidgetDao.updateWidgetOrder(widgetIdToPriorityMap)
+            logger.i({ "Updated the order of widget list with ids: $str1." }) {
+                str1 = widgetIdToPriorityMap.toString()
+            }
+        }
+    }
+
+    @WorkerThread
     private fun mapToContentModel(
         entry: Map.Entry<CommunalItemRank, CommunalWidgetItem>
-    ): CommunalWidgetContentModel {
+    ): CommunalWidgetContentModel? {
         val (_, widgetId) = entry.value
+        val providerInfo = appWidgetManager?.getAppWidgetInfo(widgetId) ?: return null
         return CommunalWidgetContentModel(
             appWidgetId = widgetId,
-            providerInfo = appWidgetManager.getAppWidgetInfo(widgetId),
+            providerInfo = providerInfo,
             priority = entry.key.rank,
         )
-    }
-
-    private fun startListening() {
-        if (isHostListening) {
-            return
-        }
-
-        appWidgetHost.startListening()
-        isHostListening = true
-    }
-
-    private fun stopListening() {
-        if (!isHostListening) {
-            return
-        }
-
-        appWidgetHost.stopListening()
-        isHostListening = false
     }
 }

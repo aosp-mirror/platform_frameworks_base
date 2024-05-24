@@ -32,6 +32,7 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.argThat;
@@ -258,14 +259,10 @@ public class WindowDecorationTests extends ShellTestCase {
                     any(),
                     eq(0 /* index */),
                     eq(WindowInsets.Type.captionBar()),
-                    eq(new Rect(100, 300, 400, 364)));
+                    eq(new Rect(100, 300, 400, 364)),
+                    any());
         }
 
-        verify(mMockSurfaceControlFinishT)
-                .setPosition(mMockTaskSurface, TASK_POSITION_IN_PARENT.x,
-                        TASK_POSITION_IN_PARENT.y);
-        verify(mMockSurfaceControlFinishT)
-                .setWindowCrop(mMockTaskSurface, 300, 100);
         verify(mMockSurfaceControlStartT).setCornerRadius(mMockTaskSurface, CORNER_RADIUS);
         verify(mMockSurfaceControlFinishT).setCornerRadius(mMockTaskSurface, CORNER_RADIUS);
         verify(mMockSurfaceControlStartT)
@@ -573,9 +570,9 @@ public class WindowDecorationTests extends ShellTestCase {
         windowDecor.relayout(taskInfo);
 
         verify(mMockWindowContainerTransaction).addInsetsSource(eq(taskInfo.token), any(),
-                eq(0) /* index */, eq(captionBar()), any());
+                eq(0) /* index */, eq(captionBar()), any(), any());
         verify(mMockWindowContainerTransaction).addInsetsSource(eq(taskInfo.token), any(),
-                eq(0) /* index */, eq(mandatorySystemGestures()), any());
+                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any());
     }
 
     @Test
@@ -642,6 +639,66 @@ public class WindowDecorationTests extends ShellTestCase {
                 eq(0) /* index */, eq(mandatorySystemGestures()));
     }
 
+    @Test
+    public void testTaskPositionAndCropNotSetWhenFalse() {
+        final Display defaultDisplay = mock(Display.class);
+        doReturn(defaultDisplay).when(mMockDisplayController)
+                .getDisplay(Display.DEFAULT_DISPLAY);
+
+        final ActivityManager.RunningTaskInfo taskInfo = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setBounds(TASK_BOUNDS)
+                .setPositionInParent(TASK_POSITION_IN_PARENT.x, TASK_POSITION_IN_PARENT.y)
+                .setVisible(true)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM)
+                .build();
+        taskInfo.isFocused = true;
+        // Density is 2. Shadow radius is 10px. Caption height is 64px.
+        taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
+        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+
+
+        mRelayoutParams.mSetTaskPositionAndCrop = false;
+        windowDecor.relayout(taskInfo);
+
+        verify(mMockSurfaceControlStartT, never()).setWindowCrop(
+                eq(mMockTaskSurface), anyInt(), anyInt());
+        verify(mMockSurfaceControlFinishT, never()).setPosition(
+                eq(mMockTaskSurface), anyFloat(), anyFloat());
+        verify(mMockSurfaceControlFinishT, never()).setWindowCrop(
+                eq(mMockTaskSurface), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testTaskPositionAndCropSetWhenSetTrue() {
+        final Display defaultDisplay = mock(Display.class);
+        doReturn(defaultDisplay).when(mMockDisplayController)
+                .getDisplay(Display.DEFAULT_DISPLAY);
+
+        final ActivityManager.RunningTaskInfo taskInfo = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setBounds(TASK_BOUNDS)
+                .setPositionInParent(TASK_POSITION_IN_PARENT.x, TASK_POSITION_IN_PARENT.y)
+                .setVisible(true)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM)
+                .build();
+        taskInfo.isFocused = true;
+        // Density is 2. Shadow radius is 10px. Caption height is 64px.
+        taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
+        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+
+        mRelayoutParams.mSetTaskPositionAndCrop = true;
+        windowDecor.relayout(taskInfo);
+
+        verify(mMockSurfaceControlStartT).setWindowCrop(
+                eq(mMockTaskSurface), anyInt(), anyInt());
+        verify(mMockSurfaceControlFinishT).setPosition(
+                eq(mMockTaskSurface), anyFloat(), anyFloat());
+        verify(mMockSurfaceControlFinishT).setWindowCrop(
+                eq(mMockTaskSurface), anyInt(), anyInt());
+    }
+
+
     private TestWindowDecoration createWindowDecoration(ActivityManager.RunningTaskInfo taskInfo) {
         return new TestWindowDecoration(mContext, mMockDisplayController, mMockShellTaskOrganizer,
                 taskInfo, mMockTaskSurface, mWindowConfiguration,
@@ -702,6 +759,11 @@ public class WindowDecorationTests extends ShellTestCase {
             relayout(taskInfo, false /* applyStartTransactionOnDraw */);
         }
 
+        @Override
+        Rect calculateValidDragArea() {
+            return null;
+        }
+
         void relayout(ActivityManager.RunningTaskInfo taskInfo,
                 boolean applyStartTransactionOnDraw) {
             mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
@@ -711,15 +773,13 @@ public class WindowDecorationTests extends ShellTestCase {
 
         private WindowDecoration.AdditionalWindow addTestWindow() {
             final Resources resources = mDecorWindowContext.getResources();
-            int x = mRelayoutParams.mCaptionX;
-            int y = mRelayoutParams.mCaptionY;
             int width = loadDimensionPixelSize(resources, mCaptionMenuWidthId);
             int height = loadDimensionPixelSize(resources, mRelayoutParams.mCaptionHeightId);
             String name = "Test Window";
             WindowDecoration.AdditionalWindow additionalWindow =
                     addWindow(R.layout.desktop_mode_window_decor_handle_menu, name,
-                            mMockSurfaceControlAddWindowT, mMockSurfaceSyncGroup, x, y,
-                            width, height);
+                            mMockSurfaceControlAddWindowT, mMockSurfaceSyncGroup, 0 /* x */,
+                            0 /* y */, width, height);
             return additionalWindow;
         }
     }

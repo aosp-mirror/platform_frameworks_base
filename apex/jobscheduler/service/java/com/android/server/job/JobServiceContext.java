@@ -534,7 +534,16 @@ public final class JobServiceContext implements ServiceConnection {
                     /* system_measured_source_download_bytes */ 0,
                     /* system_measured_source_upload_bytes */ 0,
                     /* system_measured_calling_download_bytes */ 0,
-                    /* system_measured_calling_upload_bytes */ 0);
+                    /* system_measured_calling_upload_bytes */ 0,
+                    job.getJob().getIntervalMillis(),
+                    job.getJob().getFlexMillis(),
+                    job.hasFlexibilityConstraint(),
+                    job.isConstraintSatisfied(JobStatus.CONSTRAINT_FLEXIBLE),
+                    job.canApplyTransportAffinities(),
+                    job.getNumAppliedFlexibleConstraints(),
+                    job.getNumDroppedFlexibleConstraints(),
+                    job.getFilteredTraceTag(),
+                    job.getFilteredDebugTags());
             sEnqueuedJwiAtJobStart.logSampleWithUid(job.getUid(), job.getWorkCount());
             final String sourcePackage = job.getSourcePackageName();
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
@@ -1616,7 +1625,16 @@ public final class JobServiceContext implements ServiceConnection {
                 TrafficStats.getUidRxBytes(completedJob.getUid())
                         - mInitialDownloadedBytesFromCalling,
                 TrafficStats.getUidTxBytes(completedJob.getUid())
-                        - mInitialUploadedBytesFromCalling);
+                        - mInitialUploadedBytesFromCalling,
+                completedJob.getJob().getIntervalMillis(),
+                completedJob.getJob().getFlexMillis(),
+                completedJob.hasFlexibilityConstraint(),
+                completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_FLEXIBLE),
+                completedJob.canApplyTransportAffinities(),
+                completedJob.getNumAppliedFlexibleConstraints(),
+                completedJob.getNumDroppedFlexibleConstraints(),
+                completedJob.getFilteredTraceTag(),
+                completedJob.getFilteredDebugTags());
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
                     getId());

@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.Flow
 /** Repository responsible for retrieving data related to running tasks. */
 interface TasksRepository {
 
+    suspend fun launchRecentTask(taskInfo: RunningTaskInfo)
+
     /**
      * Tries to find a [RunningTaskInfo] with a matching window container token. Returns `null` when
      * no matching task was found.

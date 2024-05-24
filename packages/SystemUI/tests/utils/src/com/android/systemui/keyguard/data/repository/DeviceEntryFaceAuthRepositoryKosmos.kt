@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.kosmos.Kosmos
 
 var Kosmos.deviceEntryFaceAuthRepository: DeviceEntryFaceAuthRepository by

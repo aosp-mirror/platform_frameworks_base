@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;

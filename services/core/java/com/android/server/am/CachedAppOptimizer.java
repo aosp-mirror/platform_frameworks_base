@@ -1419,6 +1419,11 @@ public final class CachedAppOptimizer {
     }
 
     @GuardedBy({"mAm", "mProcLock"})
+    void freezeAppAsyncAtEarliestLSP(ProcessRecord app) {
+        freezeAppAsyncLSP(app, updateEarliestFreezableTime(app, 0));
+    }
+
+    @GuardedBy({"mAm", "mProcLock"})
     void freezeAppAsyncInternalLSP(ProcessRecord app, @UptimeMillisLong long delayMillis,
             boolean force) {
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
@@ -1714,6 +1719,14 @@ public final class CachedAppOptimizer {
                 compactApp(frozenProc, CompactProfile.FULL, CompactSource.APP, false);
             }
         }
+        frozenProc.onProcessFrozen();
+    }
+
+    /**
+     * Callback received when an attempt to freeze a process is cancelled (failed).
+     */
+    void onProcessFrozenCancelled(ProcessRecord app) {
+        app.onProcessFrozenCancelled();
     }
 
     /**
@@ -2203,6 +2216,8 @@ public final class CachedAppOptimizer {
                         onProcessFrozen(proc);
                         removeMessages(DEADLOCK_WATCHDOG_MSG);
                         sendEmptyMessageDelayed(DEADLOCK_WATCHDOG_MSG, FREEZE_DEADLOCK_TIMEOUT_MS);
+                    } else {
+                        onProcessFrozenCancelled(proc);
                     }
                 } break;
                 case REPORT_UNFREEZE_MSG: {
@@ -2241,10 +2256,9 @@ public final class CachedAppOptimizer {
                         }
                     }
 
-                    // Check binder errors to frozen processes with a local freezer lock
-                    synchronized (mFreezerLock) {
-                        binderErrorLocked(pids);
-                    }
+                    // Check binder errors to frozen processes
+                    // Freezer lock is not required as we don't perform (un)freeze operations here
+                    binderErrorInternal(pids);
                 } break;
                 default:
                     return;
@@ -2460,7 +2474,7 @@ public final class CachedAppOptimizer {
                                 pr = mAm.mPidsSelfLocked.get(blocked);
                             }
                             if (pr != null
-                                    && pr.mState.getCurAdj() < ProcessList.CACHED_APP_MIN_ADJ) {
+                                    && pr.mState.getCurAdj() < ProcessList.FREEZER_CUTOFF_ADJ) {
                                 Slog.d(TAG_AM, app.processName + " (" + pid + ") blocks "
                                         + pr.processName + " (" + blocked + ")");
                                 // Found at least one blocked non-cached process
@@ -2603,7 +2617,7 @@ public final class CachedAppOptimizer {
         mFreezeHandler.sendEmptyMessage(BINDER_ERROR_MSG);
     }
 
-    private void binderErrorLocked(IntArray pids) {
+    private void binderErrorInternal(IntArray pids) {
         // PIDs that run out of async binder buffer when being frozen
         ArraySet<Integer> pidsAsync = (mFreezerBinderAsyncThreshold < 0) ? null : new ArraySet<>();
 

@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.data.model
 
 import android.graphics.drawable.Icon
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
+import com.android.systemui.statusbar.notification.stack.BUCKET_UNKNOWN
 
 /** Simple ActiveNotificationModel builder for use in tests. */
 fun activeNotificationModel(
@@ -32,6 +33,11 @@ fun activeNotificationModel(
     aodIcon: Icon? = null,
     shelfIcon: Icon? = null,
     statusBarIcon: Icon? = null,
+    uid: Int = 0,
+    instanceId: Int? = null,
+    isGroupSummary: Boolean = false,
+    packageName: String = "pkg",
+    bucket: Int = BUCKET_UNKNOWN,
 ) =
     ActiveNotificationModel(
         key = key,
@@ -45,4 +51,9 @@ fun activeNotificationModel(
         aodIcon = aodIcon,
         shelfIcon = shelfIcon,
         statusBarIcon = statusBarIcon,
+        uid = uid,
+        packageName = packageName,
+        instanceId = instanceId,
+        isGroupSummary = isGroupSummary,
+        bucket = bucket,
     )

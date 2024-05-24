@@ -64,6 +64,8 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
@@ -129,7 +131,8 @@ private fun Title(title: String, maxLines: Int = Int.MAX_VALUE) {
         modifier = Modifier.padding(
             start = SettingsDimension.itemPaddingAround,
             end = SettingsDimension.itemPaddingEnd,
-        ),
+        )
+        .semantics { heading() },
         overflow = TextOverflow.Ellipsis,
         maxLines = maxLines,
     )
@@ -177,7 +180,7 @@ private class TopAppBarColors(
      * @param colorTransitionFraction a `0.0` to `1.0` value that represents a color transition
      * percentage
      */
-    @Composable
+    @Stable
     fun containerColor(colorTransitionFraction: Float): Color {
         return lerp(
             containerColor,
@@ -516,7 +519,7 @@ private fun TopAppBarLayout(
                 0
             }
 
-        val layoutHeight = if (heightPx.isNaN()) 0 else heightPx.roundToInt()
+        val layoutHeight = if (heightPx > 0) heightPx.roundToInt() else 0
 
         layout(constraints.maxWidth, layoutHeight) {
             // Navigation icon

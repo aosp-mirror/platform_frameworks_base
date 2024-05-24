@@ -21,12 +21,14 @@ import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_PERMISSION_RESTORE;
 import static android.content.ComponentName.createRelative;
+import static android.content.pm.PackageManager.FEATURE_WATCH;
 
-import static com.android.server.companion.Utils.prepareForIpc;
+import static com.android.server.companion.utils.Utils.prepareForIpc;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.DeviceNotAssociatedException;
@@ -39,6 +41,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -51,9 +54,9 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.server.companion.AssociationStore;
 import com.android.server.companion.CompanionDeviceManagerService;
-import com.android.server.companion.PackageUtils;
-import com.android.server.companion.PermissionsUtils;
 import com.android.server.companion.transport.CompanionTransportManager;
+import com.android.server.companion.utils.PackageUtils;
+import com.android.server.companion.utils.PermissionsUtils;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -186,7 +189,11 @@ public class SystemDataTransferProcessor {
         final long token = Binder.clearCallingIdentity();
         try {
             return PendingIntent.getActivityAsUser(mContext, /*requestCode */ associationId, intent,
-                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE, /* options= */ null,
+                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE,
+                    ActivityOptions.makeBasic()
+                            .setPendingIntentCreatorBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                            .toBundle(),
                     UserHandle.CURRENT);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -301,6 +308,13 @@ public class SystemDataTransferProcessor {
     }
 
     private void onReceivePermissionRestore(byte[] message) {
+        // TODO: Disable Permissions Sync for non-watch devices until we figure out a better UX
+        //       model
+        if (!Build.isDebuggable() && !mContext.getPackageManager().hasSystemFeature(
+                FEATURE_WATCH)) {
+            Slog.e(LOG_TAG, "Permissions restore is only available on watch.");
+            return;
+        }
         Slog.i(LOG_TAG, "Applying permissions.");
         // Start applying permissions
         UserHandle user = mContext.getUser();

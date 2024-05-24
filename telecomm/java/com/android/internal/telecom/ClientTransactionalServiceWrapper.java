@@ -33,6 +33,8 @@ import android.telecom.PhoneAccountHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.server.telecom.flags.Flags;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -148,6 +150,7 @@ public class ClientTransactionalServiceWrapper {
         private static final String ON_REQ_ENDPOINT_CHANGE = "onRequestEndpointChange";
         private static final String ON_AVAILABLE_CALL_ENDPOINTS = "onAvailableCallEndpointsChanged";
         private static final String ON_MUTE_STATE_CHANGED = "onMuteStateChanged";
+        private static final String ON_VIDEO_STATE_CHANGED = "onVideoStateChanged";
         private static final String ON_CALL_STREAMING_FAILED = "onCallStreamingFailed";
         private static final String ON_EVENT = "onEvent";
 
@@ -208,8 +211,7 @@ public class ClientTransactionalServiceWrapper {
                 if (resultCode == TELECOM_TRANSACTION_SUCCESS) {
 
                     // create the interface object that the client will interact with
-                    CallControl control = new CallControl(callId, callControl, mRepository,
-                            mPhoneAccountHandle);
+                    CallControl control = new CallControl(callId, callControl);
                     // give the client the object via the OR that was passed into addCall
                     pendingControl.onResult(control);
 
@@ -262,6 +264,11 @@ public class ClientTransactionalServiceWrapper {
             handleEventCallback(callId, ON_MUTE_STATE_CHANGED, isMuted);
         }
 
+        @Override
+        public void onVideoStateChanged(String callId, int videoState) {
+            handleEventCallback(callId, ON_VIDEO_STATE_CHANGED, videoState);
+        }
+
         public void handleEventCallback(String callId, String action, Object arg) {
             Log.d(TAG, TextUtils.formatSimple("hEC: [%s], callId=[%s]", action, callId));
             // lookup the callEventCallback associated with the particular call
@@ -281,6 +288,11 @@ public class ClientTransactionalServiceWrapper {
                                 break;
                             case ON_MUTE_STATE_CHANGED:
                                 callback.onMuteStateChanged((boolean) arg);
+                                break;
+                            case ON_VIDEO_STATE_CHANGED:
+                                if (Flags.transactionalVideoState()) {
+                                    callback.onVideoStateChanged((int) arg);
+                                }
                                 break;
                             case ON_CALL_STREAMING_FAILED:
                                 callback.onCallStreamingFailed((int) arg /* reason */);

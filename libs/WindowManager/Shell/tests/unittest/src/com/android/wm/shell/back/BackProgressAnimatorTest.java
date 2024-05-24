@@ -18,6 +18,7 @@ package com.android.wm.shell.back;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -28,6 +29,7 @@ import android.window.BackMotionEvent;
 import android.window.BackProgressAnimator;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,6 +55,7 @@ public class BackProgressAnimatorTest {
                 /* progress = */ progress,
                 /* velocityX = */ 0,
                 /* velocityY = */ 0,
+                /* triggerBack = */ false,
                 /* swipeEdge = */ BackEvent.EDGE_LEFT,
                 /* departingAnimationTarget = */ null);
     }
@@ -99,6 +102,36 @@ public class BackProgressAnimatorTest {
         mTargetProgressCalled.await(1, TimeUnit.SECONDS);
         assertNotNull(mReceivedBackEvent);
         assertEquals(mReceivedBackEvent.getProgress(), mTargetProgress, 0 /* delta */);
+    }
+
+    @Test
+    public void testResetCallsCancelCallbackImmediately() throws InterruptedException {
+        // Give the animator some progress.
+        final BackMotionEvent backEvent = backMotionEventFrom(100, mTargetProgress);
+        mMainThreadHandler.post(
+                () -> mProgressAnimator.onBackProgressed(backEvent));
+        mTargetProgressCalled.await(1, TimeUnit.SECONDS);
+        assertNotNull(mReceivedBackEvent);
+
+        mTargetProgress = 0;
+        mReceivedBackEvent = null;
+        mTargetProgressCalled = new CountDownLatch(1);
+
+        CountDownLatch cancelCallbackCalled = new CountDownLatch(1);
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                () -> mProgressAnimator.onBackCancelled(cancelCallbackCalled::countDown));
+
+        // verify onBackProgressed and onBackCancelled not yet called
+        assertNull(mReceivedBackEvent);
+        assertEquals(1, cancelCallbackCalled.getCount());
+
+        // call reset
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> mProgressAnimator.reset());
+
+        // verify that back event with progress 0 is sent and cancel callback is invoked
+        assertNotNull(mReceivedBackEvent);
+        assertEquals(mReceivedBackEvent.getProgress(), mTargetProgress, 0 /* delta */);
+        assertEquals(0, cancelCallbackCalled.getCount());
     }
 
     private void onGestureProgress(BackEvent backEvent) {

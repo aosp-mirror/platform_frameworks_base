@@ -16,14 +16,15 @@
 
 package com.android.systemui.qs.pipeline.data.repository
 
+import android.platform.test.annotations.EnabledOnRavenwood
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
+import com.android.systemui.res.R
 import com.android.systemui.retail.data.repository.FakeRetailModeRepository
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
@@ -39,6 +40,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class TileSpecSettingsRepositoryTest : SysuiTestCase() {
@@ -183,6 +185,22 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
             underTest.setTiles(0, listOf(TileSpec.create("a")))
 
             assertThat(loadTilesForUser(0)).isEqualTo(DEFAULT_TILES)
+        }
+
+    @Test
+    fun prependDefault() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tilesSpecs(0))
+
+            val startingTiles = listOf(TileSpec.create("e"), TileSpec.create("f"))
+
+            underTest.setTiles(0, startingTiles)
+            runCurrent()
+
+            underTest.prependDefault(0)
+
+            assertThat(tiles!!)
+                .containsExactlyElementsIn(DEFAULT_TILES.toTileSpecs() + startingTiles)
         }
 
     private fun TestScope.storeTilesForUser(specs: String, forUser: Int) {

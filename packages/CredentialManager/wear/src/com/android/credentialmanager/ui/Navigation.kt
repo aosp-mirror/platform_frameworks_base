@@ -26,6 +26,22 @@ fun NavController.navigateToSinglePasswordScreen() {
     navigateToAsRoot(Screen.SinglePasswordScreen.route)
 }
 
+fun NavController.navigateToSinglePasskeyScreen() {
+    navigateToAsRoot(Screen.SinglePasskeyScreen.route)
+}
+
+fun NavController.navigateToSignInWithProviderScreen() {
+    navigateToAsRoot(Screen.SignInWithProviderScreen.route)
+}
+
+fun NavController.navigateToMultipleCredentialsFoldScreen() {
+    navigateToAsRoot(Screen.MultipleCredentialsScreenFold.route)
+}
+
+fun NavController.navigateToMultipleCredentialsFlattenScreen() {
+    navigateToAsRoot(Screen.MultipleCredentialsScreenFlatten.route)
+}
+
 fun NavController.navigateToAsRoot(route: String) {
     popBackStack()
     navigate(route)

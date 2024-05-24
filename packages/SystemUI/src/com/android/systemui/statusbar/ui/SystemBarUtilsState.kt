@@ -17,10 +17,16 @@
 package com.android.systemui.statusbar.ui
 
 import com.android.internal.policy.SystemBarUtils
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.onConfigChanged
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
@@ -31,6 +37,8 @@ import kotlinx.coroutines.flow.onStart
 class SystemBarUtilsState
 @Inject
 constructor(
+    @Background bgContext: CoroutineContext,
+    @Main mainContext: CoroutineContext,
     configurationController: ConfigurationController,
     proxy: SystemBarUtilsProxy,
 ) {
@@ -38,5 +46,10 @@ constructor(
     val statusBarHeight: Flow<Int> =
         configurationController.onConfigChanged
             .onStart<Any> { emit(Unit) }
+            .flowOn(mainContext)
+            .conflate()
             .map { proxy.getStatusBarHeight() }
+            .distinctUntilChanged()
+            .flowOn(bgContext)
+            .conflate()
 }

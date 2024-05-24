@@ -20,6 +20,22 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="@dimen/biometric_auth_icon_size"
+        android:layout_height="@dimen/biometric_auth_icon_size"
+        android:layout_gravity="center"
+        android:scaleType="fitXY"/>
+
+    <TextView
+        android:id="@+id/logo_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="@integer/biometric_dialog_text_gravity"
+        android:singleLine="true"
+        android:marqueeRepeatLimit="1"
+        android:ellipsize="marquee"/>
+
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"
@@ -47,6 +63,23 @@
         android:scrollbars ="vertical"
         android:importantForAccessibility="no"
         style="@style/TextAppearance.AuthCredential.Description"/>
+
+    <Space
+        android:id="@+id/space_above_content"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/biometric_prompt_space_above_content"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/customized_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fadeScrollbars="false"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/biometric_prompt_content_container_padding_horizontal"
+        android:scrollbars="vertical"
+        android:visibility="gone" />
 
     <Space android:id="@+id/space_above_icon"
         android:layout_width="match_parent"

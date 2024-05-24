@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Flags;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.ModuleInfo;
@@ -226,6 +227,11 @@ public class ApplicationsState {
         final List<ModuleInfo> moduleInfos = mPm.getInstalledModules(0 /* flags */);
         for (ModuleInfo info : moduleInfos) {
             mSystemModules.put(info.getPackageName(), info.isHidden());
+            if (Flags.provideInfoOfApkInApex()) {
+                for (String apkInApexPackageName : info.getApkInApexPackageNames()) {
+                    mSystemModules.put(apkInApexPackageName, info.isHidden());
+                }
+            }
         }
 
         /**
@@ -1615,6 +1621,7 @@ public class ApplicationsState {
     }
 
     public static class AppEntry extends SizeInfo {
+        @VisibleForTesting String mProfileType;
         @Nullable public final File apkFile;
         public final long id;
         public String label;
@@ -1640,11 +1647,6 @@ public class ApplicationsState {
          * Whether or not it's a Home app.
          */
         public boolean isHomeApp;
-
-        /**
-         * Whether or not it's a cloned app .
-         */
-        public boolean isCloned;
 
         public String getNormalizedLabel() {
             if (normalizedLabel != null) {
@@ -1686,11 +1688,22 @@ public class ApplicationsState {
                         () -> this.ensureLabelDescriptionLocked(context));
             }
             UserManager um = UserManager.get(context);
-            this.showInPersonalTab = shouldShowInPersonalTab(um, info.uid);
             UserInfo userInfo = um.getUserInfo(UserHandle.getUserId(info.uid));
-            if (userInfo != null) {
-                this.isCloned = userInfo.isCloneProfile();
-            }
+            mProfileType = userInfo.userType;
+            this.showInPersonalTab = shouldShowInPersonalTab(um, info.uid);
+        }
+
+        public boolean isClonedProfile() {
+            return UserManager.USER_TYPE_PROFILE_CLONE.equals(mProfileType);
+        }
+
+        public boolean isManagedProfile() {
+            return UserManager.USER_TYPE_PROFILE_MANAGED.equals(mProfileType);
+        }
+
+        public boolean isPrivateProfile() {
+            return android.os.Flags.allowPrivateProfile()
+                    && UserManager.USER_TYPE_PROFILE_PRIVATE.equals(mProfileType);
         }
 
         /**
@@ -1884,16 +1897,24 @@ public class ApplicationsState {
     };
 
     public static final AppFilter FILTER_WORK = new AppFilter() {
-        private int mCurrentUser;
 
         @Override
-        public void init() {
-            mCurrentUser = ActivityManager.getCurrentUser();
-        }
+        public void init() {}
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            return !entry.showInPersonalTab;
+            return !entry.showInPersonalTab && entry.isManagedProfile();
+        }
+    };
+
+    public static final AppFilter FILTER_PRIVATE_PROFILE = new AppFilter() {
+
+        @Override
+        public void init() {}
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            return !entry.showInPersonalTab && entry.isPrivateProfile();
         }
     };
 

@@ -196,6 +196,9 @@ public class BatterySaverStateMachineTest {
         when(mMockResources.getBoolean(
                 com.android.internal.R.bool.config_batterySaverStickyBehaviourDisabled))
                 .thenReturn(false);
+        when(mMockResources.getBoolean(
+                com.android.internal.R.bool.config_batterySaverTurnedOffNotificationEnabled))
+                .thenReturn(true);
         when(mMockResources.getInteger(
                 com.android.internal.R.integer.config_dynamicPowerSavingsDefaultDisableThreshold))
                 .thenReturn(80);

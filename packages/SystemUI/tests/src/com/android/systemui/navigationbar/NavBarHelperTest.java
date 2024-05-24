@@ -65,6 +65,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import dagger.Lazy;
 
@@ -123,6 +124,8 @@ public class NavBarHelperTest extends SysuiTestCase {
             SYSUI_STATE_A11Y_BUTTON_CLICKABLE | SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
     private NavBarHelper mNavBarHelper;
 
+    private final Executor mSynchronousExecutor = runnable -> runnable.run();
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -140,7 +143,8 @@ public class NavBarHelperTest extends SysuiTestCase {
                 mSystemActions, mOverviewProxyService, mAssistManagerLazy,
                 () -> Optional.of(mock(CentralSurfaces.class)), mock(KeyguardStateController.class),
                 mNavigationModeController, mEdgeBackGestureHandlerFactory, mWm, mUserTracker,
-                mDisplayTracker, mNotificationShadeWindowController, mDumpManager, mCommandQueue);
+                mDisplayTracker, mNotificationShadeWindowController, mDumpManager, mCommandQueue,
+                mSynchronousExecutor);
 
     }
 

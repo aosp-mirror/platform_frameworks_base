@@ -42,10 +42,12 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.accessibilityservice.IBrailleDisplayController;
 import android.accessibilityservice.MagnificationConfig;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -58,6 +60,7 @@ import android.graphics.Region;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
+import android.hardware.usb.UsbDevice;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -1685,6 +1688,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     public void resetLocked() {
+        if (Flags.resettableDynamicProperties()) {
+            mAccessibilityServiceInfo.resetDynamicallyConfigurableProperties();
+        }
         mSystemSupport.getKeyEventDispatcher().flush(this);
         try {
             // Clear the proxy in the other process so this
@@ -2772,5 +2778,24 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         t.apply();
         t.close();
         mOverlays.clear();
+    }
+
+    @Override
+    @SuppressLint("AndroidFrameworkRequiresPermission") // Unsupported in Abstract class
+    public void connectBluetoothBrailleDisplay(String bluetoothAddress,
+            IBrailleDisplayController controller) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void connectUsbBrailleDisplay(UsbDevice usbDevice,
+            IBrailleDisplayController controller) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    @SuppressLint("AndroidFrameworkRequiresPermission") // Unsupported in Abstract class
+    public void setTestBrailleDisplayData(List<Bundle> brailleDisplays) {
+        throw new UnsupportedOperationException();
     }
 }

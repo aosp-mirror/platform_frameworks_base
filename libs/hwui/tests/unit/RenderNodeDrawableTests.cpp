@@ -941,8 +941,9 @@ RENDERTHREAD_TEST(RenderNodeDrawable, simple) {
         void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
             EXPECT_EQ(0, mDrawCounter++);
         }
-        void onDrawImage2(const SkImage*, SkScalar dx, SkScalar dy, const SkSamplingOptions&,
-                          const SkPaint*) override {
+        void onDrawImageRect2(const SkImage*, const SkRect&, const SkRect&,
+                              const SkSamplingOptions&, const SkPaint*,
+                              SrcRectConstraint) override {
             EXPECT_EQ(1, mDrawCounter++);
         }
     };

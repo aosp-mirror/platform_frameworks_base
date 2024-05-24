@@ -314,13 +314,20 @@ public class FocusFinder {
         if (count < 2) {
             return null;
         }
+        View next = null;
+        final boolean[] looped = new boolean[1];
         switch (direction) {
             case View.FOCUS_FORWARD:
-                return getNextFocusable(focused, focusables, count);
+                next = getNextFocusable(focused, focusables, count, looped);
+                break;
             case View.FOCUS_BACKWARD:
-                return getPreviousFocusable(focused, focusables, count);
+                next = getPreviousFocusable(focused, focusables, count, looped);
+                break;
         }
-        return focusables.get(count - 1);
+        if (root != null && root.mAttachInfo != null && root == root.getRootView()) {
+            root.mAttachInfo.mNextFocusLooped = looped[0];
+        }
+        return next != null ? next : focusables.get(count - 1);
     }
 
     private void setFocusBottomRight(ViewGroup root, Rect focusedRect) {
@@ -375,7 +382,8 @@ public class FocusFinder {
         return closest;
     }
 
-    private static View getNextFocusable(View focused, ArrayList<View> focusables, int count) {
+    private static View getNextFocusable(View focused, ArrayList<View> focusables, int count,
+            boolean[] outLooped) {
         if (count < 2) {
             return null;
         }
@@ -385,10 +393,12 @@ public class FocusFinder {
                 return focusables.get(position + 1);
             }
         }
+        outLooped[0] = true;
         return focusables.get(0);
     }
 
-    private static View getPreviousFocusable(View focused, ArrayList<View> focusables, int count) {
+    private static View getPreviousFocusable(View focused, ArrayList<View> focusables, int count,
+            boolean[] outLooped) {
         if (count < 2) {
             return null;
         }
@@ -398,6 +408,7 @@ public class FocusFinder {
                 return focusables.get(position - 1);
             }
         }
+        outLooped[0] = true;
         return focusables.get(count - 1);
     }
 

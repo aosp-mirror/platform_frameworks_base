@@ -16,7 +16,7 @@
 
 package android.telephony.satellite.stub;
 
-import android.telephony.satellite.NtnSignalStrength;
+import android.telephony.satellite.stub.NtnSignalStrength;
 
 /**
  * Consumer pattern for a request that receives the signal strength of non-terrestrial network from

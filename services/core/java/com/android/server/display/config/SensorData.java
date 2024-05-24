@@ -22,6 +22,7 @@ import android.content.res.Resources;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +32,9 @@ import java.util.List;
  * Uniquely identifies a Sensor, with the combination of Type and Name.
  */
 public class SensorData {
+
+    public static final String TEMPERATURE_TYPE_DISPLAY = "DISPLAY";
+    public static final String TEMPERATURE_TYPE_SKIN = "SKIN";
 
     @Nullable
     public final String type;
@@ -140,6 +144,32 @@ public class SensorData {
         } else {
             return new SensorData();
         }
+    }
+
+    /**
+     * Loads temperature sensor data for no config case. (Type: SKIN, Name: null)
+     */
+    public static SensorData loadTempSensorUnspecifiedConfig() {
+        return new SensorData(TEMPERATURE_TYPE_SKIN, null);
+    }
+
+    /**
+     * Loads temperature sensor data from given display config.
+     * If empty or null config given default to (Type: SKIN, Name: null)
+     */
+    public static SensorData loadTempSensorConfig(DisplayManagerFlags flags,
+            DisplayConfiguration config) {
+        SensorDetails sensorDetails = config.getTempSensor();
+        if (!flags.isSensorBasedBrightnessThrottlingEnabled() || sensorDetails == null) {
+            return new SensorData(TEMPERATURE_TYPE_SKIN, null);
+        }
+        String name = sensorDetails.getName();
+        String type = sensorDetails.getType();
+        if (TextUtils.isEmpty(type) || TextUtils.isEmpty(name)) {
+            type = TEMPERATURE_TYPE_SKIN;
+            name = null;
+        }
+        return new SensorData(type, name);
     }
 
     /**

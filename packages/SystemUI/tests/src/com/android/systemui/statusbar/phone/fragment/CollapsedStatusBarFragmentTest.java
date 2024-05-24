@@ -36,6 +36,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
@@ -43,7 +44,6 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.animation.AnimatorTestRule;
-import com.android.systemui.common.ui.ConfigurationState;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.log.LogBuffer;
@@ -57,9 +57,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
-import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker;
-import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarNotificationIconViewStore;
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerStatusBarViewModel;
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
@@ -70,7 +68,6 @@ import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeCollapsedStatusBarViewBinder;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeCollapsedStatusBarViewModel;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.statusbar.ui.SystemBarUtilsState;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
 import com.android.systemui.util.CarrierConfigTracker;
@@ -95,7 +92,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     private NotificationIconAreaController mMockNotificationAreaController;
     private ShadeExpansionStateManager mShadeExpansionStateManager;
-    private View mNotificationAreaInner;
     private OngoingCallController mOngoingCallController;
     private SystemStatusAnimationScheduler mAnimationScheduler;
     private StatusBarLocationPublisher mLocationPublisher;
@@ -135,7 +131,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Rule
-    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
 
     private List<StatusBarWindowStateListener> mStatusBarWindowStateListeners = new ArrayList<>();
 
@@ -274,15 +270,15 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NOTIFICATION_ICONS, 0, false);
 
-        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
+        assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        assertEquals(View.VISIBLE, mNotificationAreaInner.getVisibility());
+        assertEquals(View.VISIBLE, getNotificationAreaView().getVisibility());
 
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NOTIFICATION_ICONS, 0, false);
 
-        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
+        assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
     }
 
     @Test
@@ -314,7 +310,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are hidden
         assertEquals(View.INVISIBLE, getClockView().getVisibility());
-        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
+        assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
     }
 
@@ -330,7 +326,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are shown
         assertEquals(View.VISIBLE, getClockView().getVisibility());
-        assertEquals(View.VISIBLE, mNotificationAreaInner.getVisibility());
+        assertEquals(View.VISIBLE, getNotificationAreaView().getVisibility());
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
@@ -347,7 +343,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are hidden
         assertEquals(View.INVISIBLE, getClockView().getVisibility());
-        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
+        assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
 
         // WHEN the shade is updated to no longer be open
@@ -358,7 +354,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are shown
         assertEquals(View.VISIBLE, getClockView().getVisibility());
-        assertEquals(View.VISIBLE, mNotificationAreaInner.getVisibility());
+        assertEquals(View.VISIBLE, getNotificationAreaView().getVisibility());
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
@@ -372,7 +368,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are shown
         assertEquals(View.VISIBLE, getClockView().getVisibility());
-        assertEquals(View.VISIBLE, mNotificationAreaInner.getVisibility());
+        assertEquals(View.VISIBLE, getNotificationAreaView().getVisibility());
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
@@ -386,7 +382,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are hidden
         assertEquals(View.GONE, getClockView().getVisibility());
-        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
+        assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
     }
 
@@ -400,7 +396,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are hidden
         assertEquals(View.GONE, getClockView().getVisibility());
-        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
+        assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
 
         // WHEN the transition has finished
@@ -409,7 +405,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are shown
         assertEquals(View.VISIBLE, getClockView().getVisibility());
-        assertEquals(View.VISIBLE, mNotificationAreaInner.getVisibility());
+        assertEquals(View.VISIBLE, getNotificationAreaView().getVisibility());
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
@@ -442,7 +438,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         assertEquals(View.VISIBLE,
                 mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
-        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
+        assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
     }
 
     @Test
@@ -507,8 +503,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         fragment.disable(DEFAULT_DISPLAY, 0, 0, true);
 
         // Notification area is hidden without delay
-        assertEquals(0f, mNotificationAreaInner.getAlpha(), 0.01);
-        assertEquals(View.INVISIBLE, mNotificationAreaInner.getVisibility());
+        assertEquals(0f, getNotificationAreaView().getAlpha(), 0.01);
+        assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
     }
 
     @Test
@@ -702,7 +698,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mKeyguardStateController,
                 mShadeViewController,
                 mStatusBarStateController,
-                mock(StatusBarIconViewBindingFailureTracker.class),
+                mock(NotificationIconContainerStatusBarViewBinder.class),
                 mCommandQueue,
                 mCarrierConfigTracker,
                 new CollapsedStatusBarFragmentLogger(
@@ -715,10 +711,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mDumpManager,
                 mStatusBarWindowStateController,
                 mKeyguardUpdateMonitor,
-                mock(NotificationIconContainerStatusBarViewModel.class),
-                mock(ConfigurationState.class),
-                mock(SystemBarUtilsState.class),
-                mock(StatusBarNotificationIconViewStore.class),
                 mock(DemoModeController.class));
     }
 
@@ -731,11 +723,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     private void setUpNotificationIconAreaController() {
         mMockNotificationAreaController = mock(NotificationIconAreaController.class);
-
-        mNotificationAreaInner = new View(mContext);
-
-        when(mMockNotificationAreaController.getNotificationInnerAreaView()).thenReturn(
-                mNotificationAreaInner);
+        View notificationAreaInner =
+                LayoutInflater.from(mContext).inflate(R.layout.notification_icon_area, null);
+        when(mMockNotificationAreaController.getNotificationInnerAreaView())
+                .thenReturn(notificationAreaInner);
     }
 
     /**
@@ -789,5 +780,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     private View getEndSideContentView() {
         return mFragment.getView().findViewById(R.id.status_bar_end_side_content);
+    }
+
+    private View getNotificationAreaView() {
+        return mFragment.getView().findViewById(R.id.notificationIcons);
     }
 }

@@ -19,17 +19,54 @@ package com.android.compose.animation.scene
 import androidx.annotation.FloatRange
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.platform.LocalDensity
-import kotlinx.coroutines.channels.Channel
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+
+/**
+ * [SceneTransitionLayout] is a container that automatically animates its content whenever its state
+ * changes.
+ *
+ * Note: You should use [androidx.compose.animation.AnimatedContent] instead of
+ * [SceneTransitionLayout] if it fits your need. Use [SceneTransitionLayout] over AnimatedContent if
+ * you need support for swipe gestures, shared elements or transitions defined declaratively outside
+ * UI code.
+ *
+ * @param state the state of this layout.
+ * @param swipeSourceDetector the edge detector used to detect which edge a swipe is started from,
+ *   if any.
+ * @param transitionInterceptionThreshold used during a scene transition. For the scene to be
+ *   intercepted, the progress value must be above the threshold, and below (1 - threshold).
+ * @param scenes the configuration of the different scenes of this layout.
+ * @see updateSceneTransitionLayoutState
+ */
+@Composable
+fun SceneTransitionLayout(
+    state: SceneTransitionLayoutState,
+    modifier: Modifier = Modifier,
+    swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
+    @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
+    scenes: SceneTransitionLayoutScope.() -> Unit,
+) {
+    SceneTransitionLayoutForTesting(
+        state,
+        modifier,
+        swipeSourceDetector,
+        transitionInterceptionThreshold,
+        onLayoutImpl = null,
+        scenes,
+    )
+}
 
 /**
  * [SceneTransitionLayout] is a container that automatically animates its content whenever
@@ -45,8 +82,8 @@ import kotlinx.coroutines.channels.Channel
  *   This is called when the user commits a transition to a new scene because of a [UserAction], for
  *   instance by triggering back navigation or by swiping to a new scene.
  * @param transitions the definition of the transitions used to animate a change of scene.
- * @param state the observable state of this layout.
- * @param edgeDetector the edge detector used to detect which edge a swipe is started from, if any.
+ * @param swipeSourceDetector the source detector used to detect which source a swipe is started
+ *   from, if any.
  * @param transitionInterceptionThreshold used during a scene transition. For the scene to be
  *   intercepted, the progress value must be above the threshold, and below (1 - threshold).
  * @param scenes the configuration of the different scenes of this layout.
@@ -57,20 +94,16 @@ fun SceneTransitionLayout(
     onChangeScene: (SceneKey) -> Unit,
     transitions: SceneTransitions,
     modifier: Modifier = Modifier,
-    state: SceneTransitionLayoutState = remember { SceneTransitionLayoutState(currentScene) },
-    edgeDetector: EdgeDetector = DefaultEdgeDetector,
+    swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
     @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
-    SceneTransitionLayoutForTesting(
-        currentScene,
-        onChangeScene,
-        transitions,
+    val state = updateSceneTransitionLayoutState(currentScene, onChangeScene, transitions)
+    SceneTransitionLayout(
         state,
-        edgeDetector,
-        transitionInterceptionThreshold,
         modifier,
-        onLayoutImpl = null,
+        swipeSourceDetector,
+        transitionInterceptionThreshold,
         scenes,
     )
 }
@@ -87,7 +120,7 @@ interface SceneTransitionLayoutScope {
      */
     fun scene(
         key: SceneKey,
-        userActions: Map<UserAction, SceneKey> = emptyMap(),
+        userActions: Map<UserAction, UserActionResult> = emptyMap(),
         content: @Composable SceneScope.() -> Unit,
     )
 }
@@ -98,9 +131,9 @@ interface SceneTransitionLayoutScope {
  */
 @DslMarker annotation class ElementDsl
 
-@ElementDsl
 @Stable
-interface SceneScope {
+@ElementDsl
+interface BaseSceneScope {
     /** The state of the [SceneTransitionLayout] in which this scene is contained. */
     val layoutState: SceneTransitionLayoutState
 
@@ -111,19 +144,72 @@ interface SceneScope {
      * that the element can be transformed and animated when the scene transitions in or out.
      *
      * Additionally, this [key] will be used to detect elements that are shared between scenes to
-     * automatically interpolate their size, offset and [shared values][animateSharedValueAsState].
+     * automatically interpolate their size and offset. If you need to animate shared element values
+     * (i.e. values associated to this element that change depending on which scene it is composed
+     * in), use [Element] instead.
      *
      * Note that shared elements tagged using this function will be duplicated in each scene they
      * are part of, so any **internal** state (e.g. state created using `remember {
      * mutableStateOf(...) }`) will be lost. If you need to preserve internal state, you should use
      * [MovableElement] instead.
      *
+     * @see Element
      * @see MovableElement
-     *
-     * TODO(b/291566282): Migrate this to the new Modifier Node API and remove the @Composable
-     *   constraint.
      */
     fun Modifier.element(key: ElementKey): Modifier
+
+    /**
+     * Create an element identified by [key].
+     *
+     * Similar to [element], this creates an element that will be automatically shared when present
+     * in multiple scenes and that can be transformed during transitions, the same way that
+     * [element] does.
+     *
+     * The only difference with [element] is that the provided [ElementScope] allows you to
+     * [animate element values][ElementScope.animateElementValueAsState] or specify its
+     * [movable content][Element.movableContent] that will be "moved" and composed only once during
+     * transitions (as opposed to [element] that duplicates shared elements) so that any internal
+     * state is preserved during and after the transition.
+     *
+     * @see element
+     * @see MovableElement
+     */
+    @Composable
+    fun Element(
+        key: ElementKey,
+        modifier: Modifier,
+
+        // TODO(b/317026105): As discussed in http://shortn/_gJVdltF8Si, remove the @Composable
+        // scope here to make sure that callers specify the content in ElementScope.content {} or
+        // ElementScope.movableContent {}.
+        content: @Composable ElementScope<ElementContentScope>.() -> Unit,
+    )
+
+    /**
+     * Create a *movable* element identified by [key].
+     *
+     * Similar to [Element], this creates an element that will be automatically shared when present
+     * in multiple scenes and that can be transformed during transitions, and you can also use the
+     * provided [ElementScope] to [animate element values][ElementScope.animateElementValueAsState].
+     *
+     * The important difference with [element] and [Element] is that this element
+     * [content][ElementScope.content] will be "moved" and composed only once during transitions, as
+     * opposed to [element] and [Element] that duplicates shared elements, so that any internal
+     * state is preserved during and after the transition.
+     *
+     * @see element
+     * @see Element
+     */
+    @Composable
+    fun MovableElement(
+        key: ElementKey,
+        modifier: Modifier,
+
+        // TODO(b/317026105): As discussed in http://shortn/_gJVdltF8Si, remove the @Composable
+        // scope here to make sure that callers specify the content in ElementScope.content {} or
+        // ElementScope.movableContent {}.
+        content: @Composable ElementScope<MovableElementContentScope>.() -> Unit,
+    )
 
     /**
      * Adds a [NestedScrollConnection] to intercept scroll events not handled by the scrollable
@@ -150,78 +236,108 @@ interface SceneScope {
     ): Modifier
 
     /**
-     * Create a *movable* element identified by [key].
-     *
-     * This creates an element that will be automatically shared when present in multiple scenes and
-     * that can be transformed during transitions, the same way that [element] does. The major
-     * difference with [element] is that elements created with [MovableElement] will be "moved" and
-     * composed only once during transitions (as opposed to [element] that duplicates shared
-     * elements) so that any internal state is preserved during and after the transition.
-     *
-     * @see element
+     * Don't resize during transitions. This can for instance be used to make sure that scrollable
+     * lists keep a constant size during transitions even if its elements are growing/shrinking.
      */
-    @Composable
-    fun MovableElement(
-        key: ElementKey,
-        modifier: Modifier,
-        content: @Composable MovableElementScope.() -> Unit,
-    )
+    fun Modifier.noResizeDuringTransitions(): Modifier
+}
 
+@Stable
+@ElementDsl
+interface SceneScope : BaseSceneScope {
     /**
-     * Animate some value of a shared element.
+     * Animate some value at the scene level.
      *
      * @param value the value of this shared value in the current scene.
      * @param key the key of this shared value.
-     * @param element the element associated with this value. If `null`, this value will be
-     *   associated at the scene level, which means that [key] should be used maximum once in the
-     *   same scene.
      * @param lerp the *linear* interpolation function that should be used to interpolate between
      *   two different values. Note that it has to be linear because the [fraction] passed to this
      *   interpolator is already interpolated.
      * @param canOverflow whether this value can overflow past the values it is interpolated
      *   between, for instance because the transition is animated using a bouncy spring.
-     * @see animateSharedIntAsState
-     * @see animateSharedFloatAsState
-     * @see animateSharedDpAsState
-     * @see animateSharedColorAsState
+     * @see animateSceneIntAsState
+     * @see animateSceneFloatAsState
+     * @see animateSceneDpAsState
+     * @see animateSceneColorAsState
      */
     @Composable
-    fun <T> animateSharedValueAsState(
+    fun <T> animateSceneValueAsState(
         value: T,
         key: ValueKey,
-        element: ElementKey?,
         lerp: (start: T, stop: T, fraction: Float) -> T,
         canOverflow: Boolean,
-    ): State<T>
+    ): AnimatedState<T>
+}
+
+@Stable
+@ElementDsl
+interface ElementScope<ContentScope> {
+    /**
+     * Animate some value associated to this element.
+     *
+     * @param value the value of this shared value in the current scene.
+     * @param key the key of this shared value.
+     * @param lerp the *linear* interpolation function that should be used to interpolate between
+     *   two different values. Note that it has to be linear because the [fraction] passed to this
+     *   interpolator is already interpolated.
+     * @param canOverflow whether this value can overflow past the values it is interpolated
+     *   between, for instance because the transition is animated using a bouncy spring.
+     * @see animateElementIntAsState
+     * @see animateElementFloatAsState
+     * @see animateElementDpAsState
+     * @see animateElementColorAsState
+     */
+    @Composable
+    fun <T> animateElementValueAsState(
+        value: T,
+        key: ValueKey,
+        lerp: (start: T, stop: T, fraction: Float) -> T,
+        canOverflow: Boolean,
+    ): AnimatedState<T>
 
     /**
-     * Punch a hole in this [element] using the bounds of [bounds] in [scene] and the given [shape].
+     * The content of this element.
      *
-     * Punching a hole in an element will "remove" any pixel drawn by that element in the hole area.
-     * This can be used to make content drawn below an opaque element visible. For example, if we
-     * have [this lockscreen scene](http://shortn/_VYySFnJDhN) drawn below
-     * [this shade scene](http://shortn/_fpxGUk0Rg7) and punch a hole in the latter using the big
-     * clock time bounds and a RoundedCornerShape(10dp), [this](http://shortn/_qt80IvORFj) would be
-     * the result.
+     * Important: This must be called exactly once, after all calls to [animateElementValueAsState].
      */
-    fun Modifier.punchHole(element: ElementKey, bounds: ElementKey, shape: Shape): Modifier
+    @Composable fun content(content: @Composable ContentScope.() -> Unit)
 }
 
-// TODO(b/291053742): Add animateSharedValueAsState(targetValue) without any ValueKey and ElementKey
-// arguments to allow sharing values inside a movable element.
+/**
+ * The exact same scope as [androidx.compose.foundation.layout.BoxScope].
+ *
+ * We can't reuse BoxScope directly because of the @LayoutScopeMarker annotation on it, which would
+ * prevent us from calling Modifier.element() and other methods of [SceneScope] inside any Box {} in
+ * the [content][ElementScope.content] of a [SceneScope.Element] or a [SceneScope.MovableElement].
+ */
+@Stable
 @ElementDsl
-interface MovableElementScope {
-    @Composable
-    fun <T> animateSharedValueAsState(
-        value: T,
-        debugName: String,
-        lerp: (start: T, stop: T, fraction: Float) -> T,
-        canOverflow: Boolean,
-    ): State<T>
+interface ElementBoxScope {
+    /** @see [androidx.compose.foundation.layout.BoxScope.align]. */
+    @Stable fun Modifier.align(alignment: Alignment): Modifier
+
+    /** @see [androidx.compose.foundation.layout.BoxScope.matchParentSize]. */
+    @Stable fun Modifier.matchParentSize(): Modifier
 }
+
+/** The scope for "normal" (not movable) elements. */
+@Stable @ElementDsl interface ElementContentScope : SceneScope, ElementBoxScope
+
+/**
+ * The scope for the content of movable elements.
+ *
+ * Note that it extends [BaseSceneScope] and not [SceneScope] because movable elements should not
+ * call [SceneScope.animateSceneValueAsState], given that their content is not composed in all
+ * scenes.
+ */
+@Stable @ElementDsl interface MovableElementContentScope : BaseSceneScope, ElementBoxScope
 
 /** An action performed by the user. */
-sealed interface UserAction
+sealed interface UserAction {
+    infix fun to(scene: SceneKey): Pair<UserAction, UserActionResult> {
+        return this to UserActionResult(toScene = scene)
+    }
+}
 
 /** The user navigated back, either using a gesture or by triggering a KEYCODE_BACK event. */
 data object Back : UserAction
@@ -230,7 +346,7 @@ data object Back : UserAction
 data class Swipe(
     val direction: SwipeDirection,
     val pointerCount: Int = 1,
-    val fromEdge: Edge? = null,
+    val fromSource: SwipeSource? = null,
 ) : UserAction {
     companion object {
         val Left = Swipe(SwipeDirection.Left)
@@ -248,6 +364,86 @@ enum class SwipeDirection(val orientation: Orientation) {
 }
 
 /**
+ * The source of a Swipe.
+ *
+ * Important: This can be anything that can be returned by any [SwipeSourceDetector], but this must
+ * implement [equals] and [hashCode]. Note that those can be trivially implemented using data
+ * classes.
+ */
+interface SwipeSource {
+    // Require equals() and hashCode() to be implemented.
+    override fun equals(other: Any?): Boolean
+
+    override fun hashCode(): Int
+}
+
+interface SwipeSourceDetector {
+    /**
+     * Return the [SwipeSource] associated to [position] inside a layout of size [layoutSize], given
+     * [density] and [orientation].
+     */
+    fun source(
+        layoutSize: IntSize,
+        position: IntOffset,
+        density: Density,
+        orientation: Orientation,
+    ): SwipeSource?
+}
+
+/** The result of performing a [UserAction]. */
+data class UserActionResult(
+    /** The scene we should be transitioning to during the [UserAction]. */
+    val toScene: SceneKey,
+
+    /** The key of the transition that should be used. */
+    val transitionKey: TransitionKey? = null,
+)
+
+interface UserActionDistance {
+    /**
+     * Return the **absolute** distance of the user action given the size of the scene we are
+     * animating from and the [orientation].
+     *
+     * Note: This function will be called for each drag event until it returns a value > 0f. This
+     * for instance allows you to return 0f or a negative value until the first layout pass of a
+     * scene, so that you can use the size and position of elements in the scene we are
+     * transitioning to when computing this absolute distance.
+     */
+    fun UserActionDistanceScope.absoluteDistance(
+        fromSceneSize: IntSize,
+        orientation: Orientation
+    ): Float
+}
+
+interface UserActionDistanceScope : Density {
+    /**
+     * Return the *target* size of [this] element in the given [scene], i.e. the size of the element
+     * when idle, or `null` if the element is not composed and measured in that scene (yet).
+     */
+    fun ElementKey.targetSize(scene: SceneKey): IntSize?
+
+    /**
+     * Return the *target* offset of [this] element in the given [scene], i.e. the size of the
+     * element when idle, or `null` if the element is not composed and placed in that scene (yet).
+     */
+    fun ElementKey.targetOffset(scene: SceneKey): Offset?
+
+    /**
+     * Return the *target* size of [this] scene, i.e. the size of the scene when idle, or `null` if
+     * the scene was never composed.
+     */
+    fun SceneKey.targetSize(): IntSize?
+}
+
+/** The user action has a fixed [absoluteDistance]. */
+class FixedDistance(private val distance: Dp) : UserActionDistance {
+    override fun UserActionDistanceScope.absoluteDistance(
+        fromSceneSize: IntSize,
+        orientation: Orientation,
+    ): Float = distance.toPx()
+}
+
+/**
  * An internal version of [SceneTransitionLayout] to be used for tests.
  *
  * Important: You should use this only in tests and if you need to access the underlying
@@ -255,24 +451,20 @@ enum class SwipeDirection(val orientation: Orientation) {
  */
 @Composable
 internal fun SceneTransitionLayoutForTesting(
-    currentScene: SceneKey,
-    onChangeScene: (SceneKey) -> Unit,
-    transitions: SceneTransitions,
     state: SceneTransitionLayoutState,
-    edgeDetector: EdgeDetector,
-    transitionInterceptionThreshold: Float,
-    modifier: Modifier,
-    onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)?,
+    modifier: Modifier = Modifier,
+    swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
+    transitionInterceptionThreshold: Float = 0f,
+    onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)? = null,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
     val layoutImpl = remember {
         SceneTransitionLayoutImpl(
-                state = state as SceneTransitionLayoutStateImpl,
-                onChangeScene = onChangeScene,
+                state = state as BaseSceneTransitionLayoutState,
                 density = density,
-                edgeDetector = edgeDetector,
+                swipeSourceDetector = swipeSourceDetector,
                 transitionInterceptionThreshold = transitionInterceptionThreshold,
                 builder = scenes,
                 coroutineScope = coroutineScope,
@@ -280,7 +472,10 @@ internal fun SceneTransitionLayoutForTesting(
             .also { onLayoutImpl?.invoke(it) }
     }
 
-    val targetSceneChannel = remember { Channel<SceneKey>(Channel.CONFLATED) }
+    // TODO(b/317014852): Move this into the SideEffect {} again once STLImpl.scenes is not a
+    // SnapshotStateMap anymore.
+    layoutImpl.updateScenes(scenes)
+
     SideEffect {
         if (state != layoutImpl.state) {
             error(
@@ -289,24 +484,9 @@ internal fun SceneTransitionLayoutForTesting(
             )
         }
 
-        layoutImpl.onChangeScene = onChangeScene
-        (state as SceneTransitionLayoutStateImpl).transitions = transitions
         layoutImpl.density = density
-        layoutImpl.edgeDetector = edgeDetector
-        layoutImpl.updateScenes(scenes)
-
-        state.transitions = transitions
-
-        targetSceneChannel.trySend(currentScene)
-    }
-
-    LaunchedEffect(targetSceneChannel) {
-        for (newKey in targetSceneChannel) {
-            // Inspired by AnimateAsState.kt: let's poll the last value to avoid being one frame
-            // late.
-            val newKey = targetSceneChannel.tryReceive().getOrNull() ?: newKey
-            animateToScene(layoutImpl.state, newKey)
-        }
+        layoutImpl.swipeSourceDetector = swipeSourceDetector
+        layoutImpl.transitionInterceptionThreshold = transitionInterceptionThreshold
     }
 
     layoutImpl.Content(modifier)

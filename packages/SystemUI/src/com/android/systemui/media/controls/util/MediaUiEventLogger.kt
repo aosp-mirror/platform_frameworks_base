@@ -21,9 +21,9 @@ import com.android.internal.logging.InstanceIdSequence
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.media.controls.models.player.MediaData
-import com.android.systemui.media.controls.ui.MediaHierarchyManager
-import com.android.systemui.media.controls.ui.MediaLocation
+import com.android.systemui.media.controls.shared.model.MediaData
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.MediaLocation
 import com.android.systemui.res.R
 import java.lang.IllegalArgumentException
 import javax.inject.Inject

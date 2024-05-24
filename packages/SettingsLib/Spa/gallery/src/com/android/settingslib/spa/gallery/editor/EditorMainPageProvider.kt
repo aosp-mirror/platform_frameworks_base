@@ -35,9 +35,9 @@ object EditorMainPageProvider : SettingsPageProvider {
         return listOf(
             SettingsOutlinedTextFieldPageProvider.buildInjectEntry().setLink(fromPage = owner)
                 .build(),
-            SettingsExposedDropdownMenuBoxPageProvider.buildInjectEntry().setLink(fromPage = owner)
+            SettingsDropdownBoxPageProvider.buildInjectEntry().setLink(fromPage = owner)
                 .build(),
-            SettingsExposedDropdownMenuCheckBoxProvider.buildInjectEntry().setLink(fromPage = owner)
+            SettingsDropdownCheckBoxProvider.buildInjectEntry().setLink(fromPage = owner)
                 .build(),
             SettingsTextFieldPasswordPageProvider.buildInjectEntry().setLink(fromPage = owner)
                 .build(),

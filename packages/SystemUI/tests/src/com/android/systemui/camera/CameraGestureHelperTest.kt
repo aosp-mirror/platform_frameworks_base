@@ -81,10 +81,10 @@ class CameraGestureHelperTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(cameraIntents.getSecureCameraIntent()).thenReturn(
+        whenever(cameraIntents.getSecureCameraIntent(anyInt())).thenReturn(
             Intent(CameraIntents.DEFAULT_SECURE_CAMERA_INTENT_ACTION)
         )
-        whenever(cameraIntents.getInsecureCameraIntent()).thenReturn(
+        whenever(cameraIntents.getInsecureCameraIntent(anyInt())).thenReturn(
             Intent(CameraIntents.DEFAULT_INSECURE_CAMERA_INTENT_ACTION)
         )
 

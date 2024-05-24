@@ -19,10 +19,12 @@ package android.view.accessibility;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.accessibilityservice.IBrailleDisplayController;
 import android.accessibilityservice.MagnificationConfig;
 import android.annotation.NonNull;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Region;
+import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteCallback;
@@ -237,4 +239,15 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
             int accessibilityWindowId,
             SurfaceControl sc,
             IAccessibilityInteractionConnectionCallback callback) {}
+
+    @Override
+    public void connectBluetoothBrailleDisplay(String bluetoothAddress,
+            IBrailleDisplayController controller) {}
+
+    @Override
+    public void connectUsbBrailleDisplay(UsbDevice usbDevice,
+            IBrailleDisplayController controller) {}
+
+    @Override
+    public void setTestBrailleDisplayData(List<Bundle> brailleDisplays) {}
 }

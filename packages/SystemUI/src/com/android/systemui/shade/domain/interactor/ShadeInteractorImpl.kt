@@ -25,9 +25,10 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
 import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
-import com.android.systemui.statusbar.policy.data.repository.DeviceProvisioningRepository
+import com.android.systemui.statusbar.policy.data.repository.UserSetupRepository
+import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
 import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
+import com.android.systemui.util.kotlin.combine
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -44,7 +45,7 @@ class ShadeInteractorImpl
 @Inject
 constructor(
     @Application val scope: CoroutineScope,
-    deviceProvisioningRepository: DeviceProvisioningRepository,
+    deviceProvisioningInteractor: DeviceProvisioningInteractor,
     disableFlagsRepository: DisableFlagsRepository,
     dozeParams: DozeParameters,
     keyguardRepository: KeyguardRepository,
@@ -55,12 +56,20 @@ constructor(
     private val baseShadeInteractor: BaseShadeInteractor,
 ) : ShadeInteractor, BaseShadeInteractor by baseShadeInteractor {
     override val isShadeEnabled: StateFlow<Boolean> =
-        disableFlagsRepository.disableFlags
-            .map { it.isShadeEnabled() }
+        combine(
+                deviceProvisioningInteractor.isFactoryResetProtectionActive,
+                disableFlagsRepository.disableFlags,
+            ) { isFrpActive, isDisabledByFlags ->
+                isDisabledByFlags.isShadeEnabled() && !isFrpActive
+            }
+            .distinctUntilChanged()
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 
-    override val isAnyFullyExpanded: Flow<Boolean> =
-        anyExpansion.map { it >= 1f }.distinctUntilChanged()
+    override val isAnyFullyExpanded: StateFlow<Boolean> =
+        anyExpansion
+            .map { it >= 1f }
+            .distinctUntilChanged()
+            .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 
     override val isShadeFullyExpanded: Flow<Boolean> =
         baseShadeInteractor.shadeExpansion.map { it >= 1f }.distinctUntilChanged()
@@ -75,7 +84,7 @@ constructor(
             powerInteractor.isAsleep,
             keyguardTransitionInteractor.isInTransitionToStateWhere { it == KeyguardState.AOD },
             keyguardRepository.dozeTransitionModel.map { it.to == DozeStateModel.DOZE_PULSING },
-            deviceProvisioningRepository.isFactoryResetProtectionActive,
+            deviceProvisioningInteractor.isFactoryResetProtectionActive,
         ) { isAsleep, goingToSleep, isPulsing, isFrpActive ->
             when {
                 // Touches are disabled when Factory Reset Protection is active
@@ -94,8 +103,8 @@ constructor(
             disableFlagsRepository.disableFlags,
             isShadeEnabled,
             keyguardRepository.isDozing,
-            userSetupRepository.isUserSetupFlow,
-            deviceProvisioningRepository.isDeviceProvisioned,
+            userSetupRepository.isUserSetUp,
+            deviceProvisioningInteractor.isDeviceProvisioned,
         ) { disableFlags, isShadeEnabled, isDozing, isUserSetup, isDeviceProvisioned ->
             isDeviceProvisioned &&
                 // Disallow QS during setup if it's a simple user switcher. (The user intends to

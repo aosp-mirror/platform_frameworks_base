@@ -189,9 +189,15 @@ public class MessagingLayout extends FrameLayout
                 /* isHistoric= */true, usePrecomputedText);
         final List<MessagingMessage> newMessagingMessages =
                 createMessages(newMessages, /* isHistoric */false, usePrecomputedText);
+        // Let's first find our groups!
+        List<List<MessagingMessage>> groups = new ArrayList<>();
+        List<Person> senders = new ArrayList<>();
+
+        // Lets first find the groups
+        findGroups(historicMessagingMessages, newMessagingMessages, groups, senders);
 
         return new MessagingData(user, showSpinner,
-                historicMessagingMessages, newMessagingMessages);
+                historicMessagingMessages, newMessagingMessages, groups, senders);
     }
 
     /**
@@ -256,10 +262,10 @@ public class MessagingLayout extends FrameLayout
     private void bind(MessagingData messagingData) {
         setUser(messagingData.getUser());
 
-        List<MessagingMessage> historicMessages = messagingData.getHistoricMessagingMessages();
-        List<MessagingMessage> messages = messagingData.getNewMessagingMessages();
+        // Let's now create the views and reorder them accordingly
         ArrayList<MessagingGroup> oldGroups = new ArrayList<>(mGroups);
-        addMessagesToGroups(historicMessages, messages, messagingData.getShowSpinner());
+        createGroupViews(messagingData.getGroups(), messagingData.getSenders(),
+                messagingData.getShowSpinner());
 
         // Let's first check which groups were removed altogether and remove them in one animation
         removeGroups(oldGroups);
@@ -272,8 +278,8 @@ public class MessagingLayout extends FrameLayout
             historicMessage.removeMessage(mToRecycle);
         }
 
-        mMessages = messages;
-        mHistoricMessages = historicMessages;
+        mMessages = messagingData.getNewMessagingMessages();
+        mHistoricMessages = messagingData.getHistoricMessagingMessages();
 
         updateHistoricMessageVisibility();
         updateTitleAndNamesDisplay();
@@ -449,19 +455,6 @@ public class MessagingLayout extends FrameLayout
             userIcon.setTint(mLayoutColor);
             mUser = mUser.toBuilder().setIcon(userIcon).build();
         }
-    }
-
-    private void addMessagesToGroups(List<MessagingMessage> historicMessages,
-            List<MessagingMessage> messages, boolean showSpinner) {
-        // Let's first find our groups!
-        List<List<MessagingMessage>> groups = new ArrayList<>();
-        List<Person> senders = new ArrayList<>();
-
-        // Lets first find the groups
-        findGroups(historicMessages, messages, groups, senders);
-
-        // Let's now create the views and reorder them accordingly
-        createGroupViews(groups, senders, showSpinner);
     }
 
     private void createGroupViews(List<List<MessagingMessage>> groups,

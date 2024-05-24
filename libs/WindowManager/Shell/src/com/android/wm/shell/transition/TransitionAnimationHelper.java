@@ -56,7 +56,7 @@ import com.android.internal.R;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.util.TransitionUtil;
+import com.android.wm.shell.shared.TransitionUtil;
 
 /** The helper class that provides methods for adding styles to transition animations. */
 public class TransitionAnimationHelper {

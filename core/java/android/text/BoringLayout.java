@@ -273,7 +273,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                 outerwidth /* ellipsizedWidth */, null /* ellipsize */, 1 /* maxLines */,
                 BREAK_STRATEGY_SIMPLE, HYPHENATION_FREQUENCY_NONE, null /* leftIndents */,
                 null /* rightIndents */, JUSTIFICATION_MODE_NONE, LineBreakConfig.NONE, false,
-                null);
+                false /* shiftDrawingOffsetForStartOverhang */, null);
 
         mEllipsizedWidth = outerwidth;
         mEllipsizedStart = 0;
@@ -346,7 +346,8 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                 ellipsizedWidth, ellipsize, 1 /* maxLines */,
                 BREAK_STRATEGY_SIMPLE, HYPHENATION_FREQUENCY_NONE, null /* leftIndents */,
                 null /* rightIndents */, JUSTIFICATION_MODE_NONE,
-                LineBreakConfig.NONE, metrics, false /* useBoundsForWidth */, null);
+                LineBreakConfig.NONE, metrics, false /* useBoundsForWidth */,
+                false /* shiftDrawingOffsetForStartOverhang */, null);
     }
 
     /** @hide */
@@ -363,12 +364,14 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             TextUtils.TruncateAt ellipsize,
             Metrics metrics,
             boolean useBoundsForWidth,
+            boolean shiftDrawingOffsetForStartOverhang,
             @Nullable Paint.FontMetrics minimumFontMetrics) {
         this(text, paint, width, align, TextDirectionHeuristics.LTR,
                 spacingMult, spacingAdd, includePad, fallbackLineSpacing, ellipsizedWidth,
                 ellipsize, 1 /* maxLines */, Layout.BREAK_STRATEGY_SIMPLE,
                 Layout.HYPHENATION_FREQUENCY_NONE, null, null, Layout.JUSTIFICATION_MODE_NONE,
-                LineBreakConfig.NONE, metrics, useBoundsForWidth, minimumFontMetrics);
+                LineBreakConfig.NONE, metrics, useBoundsForWidth,
+                shiftDrawingOffsetForStartOverhang, minimumFontMetrics);
     }
 
     /* package */ BoringLayout(
@@ -392,12 +395,14 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             LineBreakConfig lineBreakConfig,
             Metrics metrics,
             boolean useBoundsForWidth,
+            boolean shiftDrawingOffsetForStartOverhang,
             @Nullable Paint.FontMetrics minimumFontMetrics) {
 
         super(text, paint, width, align, textDir, spacingMult, spacingAdd, includePad,
                 fallbackLineSpacing, ellipsizedWidth, ellipsize, maxLines, breakStrategy,
                 hyphenationFrequency, leftIndents, rightIndents, justificationMode,
-                lineBreakConfig, useBoundsForWidth, minimumFontMetrics);
+                lineBreakConfig, useBoundsForWidth, shiftDrawingOffsetForStartOverhang,
+                minimumFontMetrics);
 
 
         boolean trust;
@@ -454,7 +459,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             line.set(paint, source, 0, source.length(), Layout.DIR_LEFT_TO_RIGHT,
                     Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null,
                     mEllipsizedStart, mEllipsizedStart + mEllipsizedCount, useFallbackLineSpacing);
-            mMax = (int) Math.ceil(line.metrics(null, null, false));
+            mMax = (int) Math.ceil(line.metrics(null, null, false, null));
             TextLine.recycle(line);
         }
 
@@ -585,9 +590,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
         }
 
         if (ClientFlags.fixLineHeightForLocale()) {
-            if (minimumFontMetrics == null) {
-                paint.getFontMetricsIntForLocale(fm);
-            } else {
+            if (minimumFontMetrics != null) {
                 fm.set(minimumFontMetrics);
                 // Because the font metrics is provided by public APIs, adjust the top/bottom with
                 // ascent/descent: top must be smaller than ascent, bottom must be larger than
@@ -603,7 +606,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                 0 /* ellipsisStart, 0 since text has not been ellipsized at this point */,
                 0 /* ellipsisEnd, 0 since text has not been ellipsized at this point */,
                 useFallbackLineSpacing);
-        fm.width = (int) Math.ceil(line.metrics(fm, fm.mDrawingBounds, false));
+        fm.width = (int) Math.ceil(line.metrics(fm, fm.mDrawingBounds, false, null));
         TextLine.recycle(line);
 
         return fm;
@@ -713,18 +716,21 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
     public void draw(Canvas c, Path highlight, Paint highlightpaint,
                      int cursorOffset) {
         if (mDirect != null && highlight == null) {
-            if (getUseBoundsForWidth()) {
-                c.save();
+            float leftShift = 0;
+            if (getUseBoundsForWidth() && getShiftDrawingOffsetForStartOverhang()) {
                 RectF drawingRect = computeDrawingBoundingBox();
                 if (drawingRect.left < 0) {
-                    c.translate(-drawingRect.left, 0);
+                    leftShift = -drawingRect.left;
+                    c.translate(leftShift, 0);
                 }
             }
 
             c.drawText(mDirect, 0, mBottom - mDesc, mPaint);
 
-            if (getUseBoundsForWidth()) {
-                c.restore();
+            if (leftShift != 0) {
+                // Manually translate back to the original position because of b/324498002, using
+                // save/restore disappears the toggle switch drawables.
+                c.translate(-leftShift, 0);
             }
         } else {
             super.draw(c, highlight, highlightpaint, cursorOffset);

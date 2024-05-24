@@ -26,6 +26,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.flags.FeatureFlags;
@@ -118,6 +119,7 @@ public class LegacyNotificationIconAreaControllerImplTest extends SysuiTestCase 
 
     @Test
     public void testAppearResetsTranslation() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
         mController.setupAodIcons(mAodIcons);
         when(mDozeParameters.shouldControlScreenOff()).thenReturn(false);
         mController.appearAodIcons();

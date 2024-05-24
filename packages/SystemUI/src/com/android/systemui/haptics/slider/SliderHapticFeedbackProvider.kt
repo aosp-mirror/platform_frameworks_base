@@ -162,25 +162,31 @@ class SliderHapticFeedbackProvider(
 
     override fun onLowerBookend() {
         if (!hasVibratedAtLowerBookend) {
-            velocityTracker.computeCurrentVelocity(UNITS_SECOND, config.maxVelocityToScale)
-            vibrateOnEdgeCollision(abs(velocityTracker.xVelocity))
+            vibrateOnEdgeCollision(abs(getTrackedVelocity()))
             hasVibratedAtLowerBookend = true
         }
     }
 
     override fun onUpperBookend() {
         if (!hasVibratedAtUpperBookend) {
-            velocityTracker.computeCurrentVelocity(UNITS_SECOND, config.maxVelocityToScale)
-            vibrateOnEdgeCollision(abs(velocityTracker.xVelocity))
+            vibrateOnEdgeCollision(abs(getTrackedVelocity()))
             hasVibratedAtUpperBookend = true
         }
     }
 
     override fun onProgress(@FloatRange(from = 0.0, to = 1.0) progress: Float) {
-        velocityTracker.computeCurrentVelocity(UNITS_SECOND, config.maxVelocityToScale)
-        vibrateDragTexture(abs(velocityTracker.xVelocity), progress)
+        vibrateDragTexture(abs(getTrackedVelocity()), progress)
         hasVibratedAtUpperBookend = false
         hasVibratedAtLowerBookend = false
+    }
+
+    private fun getTrackedVelocity(): Float {
+        velocityTracker.computeCurrentVelocity(UNITS_SECOND, config.maxVelocityToScale)
+        return if (velocityTracker.isAxisSupported(config.velocityAxis)) {
+            velocityTracker.getAxisVelocity(config.velocityAxis)
+        } else {
+            0f
+        }
     }
 
     override fun onProgressJump(@FloatRange(from = 0.0, to = 1.0) progress: Float) {}

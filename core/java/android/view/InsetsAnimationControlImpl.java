@@ -34,16 +34,15 @@ import static android.view.InsetsController.DEBUG;
 import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
 import static android.view.InsetsController.LayoutInsetsDuringAnimation;
 import static android.view.InsetsSource.ID_IME;
-import static android.view.InsetsState.ISIDE_BOTTOM;
-import static android.view.InsetsState.ISIDE_FLOATING;
-import static android.view.InsetsState.ISIDE_LEFT;
-import static android.view.InsetsState.ISIDE_RIGHT;
-import static android.view.InsetsState.ISIDE_TOP;
+import static android.view.InsetsSource.SIDE_BOTTOM;
+import static android.view.InsetsSource.SIDE_NONE;
+import static android.view.InsetsSource.SIDE_LEFT;
+import static android.view.InsetsSource.SIDE_RIGHT;
+import static android.view.InsetsSource.SIDE_TOP;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.inputmethod.ImeTracker.DEBUG_IME_VISIBILITY;
-import static android.view.inputmethod.ImeTracker.TOKEN_NONE;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
@@ -60,7 +59,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.SparseSetArray;
 import android.util.proto.ProtoOutputStream;
-import android.view.InsetsState.InternalInsetsSide;
+import android.view.InsetsSource.InternalInsetsSide;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
@@ -142,7 +141,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
             if (mHasZeroInsetsIme) {
                 // IME has shownInsets of ZERO, and can't map to a side by default.
                 // Map zero insets IME to bottom, making it a special case of bottom insets.
-                idSideMap.put(ID_IME, ISIDE_BOTTOM);
+                idSideMap.put(ID_IME, SIDE_BOTTOM);
             }
             buildSideControlsMap(idSideMap, mSideControlsMap, controls);
         } else {
@@ -165,9 +164,9 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         mStatsToken = statsToken;
         if (DEBUG_IME_VISIBILITY && (types & ime()) != 0) {
             EventLog.writeEvent(IMF_IME_ANIM_START,
-                    mStatsToken != null ? mStatsToken.getTag() : TOKEN_NONE, mAnimationType,
-                    mCurrentAlpha, "Current:" + mCurrentInsets, "Shown:" + mShownInsets,
-                    "Hidden:" + mHiddenInsets);
+                    mStatsToken != null ? mStatsToken.getTag() : ImeTracker.TOKEN_NONE,
+                    mAnimationType, mCurrentAlpha, "Current:" + mCurrentInsets,
+                    "Shown:" + mShownInsets, "Hidden:" + mHiddenInsets);
         }
         mController.startAnimation(this, listener, types, mAnimation,
                 new Bounds(mHiddenInsets, mShownInsets));
@@ -245,6 +244,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     }
 
     @Override
+    @Nullable
     public ImeTracker.Token getStatsToken() {
         return mStatsToken;
     }
@@ -286,10 +286,10 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         }
         final Insets offset = Insets.subtract(mShownInsets, mPendingInsets);
         final ArrayList<SurfaceParams> params = new ArrayList<>();
-        updateLeashesForSide(ISIDE_LEFT, offset.left, params, outState, mPendingAlpha);
-        updateLeashesForSide(ISIDE_TOP, offset.top, params, outState, mPendingAlpha);
-        updateLeashesForSide(ISIDE_RIGHT, offset.right, params, outState, mPendingAlpha);
-        updateLeashesForSide(ISIDE_BOTTOM, offset.bottom, params, outState, mPendingAlpha);
+        updateLeashesForSide(SIDE_LEFT, offset.left, params, outState, mPendingAlpha);
+        updateLeashesForSide(SIDE_TOP, offset.top, params, outState, mPendingAlpha);
+        updateLeashesForSide(SIDE_RIGHT, offset.right, params, outState, mPendingAlpha);
+        updateLeashesForSide(SIDE_BOTTOM, offset.bottom, params, outState, mPendingAlpha);
 
         mController.applySurfaceParams(params.toArray(new SurfaceParams[params.size()]));
         mCurrentInsets = mPendingInsets;
@@ -330,8 +330,8 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         mListener.onFinished(this);
         if (DEBUG_IME_VISIBILITY && (mTypes & ime()) != 0) {
             EventLog.writeEvent(IMF_IME_ANIM_FINISH,
-                    mStatsToken != null ? mStatsToken.getTag() : TOKEN_NONE, mAnimationType,
-                    mCurrentAlpha, shown ? 1 : 0, Objects.toString(insets));
+                    mStatsToken != null ? mStatsToken.getTag() : ImeTracker.TOKEN_NONE,
+                    mAnimationType, mCurrentAlpha, shown ? 1 : 0, Objects.toString(insets));
         }
     }
 
@@ -355,8 +355,8 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         if (DEBUG) Log.d(TAG, "notify Control request cancelled for types: " + mTypes);
         if (DEBUG_IME_VISIBILITY && (mTypes & ime()) != 0) {
             EventLog.writeEvent(IMF_IME_ANIM_CANCEL,
-                    mStatsToken != null ? mStatsToken.getTag() : TOKEN_NONE, mAnimationType,
-                    Objects.toString(mPendingInsets));
+                    mStatsToken != null ? mStatsToken.getTag() : ImeTracker.TOKEN_NONE,
+                    mAnimationType, Objects.toString(mPendingInsets));
         }
         releaseLeashes();
     }
@@ -499,19 +499,19 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         final float surfaceOffset = mTranslator != null
                 ? mTranslator.translateLengthInAppWindowToScreen(offset) : offset;
         switch (side) {
-            case ISIDE_LEFT:
+            case SIDE_LEFT:
                 m.postTranslate(-surfaceOffset, 0);
                 frame.offset(-offset, 0);
                 break;
-            case ISIDE_TOP:
+            case SIDE_TOP:
                 m.postTranslate(0, -surfaceOffset);
                 frame.offset(0, -offset);
                 break;
-            case ISIDE_RIGHT:
+            case SIDE_RIGHT:
                 m.postTranslate(surfaceOffset, 0);
                 frame.offset(offset, 0);
                 break;
-            case ISIDE_BOTTOM:
+            case SIDE_BOTTOM:
                 m.postTranslate(0, surfaceOffset);
                 frame.offset(0, offset);
                 break;
@@ -543,9 +543,10 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
                 // control may be null if it got revoked.
                 continue;
             }
-            @InternalInsetsSide int side = InsetsState.getInsetSide(control.getInsetsHint());
-            if (side == ISIDE_FLOATING && control.getType() == WindowInsets.Type.ime()) {
-                side = ISIDE_BOTTOM;
+            @InternalInsetsSide int side = InsetsSource.getInsetSide(control.getInsetsHint());
+            if (side == SIDE_NONE && control.getType() == WindowInsets.Type.ime()) {
+                // IME might not provide insets when it is fullscreen or floating.
+                side = SIDE_BOTTOM;
             }
             sideControlsMap.add(side, control);
         }

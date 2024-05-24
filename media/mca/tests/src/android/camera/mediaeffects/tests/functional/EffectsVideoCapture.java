@@ -16,18 +16,19 @@
 
 package android.camera.mediaeffects.tests.functional;
 
-import android.media.filterfw.samples.CameraEffectsRecordingSample;
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Intent;
-import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.view.KeyEvent;
-import android.util.Log;
-import android.content.Intent;
-import android.os.Environment;
 import android.media.MediaMetadataRetriever;
+import android.media.filterfw.samples.CameraEffectsRecordingSample;
 import android.net.Uri;
+import android.os.Environment;
+import android.test.ActivityInstrumentationTestCase2;
+import android.util.Log;
+import android.view.KeyEvent;
+
+import androidx.test.filters.LargeTest;
+
 import java.io.File;
 
 public class EffectsVideoCapture extends ActivityInstrumentationTestCase2

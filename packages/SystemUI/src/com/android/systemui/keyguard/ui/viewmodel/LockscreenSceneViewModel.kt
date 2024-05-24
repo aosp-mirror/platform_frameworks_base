@@ -16,11 +16,12 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -38,7 +39,6 @@ constructor(
     deviceEntryInteractor: DeviceEntryInteractor,
     communalInteractor: CommunalInteractor,
     val longPress: KeyguardLongPressViewModel,
-    val keyguardRoot: KeyguardRootViewModel,
     val notifications: NotificationsPlaceholderViewModel,
 ) {
     /** The key of the scene we should switch to when swiping up. */
@@ -52,14 +52,16 @@ constructor(
             )
 
     private fun upDestinationSceneKey(isUnlocked: Boolean): SceneKey {
-        return if (isUnlocked) SceneKey.Gone else SceneKey.Bouncer
+        return if (isUnlocked) Scenes.Gone else Scenes.Bouncer
     }
 
     /** The key of the scene we should switch to when swiping left. */
-    val leftDestinationSceneKey: SceneKey? =
-        if (communalInteractor.isCommunalEnabled) {
-            SceneKey.Communal
-        } else {
-            null
-        }
+    val leftDestinationSceneKey: StateFlow<SceneKey?> =
+        communalInteractor.isCommunalAvailable
+            .map { available -> if (available) Scenes.Communal else null }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = null,
+            )
 }

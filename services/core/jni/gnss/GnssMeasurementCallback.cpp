@@ -392,7 +392,7 @@ void GnssMeasurementCallbackAidl::translateAndSetGnssData(const GnssData& data) 
 
     jobjectArray gnssAgcArray = nullptr;
     gnssAgcArray = translateAllGnssAgcs(env, data.gnssAgcs);
-    if (this->getInterfaceVersion() >= 3) {
+    if (interfaceVersion >= 3) {
         setMeasurementData(env, mCallbacksObj, clock, measurementArray, gnssAgcArray,
                            /*hasIsFullTracking=*/true, data.isFullTracking);
     } else {
@@ -467,7 +467,7 @@ void GnssMeasurementCallbackAidl::translateSingleGnssMeasurement(JNIEnv* env,
                                            satellitePvt.tropoDelayMeters);
         }
 
-        if (this->getInterfaceVersion() >= 2) {
+        if (interfaceVersion >= 2) {
             callObjectMethodIgnoringResult(env, satellitePvtBuilderObject,
                                            method_satellitePvtBuilderSetTimeOfClock,
                                            satellitePvt.timeOfClockSeconds);

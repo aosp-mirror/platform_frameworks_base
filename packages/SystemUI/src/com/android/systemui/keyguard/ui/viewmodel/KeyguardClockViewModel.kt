@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.content.Context
 import androidx.constraintlayout.helper.widget.Layer
 import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.keyguard.KeyguardClockSwitch.SMALL
@@ -23,12 +24,17 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
 import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
+import com.android.systemui.statusbar.policy.SplitShadeStateController
+import com.android.systemui.util.Utils
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
@@ -36,9 +42,11 @@ import kotlinx.coroutines.flow.stateIn
 class KeyguardClockViewModel
 @Inject
 constructor(
-    val keyguardInteractor: KeyguardInteractor,
-    val keyguardClockInteractor: KeyguardClockInteractor,
+    keyguardInteractor: KeyguardInteractor,
+    private val keyguardClockInteractor: KeyguardClockInteractor,
     @Application private val applicationScope: CoroutineScope,
+    private val splitShadeStateController: SplitShadeStateController,
+    notifsKeyguardInteractor: NotificationsKeyguardInteractor,
 ) {
     var burnInLayer: Layer? = null
     val useLargeClock: Boolean
@@ -79,10 +87,37 @@ constructor(
                         ?: false
             )
 
-    val clockShouldBeCentered: Flow<Boolean> =
+    val clockShouldBeCentered: StateFlow<Boolean> =
         keyguardInteractor.clockShouldBeCentered.stateIn(
             scope = applicationScope,
             started = SharingStarted.WhileSubscribed(),
-            initialValue = true
+            initialValue = false
         )
+
+    val isAodIconsVisible: StateFlow<Boolean> =
+        notifsKeyguardInteractor.areNotificationsFullyHidden.stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = false
+        )
+
+    /** Calculates the top margin for the small clock. */
+    fun getSmallClockTopMargin(context: Context): Int {
+        var topMargin: Int
+        val statusBarHeight = Utils.getStatusBarHeaderHeightKeyguard(context)
+
+        if (splitShadeStateController.shouldUseSplitNotificationShade(context.resources)) {
+            topMargin =
+                context.resources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin)
+            if (ComposeLockscreen.isEnabled) {
+                topMargin -= statusBarHeight
+            }
+        } else {
+            topMargin = context.resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin)
+            if (!ComposeLockscreen.isEnabled) {
+                topMargin += statusBarHeight
+            }
+        }
+        return topMargin
+    }
 }

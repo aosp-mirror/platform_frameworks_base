@@ -30,6 +30,10 @@ enum class FingerprintSensorType {
     fun isUdfps(): Boolean {
         return (this == UDFPS_OPTICAL) || (this == UDFPS_ULTRASONIC)
     }
+
+    fun isPowerButton(): Boolean {
+        return this == POWER_BUTTON
+    }
 }
 
 /** Convert [this] to corresponding [FingerprintSensorType] */
@@ -42,4 +46,15 @@ fun Int.toSensorType(): FingerprintSensorType =
         FingerprintSensorProperties.TYPE_POWER_BUTTON -> FingerprintSensorType.POWER_BUTTON
         FingerprintSensorProperties.TYPE_HOME_BUTTON -> FingerprintSensorType.HOME_BUTTON
         else -> throw IllegalArgumentException("Invalid SensorType value: $this")
+    }
+
+/** Convert [this] to corresponding [Int] */
+fun FingerprintSensorType.toInt(): Int =
+    when (this) {
+        FingerprintSensorType.UNKNOWN -> FingerprintSensorProperties.TYPE_UNKNOWN
+        FingerprintSensorType.REAR -> FingerprintSensorProperties.TYPE_REAR
+        FingerprintSensorType.UDFPS_ULTRASONIC -> FingerprintSensorProperties.TYPE_UDFPS_ULTRASONIC
+        FingerprintSensorType.UDFPS_OPTICAL -> FingerprintSensorProperties.TYPE_UDFPS_OPTICAL
+        FingerprintSensorType.POWER_BUTTON -> FingerprintSensorProperties.TYPE_POWER_BUTTON
+        FingerprintSensorType.HOME_BUTTON -> FingerprintSensorProperties.TYPE_HOME_BUTTON
     }

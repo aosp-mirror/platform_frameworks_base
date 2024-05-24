@@ -16,6 +16,7 @@
 
 package com.android.protolog.tool
 
+import com.android.internal.protolog.common.LogLevel
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.expr.BinaryExpr
 import com.github.javaparser.ast.expr.StringLiteralExpr
@@ -27,31 +28,31 @@ import org.junit.Test
 class CodeUtilsTest {
     @Test
     fun hash() {
-        assertEquals(-1259556708, CodeUtils.hash("Test.java:50", "test",
+        assertEquals(3883826472308915399, CodeUtils.hash("Test.java:50", "test",
                 LogLevel.DEBUG, LogGroup("test", true, true, "TAG")))
     }
 
     @Test
     fun hash_changeLocation() {
-        assertEquals(15793504, CodeUtils.hash("Test.java:10", "test2",
+        assertEquals(4125273133972468649, CodeUtils.hash("Test.java:10", "test2",
                 LogLevel.DEBUG, LogGroup("test", true, true, "TAG")))
     }
 
     @Test
     fun hash_changeLevel() {
-        assertEquals(-731772463, CodeUtils.hash("Test.java:50", "test",
+        assertEquals(2618535069521361990, CodeUtils.hash("Test.java:50", "test",
                 LogLevel.ERROR, LogGroup("test", true, true, "TAG")))
     }
 
     @Test
     fun hash_changeMessage() {
-        assertEquals(-2026343204, CodeUtils.hash("Test.java:50", "test2",
+        assertEquals(8907822592109789043, CodeUtils.hash("Test.java:50", "test2",
                 LogLevel.DEBUG, LogGroup("test", true, true, "TAG")))
     }
 
     @Test
     fun hash_changeGroup() {
-        assertEquals(1607870166, CodeUtils.hash("Test.java:50", "test2",
+        assertEquals(-1299517016176640015, CodeUtils.hash("Test.java:50", "test2",
                 LogLevel.DEBUG, LogGroup("test2", true, true, "TAG")))
     }
 

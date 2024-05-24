@@ -57,7 +57,7 @@ public class PowerStatsSpan {
      * {@link #isCompatibleXmlFormat} to return true for all legacy versions
      * that are compatible with the new one.
      */
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
     private static final String XML_TAG_METADATA = "metadata";
     private static final String XML_ATTR_ID = "id";

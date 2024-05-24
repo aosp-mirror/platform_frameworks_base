@@ -120,6 +120,15 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Sakatu ikusteko"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Errore bat gertatu da pantaila-grabaketa gordetzean"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Errore bat gertatu da pantaila grabatzen hastean"</string>
+    <string name="issuerecord_title" msgid="286627115110121849">"Arazo-grabagailua"</string>
+    <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Arazoaren grabaketa prozesatzen"</string>
+    <string name="issuerecord_channel_description" msgid="6142326363431474632">"Arazo bat biltzeko saio baten aktibo dagoen jakinarazpena"</string>
+    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"Arazoa grabatzen"</string>
+    <string name="issuerecord_share_label" msgid="3992657993619876199">"Partekatu"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"Gorde da arazoaren grabaketa"</string>
+    <string name="issuerecord_save_text" msgid="1205985304551521495">"Sakatu ikusteko"</string>
+    <string name="issuerecord_save_error" msgid="6913040083446722726">"Errore bat gertatu da arazoa grabatzean"</string>
+    <string name="issuerecord_start_error" msgid="3402782952722871190">"Errore bat gertatu da arazoa grabatzen hastean"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Pantaila osoa ikusgai"</string>
     <string name="immersive_cling_description" msgid="6913958856085185775">"Irteteko, pasatu hatza goitik behera."</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Ados"</string>
@@ -188,10 +197,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Ezin izan da konfiguratu aurpegi bidez desblokeatzeko eginbidea. Berriro saiatzeko, joan ezarpenetara."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sakatu hatz-marken sentsorea"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Aurrera egiteko, sakatu desblokeatzeko ikonoa"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ezin da hauteman aurpegia. Erabili hatz-marka."</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"Ez da ezagutu aurpegia. Erabili hatz-marka."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <string name="keyguard_face_failed" msgid="9044619102286917151">"Ezin da ezagutu aurpegia"</string>
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"Ez da ezagutu aurpegia"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Erabili hatz-marka"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Aurpegi bidez desblokeatzeko eginbidea ez dago erabilgarri"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetootha konektatuta."</string>
@@ -259,6 +268,8 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gordeta"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"deskonektatu"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktibatu"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Aktibatu automatikoki berriro bihar"</string>
+    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"Quick Share, Bilatu nire gailua, gailuaren kokapena eta beste eginbide batzuek Bluetootha darabilte"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audioa"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Entzungailua"</string>
@@ -330,6 +341,17 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Pantaila-grabaketa"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Hasi"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Gelditu"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Arazo bat dago grabaketarekin"</string>
+    <string name="qs_record_issue_start" msgid="2979831312582567056">"Hasi"</string>
+    <string name="qs_record_issue_stop" msgid="3531747965741982657">"Gelditu"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Gailuaren erabileraren zer alderdiri eragin dio?"</string>
+    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Hautatu arazo mota"</string>
+    <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Pantaila-grabaketa"</string>
+  <string-array name="qs_record_issue_types">
+    <item msgid="2947988124014085798">"Errendimendua"</item>
+    <item msgid="1627504621139124393">"Erabiltzaile-interfazea"</item>
+    <item msgid="8309220355268900335">"Bateria"</item>
+  </string-array>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Esku bakarreko modua"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"Kontrastea"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Arrunta"</string>
@@ -355,8 +377,8 @@
     <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"Aplikazio eta zerbitzu guztiek mikrofonoa erabil dezakete."</string>
     <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"Mikrofonoa erabiltzeko baimena desgaituta dago aplikazio eta zerbitzu guztietarako. Mikrofonoa erabiltzeko baimena gaitzeko, joan Ezarpenak &gt; Pribatutasuna &gt; Mikrofonoa atalera."</string>
     <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"Mikrofonoa erabiltzeko baimena desgaituta dago aplikazio eta zerbitzu guztietarako. Baimen hori aldatzeko, joan Ezarpenak &gt; Pribatutasuna &gt; Mikrofonoa atalera."</string>
-    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"Piztu da kamera"</string>
-    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"Itzali da kamera"</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"Aktibatu da kamera"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"Desaktibatu da kamera"</string>
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Aplikazio eta zerbitzu guztiek kamera erabil dezakete."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Kamera erabiltzeko baimena desgaituta dago aplikazio eta zerbitzu guztietarako."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Mikrofonoaren botoia erabiltzeko, gaitu mikrofonoa erabiltzeko baimena ezarpenetan."</string>
@@ -401,9 +423,18 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mantso kargatzen • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> guztiz kargatu arte"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Kargatzen • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> guztiz kargatu arte"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Tutorial komuna hasteko, pasatu hatza ezkerrera"</string>
-    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Ireki widget-editorea"</string>
-    <string name="button_to_remove_widget" msgid="1511255853677835341">"Kendu widget bat"</string>
-    <string name="hub_mode_add_widget_button_text" msgid="3956587989338301487">"Gehitu widgeta"</string>
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Pertsonalizatu"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Baztertu"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Gehitu eta kendu eremu honetako widgetak, edo aldatu haien ordena"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Gehitu widget gehiago"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Widgetak pertsonalizatzeko, sakatu luze"</string>
+    <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Pertsonalizatu widgetak"</string>
+    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
+    <skip />
+    <string name="edit_widget" msgid="9030848101135393954">"Editatu widgeta"</string>
+    <string name="button_to_remove_widget" msgid="3948204829181214098">"Kendu"</string>
+    <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Gehitu widget bat"</string>
+    <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Eginda"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Aldatu erabiltzailea"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"zabaldu menua"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Saioko aplikazio eta datu guztiak ezabatuko dira."</string>
@@ -501,6 +532,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Zure gurasoak kudeatzen du gailua. Zure gurasoak gailuko informazioa ikusi eta kudea dezake; besteak beste, zer aplikazio erabiltzen dituzun, zure kokapena zein den eta pantaila aurrean zenbat eta noiz egoten zaren."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPNa"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent bidez desblokeatuta"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"Lapurreten aurkako babesa\nGailua blokeatuta dago, desblokeatzeko saiakera gehiegi"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Soinuaren ezarpenak"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Ezarri azpitituluak automatikoki"</string>
@@ -510,6 +542,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"desgaitu"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Audioa eta dardara"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Ezarpenak"</string>
+    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Istanteko azpitituluak"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Bolumena maila seguruago batera jaitsi da"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Entzungailuen bolumena gomendatutako denbora baino luzaroago egon da ozen"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Entzungailuen bolumenak aste honetarako muga segurua gainditu du"</string>
@@ -542,17 +575,22 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Jo tonua"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Dardara"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Ez jo tonua"</string>
+    <string name="media_device_cast" msgid="4786241789687569892">"Igorri"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Ez dago erabilgarri, tonua desaktibatuta dagoelako"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Sakatu audioa aktibatzeko."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Sakatu dardara ezartzeko. Baliteke erabilerraztasun-eginbideen audioa desaktibatzea."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Sakatu audioa desaktibatzeko. Baliteke erabilerraztasun-eginbideen audioa desaktibatzea."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Sakatu hau dardara ezartzeko."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Sakatu hau audioa desaktibatzeko."</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Zarata-murrizketa"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Sakatu tonu-jotzailearen modua aldatzeko"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"desaktibatu audioa"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"aktibatu audioa"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"dardara"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s gailuaren bolumena kontrolatzeko aukerak"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Tonuak jo egingo du deiak eta jakinarazpenak jasotzean (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> hemen erreproduzitzen:"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Audioa erreproduzitzen jarraituko du"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Sistemaren erabiltzaile-interfazearen konfiguratzailea"</string>
     <string name="status_bar" msgid="4357390266055077437">"Egoera-barra"</string>
     <string name="demo_mode" msgid="263484519766901593">"Sistemaren erabiltzaile-interfazearen demo modua"</string>
@@ -576,6 +614,10 @@
     <string name="alarm_template" msgid="2234991538018805736">"ordua: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"data: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Wifi-gunea"</string>
+    <string name="accessibility_status_bar_satellite_no_connection" msgid="3001571744269917762">"Satelitea, konexiorik ez"</string>
+    <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Satelitea, konexio ahula"</string>
+    <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelitea, konexio ona"</string>
+    <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelitea, konexioa erabilgarri"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Laneko profila"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Dibertsioa batzuentzat, baina ez guztientzat"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Sistemaren erabiltzaile-interfazearen konfiguratzaileak Android erabiltzaile-interfazea moldatzeko eta pertsonalizatzeko modu gehiago eskaintzen dizkizu. Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
@@ -587,9 +629,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Bluetooth eginbidea aktibatu nahi duzu?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Teklatua tabletara konektatzeko, Bluetooth eginbidea aktibatu behar duzu."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Aktibatu"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Bateria-mailaren arabera jakinarazpenak kontrolatzeko aukerak"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Aktibatuta: aurpegian oinarrituta"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Bateria-mailaren arabera jakinarazpenak kontrolatzeko aukerekin, 0 eta 5 bitarteko garrantzi-mailetan sailka ditzakezu aplikazioen jakinarazpenak. \n\n"<b>"5. maila"</b>" \n- Erakutsi jakinarazpenen zerrendaren goialdean. \n- Baimendu etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"4. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"3. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n\n"<b>"2. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n\n"<b>"1. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n- Ezkutatu pantaila blokeatutik eta egoera-barratik. \n- Erakutsi jakinarazpenen zerrendaren behealdean. \n\n"<b>"0. maila"</b>" \n- Blokeatu aplikazioaren jakinarazpen guztiak."</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Eginda"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Aplikatu"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Desaktibatu jakinarazpenak"</string>
@@ -633,6 +673,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"jakinarazpena atzeratzeko aukerak"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Gogorarazi"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"Desegin"</string>
+    <string name="snooze_undo_content_description" msgid="2711656788917580801">"Desegin jakinarazpena atzeratzea"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g>z atzeratu da"</string>
     <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# ordu}=2{# ordu}other{# ordu}}"</string>
     <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# minutu}other{# minutu}}"</string>
@@ -689,7 +730,7 @@
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"Atera pantaila-argazki bat"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Erakutsi lasterbideak"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Egin atzera"</string>
-    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Joan hasierako pantailara"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Joan orri nagusira"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Ikusi azkenaldiko aplikazioak"</string>
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Ikusi azken aplikazioak banan-banan (aurrerantz)"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Ikusi azken aplikazioak banan-banan (atzerantz)"</string>
@@ -698,7 +739,7 @@
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Ireki ezarpenak"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Ireki Laguntzailea"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Blokeatu pantaila"</string>
-    <string name="group_system_quick_memo" msgid="6257072703041301265">"Ireki oharrak"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"Egin ohar bat"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Zereginen aldibereko sistemaren exekuzioa"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Sartu pantaila zatituaren eskuineko aldean oraingo aplikazioarekin"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Sartu pantaila zatituaren ezkerreko aldean oraingo aplikazioarekin"</string>
@@ -796,6 +837,10 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Itzaltzeko menua"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g> orria"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Pantaila blokeatua"</string>
+    <!-- no translation found for finder_active (7907846989716941952) -->
+    <skip />
+    <!-- no translation found for shutdown_progress (5464239146561542178) -->
+    <skip />
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ikusi zaintzeko urratsak"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ikusi zaintzeko urratsak"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Deskonektatu gailua"</string>
@@ -822,6 +867,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"Konfigurazioa"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Memoria"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Aholkuak"</string>
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"Erabilerraztasuna"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Zuzeneko aplikazioak"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> abian da"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Ezer instalatu gabe ireki da aplikazioa."</string>
@@ -857,7 +903,6 @@
     <string name="auto_saver_title" msgid="6873691178754086596">"Sakatu bateria-aurreztailea noiz aktibatu programatzeko"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Aktibatu aurreztailea bateria agortzeko arriskua dagoenean"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Ez, eskerrik asko"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
     <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"Erabiltzen ari da"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikazio batzuk <xliff:g id="TYPES_LIST">%s</xliff:g> erabiltzen ari dira."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
@@ -918,6 +963,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Erabilerraztasun-eginbideak irekitzeko, sakatu hau. Ezarpenetan pertsonalizatu edo ordez dezakezu botoia.\n\n"<annotation id="link">"Ikusi ezarpenak"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Eraman botoia ertzera aldi baterako ezkutatzeko"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Desegin"</string>
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"Erabilerraztasuna botoia ezkutatuta dago"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Erabilerraztasuna botoia erakusteko, sakatu hau"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Kendu da lasterbidea (<xliff:g id="FEATURE_NAME">%s</xliff:g>)"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# lasterbide kendu da}other{# lasterbide kendu dira}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Eraman goialdera, ezkerretara"</string>
@@ -928,6 +975,7 @@
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Atera ertzetik eta erakutsi"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Kendu"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"aldatu"</string>
+    <string name="accessibility_floating_button_action_edit" msgid="1688227814600463987">"Editatu"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Gailuak kontrolatzeko widgetak"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Aukeratu aplikazio bat kontrolatzeko aukerak gehitzeko"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Kontrolatzeko # aukera gehitu da.}other{Kontrolatzeko # aukera gehitu dira.}}"</string>
@@ -1046,7 +1094,7 @@
     <string name="build_number_copy_toast" msgid="877720921605503046">"Kopiatu da konpilazio-zenbakia arbelean."</string>
     <string name="basic_status" msgid="2315371112182658176">"Elkarrizketa irekia"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Elkarrizketa-widgetak"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"Sakatu elkarrizketa bat hasierako pantailan gehitzeko"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Sakatu elkarrizketa bat orri nagusian gehitzeko"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Azken elkarrizketak agertuko dira hemen"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Lehentasunezko elkarrizketak"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Azken elkarrizketak"</string>
@@ -1147,6 +1195,7 @@
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"Oharrak idaztea"</string>
     <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"Oharrak idaztea, <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
+    <string name="audio_sharing_description" msgid="8849060142768870004">"Audioa partekatzen"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Igortzen"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren audioa igortzeari utzi nahi diozu?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> aplikazioaren audioa igortzen baduzu, edo audio-irteera aldatzen baduzu, une hartako igorpena eten egingo da"</string>
@@ -1196,7 +1245,9 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"Erabiltzailearen presentzia hauteman da"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Ezarri oharren aplikazio lehenetsia ezarpenetan"</string>
     <string name="install_app" msgid="5066668100199613936">"Instalatu aplikazioa"</string>
+    <string name="dismissible_keyguard_swipe" msgid="8377597870094949432">"Aurrera egiteko, pasatu hatza gora"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Kanpoko pantailan islatu nahi duzu?"</string>
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"Barneko pantaila islatuko da. Aurreko pantaila desaktibatu egingo da."</string>
     <string name="mirror_display" msgid="2515262008898122928">"Islatu pantaila"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"Baztertu"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Konektatutako pantaila"</string>
@@ -1220,4 +1271,6 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) aplikazioak erabili du duela gutxi"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Teklatuaren hondoko argia"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d/%2$d maila"</string>
+    <string name="home_controls_dream_label" msgid="6567105701292324257">"Etxeko gailuak kontrolatzeko aukerak"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"Atzitu etxeko gailuak kontrolatzeko aukerak pantaila-babesletik"</string>
 </resources>

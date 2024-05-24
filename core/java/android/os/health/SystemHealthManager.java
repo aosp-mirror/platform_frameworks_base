@@ -25,8 +25,8 @@ import android.content.Context;
 import android.os.BatteryStats;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IPowerStatsService;
+import android.os.OutcomeReceiver;
 import android.os.PowerMonitor;
 import android.os.PowerMonitorReadings;
 import android.os.Process;
@@ -39,6 +39,7 @@ import com.android.internal.app.IBatteryStats;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -161,12 +162,12 @@ public class SystemHealthManager {
      * (on-device power rail monitor) rails and modeled energy consumers.  If ODPM is unsupported
      * on this device this method delivers an empty list.
      *
-     * @param handler  optional Handler to deliver the callback. If not supplied, the callback
+     * @param executor optional Handler to deliver the callback. If not supplied, the callback
      *                 may be invoked on an arbitrary thread.
      * @param onResult callback for the result
      */
     @FlaggedApi("com.android.server.power.optimization.power_monitor_api")
-    public void getSupportedPowerMonitors(@Nullable Handler handler,
+    public void getSupportedPowerMonitors(@Nullable Executor executor,
             @NonNull Consumer<List<PowerMonitor>> onResult) {
         final List<PowerMonitor> result;
         synchronized (mPowerMonitorsLock) {
@@ -180,15 +181,15 @@ public class SystemHealthManager {
             }
         }
         if (result != null) {
-            if (handler != null) {
-                handler.post(() -> onResult.accept(result));
+            if (executor != null) {
+                executor.execute(() -> onResult.accept(result));
             } else {
                 onResult.accept(result);
             }
             return;
         }
         try {
-            mPowerStats.getSupportedPowerMonitors(new ResultReceiver(handler) {
+            mPowerStats.getSupportedPowerMonitors(new ResultReceiver(null) {
                 @Override
                 protected void onReceiveResult(int resultCode, Bundle resultData) {
                     PowerMonitor[] array = resultData.getParcelableArray(
@@ -197,7 +198,11 @@ public class SystemHealthManager {
                     synchronized (mPowerMonitorsLock) {
                         mPowerMonitorsInfo = result;
                     }
-                    onResult.accept(result);
+                    if (executor != null) {
+                        executor.execute(()-> onResult.accept(result));
+                    } else {
+                        onResult.accept(result);
+                    }
                 }
             });
         } catch (RemoteException e) {
@@ -213,17 +218,22 @@ public class SystemHealthManager {
      * monitors.
      *
      * @param powerMonitors power monitors to be retrieved.
-     * @param handler       optional Handler to deliver the callbacks. If not supplied, the callback
-     *                      may be invoked on an arbitrary thread.
-     * @param onSuccess     callback for the result
-     * @param onError       callback invoked in case of an error
+     * @param executor      optional Executor to deliver the callbacks. If not supplied, the
+     *                      callback may be invoked on an arbitrary thread.
+     * @param onResult      callback for the result
      */
     @FlaggedApi("com.android.server.power.optimization.power_monitor_api")
     public void getPowerMonitorReadings(@NonNull List<PowerMonitor> powerMonitors,
-            @Nullable Handler handler, @NonNull Consumer<PowerMonitorReadings> onSuccess,
-            @NonNull Consumer<RuntimeException> onError) {
+            @Nullable Executor executor,
+            @NonNull OutcomeReceiver<PowerMonitorReadings, RuntimeException> onResult) {
         if (mPowerStats == null) {
-            onError.accept(new IllegalArgumentException("Unsupported power monitor"));
+            IllegalArgumentException error =
+                    new IllegalArgumentException("Unsupported power monitor");
+            if (executor != null) {
+                executor.execute(() -> onResult.onError(error));
+            } else {
+                onResult.onError(error);
+            }
             return;
         }
 
@@ -235,18 +245,31 @@ public class SystemHealthManager {
             indices[i] = powerMonitorsArray[i].index;
         }
         try {
-            mPowerStats.getPowerMonitorReadings(indices, new ResultReceiver(handler) {
+            mPowerStats.getPowerMonitorReadings(indices, new ResultReceiver(null) {
                 @Override
                 protected void onReceiveResult(int resultCode, Bundle resultData) {
                     if (resultCode == IPowerStatsService.RESULT_SUCCESS) {
-                        onSuccess.accept(new PowerMonitorReadings(powerMonitorsArray,
+                        PowerMonitorReadings result = new PowerMonitorReadings(powerMonitorsArray,
                                 resultData.getLongArray(IPowerStatsService.KEY_ENERGY),
-                                resultData.getLongArray(IPowerStatsService.KEY_TIMESTAMPS)));
-                    } else if (resultCode == IPowerStatsService.RESULT_UNSUPPORTED_POWER_MONITOR) {
-                        onError.accept(new IllegalArgumentException("Unsupported power monitor"));
+                                resultData.getLongArray(IPowerStatsService.KEY_TIMESTAMPS));
+                        if (executor != null) {
+                            executor.execute(() -> onResult.onResult(result));
+                        } else {
+                            onResult.onResult(result);
+                        }
                     } else {
-                        onError.accept(new IllegalStateException(
-                                "Unrecognized result code " + resultCode));
+                        RuntimeException error;
+                        if (resultCode == IPowerStatsService.RESULT_UNSUPPORTED_POWER_MONITOR) {
+                            error = new IllegalArgumentException("Unsupported power monitor");
+                        } else {
+                            error = new IllegalStateException(
+                                    "Unrecognized result code " + resultCode);
+                        }
+                        if (executor != null) {
+                            executor.execute(() -> onResult.onError(error));
+                        } else {
+                            onResult.onError(error);
+                        }
                     }
                 }
             });

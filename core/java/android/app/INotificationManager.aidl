@@ -24,6 +24,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationHistory;
 import android.app.NotificationManager;
+import android.app.ICallNotificationEventCallback;
 import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -38,6 +39,7 @@ import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
 import android.service.notification.NotificationListenerFilter;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenPolicy;
 import android.app.AutomaticZenRule;
 import android.service.notification.ZenModeConfig;
 
@@ -167,7 +169,7 @@ interface INotificationManager
     void requestInterruptionFilterFromListener(in INotificationListener token, int interruptionFilter);
     int getInterruptionFilterFromListener(in INotificationListener token);
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
-    void setInterruptionFilter(String pkg, int interruptionFilter);
+    void setInterruptionFilter(String pkg, int interruptionFilter, boolean fromUser);
 
     void updateNotificationChannelGroupFromPrivilegedListener(in INotificationListener token, String pkg, in UserHandle user, in NotificationChannelGroup group);
     void updateNotificationChannelFromPrivilegedListener(in INotificationListener token, String pkg, in UserHandle user, in NotificationChannel channel);
@@ -205,23 +207,25 @@ interface INotificationManager
     @UnsupportedAppUsage
     ZenModeConfig getZenModeConfig();
     NotificationManager.Policy getConsolidatedNotificationPolicy();
-    oneway void setZenMode(int mode, in Uri conditionId, String reason);
+    oneway void setZenMode(int mode, in Uri conditionId, String reason, boolean fromUser);
     oneway void notifyConditions(String pkg, in IConditionProvider provider, in Condition[] conditions);
     boolean isNotificationPolicyAccessGranted(String pkg);
     NotificationManager.Policy getNotificationPolicy(String pkg);
-    void setNotificationPolicy(String pkg, in NotificationManager.Policy policy);
+    void setNotificationPolicy(String pkg, in NotificationManager.Policy policy, boolean fromUser);
     boolean isNotificationPolicyAccessGrantedForPackage(String pkg);
     void setNotificationPolicyAccessGranted(String pkg, boolean granted);
     void setNotificationPolicyAccessGrantedForUser(String pkg, int userId, boolean granted);
+    ZenPolicy getDefaultZenPolicy();
     AutomaticZenRule getAutomaticZenRule(String id);
     Map<String, AutomaticZenRule> getAutomaticZenRules();
     // TODO: b/310620812 - Remove getZenRules() when MODES_API is inlined.
     List<ZenModeConfig.ZenRule> getZenRules();
-    String addAutomaticZenRule(in AutomaticZenRule automaticZenRule, String pkg);
-    boolean updateAutomaticZenRule(String id, in AutomaticZenRule automaticZenRule);
-    boolean removeAutomaticZenRule(String id);
-    boolean removeAutomaticZenRules(String packageName);
+    String addAutomaticZenRule(in AutomaticZenRule automaticZenRule, String pkg, boolean fromUser);
+    boolean updateAutomaticZenRule(String id, in AutomaticZenRule automaticZenRule, boolean fromUser);
+    boolean removeAutomaticZenRule(String id, boolean fromUser);
+    boolean removeAutomaticZenRules(String packageName, boolean fromUser);
     int getRuleInstanceCount(in ComponentName owner);
+    int getAutomaticZenRuleState(String id);
     void setAutomaticZenRuleState(String id, in Condition condition);
 
     byte[] getBackupPayload(int user);
@@ -245,4 +249,10 @@ interface INotificationManager
 
     @EnforcePermission("MANAGE_TOAST_RATE_LIMITING")
     void setToastRateLimitingEnabled(boolean enable);
+
+    @EnforcePermission(allOf={"INTERACT_ACROSS_USERS", "ACCESS_NOTIFICATIONS"})
+    void registerCallNotificationEventListener(String packageName, in UserHandle userHandle, in ICallNotificationEventCallback listener);
+    @EnforcePermission(allOf={"INTERACT_ACROSS_USERS", "ACCESS_NOTIFICATIONS"})
+    void unregisterCallNotificationEventListener(String packageName, in UserHandle userHandle, in ICallNotificationEventCallback listener);
+
 }

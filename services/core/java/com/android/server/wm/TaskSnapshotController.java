@@ -68,7 +68,7 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
                 Environment::getDataSystemCeDirectory);
         mPersister = new TaskSnapshotPersister(persistQueue, mPersistInfoProvider);
 
-        initialize(new TaskSnapshotCache(service, new AppSnapshotLoader(mPersistInfoProvider)));
+        initialize(new TaskSnapshotCache(new AppSnapshotLoader(mPersistInfoProvider)));
         final boolean snapshotEnabled =
                 !service.mContext
                         .getResources()
@@ -268,6 +268,11 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
     @Override
     ActivityManager.TaskDescription getTaskDescription(Task source) {
         return source.getTaskDescription();
+    }
+
+    @Override
+    protected Rect getLetterboxInsets(ActivityRecord topActivity) {
+        return topActivity.getLetterboxInsets();
     }
 
     void getClosingTasksInner(Task task, ArraySet<Task> outClosingTasks) {

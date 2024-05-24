@@ -35,3 +35,48 @@ flag {
   description: "This flag controls the vibrate while unlocked setting of polite notifications"
   bug: "270456865"
 }
+
+flag {
+  name: "autogroup_summary_icon_update"
+  namespace: "systemui"
+  description: "This flag controls the fix for notifications autogroup summary icon updates"
+  bug: "227693160"
+}
+
+flag {
+    name: "screenshare_notification_hiding"
+    namespace: "systemui"
+    description: "Enable hiding of notifications during screenshare"
+    bug: "312784809"
+}
+
+flag {
+  name: "notification_reduce_messagequeue_usage"
+  namespace: "systemui"
+  description: "When this flag is on, NMS will no longer call removeMessage() and hasCallbacks() on Handler"
+  bug: "311051285"
+}
+
+flag {
+  name: "notification_test"
+  namespace: "systemui"
+  description: "Timing test, no functionality"
+  bug: "316931130"
+}
+
+flag {
+  name: "notification_custom_view_uri_restriction"
+  namespace: "systemui"
+  description: "This flag enables memory restriction of notifications holding custom views with Uri Bitmaps"
+  bug: "270553691"
+}
+
+flag {
+  name: "notification_hide_unused_channels"
+  namespace: "systemui"
+  description: "By default, hide non-blocked notification channels that haven't sent a notification in the last 2 weeks"
+  bug: "322536537"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

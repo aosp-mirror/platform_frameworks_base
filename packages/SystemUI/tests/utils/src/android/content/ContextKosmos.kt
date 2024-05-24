@@ -16,9 +16,10 @@
 
 package android.content
 
-import com.android.systemui.SysuiTestableContext
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
+import com.android.systemui.util.mockito.mock
 
-val Kosmos.testableContext: SysuiTestableContext by Kosmos.Fixture { testCase.context }
-var Kosmos.applicationContext: Context by Kosmos.Fixture { testableContext }
+var Kosmos.applicationContext: Context by
+    Kosmos.Fixture { testCase.context.apply { ensureTestableResources() } }
+val Kosmos.mockedContext: Context by Kosmos.Fixture { mock<Context>() }

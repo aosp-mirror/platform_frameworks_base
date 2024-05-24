@@ -31,10 +31,10 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.keyguard.KeyguardStatusView
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.keyguard.KeyguardViewConfigurator
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.KeyguardSection
-import com.android.systemui.media.controls.ui.KeyguardMediaController
+import com.android.systemui.media.controls.ui.controller.KeyguardMediaController
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.shade.NotificationPanelViewController
@@ -58,7 +58,7 @@ constructor(
     private val statusViewId = R.id.keyguard_status_view
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!KeyguardShadeMigrationNssl.isEnabled) {
+        if (!migrateClocksToBlueprint()) {
             return
         }
         // At startup, 2 views with the ID `R.id.keyguard_status_view` will be available.
@@ -83,7 +83,7 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (KeyguardShadeMigrationNssl.isEnabled) {
+        if (migrateClocksToBlueprint()) {
             constraintLayout.findViewById<KeyguardStatusView?>(R.id.keyguard_status_view)?.let {
                 val statusViewComponent =
                     keyguardStatusViewComponentFactory.build(it, context.display)

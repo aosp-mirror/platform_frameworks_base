@@ -494,6 +494,10 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
     }
 
     private void onUserCanceled(@NonNull Context context, @NonNull Intent intent) {
+        if (!isIntentValid(intent)) {
+            loge("Ignoring onUserCanceled called with invalid intent.");
+            return;
+        }
         int capability = intent.getIntExtra(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY,
                 SlicePurchaseController.PREMIUM_CAPABILITY_INVALID);
         logd("onUserCanceled: " + TelephonyManager.convertPremiumCapabilityToString(capability));

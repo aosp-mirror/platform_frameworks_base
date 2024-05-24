@@ -390,7 +390,7 @@ public class SplashScreenExitAnimationUtils {
                                 SurfaceControl firstWindowSurface, ViewGroup splashScreenView,
                                 TransactionPool transactionPool, Rect firstWindowFrame,
                                 int mainWindowShiftLength, float roundedCornerRadius) {
-            mFromYDelta = fromYDelta - roundedCornerRadius;
+            mFromYDelta = fromYDelta - Math.max(firstWindowFrame.top, roundedCornerRadius);
             mToYDelta = toYDelta;
             mOccludeHoleView = occludeHoleView;
             mApplier = new SyncRtSurfaceTransactionApplier(occludeHoleView);

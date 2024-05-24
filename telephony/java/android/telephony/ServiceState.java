@@ -63,6 +63,7 @@ import java.util.stream.Collectors;
  * For historical reasons this class is not declared as final; however,
  * it should be treated as though it were final.
  */
+@android.ravenwood.annotation.RavenwoodKeepPartialClass
 public class ServiceState implements Parcelable {
 
     static final String LOG_TAG = "PHONE";
@@ -1140,6 +1141,7 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static @NonNull String frequencyRangeToString(@FrequencyRange int range) {
         switch (range) {
             case FREQUENCY_RANGE_UNKNOWN: return "UNKNOWN";

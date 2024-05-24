@@ -24,7 +24,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.common.shared.model.Position
+import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -51,6 +52,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.verify
@@ -59,6 +62,7 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@android.platform.test.annotations.EnabledOnRavenwood
 class KeyguardRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var statusBarStateController: StatusBarStateController
@@ -67,10 +71,13 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var authController: AuthController
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var dreamOverlayCallbackController: DreamOverlayCallbackController
+    @Mock private lateinit var userTracker: UserTracker
+    @Captor private lateinit var updateCallbackCaptor: ArgumentCaptor<KeyguardUpdateMonitorCallback>
     private val mainDispatcher = StandardTestDispatcher()
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
     private lateinit var systemClock: FakeSystemClock
+    private lateinit var facePropertyRepository: FakeFacePropertyRepository
 
     private lateinit var underTest: KeyguardRepositoryImpl
 
@@ -78,6 +85,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         systemClock = FakeSystemClock()
+        facePropertyRepository = FakeFacePropertyRepository()
         underTest =
             KeyguardRepositoryImpl(
                 statusBarStateController,
@@ -89,6 +97,8 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 mainDispatcher,
                 testScope.backgroundScope,
                 systemClock,
+                facePropertyRepository,
+                userTracker,
             )
     }
 
@@ -129,21 +139,15 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun clockPosition() =
+    fun topClippingBounds() =
         testScope.runTest {
-            assertThat(underTest.clockPosition.value).isEqualTo(Position(0, 0))
+            assertThat(underTest.topClippingBounds.value).isNull()
 
-            underTest.setClockPosition(0, 1)
-            assertThat(underTest.clockPosition.value).isEqualTo(Position(0, 1))
+            underTest.topClippingBounds.value = 50
+            assertThat(underTest.topClippingBounds.value).isEqualTo(50)
 
-            underTest.setClockPosition(1, 9)
-            assertThat(underTest.clockPosition.value).isEqualTo(Position(1, 9))
-
-            underTest.setClockPosition(1, 0)
-            assertThat(underTest.clockPosition.value).isEqualTo(Position(1, 0))
-
-            underTest.setClockPosition(3, 1)
-            assertThat(underTest.clockPosition.value).isEqualTo(Position(3, 1))
+            underTest.topClippingBounds.value = 500
+            assertThat(underTest.topClippingBounds.value).isEqualTo(500)
         }
 
     @Test
@@ -216,10 +220,10 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isKeyguardUnlocked() =
+    fun isKeyguardDismissible() =
         testScope.runTest {
             whenever(keyguardStateController.isUnlocked).thenReturn(false)
-            val isKeyguardUnlocked by collectLastValue(underTest.isKeyguardUnlocked)
+            val isKeyguardUnlocked by collectLastValue(underTest.isKeyguardDismissible)
 
             runCurrent()
             assertThat(isKeyguardUnlocked).isFalse()
@@ -482,10 +486,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val values = mutableListOf<Point?>()
             val job = underTest.faceSensorLocation.onEach(values::add).launchIn(this)
-
-            val captor = argumentCaptor<AuthController.Callback>()
             runCurrent()
-            verify(authController).addCallback(captor.capture())
 
             // An initial, null value should be initially emitted so that flows combined with this
             // one
@@ -500,8 +501,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                     Point(250, 250),
                 )
                 .onEach {
-                    whenever(authController.faceSensorLocation).thenReturn(it)
-                    captor.value.onFaceSensorLocationChanged()
+                    facePropertyRepository.setSensorLocation(it)
                     runCurrent()
                 }
                 .also { dispatchedSensorLocations ->
@@ -552,5 +552,26 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 )
 
             job.cancel()
+        }
+
+    @Test
+    fun isEncryptedOrLockdown() =
+        TestScope(mainDispatcher).runTest {
+            whenever(userTracker.userId).thenReturn(0)
+            whenever(keyguardUpdateMonitor.isEncryptedOrLockdown(0)).thenReturn(true)
+
+            // Default value for isEncryptedOrLockdown is true
+            val isEncryptedOrLockdown by collectLastValue(underTest.isEncryptedOrLockdown)
+            assertThat(isEncryptedOrLockdown).isTrue()
+
+            verify(keyguardUpdateMonitor).registerCallback(updateCallbackCaptor.capture())
+            val updateCallback = updateCallbackCaptor.value
+
+            // Strong auth state updated
+            whenever(keyguardUpdateMonitor.isEncryptedOrLockdown(0)).thenReturn(false)
+            updateCallback.onStrongAuthStateChanged(0)
+
+            // Verify no longer encrypted or lockdown
+            assertThat(isEncryptedOrLockdown).isFalse()
         }
 }

@@ -16,6 +16,8 @@
 
 package com.android.server.appop;
 
+import static com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
@@ -31,17 +33,23 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.OnOpActiveChangedListener;
+import android.companion.virtual.VirtualDeviceManager;
+import android.companion.virtual.VirtualDeviceParams;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Process;
+import android.virtualdevice.cts.common.FakeAssociationRule;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tests app ops version upgrades
@@ -50,6 +58,8 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class AppOpsActiveWatcherTest {
 
+    @Rule
+    public FakeAssociationRule mFakeAssociationRule = new FakeAssociationRule();
     private static final long NOTIFICATION_TIMEOUT_MILLIS = 5000;
 
     @Test
@@ -69,7 +79,7 @@ public class AppOpsActiveWatcherTest {
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
                 eq(Process.myUid()), eq(getContext().getPackageName()),
-                isNull(), eq(true), anyInt(), anyInt());
+                isNull(), eq(Context.DEVICE_ID_DEFAULT), eq(true), anyInt(), anyInt());
 
         // This should be the only callback we got
         verifyNoMoreInteractions(listener);
@@ -88,7 +98,7 @@ public class AppOpsActiveWatcherTest {
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
                 eq(Process.myUid()), eq(getContext().getPackageName()), isNull(),
-                eq(false), anyInt(), anyInt());
+                eq(Context.DEVICE_ID_DEFAULT), eq(false), anyInt(), anyInt());
 
         // Verify that the op is not active
         assertThat(appOpsManager.isOperationActive(AppOpsManager.OP_CAMERA,
@@ -126,11 +136,69 @@ public class AppOpsActiveWatcherTest {
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
                 eq(Process.myUid()), eq(getContext().getPackageName()), isNull(),
-                eq(true), anyInt(), anyInt());
+                eq(Context.DEVICE_ID_DEFAULT), eq(true), anyInt(), anyInt());
 
         // Finish up
         appOpsManager.finishOp(AppOpsManager.OP_CAMERA);
         appOpsManager.stopWatchingActive(listener);
+    }
+
+    @Test
+    public void testWatchActiveOpsForExternalDevice() {
+        final VirtualDeviceManager virtualDeviceManager = getContext().getSystemService(
+                VirtualDeviceManager.class);
+        AtomicInteger virtualDeviceId = new AtomicInteger();
+        runWithShellPermissionIdentity(() -> {
+            final VirtualDeviceManager.VirtualDevice virtualDevice =
+                    virtualDeviceManager.createVirtualDevice(
+                            mFakeAssociationRule.getAssociationInfo().getId(),
+                            new VirtualDeviceParams.Builder().setName("virtual_device").build());
+            virtualDeviceId.set(virtualDevice.getDeviceId());
+        });
+        final OnOpActiveChangedListener listener = mock(OnOpActiveChangedListener.class);
+        AttributionSource attributionSource = new AttributionSource(Process.myUid(),
+                getContext().getOpPackageName(), getContext().getAttributionTag(),
+                virtualDeviceId.get());
+
+        final AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
+        appOpsManager.startWatchingActive(new String[]{AppOpsManager.OPSTR_CAMERA,
+                AppOpsManager.OPSTR_RECORD_AUDIO}, getContext().getMainExecutor(), listener);
+
+        appOpsManager.startOpNoThrow(getContext().getAttributionSource().getToken(),
+                AppOpsManager.OP_CAMERA, attributionSource, false, "",
+                AppOpsManager.ATTRIBUTION_FLAGS_NONE, AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
+
+        verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
+                .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
+                eq(Process.myUid()), eq(getContext().getOpPackageName()),
+                eq(getContext().getAttributionTag()), eq(virtualDeviceId.get()), eq(true),
+                eq(AppOpsManager.ATTRIBUTION_FLAGS_NONE),
+                eq(AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE));
+        verifyNoMoreInteractions(listener);
+
+        appOpsManager.finishOp(getContext().getAttributionSource().getToken(),
+                AppOpsManager.OP_CAMERA, attributionSource);
+
+        verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
+                .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
+                eq(Process.myUid()), eq(getContext().getOpPackageName()),
+                eq(getContext().getAttributionTag()), eq(virtualDeviceId.get()), eq(false),
+                eq(AppOpsManager.ATTRIBUTION_FLAGS_NONE),
+                eq(AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE));
+        verifyNoMoreInteractions(listener);
+
+        appOpsManager.stopWatchingActive(listener);
+
+        appOpsManager.startOpNoThrow(getContext().getAttributionSource().getToken(),
+                AppOpsManager.OP_CAMERA, attributionSource, false, "",
+                AppOpsManager.ATTRIBUTION_FLAGS_NONE, AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
+
+        verifyNoMoreInteractions(listener);
+
+        appOpsManager.finishOp(getContext().getAttributionSource().getToken(),
+                AppOpsManager.OP_CAMERA, attributionSource);
+
+        verifyNoMoreInteractions(listener);
     }
 
     @Test

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH
+import com.android.systemui.Flags.statusBarStaticInoutIndicators
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.flags.FeatureFlagsClassic
@@ -32,12 +33,15 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityMod
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
 /** Common interface for all of the location-based mobile icon view models. */
@@ -70,9 +74,102 @@ interface MobileIconViewModelCommon {
  * model gets the exact same information, as well as allows us to log that unified state only once
  * per icon.
  */
-@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 class MobileIconViewModel(
+    override val subscriptionId: Int,
+    iconInteractor: MobileIconInteractor,
+    airplaneModeInteractor: AirplaneModeInteractor,
+    constants: ConnectivityConstants,
+    flags: FeatureFlagsClassic,
+    scope: CoroutineScope,
+) : MobileIconViewModelCommon {
+    private val cellProvider by lazy {
+        CellularIconViewModel(
+            subscriptionId,
+            iconInteractor,
+            airplaneModeInteractor,
+            constants,
+            flags,
+            scope,
+        )
+    }
+
+    private val satelliteProvider by lazy {
+        CarrierBasedSatelliteViewModelImpl(
+            subscriptionId,
+            iconInteractor,
+        )
+    }
+
+    /**
+     * Similar to repository switching, this allows us to split up the logic of satellite/cellular
+     * states, since they are different by nature
+     */
+    private val vmProvider: Flow<MobileIconViewModelCommon> =
+        iconInteractor.isNonTerrestrial
+            .mapLatest { nonTerrestrial ->
+                if (nonTerrestrial) {
+                    satelliteProvider
+                } else {
+                    cellProvider
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), cellProvider)
+
+    override val isVisible: StateFlow<Boolean> =
+        vmProvider
+            .flatMapLatest { it.isVisible }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val icon: Flow<SignalIconModel> = vmProvider.flatMapLatest { it.icon }
+
+    override val contentDescription: Flow<ContentDescription> =
+        vmProvider.flatMapLatest { it.contentDescription }
+
+    override val roaming: Flow<Boolean> = vmProvider.flatMapLatest { it.roaming }
+
+    override val networkTypeIcon: Flow<Icon.Resource?> =
+        vmProvider.flatMapLatest { it.networkTypeIcon }
+
+    override val networkTypeBackground: StateFlow<Icon.Resource?> =
+        vmProvider
+            .flatMapLatest { it.networkTypeBackground }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), null)
+
+    override val activityInVisible: Flow<Boolean> =
+        vmProvider.flatMapLatest { it.activityInVisible }
+
+    override val activityOutVisible: Flow<Boolean> =
+        vmProvider.flatMapLatest { it.activityOutVisible }
+
+    override val activityContainerVisible: Flow<Boolean> =
+        vmProvider.flatMapLatest { it.activityContainerVisible }
+}
+
+/** Representation of this network when it is non-terrestrial (e.g., satellite) */
+private class CarrierBasedSatelliteViewModelImpl(
+    override val subscriptionId: Int,
+    interactor: MobileIconInteractor,
+) : MobileIconViewModelCommon {
+    override val isVisible: StateFlow<Boolean> = MutableStateFlow(true)
+    override val icon: Flow<SignalIconModel> = interactor.signalLevelIcon
+
+    override val contentDescription: Flow<ContentDescription> =
+        MutableStateFlow(ContentDescription.Loaded(""))
+
+    /** These fields are not used for satellite icons currently */
+    override val roaming: Flow<Boolean> = flowOf(false)
+    override val networkTypeIcon: Flow<Icon.Resource?> = flowOf(null)
+    override val networkTypeBackground: StateFlow<Icon.Resource?> = MutableStateFlow(null)
+    override val activityInVisible: Flow<Boolean> = flowOf(false)
+    override val activityOutVisible: Flow<Boolean> = flowOf(false)
+    override val activityContainerVisible: Flow<Boolean> = flowOf(false)
+}
+
+/** Terrestrial (cellular) icon. */
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
+@OptIn(ExperimentalCoroutinesApi::class)
+private class CellularIconViewModel(
     override val subscriptionId: Int,
     iconInteractor: MobileIconInteractor,
     airplaneModeInteractor: AirplaneModeInteractor,
@@ -199,7 +296,10 @@ class MobileIconViewModel(
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val activityContainerVisible: Flow<Boolean> =
-        activity
-            .map { it != null && (it.hasActivityIn || it.hasActivityOut) }
+        if (statusBarStaticInoutIndicators()) {
+                flowOf(constants.shouldShowActivityConfig)
+            } else {
+                activity.map { it != null && (it.hasActivityIn || it.hasActivityOut) }
+            }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 }

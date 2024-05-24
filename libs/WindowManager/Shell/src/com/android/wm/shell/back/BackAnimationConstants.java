@@ -21,5 +21,4 @@ package com.android.wm.shell.back;
  */
 class BackAnimationConstants {
     static final float UPDATE_SYSUI_FLAGS_THRESHOLD = 0.20f;
-    static final float PROGRESS_COMMIT_THRESHOLD = 0.1f;
 }

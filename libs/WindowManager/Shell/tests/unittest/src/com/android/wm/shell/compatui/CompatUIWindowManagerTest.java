@@ -20,6 +20,7 @@ import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
 import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
 import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.view.WindowInsets.Type.navigationBars;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -27,6 +28,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
@@ -39,6 +41,7 @@ import android.app.AppCompatTaskInfo;
 import android.app.TaskInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.util.Pair;
 import android.view.DisplayInfo;
@@ -50,6 +53,7 @@ import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
@@ -59,6 +63,7 @@ import com.android.wm.shell.compatui.CompatUIController.CompatUIHintsState;
 import junit.framework.Assert;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -76,8 +81,12 @@ import java.util.function.Consumer;
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 public class CompatUIWindowManagerTest extends ShellTestCase {
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
     private static final int TASK_ID = 1;
+    private static final int TASK_WIDTH = 2000;
+    private static final int TASK_HEIGHT = 2000;
 
     @Mock private SyncTransactionQueue mSyncTransactionQueue;
     @Mock private CompatUIController.CompatUICallback mCallback;
@@ -93,6 +102,7 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        doReturn(100).when(mCompatUIConfiguration).getHideSizeCompatRestartButtonTolerance();
         mTaskInfo = createTaskInfo(/* hasSizeCompat= */ false, CAMERA_COMPAT_CONTROL_HIDDEN);
         mWindowManager = new CompatUIWindowManager(mContext, mTaskInfo, mSyncTransactionQueue,
                 mCallback, mTaskListener, new DisplayLayout(), new CompatUIHintsState(),
@@ -136,6 +146,13 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         clearInvocations(mWindowManager);
         mWindowManager.release();
         mWindowManager.mHasSizeCompat = false;
+        assertFalse(mWindowManager.createLayout(/* canShow= */ true));
+
+        // Returns false and doesn't create layout if restart button should be hidden.
+        clearInvocations(mWindowManager);
+        mWindowManager.mHasSizeCompat = true;
+        mTaskInfo.appCompatTaskInfo.topActivityLetterboxWidth = TASK_WIDTH;
+        mTaskInfo.appCompatTaskInfo.topActivityLetterboxHeight = TASK_HEIGHT;
         assertFalse(mWindowManager.createLayout(/* canShow= */ true));
 
         verify(mWindowManager, never()).inflateLayout();
@@ -199,6 +216,7 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         // No diff
         clearInvocations(mWindowManager);
         TaskInfo taskInfo = createTaskInfo(/* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN);
+        doReturn(true).when(mWindowManager).shouldShowSizeCompatRestartButton(any());
         assertTrue(mWindowManager.updateCompatInfo(taskInfo, mTaskListener, /* canShow= */ true));
 
         verify(mWindowManager, never()).updateSurfacePosition();
@@ -283,7 +301,6 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
 
     @Test
     public void testUpdateCompatInfoLayoutNotInflatedYet() {
-        mWindowManager.mHasSizeCompat = true;
         mWindowManager.createLayout(/* canShow= */ false);
 
         verify(mWindowManager, never()).inflateLayout();
@@ -303,6 +320,15 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         mWindowManager.updateCompatInfo(taskInfo, mTaskListener, /* canShow= */ true);
 
         verify(mWindowManager).inflateLayout();
+
+        // Change shouldShowSizeCompatRestartButton to false and pass canShow true, layout
+        // shouldn't be inflated
+        clearInvocations(mWindowManager);
+        taskInfo.appCompatTaskInfo.topActivityLetterboxWidth = TASK_WIDTH;
+        taskInfo.appCompatTaskInfo.topActivityLetterboxHeight = TASK_HEIGHT;
+        mWindowManager.updateCompatInfo(taskInfo, mTaskListener, /* canShow= */ true);
+
+        verify(mWindowManager, never()).inflateLayout();
     }
 
     @Test
@@ -464,6 +490,36 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         Assert.assertTrue(mWindowManager.needsToBeRecreated(newTaskInfo, mTaskListener));
     }
 
+    @Test
+    public void testShouldShowSizeCompatRestartButton() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ALLOW_HIDE_SCM_BUTTON);
+
+        doReturn(86).when(mCompatUIConfiguration).getHideSizeCompatRestartButtonTolerance();
+        mWindowManager = new CompatUIWindowManager(mContext, mTaskInfo, mSyncTransactionQueue,
+                mCallback, mTaskListener, new DisplayLayout(), new CompatUIHintsState(),
+                mCompatUIConfiguration, mOnRestartButtonClicked);
+
+        // Simulate rotation of activity in square display
+        TaskInfo taskInfo = createTaskInfo(true, CAMERA_COMPAT_CONTROL_HIDDEN);
+        taskInfo.configuration.windowConfiguration.setBounds(new Rect(0, 0, 2000, 2000));
+        taskInfo.appCompatTaskInfo.topActivityLetterboxHeight = 2000;
+        taskInfo.appCompatTaskInfo.topActivityLetterboxWidth = 1850;
+
+        assertFalse(mWindowManager.shouldShowSizeCompatRestartButton(taskInfo));
+
+        // Simulate exiting split screen/folding
+        taskInfo.appCompatTaskInfo.topActivityLetterboxWidth = 1000;
+        assertTrue(mWindowManager.shouldShowSizeCompatRestartButton(taskInfo));
+
+        // Simulate folding
+        taskInfo.configuration.windowConfiguration.setBounds(new Rect(0, 0, 1000, 2000));
+        assertFalse(mWindowManager.shouldShowSizeCompatRestartButton(taskInfo));
+
+        taskInfo.appCompatTaskInfo.topActivityLetterboxWidth = 1000;
+        taskInfo.appCompatTaskInfo.topActivityLetterboxHeight = 500;
+        assertTrue(mWindowManager.shouldShowSizeCompatRestartButton(taskInfo));
+    }
+
     private static TaskInfo createTaskInfo(boolean hasSizeCompat,
             @AppCompatTaskInfo.CameraCompatControlState int cameraCompatControlState) {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
@@ -471,6 +527,11 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         taskInfo.appCompatTaskInfo.topActivityInSizeCompat = hasSizeCompat;
         taskInfo.appCompatTaskInfo.cameraCompatControlState = cameraCompatControlState;
         taskInfo.configuration.uiMode &= ~Configuration.UI_MODE_TYPE_DESK;
+        // Letterboxed activity that takes half the screen should show size compat restart button
+        taskInfo.configuration.windowConfiguration.setBounds(
+                new Rect(0, 0, TASK_WIDTH, TASK_HEIGHT));
+        taskInfo.appCompatTaskInfo.topActivityLetterboxHeight = 1000;
+        taskInfo.appCompatTaskInfo.topActivityLetterboxWidth = 1000;
         return taskInfo;
     }
 }

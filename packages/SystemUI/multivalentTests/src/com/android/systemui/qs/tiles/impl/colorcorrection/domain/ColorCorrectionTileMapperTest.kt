@@ -36,8 +36,9 @@ import org.junit.runner.RunWith
 class ColorCorrectionTileMapperTest : SysuiTestCase() {
     private val kosmos = Kosmos()
     private val colorCorrectionTileConfig = kosmos.qsColorCorrectionTileConfig
-    private val subtitleArray =
+    private val subtitleArray by lazy {
         context.resources.getStringArray(R.array.tile_states_color_correction)
+    }
     // Using lazy (versus =) to make sure we override the right context -- see b/311612168
     private val mapper by lazy {
         ColorCorrectionTileMapper(

@@ -70,6 +70,8 @@ public:
             : mType(Type::RRect), mOp(op), mMatrix(m), mRRect(rrect) {}
     Clip(const SkPath& path, SkClipOp op, const SkMatrix& m)
             : mType(Type::Path), mOp(op), mMatrix(m), mPath(std::in_place, path) {}
+    Clip(const sk_sp<SkShader> shader, SkClipOp op, const SkMatrix& m)
+            : mType(Type::Shader), mOp(op), mMatrix(m), mShader(shader) {}
 
     void apply(SkCanvas* canvas) const {
         canvas->setMatrix(mMatrix);
@@ -86,6 +88,8 @@ public:
                 // Ensure path clips are anti-aliased
                 canvas->clipPath(mPath.value(), mOp, true);
                 break;
+            case Type::Shader:
+                canvas->clipShader(mShader, mOp);
         }
     }
 
@@ -94,6 +98,7 @@ private:
         Rect,
         RRect,
         Path,
+        Shader,
     };
 
     Type mType;
@@ -103,6 +108,7 @@ private:
     // These are logically a union (tracked separately due to non-POD path).
     std::optional<SkPath> mPath;
     SkRRect mRRect;
+    sk_sp<SkShader> mShader;
 };
 
 Canvas* Canvas::create_canvas(const SkBitmap& bitmap) {
@@ -341,6 +347,10 @@ void SkiaCanvas::concat(const SkMatrix& matrix) {
     mCanvas->concat(matrix);
 }
 
+void SkiaCanvas::concat(const SkM44& matrix) {
+    mCanvas->concat(matrix);
+}
+
 void SkiaCanvas::rotate(float degrees) {
     mCanvas->rotate(degrees);
 }
@@ -407,6 +417,11 @@ bool SkiaCanvas::clipPath(const SkPath* path, SkClipOp op) {
     this->recordClip(*path, op);
     mCanvas->clipPath(*path, op, true);
     return !mCanvas->isClipEmpty();
+}
+
+void SkiaCanvas::clipShader(sk_sp<SkShader> shader, SkClipOp op) {
+    this->recordClip(shader, op);
+    mCanvas->clipShader(shader, op);
 }
 
 bool SkiaCanvas::replaceClipRect_deprecated(float left, float top, float right, float bottom) {

@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofón"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Zoznam hovorov"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Zariadenia v okolí"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Zmena výstupu médií"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotky a médiá"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Upozornenia"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Upozornenia"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Aplikácie"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Streaming"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Môže uskutočňovať a spravovať telefonické hovory"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Môže čítať zo zoznamu hovorov telefónu a zapisovať doň"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Môže odosielať a zobrazovať správy SMS"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Má prístup k vašim kontaktom"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Má prístup k vášmu kalendáru"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Môže nahrávať zvuk"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Môže vyhľadávať zariadenia v okolí, určovať ich relatívnu pozíciu a pripájať sa k nim"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Môže čítať všetky upozornenia vrátane informácií, ako sú kontakty, správy a fotky"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Volanie a správa telefonických hovorov"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Čítanie a zapisovanie do zoznamu telefonických hovorov"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Posielanie a zobrazovanie správ SMS"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Prístup ku kontaktom"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Prístup ku kalendáru"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Nahrávanie zvuku"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Vyhľadajte zariadenia v okolí, pripojte sa k nim a určite ich relatívnu polohu"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Čítajte všetky upozornenia vrátane informácií, ako sú kontakty, správy a fotky"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Čítajte všetky upozornenia vrátane informácií, ako sú kontakty, správy a fotky&lt;br/&gt;• Odosielajte upozornenia&lt;br/&gt;&lt;br/&gt;Schopnosť tejto aplikácie čítať a odosielať upozornenia môžete kedykoľvek spravovať v sekcii Nastavenia &gt; Upozornenia."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Streamovať aplikácie telefónu"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Streaming aplikácii a ďalších systémových funkcií zo zariadenia"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Získajte prístup k dostupným zariadeniam a ovládajte, ktoré bude streamovať alebo prenášať zvuk či video z iných aplikácií"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefón"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
 </resources>

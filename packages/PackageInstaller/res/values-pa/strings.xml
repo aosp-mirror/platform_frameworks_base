@@ -44,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ਇਹ ਵਰਤੋਂਕਾਰ ਅਗਿਆਤ ਐਪਾਂ ਨੂੰ ਸਥਾਪਤ ਨਹੀਂ ਕਰ ਸਕਦਾ"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ਇਸ ਵਰਤੋਂਕਾਰ ਨੂੰ ਐਪਾਂ ਸਥਾਪਤ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ"</string>
     <string name="ok" msgid="7871959885003339302">"ਠੀਕ ਹੈ"</string>
+    <string name="archive" msgid="4447791830199354721">"ਪੁਰਾਲੇਖਬੱਧ ਕਰੋ"</string>
     <string name="update_anyway" msgid="8792432341346261969">"ਫਿਰ ਵੀ ਅੱਪਡੇਟ ਕਰੋ"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ਐਪਾਂ ਪ੍ਰਬੰਧਿਤ ਕਰੋ"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ਜਗ੍ਹਾ ਖਾਲੀ ਨਹੀਂ"</string>
@@ -58,6 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"ਅੱਪਡੇਟ ਅਣਸਥਾਪਤ ਕਰੋ"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> ਅੱਗੇ ਦਿੱਤੀ ਐਪ ਦਾ ਭਾਗ ਹੈ:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"ਤੁਹਾਡਾ ਨਿੱਜੀ ਡਾਟਾ ਰੱਖਿਅਤ ਕੀਤਾ ਜਾਵੇਗਾ"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"ਕੀ ਇਸ ਐਪ ਨੂੰ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਲਈ ਪੁਰਾਲੇਖਬੱਧ ਕਰਨਾ ਹੈ? ਤੁਹਾਡਾ ਨਿੱਜੀ ਡਾਟਾ ਰੱਖਿਅਤ ਕੀਤਾ ਜਾਵੇਗਾ"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"ਕੀ ਇਸ ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ \'ਤੇ ਪੁਰਾਲੇਖਬੱਧ ਕਰਨਾ ਹੈ? ਤੁਹਾਡਾ ਨਿੱਜੀ ਡਾਟਾ ਰੱਖਿਅਤ ਕੀਤਾ ਜਾਵੇਗਾ"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"ਕੀ ਇਸ ਐਪ ਨੂੰ <xliff:g id="USERNAME">%1$s</xliff:g> ਲਈ ਪੁਰਾਲੇਖਬੱਧ ਕਰਨਾ ਹੈ? ਤੁਹਾਡਾ ਨਿੱਜੀ ਡਾਟਾ ਰੱਖਿਅਤ ਕੀਤਾ ਜਾਵੇਗਾ"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਆਪਣੀ ਨਿੱਜੀ ਸਪੇਸ ਤੋਂ ਪੁਰਾਲੇਖਬੱਧ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? ਤੁਹਾਡਾ ਨਿੱਜੀ ਡਾਟਾ ਰੱਖਿਅਤ ਕੀਤਾ ਜਾਵੇਗਾ"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ "<b>"ਸਾਰੇ"</b>" ਵਰਤੋਂਕਾਰਾਂ ਲਈ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? ਐਪਲੀਕੇਸ਼ਨ ਅਤੇ ਇਸਦਾ ਡਾਟਾ ਡੀਵਾਈਸ \'ਤੇ "<b>"ਸਾਰੇ"</b>" ਵਰਤੋਂਕਾਰਾਂ ਵੱਲੋਂ ਹਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"ਕੀ ਤੁਸੀਂ ਵਰਤੋਂਕਾਰ <xliff:g id="USERNAME">%1$s</xliff:g> ਲਈ ਇਸ ਐਪ ਨੂੰ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਆਪਣੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਤੋਂ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
@@ -86,8 +92,6 @@
     <string name="manage_users" msgid="1243995386982560813">"ਵਰਤੋਂਕਾਰਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਨੂੰ ਅਣਸਥਾਪਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ।"</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"ਪੈਕੇਜ ਨੂੰ ਪਾਰਸ ਕਰਨ ਵਿੱਚ ਇੱਕ ਸਮੱਸਿਆ ਸੀ।"</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear \'ਤੇ ਸਥਾਪਤ ਜਾਂ ਅਣਸਥਾਪਤ ਕਰਨ ਦੀਆਂ ਕਾਰਵਾਈਆਂ ਸਮਰਥਿਤ ਨਹੀਂ ਹਨ।"</string>
     <string name="message_staging" msgid="8032722385658438567">"ਐਪ ਨੂੰ ਸਟੇਜ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"ਅਗਿਆਤ"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"ਤੁਹਾਡੀ ਸੁਰੱਖਿਆ ਲਈ, ਫ਼ਿਲਹਾਲ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ ਨੂੰ ਇਸ ਸਰੋਤ ਤੋਂ ਅਗਿਆਤ ਐਪਾਂ ਸਥਾਪਤ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ। ਤੁਸੀਂ ਇਸ ਨੂੰ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।"</string>
@@ -98,17 +102,18 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ਤੁਹਾਡਾ ਟੈਬਲੈੱਟ ਅਤੇ ਨਿੱਜੀ ਡਾਟਾ ਅਗਿਆਤ ਐਪਾਂ ਤੋਂ ਹਮਲੇ ਪ੍ਰਤੀ ਵਧੇਰੇ ਵਿੰਨਣਸ਼ੀਲ ਹਨ। ਇਹ ਐਪ ਸਥਾਪਤ ਕਰਕੇ, ਤੁਸੀਂ ਸਹਿਮਤੀ ਦਿੰਦੇ ਹੋ ਕਿ ਆਪਣੇ ਟੈਬਲੈੱਟ ਨੂੰ ਹੋਣ ਵਾਲੇ ਕਿਸੇ ਵੀ ਨੁਕਸਾਨ ਜਾਂ ਡਾਟੇ ਦੀ ਹਾਨੀ ਲਈ ਤੁਸੀਂ ਜ਼ੁੰਮੇਵਾਰ ਹੋ ਜੋ ਸ਼ਾਇਦ ਇਸ ਐਪ ਨੂੰ ਵਰਤਣ ਦੇ ਨਤੀਜੇ ਵਜੋਂ ਹੋ ਸਕਦਾ ਹੈ।"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ਤੁਹਾਡਾ ਟੀਵੀ ਅਤੇ ਨਿੱਜੀ ਡਾਟਾ ਅਗਿਆਤ ਐਪਾਂ ਤੋਂ ਹਮਲੇ ਪ੍ਰਤੀ ਵਧੇਰੇ ਵਿੰਨਣਸ਼ੀਲ ਹਨ। ਇਹ ਐਪ ਸਥਾਪਤ ਕਰਕੇ, ਤੁਸੀਂ ਸਹਿਮਤੀ ਦਿੰਦੇ ਹੋ ਕਿ ਆਪਣੇ ਟੀਵੀ ਨੂੰ ਹੋਣ ਵਾਲੇ ਕਿਸੇ ਵੀ ਨੁਕਸਾਨ ਜਾਂ ਡਾਟੇ ਦੀ ਹਾਨੀ ਲਈ ਤੁਸੀਂ ਜ਼ੁੰਮੇਵਾਰ ਹੋ ਜੋ ਸ਼ਾਇਦ ਇਸ ਐਪ ਨੂੰ ਵਰਤਣ ਦੇ ਨਤੀਜੇ ਵਜੋਂ ਹੋ ਸਕਦਾ ਹੈ।"</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਦਾ ਕਲੋਨ"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"ਕੀ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਨੂੰ ਪੁਰਾਲੇਖਬੱਧ ਕਰਨਾ ਹੈ?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ਜਾਰੀ ਰੱਖੋ"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"ਵੀਅਰ ਐਪਾਂ ਸਥਾਪਤ ਜਾਂ ਅਣਸਥਾਪਤ ਕਰਨਾ"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ਐਪ ਸਥਾਪਨਾ ਦੀ ਸੂਚਨਾ"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"ਸਫਲਤਾਪੂਰਵਕ ਸਥਾਪਤ ਕੀਤੀ ਗਈ"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"\"<xliff:g id="APPNAME">%1$s</xliff:g>\" ਨੂੰ ਸਫਲਤਾਪੂਰਵਕ ਸਥਾਪਤ ਕੀਤਾ ਗਿਆ"</string>
-    <string name="unarchive_application_title" msgid="7958278328280721421">"ਕੀ <xliff:g id="APPNAME">%1$s</xliff:g> ਨੂੰ <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ਤੋਂ ਮੁੜ-ਬਹਾਲ ਕਰਨਾ ਹੈ?"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"ਕੀ <xliff:g id="APPNAME">%1$s</xliff:g> ਨੂੰ <xliff:g id="INSTALLERNAME">%2$s</xliff:g> ਤੋਂ ਮੁੜ-ਬਹਾਲ ਕਰਨਾ ਹੈ?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"ਇਹ ਐਪ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡਾਊਨਲੋਡ ਹੋਣੀ ਸ਼ੁਰੂ ਹੋ ਜਾਵੇਗੀ"</string>
     <string name="restore" msgid="8460854736328970444">"ਮੁੜ-ਬਹਾਲ ਕਰੋ"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"ਤੁਸੀਂ ਆਫ਼ਲਾਈਨ ਹੋ"</string>
-    <string name="unarchive_error_offline_body" msgid="255717000519772755">"ਜਦੋਂ ਤੁਸੀਂ ਇੰਟਰਨੈੱਟ ਨਾਲ ਕਨੈਕਟ ਹੁੰਦੇ ਹੋ, ਤਾਂ ਇਹ ਐਪ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਮੁੜ-ਬਹਾਲ ਹੋ ਜਾਵੇਗੀ"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਬਹਾਲ ਕਰਨ ਲਈ, ਆਪਣੇ ਇੰਟਰਨੈੱਟ ਕਨੈਕਸ਼ਨ ਦੀ ਜਾਂਚ ਕਰ ਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"ਕੋਈ ਗੜਬੜ ਹੋ ਗਈ"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਬਹਾਲ ਕਰਨ ਵੇਲੇ ਕੋਈ ਸਮੱਸਿਆ ਆਈ"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"ਲੋੜੀਂਦੀ ਸਟੋਰੇਜ ਨਹੀਂ ਹੈ"</string>
@@ -116,8 +121,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"ਕਾਰਵਾਈ ਦੀ ਲੋੜ"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਬਹਾਲ ਕਰਨ ਲਈ ਅਗਲੇ ਪੜਾਵਾਂ ਦੀ ਪਾਲਣਾ ਕਰੋ"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ਨੂੰ ਬੰਦ ਕੀਤਾ ਗਿਆ"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਬਹਾਲ ਕਰਨ ਲਈ, ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਜਾ ਕੇ<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ਨੂੰ ਅਣਸਥਾਪਤ ਕੀਤਾ ਗਿਆ"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਬਹਾਲ ਕਰਨ ਲਈ, ਤੁਹਾਨੂੰ <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ਨੂੰ ਸਥਾਪਤ ਕਰਨ ਦੀ ਲੋੜ ਪਵੇਗੀ"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"ਜਾਰੀ ਰੱਖੋ"</string>

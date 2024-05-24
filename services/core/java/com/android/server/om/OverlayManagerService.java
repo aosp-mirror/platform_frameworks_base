@@ -362,7 +362,7 @@ public final class OverlayManagerService extends SystemService {
                 defaultPackages.add(packageName);
             }
         }
-        return defaultPackages.toArray(new String[defaultPackages.size()]);
+        return defaultPackages.toArray(new String[0]);
     }
 
     private final class OverlayManagerPackageMonitor extends PackageMonitor {
@@ -1160,7 +1160,7 @@ public final class OverlayManagerService extends SystemService {
         // state may lead to contradictions within OMS. Better then to lag
         // behind until all pending intents have been processed.
         private final ArrayMap<String, PackageStateUsers> mCache = new ArrayMap<>();
-        private final Set<Integer> mInitializedUsers = new ArraySet<>();
+        private final ArraySet<Integer> mInitializedUsers = new ArraySet<>();
 
         PackageManagerHelperImpl(Context context) {
             mContext = context;
@@ -1176,8 +1176,7 @@ public final class OverlayManagerService extends SystemService {
          */
         @NonNull
         public ArrayMap<String, PackageState> initializeForUser(final int userId) {
-            if (!mInitializedUsers.contains(userId)) {
-                mInitializedUsers.add(userId);
+            if (mInitializedUsers.add(userId)) {
                 mPackageManagerInternal.forEachPackageState((packageState -> {
                     if (packageState.getPkg() != null
                             && packageState.getUserStateOrDefault(userId).isInstalled()) {
@@ -1545,8 +1544,7 @@ public final class OverlayManagerService extends SystemService {
                 final OverlayPaths frameworkOverlays =
                         mImpl.getEnabledOverlayPaths("android", userId, false);
                 for (final String targetPackageName : targetPackageNames) {
-                    final OverlayPaths.Builder list = new OverlayPaths.Builder();
-                    list.addAll(frameworkOverlays);
+                    final var list = new OverlayPaths.Builder(frameworkOverlays);
                     if (!"android".equals(targetPackageName)) {
                         list.addAll(mImpl.getEnabledOverlayPaths(targetPackageName, userId, true));
                     }
@@ -1558,17 +1556,21 @@ public final class OverlayManagerService extends SystemService {
             final HashSet<String> invalidPackages = new HashSet<>();
             pm.setEnabledOverlayPackages(userId, pendingChanges, updatedPackages, invalidPackages);
 
-            for (final String targetPackageName : targetPackageNames) {
-                if (DEBUG) {
-                    Slog.d(TAG, "-> Updating overlay: target=" + targetPackageName + " overlays=["
-                            + pendingChanges.get(targetPackageName)
-                            + "] userId=" + userId);
-                }
+            if (DEBUG || !invalidPackages.isEmpty()) {
+                for (final String targetPackageName : targetPackageNames) {
+                    if (DEBUG) {
+                        Slog.d(TAG,
+                                "-> Updating overlay: target=" + targetPackageName + " overlays=["
+                                        + pendingChanges.get(targetPackageName)
+                                        + "] userId=" + userId);
+                    }
 
-                if (invalidPackages.contains(targetPackageName)) {
-                    Slog.e(TAG, TextUtils.formatSimple(
-                            "Failed to change enabled overlays for %s user %d", targetPackageName,
-                            userId));
+                    if (invalidPackages.contains(targetPackageName)) {
+                        Slog.e(TAG, TextUtils.formatSimple(
+                                "Failed to change enabled overlays for %s user %d",
+                                targetPackageName,
+                                userId));
+                    }
                 }
             }
             return new ArrayList<>(updatedPackages);

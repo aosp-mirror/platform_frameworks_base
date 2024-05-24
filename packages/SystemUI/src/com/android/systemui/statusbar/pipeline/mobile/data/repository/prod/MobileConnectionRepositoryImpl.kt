@@ -96,7 +96,7 @@ import kotlinx.coroutines.withContext
 class MobileConnectionRepositoryImpl(
     override val subId: Int,
     private val context: Context,
-    subscriptionModel: StateFlow<SubscriptionModel?>,
+    subscriptionModel: Flow<SubscriptionModel?>,
     defaultNetworkName: NetworkNameModel,
     networkNameSeparator: String,
     connectivityManager: ConnectivityManager,
@@ -227,6 +227,12 @@ class MobileConnectionRepositoryImpl(
             .map { Utils.isInService(it.serviceState) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
+    override val isNonTerrestrial =
+        callbackEvents
+            .mapNotNull { it.onServiceStateChanged }
+            .map { it.serviceState.isUsingNonTerrestrialNetwork }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
     override val isGsm =
         callbackEvents
             .mapNotNull { it.onSignalStrengthChanged }
@@ -325,8 +331,13 @@ class MobileConnectionRepositoryImpl(
     override val cdmaRoaming: StateFlow<Boolean> =
         telephonyPollingEvent
             .mapLatest {
-                val cdmaEri = telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber
-                cdmaEri == ERI_ON || cdmaEri == ERI_FLASH
+                try {
+                    val cdmaEri = telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber
+                    cdmaEri == ERI_ON || cdmaEri == ERI_FLASH
+                } catch (e: UnsupportedOperationException) {
+                    // Handles the same as a function call failure
+                    false
+                }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
@@ -448,7 +459,7 @@ class MobileConnectionRepositoryImpl(
         fun build(
             subId: Int,
             mobileLogger: TableLogBuffer,
-            subscriptionModel: StateFlow<SubscriptionModel?>,
+            subscriptionModel: Flow<SubscriptionModel?>,
             defaultNetworkName: NetworkNameModel,
             networkNameSeparator: String,
         ): MobileConnectionRepository {

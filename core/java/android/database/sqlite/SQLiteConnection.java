@@ -121,7 +121,11 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     // The native SQLiteConnection pointer.  (FOR INTERNAL USE ONLY)
     private long mConnectionPtr;
 
+    // Restrict this connection to read-only operations.
     private boolean mOnlyAllowReadOnlyOperations;
+
+    // Allow this connection to treat updates to temporary tables as read-only operations.
+    private boolean mAllowTempTableRetry = Flags.sqliteAllowTempTables();
 
     // The number of times attachCancellationSignal has been called.
     // Because SQLite statement execution can be reentrant, we keep track of how many
@@ -142,6 +146,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private static native void nativeFinalizeStatement(long connectionPtr, long statementPtr);
     private static native int nativeGetParameterCount(long connectionPtr, long statementPtr);
     private static native boolean nativeIsReadOnly(long connectionPtr, long statementPtr);
+    private static native boolean nativeUpdatesTempOnly(long connectionPtr, long statementPtr);
     private static native int nativeGetColumnCount(long connectionPtr, long statementPtr);
     private static native String nativeGetColumnName(long connectionPtr, long statementPtr,
             int index);
@@ -1095,7 +1100,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         try {
             final int numParameters = nativeGetParameterCount(mConnectionPtr, statementPtr);
             final int type = DatabaseUtils.getSqlStatementTypeExtended(sql);
-            final boolean readOnly = nativeIsReadOnly(mConnectionPtr, statementPtr);
+            boolean readOnly = nativeIsReadOnly(mConnectionPtr, statementPtr);
             statement = obtainPreparedStatement(sql, statementPtr, numParameters, type, readOnly,
                     seqNum);
             if (!skipCache && isCacheable(type)) {
@@ -1263,13 +1268,20 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
 
     /**
      * Verify that the statement is read-only, if the connection only allows read-only
-     * operations.
+     * operations.  If the connection allows updates to temporary tables, then the statement is
+     * read-only if the only updates are to temporary tables.
      * @param statement The statement to check.
      * @throws SQLiteException if the statement could update the database inside a read-only
      * transaction.
      */
     void throwIfStatementForbidden(PreparedStatement statement) {
         if (mOnlyAllowReadOnlyOperations && !statement.mReadOnly) {
+            if (mAllowTempTableRetry) {
+                statement.mReadOnly =
+                        nativeUpdatesTempOnly(mConnectionPtr, statement.mStatementPtr);
+                if (statement.mReadOnly) return;
+            }
+
             throw new SQLiteException("Cannot execute this statement because it "
                     + "might modify the database but the connection is read-only.");
         }

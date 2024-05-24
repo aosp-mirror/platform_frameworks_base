@@ -18,7 +18,9 @@ package android.companion.virtual.sensor;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.companion.virtual.IVirtualDevice;
 import android.hardware.Sensor;
 import android.os.IBinder;
@@ -54,6 +56,15 @@ public final class VirtualSensor implements Parcelable {
         mToken = token;
     }
 
+    /**
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
+    public VirtualSensor(int handle, int type, @NonNull String name) {
+        this(handle, type, name, /*virtualDevice=*/null, /*token=*/null);
+    }
+
     private VirtualSensor(Parcel parcel) {
         mHandle = parcel.readInt();
         mType = parcel.readInt();
@@ -67,6 +78,8 @@ public final class VirtualSensor implements Parcelable {
      *
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public int getHandle() {
         return mHandle;
     }

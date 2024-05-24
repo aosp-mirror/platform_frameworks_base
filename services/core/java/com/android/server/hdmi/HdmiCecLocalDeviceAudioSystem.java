@@ -201,7 +201,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         if (WAKE_ON_HOTPLUG && connected) {
             mService.wakeUp();
         }
-        if (mService.getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT) {
+        HdmiPortInfo portInfo = mService.getPortInfo(portId);
+        if (portInfo != null && portInfo.getType() == HdmiPortInfo.PORT_OUTPUT) {
             mCecMessageCache.flushAll();
             if (!connected) {
                 if (isSystemAudioActivated()) {
@@ -316,6 +317,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         if ((systemAudioOnPowerOnProp == ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON)
                 || ((systemAudioOnPowerOnProp == USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON)
                 && lastSystemAudioControlStatus && isSystemAudioControlFeatureEnabled())) {
+            if (hasAction(SystemAudioInitiationActionFromAvr.class)) {
+                Slog.i(TAG, "SystemAudioInitiationActionFromAvr is in progress. Restarting.");
+                removeAction(SystemAudioInitiationActionFromAvr.class);
+            }
             addAndStartAction(new SystemAudioInitiationActionFromAvr(this));
         }
     }
@@ -1031,6 +1036,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     void onSystemAudioControlFeatureSupportChanged(boolean enabled) {
         setSystemAudioControlFeatureEnabled(enabled);
         if (enabled) {
+            if (hasAction(SystemAudioInitiationActionFromAvr.class)) {
+                Slog.i(TAG, "SystemAudioInitiationActionFromAvr is in progress. Restarting.");
+                removeAction(SystemAudioInitiationActionFromAvr.class);
+            }
             addAndStartAction(new SystemAudioInitiationActionFromAvr(this));
         }
     }

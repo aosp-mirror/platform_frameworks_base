@@ -30,6 +30,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@android.platform.test.annotations.EnabledOnRavenwood
 class BcSmartspaceConfigProviderTest : SysuiTestCase() {
     @Mock private lateinit var featureFlags: FeatureFlags
 

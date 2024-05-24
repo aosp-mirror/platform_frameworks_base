@@ -104,7 +104,7 @@ class HeadsUpCoordinator @Inject constructor(
 
     /**
      * Once the pipeline starts running, we can look through posted entries and quickly process
-     * any that don't have groups, and thus will never gave a group alert edge case.
+     * any that don't have groups, and thus will never gave a group heads up edge case.
      */
     fun onBeforeTransformGroups(list: List<ListEntry>) {
         mNow = mSystemClock.currentTimeMillis()
@@ -125,7 +125,7 @@ class HeadsUpCoordinator @Inject constructor(
     /**
      * Once we have a nearly final shade list (not including what's pruned for inflation reasons),
      * we know that stability and [NotifPromoter]s have been applied, so we can use the location of
-     * notifications in this list to determine what kind of group alert behavior should happen.
+     * notifications in this list to determine what kind of group heads up behavior should happen.
      */
     fun onBeforeFinalizeFilter(list: List<ListEntry>) = mHeadsUpManager.modifyHuns { hunMutator ->
         // Nothing to do if there are no other adds/updates
@@ -140,7 +140,7 @@ class HeadsUpCoordinator @Inject constructor(
             .groupBy { it.sbn.groupKey }
         val groupLocationsByKey: Map<String, GroupLocation> by lazy { getGroupLocationsByKey(list) }
         mLogger.logEvaluatingGroups(postedEntriesByGroup.size)
-        // For each group, determine which notification(s) for a group should alert.
+        // For each group, determine which notification(s) for a group should heads up.
         postedEntriesByGroup.forEach { (groupKey, postedEntries) ->
             // get and classify the logical members
             val logicalMembers = logicalMembersByGroup[groupKey] ?: emptyList()
@@ -149,7 +149,7 @@ class HeadsUpCoordinator @Inject constructor(
             // Report the start of this group's evaluation
             mLogger.logEvaluatingGroup(groupKey, postedEntries.size, logicalMembers.size)
 
-            // If there is no logical summary, then there is no alert to transfer
+            // If there is no logical summary, then there is no heads up to transfer
             if (logicalSummary == null) {
                 postedEntries.forEach {
                     handlePostedEntry(it, hunMutator, scenario = "logical-summary-missing")
@@ -157,43 +157,43 @@ class HeadsUpCoordinator @Inject constructor(
                 return@forEach
             }
 
-            // If summary isn't wanted to be heads up, then there is no alert to transfer
+            // If summary isn't wanted to be heads up, then there is no heads up to transfer
             if (!isGoingToShowHunStrict(logicalSummary)) {
                 postedEntries.forEach {
-                    handlePostedEntry(it, hunMutator, scenario = "logical-summary-not-alerting")
+                    handlePostedEntry(it, hunMutator, scenario = "logical-summary-not-heads-up")
                 }
                 return@forEach
             }
 
-            // The group is alerting! Overall goals:
-            //  - Maybe transfer its alert to a child
-            //  - Also let any/all newly alerting children still alert
-            var childToReceiveParentAlert: NotificationEntry?
+            // The group is heads up! Overall goals:
+            //  - Maybe transfer its heads up to a child
+            //  - Also let any/all newly heads up children still heads up
+            var childToReceiveParentHeadsUp: NotificationEntry?
             var targetType = "undefined"
 
-            // If the parent is alerting, always look at the posted notification with the newest
+            // If the parent is heads up, always look at the posted notification with the newest
             // 'when', and if it is isolated with GROUP_ALERT_SUMMARY, then it should receive the
-            // parent's alert.
-            childToReceiveParentAlert =
-                findAlertOverride(postedEntries, groupLocationsByKey::getLocation)
-            if (childToReceiveParentAlert != null) {
-                targetType = "alertOverride"
+            // parent's heads up.
+            childToReceiveParentHeadsUp =
+                findHeadsUpOverride(postedEntries, groupLocationsByKey::getLocation)
+            if (childToReceiveParentHeadsUp != null) {
+                targetType = "headsUpOverride"
             }
 
-            // If the summary is Detached and we have not picked a receiver of the alert, then we
-            // need to look for the best child to alert in place of the summary.
+            // If the summary is Detached and we have not picked a receiver of the heads up, then we
+            // need to look for the best child to heads up in place of the summary.
             val isSummaryAttached = groupLocationsByKey.contains(logicalSummary.key)
-            if (!isSummaryAttached && childToReceiveParentAlert == null) {
-                childToReceiveParentAlert =
+            if (!isSummaryAttached && childToReceiveParentHeadsUp == null) {
+                childToReceiveParentHeadsUp =
                     findBestTransferChild(logicalMembers, groupLocationsByKey::getLocation)
-                if (childToReceiveParentAlert != null) {
+                if (childToReceiveParentHeadsUp != null) {
                     targetType = "bestChild"
                 }
             }
 
-            // If there is no child to receive the parent alert, then just handle the posted entries
-            // and return.
-            if (childToReceiveParentAlert == null) {
+            // If there is no child to receive the parent heads up, then just handle the posted
+            // entries and return.
+            if (childToReceiveParentHeadsUp == null) {
                 postedEntries.forEach {
                     handlePostedEntry(it, hunMutator, scenario = "no-transfer-target")
                 }
@@ -203,14 +203,14 @@ class HeadsUpCoordinator @Inject constructor(
             // At this point we just need to initiate the transfer
             val summaryUpdate = mPostedEntries[logicalSummary.key]
 
-            // Because we now know for certain that some child is going to alert for this summary
-            // (as we have found a child to transfer the alert to), mark the group as having
+            // Because we now know for certain that some child is going to heads up for this summary
+            // (as we have found a child to transfer the heads up to), mark the group as having
             // interrupted. This will allow us to know in the future that the "should heads up"
             // state of this group has already been handled, just not via the summary entry itself.
             logicalSummary.setInterruption()
-            mLogger.logSummaryMarkedInterrupted(logicalSummary.key, childToReceiveParentAlert.key)
+            mLogger.logSummaryMarkedInterrupted(logicalSummary.key, childToReceiveParentHeadsUp.key)
 
-            // If the summary was not attached, then remove the alert from the detached summary.
+            // If the summary was not attached, then remove the heads up from the detached summary.
             // Otherwise we can simply ignore its posted update.
             if (!isSummaryAttached) {
                 val summaryUpdateForRemoval = summaryUpdate?.also {
@@ -221,60 +221,63 @@ class HeadsUpCoordinator @Inject constructor(
                         wasUpdated = false,
                         shouldHeadsUpEver = false,
                         shouldHeadsUpAgain = false,
-                        isAlerting = mHeadsUpManager.isAlerting(logicalSummary.key),
+                        isHeadsUpEntry = mHeadsUpManager.isHeadsUpEntry(logicalSummary.key),
                         isBinding = isEntryBinding(logicalSummary),
                 )
-                // If we transfer the alert and the summary isn't even attached, that means we
-                // should ensure the summary is no longer alerting, so we remove it here.
+                // If we transfer the heads up notification and the summary isn't even attached,
+                // that means we should ensure the summary is no longer a heads up notification,
+                // so we remove it here.
                 handlePostedEntry(
                         summaryUpdateForRemoval,
                         hunMutator,
-                        scenario = "detached-summary-remove-alert")
+                        scenario = "detached-summary-remove-heads-up")
             } else if (summaryUpdate != null) {
                 mLogger.logPostedEntryWillNotEvaluate(
                         summaryUpdate,
                         reason = "attached-summary-transferred")
             }
 
-            // Handle all posted entries -- if the child receiving the parent's alert is in the
-            // list, then set its flags to ensure it alerts.
-            var didAlertChildToReceiveParentAlert = false
+            // Handle all posted entries -- if the child receiving the parent's heads up is in the
+            // list, then set its flags to ensure it heads up.
+            var didHeadsUpChildToReceiveParentHeadsUp = false
             postedEntries.asSequence()
                     .filter { it.key != logicalSummary.key }
                     .forEach { postedEntry ->
-                        if (childToReceiveParentAlert.key == postedEntry.key) {
+                        if (childToReceiveParentHeadsUp.key == postedEntry.key) {
                             // Update the child's posted update so that it
                             postedEntry.shouldHeadsUpEver = true
                             postedEntry.shouldHeadsUpAgain = true
                             handlePostedEntry(
                                     postedEntry,
                                     hunMutator,
-                                    scenario = "child-alert-transfer-target-$targetType")
-                            didAlertChildToReceiveParentAlert = true
+                                    scenario = "child-heads-up-transfer-target-$targetType")
+                            didHeadsUpChildToReceiveParentHeadsUp = true
                         } else {
                             handlePostedEntry(
                                     postedEntry,
                                     hunMutator,
-                                    scenario = "child-alert-non-target")
+                                    scenario = "child-heads-up-non-target")
                         }
                     }
 
-            // If the child receiving the alert was not updated on this tick (which can happen in a
-            // standard alert transfer scenario), then construct an update so that we can apply it.
-            if (!didAlertChildToReceiveParentAlert) {
+            // If the child receiving the heads up notification was not updated on this tick
+            // (which can happen in a standard heads up transfer scenario), then construct an update
+            // so that we can apply it.
+            if (!didHeadsUpChildToReceiveParentHeadsUp) {
                 val posted = PostedEntry(
-                        childToReceiveParentAlert,
+                        childToReceiveParentHeadsUp,
                         wasAdded = false,
                         wasUpdated = false,
                         shouldHeadsUpEver = true,
                         shouldHeadsUpAgain = true,
-                        isAlerting = mHeadsUpManager.isAlerting(childToReceiveParentAlert.key),
-                        isBinding = isEntryBinding(childToReceiveParentAlert),
+                        isHeadsUpEntry =
+                                mHeadsUpManager.isHeadsUpEntry(childToReceiveParentHeadsUp.key),
+                        isBinding = isEntryBinding(childToReceiveParentHeadsUp),
                 )
                 handlePostedEntry(
                         posted,
                         hunMutator,
-                        scenario = "non-posted-child-alert-transfer-target-$targetType")
+                        scenario = "non-posted-child-heads-up-transfer-target-$targetType")
             }
         }
         // After this method runs, all posted entries should have been handled (or skipped).
@@ -286,9 +289,9 @@ class HeadsUpCoordinator @Inject constructor(
 
     /**
      * Find the posted child with the newest when, and return it if it is isolated and has
-     * GROUP_ALERT_SUMMARY so that it can be alerted.
+     * GROUP_ALERT_SUMMARY so that it can be heads uped.
      */
-    private fun findAlertOverride(
+    private fun findHeadsUpOverride(
         postedEntries: List<PostedEntry>,
         locationLookupByKey: (String) -> GroupLocation,
     ): NotificationEntry? = postedEntries.asSequence()
@@ -344,16 +347,17 @@ class HeadsUpCoordinator @Inject constructor(
             }
         } else {
             if (posted.isHeadsUpAlready) {
-                // NOTE: This might be because we're alerting (i.e. tracked by HeadsUpManager) OR
-                // it could be because we're binding, and that will affect the next step.
+                // NOTE: This might be because we're showing heads up (i.e. tracked by
+                // HeadsUpManager) OR it could be because we're binding, and that will affect the
+                // next step.
                 if (posted.shouldHeadsUpEver) {
-                    // If alerting, we need to post an update.  Otherwise we're still binding,
-                    // and we can just let that finish.
-                    if (posted.isAlerting) {
+                    // If showing heads up, we need to post an update. Otherwise we're still
+                    // binding, and we can just let that finish.
+                    if (posted.isHeadsUpEntry) {
                         hunMutator.updateNotification(posted.key, posted.shouldHeadsUpAgain)
                     }
                 } else {
-                    if (posted.isAlerting) {
+                    if (posted.isHeadsUpEntry) {
                         // We don't want this to be interrupting anymore, let's remove it
                         hunMutator.removeNotification(posted.key, false /*removeImmediately*/)
                     } else {
@@ -408,7 +412,7 @@ class HeadsUpCoordinator @Inject constructor(
                 wasUpdated = false,
                 shouldHeadsUpEver = shouldHeadsUpEver,
                 shouldHeadsUpAgain = true,
-                isAlerting = false,
+                isHeadsUpEntry = false,
                 isBinding = false,
             )
 
@@ -418,21 +422,21 @@ class HeadsUpCoordinator @Inject constructor(
 
         /**
          * Notification could've updated to be heads up or not heads up. Even if it did update to
-         * heads up, if the notification specified that it only wants to alert once, don't heads
+         * heads up, if the notification specified that it only wants to heads up once, don't heads
          * up again.
          */
         override fun onEntryUpdated(entry: NotificationEntry) {
             val shouldHeadsUpEver =
                 mVisualInterruptionDecisionProvider.makeAndLogHeadsUpDecision(entry).shouldInterrupt
             val shouldHeadsUpAgain = shouldHunAgain(entry)
-            val isAlerting = mHeadsUpManager.isAlerting(entry.key)
+            val isHeadsUpEntry = mHeadsUpManager.isHeadsUpEntry(entry.key)
             val isBinding = isEntryBinding(entry)
             val posted = mPostedEntries.compute(entry.key) { _, value ->
                 value?.also { update ->
                     update.wasUpdated = true
                     update.shouldHeadsUpEver = shouldHeadsUpEver
                     update.shouldHeadsUpAgain = update.shouldHeadsUpAgain || shouldHeadsUpAgain
-                    update.isAlerting = isAlerting
+                    update.isHeadsUpEntry = isHeadsUpEntry
                     update.isBinding = isBinding
                 } ?: PostedEntry(
                     entry,
@@ -440,15 +444,15 @@ class HeadsUpCoordinator @Inject constructor(
                     wasUpdated = true,
                     shouldHeadsUpEver = shouldHeadsUpEver,
                     shouldHeadsUpAgain = shouldHeadsUpAgain,
-                    isAlerting = isAlerting,
+                    isHeadsUpEntry = isHeadsUpEntry,
                     isBinding = isBinding,
                 )
             }
-            // Handle cancelling alerts here, rather than in the OnBeforeFinalizeFilter, so that
+            // Handle cancelling heads up here, rather than in the OnBeforeFinalizeFilter, so that
             // work can be done before the ShadeListBuilder is run. This prevents re-entrant
             // behavior between this Coordinator, HeadsUpManager, and VisualStabilityManager.
             if (posted?.shouldHeadsUpEver == false) {
-                if (posted.isAlerting) {
+                if (posted.isHeadsUpEntry) {
                     // We don't want this to be interrupting anymore, let's remove it
                     mHeadsUpManager.removeNotification(posted.key, false /*removeImmediately*/)
                 } else if (posted.isBinding) {
@@ -462,14 +466,14 @@ class HeadsUpCoordinator @Inject constructor(
         }
 
         /**
-         * Stop alerting HUNs that are removed from the notification collection
+         * Stop showing as heads up once removed from the notification collection
          */
         override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
             mPostedEntries.remove(entry.key)
             mEntriesUpdateTimes.remove(entry.key)
             cancelHeadsUpBind(entry)
             val entryKey = entry.key
-            if (mHeadsUpManager.isAlerting(entryKey)) {
+            if (mHeadsUpManager.isHeadsUpEntry(entryKey)) {
                 // TODO: This should probably know the RemoteInputCoordinator's conditions,
                 //  or otherwise reference that coordinator's state, rather than replicate its logic
                 val removeImmediatelyForRemoteInput = (mRemoteInputManager.isSpinning(entryKey) &&
@@ -484,7 +488,7 @@ class HeadsUpCoordinator @Inject constructor(
 
         /**
          * Identify notifications whose heads-up state changes when the notification rankings are
-         * updated, and have those changed notifications alert if necessary.
+         * updated, and have those changed notifications heads up if necessary.
          *
          * This method will occur after any operations in onEntryAdded or onEntryUpdated, so any
          * handling of ranking changes needs to take into account that we may have just made a
@@ -492,7 +496,7 @@ class HeadsUpCoordinator @Inject constructor(
          */
         override fun onRankingApplied() {
             // Because a ranking update may cause some notifications that are no longer (or were
-            // never) in mPostedEntries to need to alert, we need to check every notification
+            // never) in mPostedEntries to need to heads up, we need to check every notification
             // known to the pipeline.
             for (entry in mNotifPipeline.allNotifs) {
                 // Only consider entries that are recent enough, since we want to apply a fairly
@@ -500,9 +504,9 @@ class HeadsUpCoordinator @Inject constructor(
                 // app-provided notification update.
                 if (!isNewEnoughForRankingUpdate(entry)) continue
 
-                // The only entries we consider alerting for here are entries that have never
-                // interrupted and that now say they should heads up or FSI; if they've alerted in
-                // the past, we don't want to incorrectly alert a second time if there wasn't an
+                // The only entries we consider heads up for here are entries that have never
+                // interrupted and that now say they should heads up or FSI; if they've heads uped in
+                // the past, we don't want to incorrectly heads up a second time if there wasn't an
                 // explicit notification update.
                 if (entry.hasInterrupted()) continue
 
@@ -561,7 +565,7 @@ class HeadsUpCoordinator @Inject constructor(
     }
 
     /**
-     * Checks whether an update for a notification warrants an alert for the user.
+     * Checks whether an update for a notification warrants an heads up for the user.
      */
     private fun shouldHunAgain(entry: NotificationEntry): Boolean {
         return (!entry.hasInterrupted() ||
@@ -716,25 +720,25 @@ class HeadsUpCoordinator @Inject constructor(
     }
 
     /**
-     * Whether the notification is already alerting or binding so that it can imminently alert
+     * Whether the notification is already heads up or binding so that it can imminently heads up
      */
     private fun isAttemptingToShowHun(entry: ListEntry) =
-        mHeadsUpManager.isAlerting(entry.key) || isEntryBinding(entry)
+        mHeadsUpManager.isHeadsUpEntry(entry.key) || isEntryBinding(entry)
 
     /**
-     * Whether the notification is already alerting/binding per [isAttemptingToShowHun] OR if it
-     * has been updated so that it should alert this update.  This method is permissive because it
-     * returns `true` even if the update would (in isolation of its group) cause the alert to be
-     * retracted.  This is important for not retracting transferred group alerts.
+     * Whether the notification is already heads up/binding per [isAttemptingToShowHun] OR if it
+     * has been updated so that it should heads up this update.  This method is permissive because
+     * it returns `true` even if the update would (in isolation of its group) cause the heads up to
+     * be retracted.  This is important for not retracting transferred group heads ups.
      */
     private fun isGoingToShowHunNoRetract(entry: ListEntry) =
         mPostedEntries[entry.key]?.calculateShouldBeHeadsUpNoRetract ?: isAttemptingToShowHun(entry)
 
     /**
      * If the notification has been updated, then whether it should HUN in isolation, otherwise
-     * defers to the already alerting/binding state of [isAttemptingToShowHun].  This method is
-     * strict because any update which would revoke the alert supersedes the current
-     * alerting/binding state.
+     * defers to the already heads up/binding state of [isAttemptingToShowHun].  This method is
+     * strict because any update which would revoke the heads up supersedes the current
+     * heads up/binding state.
      */
     private fun isGoingToShowHunStrict(entry: ListEntry) =
         mPostedEntries[entry.key]?.calculateShouldBeHeadsUpStrict ?: isAttemptingToShowHun(entry)
@@ -760,12 +764,12 @@ class HeadsUpCoordinator @Inject constructor(
         var wasUpdated: Boolean,
         var shouldHeadsUpEver: Boolean,
         var shouldHeadsUpAgain: Boolean,
-        var isAlerting: Boolean,
+        var isHeadsUpEntry: Boolean,
         var isBinding: Boolean,
     ) {
         val key = entry.key
         val isHeadsUpAlready: Boolean
-            get() = isAlerting || isBinding
+            get() = isHeadsUpEntry || isBinding
         val calculateShouldBeHeadsUpStrict: Boolean
             get() = shouldHeadsUpEver && (wasAdded || shouldHeadsUpAgain || isHeadsUpAlready)
         val calculateShouldBeHeadsUpNoRetract: Boolean
@@ -781,7 +785,7 @@ private fun Map<String, GroupLocation>.getLocation(key: String): GroupLocation =
 /**
  * Invokes the given block with a [HunMutator] that defers all HUN removals. This ensures that the
  * HeadsUpManager is notified of additions before removals, which prevents a glitch where the
- * HeadsUpManager temporarily believes that nothing is alerting, causing bad re-entrant behavior.
+ * HeadsUpManager temporarily believes that nothing is heads up, causing bad re-entrant behavior.
  */
 private fun <R> HeadsUpManager.modifyHuns(block: (HunMutator) -> R): R {
     val mutator = HunMutatorImpl(this)
@@ -790,7 +794,7 @@ private fun <R> HeadsUpManager.modifyHuns(block: (HunMutator) -> R): R {
 
 /** Mutates the HeadsUp state of notifications. */
 private interface HunMutator {
-    fun updateNotification(key: String, alert: Boolean)
+    fun updateNotification(key: String, shouldHeadsUpAgain: Boolean)
     fun removeNotification(key: String, releaseImmediately: Boolean)
 }
 
@@ -801,8 +805,8 @@ private interface HunMutator {
 private class HunMutatorImpl(private val headsUpManager: HeadsUpManager) : HunMutator {
     private val deferred = mutableListOf<Pair<String, Boolean>>()
 
-    override fun updateNotification(key: String, alert: Boolean) {
-        headsUpManager.updateNotification(key, alert)
+    override fun updateNotification(key: String, shouldHeadsUpAgain: Boolean) {
+        headsUpManager.updateNotification(key, shouldHeadsUpAgain)
     }
 
     override fun removeNotification(key: String, releaseImmediately: Boolean) {

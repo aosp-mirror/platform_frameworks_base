@@ -50,6 +50,14 @@ public final class AudioProductStrategy implements Parcelable {
 
     private static final String TAG = "AudioProductStrategy";
 
+    /**
+     * The audio flags that will affect product strategy selection.
+     */
+    private static final int AUDIO_FLAGS_AFFECT_STRATEGY_SELECTION =
+            AudioAttributes.FLAG_AUDIBILITY_ENFORCED
+                    | AudioAttributes.FLAG_SCO
+                    | AudioAttributes.FLAG_BEACON;
+
     private final AudioAttributesGroup[] mAudioAttributesGroups;
     private final String mName;
     /**
@@ -438,8 +446,8 @@ public final class AudioProductStrategy implements Parcelable {
                 || (attr.getSystemUsage() == refAttr.getSystemUsage()))
             && ((refAttr.getContentType() == AudioAttributes.CONTENT_TYPE_UNKNOWN)
                 || (attr.getContentType() == refAttr.getContentType()))
-            && ((refAttr.getAllFlags() == 0)
-                || (attr.getAllFlags() != 0
+            && (((refAttr.getAllFlags() & AUDIO_FLAGS_AFFECT_STRATEGY_SELECTION) == 0)
+                || ((attr.getAllFlags() & AUDIO_FLAGS_AFFECT_STRATEGY_SELECTION) != 0
                 && (attr.getAllFlags() & refAttr.getAllFlags()) == refAttr.getAllFlags()))
             && ((refFormattedTags.length() == 0) || refFormattedTags.equals(cliFormattedTags));
     }

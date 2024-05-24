@@ -101,6 +101,7 @@ import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.TelephonyPermissions;
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -417,6 +418,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             LinkCapacityEstimate.INVALID, LinkCapacityEstimate.INVALID)));
     private List<List<LinkCapacityEstimate>> mLinkCapacityEstimateLists;
 
+    private int[] mSimultaneousCellularCallingSubIds = {};
+
     private int[] mECBMReason;
     private boolean[] mECBMStarted;
     private int[] mSCBMReason;
@@ -563,7 +566,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 || events.contains(TelephonyCallback.EVENT_VOICE_ACTIVATION_STATE_CHANGED)
                 || events.contains(TelephonyCallback.EVENT_RADIO_POWER_STATE_CHANGED)
                 || events.contains(TelephonyCallback.EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED)
-                || events.contains(TelephonyCallback.EVENT_EMERGENCY_CALLBACK_MODE_CHANGED);
+                || events.contains(TelephonyCallback.EVENT_EMERGENCY_CALLBACK_MODE_CHANGED)
+                || events.contains(TelephonyCallback
+                        .EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED);
     }
 
     private static final int MSG_USER_SWITCHED = 1;
@@ -1121,6 +1126,21 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
 
+        int phoneId = -1;
+        int subscriptionId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
+        if(Flags.preventSystemServerAndPhoneDeadlock()) {
+            // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
+            // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
+            if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+                if (DBG) {
+                    log("invalid subscription id, use default id");
+                }
+            } else { //APP specify subID
+                subscriptionId = subId;
+            }
+            phoneId = getPhoneIdFromSubId(subscriptionId);
+        }
+
         synchronized (mRecords) {
             // register
             IBinder b = callback.asBinder();
@@ -1140,17 +1160,23 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             r.renounceFineLocationAccess = renounceFineLocationAccess;
             r.callerUid = Binder.getCallingUid();
             r.callerPid = Binder.getCallingPid();
-            // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
-            // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
-            if (!SubscriptionManager.isValidSubscriptionId(subId)) {
-                if (DBG) {
-                    log("invalid subscription id, use default id");
+
+            if(!Flags.preventSystemServerAndPhoneDeadlock()) {
+                // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
+                // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
+                if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+                    if (DBG) {
+                        log("invalid subscription id, use default id");
+                    }
+                    r.subId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
+                } else {//APP specify subID
+                    r.subId = subId;
                 }
-                r.subId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
-            } else {//APP specify subID
-                r.subId = subId;
+                r.phoneId = getPhoneIdFromSubId(r.subId);
+            } else {
+                r.subId = subscriptionId;
+                r.phoneId = phoneId;
             }
-            r.phoneId = getPhoneIdFromSubId(r.subId);
             r.eventList = events;
 
             if (DBG) {
@@ -1422,6 +1448,15 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     try {
                         r.callback.onDataEnabledChanged(
                                 mIsDataEnabled[r.phoneId], mDataEnabledReason[r.phoneId]);
+                    } catch (RemoteException ex) {
+                        remove(r.binder);
+                    }
+                }
+                if (events.contains(TelephonyCallback
+                        .EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED)) {
+                    try {
+                        r.callback.onSimultaneousCallingStateChanged(
+                                mSimultaneousCellularCallingSubIds);
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -1879,8 +1914,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private void notifyCarrierNetworkChangeWithPermission(int subId, boolean active) {
+        int phoneId = -1;
+        if(Flags.preventSystemServerAndPhoneDeadlock()) {
+            phoneId = getPhoneIdFromSubId(subId);
+        }
         synchronized (mRecords) {
-            int phoneId = getPhoneIdFromSubId(subId);
+            if(!Flags.preventSystemServerAndPhoneDeadlock()) {
+                phoneId = getPhoneIdFromSubId(subId);
+            }
             mCarrierNetworkChangeState[phoneId] = active;
 
             if (VDBG) {
@@ -2679,6 +2720,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyEmergencyNumberList()")) {
             return;
         }
+        if (Flags.enforceTelephonyFeatureMappingForPublicApis()) {
+            if (!mContext.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_TELEPHONY_CALLING)) {
+                // TelephonyManager.getEmergencyNumberList() throws an exception if
+                // FEATURE_TELEPHONY_CALLING is not defined.
+                return;
+            }
+        }
 
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
@@ -3076,6 +3125,43 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    /**
+     * Notify the listeners that simultaneous cellular calling subscriptions have changed
+     * @param subIds The set of subIds that support simultaneous cellular calling
+     */
+    public void notifySimultaneousCellularCallingSubscriptionsChanged(int[] subIds) {
+        if (!checkNotifyPermission("notifySimultaneousCellularCallingSubscriptionsChanged()")) {
+            return;
+        }
+
+        if (VDBG) {
+            StringBuilder b = new StringBuilder();
+            b.append("notifySimultaneousCellularCallingSubscriptionsChanged: ");
+            b.append("subIds = {");
+            for (int i : subIds) {
+                b.append(" ");
+                b.append(i);
+            }
+            b.append("}");
+            log(b.toString());
+        }
+
+        synchronized (mRecords) {
+            mSimultaneousCellularCallingSubIds = subIds;
+            for (Record r : mRecords) {
+                if (r.matchTelephonyCallbackEvent(TelephonyCallback
+                        .EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED)) {
+                    try {
+                        r.callback.onSimultaneousCallingStateChanged(subIds);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
                     }
                 }
             }

@@ -79,11 +79,28 @@ message CombinedVibrationEffectProto {
     repeated int32 delays = 2;
 }
 
+// Next Tag: 5
 message VibrationAttributesProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
     optional int32 usage = 1;
     optional int32 audio_usage = 2;
     optional int32 flags = 3;
+    optional int32 category = 4;
+}
+
+// Next Tag: 4
+message VibrationParamProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    optional VibrationScaleParamProto scale = 1;
+    optional int64 create_time = 2;
+    optional bool is_from_request = 3;
+}
+
+// Next Tag: 3
+message VibrationScaleParamProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    optional int32 types_mask = 1;
+    optional float scale = 2;
 }
 
 // Next Tag: 9
@@ -132,16 +149,19 @@ message VibrationProto {
     }
 }
 
-// Next Tag: 25
+// Next Tag: 29
 message VibratorManagerServiceDumpProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
     repeated int32 vibrator_ids = 1;
     optional VibrationProto current_vibration = 2;
     optional bool is_vibrating = 3;
+    optional int32 is_vibrator_controller_registered = 27;
     optional VibrationProto current_external_vibration = 4;
     optional bool vibrator_under_external_control = 5;
     optional bool low_power_mode = 6;
     optional bool vibrate_on = 24;
+    optional bool keyboard_vibration_on = 25;
+    optional int32 default_vibration_amplitude = 26;
     optional int32 alarm_intensity = 18;
     optional int32 alarm_default_intensity = 19;
     optional int32 haptic_feedback_intensity = 7;
@@ -158,5 +178,6 @@ message VibratorManagerServiceDumpProto {
     repeated VibrationProto previous_notification_vibrations = 14;
     repeated VibrationProto previous_alarm_vibrations = 15;
     repeated VibrationProto previous_vibrations = 16;
-    repeated VibrationProto previous_external_vibrations = 17;
+    repeated VibrationParamProto previous_vibration_params = 28;
+    reserved 17; // prev previous_external_vibrations
 }

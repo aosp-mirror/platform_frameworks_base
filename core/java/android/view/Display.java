@@ -86,6 +86,7 @@ import java.util.function.Consumer;
  * that are currently attached and whether mirroring has been enabled.
  * </p>
  */
+@android.ravenwood.annotation.RavenwoodKeepPartialClass
 public final class Display {
     private static final String TAG = "Display";
     private static final boolean DEBUG = false;
@@ -1210,6 +1211,8 @@ public final class Display {
      * @see #REMOVE_MODE_DESTROY_CONTENT
      */
     // TODO (b/114338689): Remove the method and use IWindowManager#getRemoveContentMode
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public int getRemoveMode() {
         return mDisplayInfo.removeMode;
     }
@@ -1998,6 +2001,7 @@ public final class Display {
      * display power state. In SUSPEND states, updates are absolutely forbidden.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isSuspendedState(int state) {
         return state == STATE_OFF || state == STATE_DOZE_SUSPEND || state == STATE_ON_SUSPEND;
     }
@@ -2007,6 +2011,7 @@ public final class Display {
      * specified display power state.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isDozeState(int state) {
         return state == STATE_DOZE || state == STATE_DOZE_SUSPEND;
     }
@@ -2016,6 +2021,7 @@ public final class Display {
      * or {@link #STATE_VR}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isActiveState(int state) {
         return state == STATE_ON || state == STATE_VR;
     }
@@ -2024,6 +2030,7 @@ public final class Display {
      * Returns true if the display is in an off state such as {@link #STATE_OFF}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isOffState(int state) {
         return state == STATE_OFF;
     }
@@ -2033,6 +2040,7 @@ public final class Display {
      * or {@link #STATE_VR} or {@link #STATE_ON_SUSPEND}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isOnState(int state) {
         return state == STATE_ON || state == STATE_VR || state == STATE_ON_SUSPEND;
     }
@@ -2079,6 +2087,7 @@ public final class Display {
      *
      * @see Display#getSupportedModes()
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class Mode implements Parcelable {
         /**
          * @hide
@@ -2467,6 +2476,7 @@ public final class Display {
      * <p>You can get an instance for a given {@link Display} object with
      * {@link Display#getHdrCapabilities getHdrCapabilities()}.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class HdrCapabilities implements Parcelable {
         /**
          * Invalid luminance value.

@@ -262,10 +262,10 @@ public class SlicePurchaseBroadcastReceiverTest {
 
     @Test
     public void testNotificationCanceled() {
+        displayPerformanceBoostNotification();
+
         // send ACTION_NOTIFICATION_CANCELED
         doReturn("com.android.phone.slice.action.NOTIFICATION_CANCELED").when(mIntent).getAction();
-        doReturn(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY).when(mIntent).getIntExtra(
-                eq(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY), anyInt());
         mSlicePurchaseBroadcastReceiver.onReceive(mContext, mIntent);
 
         // verify notification was canceled
@@ -276,7 +276,7 @@ public class SlicePurchaseBroadcastReceiverTest {
     }
 
     @Test
-    public void testNotificationTimeout() throws Exception {
+    public void testNotificationTimeout() {
         displayPerformanceBoostNotification();
 
         // send ACTION_SLICE_PURCHASE_APP_RESPONSE_TIMEOUT
@@ -353,7 +353,7 @@ public class SlicePurchaseBroadcastReceiverTest {
         verify(mNotificationManager, never()).notifyAsUser(
                 eq(SlicePurchaseBroadcastReceiver.PERFORMANCE_BOOST_NOTIFICATION_TAG),
                 eq(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY),
-                any(),
+                any(Notification.class),
                 eq(UserHandle.ALL));
         verify(mNotificationShownIntent, never()).send();
 

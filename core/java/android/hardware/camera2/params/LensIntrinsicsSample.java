@@ -37,16 +37,18 @@ public final class LensIntrinsicsSample {
      * Create a new {@link LensIntrinsicsSample}.
      *
      * <p>{@link LensIntrinsicsSample} contains the timestamp and the
-     * {@link CaptureResult#LENS_INTRINSIC_CALIBRATION} sample.
+     * {@link CaptureResult#LENS_INTRINSIC_CALIBRATION} sample.</p>
      *
-     * @param timestamp timestamp of the lens intrinsics sample.
-     * @param lensIntrinsics the lens intrinsic calibration for the sample.
+     * @param timestampNs timestamp in nanoseconds of the lens intrinsics sample. This uses the
+     *                  same time basis as {@link CaptureResult#SENSOR_TIMESTAMP}.
+     * @param lensIntrinsics the lens {@link CaptureResult#LENS_INTRINSIC_CALIBRATION intrinsic}
+     *                      calibration for the sample.
      *
      * @throws IllegalArgumentException if lensIntrinsics length is different from 5
      */
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
-    public LensIntrinsicsSample(final long timestamp, @NonNull final float[] lensIntrinsics) {
-        mTimestampNs = timestamp;
+    public LensIntrinsicsSample(final long timestampNs, @NonNull final float[] lensIntrinsics) {
+        mTimestampNs = timestampNs;
         Preconditions.checkArgument(lensIntrinsics.length == 5);
         mLensIntrinsics = lensIntrinsics;
     }
@@ -54,18 +56,18 @@ public final class LensIntrinsicsSample {
     /**
      * Get the timestamp in nanoseconds.
      *
-     *<p>The timestamps are in the same timebase as and comparable to
+     *<p>The timestamps are in the same time basis as and comparable to
      *{@link CaptureResult#SENSOR_TIMESTAMP android.sensor.timestamp}.</p>
      *
      * @return a long value (guaranteed to be finite)
      */
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
-    public long getTimestamp() {
+    public long getTimestampNanos() {
         return mTimestampNs;
     }
 
     /**
-     * Get the lens intrinsics calibration
+     * Get the lens {@link CaptureResult#LENS_INTRINSIC_CALIBRATION intrinsics} calibration
      *
      * @return a floating point value (guaranteed to be finite)
      * @see CaptureResult#LENS_INTRINSIC_CALIBRATION

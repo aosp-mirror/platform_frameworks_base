@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Mikropono"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Mga log ng tawag"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Mga kalapit na device"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Palitan ang media output"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Mga larawan at media"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Mga Notification"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Mga Notification"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Mga App"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Streaming"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Puwedeng gumawa at mamahala ng mga tawag sa telepono"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Puwedeng magbasa at magsulat ng log ng tawag sa telepono"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Puwedeng magpadala at tumingin ng mga SMS message"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Puwedeng mag-access ng iyong mga contact"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Puwedeng mag-access ng iyong kalendaryo"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Kayang mag-record ng audio"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Puwedeng mahanap ang, kumonekta sa, at tukuyin ang relatibong posisyon ng mga kalapit na device"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Magbasa ng lahat ng notification, kabilang ang impormasyon gaya ng mga contact, mensahe, at larawan"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Tumawag at mamahala ng mga tawag sa telepono"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"I-read at i-write ang log ng tawag sa telepono"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Magpadala at tumingin ng mga mensaheng SMS"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"I-access ang iyong mga contact"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"I-access ang iyong kalendaryo"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Mag-record ng audio"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Maghanap ng, kumonekta sa, at tukuyin ang relatibong posisyon ng mga kalapit na device"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Basahin ang lahat ng notification, kabilang ang impormasyon tulad ng mga contact, mensahe, at larawan"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Basahin ang lahat ng notification, kabilang ang impormasyon tulad ng mga contact, mensahe, at larawan&lt;br/&gt;• Magpadala ng mga notification&lt;br/&gt;&lt;br/&gt;Puwede mong pamahalaan ang kakayahan ng app na ito na magbasa at magpadala ng mga notification kahit kailan sa Mga Setting &gt; Mga Notification."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"I-stream ang mga app ng iyong telepono"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Mag-stream ng mga app at iba pang feature ng system mula sa iyong telepono"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"I-access ang listahan ng mga available na device at kontrolin kung alin ang magsi-stream o magka-cast ng audio o video mula sa iba pang app"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telepono"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
 </resources>

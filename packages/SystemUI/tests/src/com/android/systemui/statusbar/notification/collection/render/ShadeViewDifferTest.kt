@@ -22,7 +22,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.logcatLogBuffer
+import com.android.systemui.log.logcatLogBuffer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test

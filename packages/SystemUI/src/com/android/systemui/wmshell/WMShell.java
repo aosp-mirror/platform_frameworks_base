@@ -256,7 +256,7 @@ public final class WMShell implements
         });
         mCommandQueue.addCallback(new CommandQueue.Callbacks() {
             @Override
-            public void goToFullscreenFromSplit() {
+            public void moveFocusedTaskToFullscreen(int displayId) {
                 splitScreen.goToFullscreenFromSplit();
             }
         });
@@ -347,15 +347,27 @@ public final class WMShell implements
         desktopMode.addVisibleTasksListener(
                 new DesktopModeTaskRepository.VisibleTasksListener() {
                     @Override
-                    public void onVisibilityChanged(int displayId, boolean hasFreeformTasks) {
+                    public void onTasksVisibilityChanged(int displayId, int visibleTasksCount) {
                         if (displayId == Display.DEFAULT_DISPLAY) {
                             mSysUiState.setFlag(SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE,
-                                            hasFreeformTasks)
+                                            visibleTasksCount > 0)
                                     .commitUpdate(mDisplayTracker.getDefaultDisplayId());
                         }
                         // TODO(b/278084491): update sysui state for changes on other displays
                     }
                 }, mSysUiMainExecutor);
+        mCommandQueue.addCallback(new CommandQueue.Callbacks() {
+            @Override
+            public void enterDesktop(int displayId) {
+                desktopMode.enterDesktop(displayId);
+            }
+        });
+        mCommandQueue.addCallback(new CommandQueue.Callbacks() {
+            @Override
+            public void moveFocusedTaskToFullscreen(int displayId) {
+                desktopMode.moveFocusedTaskToFullscreen(displayId);
+            }
+        });
     }
 
     @VisibleForTesting

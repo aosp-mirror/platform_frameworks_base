@@ -26,7 +26,7 @@ option java_multiple_files = true;
  * Represents a {@link android.view.InsetsSource} object.
  */
 message InsetsSourceProto {
-    optional string type = 1;
+    optional string type = 1 [deprecated=true];
     optional .android.graphics.RectProto frame = 2;
     optional .android.graphics.RectProto visible_frame = 3;
     optional bool visible = 4;

@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> na <xliff:g id="TIME_DELAY">{2}</xliff:g> seconden"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: niet doorgeschakeld"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: niet doorgeschakeld"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Beveiliging van mobiele netwerken"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Instellingen checken"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Toegang gehad tot apparaat-ID"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Een netwerk op de <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g>-verbinding heeft de unieke ID van je apparaat (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> keer geregistreerd in de periode tussen <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> en <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Verbinding met <xliff:g id="NETWORK_NAME">%1$s</xliff:g> versleuteld"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Je bent nu verbonden met beter beveiligd mobiel netwerk."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Niet-versleutelde verbinding met <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Je bent verbonden met een niet-versleuteld mobiel netwerk. Je gesprekken, berichten en gegevens zijn kwetsbaar voor onderschepping."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Mobiele beveiligingsinstellingen"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Meer informatie"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Functiecode voltooid."</string>
     <string name="fcError" msgid="5325116502080221346">"Verbindingsprobleem of ongeldige functiecode."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -370,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Hiermee kan de app de module voor cell broadcasts binden om cell broadcast-berichten door te sturen als die worden ontvangen. Cell broadcast-waarschuwingen worden op bepaalde locaties verzonden om je te waarschuwen voor noodsituaties. Schadelijke apps kunnen de prestaties of verwerking van je apparaat verstoren als een bericht met een noodmelding wordt ontvangen."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Actieve gesprekken beheren"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Hiermee kan een app informatie over actieve gesprekken op je apparaat bekijken en deze gesprekken beheren."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Toegang tot de laatst bekende mobiele identiteit."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Hiermee krijgt een app toegang tot de laatst bekende mobiele identiteit die via telefonie is verstrekt."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"infodienstberichten lezen"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Toestaan dat de app infodienstberichten leest die worden ontvangen op je apparaat. Infodienstberichten worden verzonden naar bepaalde locaties om u te waarschjeen voor noodsituaties. Schadelijke apps kunnen de prestaties of verwerking van je apparaat verstoren wanneer een infodienstbericht wordt ontvangen."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"Geabonneerde feeds lezen"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Hiermee kan de app gebruikmaken van services op de voorgrond van het type \'systemExempted\'"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"service op de voorgrond van het type \'fileManagement\' uitvoeren"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Hiermee kan de app gebruikmaken van services op de voorgrond van het type \'fileManagement\'."</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"service op de voorgrond van het type \'mediaProcessing\' uitvoeren"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Hiermee kan de app gebruikmaken van services op de voorgrond van het type \'mediaProcessing\'"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"service op de voorgrond van het type \'specialUse\' uitvoeren"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Hiermee kan de app gebruikmaken van services op de voorgrond van het type \'specialUse\'"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"opslagruimte van app meten"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Hiermee kan de app de infraroodzender van de telefoon gebruiken."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"achtergrond instellen"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Hiermee kan de app de systeemachtergrond instellen."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Toegang tot verborgen profielen"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Hiermee kan de app toegang krijgen tot verborgen profielen."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"je achtergrondformaat aanpassen"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Hiermee kan de app de grootte van de achtergrond instellen."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"tijdzone instellen"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Schermvergrendeling gebruiken"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Voer je schermvergrendeling in om door te gaan"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Druk stevig op de sensor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Vingerafdruk niet herkend. Probeer het opnieuw."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Vingerafdruk niet herkend. Probeer het opnieuw."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Reinig de vingerafdruksensor en probeer het opnieuw"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Reinig de sensor en probeer het opnieuw"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Druk stevig op de sensor"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Vingerafdruk geverifieerd"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Gezicht geverifieerd"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Gezicht geverifieerd. Druk op Bevestigen."</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardware voor vingerafdruk niet beschikbaar."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Hardware voor vingerafdruk niet beschikbaar"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Kan vingerafdruk niet instellen"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Time-out bij instellen van vingerafdruk. Probeer het opnieuw."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Vingerafdrukbewerking geannuleerd."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Vingerafdrukverificatie geannuleerd door gebruiker."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Vingerafdrukbewerking geannuleerd"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Vingerafdrukverificatie geannuleerd door gebruiker"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Te veel pogingen. Gebruik in plaats daarvan de schermvergrendeling."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Te veel pogingen. Gebruik in plaats daarvan de schermvergrendeling."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Kan vingerafdruk niet verwerken. Probeer het opnieuw."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Geen vingerafdrukken geregistreerd."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Dit apparaat heeft geen vingerafdruksensor."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor staat tijdelijk uit."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Kan vingerafdruksensor niet gebruiken. Ga naar een reparateur."</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Geen vingerafdrukken geregistreerd"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Dit apparaat heeft geen vingerafdruksensor"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Sensor tijdelijk uitgezet"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Kan vingerafdruksensor niet gebruiken. Ga naar een reparateur."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Aan/uit-knop ingedrukt"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Vinger <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Vingerafdruk gebruiken"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Je gezicht is niet te zien. Houd je telefoon op ooghoogte."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Te veel beweging. Houd je telefoon stil."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Registreer je gezicht opnieuw."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Gezicht niet herkend. Probeer het opnieuw."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Gezicht niet herkend. Probeer het opnieuw."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Verander de positie van je hoofd een beetje"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Kijk goed recht naar je telefoon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Kijk goed recht naar je telefoon"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Hiermee kan de app sensorgegevens samplen met een snelheid die hoger is dan 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"app updaten zonder gebruikersactie"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Hiermee kan de houder de eerder geïnstalleerde app updaten zonder gebruikersactie"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"de verificatiestatus updaten van E2EE-contactsleutels die eigendom zijn van andere apps"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Hiermee kan de app de verificatiestatus updaten van E2EE-contactsleutels die eigendom zijn van andere apps."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Wachtwoordregels instellen"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"De lengte en het aantal tekens beheren die zijn toegestaan in wachtwoorden en pincodes voor schermvergrendeling."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Pogingen voor schermontgrendeling bijhouden"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Afspraken"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Slapen"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Beheerd door <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Aan"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Uit"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> zet sommige geluiden uit"</string>
@@ -1925,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Geverifieerd"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Uitvouwen"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Samenvouwen"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Samengevouwen"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Uitgevouwen"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"uitvouwen aan- of uitzetten"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Poort voor Android-USB-randapparatuur"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Werk-apps hervatten?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Hervatten"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Noodgeval"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Schermvergrendeling instellen"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Schermvergrendeling instellen"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Als je je privéruimte wilt gebruiken, stel je een schermvergrendeling op dit apparaat in"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"App is niet beschikbaar"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> is momenteel niet beschikbaar."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> niet beschikbaar"</string>
@@ -2338,11 +2362,9 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Hiermee kan een bijbehorende app services op de voorgrond vanuit de achtergrond starten."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Microfoon is beschikbaar"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Microfoon is geblokkeerd"</string>
-    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Kan niet spiegelen naar scherm"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Kan niet mirroren naar scherm"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Gebruik een andere kabel en probeer het opnieuw"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Je apparaat is te warm en kan pas naar het scherm mirroren als het is afgekoeld"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"De kabel ondersteunt misschien geen schermen"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Je USB-C-kabel sluit misschien niet goed aan op schermen"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen staat aan"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> gebruikt beide schermen om content te tonen"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Werk 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Gemeenschappelijk"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Automatisch verbonden met satelliet"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Je kunt berichten sturen en krijgen zonder een mobiel of wifi-netwerk"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Berichten openen"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Hoe het werkt"</string>
 </resources>

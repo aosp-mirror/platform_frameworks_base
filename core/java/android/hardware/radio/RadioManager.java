@@ -166,12 +166,7 @@ public class RadioManager {
      * analog handover state managed from the HAL implementation side.
      *
      * <p>Some radio technologies may not support this, i.e. DAB.
-     *
-     * @deprecated Use {@link #CONFIG_FORCE_ANALOG_FM} instead. If {@link #CONFIG_FORCE_ANALOG_FM}
-     * is supported in HAL, {@link RadioTuner#setConfigFlag} and {@link RadioTuner#isConfigFlagSet}
-     * with CONFIG_FORCE_ANALOG will set/get the value of {@link #CONFIG_FORCE_ANALOG_FM}.
      */
-    @Deprecated
     public static final int CONFIG_FORCE_ANALOG = 2;
     /**
      * Forces the digital playback for the supporting radio technology.
@@ -316,7 +311,7 @@ public class RadioManager {
         }
 
         /** Unique module identifier provided by the native service.
-         * For use with {@link #openTuner(int, BandConfig, boolean, Callback, Handler)}.
+         * For use with {@link #openTuner(int, BandConfig, boolean, RadioTuner.Callback, Handler)}.
          * @return the radio module unique identifier.
          */
         public int getId() {
@@ -1566,7 +1561,7 @@ public class RadioManager {
         /** Main channel expressed in units according to band type.
          * Currently all defined band types express channels as frequency in kHz
          * @return the program channel
-         * @deprecated Use {@link getSelector()} instead.
+         * @deprecated Use {@link ProgramInfo#getSelector} instead.
          */
         @Deprecated
         public int getChannel() {
@@ -1580,7 +1575,7 @@ public class RadioManager {
 
         /** Sub channel ID. E.g 1 for HD radio HD1
          * @return the program sub channel
-         * @deprecated Use {@link getSelector()} instead.
+         * @deprecated Use {@link ProgramInfo#getSelector} instead.
          */
         @Deprecated
         public int getSubChannel() {
@@ -1609,7 +1604,7 @@ public class RadioManager {
 
         /** {@code true} if the received program is digital (e.g HD radio)
          * @return {@code true} if digital, {@code false} otherwise.
-         * @deprecated Use {@link getLogicallyTunedTo()} instead.
+         * @deprecated Use {@link ProgramInfo#getLogicallyTunedTo()} instead.
          */
         @Deprecated
         public boolean isDigital() {
@@ -1918,7 +1913,8 @@ public class RadioManager {
      * Removes previously registered announcement listener.
      *
      * @param listener announcement listener, previously registered with
-     *        {@link addAnnouncementListener}
+     *        {@link #addAnnouncementListener(Executor, Set, Announcement.OnListUpdatedListener)}
+     *        or {@link #addAnnouncementListener(Set, Announcement.OnListUpdatedListener)}
      */
     @RequiresPermission(Manifest.permission.ACCESS_BROADCAST_RADIO)
     public void removeAnnouncementListener(@NonNull Announcement.OnListUpdatedListener listener) {

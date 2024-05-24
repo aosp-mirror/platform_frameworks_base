@@ -18,9 +18,9 @@
 
 package com.android.server.wm.flicker.helpers
 
-import android.tools.common.Rotation
-import android.tools.device.flicker.legacy.FlickerTestData
-import android.tools.device.flicker.rules.ChangeDisplayOrientationRule
+import android.tools.Rotation
+import android.tools.flicker.legacy.FlickerTestData
+import android.tools.flicker.rules.ChangeDisplayOrientationRule
 
 /**
  * Changes the device [rotation] and wait for the rotation animation to complete

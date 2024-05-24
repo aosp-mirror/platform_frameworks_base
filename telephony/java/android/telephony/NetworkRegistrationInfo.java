@@ -649,12 +649,19 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     /**
-     * @return Reason for denial if the registration state is {@link #REGISTRATION_STATE_DENIED}.
-     * Depending on {@code accessNetworkTechnology}, the values are defined in 3GPP TS 24.008
-     * 10.5.3.6 for UMTS, 3GPP TS 24.301 9.9.3.9 for LTE, and 3GPP2 A.S0001 6.2.2.44 for CDMA
-     * @hide
+     * Get the 3GPP/3GPP2 reason code indicating why registration failed.
+     *
+     * Returns the reason code for non-transient registration failures. Typically this method will
+     * only return the last reason code received during a network selection procedure. The reason
+     * code is system-specific; however, the reason codes for both 3GPP and 3GPP2 systems are
+     * largely equivalent across generations.
+     *
+     * @return registration reject cause if available, otherwise 0. Depending on
+     * {@link #getAccessNetworkTechnology}, the values are defined in 3GPP TS 24.008 10.5.3.6 for
+     * WCDMA/UMTS, 3GPP TS 24.301 9.9.3.9 for LTE/EPS, 3GPP 24.501 Annex A for NR/5GS, or 3GPP2
+     * A.S0001 6.2.2.44 for CDMA.
      */
-    @SystemApi
+    @FlaggedApi(Flags.FLAG_NETWORK_REGISTRATION_INFO_REJECT_CAUSE)
     public int getRejectCause() {
         return mRejectCause;
     }

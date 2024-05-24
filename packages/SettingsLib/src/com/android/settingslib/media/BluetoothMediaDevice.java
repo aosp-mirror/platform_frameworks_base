@@ -19,6 +19,7 @@ import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECT
 
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHearingAid;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
@@ -42,18 +43,16 @@ public class BluetoothMediaDevice extends MediaDevice {
     BluetoothMediaDevice(
             Context context,
             CachedBluetoothDevice device,
-            MediaRoute2Info info,
-            String packageName) {
-        this(context, device, info, packageName, null);
+            MediaRoute2Info info) {
+        this(context, device, info, null);
     }
 
     BluetoothMediaDevice(
             Context context,
             CachedBluetoothDevice device,
             MediaRoute2Info info,
-            String packageName,
             RouteListingPreference.Item item) {
-        super(context, info, packageName, item);
+        super(context, info, item);
         mCachedDevice = device;
         mAudioManager = context.getSystemService(AudioManager.class);
         initDeviceRecord();
@@ -100,7 +99,12 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     @Override
     public String getId() {
-        return MediaDeviceUtils.getId(mCachedDevice);
+        if (mCachedDevice.isHearingAidDevice()) {
+            if (mCachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID) {
+                return Long.toString(mCachedDevice.getHiSyncId());
+            }
+        }
+        return mCachedDevice.getAddress();
     }
 
     /**

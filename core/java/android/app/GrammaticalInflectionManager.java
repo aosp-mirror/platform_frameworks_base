@@ -114,7 +114,7 @@ public class GrammaticalInflectionManager {
         }
 
         try {
-            mService.setSystemWideGrammaticalGender(mContext.getUserId(), grammaticalGender);
+            mService.setSystemWideGrammaticalGender(grammaticalGender, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -131,7 +131,8 @@ public class GrammaticalInflectionManager {
     @Configuration.GrammaticalGender
     public int getSystemGrammaticalGender() {
         try {
-            return mService.getSystemGrammaticalGender(mContext.getUserId());
+            return mService.getSystemGrammaticalGender(mContext.getAttributionSource(),
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

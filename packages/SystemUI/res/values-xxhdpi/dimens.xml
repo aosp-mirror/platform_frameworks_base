@@ -22,4 +22,8 @@
          fraction of a pixel.-->
     <fraction name="battery_subpixel_smoothing_left">33%</fraction>
     <fraction name="battery_subpixel_smoothing_right">33%</fraction>
+
+    <!-- Biometrics fingerprint icon size for full resolution.-->
+    <dimen name="biometric_dialog_fingerprint_icon_width">120dp</dimen>
+    <dimen name="biometric_dialog_fingerprint_icon_height">120dp</dimen>
 </resources>

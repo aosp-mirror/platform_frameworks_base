@@ -58,12 +58,14 @@ fun createFilterFromTextPolicyFile(
         ): OutputFilter {
     log.i("Loading offloaded annotations from $filename ...")
     log.withIndent {
-        val imf = InMemoryOutputFilter(classes, fallback)
+        val subclassFilter = SubclassFilter(classes, fallback)
+        val imf = InMemoryOutputFilter(classes, subclassFilter)
 
         var lineNo = 0
 
         var aidlPolicy: FilterPolicyWithReason? = null
         var featureFlagsPolicy: FilterPolicyWithReason? = null
+        var syspropsPolicy: FilterPolicyWithReason? = null
 
         try {
             BufferedReader(FileReader(filename)).use { reader ->
@@ -93,6 +95,10 @@ fun createFilterFromTextPolicyFile(
                             }
                             className = fields[1]
 
+                            // superClass is set when the class name starts with a "*".
+                            val superClass = resolveExtendingClass(className)
+
+                            // :aidl, etc?
                             val classType = resolveSpecialClass(className)
 
                             if (fields[2].startsWith("!")) {
@@ -123,23 +129,38 @@ fun createFilterFromTextPolicyFile(
                                 when (classType) {
                                     SpecialClass.NotSpecial -> {
                                         // TODO: Duplicate check, etc
-                                        imf.setPolicyForClass(
-                                                className, policy.withReason(FILTER_REASON))
+                                        if (superClass == null) {
+                                            imf.setPolicyForClass(
+                                                className, policy.withReason(FILTER_REASON)
+                                            )
+                                        } else {
+                                            subclassFilter.addPolicy(superClass,
+                                                policy.withReason("extends $superClass"))
+                                        }
                                     }
                                     SpecialClass.Aidl -> {
                                         if (aidlPolicy != null) {
                                             throw ParseException(
                                                     "Policy for AIDL classes already defined")
                                         }
-                                        aidlPolicy = policy.withReason("$FILTER_REASON (AIDL)")
+                                        aidlPolicy = policy.withReason(
+                                                "$FILTER_REASON (special-class AIDL)")
                                     }
                                     SpecialClass.FeatureFlags -> {
                                         if (featureFlagsPolicy != null) {
                                             throw ParseException(
                                                     "Policy for feature flags already defined")
                                         }
-                                        featureFlagsPolicy =
-                                                policy.withReason("$FILTER_REASON (feature flags)")
+                                        featureFlagsPolicy = policy.withReason(
+                                                "$FILTER_REASON (special-class feature flags)")
+                                    }
+                                    SpecialClass.Sysprops -> {
+                                        if (syspropsPolicy != null) {
+                                            throw ParseException(
+                                                    "Policy for sysprops already defined")
+                                        }
+                                        syspropsPolicy = policy.withReason(
+                                                "$FILTER_REASON (special-class sysprops)")
                                     }
                                 }
                             }
@@ -205,10 +226,10 @@ fun createFilterFromTextPolicyFile(
         }
 
         var ret: OutputFilter = imf
-        if (aidlPolicy != null || featureFlagsPolicy != null) {
+        if (aidlPolicy != null || featureFlagsPolicy != null || syspropsPolicy != null) {
             log.d("AndroidHeuristicsFilter enabled")
             ret = AndroidHeuristicsFilter(
-                    classes, aidlPolicy, featureFlagsPolicy, imf)
+                    classes, aidlPolicy, featureFlagsPolicy, syspropsPolicy, imf)
         }
         return ret
     }
@@ -218,6 +239,7 @@ private enum class SpecialClass {
     NotSpecial,
     Aidl,
     FeatureFlags,
+    Sysprops,
 }
 
 private fun resolveSpecialClass(className: String): SpecialClass {
@@ -227,8 +249,16 @@ private fun resolveSpecialClass(className: String): SpecialClass {
     when (className.lowercase()) {
         ":aidl" -> return SpecialClass.Aidl
         ":feature_flags" -> return SpecialClass.FeatureFlags
+        ":sysprops" -> return SpecialClass.Sysprops
     }
     throw ParseException("Invalid special class name \"$className\"")
+}
+
+private fun resolveExtendingClass(className: String): String? {
+    if (!className.startsWith("*")) {
+        return null
+    }
+    return className.substring(1)
 }
 
 private fun parsePolicy(s: String): FilterPolicy {

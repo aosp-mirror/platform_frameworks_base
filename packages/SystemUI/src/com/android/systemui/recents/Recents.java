@@ -23,13 +23,17 @@ import android.provider.Settings;
 
 import com.android.systemui.CoreStartable;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.io.PrintWriter;
 
 /**
  * A proxy to a Recents implementation.
  */
-public class Recents implements CoreStartable, CommandQueue.Callbacks {
+public class Recents implements
+        CoreStartable,
+        ConfigurationController.ConfigurationListener,
+        CommandQueue.Callbacks {
 
     private final Context mContext;
     private final RecentsImplementation mImpl;
@@ -53,7 +57,7 @@ public class Recents implements CoreStartable, CommandQueue.Callbacks {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigChanged(Configuration newConfig) {
         mImpl.onConfigurationChanged(newConfig);
     }
 

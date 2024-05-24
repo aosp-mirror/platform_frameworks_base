@@ -19,9 +19,11 @@ import static android.os.UserManager.DISALLOW_OUTGOING_CALLS;
 import static android.os.UserManager.DISALLOW_SMS;
 import static android.os.UserManager.DISALLOW_USER_SWITCH;
 import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
+import static android.os.UserManager.USER_TYPE_PROFILE_PRIVATE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -30,20 +32,27 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
+import android.multiuser.Flags;
+import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
@@ -52,6 +61,7 @@ import android.util.Xml;
 
 import androidx.test.annotation.UiThreadTest;
 
+import com.android.dx.mockito.inline.extended.MockedVoidMethod;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.testing.ExtendedMockitoRule;
@@ -65,6 +75,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -115,7 +126,10 @@ public final class UserManagerServiceTest {
             .spyStatic(LocalServices.class)
             .spyStatic(SystemProperties.class)
             .mockStatic(Settings.Global.class)
+            .mockStatic(Settings.Secure.class)
             .build();
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private final Object mPackagesLock = new Object();
     private final Context mRealContext = androidx.test.InstrumentationRegistry.getInstrumentation()
@@ -133,6 +147,8 @@ public final class UserManagerServiceTest {
     private @Mock StorageManager mStorageManager;
     private @Mock LockSettingsInternal mLockSettingsInternal;
     private @Mock PackageManagerInternal mPackageManagerInternal;
+    private @Mock KeyguardManager mKeyguardManager;
+    private @Mock PowerManager mPowerManager;
 
     /**
      * Reference to the {@link UserManagerService} being tested.
@@ -156,6 +172,8 @@ public final class UserManagerServiceTest {
         when(mDeviceStorageMonitorInternal.isMemoryLow()).thenReturn(false);
         mockGetLocalService(DeviceStorageMonitorInternal.class, mDeviceStorageMonitorInternal);
         when(mSpiedContext.getSystemService(StorageManager.class)).thenReturn(mStorageManager);
+        when(mSpiedContext.getSystemService(KeyguardManager.class)).thenReturn(mKeyguardManager);
+        when(mSpiedContext.getSystemService(PowerManager.class)).thenReturn(mPowerManager);
         mockGetLocalService(LockSettingsInternal.class, mLockSettingsInternal);
         mockGetLocalService(PackageManagerInternal.class, mPackageManagerInternal);
         doNothing().when(mSpiedContext).sendBroadcastAsUser(any(), any(), any());
@@ -538,7 +556,7 @@ public final class UserManagerServiceTest {
     @Test
     public void testCreateUserWithLongName_TruncatesName() {
         UserInfo user = mUms.createUserWithThrow(generateLongString(), USER_TYPE_FULL_SECONDARY, 0);
-        assertThat(user.name.length()).isEqualTo(500);
+        assertThat(user.name.length()).isEqualTo(UserManager.MAX_USER_NAME_LENGTH);
         UserInfo user1 = mUms.createUserWithThrow("Test", USER_TYPE_FULL_SECONDARY, 0);
         assertThat(user1.name.length()).isEqualTo(4);
     }
@@ -548,6 +566,171 @@ public final class UserManagerServiceTest {
             throws IOException, XmlPullParserException {
         UserInfo user = mUms.createUserWithThrow("Test", USER_TYPE_FULL_SECONDARY, 0);
         assertTrue(hasRestrictionsInUserXMLFile(user.id));
+    }
+
+    @Test
+    public void testAutoLockPrivateProfile() {
+        UserManagerService mSpiedUms = spy(mUms);
+        UserInfo privateProfileUser =
+                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow("TestPrivateProfile",
+                        USER_TYPE_PROFILE_PRIVATE, 0, 0, null);
+        Mockito.doNothing().when(mSpiedUms).setQuietModeEnabledAsync(
+                eq(privateProfileUser.getUserHandle().getIdentifier()), eq(true), any(),
+                any());
+
+        mSpiedUms.autoLockPrivateSpace();
+
+        Mockito.verify(mSpiedUms).setQuietModeEnabledAsync(
+                eq(privateProfileUser.getUserHandle().getIdentifier()), eq(true),
+                any(), any());
+    }
+
+    @Test
+    public void testAutoLockOnDeviceLockForPrivateProfile() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE);
+        UserManagerService mSpiedUms = spy(mUms);
+        UserInfo privateProfileUser =
+                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow("TestPrivateProfile",
+                USER_TYPE_PROFILE_PRIVATE, 0, 0, null);
+        mockAutoLockForPrivateSpace(Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK);
+        Mockito.doNothing().when(mSpiedUms).setQuietModeEnabledAsync(
+                eq(privateProfileUser.getUserHandle().getIdentifier()), eq(true), any(),
+                any());
+
+        mSpiedUms.tryAutoLockingPrivateSpaceOnKeyguardChanged(true);
+
+        Mockito.verify(mSpiedUms).setQuietModeEnabledAsync(
+                eq(privateProfileUser.getUserHandle().getIdentifier()), eq(true),
+                        any(), any());
+    }
+
+    @Test
+    public void testAutoLockOnDeviceLockForPrivateProfile_keyguardUnlocked() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE);
+        UserManagerService mSpiedUms = spy(mUms);
+        UserInfo privateProfileUser =
+                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow("TestPrivateProfile",
+                USER_TYPE_PROFILE_PRIVATE, 0, 0, null);
+        mockAutoLockForPrivateSpace(Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK);
+
+        mSpiedUms.tryAutoLockingPrivateSpaceOnKeyguardChanged(false);
+
+        // Verify that no operation to disable quiet mode is not called
+        Mockito.verify(mSpiedUms, never()).setQuietModeEnabledAsync(
+                eq(privateProfileUser.getUserHandle().getIdentifier()), eq(true),
+                any(), any());
+    }
+
+    @Test
+    public void testAutoLockOnDeviceLockForPrivateProfile_flagDisabled() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE);
+        UserManagerService mSpiedUms = spy(mUms);
+        UserInfo privateProfileUser =
+                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow("TestPrivateProfile",
+                USER_TYPE_PROFILE_PRIVATE, 0, 0, null);
+
+        mSpiedUms.tryAutoLockingPrivateSpaceOnKeyguardChanged(true);
+
+        // Verify that no auto-lock operations take place
+        verify((MockedVoidMethod) () -> Settings.Secure.getInt(any(),
+                eq(Settings.Secure.PRIVATE_SPACE_AUTO_LOCK), anyInt()), never());
+        Mockito.verify(mSpiedUms, never()).setQuietModeEnabledAsync(
+                eq(privateProfileUser.getUserHandle().getIdentifier()), eq(true),
+                any(), any());
+    }
+
+    @Test
+    public void testAutoLockAfterInactityForPrivateProfile() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE);
+        UserManagerService mSpiedUms = spy(mUms);
+        mockAutoLockForPrivateSpace(Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_AFTER_INACTIVITY);
+        when(mPowerManager.isInteractive()).thenReturn(false);
+
+        UserInfo privateProfileUser =
+                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow("TestPrivateProfile",
+                        USER_TYPE_PROFILE_PRIVATE, 0, 0, null);
+        Mockito.doNothing().when(mSpiedUms).scheduleMessageToAutoLockPrivateSpace(
+                eq(privateProfileUser.getUserHandle().getIdentifier()), any(),
+                anyLong());
+
+
+        mSpiedUms.maybeScheduleMessageToAutoLockPrivateSpace();
+
+        Mockito.verify(mSpiedUms).scheduleMessageToAutoLockPrivateSpace(
+                eq(privateProfileUser.getUserHandle().getIdentifier()), any(), anyLong());
+    }
+
+    @Test
+    public void testSetOrUpdateAutoLockPreference_noPrivateProfile() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE);
+
+        mUms.setOrUpdateAutoLockPreferenceForPrivateProfile(
+                Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_AFTER_INACTIVITY);
+
+        Mockito.verify(mSpiedContext, never()).registerReceiver(any(), any(), any(), any());
+        Mockito.verify(mSpiedContext, never()).unregisterReceiver(any());
+        Mockito.verify(mKeyguardManager, never()).removeKeyguardLockedStateListener((any()));
+        Mockito.verify(mKeyguardManager, never()).addKeyguardLockedStateListener(any(), any());
+    }
+
+    @Test
+    public void testSetOrUpdateAutoLockPreference() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE);
+        mUms.createProfileForUserEvenWhenDisallowedWithThrow("TestPrivateProfile",
+                        USER_TYPE_PROFILE_PRIVATE, 0, 0, null);
+
+        // Set the preference to auto lock on device lock
+        mUms.setOrUpdateAutoLockPreferenceForPrivateProfile(
+                Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK);
+
+        // Verify that keyguard state listener was added
+        Mockito.verify(mKeyguardManager).addKeyguardLockedStateListener(any(), any());
+        //Verity that keyguard state listener was not removed
+        Mockito.verify(mKeyguardManager, never()).removeKeyguardLockedStateListener(any());
+        // Broadcasts are already unregistered when UserManagerService starts and the flag
+        // isDeviceInactivityBroadcastReceiverRegistered is false
+        Mockito.verify(mSpiedContext, never()).registerReceiver(any(), any(), any(), any());
+        Mockito.verify(mSpiedContext, never()).unregisterReceiver(any());
+
+        Mockito.clearInvocations(mKeyguardManager);
+        Mockito.clearInvocations(mSpiedContext);
+
+        // Now set the preference to auto-lock on inactivity
+        mUms.setOrUpdateAutoLockPreferenceForPrivateProfile(
+                Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_AFTER_INACTIVITY);
+
+        // Verify that inactivity broadcasts are registered
+        Mockito.verify(mSpiedContext, times(2)).registerReceiver(any(), any(), any(), any());
+        // Verify that keyguard state listener is removed
+        Mockito.verify(mKeyguardManager).removeKeyguardLockedStateListener(any());
+        // Verify that all other operations don't take place
+        Mockito.verify(mSpiedContext, never()).unregisterReceiver(any());
+        Mockito.verify(mKeyguardManager, never()).addKeyguardLockedStateListener(any(), any());
+
+        Mockito.clearInvocations(mKeyguardManager);
+        Mockito.clearInvocations(mSpiedContext);
+
+        // Finally, set the preference to don't auto-lock
+        mUms.setOrUpdateAutoLockPreferenceForPrivateProfile(
+                Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_NEVER);
+
+        // Verify that inactivity broadcasts are unregistered and keyguard listener was removed
+        Mockito.verify(mSpiedContext).unregisterReceiver(any());
+        Mockito.verify(mKeyguardManager).removeKeyguardLockedStateListener(any());
+        // Verify that no broadcasts were registered and no listeners were added
+        Mockito.verify(mSpiedContext, never()).registerReceiver(any(), any(), any(), any());
+        Mockito.verify(mKeyguardManager, never()).addKeyguardLockedStateListener(any(), any());
+    }
+
+    @Test
+    public void testGetProfileIdsExcludingHidden() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_HIDING_PROFILES);
+        UserInfo privateProfileUser =
+                mUms.createProfileForUserEvenWhenDisallowedWithThrow("TestPrivateProfile",
+                        USER_TYPE_PROFILE_PRIVATE, 0, 0, null);
+        for (int id : mUms.getProfileIdsExcludingHidden(0, true)) {
+            assertThat(id).isNotEqualTo(privateProfileUser.id);
+        }
     }
 
     /**
@@ -630,6 +813,12 @@ public final class UserManagerServiceTest {
     private void mockShowMultiuserUI(boolean show) {
         doReturn(show).when(() ->
                 SystemProperties.getBoolean(eq("fw.show_multiuserui"), anyBoolean()));
+    }
+
+    private void mockAutoLockForPrivateSpace(int val) {
+        doReturn(val).when(() ->
+                Settings.Secure.getIntForUser(any(), eq(Settings.Secure.PRIVATE_SPACE_AUTO_LOCK),
+                        anyInt(), anyInt()));
     }
 
     private void mockCurrentUser(@UserIdInt int userId) {

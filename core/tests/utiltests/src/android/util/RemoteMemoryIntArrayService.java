@@ -84,11 +84,7 @@ public class RemoteMemoryIntArrayService extends Service {
             @Override
             public int size() {
                 synchronized (mLock) {
-                    try {
-                        return mArray.size();
-                    } catch (IOException e) {
-                        throw new IllegalStateException(e);
-                    }
+                    return mArray.size();
                 }
             }
 

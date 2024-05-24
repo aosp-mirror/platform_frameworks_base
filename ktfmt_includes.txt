@@ -505,9 +505,9 @@
 -packages/SystemUI/tests/src/com/android/systemui/DisplayCutoutBaseViewTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/InstanceIdSequenceFake.kt
 -packages/SystemUI/tests/src/com/android/systemui/ScreenDecorHwcLayerTest.kt
--packages/SystemUI/tests/src/com/android/systemui/animation/DialogLaunchAnimatorTest.kt
+-packages/SystemUI/tests/src/com/android/systemui/animation/DialogTransitionAnimatorTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/animation/FontInterpolatorTest.kt
--packages/SystemUI/tests/src/com/android/systemui/animation/GhostedViewLaunchAnimatorControllerTest.kt
+-packages/SystemUI/tests/src/com/android/systemui/animation/GhostedViewTransitionAnimatorControllerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/animation/TextAnimatorTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/animation/TextInterpolatorTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/animation/ViewHierarchyAnimatorTest.kt

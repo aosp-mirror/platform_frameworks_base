@@ -41,13 +41,15 @@ public class SysUiState implements Dumpable {
     public static final boolean DEBUG = false;
 
     private final DisplayTracker mDisplayTracker;
+    private final SceneContainerPlugin mSceneContainerPlugin;
     private @QuickStepContract.SystemUiStateFlags int mFlags;
     private final List<SysUiStateCallback> mCallbacks = new ArrayList<>();
     private int mFlagsToSet = 0;
     private int mFlagsToClear = 0;
 
-    public SysUiState(DisplayTracker displayTracker) {
+    public SysUiState(DisplayTracker displayTracker, SceneContainerPlugin sceneContainerPlugin) {
         mDisplayTracker = displayTracker;
+        mSceneContainerPlugin = sceneContainerPlugin;
     }
 
     /**
@@ -71,6 +73,16 @@ public class SysUiState implements Dumpable {
 
     /** Methods to this call can be chained together before calling {@link #commitUpdate(int)}. */
     public SysUiState setFlag(int flag, boolean enabled) {
+        final Boolean overrideOrNull = mSceneContainerPlugin.flagValueOverride(flag);
+        if (overrideOrNull != null && enabled != overrideOrNull) {
+            if (DEBUG) {
+                Log.d(TAG, "setFlag for flag " + flag + " and value " + enabled + " overridden to "
+                        + overrideOrNull + " by scene container plugin");
+            }
+
+            enabled = overrideOrNull;
+        }
+
         if (enabled) {
             mFlagsToSet |= flag;
         } else {

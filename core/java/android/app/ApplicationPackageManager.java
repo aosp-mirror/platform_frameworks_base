@@ -120,6 +120,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LauncherIcons;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.Immutable;
@@ -131,6 +132,7 @@ import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -835,7 +837,7 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public int checkPermission(String permName, String pkgName) {
-        return PermissionManager.checkPackageNamePermission(permName, pkgName,
+        return getPermissionManager().checkPackageNamePermission(permName, pkgName,
                 mContext.getDeviceId(), getUserId());
     }
 
@@ -1266,6 +1268,22 @@ public class ApplicationPackageManager extends PackageManager {
         }
 
         return appMetadata != null ? appMetadata : new PersistableBundle();
+    }
+
+    @Override
+    public @AppMetadataSource int getAppMetadataSource(@NonNull String packageName)
+            throws NameNotFoundException {
+        Objects.requireNonNull(packageName, "packageName cannot be null");
+        int source = PackageManager.APP_METADATA_SOURCE_UNKNOWN;
+        try {
+            source = mPM.getAppMetadataSource(packageName, getUserId());
+        } catch (ParcelableException e) {
+            e.maybeRethrow(NameNotFoundException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return source;
     }
 
     @SuppressWarnings("unchecked")
@@ -4030,19 +4048,25 @@ public class ApplicationPackageManager extends PackageManager {
     @Nullable
     private Drawable getArchivedAppIcon(String packageName) {
         try {
-            return new BitmapDrawable(null,
-                    mPM.getArchivedAppIcon(packageName, new UserHandle(getUserId())));
+            Bitmap archivedAppIcon = mPM.getArchivedAppIcon(packageName,
+                    new UserHandle(getUserId()),
+                    mContext.getPackageName());
+            if (archivedAppIcon == null) {
+                return null;
+            }
+            return new BitmapDrawable(null, archivedAppIcon);
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            Slog.e(TAG, "Failed to retrieve archived app icon: " + e.getMessage());
+            return null;
         }
     }
 
     @Override
-    public <T> T parseAndroidManifest(@NonNull String apkFilePath,
+    public <T> T parseAndroidManifest(@NonNull File apkFile,
             @NonNull Function<XmlResourceParser, T> parserFunction) throws IOException {
-        Objects.requireNonNull(apkFilePath, "apkFilePath cannot be null");
+        Objects.requireNonNull(apkFile, "apkFile cannot be null");
         Objects.requireNonNull(parserFunction, "parserFunction cannot be null");
-        try (XmlResourceParser xmlResourceParser = getAndroidManifestParser(apkFilePath)) {
+        try (XmlResourceParser xmlResourceParser = getAndroidManifestParser(apkFile)) {
             return parserFunction.apply(xmlResourceParser);
         } catch (IOException e) {
             Log.w(TAG, "Failed to get the android manifest parser", e);
@@ -4050,11 +4074,11 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
-    private static XmlResourceParser getAndroidManifestParser(@NonNull String apkFilePath)
+    private static XmlResourceParser getAndroidManifestParser(@NonNull File apkFile)
             throws IOException {
         ApkAssets apkAssets = null;
         try {
-            apkAssets = ApkAssets.loadFromPath(apkFilePath);
+            apkAssets = ApkAssets.loadFromPath(apkFile.getAbsolutePath());
             return apkAssets.openXml(ApkLiteParseUtils.ANDROID_MANIFEST_FILENAME);
         } finally {
             if (apkAssets != null) {

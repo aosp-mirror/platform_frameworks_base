@@ -301,9 +301,7 @@
             granted to the system companion device manager service -->
         <flag name="companion" value="0x800000" />
         <!-- Additional flag from base permission type: this permission will be granted to the
-             retail demo app, as defined by the OEM.
-             This flag has been replaced by the retail demo role and is a no-op since Android V.
-          -->
+             retail demo app, as defined by the OEM. -->
         <flag name="retailDemo" value="0x1000000" />
         <!-- Additional flag from base permission type: this permission will be granted to the
              recents app. -->
@@ -507,6 +505,12 @@
          to use this feature.  This flag can only be used with services,
          receivers, and providers; it can not be used with activities. -->
     <attr name="singleUser" format="boolean" />
+
+    <!-- If set to true, only a single instance of this component will
+    run and be available for the SYSTEM user. Non SYSTEM users will not be
+    allowed to access the component if this flag is enabled.
+    This flag can be used with services, receivers, providers and activities. -->
+    <attr name="systemUserOnly" format="boolean" />
 
     <!-- Specify a specific process that the associated code is to run in.
          Use with the application tag (to supply a default process for all
@@ -1269,11 +1273,17 @@
          null to indicate no split types are offered. -->
     <attr name="splitTypes" format="string" />
 
-    <!-- Flag to specify if this app wants to run the dex within its APK but not extracted or
-         locally compiled variants. This keeps the dex code protected by the APK signature. Such
-         apps will always run in JIT mode (same when they are first installed), and the system will
-         never generate ahead-of-time compiled code for them. Depending on the app's workload,
-         there may be some run time performance change, noteably the cold start time. -->
+    <!-- Flag to specify if this app (or process) wants to run the dex within its APK but not
+         extracted or locally compiled variants. This keeps the dex code protected by the APK
+         signature. Such apps (or processes) will always run in JIT mode (same when they are first
+         installed). If enabled at the app level, the system will never generate ahead-of-time
+         compiled code for the app. Depending on the app's workload, there may be some run time
+         performance change, noteably the cold start time.
+
+         <p>This attribute can be applied to either
+         {@link android.R.styleable#AndroidManifestProcess process} or
+         {@link android.R.styleable#AndroidManifestApplication application} tags. If enabled at the
+         app level, any process level attribute is effectively ignored.  -->
     <attr name="useEmbeddedDex" format="boolean" />
 
     <!-- Extra options for an activity's UI. Applies to either the {@code <activity>} or
@@ -1598,6 +1608,10 @@
          This is a private attribute, used without android: namespace. -->
     <attr name="updatableSystem" format="boolean" />
 
+    <!-- Allows each installer in the system image to designate another app in the system image to
+        update the installer. -->
+    <attr name="emergencyInstaller" format="string" />
+
     <!-- Specify the type of foreground service. Multiple types can be specified by ORing the flags
          together. -->
     <attr name="foregroundServiceType">
@@ -1746,6 +1760,12 @@
             TODO: b/258855262 mark this field as {@code hide} once this bug is fixed.
             <flag name="fileManagement" value="0x1000" />
         -->
+        <!-- Media processing use cases such as video or photo editing and processing.
+            <p>Requires the app to hold the permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_MEDIA_PROCESSING} in order to use
+            this type.
+        -->
+        <flag name="mediaProcessing" value="0x2000" />
         <!-- Use cases that can't be categorized into any other foreground service types, but also
             can't use @link android.app.job.JobInfo.Builder} APIs.
             See {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SPECIAL_USE} for the
@@ -1808,6 +1828,12 @@
     <attr name="attributionTags" format="string" />
 
     <attr name="allowUpdateOwnership" format="boolean" />
+
+    <!-- This attribute can be applied to any tag in the manifest. The system uses its value to
+         determine whether the element (e.g., a permission) should be enabled or disabled
+         depending on the state of feature flags.
+         @hide @SystemApi @FlaggedApi("android.content.res.manifest_flagging") -->
+    <attr name="featureFlag" format="string" />
 
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
@@ -1891,6 +1917,12 @@
              try to load its code when launching components.  The default is true
              for normal behavior. -->
         <attr name="hasCode" format="boolean" />
+        <!-- Specifies if activities can be launched on top of this application by activities from
+             other applications in the same task. If set to false, activity launches which would
+             replace this application with another when in the user's view will be blocked.
+             The default is true. -->
+        <!-- @FlaggedApi("android.security.asm_restrictions_enabled") -->
+        <attr name="allowCrossUidActivitySwitchFromBelow" format="boolean" />
         <attr name="persistent" />
         <attr name="persistentWhenFeatureAvailable" />
         <attr name="requiredForAllUsers" />
@@ -2777,6 +2809,7 @@
         <attr name="gwpAsanMode" />
         <attr name="memtagMode" />
         <attr name="nativeHeapZeroInitialized" />
+        <attr name="useEmbeddedDex" />
     </declare-styleable>
 
     <!-- The <code>deny-permission</code> tag specifies that a permission is to be denied
@@ -2855,6 +2888,7 @@
              Context.createAttributionContext() using the first attribution tag
              contained here. -->
         <attr name="attributionTags" />
+        <attr name="systemUserOnly" format="boolean" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml
@@ -2986,7 +3020,12 @@
              depends on the number of isolated services that an application starts,
              and how much memory those services save by preloading and sharing memory with
              the app zygote. Therefore, it is recommended to measure memory usage under
-             typical workloads to determine whether it makes sense to use this flag. -->
+             typical workloads to determine whether it makes sense to use this flag.
+
+             <p>There is a limit to the number of isolated services that can be spawned from
+                the Application Zygote; the absolute limit is 100, but due to potential
+                delays in service process cleanup, a much safer limit to use in practice is 50.
+             -->
         <attr name="useAppZygote" format="boolean" />
         <!-- If this is a foreground service, specify its category. -->
         <attr name="foregroundServiceType" />
@@ -3008,6 +3047,7 @@
              ignored when the process is bound into a shared isolated process by a client.
         -->
         <attr name="allowSharedIsolatedProcess" format="boolean" />
+        <attr name="systemUserOnly" format="boolean" />
     </declare-styleable>
 
     <!-- @hide The <code>apex-system-service</code> tag declares an apex system service
@@ -3135,7 +3175,7 @@
         <attr name="uiOptions" />
         <attr name="parentActivityName" />
         <attr name="singleUser" />
-        <!-- @hide This broadcast receiver or activity will only receive broadcasts for the
+        <!-- This broadcast receiver or activity will only receive broadcasts for the
              system user-->
         <attr name="systemUserOnly" format="boolean" />
         <attr name="persistableMode" />
@@ -3244,6 +3284,32 @@
              <p> By default, the behavior is configured by the same attribute in application.
         -->
         <attr name="enableOnBackInvokedCallback" format="boolean"/>
+
+        <!-- Specifies permissions necessary to launch this activity via
+             {@link android.content.Context#startActivity} when passing content URIs. The default
+             value is {@code none}, meaning no specific permissions are required. Setting this
+             attribute restricts activity invocation based on the invoker's permissions. If the
+             invoker doesn't have the required permissions, the activity start will be denied via a
+             {@link java.lang.SecurityException}.
+
+             <p> Note that the enforcement works for content URIs inside
+             {@link android.content.Intent#getData}, {@link android.content.Intent#EXTRA_STREAM},
+             and {@link android.content.Intent#getClipData}.
+             @FlaggedApi("android.security.content_uri_permission_apis") -->
+        <attr name="requireContentUriPermissionFromCaller" format="string">
+            <!-- Default, no specific permissions are required. -->
+            <enum name="none" value="0" />
+            <!-- Enforces the invoker to have read access to the passed content URIs. -->
+            <enum name="read" value="1" />
+            <!-- Enforces the invoker to have write access to the passed content URIs. -->
+            <enum name="write" value="2" />
+            <!-- Enforces the invoker to have either read or write access to the passed content
+                 URIs. -->
+            <enum name="readOrWrite" value="3" />
+            <!-- Enforces the invoker to have both read and write access to the passed content
+                 URIs. -->
+            <enum name="readAndWrite" value="4" />
+        </attr>
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new
@@ -3415,6 +3481,20 @@
     <!-- Attributes that can be supplied in an AndroidManifest.xml
          <code>data</code> tag, a child of the
          {@link #AndroidManifestIntentFilter intent-filter} tag, describing
+         a group matching rule consisting of one or more
+         {@link #AndroidManifestData data} tags that must all match.  This
+         tag can be specified multiple times to create multiple groups that
+         will be matched in the order they are defined. -->
+    <declare-styleable name="AndroidManifestUriRelativeFilterGroup"
+        parent="AndroidManifestIntentFilter">
+        <!-- Specify if this group is allow rule or disallow rule.  If this
+             attribute is not specified then it is assumed to be true -->
+        <attr name="allow" format="boolean"/>
+    </declare-styleable>
+
+    <!-- Attributes that can be supplied in an AndroidManifest.xml
+         <code>data</code> tag, a child of the
+         {@link #AndroidManifestIntentFilter intent-filter} tag, describing
          the types of data that match.  This tag can be specified multiple
          times to supply multiple data options, as described in the
          {@link android.content.IntentFilter} class.  Note that all such
@@ -3422,7 +3502,8 @@
          <code>&lt;data android:scheme="myscheme" android:host="me.com" /&gt;</code>
          is equivalent to <code>&lt;data android:scheme="myscheme" /&gt;
          &lt;data android:host="me.com" /&gt;</code>. -->
-    <declare-styleable name="AndroidManifestData" parent="AndroidManifestIntentFilter">
+    <declare-styleable name="AndroidManifestData"
+        parent="AndroidManifestIntentFilter AndroidManifestUriRelativeFilterGroup">
         <!-- Specify a MIME type that is handled, as per
              {@link android.content.IntentFilter#addDataType
              IntentFilter.addDataType()}.
@@ -3526,6 +3607,70 @@
              IntentFilter.addDataPath()} with
              {@link android.os.PatternMatcher#PATTERN_SUFFIX}. -->
         <attr name="pathSuffix" />
+        <!-- Specify a URI query that must exactly match, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_LITERAL}. -->
+        <attr name="query" format="string" />
+        <!-- Specify a URI query that must be a prefix to match, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_PREFIX}. -->
+        <attr name="queryPrefix" format="string" />
+        <!-- Specify a URI query that matches a simple pattern, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_SIMPLE_GLOB}.
+             Note that because '\' is used as an escape character when
+             reading the string from XML (before it is parsed as a pattern),
+             you will need to double-escape: for example a literal "*" would
+             be written as "\\*" and a literal "\" would be written as
+             "\\\\".  This is basically the same as what you would need to
+             write if constructing the string in Java code. -->
+        <attr name="queryPattern" format="string" />
+        <!-- Specify a URI query that matches an advanced pattern, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_ADVANCED_GLOB}.
+             Note that because '\' is used as an escape character when
+             reading the string from XML (before it is parsed as a pattern),
+             you will need to double-escape: for example a literal "*" would
+             be written as "\\*" and a literal "\" would be written as
+             "\\\\".  This is basically the same as what you would need to
+             write if constructing the string in Java code. -->
+        <attr name="queryAdvancedPattern" format="string" />
+        <!-- Specify a URI query that must be a suffix to match, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_SUFFIX}. -->
+        <attr name="querySuffix" format="string" />
+        <!-- Specify a URI fragment that must exactly match, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_LITERAL}. -->
+        <attr name="fragment" format="string" />
+        <!-- Specify a URI fragment that must be a prefix to match, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_PREFIX}. -->
+        <attr name="fragmentPrefix" format="string" />
+        <!-- Specify a URI fragment that matches a simple pattern, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_SIMPLE_GLOB}.
+             Note that because '\' is used as an escape character when
+             reading the string from XML (before it is parsed as a pattern),
+             you will need to double-escape: for example a literal "*" would
+             be written as "\\*" and a literal "\" would be written as
+             "\\\\".  This is basically the same as what you would need to
+             write if constructing the string in Java code. -->
+        <attr name="fragmentPattern" format="string" />
+        <!-- Specify a URI fragment that matches an advanced pattern, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_ADVANCED_GLOB}.
+             Note that because '\' is used as an escape character when
+             reading the string from XML (before it is parsed as a pattern),
+             you will need to double-escape: for example a literal "*" would
+             be written as "\\*" and a literal "\" would be written as
+             "\\\\".  This is basically the same as what you would need to
+             write if constructing the string in Java code. -->
+        <attr name="fragmentAdvancedPattern" format="string" />
+        <!-- Specify a URI fragment that must be a suffix to match, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_SUFFIX}. -->
+        <attr name="fragmentSuffix" format="string" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml

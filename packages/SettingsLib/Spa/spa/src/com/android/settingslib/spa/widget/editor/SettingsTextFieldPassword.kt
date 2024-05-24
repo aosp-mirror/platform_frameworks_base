@@ -52,7 +52,7 @@ fun SettingsTextFieldPassword(
     var visibility by remember { mutableStateOf(false) }
     OutlinedTextField(
         modifier = Modifier
-            .padding(SettingsDimension.itemPadding)
+            .padding(SettingsDimension.menuFieldPadding)
             .fillMaxWidth(),
         value = value,
         onValueChange = onTextChange,

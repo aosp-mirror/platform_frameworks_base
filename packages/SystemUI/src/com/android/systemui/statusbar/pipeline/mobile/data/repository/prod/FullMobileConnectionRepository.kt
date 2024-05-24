@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConn
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -48,7 +49,7 @@ class FullMobileConnectionRepository(
     override val subId: Int,
     startingIsCarrierMerged: Boolean,
     override val tableLogBuffer: TableLogBuffer,
-    subscriptionModel: StateFlow<SubscriptionModel?>,
+    subscriptionModel: Flow<SubscriptionModel?>,
     private val defaultNetworkName: NetworkNameModel,
     private val networkNameSeparator: String,
     @Application scope: CoroutineScope,
@@ -173,6 +174,21 @@ class FullMobileConnectionRepository(
                 activeRepo.value.isInService.value
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.isInService.value)
+
+    override val isNonTerrestrial =
+        activeRepo
+            .flatMapLatest { it.isNonTerrestrial }
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                columnName = COL_IS_NTN,
+                activeRepo.value.isNonTerrestrial.value
+            )
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                activeRepo.value.isNonTerrestrial.value
+            )
 
     override val isGsm =
         activeRepo
@@ -331,7 +347,7 @@ class FullMobileConnectionRepository(
         fun build(
             subId: Int,
             startingIsCarrierMerged: Boolean,
-            subscriptionModel: StateFlow<SubscriptionModel?>,
+            subscriptionModel: Flow<SubscriptionModel?>,
             defaultNetworkName: NetworkNameModel,
             networkNameSeparator: String,
         ): FullMobileConnectionRepository {
@@ -365,6 +381,7 @@ class FullMobileConnectionRepository(
         const val COL_CARRIER_NETWORK_CHANGE = "carrierNetworkChangeActive"
         const val COL_CDMA_LEVEL = "cdmaLevel"
         const val COL_EMERGENCY = "emergencyOnly"
+        const val COL_IS_NTN = "isNtn"
         const val COL_IS_GSM = "isGsm"
         const val COL_IS_IN_SERVICE = "isInService"
         const val COL_OPERATOR = "operatorName"

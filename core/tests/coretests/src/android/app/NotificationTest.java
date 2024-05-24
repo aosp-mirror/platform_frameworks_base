@@ -1244,29 +1244,33 @@ public class NotificationTest {
     }
 
     @Test
-    public void testBigPictureStyle_setExtras_pictureIconNull_noPictureIconKey() {
+    public void testBigPictureStyle_setExtras_pictureIconNull_pictureIconKeyNull() {
         Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
         bpStyle.bigPicture((Bitmap) null);
 
         Bundle extras = new Bundle();
         bpStyle.addExtras(extras);
 
-        assertThat(extras.containsKey(EXTRA_PICTURE_ICON)).isFalse();
+        assertThat(extras.containsKey(EXTRA_PICTURE_ICON)).isTrue();
+        final Parcelable pictureIcon = extras.getParcelable(EXTRA_PICTURE_ICON);
+        assertThat(pictureIcon).isNull();
     }
 
     @Test
-    public void testBigPictureStyle_setExtras_pictureIconNull_noPictureKey() {
+    public void testBigPictureStyle_setExtras_pictureIconNull_pictureKeyNull() {
         Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
         bpStyle.bigPicture((Bitmap) null);
 
         Bundle extras = new Bundle();
         bpStyle.addExtras(extras);
 
-        assertThat(extras.containsKey(EXTRA_PICTURE)).isFalse();
+        assertThat(extras.containsKey(EXTRA_PICTURE)).isTrue();
+        final Parcelable picture = extras.getParcelable(EXTRA_PICTURE);
+        assertThat(picture).isNull();
     }
 
     @Test
-    public void testBigPictureStyle_setExtras_pictureIconTypeBitmap_noPictureIconKey() {
+    public void testBigPictureStyle_setExtras_pictureIconTypeBitmap_pictureIconKeyNull() {
         Bitmap bitmap = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
         Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
         bpStyle.bigPicture(bitmap);
@@ -1274,11 +1278,13 @@ public class NotificationTest {
         Bundle extras = new Bundle();
         bpStyle.addExtras(extras);
 
-        assertThat(extras.containsKey(EXTRA_PICTURE_ICON)).isFalse();
+        assertThat(extras.containsKey(EXTRA_PICTURE_ICON)).isTrue();
+        final Parcelable pictureIcon = extras.getParcelable(EXTRA_PICTURE_ICON);
+        assertThat(pictureIcon).isNull();
     }
 
     @Test
-    public void testBigPictureStyle_setExtras_pictureIconTypeIcon_noPictureKey() {
+    public void testBigPictureStyle_setExtras_pictureIconTypeIcon_pictureKeyNull() {
         Icon icon = Icon.createWithResource(mContext, R.drawable.btn_plus);
         Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
         bpStyle.bigPicture(icon);
@@ -1286,7 +1292,9 @@ public class NotificationTest {
         Bundle extras = new Bundle();
         bpStyle.addExtras(extras);
 
-        assertThat(extras.containsKey(EXTRA_PICTURE)).isFalse();
+        assertThat(extras.containsKey(EXTRA_PICTURE)).isTrue();
+        final Parcelable picture = extras.getParcelable(EXTRA_PICTURE);
+        assertThat(picture).isNull();
     }
 
     @Test

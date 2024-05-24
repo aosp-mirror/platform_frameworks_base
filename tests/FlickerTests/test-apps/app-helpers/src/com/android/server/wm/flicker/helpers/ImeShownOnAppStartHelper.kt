@@ -17,13 +17,13 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.tools.common.Rotation
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.common.traces.component.IComponentMatcher
-import android.tools.device.helpers.FIND_TIMEOUT
-import android.tools.device.helpers.IME_PACKAGE
-import android.tools.device.traces.parsers.WindowManagerStateHelper
-import android.tools.device.traces.parsers.toFlickerComponent
+import android.tools.Rotation
+import android.tools.helpers.FIND_TIMEOUT
+import android.tools.helpers.IME_PACKAGE
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.traces.component.IComponentMatcher
+import android.tools.traces.parsers.WindowManagerStateHelper
+import android.tools.traces.parsers.toFlickerComponent
 import android.view.WindowInsets.Type.ime
 import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars

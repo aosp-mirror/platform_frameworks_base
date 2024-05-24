@@ -300,37 +300,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 mLocalNapRoleConnected = false;
             }
 
-            if (!HearingAidStatsLogUtils.isUserCategorized(mContext)) {
-                if (HearingAidStatsLogUtils.isJustBonded(getAddress())) {
-                    // Saves bonded timestamp as the source for judging whether to display
-                    // the survey
-                    if (getProfiles().stream().anyMatch(
-                            p -> (p instanceof HearingAidProfile
-                                    || p instanceof HapClientProfile))) {
-                        HearingAidStatsLogUtils.addCurrentTimeToHistory(mContext,
-                                HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_AIDS_PAIRED);
-                    } else if (getProfiles().stream().anyMatch(
-                            p -> (p instanceof A2dpSinkProfile || p instanceof HeadsetProfile))) {
-                        HearingAidStatsLogUtils.addCurrentTimeToHistory(mContext,
-                                HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_DEVICES_PAIRED);
-                    }
-                    HearingAidStatsLogUtils.removeFromJustBonded(getAddress());
-                }
-
-                // Saves connected timestamp as the source for judging whether to display
-                // the survey
-                if (newProfileState == BluetoothProfile.STATE_CONNECTED) {
-                    if (profile instanceof HearingAidProfile
-                            || profile instanceof HapClientProfile) {
-                        HearingAidStatsLogUtils.addCurrentTimeToHistory(mContext,
-                                HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_AIDS_CONNECTED);
-                    } else if (profile instanceof A2dpSinkProfile
-                            || profile instanceof HeadsetProfile) {
-                        HearingAidStatsLogUtils.addCurrentTimeToHistory(mContext,
-                                HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_DEVICES_CONNECTED);
-                    }
-                }
-            }
+            HearingAidStatsLogUtils.updateHistoryIfNeeded(mContext, this, profile, newProfileState);
         }
 
         fetchActiveDevices();
@@ -410,8 +380,13 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         connectDevice();
     }
 
-    void setHearingAidInfo(HearingAidInfo hearingAidInfo) {
+    public void setHearingAidInfo(HearingAidInfo hearingAidInfo) {
         mHearingAidInfo = hearingAidInfo;
+        dispatchAttributesChanged();
+    }
+
+    public HearingAidInfo getHearingAidInfo() {
+        return mHearingAidInfo;
     }
 
     /**
@@ -982,11 +957,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 connect();
             }
 
-            if (!HearingAidStatsLogUtils.isUserCategorized(mContext)) {
-                // Saves this device as just bonded and checks if it's an hearing device after
-                // profiles are connected. This is for judging whether to display the survey.
-                HearingAidStatsLogUtils.addToJustBonded(getAddress());
-            }
+            // Saves this device as just bonded and checks if it's an hearing device after
+            // profiles are connected. This is for judging whether to display the survey.
+            HearingAidStatsLogUtils.addToJustBonded(getAddress());
         }
     }
 
@@ -1740,12 +1713,14 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         final BluetoothDevice tmpDevice = mDevice;
         final short tmpRssi = mRssi;
         final boolean tmpJustDiscovered = mJustDiscovered;
+        final HearingAidInfo tmpHearingAidInfo = mHearingAidInfo;
 
         // Set main device from sub device
         release();
         mDevice = newMainDevice.mDevice;
         mRssi = newMainDevice.mRssi;
         mJustDiscovered = newMainDevice.mJustDiscovered;
+        mHearingAidInfo = newMainDevice.mHearingAidInfo;
         fillData();
 
         // Set sub device from backup
@@ -1753,6 +1728,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         newMainDevice.mDevice = tmpDevice;
         newMainDevice.mRssi = tmpRssi;
         newMainDevice.mJustDiscovered = tmpJustDiscovered;
+        newMainDevice.mHearingAidInfo = tmpHearingAidInfo;
         newMainDevice.fillData();
 
         // Add the sub device back into mMemberDevices with correct hash

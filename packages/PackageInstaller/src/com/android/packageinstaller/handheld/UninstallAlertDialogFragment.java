@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Flags;
 import android.os.Process;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
@@ -131,7 +132,7 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
         final boolean isUpdate =
                 ((dialogInfo.appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
         final boolean isArchive =
-                android.content.pm.Flags.archiving() && (
+                isArchivingEnabled() && (
                         (dialogInfo.deleteFlags & PackageManager.DELETE_ARCHIVE) != 0);
         final UserHandle myUserHandle = Process.myUserHandle();
         UserManager userManager = getContext().getSystemService(UserManager.class);
@@ -240,6 +241,11 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
         }
 
         return dialogBuilder.create();
+    }
+
+    private static boolean isArchivingEnabled() {
+        return android.content.pm.Flags.archiving()
+                || SystemProperties.getBoolean("pm.archiving.enabled", false);
     }
 
     private boolean isCloneProfile(UserHandle userHandle) {

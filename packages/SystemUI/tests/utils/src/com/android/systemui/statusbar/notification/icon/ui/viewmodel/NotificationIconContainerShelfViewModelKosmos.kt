@@ -17,11 +17,13 @@
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.statusbar.notification.icon.domain.interactor.notificationIconsInteractor
 
 val Kosmos.notificationIconContainerShelfViewModel by
     Kosmos.Fixture {
         NotificationIconContainerShelfViewModel(
+            bgContext = testDispatcher,
             interactor = notificationIconsInteractor,
         )
     }

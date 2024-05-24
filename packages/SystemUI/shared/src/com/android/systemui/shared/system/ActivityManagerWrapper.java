@@ -196,7 +196,7 @@ public class ActivityManagerWrapper {
             final RecentsAnimationListener animationHandler, final Consumer<Boolean> resultCallback,
             Handler resultCallbackHandler) {
         boolean result = startRecentsActivity(intent, eventTime, animationHandler);
-        if (resultCallback != null) {
+        if (resultCallback != null && resultCallbackHandler != null) {
             resultCallbackHandler.post(new Runnable() {
                 @Override
                 public void run() {

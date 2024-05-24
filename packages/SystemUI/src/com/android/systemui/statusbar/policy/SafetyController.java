@@ -100,10 +100,13 @@ public class SafetyController implements
     }
 
     private void handleSafetyCenterEnableChange() {
+        final ArrayList<SafetyController.Listener> copy;
         synchronized (mListeners) {
-            for (int i = 0; i < mListeners.size(); i++) {
-                mListeners.get(i).onSafetyCenterEnableChanged(mSafetyCenterEnabled);
-            }
+            copy = new ArrayList<>(mListeners);
+        }
+        final int n = copy.size();
+        for (int i = 0; i < n; i++) {
+            copy.get(i).onSafetyCenterEnableChanged(mSafetyCenterEnabled);
         }
     }
 

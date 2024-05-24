@@ -69,6 +69,7 @@ public class GlobalSettings {
         Settings.Global.PRIVATE_DNS_SPECIFIER,
         Settings.Global.SOFT_AP_TIMEOUT_ENABLED,
         Settings.Global.ZEN_DURATION,
+        Settings.Global.MUTE_ALARM_STREAM_WITH_RINGER_MODE_USER_PREFERENCE,
         Settings.Global.REVERSE_CHARGING_AUTO_ON,
         Settings.Global.CHARGING_VIBRATION_ENABLED,
         Settings.Global.AWARE_ALLOWED,
@@ -92,6 +93,7 @@ public class GlobalSettings {
         Settings.Global.Wearable.CLOCKWORK_AUTO_TIME,
         Settings.Global.Wearable.CLOCKWORK_AUTO_TIME_ZONE,
         Settings.Global.Wearable.CLOCKWORK_24HR_TIME,
+        Settings.Global.Wearable.CONSISTENT_NOTIFICATION_BLOCKING_ENABLED,
         Settings.Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED,
         Settings.Global.Wearable.AMBIENT_ENABLED,
         Settings.Global.Wearable.AMBIENT_TILT_TO_WAKE,
@@ -112,5 +114,7 @@ public class GlobalSettings {
         Settings.Global.Wearable.SCREENSHOT_ENABLED,
         Settings.Global.Wearable.SCREEN_UNLOCK_SOUND_ENABLED,
         Settings.Global.Wearable.CHARGING_SOUNDS_ENABLED,
+        Settings.Global.Wearable.WRIST_DETECTION_AUTO_LOCKING_ENABLED,
+        Settings.Global.FORCE_ENABLE_PSS_PROFILING,
     };
 }

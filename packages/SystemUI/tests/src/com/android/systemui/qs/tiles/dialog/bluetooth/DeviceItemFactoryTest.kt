@@ -16,10 +16,18 @@
 
 package com.android.systemui.qs.tiles.dialog.bluetooth
 
+import android.bluetooth.BluetoothDevice
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+import android.media.AudioManager
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
+import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
+import com.android.settingslib.flags.Flags
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -35,19 +43,26 @@ import org.mockito.junit.MockitoRule
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class DeviceItemFactoryTest : SysuiTestCase() {
-
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     @Mock private lateinit var cachedDevice: CachedBluetoothDevice
+    @Mock private lateinit var bluetoothDevice: BluetoothDevice
+    @Mock private lateinit var packageManager: PackageManager
 
     private val availableMediaDeviceItemFactory = AvailableMediaDeviceItemFactory()
     private val connectedDeviceItemFactory = ConnectedDeviceItemFactory()
     private val savedDeviceItemFactory = SavedDeviceItemFactory()
 
+    private val audioManager = context.getSystemService(AudioManager::class.java)!!
+
     @Before
     fun setup() {
         `when`(cachedDevice.name).thenReturn(DEVICE_NAME)
+        `when`(cachedDevice.address).thenReturn(DEVICE_ADDRESS)
+        `when`(cachedDevice.device).thenReturn(bluetoothDevice)
         `when`(cachedDevice.connectionSummary).thenReturn(CONNECTION_SUMMARY)
+
+        context.setMockPackageManager(packageManager)
     }
 
     @Test
@@ -72,6 +87,225 @@ class DeviceItemFactoryTest : SysuiTestCase() {
         assertThat(deviceItem.background).isNotNull()
     }
 
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testSavedFactory_isFilterMatched_bondedAndNotConnected_returnsTrue() {
+        `when`(cachedDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
+        `when`(cachedDevice.isConnected).thenReturn(false)
+
+        assertThat(savedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isTrue()
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testSavedFactory_isFilterMatched_connected_returnsFalse() {
+        `when`(cachedDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
+        `when`(cachedDevice.isConnected).thenReturn(true)
+
+        assertThat(savedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isFalse()
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testSavedFactory_isFilterMatched_notBonded_returnsFalse() {
+        `when`(cachedDevice.bondState).thenReturn(BluetoothDevice.BOND_NONE)
+        `when`(cachedDevice.isConnected).thenReturn(false)
+
+        assertThat(savedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isFalse()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testSavedFactory_isFilterMatched_exclusivelyManaged_returnsFalse() {
+        val exclusiveManagerName =
+            BluetoothUtils.getExclusiveManagers().firstOrNull() ?: FAKE_EXCLUSIVE_MANAGER_NAME
+        `when`(bluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER))
+            .thenReturn(exclusiveManagerName.toByteArray())
+        `when`(packageManager.getPackageInfo(exclusiveManagerName, 0)).thenReturn(PackageInfo())
+        `when`(cachedDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
+        `when`(cachedDevice.isConnected).thenReturn(false)
+
+        assertThat(savedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isFalse()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testSavedFactory_isFilterMatched_noExclusiveManager_returnsTrue() {
+        `when`(cachedDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
+        `when`(cachedDevice.isConnected).thenReturn(false)
+
+        assertThat(savedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isTrue()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testSavedFactory_isFilterMatched_notAllowedExclusiveManager_returnsTrue() {
+        `when`(bluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER))
+            .thenReturn(FAKE_EXCLUSIVE_MANAGER_NAME.toByteArray())
+        `when`(packageManager.getPackageInfo(FAKE_EXCLUSIVE_MANAGER_NAME, 0))
+            .thenReturn(PackageInfo())
+        `when`(cachedDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
+        `when`(cachedDevice.isConnected).thenReturn(false)
+
+        assertThat(savedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isTrue()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testSavedFactory_isFilterMatched_uninstalledExclusiveManager_returnsTrue() {
+        val exclusiveManagerName =
+            BluetoothUtils.getExclusiveManagers().firstOrNull() ?: FAKE_EXCLUSIVE_MANAGER_NAME
+        `when`(bluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER))
+            .thenReturn(exclusiveManagerName.toByteArray())
+        `when`(packageManager.getPackageInfo(exclusiveManagerName, 0))
+            .thenThrow(PackageManager.NameNotFoundException("Test!"))
+        `when`(cachedDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
+        `when`(cachedDevice.isConnected).thenReturn(false)
+
+        assertThat(savedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isTrue()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testSavedFactory_isFilterMatched_notExclusivelyManaged_notBonded_returnsFalse() {
+        `when`(cachedDevice.bondState).thenReturn(BluetoothDevice.BOND_NONE)
+        `when`(cachedDevice.isConnected).thenReturn(false)
+
+        assertThat(savedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isFalse()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testSavedFactory_isFilterMatched_notExclusivelyManaged_connected_returnsFalse() {
+        `when`(cachedDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
+        `when`(cachedDevice.isConnected).thenReturn(true)
+
+        assertThat(savedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isFalse()
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testConnectedFactory_isFilterMatched_bondedAndConnected_returnsTrue() {
+        `when`(bluetoothDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
+        `when`(bluetoothDevice.isConnected).thenReturn(true)
+        audioManager.setMode(AudioManager.MODE_NORMAL)
+
+        assertThat(connectedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isTrue()
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testConnectedFactory_isFilterMatched_notConnected_returnsFalse() {
+        `when`(bluetoothDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
+        `when`(bluetoothDevice.isConnected).thenReturn(false)
+        audioManager.setMode(AudioManager.MODE_NORMAL)
+
+        assertThat(connectedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isFalse()
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testConnectedFactory_isFilterMatched_notBonded_returnsFalse() {
+        `when`(bluetoothDevice.bondState).thenReturn(BluetoothDevice.BOND_NONE)
+        `when`(bluetoothDevice.isConnected).thenReturn(true)
+        audioManager.setMode(AudioManager.MODE_NORMAL)
+
+        assertThat(connectedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isFalse()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testConnectedFactory_isFilterMatched_exclusivelyManaged_returnsFalse() {
+        val exclusiveManagerName =
+            BluetoothUtils.getExclusiveManagers().firstOrNull() ?: FAKE_EXCLUSIVE_MANAGER_NAME
+        `when`(bluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER))
+            .thenReturn(exclusiveManagerName.toByteArray())
+        `when`(packageManager.getPackageInfo(exclusiveManagerName, 0)).thenReturn(PackageInfo())
+        `when`(bluetoothDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
+        `when`(bluetoothDevice.isConnected).thenReturn(true)
+        audioManager.setMode(AudioManager.MODE_NORMAL)
+
+        assertThat(connectedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isFalse()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testConnectedFactory_isFilterMatched_noExclusiveManager_returnsTrue() {
+        `when`(bluetoothDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
+        `when`(bluetoothDevice.isConnected).thenReturn(true)
+        audioManager.setMode(AudioManager.MODE_NORMAL)
+
+        assertThat(connectedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isTrue()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testConnectedFactory_isFilterMatched_notAllowedExclusiveManager_returnsTrue() {
+        `when`(bluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER))
+            .thenReturn(FAKE_EXCLUSIVE_MANAGER_NAME.toByteArray())
+        `when`(packageManager.getPackageInfo(FAKE_EXCLUSIVE_MANAGER_NAME, 0))
+            .thenReturn(PackageInfo())
+        `when`(bluetoothDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
+        `when`(bluetoothDevice.isConnected).thenReturn(true)
+        audioManager.setMode(AudioManager.MODE_NORMAL)
+
+        assertThat(connectedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isTrue()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testConnectedFactory_isFilterMatched_uninstalledExclusiveManager_returnsTrue() {
+        val exclusiveManagerName =
+            BluetoothUtils.getExclusiveManagers().firstOrNull() ?: FAKE_EXCLUSIVE_MANAGER_NAME
+        `when`(bluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER))
+            .thenReturn(exclusiveManagerName.toByteArray())
+        `when`(packageManager.getPackageInfo(exclusiveManagerName, 0))
+            .thenThrow(PackageManager.NameNotFoundException("Test!"))
+        `when`(bluetoothDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
+        `when`(bluetoothDevice.isConnected).thenReturn(true)
+        audioManager.setMode(AudioManager.MODE_NORMAL)
+
+        assertThat(connectedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isTrue()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testConnectedFactory_isFilterMatched_notExclusivelyManaged_notBonded_returnsFalse() {
+        `when`(bluetoothDevice.bondState).thenReturn(BluetoothDevice.BOND_NONE)
+        `when`(bluetoothDevice.isConnected).thenReturn(true)
+        audioManager.setMode(AudioManager.MODE_NORMAL)
+
+        assertThat(connectedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isFalse()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
+    fun testConnectedFactory_isFilterMatched_notExclusivelyManaged_notConnected_returnsFalse() {
+        `when`(bluetoothDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
+        `when`(bluetoothDevice.isConnected).thenReturn(false)
+        audioManager.setMode(AudioManager.MODE_NORMAL)
+
+        assertThat(connectedDeviceItemFactory.isFilterMatched(context, cachedDevice, audioManager))
+            .isFalse()
+    }
+
     private fun assertDeviceItem(deviceItem: DeviceItem?, deviceItemType: DeviceItemType) {
         assertThat(deviceItem).isNotNull()
         assertThat(deviceItem!!.type).isEqualTo(deviceItemType)
@@ -83,5 +317,7 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     companion object {
         const val DEVICE_NAME = "DeviceName"
         const val CONNECTION_SUMMARY = "ConnectionSummary"
+        private const val FAKE_EXCLUSIVE_MANAGER_NAME = "com.fake.name"
+        private const val DEVICE_ADDRESS = "04:52:C7:0B:D8:3C"
     }
 }

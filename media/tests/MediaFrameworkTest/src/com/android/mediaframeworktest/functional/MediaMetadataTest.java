@@ -18,8 +18,9 @@ package com.android.mediaframeworktest.functional;
 
 import android.media.MediaMetadataRetriever;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Log;
+
+import androidx.test.filters.MediumTest;
 
 import com.android.mediaframeworktest.MediaNames;
 import com.android.mediaframeworktest.MediaProfileReader;

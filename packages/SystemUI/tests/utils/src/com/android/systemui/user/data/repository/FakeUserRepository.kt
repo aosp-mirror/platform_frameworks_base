@@ -39,12 +39,18 @@ class FakeUserRepository @Inject constructor() : UserRepository {
         // User id to represent a non system (human) user id. We presume this is the main user.
         private const val MAIN_USER_ID = 10
 
-        private val DEFAULT_SELECTED_USER = 0
+        private const val DEFAULT_SELECTED_USER = 0
         private val DEFAULT_SELECTED_USER_INFO =
             UserInfo(
                 /* id= */ DEFAULT_SELECTED_USER,
                 /* name= */ "default selected user",
                 /* flags= */ 0,
+            )
+        private val MAIN_USER =
+            UserInfo(
+                /* id= */ MAIN_USER_ID,
+                /* name= */ "main user",
+                /* flags= */ UserInfo.FLAG_MAIN,
             )
     }
 
@@ -111,6 +117,20 @@ class FakeUserRepository @Inject constructor() : UserRepository {
 
         selectedUser.value = SelectedUserModel(userInfo, selectionStatus)
         yield()
+    }
+
+    /** Resets the current user to the default of [DEFAULT_SELECTED_USER_INFO]. */
+    suspend fun asDefaultUser(): UserInfo {
+        setUserInfos(listOf(DEFAULT_SELECTED_USER_INFO))
+        setSelectedUserInfo(DEFAULT_SELECTED_USER_INFO)
+        return DEFAULT_SELECTED_USER_INFO
+    }
+
+    /** Makes the current user [MAIN_USER]. */
+    suspend fun asMainUser(): UserInfo {
+        setUserInfos(listOf(MAIN_USER))
+        setSelectedUserInfo(MAIN_USER)
+        return MAIN_USER
     }
 
     suspend fun setSettings(settings: UserSwitcherSettingsModel) {

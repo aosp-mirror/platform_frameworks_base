@@ -39,3 +39,51 @@ flag {
     description: "Feature flag for supporting stylus handwriting delegation from RemoteViews on the home screen"
     bug: "279959705"
 }
+
+flag {
+    name: "use_handwriting_listener_for_tooltype"
+    namespace: "input_method"
+    description: "Feature flag for using handwriting spy for determining pointer toolType."
+    bug: "309554999"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "use_zero_jank_proxy"
+    namespace: "input_method"
+    description: "Feature flag for using a proxy that uses async calls to achieve zero jank for IMMS calls."
+    bug: "293640003"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "ime_switcher_revamp"
+    namespace: "input_method"
+    description: "Feature flag for revamping the Input Method Switcher menu"
+    bug: "311791923"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "initiation_without_input_connection"
+    namespace: "input_method"
+    description: "Feature flag for initiating handwriting without InputConnection"
+    bug: "308827131"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "connectionless_handwriting"
+    namespace: "input_method"
+    description: "Feature flag for connectionless stylus handwriting APIs"
+    bug: "300979854"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "predictive_back_ime"
+    namespace: "input_method"
+    description: "Predictive back animation for IMEs"
+    bug: "322836622"
+    is_fixed_read_only: true
+}
