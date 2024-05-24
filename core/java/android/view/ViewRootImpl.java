@@ -22,6 +22,8 @@ import static android.graphics.HardwareRenderer.SYNC_CONTEXT_IS_STOPPED;
 import static android.graphics.HardwareRenderer.SYNC_LOST_SURFACE_REWARD_IF_FOUND;
 import static android.os.IInputConstants.INVALID_INPUT_EVENT_ID;
 import static android.os.Trace.TRACE_TAG_VIEW;
+import static android.util.SequenceUtils.getInitSeq;
+import static android.util.SequenceUtils.isIncomingSeqNewer;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.DragEvent.ACTION_DRAG_LOCATION;
@@ -128,6 +130,7 @@ import static com.android.text.flags.Flags.disableHandwritingInitiatorForIme;
 import static com.android.window.flags.Flags.activityWindowInfoFlag;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
 import static com.android.window.flags.Flags.insetsControlChangedItem;
+import static com.android.window.flags.Flags.insetsControlSeq;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
 
 import android.Manifest;
@@ -889,6 +892,12 @@ public final class ViewRootImpl implements ViewParent,
     /** Non-{@code null} if {@link #mActivityConfigCallback} is not {@code null}. */
     @Nullable
     private ActivityWindowInfo mLastReportedActivityWindowInfo;
+    @Nullable
+    private final ClientWindowFrames mLastReportedFrames = insetsControlSeq()
+            ? new ClientWindowFrames()
+            : null;
+    private int mLastReportedInsetsStateSeq = getInitSeq();
+    private int mLastReportedActiveControlsSeq = getInitSeq();
 
     boolean mScrollMayChange;
     @SoftInputModeFlags
@@ -1583,8 +1592,6 @@ public final class ViewRootImpl implements ViewParent,
                         attachedFrame = null;
                     }
                     if (mTranslator != null) {
-                        mTranslator.translateInsetsStateInScreenToAppWindow(mTempInsets);
-                        mTranslator.translateSourceControlsInScreenToAppWindow(mTempControls.get());
                         mTranslator.translateRectInScreenToAppWindow(attachedFrame);
                     }
                     mTmpFrames.attachedFrame = attachedFrame;
@@ -1607,8 +1614,7 @@ public final class ViewRootImpl implements ViewParent,
                 mAttachInfo.mAlwaysConsumeSystemBars =
                         (res & WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS) != 0;
                 mPendingAlwaysConsumeSystemBars = mAttachInfo.mAlwaysConsumeSystemBars;
-                mInsetsController.onStateChanged(mTempInsets);
-                mInsetsController.onControlsChanged(mTempControls.get());
+                handleInsetsControlChanged(mTempInsets, mTempControls);
                 final InsetsState state = mInsetsController.getState();
                 final Rect displayCutoutSafe = mTempRect;
                 state.getDisplayCutoutSafe(displayCutoutSafe);
@@ -2206,17 +2212,18 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
+        onClientWindowFramesChanged(frames);
+
         CompatibilityInfo.applyOverrideScaleIfNeeded(mergedConfiguration);
         final Rect frame = frames.frame;
         final Rect displayFrame = frames.displayFrame;
         final Rect attachedFrame = frames.attachedFrame;
         if (mTranslator != null) {
-            mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
             mTranslator.translateRectInScreenToAppWindow(frame);
             mTranslator.translateRectInScreenToAppWindow(displayFrame);
             mTranslator.translateRectInScreenToAppWindow(attachedFrame);
         }
-        mInsetsController.onStateChanged(insetsState);
+        onInsetsStateChanged(insetsState);
         final float compatScale = frames.compatScale;
         final boolean frameChanged = !mWinFrame.equals(frame);
         final boolean shouldReportActivityWindowInfoChanged =
@@ -2281,26 +2288,69 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /** Handles messages {@link #MSG_INSETS_CONTROL_CHANGED}. */
-    private void handleInsetsControlChanged(@NonNull InsetsState insetsState,
+    @VisibleForTesting
+    public void handleInsetsControlChanged(@NonNull InsetsState insetsState,
             @NonNull InsetsSourceControl.Array activeControls) {
-        final InsetsSourceControl[] controls = activeControls.get();
-
-        if (mTranslator != null) {
-            mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
-            mTranslator.translateSourceControlsInScreenToAppWindow(controls);
-        }
-
         // Deliver state change before control change, such that:
         // a) When gaining control, controller can compare with server state to evaluate
         // whether it needs to run animation.
         // b) When loosing control, controller can restore server state by taking last
         // dispatched state as truth.
-        mInsetsController.onStateChanged(insetsState);
-        if (mAdded) {
-            mInsetsController.onControlsChanged(controls);
-        } else {
-            activeControls.release();
+        onInsetsStateChanged(insetsState);
+        onActiveControlsChanged(activeControls);
+    }
+
+    private void onClientWindowFramesChanged(@NonNull ClientWindowFrames inOutFrames) {
+        if (mLastReportedFrames == null) {
+            return;
         }
+        if (isIncomingSeqNewer(mLastReportedFrames.seq, inOutFrames.seq)) {
+            // Keep track of the latest.
+            mLastReportedFrames.setTo(inOutFrames);
+        } else {
+            // If the last reported frames is newer, use the last reported instead.
+            inOutFrames.setTo(mLastReportedFrames);
+        }
+    }
+
+    private void onInsetsStateChanged(@NonNull InsetsState insetsState) {
+        if (insetsControlSeq()) {
+            if (isIncomingSeqNewer(mLastReportedInsetsStateSeq, insetsState.getSeq())) {
+                mLastReportedInsetsStateSeq = insetsState.getSeq();
+            } else {
+                // The last reported InsetsState is newer. Skip.
+                return;
+            }
+        }
+
+        if (mTranslator != null) {
+            mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
+        }
+        mInsetsController.onStateChanged(insetsState);
+    }
+
+    private void onActiveControlsChanged(@NonNull InsetsSourceControl.Array activeControls) {
+        if (!mAdded) {
+            // Do not update the last report if window is not added yet.
+            activeControls.release();
+            return;
+        }
+
+        if (insetsControlSeq()) {
+            if (isIncomingSeqNewer(mLastReportedActiveControlsSeq, activeControls.getSeq())) {
+                mLastReportedActiveControlsSeq = activeControls.getSeq();
+            } else {
+                // The last reported controls is newer. Skip.
+                activeControls.release();
+                return;
+            }
+        }
+
+        final InsetsSourceControl[] controls = activeControls.get();
+        if (mTranslator != null) {
+            mTranslator.translateSourceControlsInScreenToAppWindow(controls);
+        }
+        mInsetsController.onControlsChanged(controls);
     }
 
     private final DisplayListener mDisplayListener = new DisplayListener() {
@@ -9173,6 +9223,8 @@ public final class ViewRootImpl implements ViewParent,
                     mRelayoutSeq, mLastSyncSeqId, mRelayoutResult);
             mRelayoutRequested = true;
 
+            onClientWindowFramesChanged(mTmpFrames);
+
             if (activityWindowInfoFlag() && mPendingActivityWindowInfo != null) {
                 final ActivityWindowInfo outInfo = mRelayoutResult.activityWindowInfo;
                 if (outInfo != null) {
@@ -9189,13 +9241,10 @@ public final class ViewRootImpl implements ViewParent,
                 mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
                 mTranslator.translateRectInScreenToAppWindow(mTmpFrames.displayFrame);
                 mTranslator.translateRectInScreenToAppWindow(mTmpFrames.attachedFrame);
-                mTranslator.translateInsetsStateInScreenToAppWindow(mTempInsets);
-                mTranslator.translateSourceControlsInScreenToAppWindow(mTempControls.get());
             }
             mInvCompatScale = 1f / mTmpFrames.compatScale;
             CompatibilityInfo.applyOverrideScaleIfNeeded(mPendingMergedConfiguration);
-            mInsetsController.onStateChanged(mTempInsets);
-            mInsetsController.onControlsChanged(mTempControls.get());
+            handleInsetsControlChanged(mTempInsets, mTempControls);
 
             mPendingAlwaysConsumeSystemBars =
                     (relayoutResult & RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS) != 0;
