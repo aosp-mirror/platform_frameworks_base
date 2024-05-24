@@ -288,3 +288,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "expedite_activity_launch_on_cold_start"
+    namespace: "system_performance"
+    description: "Notify ActivityTaskManager of cold starts early to fix app launch behavior."
+    bug: "319519089"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

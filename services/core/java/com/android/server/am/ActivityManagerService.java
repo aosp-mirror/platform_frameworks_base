@@ -4799,9 +4799,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             updateLruProcessLocked(app, false, null);
             checkTime(startTime, "attachApplicationLocked: after updateLruProcessLocked");
 
-            updateOomAdjLocked(app, OOM_ADJ_REASON_PROCESS_BEGIN);
-            checkTime(startTime, "attachApplicationLocked: after updateOomAdjLocked");
-
             final long now = SystemClock.uptimeMillis();
             synchronized (mAppProfiler.mProfilerLock) {
                 app.mProfile.setLastRequestedGc(now);
@@ -4814,6 +4811,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.v(TAG_PROCESSES, "Attach application locked removing on hold: " + app);
             }
             mProcessesOnHold.remove(app);
+
+            // See if the top visible activity is waiting to run in this process...
+            if (com.android.server.am.Flags.expediteActivityLaunchOnColdStart()) {
+                if (normalMode) {
+                    mAtmInternal.attachApplication(app.getWindowProcessController());
+                }
+            }
+            updateOomAdjLocked(app, OOM_ADJ_REASON_PROCESS_BEGIN);
+            checkTime(startTime, "attachApplicationLocked: after updateOomAdjLocked");
 
             if (!mConstants.mEnableWaitForFinishAttachApplication) {
                 finishAttachApplicationInner(startSeq, callingUid, pid);
@@ -4880,18 +4886,21 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Mark the finish attach application phase as completed
             mProcessStateController.setPendingFinishAttach(app, false);
 
-            final boolean normalMode = mProcessesReady || isAllowedWhileBooting(app.info);
             final String processName = app.processName;
             boolean badApp = false;
             boolean didSomething = false;
 
-            // See if the top visible activity is waiting to run in this process...
-            if (normalMode) {
-                try {
-                    didSomething = mAtmInternal.attachApplication(app.getWindowProcessController());
-                } catch (Exception e) {
-                    Slog.wtf(TAG, "Exception thrown launching activities in " + app, e);
-                    badApp = true;
+            if (!com.android.server.am.Flags.expediteActivityLaunchOnColdStart()) {
+                final boolean normalMode = mProcessesReady || isAllowedWhileBooting(app.info);
+
+                if (normalMode) {
+                    try {
+                        didSomething |= mAtmInternal.attachApplication(
+                                app.getWindowProcessController());
+                    } catch (Exception e) {
+                        Slog.wtf(TAG, "Exception thrown launching activities in " + app, e);
+                        badApp = true;
+                    }
                 }
             }
 
