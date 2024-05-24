@@ -17,14 +17,8 @@
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
 import com.android.systemui.statusbar.chips.call.domain.interactor.CallChipInteractor
-import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
-import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
 import kotlinx.coroutines.flow.MutableStateFlow
-
-class FakeScreenRecordChipInteractor : ScreenRecordChipInteractor() {
-    override val chip: MutableStateFlow<OngoingActivityChipModel> =
-        MutableStateFlow(OngoingActivityChipModel.Hidden)
-}
 
 class FakeCallChipInteractor : CallChipInteractor() {
     override val chip: MutableStateFlow<OngoingActivityChipModel> =
