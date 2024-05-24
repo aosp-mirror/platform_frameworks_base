@@ -22,8 +22,13 @@ import android.app.Notification
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.graphics.Region
+import android.os.Looper
+import android.view.Choreographer
+import android.view.InputEvent
 import android.view.KeyEvent
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ScrollCaptureResponse
 import android.view.View
 import android.view.ViewTreeObserver
@@ -48,6 +53,8 @@ import com.android.systemui.screenshot.ui.ScreenshotShelfView
 import com.android.systemui.screenshot.ui.binder.ScreenshotShelfViewBinder
 import com.android.systemui.screenshot.ui.viewmodel.AnimationState
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
+import com.android.systemui.shared.system.InputChannelCompat
+import com.android.systemui.shared.system.InputMonitorCompat
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -91,6 +98,8 @@ constructor(
     override var isPendingSharedTransition = false
 
     private val animationController = ScreenshotAnimationController(view, viewModel)
+    private var inputMonitor: InputMonitorCompat? = null
+    private var inputEventReceiver: InputChannelCompat.InputEventReceiver? = null
 
     init {
         shelfViewBinder.bind(
@@ -106,19 +115,24 @@ constructor(
         setOnKeyListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         debugLog(DEBUG_WINDOW) { "adding OnComputeInternalInsetsListener" }
         view.viewTreeObserver.addOnComputeInternalInsetsListener { info ->
-            val touchableRegion =
-                view.getTouchRegion(
-                    windowManager.currentWindowMetrics.windowInsets.getInsets(
-                        WindowInsets.Type.systemGestures()
-                    )
-                )
             info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION)
-            info.touchableRegion.set(touchableRegion)
+            info.touchableRegion.set(getTouchRegion())
         }
         screenshotPreview = view.screenshotPreview
         thumbnailObserver.setViews(
             view.blurredScreenshotPreview,
             view.requireViewById(R.id.screenshot_preview_border)
+        )
+        view.addOnAttachStateChangeListener(
+            object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v: View) {
+                    startInputListening()
+                }
+
+                override fun onViewDetachedFromWindow(v: View) {
+                    stopInputListening()
+                }
+            }
         )
     }
 
@@ -236,7 +250,12 @@ constructor(
         callbacks?.onUserInteraction() // reset the timeout
     }
 
-    override fun stopInputListening() {}
+    override fun stopInputListening() {
+        inputMonitor?.dispose()
+        inputMonitor = null
+        inputEventReceiver?.dispose()
+        inputEventReceiver = null
+    }
 
     override fun requestFocus() {
         view.requestFocus()
@@ -300,6 +319,32 @@ constructor(
                     return false
                 }
             }
+        )
+    }
+
+    private fun startInputListening() {
+        stopInputListening()
+        inputMonitor =
+            InputMonitorCompat("Screenshot", displayId).also {
+                inputEventReceiver =
+                    it.getInputReceiver(Looper.getMainLooper(), Choreographer.getInstance()) {
+                        ev: InputEvent? ->
+                        if (
+                            ev is MotionEvent &&
+                                ev.actionMasked == MotionEvent.ACTION_DOWN &&
+                                !getTouchRegion().contains(ev.rawX.toInt(), ev.rawY.toInt())
+                        ) {
+                            callbacks?.onTouchOutside()
+                        }
+                    }
+            }
+    }
+
+    private fun getTouchRegion(): Region {
+        return view.getTouchRegion(
+            windowManager.currentWindowMetrics.windowInsets.getInsets(
+                WindowInsets.Type.systemGestures()
+            )
         )
     }
 
