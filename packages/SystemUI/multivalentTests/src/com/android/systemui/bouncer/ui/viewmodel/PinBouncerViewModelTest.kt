@@ -16,6 +16,12 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import android.view.KeyEvent.KEYCODE_0
+import android.view.KeyEvent.KEYCODE_4
+import android.view.KeyEvent.KEYCODE_A
+import android.view.KeyEvent.KEYCODE_DEL
+import android.view.KeyEvent.KEYCODE_NUMPAD_0
+import androidx.compose.ui.input.key.KeyEventType
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.SceneKey
@@ -34,6 +40,8 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import kotlin.random.Random
+import kotlin.random.nextInt
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -442,6 +450,44 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             }
 
             assertThat(pin).hasSize(FakeAuthenticationRepository.HINTING_PIN_LENGTH + 1)
+        }
+
+    @Test
+    fun onKeyboardInput_pinInput_isUpdated() =
+        testScope.runTest {
+            val pin by collectLastValue(underTest.pinInput.map { it.getPin() })
+            lockDeviceAndOpenPinBouncer()
+            val random = Random(System.currentTimeMillis())
+            // Generate a random 4 digit PIN
+            val expectedPin =
+                with(random) { arrayOf(nextInt(0..9), nextInt(0..9), nextInt(0..9), nextInt(0..9)) }
+
+            // Enter the PIN using NUM pad and normal number keyboard events
+            underTest.onKeyEvent(KeyEventType.KeyDown, KEYCODE_0 + expectedPin[0])
+            underTest.onKeyEvent(KeyEventType.KeyUp, KEYCODE_0 + expectedPin[0])
+
+            underTest.onKeyEvent(KeyEventType.KeyDown, KEYCODE_NUMPAD_0 + expectedPin[1])
+            underTest.onKeyEvent(KeyEventType.KeyUp, KEYCODE_NUMPAD_0 + expectedPin[1])
+
+            underTest.onKeyEvent(KeyEventType.KeyDown, KEYCODE_0 + expectedPin[2])
+            underTest.onKeyEvent(KeyEventType.KeyUp, KEYCODE_0 + expectedPin[2])
+
+            // Enter an additional digit in between and delete it
+            underTest.onKeyEvent(KeyEventType.KeyDown, KEYCODE_4)
+            underTest.onKeyEvent(KeyEventType.KeyUp, KEYCODE_4)
+
+            // Delete that additional digit
+            underTest.onKeyEvent(KeyEventType.KeyDown, KEYCODE_DEL)
+            underTest.onKeyEvent(KeyEventType.KeyUp, KEYCODE_DEL)
+
+            // Try entering a non digit character, this should be ignored.
+            underTest.onKeyEvent(KeyEventType.KeyDown, KEYCODE_A)
+            underTest.onKeyEvent(KeyEventType.KeyUp, KEYCODE_A)
+
+            underTest.onKeyEvent(KeyEventType.KeyDown, KEYCODE_NUMPAD_0 + expectedPin[3])
+            underTest.onKeyEvent(KeyEventType.KeyUp, KEYCODE_NUMPAD_0 + expectedPin[3])
+
+            assertThat(pin).containsExactly(*expectedPin)
         }
 
     private fun TestScope.switchToScene(toScene: SceneKey) {

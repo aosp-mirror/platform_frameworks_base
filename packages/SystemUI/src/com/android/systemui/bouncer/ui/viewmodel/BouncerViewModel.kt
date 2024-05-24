@@ -20,6 +20,8 @@ import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyResources
 import android.content.Context
 import android.graphics.Bitmap
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.core.graphics.drawable.toBitmap
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.SceneKey
@@ -326,7 +328,8 @@ class BouncerViewModel(
                 { message },
                 failedAttempts,
                 remainingAttempts,
-            ) ?: message
+            )
+                ?: message
         } else {
             message
         }
@@ -343,7 +346,8 @@ class BouncerViewModel(
                     .KEYGUARD_DIALOG_FAILED_ATTEMPTS_ERASING_PROFILE,
                 { message },
                 failedAttempts,
-            ) ?: message
+            )
+                ?: message
         } else {
             message
         }
@@ -376,6 +380,19 @@ class BouncerViewModel(
             Back to UserActionResult(prevScene),
             Swipe(SwipeDirection.Down) to UserActionResult(prevScene),
         )
+
+    /**
+     * Notifies that a key event has occurred.
+     *
+     * @return `true` when the [KeyEvent] was consumed as user input on bouncer; `false` otherwise.
+     */
+    fun onKeyEvent(keyEvent: KeyEvent): Boolean {
+        return (authMethodViewModel.value as? PinBouncerViewModel)?.onKeyEvent(
+            keyEvent.type,
+            keyEvent.nativeKeyEvent.keyCode
+        )
+            ?: false
+    }
 
     data class DialogViewModel(
         val text: String,
