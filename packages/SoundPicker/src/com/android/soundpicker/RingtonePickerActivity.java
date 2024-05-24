@@ -36,6 +36,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -253,6 +254,9 @@ public final class RingtonePickerActivity extends AlertActivity implements
             } else {
                 p.mTitle = getString(com.android.internal.R.string.ringtone_picker_title);
             }
+        } else {
+            // Make sure intents don't inject HTML elements.
+            p.mTitle = Html.escapeHtml(p.mTitle.toString());
         }
 
         setupAlert();
