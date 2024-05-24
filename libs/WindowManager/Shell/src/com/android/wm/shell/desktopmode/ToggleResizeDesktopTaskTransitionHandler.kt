@@ -86,9 +86,9 @@ class ToggleResizeDesktopTaskTransitionHandler(
                                 .setWindowCrop(leash, startBounds.width(), startBounds.height())
                                 .show(leash)
                             onTaskResizeAnimationListener.onAnimationStart(
-                                    taskId,
-                                    startTransaction,
-                                    startBounds
+                                taskId,
+                                startTransaction,
+                                startBounds
                             )
                         },
                         onEnd = {
