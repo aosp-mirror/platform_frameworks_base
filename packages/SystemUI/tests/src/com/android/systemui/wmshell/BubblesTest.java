@@ -152,6 +152,7 @@ import com.android.systemui.util.FakeEventLog;
 import com.android.systemui.util.settings.FakeGlobalSettings;
 import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.SystemClock;
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.Bubble;
@@ -2298,6 +2299,66 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController.registerBubbleStateListener(bubbleStateListener);
         mBubbleController.setBubbleBarLocation(BubbleBarLocation.LEFT);
         assertThat(bubbleStateListener.mStateChangeCalls).isEqualTo(0);
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_OPTIONAL_BUBBLE_OVERFLOW)
+    @Test
+    public void showBubbleOverflow_hasOverflowContents() {
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
+
+        BubbleStackView stackView = mBubbleController.getStackView();
+        spyOn(stackView);
+
+        // Dismiss the bubble so it's in the overflow
+        mBubbleController.removeBubble(mRow.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.getOverflowBubbles()).isNotEmpty();
+
+        verify(stackView).showOverflow(eq(true));
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_OPTIONAL_BUBBLE_OVERFLOW)
+    @Test
+    public void showBubbleOverflow_isEmpty() {
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
+
+        BubbleStackView stackView = mBubbleController.getStackView();
+        spyOn(stackView);
+
+        // Dismiss the bubble so it's in the overflow
+        mBubbleController.removeBubble(mRow.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.getOverflowBubbles()).isNotEmpty();
+        verify(stackView).showOverflow(eq(true));
+
+        // Cancel the bubble so it's removed from the overflow
+        mBubbleController.removeBubble(mRow.getKey(), Bubbles.DISMISS_NOTIF_CANCEL);
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
+        verify(stackView).showOverflow(eq(false));
+    }
+
+    @DisableFlags(Flags.FLAG_ENABLE_OPTIONAL_BUBBLE_OVERFLOW)
+    @Test
+    public void showBubbleOverflow_ignored() {
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryUpdated(mRow, /* fromSystem= */ true);
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
+
+        BubbleStackView stackView = mBubbleController.getStackView();
+        spyOn(stackView);
+
+        // Dismiss the bubble so it's in the overflow
+        mBubbleController.removeBubble(mRow.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.getOverflowBubbles()).isNotEmpty();
+
+        // Cancel the bubble so it's removed from the overflow
+        mBubbleController.removeBubble(mRow.getKey(), Bubbles.DISMISS_NOTIF_CANCEL);
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
+
+        // Show overflow should never be called if the flag is off
+        verify(stackView, never()).showOverflow(anyBoolean());
     }
 
     /** Creates a bubble using the userId and package. */
