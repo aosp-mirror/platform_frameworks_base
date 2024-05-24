@@ -23,9 +23,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
@@ -37,6 +40,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.modifiers.thenIf
+import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
@@ -54,6 +59,8 @@ fun SceneScope.OverlayShade(
     content: @Composable () -> Unit,
 ) {
     val backgroundScene by viewModel.backgroundScene.collectAsStateWithLifecycle()
+    val widthSizeClass = LocalWindowSizeClass.current.widthSizeClass
+    val isPanelFullWidth = widthSizeClass == WindowWidthSizeClass.Compact
 
     Box(modifier) {
         if (backgroundScene == Scenes.Lockscreen) {
@@ -66,10 +73,13 @@ fun SceneScope.OverlayShade(
         Scrim(onClicked = viewModel::onScrimClicked)
 
         Row(
-            modifier = Modifier.fillMaxSize().padding(OverlayShade.Dimensions.ScrimContentPadding),
+            modifier =
+                Modifier.fillMaxSize().thenIf(!isPanelFullWidth) {
+                    Modifier.padding(OverlayShade.Dimensions.ScrimContentPadding)
+                },
             horizontalArrangement = horizontalArrangement,
         ) {
-            Panel(content = content)
+            Panel(modifier = Modifier.panelSize(), content = content)
         }
     }
 }
@@ -111,6 +121,20 @@ private fun SceneScope.Panel(
     }
 }
 
+@Composable
+private fun Modifier.panelSize(): Modifier {
+    val widthSizeClass = LocalWindowSizeClass.current.widthSizeClass
+
+    return this.then(
+        when (widthSizeClass) {
+            WindowWidthSizeClass.Compact -> Modifier.fillMaxWidth()
+            WindowWidthSizeClass.Medium -> Modifier.width(OverlayShade.Dimensions.PanelWidthMedium)
+            WindowWidthSizeClass.Expanded -> Modifier.width(OverlayShade.Dimensions.PanelWidthLarge)
+            else -> error("Unsupported WindowWidthSizeClass \"$widthSizeClass\"")
+        }
+    )
+}
+
 object OverlayShade {
     object Elements {
         val Scrim = ElementKey("OverlayShadeScrim", scenePicker = LowestZIndexScenePicker)
@@ -127,6 +151,8 @@ object OverlayShade {
     object Dimensions {
         val ScrimContentPadding = 16.dp
         val PanelCornerRadius = 46.dp
+        val PanelWidthMedium = 390.dp
+        val PanelWidthLarge = 474.dp
     }
 
     object Shapes {
