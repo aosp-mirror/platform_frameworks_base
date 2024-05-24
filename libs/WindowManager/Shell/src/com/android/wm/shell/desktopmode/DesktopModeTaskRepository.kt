@@ -29,6 +29,7 @@ import androidx.core.util.valueIterator
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.util.KtProtoLog
 import java.io.PrintWriter
+import java.util.ArrayList;
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 
@@ -48,12 +49,12 @@ class DesktopModeTaskRepository {
         val activeTasks: ArraySet<Int> = ArraySet(),
         val visibleTasks: ArraySet<Int> = ArraySet(),
         val minimizedTasks: ArraySet<Int> = ArraySet(),
+        // Tasks currently in freeform mode, ordered from top to bottom (top is at index 0).
+        val freeformTasksInZOrder: ArrayList<Int> = ArrayList(),
     )
 
     // Token of the current wallpaper activity, used to remove it when the last task is removed
     var wallpaperActivityToken: WindowContainerToken? = null
-    // Tasks currently in freeform mode, ordered from top to bottom (top is at index 0).
-    private val freeformTasksInZOrder = mutableListOf<Int>()
     private val activeTasksListeners = ArraySet<ActiveTasksListener>()
     // Track visible tasks separately because a task may be part of the desktop but not visible.
     private val visibleTasksListeners = ArrayMap<VisibleTasksListener, Executor>()
@@ -235,7 +236,7 @@ class DesktopModeTaskRepository {
      */
     fun getActiveNonMinimizedTasksOrderedFrontToBack(displayId: Int): List<Int> {
         val activeTasks = getActiveTasks(displayId)
-        val allTasksInZOrder = getFreeformTasksInZOrder()
+        val allTasksInZOrder = getFreeformTasksInZOrder(displayId)
         return activeTasks
                 // Don't show already minimized Tasks
                 .filter { taskId -> !isMinimizedTask(taskId) }
@@ -245,10 +246,8 @@ class DesktopModeTaskRepository {
     /**
      * Get a list of freeform tasks, ordered from top-bottom (top at index 0).
      */
-     // TODO(b/278084491): pass in display id
-    fun getFreeformTasksInZOrder(): List<Int> {
-        return freeformTasksInZOrder
-    }
+    fun getFreeformTasksInZOrder(displayId: Int): ArrayList<Int> =
+        ArrayList(displayData[displayId]?.freeformTasksInZOrder ?: emptyList())
 
     /**
      * Updates whether a freeform task with this id is visible or not and notifies listeners.
@@ -325,16 +324,16 @@ class DesktopModeTaskRepository {
     /**
      * Add (or move if it already exists) the task to the top of the ordered list.
      */
-    fun addOrMoveFreeformTaskToTop(taskId: Int) {
+     // TODO(b/342417921): Identify if there is additional checks needed to move tasks for
+     // multi-display scenarios.
+    fun addOrMoveFreeformTaskToTop(displayId: Int, taskId: Int) {
         KtProtoLog.d(
             WM_SHELL_DESKTOP_MODE,
-            "DesktopTaskRepo: add or move task to top taskId=%d",
-            taskId
+            "DesktopTaskRepo: add or move task to top: display=%d, taskId=%d",
+            displayId, taskId
         )
-        if (freeformTasksInZOrder.contains(taskId)) {
-            freeformTasksInZOrder.remove(taskId)
-        }
-        freeformTasksInZOrder.add(0, taskId)
+        displayData[displayId]?.freeformTasksInZOrder?.remove(taskId)
+        displayData.getOrCreate(displayId).freeformTasksInZOrder.add(0, taskId)
     }
 
     /** Mark a Task as minimized. */
@@ -358,17 +357,18 @@ class DesktopModeTaskRepository {
     /**
      * Remove the task from the ordered list.
      */
-    fun removeFreeformTask(taskId: Int) {
+    fun removeFreeformTask(displayId: Int, taskId: Int) {
         KtProtoLog.d(
             WM_SHELL_DESKTOP_MODE,
-            "DesktopTaskRepo: remove freeform task from ordered list taskId=%d",
-            taskId
+            "DesktopTaskRepo: remove freeform task from ordered list: display=%d, taskId=%d",
+            displayId, taskId
         )
-        freeformTasksInZOrder.remove(taskId)
+        displayData[displayId]?.freeformTasksInZOrder?.remove(taskId)
         boundsBeforeMaximizeByTaskId.remove(taskId)
         KtProtoLog.d(
             WM_SHELL_DESKTOP_MODE,
-            "DesktopTaskRepo: remaining freeform tasks: %s", freeformTasksInZOrder.toDumpString(),
+            "DesktopTaskRepo: remaining freeform tasks: %s",
+            displayData[displayId]?.freeformTasksInZOrder?.toDumpString() ?: ""
         )
     }
 
@@ -414,7 +414,6 @@ class DesktopModeTaskRepository {
         val innerPrefix = "$prefix  "
         pw.println("${prefix}DesktopModeTaskRepository")
         dumpDisplayData(pw, innerPrefix)
-        pw.println("${innerPrefix}freeformTasksInZOrder=${freeformTasksInZOrder.toDumpString()}")
         pw.println("${innerPrefix}activeTasksListeners=${activeTasksListeners.size}")
         pw.println("${innerPrefix}visibleTasksListeners=${visibleTasksListeners.size}")
     }
@@ -425,6 +424,7 @@ class DesktopModeTaskRepository {
             pw.println("${prefix}Display $displayId:")
             pw.println("${innerPrefix}activeTasks=${data.activeTasks.toDumpString()}")
             pw.println("${innerPrefix}visibleTasks=${data.visibleTasks.toDumpString()}")
+            pw.println("${innerPrefix}freeformTasksInZOrder=${data.freeformTasksInZOrder.toDumpString()}")
         }
     }
 
