@@ -23,7 +23,7 @@ import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
-import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -56,7 +56,7 @@ class CommunalInteractorCommunalDisabledTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        communalRepository = kosmos.fakeCommunalRepository
+        communalRepository = kosmos.fakeCommunalSceneRepository
         widgetRepository = kosmos.fakeCommunalWidgetRepository
         keyguardRepository = kosmos.fakeKeyguardRepository
 

@@ -39,7 +39,7 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -122,7 +122,7 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToGlanceableHub_onWakeup_ifIdleOnCommunal_noOccludingActivity() =
         testScope.runTest {
-            kosmos.fakeCommunalRepository.setTransitionState(
+            kosmos.fakeCommunalSceneRepository.setTransitionState(
                 flowOf(ObservableTransitionState.Idle(CommunalScenes.Communal))
             )
             runCurrent()
@@ -158,7 +158,7 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToOccluded_onWakeup_whenOccludingActivityOnTop_evenIfIdleOnCommunal() =
         testScope.runTest {
-            kosmos.fakeCommunalRepository.setTransitionState(
+            kosmos.fakeCommunalSceneRepository.setTransitionState(
                 flowOf(ObservableTransitionState.Idle(CommunalScenes.Communal))
             )
             runCurrent()
@@ -177,6 +177,7 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @Suppress("ktlint:standard:max-line-length")
     fun testTransitionToOccluded_onWakeUp_ifPowerButtonGestureDetected_fromAod_nonDismissableKeyguard() =
         testScope.runTest {
             powerInteractor.onCameraLaunchGestureDetected()
@@ -241,6 +242,7 @@ class FromDozingTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    @Suppress("ktlint:standard:max-line-length")
     fun testTransitionToOccluded_onWakeUp_ifPowerButtonGestureDetectedAfterFinishedInAod_fromGone() =
         testScope.runTest {
             powerInteractor.setAwakeForTest()

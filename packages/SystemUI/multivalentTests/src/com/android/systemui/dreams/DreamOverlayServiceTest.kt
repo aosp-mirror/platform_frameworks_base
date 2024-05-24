@@ -46,7 +46,7 @@ import com.android.systemui.ambient.touch.scrim.ScrimManager
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
-import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
@@ -166,7 +166,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
         lifecycleRegistry = FakeLifecycleRegistry(mLifecycleOwner)
         bouncerRepository = kosmos.fakeKeyguardBouncerRepository
-        communalRepository = kosmos.fakeCommunalRepository
+        communalRepository = kosmos.fakeCommunalSceneRepository
 
         whenever(mDreamOverlayComponent.getDreamOverlayContainerViewController())
             .thenReturn(mDreamOverlayContainerViewController)
