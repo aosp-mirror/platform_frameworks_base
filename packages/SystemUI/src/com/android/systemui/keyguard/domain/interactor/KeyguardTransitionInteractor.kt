@@ -250,23 +250,6 @@ constructor(
         return getTransitionValueFlow(state)
     }
 
-    /**
-     * AOD<->* transition information, mapped to dozeAmount range of AOD (1f) <->
-     * * (0f).
-     */
-    @SuppressLint("SharedFlowCreation")
-    val dozeAmountTransition: Flow<TransitionStep> =
-        repository.transitions
-            .filter { step -> step.from == AOD || step.to == AOD }
-            .map { step ->
-                if (step.from == AOD) {
-                    step.copy(value = 1 - step.value)
-                } else {
-                    step
-                }
-            }
-            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
-
     /** The last [TransitionStep] with a [TransitionState] of STARTED */
     val startedKeyguardTransitionStep: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.transitionState == TransitionState.STARTED }
