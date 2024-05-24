@@ -265,8 +265,6 @@ constructor(
             .map { step -> step.to }
             .shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
-    val currentTransitionInfo: StateFlow<TransitionInfo> = repository.currentTransitionInfoInternal
-
     /** The from state of the last [TransitionState.STARTED] transition. */
     // TODO: is it performant to have several SharedFlows side by side instead of one?
     @SuppressLint("SharedFlowCreation")
