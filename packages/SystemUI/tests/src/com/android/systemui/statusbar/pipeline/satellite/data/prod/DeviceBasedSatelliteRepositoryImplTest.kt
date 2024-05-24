@@ -34,6 +34,7 @@ import android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_UNAVAI
 import android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_UNKNOWN
 import android.telephony.satellite.SatelliteManager.SatelliteException
 import android.telephony.satellite.SatelliteModemStateCallback
+import android.telephony.satellite.SatelliteSupportedStateCallback
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -326,7 +327,6 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
     @Test
     fun satelliteNotSupported_listenersAreNotRegistered() =
         testScope.runTest {
-            setupDefaultRepo()
             // GIVEN satellite is not supported
             setUpRepo(
                 uptime = MIN_UPTIME,
@@ -341,6 +341,94 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             // THEN the manager is not asked for the information, and default values are returned
             verify(satelliteManager, never()).registerForModemStateChanged(any(), any())
             verify(satelliteManager, never()).registerForNtnSignalStrengthChanged(any(), any())
+        }
+
+    @Test
+    fun satelliteSupported_registersCallbackForStateChanges() =
+        testScope.runTest {
+            // GIVEN a supported satellite manager.
+            setupDefaultRepo()
+            runCurrent()
+
+            // THEN the repo registers for state changes of satellite support
+            verify(satelliteManager, times(1)).registerForSupportedStateChanged(any(), any())
+        }
+
+    @Test
+    fun satelliteNotSupported_registersCallbackForStateChanges() =
+        testScope.runTest {
+            // GIVEN satellite is not supported
+            setUpRepo(
+                uptime = MIN_UPTIME,
+                satMan = satelliteManager,
+                satelliteSupported = false,
+            )
+
+            runCurrent()
+            // THEN the repo registers for state changes of satellite support
+            verify(satelliteManager, times(1)).registerForSupportedStateChanged(any(), any())
+        }
+
+    @Test
+    fun satelliteSupported_supportIsLost_unregistersListeners() =
+        testScope.runTest {
+            // GIVEN a supported satellite manager.
+            setupDefaultRepo()
+            runCurrent()
+
+            val callback =
+                withArgCaptor<SatelliteSupportedStateCallback> {
+                    verify(satelliteManager).registerForSupportedStateChanged(any(), capture())
+                }
+
+            // WHEN data is requested from the repo
+            val connectionState by collectLastValue(underTest.connectionState)
+            val signalStrength by collectLastValue(underTest.signalStrength)
+
+            // THEN the listeners are registered
+            verify(satelliteManager, times(1)).registerForModemStateChanged(any(), any())
+            verify(satelliteManager, times(1)).registerForNtnSignalStrengthChanged(any(), any())
+
+            // WHEN satellite support turns off
+            callback.onSatelliteSupportedStateChanged(false)
+            runCurrent()
+
+            // THEN listeners are unregistered
+            verify(satelliteManager, times(1)).unregisterForModemStateChanged(any())
+            verify(satelliteManager, times(1)).unregisterForNtnSignalStrengthChanged(any())
+        }
+
+    @Test
+    fun satelliteNotSupported_supportShowsUp_registersListeners() =
+        testScope.runTest {
+            // GIVEN satellite is not supported
+            setUpRepo(
+                uptime = MIN_UPTIME,
+                satMan = satelliteManager,
+                satelliteSupported = false,
+            )
+            runCurrent()
+
+            val callback =
+                withArgCaptor<SatelliteSupportedStateCallback> {
+                    verify(satelliteManager).registerForSupportedStateChanged(any(), capture())
+                }
+
+            // WHEN data is requested from the repo
+            val connectionState by collectLastValue(underTest.connectionState)
+            val signalStrength by collectLastValue(underTest.signalStrength)
+
+            // THEN the listeners are not yet registered
+            verify(satelliteManager, times(0)).registerForModemStateChanged(any(), any())
+            verify(satelliteManager, times(0)).registerForNtnSignalStrengthChanged(any(), any())
+
+            // WHEN satellite support turns on
+            callback.onSatelliteSupportedStateChanged(true)
+            runCurrent()
+
+            // THEN listeners are registered
+            verify(satelliteManager, times(1)).registerForModemStateChanged(any(), any())
+            verify(satelliteManager, times(1)).registerForNtnSignalStrengthChanged(any(), any())
         }
 
     @Test
