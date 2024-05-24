@@ -29,6 +29,8 @@ import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.EnabledOnRavenwood;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
 
+import com.android.ravenwood.common.RavenwoodCommonUtils;
+
 import org.junit.Assume;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -54,7 +56,7 @@ import java.util.regex.Pattern;
  * before a test class is fully initialized.
  */
 public class RavenwoodRule implements TestRule {
-    static final boolean IS_ON_RAVENWOOD = RavenwoodRuleImpl.isOnRavenwood();
+    static final boolean IS_ON_RAVENWOOD = RavenwoodCommonUtils.isOnRavenwood();
 
     /**
      * When probing is enabled, all tests will be unconditionally run on Ravenwood to detect
