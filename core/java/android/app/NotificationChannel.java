@@ -695,8 +695,8 @@ public final class NotificationChannel implements Parcelable {
      * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      *
      * @see #getVibrationEffect()
-     * @see Vibrator#areEffectsSupported(int...)
-     * @see Vibrator#arePrimitivesSupported(int...)
+     * @see android.os.Vibrator#areEffectsSupported(int...)
+     * @see android.os.Vibrator#arePrimitivesSupported(int...)
      */
     @FlaggedApi(Flags.FLAG_NOTIFICATION_CHANNEL_VIBRATION_EFFECT_API)
     public void setVibrationEffect(@Nullable VibrationEffect effect) {
