@@ -83,6 +83,7 @@ public final class AppStartInfoTracker {
     private static final int FOREACH_ACTION_NONE = 0;
     private static final int FOREACH_ACTION_REMOVE_ITEM = 1;
     private static final int FOREACH_ACTION_STOP_ITERATION = 2;
+    private static final int FOREACH_ACTION_REMOVE_AND_STOP_ITERATION = 3;
 
     private static final String MONITORING_MODE_EMPTY_TEXT = "No records";
 
@@ -659,8 +660,13 @@ public final class AppStartInfoTracker {
         }
     }
 
+    /**
+     * Run provided callback for each packake in start info dataset.
+     *
+     * @return whether the for each completed naturally, false if it was stopped manually.
+     */
     @GuardedBy("mLock")
-    private void forEachPackageLocked(
+    private boolean forEachPackageLocked(
             BiFunction<String, SparseArray<AppStartInfoContainer>, Integer> callback) {
         if (callback != null) {
             ArrayMap<String, SparseArray<AppStartInfoContainer>> map = mData.getMap();
@@ -670,14 +676,17 @@ public final class AppStartInfoTracker {
                         map.removeAt(i);
                         break;
                     case FOREACH_ACTION_STOP_ITERATION:
-                        i = 0;
-                        break;
+                        return false;
+                    case FOREACH_ACTION_REMOVE_AND_STOP_ITERATION:
+                        map.removeAt(i);
+                        return false;
                     case FOREACH_ACTION_NONE:
                     default:
                         break;
                 }
             }
         }
+        return true;
     }
 
     @GuardedBy("mLock")
@@ -870,13 +879,14 @@ public final class AppStartInfoTracker {
         }
         AtomicFile af = new AtomicFile(mProcStartInfoFile);
         FileOutputStream out = null;
+        boolean succeeded;
         long now = System.currentTimeMillis();
         try {
             out = af.startWrite();
             ProtoOutputStream proto = new ProtoOutputStream(out);
             proto.write(AppsStartInfoProto.LAST_UPDATE_TIMESTAMP, now);
             synchronized (mLock) {
-                forEachPackageLocked(
+                succeeded = forEachPackageLocked(
                         (packageName, records) -> {
                             long token = proto.start(AppsStartInfoProto.PACKAGES);
                             proto.write(AppsStartInfoProto.Package.PACKAGE_NAME, packageName);
@@ -884,19 +894,30 @@ public final class AppStartInfoTracker {
                             for (int j = 0; j < uidArraySize; j++) {
                                 try {
                                     records.valueAt(j)
-                                        .writeToProto(proto, AppsStartInfoProto.Package.USERS);
+                                            .writeToProto(proto, AppsStartInfoProto.Package.USERS);
                                 } catch (IOException e) {
                                     Slog.w(TAG, "Unable to write app start info into persistent"
                                             + "storage: " + e);
+                                    // There was likely an issue with this record that won't resolve
+                                    // next time we try to persist so remove it. Also stop iteration
+                                    // as we failed the write and need to start again from scratch.
+                                    return AppStartInfoTracker
+                                            .FOREACH_ACTION_REMOVE_AND_STOP_ITERATION;
                                 }
                             }
                             proto.end(token);
                             return AppStartInfoTracker.FOREACH_ACTION_NONE;
                         });
-                mLastAppStartInfoPersistTimestamp = now;
+                if (succeeded) {
+                    mLastAppStartInfoPersistTimestamp = now;
+                }
             }
-            proto.flush();
-            af.finishWrite(out);
+            if (succeeded) {
+                proto.flush();
+                af.finishWrite(out);
+            } else {
+                af.failWrite(out);
+            }
         } catch (IOException e) {
             Slog.w(TAG, "Unable to write historical app start info into persistent storage: " + e);
             af.failWrite(out);
