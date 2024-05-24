@@ -5,16 +5,24 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(JUnit4::class)
 class BackTransformationTest : SysuiTestCase() {
     private val targetView: View = mock()
+
+    @Before
+    fun setup() {
+        whenever(targetView.width).thenReturn(TARGET_VIEW_WIDTH)
+        whenever(targetView.height).thenReturn(TARGET_VIEW_HEIGHT)
+    }
 
     @Test
     fun defaultValue_noTransformation() {
@@ -70,11 +78,26 @@ class BackTransformationTest : SysuiTestCase() {
     }
 
     @Test
+    fun applyTo_targetView_scale_pivot() {
+        val transformation = BackTransformation(scalePivotPosition = ScalePivotPosition.CENTER)
+
+        transformation.applyTo(targetView = targetView)
+
+        verify(targetView).pivotX = TARGET_VIEW_WIDTH / 2f
+        verify(targetView).pivotY = TARGET_VIEW_HEIGHT / 2f
+    }
+
+    @Test
     fun applyTo_targetView_noTransformation() {
         val transformation = BackTransformation()
 
         transformation.applyTo(targetView = targetView)
 
         verifyNoMoreInteractions(targetView)
+    }
+
+    companion object {
+        private const val TARGET_VIEW_WIDTH = 100
+        private const val TARGET_VIEW_HEIGHT = 50
     }
 }
