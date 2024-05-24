@@ -2360,6 +2360,7 @@ public class PackageInstaller {
                     new UserHandle(mUserId), flags);
         } catch (ParcelableException e) {
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2396,6 +2397,7 @@ public class PackageInstaller {
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2427,6 +2429,7 @@ public class PackageInstaller {
                     userActionIntent, new UserHandle(mUserId));
         } catch (ParcelableException e) {
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
