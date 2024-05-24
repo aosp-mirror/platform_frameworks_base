@@ -46,6 +46,7 @@ import android.widget.TextView;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.CarrierTextManager;
+import com.android.systemui.log.core.FakeLogBuffer;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
@@ -169,6 +170,7 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 mActivityStarter,
                 handler,
                 TestableLooper.get(this).getLooper(),
+                new ShadeCarrierGroupControllerLogger(FakeLogBuffer.Factory.Companion.create()),
                 mNetworkController,
                 mCarrierTextControllerBuilder,
                 mContext,
