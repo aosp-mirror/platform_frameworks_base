@@ -264,7 +264,7 @@
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Toxunaraq cihaza qoşulun, yaxud əlaqəni ayırın"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Yeni cihaz birləşdirin"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Hamısına baxın"</string>
-    <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth aç"</string>
+    <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth-u açın"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Qoşulub"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Yadda saxlandı"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"əlaqəni kəsin"</string>
