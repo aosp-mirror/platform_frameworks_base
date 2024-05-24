@@ -668,7 +668,7 @@
     <string name="notification_more_settings" msgid="4936228656989201793">"Дадатковыя налады"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"Наладзіць"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Паказаць усплывальнае апавяшчэнне"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Выдаліць усплывальныя апавяшчэнні"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Выдаліць усплывальныя чаты"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"кіраванне апавяшчэннямі"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"параметры адкладвання апавяшчэнняў"</string>
