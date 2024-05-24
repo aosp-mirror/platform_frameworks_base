@@ -140,6 +140,16 @@ flag {
   }
 }
 
+flag {
+    name: "fix_avatar_concurrent_file_write"
+    namespace: "multiuser"
+    description: "Fix potential unexpected behavior due to concurrent file writing"
+    bug: "339351031"
+    metadata {
+    	purpose: PURPOSE_BUGFIX
+  }
+}
+
 # This flag guards the private space feature and all its implementations excluding the APIs. APIs are guarded by android.os.Flags.allow_private_profile.
 flag {
     name: "enable_private_space_features"
