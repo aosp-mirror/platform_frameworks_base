@@ -26,7 +26,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB വഴി ചാർജ് ചെയ്യാനാകില്ല"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"ഉപകരണത്തിനൊപ്പം ലഭിച്ച ചാർജർ ഉപയോഗിക്കുക"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ബാറ്ററി ലാഭിക്കൽ ഓണാക്കണോ?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ബാറ്ററി സേവർ ഓണാക്കണോ?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"ബാറ്ററി ലാഭിക്കലിനെ കുറിച്ച്"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"ഓൺ ചെയ്യുക"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"ഓണാക്കുക"</string>
@@ -605,7 +605,7 @@
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> സമയത്തേക്ക് സ്‌നൂസ് ‌ചെയ്‌തു"</string>
     <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# മണിക്കൂർ}=2{# മണിക്കൂർ}other{# മണിക്കൂർ}}"</string>
     <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# മിനിറ്റ്}other{# മിനിറ്റ്}}"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"ബാറ്ററി ലാഭിക്കൽ"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"ബാറ്ററി സേവർ"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"ബട്ടൺ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"ഹോം"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"ബാക്ക്"</string>
@@ -817,7 +817,7 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"ഏത് ആപ്പിൽ നിന്നും സ്ലൈസുകൾ കാണിക്കാൻ <xliff:g id="APP">%1$s</xliff:g>-നെ അനുവദിക്കുക"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"അനുവദിക്കുക"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"നിരസിക്കുക"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"ബാറ്ററി ലാഭിക്കൽ ഷെഡ്യൂൾ ചെയ്യാൻ ടാപ്പ് ചെയ്യുക"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"ബാറ്ററി സേവർ ഷെഡ്യൂൾ ചെയ്യാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"ബാറ്ററി ചാർജ് തീരാൻ സാധ്യതയുണ്ടെങ്കിൽ ഓണാക്കുക"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"വേണ്ട"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI ഹീപ്പ് ഡമ്പ് ചെയ്യുക"</string>
