@@ -447,20 +447,18 @@ static jboolean nativeUpdatesTempOnly(JNIEnv* env, jclass,
 
     // A temporary, to simplify the code.
     sqlite3_stmt* query = connection->tableQuery;
-    sqlite3_reset(query);
-    sqlite3_clear_bindings(query);
     result = sqlite3_bind_text(query, 1, sqlite3_sql(statement), -1, SQLITE_STATIC);
     if (result != SQLITE_OK) {
         ALOGE("tables bind pointer returns %s", sqlite3_errstr(result));
-        return false;
     }
     result = sqlite3_step(query);
-    // Make sure the query is no longer bound to the statement SQL string.
+    // Make sure the query is no longer bound to the statement SQL string and
+    // that is no longer holding any table locks.
+    sqlite3_reset(query);
     sqlite3_clear_bindings(query);
 
     if (result != SQLITE_ROW && result != SQLITE_DONE) {
         ALOGE("tables query error: %d/%s", result, sqlite3_errstr(result));
-        return false;
     }
     return result == SQLITE_DONE;
 }
