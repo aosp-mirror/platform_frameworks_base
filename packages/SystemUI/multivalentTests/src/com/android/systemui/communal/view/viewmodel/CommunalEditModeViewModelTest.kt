@@ -39,6 +39,7 @@ import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.log.CommunalUiEvent
@@ -106,6 +107,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
 
         underTest =
             CommunalEditModeViewModel(
+                kosmos.communalSceneInteractor,
                 kosmos.communalInteractor,
                 kosmos.communalSettingsInteractor,
                 mediaHost,

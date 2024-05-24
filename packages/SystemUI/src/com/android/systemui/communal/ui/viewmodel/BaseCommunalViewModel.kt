@@ -23,6 +23,7 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.media.controls.ui.view.MediaHost
@@ -33,10 +34,11 @@ import kotlinx.coroutines.flow.flowOf
 
 /** The base view model for the communal hub. */
 abstract class BaseCommunalViewModel(
+    private val communalSceneInteractor: CommunalSceneInteractor,
     private val communalInteractor: CommunalInteractor,
     val mediaHost: MediaHost,
 ) {
-    val currentScene: Flow<SceneKey> = communalInteractor.desiredScene
+    val currentScene: Flow<SceneKey> = communalSceneInteractor.currentScene
 
     /** Whether communal hub should be focused by accessibility tools. */
     open val isFocusable: Flow<Boolean> = MutableStateFlow(false)
@@ -58,7 +60,7 @@ abstract class BaseCommunalViewModel(
     }
 
     fun changeScene(scene: SceneKey, transitionKey: TransitionKey? = null) {
-        communalInteractor.changeScene(scene, transitionKey)
+        communalSceneInteractor.changeScene(scene, transitionKey)
     }
 
     /**
@@ -67,7 +69,7 @@ abstract class BaseCommunalViewModel(
      * Note that you must call is with `null` when the UI is done or risk a memory leak.
      */
     fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
-        communalInteractor.setTransitionState(transitionState)
+        communalSceneInteractor.setTransitionState(transitionState)
     }
 
     /**
