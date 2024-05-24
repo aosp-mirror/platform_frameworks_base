@@ -76,7 +76,12 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
                             info, startTransaction, finishTransaction, finishCallback);
             case TYPE_ENTER_PIP_FROM_SPLIT ->
                     animateEnterPipFromSplit(this, info, startTransaction, finishTransaction,
-                            finishCallback, mPlayer, mMixedHandler, mPipHandler, mSplitHandler);
+                            finishCallback, mPlayer, mMixedHandler, mPipHandler, mSplitHandler,
+                            /*replacingPip*/ false);
+            case TYPE_ENTER_PIP_REPLACE_FROM_SPLIT ->
+                    animateEnterPipFromSplit(this, info, startTransaction, finishTransaction,
+                            finishCallback, mPlayer, mMixedHandler, mPipHandler, mSplitHandler,
+                            /*replacingPip*/ true);
             case TYPE_KEYGUARD ->
                     animateKeyguard(this, info, startTransaction, finishTransaction, finishCallback,
                             mKeyguardHandler, mPipHandler);
