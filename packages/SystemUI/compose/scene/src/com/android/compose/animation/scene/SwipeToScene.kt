@@ -31,14 +31,18 @@ import androidx.compose.ui.unit.IntSize
  * Configures the swipeable behavior of a [SceneTransitionLayout] depending on the current state.
  */
 @Stable
-internal fun Modifier.swipeToScene(draggableHandler: DraggableHandlerImpl): Modifier {
-    return this.then(SwipeToSceneElement(draggableHandler))
+internal fun Modifier.swipeToScene(
+    draggableHandler: DraggableHandlerImpl,
+    swipeDetector: SwipeDetector
+): Modifier {
+    return this.then(SwipeToSceneElement(draggableHandler, swipeDetector))
 }
 
 private data class SwipeToSceneElement(
     val draggableHandler: DraggableHandlerImpl,
+    val swipeDetector: SwipeDetector
 ) : ModifierNodeElement<SwipeToSceneNode>() {
-    override fun create(): SwipeToSceneNode = SwipeToSceneNode(draggableHandler)
+    override fun create(): SwipeToSceneNode = SwipeToSceneNode(draggableHandler, swipeDetector)
 
     override fun update(node: SwipeToSceneNode) {
         node.draggableHandler = draggableHandler
@@ -47,6 +51,7 @@ private data class SwipeToSceneElement(
 
 private class SwipeToSceneNode(
     draggableHandler: DraggableHandlerImpl,
+    swipeDetector: SwipeDetector,
 ) : DelegatingNode(), PointerInputModifierNode {
     private val delegate =
         delegate(
@@ -55,6 +60,7 @@ private class SwipeToSceneNode(
                 enabled = ::enabled,
                 startDragImmediately = ::startDragImmediately,
                 onDragStarted = draggableHandler::onDragStarted,
+                swipeDetector = swipeDetector,
             )
         )
 
