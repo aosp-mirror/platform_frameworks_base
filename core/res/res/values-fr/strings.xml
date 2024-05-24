@@ -2401,10 +2401,10 @@
     <skip />
     <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
     <skip />
-    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ne fonctionnait pas correctement et a été supprimée. Configurez-la à nouveau pour déverrouiller votre téléphone à l\'aide votre empreinte digitale."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ne fonctionnait pas correctement et a été supprimée. Configurez-la à nouveau pour déverrouiller votre téléphone à l\'aide de votre empreinte digitale."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> et <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ne fonctionnaient pas correctement et ont été supprimées. Configurez-les à nouveau pour déverrouiller votre téléphone à l\'aide de votre empreinte digitale."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"Reconfigurer le déverrouillage par reconnaissance faciale"</string>
-    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Votre empreinte faciale ne fonctionnait pas correctement et a été supprimée. Configurez-la à nouveau pour déverrouiller votre téléphone à l\'aide votre visage."</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Votre empreinte faciale ne fonctionnait pas correctement et a été supprimée. Configurez-la à nouveau pour déverrouiller votre téléphone à l\'aide de votre visage."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configuration"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Pas maintenant"</string>
 </resources>
