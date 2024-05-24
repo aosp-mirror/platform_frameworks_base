@@ -16,6 +16,7 @@
 
 package com.android.server.location.gnss;
 
+import android.annotation.NonNull;
 import android.app.StatsManager;
 import android.content.Context;
 import android.location.GnssSignalQuality;
@@ -59,7 +60,6 @@ public class GnssMetrics {
     /** Frequency range of GPS L5, Galileo E5a, QZSS J5 frequency band */
     private static final double L5_CARRIER_FREQ_RANGE_LOW_HZ = 1164 * 1e6;
     private static final double L5_CARRIER_FREQ_RANGE_HIGH_HZ = 1189 * 1e6;
-
 
     private long mLogStartInElapsedRealtimeMs;
 
@@ -608,64 +608,72 @@ public class GnssMetrics {
         }
 
         @Override
-        public int onPullAtom(int atomTag, List<StatsEvent> data) {
-            if (atomTag == FrameworkStatsLog.GNSS_STATS) {
-                data.add(FrameworkStatsLog.buildStatsEvent(atomTag,
-                        mLocationFailureReportsStatistics.getCount(),
-                        mLocationFailureReportsStatistics.getLongSum(),
-                        mTimeToFirstFixMilliSReportsStatistics.getCount(),
-                        mTimeToFirstFixMilliSReportsStatistics.getLongSum(),
-                        mPositionAccuracyMetersReportsStatistics.getCount(),
-                        mPositionAccuracyMetersReportsStatistics.getLongSum(),
-                        mTopFourAverageCn0DbmHzReportsStatistics.getCount(),
-                        mTopFourAverageCn0DbmHzReportsStatistics.getLongSum(),
-                        mL5TopFourAverageCn0DbmHzReportsStatistics.getCount(),
-                        mL5TopFourAverageCn0DbmHzReportsStatistics.getLongSum(), mSvStatusReports,
-                        mSvStatusReportsUsedInFix, mL5SvStatusReports,
-                        mL5SvStatusReportsUsedInFix));
-            } else if (atomTag == FrameworkStatsLog.GNSS_POWER_STATS) {
-                mGnssNative.requestPowerStats();
-                GnssPowerStats gnssPowerStats = mGnssNative.getPowerStats();
-                if (gnssPowerStats == null) {
-                    return StatsManager.PULL_SKIP;
-                }
-                double[] otherModesEnergyMilliJoule = new double[VENDOR_SPECIFIC_POWER_MODES_SIZE];
-                double[] tempGnssPowerStatsOtherModes =
-                        gnssPowerStats.getOtherModesEnergyMilliJoule();
-                if (tempGnssPowerStatsOtherModes.length < VENDOR_SPECIFIC_POWER_MODES_SIZE) {
-                    System.arraycopy(tempGnssPowerStatsOtherModes, 0,
-                            otherModesEnergyMilliJoule, 0,
-                            tempGnssPowerStatsOtherModes.length);
-                } else {
-                    System.arraycopy(tempGnssPowerStatsOtherModes, 0,
-                            otherModesEnergyMilliJoule, 0,
-                            VENDOR_SPECIFIC_POWER_MODES_SIZE);
-                }
-                data.add(FrameworkStatsLog.buildStatsEvent(atomTag,
-                        (long) (gnssPowerStats.getElapsedRealtimeUncertaintyNanos()),
-                        (long) (gnssPowerStats.getTotalEnergyMilliJoule() * CONVERT_MILLI_TO_MICRO),
-                        (long) (gnssPowerStats.getSinglebandTrackingModeEnergyMilliJoule()
-                                * CONVERT_MILLI_TO_MICRO),
-                        (long) (gnssPowerStats.getMultibandTrackingModeEnergyMilliJoule()
-                                * CONVERT_MILLI_TO_MICRO),
-                        (long) (gnssPowerStats.getSinglebandAcquisitionModeEnergyMilliJoule()
-                                * CONVERT_MILLI_TO_MICRO),
-                        (long) (gnssPowerStats.getMultibandAcquisitionModeEnergyMilliJoule()
-                                * CONVERT_MILLI_TO_MICRO),
-                        (long) (otherModesEnergyMilliJoule[0] * CONVERT_MILLI_TO_MICRO),
-                        (long) (otherModesEnergyMilliJoule[1] * CONVERT_MILLI_TO_MICRO),
-                        (long) (otherModesEnergyMilliJoule[2] * CONVERT_MILLI_TO_MICRO),
-                        (long) (otherModesEnergyMilliJoule[3] * CONVERT_MILLI_TO_MICRO),
-                        (long) (otherModesEnergyMilliJoule[4] * CONVERT_MILLI_TO_MICRO),
-                        (long) (otherModesEnergyMilliJoule[5] * CONVERT_MILLI_TO_MICRO),
-                        (long) (otherModesEnergyMilliJoule[6] * CONVERT_MILLI_TO_MICRO),
-                        (long) (otherModesEnergyMilliJoule[7] * CONVERT_MILLI_TO_MICRO),
-                        (long) (otherModesEnergyMilliJoule[8] * CONVERT_MILLI_TO_MICRO),
-                        (long) (otherModesEnergyMilliJoule[9] * CONVERT_MILLI_TO_MICRO)));
-            } else {
-                throw new UnsupportedOperationException("Unknown tagId = " + atomTag);
+        public int onPullAtom(int atomTag, @NonNull List<StatsEvent> data) {
+            switch (atomTag) {
+                case FrameworkStatsLog.GNSS_STATS:
+                    return pullGnssStats(atomTag, data);
+                case FrameworkStatsLog.GNSS_POWER_STATS:
+                    return pullGnssPowerStats(atomTag, data);
+                default:
+                    throw new UnsupportedOperationException("Unknown tagId = " + atomTag);
             }
+        }
+    }
+
+    private int pullGnssStats(int atomTag, List<StatsEvent> data) {
+        data.add(FrameworkStatsLog.buildStatsEvent(atomTag,
+                mLocationFailureReportsStatistics.getCount(),
+                mLocationFailureReportsStatistics.getLongSum(),
+                mTimeToFirstFixMilliSReportsStatistics.getCount(),
+                mTimeToFirstFixMilliSReportsStatistics.getLongSum(),
+                mPositionAccuracyMetersReportsStatistics.getCount(),
+                mPositionAccuracyMetersReportsStatistics.getLongSum(),
+                mTopFourAverageCn0DbmHzReportsStatistics.getCount(),
+                mTopFourAverageCn0DbmHzReportsStatistics.getLongSum(),
+                mL5TopFourAverageCn0DbmHzReportsStatistics.getCount(),
+                mL5TopFourAverageCn0DbmHzReportsStatistics.getLongSum(), mSvStatusReports,
+                mSvStatusReportsUsedInFix, mL5SvStatusReports,
+                mL5SvStatusReportsUsedInFix));
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private int pullGnssPowerStats(int atomTag, List<StatsEvent> data) {
+        GnssPowerStats powerStats = mGnssNative.requestPowerStatsBlocking();
+        if (powerStats == null) {
+            return StatsManager.PULL_SKIP;
+        } else {
+            data.add(createPowerStatsEvent(atomTag, powerStats));
             return StatsManager.PULL_SUCCESS;
         }
+    }
+
+    private static StatsEvent createPowerStatsEvent(int atomTag,
+            @NonNull GnssPowerStats powerStats) {
+        double[] otherModesEnergyMilliJoule = new double[VENDOR_SPECIFIC_POWER_MODES_SIZE];
+        double[] tempGnssPowerStatsOtherModes = powerStats.getOtherModesEnergyMilliJoule();
+        System.arraycopy(tempGnssPowerStatsOtherModes, 0,
+                otherModesEnergyMilliJoule, 0,
+                Math.min(tempGnssPowerStatsOtherModes.length, VENDOR_SPECIFIC_POWER_MODES_SIZE));
+        return FrameworkStatsLog.buildStatsEvent(atomTag,
+                (long) (powerStats.getElapsedRealtimeUncertaintyNanos()),
+                (long) (powerStats.getTotalEnergyMilliJoule() * CONVERT_MILLI_TO_MICRO),
+                (long) (powerStats.getSinglebandTrackingModeEnergyMilliJoule()
+                        * CONVERT_MILLI_TO_MICRO),
+                (long) (powerStats.getMultibandTrackingModeEnergyMilliJoule()
+                        * CONVERT_MILLI_TO_MICRO),
+                (long) (powerStats.getSinglebandAcquisitionModeEnergyMilliJoule()
+                        * CONVERT_MILLI_TO_MICRO),
+                (long) (powerStats.getMultibandAcquisitionModeEnergyMilliJoule()
+                        * CONVERT_MILLI_TO_MICRO),
+                (long) (otherModesEnergyMilliJoule[0] * CONVERT_MILLI_TO_MICRO),
+                (long) (otherModesEnergyMilliJoule[1] * CONVERT_MILLI_TO_MICRO),
+                (long) (otherModesEnergyMilliJoule[2] * CONVERT_MILLI_TO_MICRO),
+                (long) (otherModesEnergyMilliJoule[3] * CONVERT_MILLI_TO_MICRO),
+                (long) (otherModesEnergyMilliJoule[4] * CONVERT_MILLI_TO_MICRO),
+                (long) (otherModesEnergyMilliJoule[5] * CONVERT_MILLI_TO_MICRO),
+                (long) (otherModesEnergyMilliJoule[6] * CONVERT_MILLI_TO_MICRO),
+                (long) (otherModesEnergyMilliJoule[7] * CONVERT_MILLI_TO_MICRO),
+                (long) (otherModesEnergyMilliJoule[8] * CONVERT_MILLI_TO_MICRO),
+                (long) (otherModesEnergyMilliJoule[9] * CONVERT_MILLI_TO_MICRO));
     }
 }
