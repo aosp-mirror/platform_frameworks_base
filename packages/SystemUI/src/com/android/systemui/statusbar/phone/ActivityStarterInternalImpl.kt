@@ -35,6 +35,7 @@ import javax.inject.Inject
 class ActivityStarterInternalImpl @Inject constructor() : ActivityStarterInternal {
     override fun startPendingIntentDismissingKeyguard(
         intent: PendingIntent,
+        dismissShade: Boolean,
         intentSentUiThreadCallback: Runnable?,
         associatedView: View?,
         animationController: ActivityTransitionAnimator.Controller?,

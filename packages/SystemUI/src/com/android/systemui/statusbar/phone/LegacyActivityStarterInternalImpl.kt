@@ -33,10 +33,13 @@ import android.view.View
 import android.view.WindowManager
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
+import com.android.systemui.Flags.communalHub
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.DelegateTransitionAnimatorController
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.camera.CameraIntents
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.dagger.qualifiers.Main
@@ -89,6 +92,7 @@ constructor(
     private val userTracker: UserTracker,
     private val activityIntentHelper: ActivityIntentHelper,
     @Main private val mainExecutor: DelayableExecutor,
+    private val communalSceneInteractor: CommunalSceneInteractor,
 ) : ActivityStarterInternal {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
@@ -219,6 +223,7 @@ constructor(
 
     override fun startPendingIntentDismissingKeyguard(
         intent: PendingIntent,
+        dismissShade: Boolean,
         intentSentUiThreadCallback: Runnable?,
         associatedView: View?,
         animationController: ActivityTransitionAnimator.Controller?,
@@ -257,12 +262,12 @@ constructor(
         val statusBarController =
             wrapAnimationControllerForShadeOrStatusBar(
                 animationController = animationController,
-                dismissShade = true,
+                dismissShade = dismissShade,
                 isLaunchForActivity = intent.isActivity,
             )
         val controller =
             if (actuallyShowOverLockscreen) {
-                wrapAnimationControllerForLockscreen(statusBarController)
+                wrapAnimationControllerForLockscreen(dismissShade, statusBarController)
             } else {
                 statusBarController
             }
@@ -270,7 +275,7 @@ constructor(
         // If we animate, don't collapse the shade and defer the keyguard dismiss (in case we
         // run the animation on the keyguard). The animation will take care of (instantly)
         // collapsing the shade and hiding the keyguard once it is done.
-        val collapse = !animate
+        val collapse = dismissShade && !animate
         val runnable = Runnable {
             try {
                 activityTransitionAnimator.startPendingIntentWithAnimation(
@@ -377,7 +382,7 @@ constructor(
                     dismissShade = dismissShade,
                     isLaunchForActivity = true,
                 )
-            controller = wrapAnimationControllerForLockscreen(delegate)
+            controller = wrapAnimationControllerForLockscreen(dismissShade, delegate)
         } else if (dismissShade) {
             // The animation will take care of dismissing the shade at the end of the animation.
             // If we don't animate, collapse it directly.
@@ -462,6 +467,9 @@ constructor(
                     if (dismissShade) {
                         shadeControllerLazy.get().collapseShadeForActivityStart()
                     }
+                    if (communalHub()) {
+                        communalSceneInteractor.snapToScene(CommunalScenes.Blank)
+                    }
                     return deferred
                 }
 
@@ -532,6 +540,7 @@ constructor(
      * lockscreen, the correct flags are set for it to be occluded.
      */
     private fun wrapAnimationControllerForLockscreen(
+        dismissShade: Boolean,
         animationController: ActivityTransitionAnimator.Controller?
     ): ActivityTransitionAnimator.Controller? {
         return animationController?.let {
@@ -539,7 +548,7 @@ constructor(
                 override fun onIntentStarted(willAnimate: Boolean) {
                     delegate.onIntentStarted(willAnimate)
                     if (willAnimate) {
-                        centralSurfaces?.setIsLaunchingActivityOverLockscreen(true)
+                        centralSurfaces?.setIsLaunchingActivityOverLockscreen(true, dismissShade)
                     }
                 }
 
@@ -570,7 +579,10 @@ constructor(
                     // mIsLaunchingActivityOverLockscreen being true means that we will
                     // collapse the shade (or at least run the post collapse runnables)
                     // later on.
-                    centralSurfaces?.setIsLaunchingActivityOverLockscreen(false)
+                    centralSurfaces?.setIsLaunchingActivityOverLockscreen(false, false)
+                    if (communalHub()) {
+                        communalSceneInteractor.snapToScene(CommunalScenes.Blank)
+                    }
                     delegate.onTransitionAnimationEnd(isExpandingFullyAbove)
                 }
 
@@ -586,7 +598,7 @@ constructor(
                     // mIsLaunchingActivityOverLockscreen being true means that we will
                     // collapse the shade (or at least run the // post collapse
                     // runnables) later on.
-                    centralSurfaces?.setIsLaunchingActivityOverLockscreen(false)
+                    centralSurfaces?.setIsLaunchingActivityOverLockscreen(false, false)
                     delegate.onTransitionAnimationCancelled(newKeyguardOccludedState)
                 }
             }

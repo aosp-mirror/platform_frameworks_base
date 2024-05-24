@@ -61,6 +61,7 @@ constructor(
 
         activityStarter.startPendingIntentMaybeDismissingKeyguard(
             pendingIntent,
+            /* dismissShade = */ false,
             /* intentSentUiThreadCallback = */ null,
             animationController,
             fillInIntent,

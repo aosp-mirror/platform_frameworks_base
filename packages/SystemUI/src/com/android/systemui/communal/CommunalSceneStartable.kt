@@ -32,10 +32,13 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.util.kotlin.emitOnStart
+import com.android.systemui.util.kotlin.getValue
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import com.android.systemui.util.settings.SystemSettings
+import java.util.Optional
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -67,6 +70,7 @@ constructor(
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val systemSettings: SystemSettings,
+    centralSurfacesOpt: Optional<CentralSurfaces>,
     private val notificationShadeWindowController: NotificationShadeWindowController,
     @Application private val applicationScope: CoroutineScope,
     @Background private val bgScope: CoroutineScope,
@@ -77,6 +81,8 @@ constructor(
     private var timeoutJob: Job? = null
 
     private var isDreaming: Boolean = false
+
+    private val centralSurfaces: CentralSurfaces? by centralSurfacesOpt
 
     override fun start() {
         // Handle automatically switching based on keyguard state.
@@ -184,11 +190,15 @@ constructor(
         val to = lastStartedTransition.to
         val from = lastStartedTransition.from
         val docked = dockManager.isDocked
+        val launchingActivityOverLockscreen =
+            centralSurfaces?.isLaunchingActivityOverLockscreen ?: false
 
         return when {
-            to == KeyguardState.OCCLUDED -> {
+            to == KeyguardState.OCCLUDED && !launchingActivityOverLockscreen -> {
                 // Hide communal when an activity is started on keyguard, to ensure the activity
-                // underneath the hub is shown.
+                // underneath the hub is shown. When launching activities over lockscreen, we only
+                // change scenes once the activity launch animation is finished, so avoid
+                // changing the scene here.
                 CommunalScenes.Blank
             }
             to == KeyguardState.GLANCEABLE_HUB && from == KeyguardState.OCCLUDED -> {

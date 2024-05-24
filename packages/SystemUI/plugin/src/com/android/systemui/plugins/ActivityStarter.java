@@ -70,9 +70,11 @@ public interface ActivityStarter {
     /**
      * Similar to {@link #startPendingIntentMaybeDismissingKeyguard(PendingIntent, Runnable,
      * ActivityTransitionAnimator.Controller)}, but also specifies a fill-in intent and extra
-     * options that could be used to populate the pending intent and launch the activity.
+     * option that could be used to populate the pending intent and launch the activity. This also
+     * allows the caller to avoid dismissing the shade.
      */
     void startPendingIntentMaybeDismissingKeyguard(PendingIntent intent,
+            boolean dismissShade,
             @Nullable Runnable intentSentUiThreadCallback,
             @Nullable ActivityTransitionAnimator.Controller animationController,
             @Nullable Intent fillInIntent,

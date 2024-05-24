@@ -35,6 +35,8 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.notificationShadeWindowController
+import com.android.systemui.statusbar.phone.centralSurfaces
+import com.android.systemui.statusbar.phone.centralSurfacesOptional
 import com.android.systemui.testKosmos
 import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
@@ -49,6 +51,7 @@ import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -74,6 +77,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                         applicationScope = applicationCoroutineScope,
                         bgScope = applicationCoroutineScope,
                         mainDispatcher = testDispatcher,
+                        centralSurfacesOpt = centralSurfacesOptional,
                     )
                     .apply { start() }
 
@@ -127,6 +131,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
     fun occluded_forceBlankScene() =
         with(kosmos) {
             testScope.runTest {
+                whenever(centralSurfaces.isLaunchingActivityOverLockscreen).thenReturn(false)
                 val scene by collectLastValue(communalInteractor.desiredScene)
                 communalInteractor.changeScene(CommunalScenes.Communal)
                 assertThat(scene).isEqualTo(CommunalScenes.Communal)
@@ -138,6 +143,25 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                     testScope = this
                 )
                 assertThat(scene).isEqualTo(CommunalScenes.Blank)
+            }
+        }
+
+    @Test
+    fun occluded_doesNotForceBlankSceneIfLaunchingActivityOverLockscreen() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(centralSurfaces.isLaunchingActivityOverLockscreen).thenReturn(true)
+                val scene by collectLastValue(communalInteractor.desiredScene)
+                communalInteractor.changeScene(CommunalScenes.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                updateDocked(true)
+                fakeKeyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.GLANCEABLE_HUB,
+                    to = KeyguardState.OCCLUDED,
+                    testScope = this
+                )
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
             }
         }
 

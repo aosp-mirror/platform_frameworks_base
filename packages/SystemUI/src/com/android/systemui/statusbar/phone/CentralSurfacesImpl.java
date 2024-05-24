@@ -544,6 +544,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     // Fingerprint (as computed by getLoggingFingerprint() of the last logged state.
     private int mLastLoggedStateFingerprint;
     private boolean mIsLaunchingActivityOverLockscreen;
+    private boolean mDismissingShadeForActivityLaunch;
 
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
     protected final BatteryController mBatteryController;
@@ -1573,6 +1574,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public boolean isLaunchingActivityOverLockscreen() {
         return mIsLaunchingActivityOverLockscreen;
+    }
+
+    @Override
+    public boolean isDismissingShadeForActivityLaunch() {
+        return mDismissingShadeForActivityLaunch;
     }
 
     /**
@@ -3306,8 +3312,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
-    public void setIsLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen) {
+    public void setIsLaunchingActivityOverLockscreen(
+            boolean isLaunchingActivityOverLockscreen, boolean dismissShade) {
         mIsLaunchingActivityOverLockscreen = isLaunchingActivityOverLockscreen;
+        mDismissingShadeForActivityLaunch = dismissShade;
         mKeyguardViewMediator.launchingActivityOverLockscreen(mIsLaunchingActivityOverLockscreen);
     }
 
