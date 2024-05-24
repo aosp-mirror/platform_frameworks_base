@@ -21,7 +21,7 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
 
 val Kosmos.fakeCommunalRepository by Fixture {
-    FakeCommunalRepository(applicationScope = applicationCoroutineScope)
+    FakeCommunalSceneRepository(applicationScope = applicationCoroutineScope)
 }
 
-val Kosmos.communalRepository by Fixture<CommunalRepository> { fakeCommunalRepository }
+val Kosmos.communalSceneRepository by Fixture<CommunalSceneRepository> { fakeCommunalRepository }
